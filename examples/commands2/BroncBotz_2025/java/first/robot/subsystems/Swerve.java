@@ -152,6 +152,11 @@ public class Swerve extends SubsystemBase {
         return run(() -> drive.setRobotRelativeChassisSpeeds(speeds.get()));
     }
 
+    /** Drive with field relative speeds, e.g. from a {@link SwerveInputStream}, until interrupted. */
+    public Command driveFieldRelative(Supplier<ChassisVelocities> speeds) {
+        return run(() -> drive.setFieldRelativeChassisSpeeds(speeds.get()));
+    }
+
     /**
      * Drive to a pose, ending once within the original's tolerances. Like the original's profiled
      * controller, the speed is capped at 1.3 m/s and 90 deg/s.

@@ -19,6 +19,7 @@ import first.robot.subsystems.ArmSubsystem;
 import first.robot.subsystems.ElevatorSubsystem;
 import first.robot.subsystems.ShooterSubsystem;
 import first.robot.subsystems.SwerveSubsystem;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class RobotContainer
 {
@@ -32,9 +33,12 @@ public class RobotContainer
   public RobotContainer()
   {
     DriverStationBackend.silenceJoystickConnectionAlert(true);
-    drive.setDefaultCommand(drive.setRobotRelativeChassisSpeeds(drive.getChassisSpeedsSupplier(xboxController::getLeftY,
-                                                                                               xboxController::getLeftX,
-                                                                                               xboxController::getRightX)));
+    // SwerveInputStream output is field relative.
+    drive.setDefaultCommand(drive.setFieldRelativeChassisSpeeds(
+        drive.getChassisSpeedsSupplier(() -> -xboxController.getLeftY(),
+                                       () -> -xboxController.getLeftX(),
+                                       () -> -xboxController.getRightX())
+             .withTelemetry("Driver", TelemetryVerbosity.HIGH)));
     arm.setDefaultCommand(arm.setAngle(Degrees.of(0)));
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.set(0));

@@ -27,34 +27,14 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.math.controller.PIDController;
+import yams.commands2.telemetry.SwerveInputStreamTelemetry;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
 import yams.core.mechanisms.swerve.SwerveDrive;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
- * Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
- * easily create an interface that generates {@link ChassisVelocities} from
- * {@link NiDsXboxController} <p> <br /> Inspired by SciBorgs FRC 1155. <br /> Example: <pre>
- * {@code
- *   NiDsXboxController driverXbox = new NiDsXboxController(0);
- *
- *   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
- *                                                                 () -> driverXbox.getLeftY() * -1,
- *                                                                 () -> driverXbox.getLeftX() * -1)
- * // Axis which give the desired translational angle and speed.
- *                                                             .withControllerRotationAxis(driverXbox::getRightX)
- * // Axis which give the desired angular velocity. .deadband(0.01)                  // Controller
- * deadband .scaleTranslation(0.8)           // Scaled controller translation axis
- *                                                             .allianceRelativeControl(true);  //
- * Alliance relative controls.
- *
- *   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()  // Copy the stream so further
- * changes do not affect driveAngularVelocity .withControllerHeadingAxis(driverXbox::getRightX,
- *                                                                                       driverXbox::getRightY)
- * // Axis which give the desired heading angle using trigonometry. .headingWhile(true); // Enable
- * heading based control.
- * }
- * </pre>
+ * Helper class to easily transform controller inputs into workable chassis speeds. Inspired by SciBorgs FRC 1155.
  *
  * <h2>Joystick-to-{@link yams.core.mechanisms.swerve.SwerveDrive} adapter</h2>
  * <p>
@@ -89,8 +69,8 @@ import yams.core.mechanisms.swerve.SwerveDrive;
  *     .withControllerHeadingAxis(driver::getRightX, driver::getRightY)
  *     .withHeadingControl(() -> driver.getRightStickButton());
  *
- * // In your periodic or a command, call .get() to obtain ChassisVelocities:
- * swerveDrive.drive(angularVelocityStream.get());
+ * // In your periodic or a command, call .get() to obtain field relative ChassisVelocities:
+ * swerveDrive.setFieldRelativeChassisSpeeds(angularVelocityStream.get());
  * }</pre>
  */
 public class SwerveInputStream implements Supplier<ChassisVelocities> {
@@ -142,6 +122,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   private LinearVelocity maximumChassisLinearVelocity = MetersPerSecond.of(4);
   /** Maximum chassis angular velocity, defaults to 1 Rotation per Second. */
   private AngularVelocity maximumChassisAngularVelocity = RotationsPerSecond.of(1);
+  private Optional<SwerveInputStreamTelemetry> telemetry = Optional.empty();
 
   private SwerveInputStream(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y) {
     controllerTranslationX = x;
@@ -171,6 +152,10 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return new SwerveInputStream(drive, x, y);
   }
 
+  public static SwerveInputStream of(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
+    return new SwerveInputStream(drive, x, y, rot);
+  }
+
   private SwerveInputStream(SwerveInputStream cfg) {
     swerveDrive = cfg.swerveDrive;
     controllerTranslationX = cfg.controllerTranslationX;
@@ -196,6 +181,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     translationHeadingOffset = cfg.translationHeadingOffset;
     maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
     maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
+    // Telemetry is bound to the stream it was created for, so a clone starts without any.
   }
 
   @Override
@@ -219,16 +205,16 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return translationAxisScale.orElse(1.0);
   }
 
-  public void setTranslationAxisScale(double scaleTranslation) {
-    translationAxisScale = scaleTranslation == 0 ? Optional.empty() : Optional.of(scaleTranslation);
+  public void setTranslationAxisScale(double scale) {
+    translationAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
   }
 
   public double getOmegaAxisScale() {
     return omegaAxisScale.orElse(1.0);
   }
 
-  public void setOmegaAxisScale(double scaleRotation) {
-    omegaAxisScale = scaleRotation == 0 ? Optional.empty() : Optional.of(scaleRotation);
+  public void setOmegaAxisScale(double scale) {
+    omegaAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
   }
 
   public LinearVelocity getMaximumChassisLinearVelocity() {
@@ -277,6 +263,30 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
 
   public void setRobotRelativeEnabled(boolean enabled) {
     robotRelative = enabled ? Optional.of(() -> true) : Optional.empty();
+  }
+
+  /**
+   * Publish this stream's telemetry under {@code SwerveInputStream/<name>}, updated every time the stream is read. At
+   * {@link TelemetryVerbosity#HIGH} the stream is also live tunable: see {@link SwerveInputStreamTelemetry}. Replaces
+   * any telemetry this stream already had. A {@link #clone()} does not copy the telemetry.
+   *
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity {@link TelemetryVerbosity} to publish at.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withTelemetry(String name, TelemetryVerbosity verbosity) {
+    telemetry.ifPresent(SwerveInputStreamTelemetry::close);
+    telemetry = Optional.of(new SwerveInputStreamTelemetry(this, name, verbosity));
+    return this;
+  }
+
+  /**
+   * Get this stream's telemetry, created by {@link #withTelemetry(String, TelemetryVerbosity)}.
+   *
+   * @return The {@link SwerveInputStreamTelemetry}, or empty if telemetry is not enabled.
+   */
+  public Optional<SwerveInputStreamTelemetry> getTelemetry() {
+    return telemetry;
   }
 
   public SwerveInputStream withMaximumLinearVelocity(LinearVelocity velocity) {
@@ -398,7 +408,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
       } else {
         DriverStationErrors.reportError(
             "Attempting to enter AIM mode without target, please use "
-                + "SwerveInputStream.aim() to select a target first!",
+                + "SwerveInputStream.withAim to select a target first!",
             false);
       }
     } else if (headingEnabled.isPresent() && headingEnabled.get().getAsBoolean()) {
@@ -581,7 +591,9 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     }
 
     currentMode = newMode;
-    return applyTranslationHeadingOffset(applyRobotRelativeTranslation(speeds));
+    ChassisVelocities fieldRelativeSpeeds = applyTranslationHeadingOffset(applyRobotRelativeTranslation(speeds));
+    telemetry.ifPresent(SwerveInputStreamTelemetry::updateTelemetry);
+    return fieldRelativeSpeeds;
   }
 
   enum SwerveInputMode {

@@ -13,6 +13,7 @@ import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Rotation2d;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Teleop manual driving for the swerve drivetrain, built on a YAMS {@link SwerveInputStream}.
@@ -45,7 +46,8 @@ public class ManualDrive extends Command {
             .withTranslationOnly(rotating.negate().debounce(Driving.kHeadingLockDelaySeconds).and(() -> snapHeading.isEmpty()))
             // Face the picked heading, converted to the field frame, until it is cleared.
             .withHeading(() -> snapHeadingInField().getMeasure())
-            .withHeadingControl(() -> snapHeading.isPresent());
+            .withHeadingControl(() -> snapHeading.isPresent())
+            .withTelemetry("Driver", TelemetryVerbosity.HIGH);
 
         addRequirements(swerve);
     }

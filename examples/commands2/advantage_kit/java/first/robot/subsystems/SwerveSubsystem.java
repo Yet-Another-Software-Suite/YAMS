@@ -300,14 +300,31 @@ public class SwerveSubsystem extends SubsystemBase
 
   public Command setRobotRelativeChassisSpeeds(Supplier<ChassisVelocities> speedsSupplier)
   {
-    return run(() -> {
-      Logger.recordOutput("Swerve/DesiredChassisSpeeds", speedsSupplier.get());
-      Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds",
-                          config.optimizeRobotRelativeChassisSpeeds(speedsSupplier.get()));
-      SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speedsSupplier.get());
-      Logger.recordOutput("Swerve/DesiredStates", states);
-      drive.setSwerveModuleStates(states);
-    }).withName("Set Robot Relative Chassis Speeds Supplier");
+    return run(() -> setRobotRelativeChassisSpeedsSetpoint(speedsSupplier.get()))
+        .withName("Set Robot Relative Chassis Speeds Supplier");
+  }
+
+  /**
+   * Drive with field relative speeds, e.g. from a {@link SwerveInputStream}, until interrupted. They are converted to
+   * robot relative with the logged gyro angle, so log replay matches the real match.
+   *
+   * @param fieldRelativeSpeeds Field relative {@link ChassisVelocities}, read once per loop.
+   * @return {@link Command} that drives the robot.
+   */
+  public Command setFieldRelativeChassisSpeeds(Supplier<ChassisVelocities> fieldRelativeSpeeds)
+  {
+    return run(() -> setRobotRelativeChassisSpeedsSetpoint(fieldRelativeSpeeds.get().toRobotRelative(getGyroAngle())))
+        .withName("Set Field Relative Chassis Speeds Supplier");
+  }
+
+  /** Apply robot relative speeds, logging the desired speeds and module states. */
+  private void setRobotRelativeChassisSpeedsSetpoint(ChassisVelocities speeds)
+  {
+    Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
+    Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
+    SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
+    Logger.recordOutput("Swerve/DesiredStates", states);
+    drive.setSwerveModuleStates(states);
   }
 
   /**

@@ -14,6 +14,7 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.units.measure.Angle;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /** Drive with the translation sticks while a YAMS {@link SwerveInputStream} aims at the hub. */
 public class AimAndDriveCommand extends Command {
@@ -29,7 +30,8 @@ public class AimAndDriveCommand extends Command {
     ) {
         this.swerve = swerve;
         this.input = swerve.createDriverInput(forwardInput, leftInput, () -> 0)
-            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> true);
+            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), () -> true)
+            .withTelemetry("Driver Aim", TelemetryVerbosity.HIGH);
         addRequirements(swerve);
     }
 

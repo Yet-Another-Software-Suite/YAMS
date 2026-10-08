@@ -6,115 +6,194 @@ package yams.commands2.telemetry;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleSupplier;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
 import org.wpilib.networktables.BooleanEntry;
+import org.wpilib.networktables.BooleanPublisher;
 import org.wpilib.networktables.DoubleEntry;
+import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.networktables.PubSub;
 import org.wpilib.networktables.StringPublisher;
+import org.wpilib.tunable.Tunables;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.NetworkTablesBackends;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
- * Telemetry and live tuning support for {@link SwerveInputStream}.
+ * Telemetry and live tuning for a {@link SwerveInputStream}, created by
+ * {@link SwerveInputStream#withTelemetry(String, TelemetryVerbosity)} and published every time the stream is read.
  *
- * <p>Publishes the current mode and configuration of a {@link SwerveInputStream} to NetworkTables under
- * {@code SwerveInputStream/<name>}, and applies values edited on the dashboard to the stream. Tunable values stay in
- * sync both ways: a dashboard edit is applied to the stream on the next {@link #update()}, and a change made in code,
- * e.g. a binding that changes the translation scale, is published to the dashboard. Invalid dashboard values are
+ * <ul>
+ *   <li>{@link TelemetryVerbosity#LOW}: the current drive mode, under {@code SwerveInputStream/<name>}.</li>
+ *   <li>{@link TelemetryVerbosity#MID}: also the stream's configuration (deadband, scales, maximum velocities, cubing,
+ *   alliance and robot relative), read-only.</li>
+ *   <li>{@link TelemetryVerbosity#HIGH}: also editable copies of the configuration under
+ *   {@code Tuning/SwerveInputStream/<name>}, and a {@code Live Tuning} command there that applies them to the stream
+ *   every loop while it runs.</li>
+ * </ul>
+ *
+ * <p>While live tuning, values stay in sync both ways: a dashboard edit is applied to the stream, and a change made in
+ * code, e.g. a binding that changes the translation scale, is published to the dashboard. Invalid dashboard values are
  * replaced with the stream's current value.
- *
- * <p>Usage:
- *
- * <pre>{@code
- * SwerveInputStream driveStream = SwerveInputStream.of(drive, leftY, leftX)
- *     .withControllerRotationAxis(rightX)
- *     .withDeadband(0.05);
- *
- * SwerveInputStreamTelemetry telemetry = new SwerveInputStreamTelemetry(driveStream, "drive");
- * telemetry.update(); // Call once per loop, e.g. in your command's loop before driveStream.get()
- * }</pre>
  */
 public class SwerveInputStreamTelemetry implements AutoCloseable {
   /** Stream to monitor and tune. */
-  private final SwerveInputStream stream;
+  private final SwerveInputStream      stream;
   /** Current drive mode publisher. */
-  private final StringPublisher modePublisher;
-  /** Tunable values, kept in sync between the stream and NetworkTables. */
-  private final List<TunableValue> tunableValues;
+  private final StringPublisher        modePublisher;
+  /** Read-only configuration, published at {@link TelemetryVerbosity#MID} and above. */
+  private final List<Runnable>         configPublishers = new ArrayList<>();
+  /** NetworkTables publishers to close with this telemetry. */
+  private final List<PubSub>           pubSubs          = new ArrayList<>();
+  /** Editable configuration, at {@link TelemetryVerbosity#HIGH}. */
+  private final List<TunableValue>     tunableValues    = new ArrayList<>();
+  /** Command that applies the editable configuration while it runs, at {@link TelemetryVerbosity#HIGH}. */
+  private final Optional<Command>      liveTuningCommand;
+  /** Path {@link #liveTuningCommand} is published to with {@link Tunables}. */
+  private final String                 liveTuningPath;
 
   /**
-   * Create telemetry for a {@link SwerveInputStream} under {@code SwerveInputStream/<name>}.
+   * Publish telemetry for a {@link SwerveInputStream}. Use
+   * {@link SwerveInputStream#withTelemetry(String, TelemetryVerbosity)} rather than calling this directly.
    *
-   * @param stream The {@link SwerveInputStream} to monitor and tune.
-   * @param name   The NetworkTables subtable name (e.g., "drive").
+   * @param stream    The {@link SwerveInputStream} to monitor and tune.
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity {@link TelemetryVerbosity} to publish at.
    */
-  public SwerveInputStreamTelemetry(SwerveInputStream stream, String name) {
-    this(stream, NetworkTableInstance.getDefault().getTable("SwerveInputStream").getSubTable(name));
-  }
-
-  /**
-   * Create telemetry for a {@link SwerveInputStream} in the given table.
-   *
-   * @param stream The {@link SwerveInputStream} to monitor and tune.
-   * @param table  The {@link NetworkTable} to publish to.
-   */
-  public SwerveInputStreamTelemetry(SwerveInputStream stream, NetworkTable table) {
+  public SwerveInputStreamTelemetry(SwerveInputStream stream, String name, TelemetryVerbosity verbosity) {
     this.stream = Objects.requireNonNull(stream, "stream cannot be null");
-    Objects.requireNonNull(table, "table cannot be null");
-    modePublisher = table.getStringTopic("mode").publish();
-    modePublisher.set(stream.getCurrentModeName());
-    tunableValues = List.of(
-        new TunableDouble(table, "deadband",
-                          stream::getAxisDeadband, stream::setAxisDeadband,
-                          value -> value >= 0.0 && value < 1.0),
-        new TunableDouble(table, "translationScale",
-                          stream::getTranslationAxisScale, stream::setTranslationAxisScale,
-                          value -> value > 0.0 && value <= 1.0),
-        new TunableDouble(table, "rotationScale",
-                          stream::getOmegaAxisScale, stream::setOmegaAxisScale,
-                          value -> value > 0.0 && value <= 1.0),
-        new TunableDouble(table, "maxLinearVelocity",
-                          () -> stream.getMaximumChassisLinearVelocity().in(MetersPerSecond),
-                          value -> stream.setMaximumChassisLinearVelocity(MetersPerSecond.of(value)),
-                          value -> value > 0.0 && Double.isFinite(value)),
-        new TunableDouble(table, "maxAngularVelocity",
-                          () -> stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond),
-                          value -> stream.setMaximumChassisAngularVelocity(RadiansPerSecond.of(value)),
-                          value -> value > 0.0 && Double.isFinite(value)),
-        new TunableBoolean(table, "translationCube",
-                           stream::isTranslationCubeEnabled, stream::setTranslationCubeEnabled),
-        new TunableBoolean(table, "rotationCube",
-                           stream::isOmegaCubeEnabled, stream::setOmegaCubeEnabled),
-        new TunableBoolean(table, "allianceRelative",
-                           stream::isAllianceRelativeEnabled, stream::setAllianceRelativeEnabled),
-        new TunableBoolean(table, "robotRelative",
-                           stream::isRobotRelativeEnabled, stream::setRobotRelativeEnabled));
+    Objects.requireNonNull(name, "name cannot be null");
+    Objects.requireNonNull(verbosity, "verbosity cannot be null");
+    NetworkTableInstance instance = NetworkTableInstance.getDefault();
+    NetworkTable dataTable = instance.getTable("SwerveInputStream").getSubTable(name);
+    modePublisher = track(dataTable.getStringTopic("mode").publish());
+    liveTuningPath = "Tuning/SwerveInputStream/" + name + "/Live Tuning";
+
+    if (verbosity != TelemetryVerbosity.LOW) {
+      publishConfig(dataTable);
+    }
+    if (verbosity == TelemetryVerbosity.HIGH) {
+      addTunableValues(instance.getTable("Tuning").getSubTable("SwerveInputStream").getSubTable(name));
+      // No requirements, so tuning does not interrupt the command driving with the stream.
+      Command command = Commands.run(this::applyTuningValues).withName("Live Tuning");
+      NetworkTablesBackends.ensureTuningTunableBackend();
+      Tunables.publish(liveTuningPath, command);
+      liveTuningCommand = Optional.of(command);
+    } else {
+      liveTuningCommand = Optional.empty();
+    }
+    updateTelemetry();
   }
 
   /**
-   * Publish the current state and apply any live-tuned values.
-   *
-   * <p>Call this method once per robot loop, e.g. in periodic() or in your command's loop, before reading the stream.
+   * Publish the stream's current mode and, at {@link TelemetryVerbosity#MID} and above, its configuration. Called by
+   * {@link SwerveInputStream#get()}.
    */
-  public void update() {
+  public void updateTelemetry() {
     modePublisher.set(stream.getCurrentModeName());
+    for (Runnable publisher : configPublishers) {
+      publisher.run();
+    }
+  }
+
+  /**
+   * Apply values edited on the dashboard to the stream, and publish changes made to the stream in code. The
+   * {@link #getLiveTuningCommand() Live Tuning} command calls this every loop. Does nothing below
+   * {@link TelemetryVerbosity#HIGH}.
+   */
+  public void applyTuningValues() {
     for (TunableValue value : tunableValues) {
       value.update();
     }
   }
 
-  /** Stop publishing this stream's telemetry. */
+  /**
+   * The {@code Live Tuning} command published to the dashboard, which applies dashboard edits while it runs.
+   *
+   * @return The command at {@link TelemetryVerbosity#HIGH}, otherwise empty.
+   */
+  public Optional<Command> getLiveTuningCommand() {
+    return liveTuningCommand;
+  }
+
+  /** Stop publishing this stream's telemetry, canceling and removing the {@code Live Tuning} command. */
   @Override
   public void close() {
-    modePublisher.close();
+    liveTuningCommand.ifPresent(command -> {
+      command.cancel();
+      Tunables.remove(liveTuningPath);
+    });
     for (TunableValue value : tunableValues) {
       value.close();
     }
+    for (PubSub pubSub : pubSubs) {
+      pubSub.close();
+    }
+  }
+
+  private <T extends PubSub> T track(T pubSub) {
+    pubSubs.add(pubSub);
+    return pubSub;
+  }
+
+  private void publishConfig(NetworkTable table) {
+    publishDouble(table, "deadband", stream::getAxisDeadband);
+    publishDouble(table, "translationScale", stream::getTranslationAxisScale);
+    publishDouble(table, "rotationScale", stream::getOmegaAxisScale);
+    publishDouble(table, "maxLinearVelocity", () -> stream.getMaximumChassisLinearVelocity().in(MetersPerSecond));
+    publishDouble(table, "maxAngularVelocity", () -> stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond));
+    publishBoolean(table, "translationCube", stream::isTranslationCubeEnabled);
+    publishBoolean(table, "rotationCube", stream::isOmegaCubeEnabled);
+    publishBoolean(table, "allianceRelative", stream::isAllianceRelativeEnabled);
+    publishBoolean(table, "robotRelative", stream::isRobotRelativeEnabled);
+  }
+
+  private void publishDouble(NetworkTable table, String key, DoubleSupplier value) {
+    DoublePublisher publisher = track(table.getDoubleTopic(key).publish());
+    configPublishers.add(() -> publisher.set(value.getAsDouble()));
+  }
+
+  private void publishBoolean(NetworkTable table, String key, BooleanSupplier value) {
+    BooleanPublisher publisher = track(table.getBooleanTopic(key).publish());
+    configPublishers.add(() -> publisher.set(value.getAsBoolean()));
+  }
+
+  private void addTunableValues(NetworkTable table) {
+    tunableValues.add(new TunableDouble(table, "deadband",
+                                        stream::getAxisDeadband, stream::setAxisDeadband,
+                                        value -> value >= 0.0 && value < 1.0));
+    tunableValues.add(new TunableDouble(table, "translationScale",
+                                        stream::getTranslationAxisScale, stream::setTranslationAxisScale,
+                                        value -> value > 0.0 && value <= 1.0));
+    tunableValues.add(new TunableDouble(table, "rotationScale",
+                                        stream::getOmegaAxisScale, stream::setOmegaAxisScale,
+                                        value -> value > 0.0 && value <= 1.0));
+    tunableValues.add(new TunableDouble(table, "maxLinearVelocity",
+                                        () -> stream.getMaximumChassisLinearVelocity().in(MetersPerSecond),
+                                        value -> stream.setMaximumChassisLinearVelocity(MetersPerSecond.of(value)),
+                                        value -> value > 0.0 && Double.isFinite(value)));
+    tunableValues.add(new TunableDouble(table, "maxAngularVelocity",
+                                        () -> stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond),
+                                        value -> stream.setMaximumChassisAngularVelocity(RadiansPerSecond.of(value)),
+                                        value -> value > 0.0 && Double.isFinite(value)));
+    tunableValues.add(new TunableBoolean(table, "translationCube",
+                                         stream::isTranslationCubeEnabled, stream::setTranslationCubeEnabled));
+    tunableValues.add(new TunableBoolean(table, "rotationCube",
+                                         stream::isOmegaCubeEnabled, stream::setOmegaCubeEnabled));
+    tunableValues.add(new TunableBoolean(table, "allianceRelative",
+                                         stream::isAllianceRelativeEnabled, stream::setAllianceRelativeEnabled));
+    tunableValues.add(new TunableBoolean(table, "robotRelative",
+                                         stream::isRobotRelativeEnabled, stream::setRobotRelativeEnabled));
   }
 
   /** A stream value kept in sync with a NetworkTables entry. */

@@ -139,7 +139,8 @@ public class SwerveSubsystem extends SubsystemBase {
             .withMaximumAngularVelocity(DegreesPerSecond.of(360))
             .withDeadband(0.05)
             .withCubeTranslationControllerAxis()
-            .withAllianceRelativeControl();
+            .withAllianceRelativeControl()
+            .withTelemetry("Driver", TelemetryVerbosity.HIGH);
 
     return drive.drive(
         () -> inputStream.get().toRobotRelative(drive.getGyroRotation3d().toRotation2d()));

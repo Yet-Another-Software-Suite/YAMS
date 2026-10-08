@@ -19,6 +19,7 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.swerve.SwerveDrive;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.commands3.telemetry.SwerveInputStreamTelemetry;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 
@@ -132,6 +133,11 @@ public class DriveMechanism implements Mechanism
    */
   public void setInputStream(SwerveInputStream inputStream)
   {
+    // Stop publishing the replaced stream's telemetry, e.g. when another teleop opmode is selected.
+    if (m_inputStream != null)
+    {
+      m_inputStream.getTelemetry().ifPresent(SwerveInputStreamTelemetry::close);
+    }
     m_inputStream = inputStream;
   }
 

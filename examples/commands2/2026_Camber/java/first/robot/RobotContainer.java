@@ -28,6 +28,7 @@ import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 public class RobotContainer
 {
@@ -44,7 +45,8 @@ public class RobotContainer
                                                             .withControllerRotationAxis(() -> driverController.getRightX())
                                                             .deadband(.1)
                                                             .withScaleTranslation(.8)
-                                                            .withAllianceRelativeControl();
+                                                            .withAllianceRelativeControl()
+                                                            .withTelemetry("Driver Angular Velocity", TelemetryVerbosity.HIGH);
 
   /// Testing SwerveInputStream to ensure that our swerve drive is capable of running in autonomous
   SwerveInputStream driveDirectAngle = SwerveInputStream.of(drivebase.getSwerveDrive(),
@@ -53,7 +55,8 @@ public class RobotContainer
                                                         .withHeading(this::rightStickHeading)
                                                         .deadband(0.1)
                                                         .withScaleTranslation(.8).withHeadingControl(() -> true)
-                                                        .withAllianceRelativeControl();
+                                                        .withAllianceRelativeControl()
+                                                        .withTelemetry("Driver Direct Angle", TelemetryVerbosity.HIGH);
 
   // Heading picked with the right stick. YAGSL kept the last heading while the stick was inside
   // angleJoystickRadiusDeadband, starting at 0.

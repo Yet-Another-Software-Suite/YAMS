@@ -9,6 +9,7 @@ import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Driver controls for the REV ION Starter Bot, where the left stick translates and the robot faces the direction the
@@ -33,7 +34,8 @@ public class HeadingTeleop implements OpMode
         // Heading axes are (left, forward), so pushing the right stick away from the driver faces the robot forward.
         .withControllerHeadingAxis(() -> -controller.getRightX(), () -> -controller.getRightY())
         .withHeadingControl(() -> true)
-        .withDeadband(OIConstants.kDriveDeadband));
+        .withDeadband(OIConstants.kDriveDeadband)
+        .withTelemetry("Driver", TelemetryVerbosity.HIGH));
 
     robot.drive.setDefaultCommand(robot.drive.driveInputStream());
     TeleopBindings.bind(robot);

@@ -6,107 +6,125 @@
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/Commands.hpp>
 #include <wpi/nt/BooleanTopic.hpp>
 #include <wpi/nt/DoubleTopic.hpp>
 #include <wpi/nt/NetworkTable.hpp>
 #include <wpi/nt/NetworkTableInstance.hpp>
 #include <wpi/nt/StringTopic.hpp>
+#include <wpi/tunables/Tunables.hpp>
 
+#include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/utility/SwerveInputStream.hpp"
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::mechanisms::swerve::utility {
 
 /**
- * Telemetry and live tuning support for SwerveInputStream.
+ * Telemetry and live tuning for a SwerveInputStream, created by
+ * SwerveInputStream::WithTelemetry(name, verbosity) and published every time the stream is read.
  *
- * Publishes the current mode and configuration of a SwerveInputStream to NetworkTables under
- * SwerveInputStream/<name>, and applies values edited on the dashboard to the stream. Tunable
- * values stay in sync both ways: a dashboard edit is applied to the stream on the next Update(),
- * and a change made in code, e.g. a binding that changes the translation scale, is published to the
+ * - LOW: the current drive mode, under SwerveInputStream/<name>.
+ * - MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance
+ *   and robot relative), read-only.
+ * - HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/<name>, and a
+ *   "Live Tuning" command there that applies them to the stream every loop while it runs.
+ *
+ * While live tuning, values stay in sync both ways: a dashboard edit is applied to the stream, and
+ * a change made in code, e.g. a binding that changes the translation scale, is published to the
  * dashboard. Invalid dashboard values are replaced with the stream's current value.
  *
- * The stream must outlive this object.
+ * The stream owns its telemetry and creates it when first read, so the telemetry never outlives the
+ * stream or follows it to a new address.
  */
 template <size_t NumModules = 4>
 class SwerveInputStreamTelemetry {
  public:
-  /**
-   * Create telemetry for a SwerveInputStream under SwerveInputStream/<name>.
-   *
-   * @param stream The SwerveInputStream to monitor and tune.
-   * @param name   The NetworkTables subtable name (e.g., "drive").
-   */
-  SwerveInputStreamTelemetry(SwerveInputStream<NumModules>& stream, std::string_view name)
-      : SwerveInputStreamTelemetry{stream, wpi::nt::NetworkTableInstance::GetDefault()
-                                               .GetTable("SwerveInputStream")
-                                               ->GetSubTable(name)} {}
+  using TelemetryVerbosity = SwerveDriveConfig::TelemetryVerbosity;
 
   /**
-   * Create telemetry for a SwerveInputStream in the given table.
+   * Publish telemetry for a SwerveInputStream. Use SwerveInputStream::WithTelemetry rather than
+   * creating this directly.
    *
-   * @param stream The SwerveInputStream to monitor and tune.
-   * @param table  The NetworkTable to publish to.
+   * @param stream    The SwerveInputStream to monitor and tune. Must outlive this object.
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity TelemetryVerbosity to publish at.
    */
-  SwerveInputStreamTelemetry(SwerveInputStream<NumModules>& stream,
-                             std::shared_ptr<wpi::nt::NetworkTable> table)
-      : m_stream{&stream}, m_modePublisher{table->GetStringTopic("mode").Publish()} {
-    auto* s = m_stream;
-    m_modePublisher.Set(s->GetCurrentModeName());
-    m_doubles.emplace_back(
-        *table, "deadband", [s] { return s->GetAxisDeadband(); },
-        [s](double value) { s->SetAxisDeadband(value); },
-        [](double value) { return value >= 0.0 && value < 1.0; });
-    m_doubles.emplace_back(
-        *table, "translationScale", [s] { return s->GetTranslationAxisScale(); },
-        [s](double value) { s->SetTranslationAxisScale(value); },
-        [](double value) { return value > 0.0 && value <= 1.0; });
-    m_doubles.emplace_back(
-        *table, "rotationScale", [s] { return s->GetOmegaAxisScale(); },
-        [s](double value) { s->SetOmegaAxisScale(value); },
-        [](double value) { return value > 0.0 && value <= 1.0; });
-    m_doubles.emplace_back(
-        *table, "maxLinearVelocity", [s] { return s->GetMaximumChassisLinearVelocity().value(); },
-        [s](double value) {
-          s->SetMaximumChassisLinearVelocity(wpi::units::meters_per_second_t{value});
-        },
-        [](double value) { return value > 0.0 && std::isfinite(value); });
-    m_doubles.emplace_back(
-        *table, "maxAngularVelocity",
-        [s] { return s->GetMaximumChassisAngularVelocity().value(); },
-        [s](double value) {
-          s->SetMaximumChassisAngularVelocity(wpi::units::radians_per_second_t{value});
-        },
-        [](double value) { return value > 0.0 && std::isfinite(value); });
-    m_booleans.emplace_back(
-        *table, "translationCube", [s] { return s->IsTranslationCubeEnabled(); },
-        [s](bool value) { s->SetTranslationCubeEnabled(value); });
-    m_booleans.emplace_back(
-        *table, "rotationCube", [s] { return s->IsOmegaCubeEnabled(); },
-        [s](bool value) { s->SetOmegaCubeEnabled(value); });
-    m_booleans.emplace_back(
-        *table, "allianceRelative", [s] { return s->IsAllianceRelativeEnabled(); },
-        [s](bool value) { s->SetAllianceRelativeEnabled(value); });
-    m_booleans.emplace_back(
-        *table, "robotRelative", [s] { return s->IsRobotRelativeEnabled(); },
-        [s](bool value) { s->SetRobotRelativeEnabled(value); });
+  SwerveInputStreamTelemetry(SwerveInputStream<NumModules>& stream, std::string_view name,
+                             TelemetryVerbosity verbosity)
+      : m_stream{&stream},
+        m_liveTuningPath{"Tuning/SwerveInputStream/" + std::string{name} + "/Live Tuning"} {
+    auto instance = wpi::nt::NetworkTableInstance::GetDefault();
+    auto dataTable = instance.GetTable("SwerveInputStream")->GetSubTable(name);
+    m_modePublisher = dataTable->GetStringTopic("mode").Publish();
+
+    if (verbosity == TelemetryVerbosity::MEDIUM || verbosity == TelemetryVerbosity::HIGH) {
+      PublishConfig(*dataTable);
+    }
+    if (verbosity == TelemetryVerbosity::HIGH) {
+      AddTunableValues(
+          *instance.GetTable("Tuning")->GetSubTable("SwerveInputStream")->GetSubTable(name));
+      // No requirements, so tuning does not interrupt the command driving with the stream.
+      m_liveTuningCommand.emplace(
+          wpi::cmd::Run([this] { ApplyTuningValues(); }).WithName("Live Tuning"));
+      telemetry::EnsureTuningTunableBackend();
+      wpi::tunables::Publish(m_liveTuningPath, *m_liveTuningCommand->get());
+    }
+    UpdateTelemetry();
+  }
+
+  SwerveInputStreamTelemetry(const SwerveInputStreamTelemetry&) = delete;
+  SwerveInputStreamTelemetry& operator=(const SwerveInputStreamTelemetry&) = delete;
+
+  /** Stop publishing, canceling and removing the "Live Tuning" command. */
+  ~SwerveInputStreamTelemetry() {
+    if (m_liveTuningCommand) {
+      m_liveTuningCommand->Cancel();
+      wpi::tunables::Remove(m_liveTuningPath);
+    }
   }
 
   /**
-   * Publish the current state and apply any live-tuned values. Call once per robot loop, before
-   * reading the stream.
+   * Publish the stream's current mode and, at MEDIUM and above, its configuration. Called by
+   * SwerveInputStream::Get().
    */
-  void Update() {
+  void UpdateTelemetry() {
     m_modePublisher.Set(m_stream->GetCurrentModeName());
+    for (auto& publish : m_configPublishers) {
+      publish();
+    }
+  }
+
+  /**
+   * Apply values edited on the dashboard to the stream, and publish changes made to the stream in
+   * code. The "Live Tuning" command calls this every loop. Does nothing below HIGH.
+   */
+  void ApplyTuningValues() {
     for (auto& value : m_doubles) {
       value.Update();
     }
     for (auto& value : m_booleans) {
       value.Update();
     }
+  }
+
+  /**
+   * The "Live Tuning" command published to the dashboard, which applies dashboard edits while it
+   * runs.
+   *
+   * @return The command at HIGH, otherwise empty.
+   */
+  std::optional<std::reference_wrapper<wpi::cmd::Command>> GetLiveTuningCommand() {
+    if (!m_liveTuningCommand) {
+      return std::nullopt;
+    }
+    return std::ref(*m_liveTuningCommand->get());
   }
 
  private:
@@ -164,10 +182,88 @@ class SwerveInputStreamTelemetry {
     Entry m_entry;
   };
 
+  void PublishConfig(wpi::nt::NetworkTable& table) {
+    PublishDouble(table, "deadband", [this] { return m_stream->GetAxisDeadband(); });
+    PublishDouble(table, "translationScale", [this] { return m_stream->GetTranslationAxisScale(); });
+    PublishDouble(table, "rotationScale", [this] { return m_stream->GetOmegaAxisScale(); });
+    PublishDouble(table, "maxLinearVelocity",
+                  [this] { return m_stream->GetMaximumChassisLinearVelocity().value(); });
+    PublishDouble(table, "maxAngularVelocity",
+                  [this] { return m_stream->GetMaximumChassisAngularVelocity().value(); });
+    PublishBoolean(table, "translationCube", [this] { return m_stream->IsTranslationCubeEnabled(); });
+    PublishBoolean(table, "rotationCube", [this] { return m_stream->IsOmegaCubeEnabled(); });
+    PublishBoolean(table, "allianceRelative",
+                   [this] { return m_stream->IsAllianceRelativeEnabled(); });
+    PublishBoolean(table, "robotRelative", [this] { return m_stream->IsRobotRelativeEnabled(); });
+  }
+
+  void PublishDouble(wpi::nt::NetworkTable& table, std::string_view key,
+                     std::function<double()> value) {
+    auto publisher =
+        std::make_shared<wpi::nt::DoublePublisher>(table.GetDoubleTopic(key).Publish());
+    m_configPublishers.emplace_back(
+        [publisher, value = std::move(value)] { publisher->Set(value()); });
+  }
+
+  void PublishBoolean(wpi::nt::NetworkTable& table, std::string_view key,
+                      std::function<bool()> value) {
+    auto publisher =
+        std::make_shared<wpi::nt::BooleanPublisher>(table.GetBooleanTopic(key).Publish());
+    m_configPublishers.emplace_back(
+        [publisher, value = std::move(value)] { publisher->Set(value()); });
+  }
+
+  void AddTunableValues(wpi::nt::NetworkTable& table) {
+    m_doubles.emplace_back(
+        table, "deadband", [this] { return m_stream->GetAxisDeadband(); },
+        [this](double value) { m_stream->SetAxisDeadband(value); },
+        [](double value) { return value >= 0.0 && value < 1.0; });
+    m_doubles.emplace_back(
+        table, "translationScale", [this] { return m_stream->GetTranslationAxisScale(); },
+        [this](double value) { m_stream->SetTranslationAxisScale(value); },
+        [](double value) { return value > 0.0 && value <= 1.0; });
+    m_doubles.emplace_back(
+        table, "rotationScale", [this] { return m_stream->GetOmegaAxisScale(); },
+        [this](double value) { m_stream->SetOmegaAxisScale(value); },
+        [](double value) { return value > 0.0 && value <= 1.0; });
+    m_doubles.emplace_back(
+        table, "maxLinearVelocity",
+        [this] { return m_stream->GetMaximumChassisLinearVelocity().value(); },
+        [this](double value) {
+          m_stream->SetMaximumChassisLinearVelocity(wpi::units::meters_per_second_t{value});
+        },
+        [](double value) { return value > 0.0 && std::isfinite(value); });
+    m_doubles.emplace_back(
+        table, "maxAngularVelocity",
+        [this] { return m_stream->GetMaximumChassisAngularVelocity().value(); },
+        [this](double value) {
+          m_stream->SetMaximumChassisAngularVelocity(wpi::units::radians_per_second_t{value});
+        },
+        [](double value) { return value > 0.0 && std::isfinite(value); });
+    m_booleans.emplace_back(
+        table, "translationCube", [this] { return m_stream->IsTranslationCubeEnabled(); },
+        [this](bool value) { m_stream->SetTranslationCubeEnabled(value); });
+    m_booleans.emplace_back(
+        table, "rotationCube", [this] { return m_stream->IsOmegaCubeEnabled(); },
+        [this](bool value) { m_stream->SetOmegaCubeEnabled(value); });
+    m_booleans.emplace_back(
+        table, "allianceRelative", [this] { return m_stream->IsAllianceRelativeEnabled(); },
+        [this](bool value) { m_stream->SetAllianceRelativeEnabled(value); });
+    m_booleans.emplace_back(
+        table, "robotRelative", [this] { return m_stream->IsRobotRelativeEnabled(); },
+        [this](bool value) { m_stream->SetRobotRelativeEnabled(value); });
+  }
+
   SwerveInputStream<NumModules>* m_stream;
+  std::string m_liveTuningPath;
   wpi::nt::StringPublisher m_modePublisher;
+  /** Read-only configuration, published at MEDIUM and above. */
+  std::vector<std::function<void()>> m_configPublishers;
+  /** Editable configuration, at HIGH. */
   std::vector<TunableValue<double, wpi::nt::DoubleEntry>> m_doubles;
   std::vector<TunableValue<bool, wpi::nt::BooleanEntry>> m_booleans;
+  /** Command that applies the editable configuration while it runs, at HIGH. */
+  std::optional<wpi::cmd::CommandPtr> m_liveTuningCommand;
 };
 
 }  // namespace yams::mechanisms::swerve::utility

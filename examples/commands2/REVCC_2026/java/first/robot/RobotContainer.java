@@ -15,6 +15,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.button.CommandNiDsXboxController;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.tunable.Tunables;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -50,7 +51,7 @@ public class RobotContainer
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
                 () -> -m_driverController.getRightX(),
-                OIConstants.kDriveDeadband),
+                OIConstants.kDriveDeadband).withTelemetry("Driver", TelemetryVerbosity.HIGH),
             true).withName("Robot Drive Default"));
 
     // Dashboard buttons for running individual mechanisms.

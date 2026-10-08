@@ -4,6 +4,7 @@
 #pragma once
 
 #include <any>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -20,8 +21,10 @@
 #include <wpi/units/acceleration.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
+#include <wpi/units/angular_jerk.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/current.hpp>
+#include <wpi/units/force.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
@@ -38,6 +41,19 @@ namespace yams::motorcontrollers {
 // Forward declaration to avoid circular dependency (SmartMotorController.hpp
 // includes this header, so we cannot include it here).
 class SmartMotorController;
+
+}  // namespace yams::motorcontrollers
+
+namespace yams::telemetry {
+// Forward declaration; SmartMotorControllerTelemetryConfig.hpp includes this header.
+class SmartMotorControllerTelemetryConfig;
+}  // namespace yams::telemetry
+
+namespace yams::motorcontrollers {
+
+/** Linear jerk in meters per second cubed (no predefined unit in wpi::units). */
+using meters_per_second_cubed_t = wpi::units::unit_t<wpi::units::compound_unit<
+    wpi::units::meters, wpi::units::inverse<wpi::units::cubed<wpi::units::seconds>>>>;
 
 /**
  * Unified configuration for a SmartMotorController.
@@ -132,15 +148,30 @@ class SmartMotorControllerConfig {
       wpi::units::meters_per_second_squared_t maxAcceleration);
 
   /**
-   * Enable a trapezoidal motion profile for velocity control.
+   * Enable a trapezoidal motion profile for angular velocity control.
    *
-   * @param maxVelocity     Maximum velocity constraint.
-   * @param maxAcceleration Maximum acceleration constraint.
+   * The velocity setpoint is profiled: its rate of change is limited by @p maxAcceleration and
+   * the rate of change of that by @p maxJerk.
+   *
+   * @param maxAcceleration Maximum mechanism angular acceleration.
+   * @param maxJerk         Maximum mechanism angular jerk.
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithVelocityTrapezoidProfile(
-      wpi::units::turns_per_second_t maxVelocity,
-      wpi::units::turns_per_second_squared_t maxAcceleration);
+      wpi::units::turns_per_second_squared_t maxAcceleration,
+      wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk);
+
+  /**
+   * Enable a trapezoidal motion profile for linear velocity control.
+   *
+   * Also switches the closed-loop controller to linear (distance based) units.
+   *
+   * @param maxAcceleration Maximum linear acceleration.
+   * @param maxJerk         Maximum linear jerk.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithVelocityTrapezoidProfile(
+      wpi::units::meters_per_second_squared_t maxAcceleration, meters_per_second_cubed_t maxJerk);
 
   /**
    * Enable an exponential motion profile for position control.
@@ -173,8 +204,8 @@ class SmartMotorControllerConfig {
    * Derive a linear exponential motion profile from elevator system characteristics.
    *
    * Computes kV and kA from the motor model, carriage mass, and drum radius via the
-   * elevator velocity state-space model.  Also sets the mechanism circumference so
-   * that linear closed-loop mode is activated.
+   * elevator velocity state-space model.  Also sets the mechanism circumference and
+   * activates linear closed-loop mode.
    *
    * @param maxVolts   Maximum input voltage.
    * @param motor      DC motor model.
@@ -221,6 +252,39 @@ class SmartMotorControllerConfig {
       const math::LQRConfig& lqrConfig,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
+  /**
+   * Set whether the closed-loop controller runs in linear (distance based) units.
+   *
+   * Linear mode only takes effect when a mechanism circumference is also configured.  It is
+   * enabled automatically by elevator feedforwards, linear trapezoidal profiles, and the
+   * elevator exponential profile.
+   *
+   * @param linear true for meters-based closed-loop control, false for rotations.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithLinearClosedLoopController(bool linear);
+
+  /**
+   * Set the closed-loop tolerance of the software PID controller in mechanism rotations.
+   *
+   * Throws SmartMotorControllerConfigurationException if no PID gains are configured.
+   *
+   * @param tolerance Position tolerance.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithClosedLoopTolerance(wpi::units::turn_t tolerance);
+
+  /**
+   * Set the closed-loop tolerance of the software PID controller as a distance.
+   *
+   * Throws SmartMotorControllerConfigurationException if the linear closed-loop controller is not
+   * in use, the mechanism circumference is not configured, or no PID gains are configured.
+   *
+   * @param tolerance Distance tolerance.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithClosedLoopTolerance(wpi::units::meter_t tolerance);
+
   // ---- Gearing / linear --------------------------------------------------
 
   /**
@@ -230,6 +294,24 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithMotorGearing(const gearing::MechanismGearing& gearing);
+
+  /**
+   * Set the mechanism gearing from a scalar reduction ratio.
+   *
+   * @param reductionRatio Reduction ratio (e.g. 3.0 for a 3:1 reduction, 0.5 for 1:2).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithMotorGearing(double reductionRatio);
+
+  /**
+   * Divide the configured gearing by the number of cascading elevator stages.
+   *
+   * Throws SmartMotorControllerConfigurationException if no gearing is configured.
+   *
+   * @param stages Number of cascading stages.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithCascadingElevatorStages(int stages);
 
   /**
    * Set the mechanism circumference for linear distance conversion.
@@ -275,6 +357,8 @@ class SmartMotorControllerConfig {
   /**
    * Set angular soft limits for the mechanism.
    *
+   * Throws SmartMotorControllerConfigurationException if @p lower is not below @p upper.
+   *
    * @param lower Lower angle limit (in turns; accepts any angular unit via implicit conversion).
    * @param upper Upper angle limit (in turns; accepts any angular unit via implicit conversion).
    * @return *this for chaining.
@@ -284,6 +368,11 @@ class SmartMotorControllerConfig {
 
   /**
    * Set linear soft limits for the mechanism.
+   *
+   * The limits are converted into mechanism angle limits with the mechanism circumference, so
+   * WithMechanismCircumference must be called first.  Throws
+   * SmartMotorControllerConfigurationException if the circumference is not configured or if
+   * @p lower is not below @p upper.
    *
    * @param lower Lower distance limit.
    * @param upper Upper distance limit.
@@ -324,6 +413,26 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithClosedLoopMaxVoltage(wpi::units::volt_t maxVoltage);
 
+  /**
+   * Set the nominal voltage the motor controller compensates its output for.
+   *
+   * @param voltage Ideal (compensated) voltage.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithVoltageCompensation(wpi::units::volt_t voltage);
+
+  /**
+   * Set the angle error beyond which the relative encoder is resynchronized to the absolute
+   * encoder.
+   *
+   * Throws SmartMotorControllerConfigurationException if a mechanism circumference is configured,
+   * since auto-synchronization is unavailable for distance based mechanisms.
+   *
+   * @param threshold Synchronization threshold.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithFeedbackSynchronizationThreshold(wpi::units::turn_t threshold);
+
   // ---- Control behaviour -------------------------------------------------
 
   /**
@@ -355,6 +464,15 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithClosedLoopControlPeriod(wpi::units::second_t period);
+
+  /**
+   * Set whether the motor controller resets its previous configuration and only applies what is
+   * given to this config (default true).
+   *
+   * @param reset Reset the previous configuration.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithResetPreviousConfig(bool reset);
 
   // ---- Ramp rates --------------------------------------------------------
 
@@ -452,6 +570,17 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithExternalEncoderZeroOffset(wpi::units::turn_t zeroOffset);
 
   /**
+   * Set the external encoder zero-point offset as a distance.
+   *
+   * Throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   * configured.
+   *
+   * @param zeroOffset Hardware zero offset as a linear distance.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithExternalEncoderZeroOffset(wpi::units::meter_t zeroOffset);
+
+  /**
    * Set the external encoder gearing (encoder to mechanism).
    *
    * Emits a driver station warning if the rotor-to-mechanism ratio exceeds 1, since
@@ -485,8 +614,8 @@ class SmartMotorControllerConfig {
   /**
    * Enable continuous position wrapping for the closed-loop controller.
    *
-   * Throws SmartMotorControllerConfigurationException if soft limits or a linear
-   * mechanism circumference are already configured.
+   * Throws SmartMotorControllerConfigurationException if soft limits or a linear closed-loop
+   * controller are already configured, or if no PID or LQR controller is configured.
    *
    * @param min Bottom of the wrapping range (turns).
    * @param max Top of the wrapping range (turns).
@@ -507,10 +636,33 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithTelemetry(
       const std::string& name, TelemetryVerbosity verbosity = TelemetryVerbosity::HIGH);
 
+  /**
+   * Enable NetworkTables telemetry for this motor controller under the name "motor".
+   *
+   * @param verbosity Amount of data to publish.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithTelemetry(TelemetryVerbosity verbosity);
+
+  /**
+   * Enable NetworkTables telemetry with a field-level telemetry configuration.
+   *
+   * The verbosity is set to HIGH so that live tuning is available.
+   *
+   * @param name            Table key for this motor's telemetry.
+   * @param telemetryConfig Telemetry configuration specifying the published fields.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithTelemetry(
+      const std::string& name, const telemetry::SmartMotorControllerTelemetryConfig& telemetryConfig);
+
   // ---- Subsystem ---------------------------------------------------------
 
   /**
    * Associate a command subsystem with this motor controller.
+   *
+   * Throws SmartMotorControllerConfigurationException if a subsystem has already been set.
+   * Passing nullptr leaves the subsystem unset.
    *
    * @param subsystem Pointer to the owning subsystem (must outlive this config).
    * @return *this for chaining.
@@ -526,6 +678,16 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithSimMotor(wpi::math::DCMotor motor);
+
+  /**
+   * Set the simulation period, the rate at which SimIterate() steps the simulated physics.
+   *
+   * Independent of the closed-loop control period.  Defaults to 20 ms.
+   *
+   * @param period Simulation loop period.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimulationPeriod(wpi::units::second_t period);
 
   // ---- Simulation overrides -----------------------------------------------
 
@@ -594,6 +756,19 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithSimClosedLoopController(
       double kP, double kI, double kD,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Override the closed-loop controller for the specified slot with an LQR in simulation.
+   *
+   * Clears any simulation PID override for that slot.
+   *
+   * @param lqrConfig LQRConfig to use in simulation.
+   * @param slot      Gain slot to override (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithSimClosedLoopController(
+      const math::LQRConfig& lqrConfig,
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -716,6 +891,9 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithLooselyCoupledFollowers(
       std::vector<SmartMotorController*> followers);
+
+  /** Clear the tightly coupled hardware followers so they are not reapplied. */
+  void ClearFollowers();
 
   /** Get the list of tightly coupled hardware followers. */
   const std::vector<std::pair<std::any, bool>>& GetFollowers() const;
@@ -855,7 +1033,7 @@ class SmartMotorControllerConfig {
   /**
    * Return true if the config targets a linear (distance-based) closed-loop controller.
    *
-   * @return true when a mechanism circumference has been set.
+   * @return true when linear closed-loop control is enabled and a mechanism circumference is set.
    */
   bool GetLinearClosedLoopControllerUse() const;
 
@@ -874,6 +1052,18 @@ class SmartMotorControllerConfig {
   /** @return Optional lower continuous wrapping bound (turns). */
   std::optional<wpi::units::turn_t> GetContinuousWrappingMin() const;
 
+  /**
+   * Get the position setpoint to command with continuous wrapping: the angle equivalent to
+   * @p setpoint, a whole number of wrapping ranges away, that is nearest @p current.
+   *
+   * @param setpoint Mechanism angle to go to.
+   * @param current  Current mechanism angle.
+   * @return The equivalent setpoint nearest @p current, or @p setpoint unchanged when continuous
+   *         wrapping is not configured.
+   */
+  wpi::units::turn_t GetContinuousWrappingSetpoint(wpi::units::turn_t setpoint,
+                                                   wpi::units::turn_t current) const;
+
   /** @return Optional stator current limit. */
   std::optional<wpi::units::ampere_t> GetStatorCurrentLimit() const;
   /** @return Optional stator stall current limit (integer amps). */
@@ -886,11 +1076,19 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::celsius_t> GetTemperatureCutoff() const;
   /** @return Optional maximum closed-loop output voltage. */
   std::optional<wpi::units::volt_t> GetClosedLoopControllerMaximumVoltage() const;
+  /** @return Optional voltage compensation (nominal) voltage. */
+  std::optional<wpi::units::volt_t> GetVoltageCompensation() const;
+  /** @return Optional relative-to-absolute encoder synchronization threshold. */
+  std::optional<wpi::units::turn_t> GetFeedbackSynchronizationThreshold() const;
+  /** @return Optional closed-loop tolerance in mechanism rotations. */
+  std::optional<wpi::units::turn_t> GetClosedLoopTolerance() const;
+  /** @return true if the previous motor controller configuration should be reset. */
+  bool GetResetPreviousConfig() const;
 
   /** @return Current control mode (CLOSED_LOOP or OPEN_LOOP). */
   ControlMode GetMotorControllerMode() const;
-  /** @return Current zero power mode (COAST or BRAKE). */
-  MotorMode GetZeroPower() const;
+  /** @return Zero power mode (COAST or BRAKE) if configured, otherwise empty. */
+  std::optional<MotorMode> GetZeroPower() const;
   /** @return Optional closed-loop control thread period. */
   std::optional<wpi::units::second_t> GetClosedLoopControlPeriod() const;
   /** @return Optional open-loop ramp rate. */
@@ -898,7 +1096,10 @@ class SmartMotorControllerConfig {
   /** @return Optional closed-loop ramp rate. */
   std::optional<wpi::units::second_t> GetClosedLoopRampRate() const;
 
-  /** @return Inverted state if explicitly configured, otherwise empty. */
+  /**
+   * @return Inverted state if explicitly configured, otherwise empty.  Always false in
+   *         simulation when configured, since simulated physics are not inverted.
+   */
   std::optional<bool> GetMotorInverted() const;
   /** @return Encoder inverted state if explicitly configured, otherwise empty. */
   std::optional<bool> GetEncoderInverted() const;
@@ -909,10 +1110,22 @@ class SmartMotorControllerConfig {
   std::optional<std::string> GetTelemetryName() const;
   /** @return Optional telemetry verbosity level. */
   std::optional<TelemetryVerbosity> GetVerbosity() const;
-  /** @return Owning subsystem pointer (may be nullptr). */
+  /**
+   * @return Owning subsystem pointer.  Throws SmartMotorControllerConfigurationException if no
+   *         subsystem has been set.
+   */
   wpi::cmd::SubsystemBase* GetSubsystem() const;
+  /** @return true if a subsystem has been set via WithSubsystem. */
+  bool HasSubsystem() const;
+  /**
+   * @return Telemetry configuration set via WithTelemetry(name, telemetryConfig), or nullptr if
+   *         none was given.
+   */
+  const telemetry::SmartMotorControllerTelemetryConfig* GetSmartControllerTelemetryConfig() const;
   /** @return Optional DC motor model for simulation. */
   std::optional<wpi::math::DCMotor> GetSimMotor() const;
+  /** @return Simulation loop period (default 20 ms). */
+  wpi::units::second_t GetSimulationPeriod() const;
   /** @return Moment of inertia for simulation (kg·m²). */
   wpi::units::kilogram_square_meter_t GetMOI() const;
   /** @return Optional starting mechanism position (turns). */
@@ -931,7 +1144,10 @@ class SmartMotorControllerConfig {
   std::optional<std::any> GetExternalEncoder() const;
   /** @return true if the external encoder should be the PID feedback source. */
   bool GetUseExternalFeedback() const;
-  /** @return Optional external encoder inversion override. */
+  /**
+   * @return Optional external encoder inversion override.  Always false in simulation when
+   *         configured, since simulated sensors are not inverted.
+   */
   std::optional<bool> GetExternalEncoderInverted() const;
   /** @return Optional external encoder direct conversion factor override. */
   std::optional<double> GetExternalEncoderConversionFactor() const;
@@ -979,6 +1195,9 @@ class SmartMotorControllerConfig {
   /**
    * Convert a mechanism position (turns) to a linear distance using the configured circumference.
    *
+   * All ConvertFromMechanism/ConvertToMechanism/ConvertToVoltage/ConvertToCurrent overloads throw
+   * SmartMotorControllerConfigurationException if the mechanism circumference is not configured.
+   *
    * @param mechanismPosition Mechanism position in turns to convert.
    * @return Equivalent linear distance.
    */
@@ -993,10 +1212,87 @@ class SmartMotorControllerConfig {
   wpi::units::meters_per_second_t ConvertFromMechanism(
       wpi::units::turns_per_second_t mechanismVelocity) const;
 
+  /**
+   * Convert a mechanism acceleration to a linear acceleration using the configured circumference.
+   *
+   * @param mechanismAcceleration Mechanism acceleration to convert.
+   * @return Equivalent linear acceleration.
+   */
+  wpi::units::meters_per_second_squared_t ConvertFromMechanism(
+      wpi::units::turns_per_second_squared_t mechanismAcceleration) const;
+
+  /**
+   * Convert a mechanism jerk to a linear jerk using the configured circumference.
+   *
+   * @param mechanismJerk Mechanism jerk to convert.
+   * @return Equivalent linear jerk.
+   */
+  meters_per_second_cubed_t ConvertFromMechanism(
+      wpi::units::angular_jerk::turns_per_second_cubed_t mechanismJerk) const;
+
+  /**
+   * Convert a linear distance to a mechanism position using the configured circumference.
+   *
+   * @param distance Linear distance to convert.
+   * @return Equivalent mechanism position.
+   */
+  wpi::units::turn_t ConvertToMechanism(wpi::units::meter_t distance) const;
+
+  /**
+   * Convert a linear velocity to a mechanism velocity using the configured circumference.
+   *
+   * @param velocity Linear velocity to convert.
+   * @return Equivalent mechanism velocity.
+   */
+  wpi::units::turns_per_second_t ConvertToMechanism(wpi::units::meters_per_second_t velocity) const;
+
+  /**
+   * Convert a linear acceleration to a mechanism acceleration using the configured circumference.
+   *
+   * @param acceleration Linear acceleration to convert.
+   * @return Equivalent mechanism acceleration.
+   */
+  wpi::units::turns_per_second_squared_t ConvertToMechanism(
+      wpi::units::meters_per_second_squared_t acceleration) const;
+
+  /**
+   * Convert a linear jerk to a mechanism jerk using the configured circumference.
+   *
+   * @param jerk Linear jerk to convert.
+   * @return Equivalent mechanism jerk.
+   */
+  wpi::units::angular_jerk::turns_per_second_cubed_t ConvertToMechanism(
+      meters_per_second_cubed_t jerk) const;
+
+  /**
+   * Convert a feedforward force applied at the mechanism into the equivalent motor voltage, using
+   * the gearing and mechanism circumference.  Only the voltage producing the force (the resistive
+   * drop of the matching current) is returned, not the back-EMF of the commanded speed.
+   *
+   * @param motor            DC motor model of the mechanism.
+   * @param feedforwardForce Feedforward force applied to the mechanism.
+   * @return Equivalent feedforward voltage at the motor.
+   */
+  wpi::units::volt_t ConvertToVoltage(const wpi::math::DCMotor& motor,
+                                      wpi::units::newton_t feedforwardForce) const;
+
+  /**
+   * Convert a feedforward force applied at the mechanism into the equivalent motor current, using
+   * the gearing and mechanism circumference (e.g. for torque-current closed-loop control).
+   *
+   * @param motor            DC motor model of the mechanism.
+   * @param feedforwardForce Feedforward force applied to the mechanism.
+   * @return Equivalent feedforward current at the motor.
+   */
+  wpi::units::ampere_t ConvertToCurrent(const wpi::math::DCMotor& motor,
+                                        wpi::units::newton_t feedforwardForce) const;
+
  private:
   static constexpr int kNumSlots = 4;
 
   PIDGains m_slots[kNumSlots];
+  // Slots that received PID gains via WithFeedback (zero gains still count as configured).
+  bool m_slotHasFeedback[kNumSlots]{false, false, false, false};
   int SlotIndex(ClosedLoopControllerSlot slot) const;
 
   // Validation tracking options that every ApplyConfig implementation must access
@@ -1021,6 +1317,13 @@ class SmartMotorControllerConfig {
     TrapezoidProfile,
     ExponentialProfile,
     ContinuousWrapping,
+    Followers,
+    LooselyCoupledFollowers,
+    VoltageCompensation,
+    FeedbackSynchronizationThreshold,
+    ClosedLoopTolerance,
+    ClosedLoopControlPeriod,
+    ResetPreviousConfig,
   };
   enum class ExternalEncoderOptions {
     ZeroOffset,
@@ -1034,9 +1337,17 @@ class SmartMotorControllerConfig {
   mutable std::set<BasicOptions> m_basicOptions;
   mutable std::set<ExternalEncoderOptions> m_externalEncoderOptions;
 
+  /** Rotor torque (N·m) equivalent to a force at the mechanism; throws without circumference. */
+  double ForceToRotorTorque(wpi::units::newton_t feedforwardForce) const;
+  /** Throw SmartMotorControllerConfigurationException if no circumference is configured. */
+  void RequireCircumference(const std::string& action) const;
+  /** @return true if any slot has PID gains or an LQR configured. */
+  bool HasClosedLoopController() const;
+
   // Per-slot simulation gain overrides
   struct SimGainsOverride {
     std::optional<double> kP, kI, kD;
+    std::optional<math::LQRConfig> lqr;
     std::optional<wpi::math::ArmFeedforward> armFF;
     std::optional<wpi::math::ElevatorFeedforward> elevatorFF;
     std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>> simpleFF;
@@ -1063,18 +1374,20 @@ class SmartMotorControllerConfig {
   // Limits
   std::optional<wpi::units::turn_t> m_mechLowerLimit;
   std::optional<wpi::units::turn_t> m_mechUpperLimit;
-  std::optional<wpi::units::meter_t> m_measLowerLimit;
-  std::optional<wpi::units::meter_t> m_measUpperLimit;
   std::optional<wpi::units::ampere_t> m_statorCurrentLimit;
   std::optional<wpi::units::ampere_t> m_supplyCurrentLimit;
   std::optional<wpi::units::celsius_t> m_temperatureCutoff;
   std::optional<wpi::units::volt_t> m_closedLoopMaxVoltage;
+  std::optional<wpi::units::volt_t> m_voltageCompensation;
+  std::optional<wpi::units::turn_t> m_feedbackSynchronizationThreshold;
+  std::optional<wpi::units::turn_t> m_closedLoopTolerance;
+  bool m_resetPreviousConfig{true};
   std::optional<wpi::units::turn_t> m_continuousWrappingMin;
   std::optional<wpi::units::turn_t> m_continuousWrappingMax;
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
-  MotorMode m_zeroPower{MotorMode::COAST};
+  std::optional<MotorMode> m_zeroPower;
   std::optional<wpi::units::second_t> m_closedLoopPeriod;
   std::optional<wpi::units::second_t> m_openLoopRampRate;
   std::optional<wpi::units::second_t> m_closedLoopRampRate;
@@ -1086,6 +1399,7 @@ class SmartMotorControllerConfig {
   // Gearing / linear
   std::optional<gearing::MechanismGearing> m_motorGearing;
   std::optional<wpi::units::meter_t> m_mechanismCircumference;
+  bool m_linearClosedLoopController{false};
 
   // External encoder
   std::optional<std::any> m_externalEncoder;
@@ -1099,10 +1413,13 @@ class SmartMotorControllerConfig {
   // Telemetry
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_verbosity;
+  // shared_ptr so the forward-declared type can be held; copied by value into the SMC on setup.
+  std::shared_ptr<const telemetry::SmartMotorControllerTelemetryConfig> m_telemetryConfig;
 
   wpi::cmd::SubsystemBase* m_subsystem{nullptr};
   std::optional<wpi::math::DCMotor> m_simMotor;
-  wpi::units::kilogram_square_meter_t m_moi{0.0001_kg_sq_m};
+  wpi::units::kilogram_square_meter_t m_moi{0.02_kg_sq_m};
+  std::optional<wpi::units::second_t> m_simulationPeriod;
   std::optional<wpi::units::turn_t> m_startingPosition;
   std::optional<wpi::units::meter_t> m_startingPositionDistance;
 

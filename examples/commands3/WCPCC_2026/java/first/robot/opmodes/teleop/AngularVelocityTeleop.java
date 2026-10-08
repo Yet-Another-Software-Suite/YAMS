@@ -19,6 +19,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Teleop with the original WCP drive controls. The left stick translates field centric and the X axis of the right
@@ -61,7 +62,8 @@ public class AngularVelocityTeleop implements OpMode {
             .withHeading(() -> snapHeading.orElse(Rotation2d.ZERO).plus(swerve.getOperatorForwardDirection())
                 .getMeasure())
             .withHeadingControl(() -> snapHeading.isPresent() && !aimAtHub.getAsBoolean())
-            .withTranslationOnly(() -> holdHeading.getAsBoolean() && snapHeading.isEmpty() && !aimAtHub.getAsBoolean());
+            .withTranslationOnly(() -> holdHeading.getAsBoolean() && snapHeading.isEmpty() && !aimAtHub.getAsBoolean())
+            .withTelemetry("Driver", TelemetryVerbosity.HIGH);
 
         // Opmode-scoped input stream, default command, and bindings: they only exist while this teleop runs.
         swerve.setInputStream(inputStream);

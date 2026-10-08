@@ -49,6 +49,7 @@ import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.swerve.SwerveDrive;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.commands3.telemetry.SwerveInputStreamTelemetry;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
@@ -303,6 +304,11 @@ public class SwerveMechanism implements Mechanism
    */
   public void setInputStream(SwerveInputStream inputStream)
   {
+    // Stop publishing the replaced stream's telemetry, e.g. when another teleop opmode is selected.
+    if (this.inputStream != null)
+    {
+      this.inputStream.getTelemetry().ifPresent(SwerveInputStreamTelemetry::close);
+    }
     this.inputStream = inputStream;
   }
 

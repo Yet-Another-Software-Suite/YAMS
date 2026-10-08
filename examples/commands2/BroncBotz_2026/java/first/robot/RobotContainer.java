@@ -35,6 +35,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.Tunables;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -121,7 +122,7 @@ public class RobotContainer {
     }
 
     private void configureDefaultCommands() {
-        swerve.setDefaultCommand(swerve.driveFieldOriented(driverInput()));
+        swerve.setDefaultCommand(swerve.driveFieldOriented(driverInput().withTelemetry("Driver", TelemetryVerbosity.HIGH)));
         shooter.setDefaultCommand(shooter.stop());
         kicker.setDefaultCommand(kicker.stop());
         indexer.setDefaultCommand(indexer.stop());
@@ -132,8 +133,9 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
-        driver.a().whileTrue(aimAtHub(driverInput()));
-        driver.rightBumper().whileTrue(swerve.driveFieldOriented(driverInput().withScaleTranslation(DriveConstants.kSlowModeTranslationScale))
+        driver.a().whileTrue(aimAtHub(driverInput().withTelemetry("Driver Aim", TelemetryVerbosity.HIGH)));
+        driver.rightBumper().whileTrue(swerve.driveFieldOriented(driverInput().withScaleTranslation(DriveConstants.kSlowModeTranslationScale)
+            .withTelemetry("Driver Slow", TelemetryVerbosity.HIGH))
             .withName("Slow Mode"));
         driver.leftBumper().whileTrue(swerve.lockPose());
         driver.start().and(driver.back()).onTrue(swerve.zeroGyroWithAlliance());

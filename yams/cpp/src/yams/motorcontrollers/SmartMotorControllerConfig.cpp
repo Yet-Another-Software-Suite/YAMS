@@ -12,10 +12,12 @@
 #include <vector>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/system/Models.hpp>
+#include <wpi/math/util/MathUtil.hpp>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
 #include <wpi/system/Errors.hpp>
 
 #include "yams/exceptions.hpp"
+#include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
 
 namespace yams::motorcontrollers {
 
@@ -67,6 +69,20 @@ std::string_view SmartMotorControllerConfig::ToString(BasicOptions opt) {
       return "ExponentialProfile";
     case BasicOptions::ContinuousWrapping:
       return "ContinuousWrapping";
+    case BasicOptions::Followers:
+      return "Followers";
+    case BasicOptions::LooselyCoupledFollowers:
+      return "LooselyCoupledFollowers";
+    case BasicOptions::VoltageCompensation:
+      return "VoltageCompensation";
+    case BasicOptions::FeedbackSynchronizationThreshold:
+      return "FeedbackSynchronizationThreshold";
+    case BasicOptions::ClosedLoopTolerance:
+      return "ClosedLoopTolerance";
+    case BasicOptions::ClosedLoopControlPeriod:
+      return "ClosedLoopControlPeriod";
+    case BasicOptions::ResetPreviousConfig:
+      return "ResetPreviousConfig";
     default:
       return "Unknown";
   }
@@ -111,6 +127,13 @@ void SmartMotorControllerConfig::ResetValidationCheck() const {
       BasicOptions::TrapezoidProfile,
       BasicOptions::ExponentialProfile,
       BasicOptions::ContinuousWrapping,
+      BasicOptions::Followers,
+      BasicOptions::LooselyCoupledFollowers,
+      BasicOptions::VoltageCompensation,
+      BasicOptions::FeedbackSynchronizationThreshold,
+      BasicOptions::ClosedLoopTolerance,
+      BasicOptions::ClosedLoopControlPeriod,
+      BasicOptions::ResetPreviousConfig,
   };
   m_externalEncoderOptions = {
       ExternalEncoderOptions::ZeroOffset,
@@ -150,6 +173,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
   s.kP = kP;
   s.kI = kI;
   s.kD = kD;
+  m_slotHasFeedback[SlotIndex(slot)] = true;
   return *this;
 }
 
@@ -182,6 +206,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedforward(
   s.elevatorFF = ff;
   s.armFF.reset();
   s.simpleFF.reset();
+  m_linearClosedLoopController = true;
   return *this;
 }
 
@@ -219,16 +244,34 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearTrapezoidProfi
   m_trapMaxVelLinear = maxVelocity;
   m_trapMaxAccLinear = maxAcceleration;
   m_velocityTrapProfile = false;
+  m_linearClosedLoopController = true;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithVelocityTrapezoidProfile(
-    wpi::units::turns_per_second_t maxVelocity,
-    wpi::units::turns_per_second_squared_t maxAcceleration) {
-  m_trapProfile = wpi::math::TrapezoidProfile<wpi::units::turns>{{maxVelocity, maxAcceleration}};
-  m_trapMaxVelTurns = maxVelocity;
-  m_trapMaxAccTurns = maxAcceleration;
+    wpi::units::turns_per_second_squared_t maxAcceleration,
+    wpi::units::angular_jerk::turns_per_second_cubed_t maxJerk) {
+  // A velocity profile's "position" is the velocity setpoint, so its velocity and acceleration
+  // constraints are the mechanism's acceleration and jerk limits.
+  wpi::units::turns_per_second_t accel{maxAcceleration.value()};
+  wpi::units::turns_per_second_squared_t jerk{maxJerk.value()};
+  m_trapProfile = wpi::math::TrapezoidProfile<wpi::units::turns>{{accel, jerk}};
+  m_trapMaxVelTurns = accel;
+  m_trapMaxAccTurns = jerk;
   m_velocityTrapProfile = true;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithVelocityTrapezoidProfile(
+    wpi::units::meters_per_second_squared_t maxAcceleration, meters_per_second_cubed_t maxJerk) {
+  // Constraints are stored one derivative down, as for the angular velocity profile.
+  wpi::units::meters_per_second_t accel{maxAcceleration.value()};
+  wpi::units::meters_per_second_squared_t jerk{maxJerk.value()};
+  m_linearTrapProfile = wpi::math::TrapezoidProfile<wpi::units::meters>{{accel, jerk}};
+  m_trapMaxVelLinear = accel;
+  m_trapMaxAccLinear = jerk;
+  m_velocityTrapProfile = true;
+  m_linearClosedLoopController = true;
   return *this;
 }
 
@@ -281,6 +324,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
   m_linearExpoProfile = LinearProfile{
       LinearProfile::Constraints{maxVolts, LinearProfile::kV_t{kV}, LinearProfile::kA_t{kA}}};
   m_mechanismCircumference = 2.0 * std::numbers::pi * drumRadius;
+  m_linearClosedLoopController = true;
+  m_expoMaxInput = maxVolts;
   m_expoProfile = std::nullopt;
   m_trapProfile = std::nullopt;
   m_linearTrapProfile = std::nullopt;
@@ -325,11 +370,55 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLQR(const math::LQRC
   return *this;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearClosedLoopController(
+    bool linear) {
+  m_linearClosedLoopController = linear;
+  return *this;
+}
+
+bool SmartMotorControllerConfig::HasClosedLoopController() const {
+  for (int i = 0; i < kNumSlots; ++i) {
+    if (m_slotHasFeedback[i] || m_slots[i].lqr) return true;
+  }
+  return false;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopTolerance(
+    wpi::units::turn_t tolerance) {
+  if (!HasClosedLoopController())
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "No PID controller used", "Cannot set tolerance!", "WithFeedback()");
+  m_closedLoopTolerance = tolerance;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopTolerance(
+    wpi::units::meter_t tolerance) {
+  if (!m_linearClosedLoopController)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Linear closed loop controller used with distance tolerance.",
+        "Closed loop tolerance cannot be set.", "WithLinearClosedLoopController(true)");
+  return WithClosedLoopTolerance(ConvertToMechanism(tolerance));
+}
+
 // ---- Gearing / linear ----------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMotorGearing(
     const gearing::MechanismGearing& gearing) {
   m_motorGearing = gearing;
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithMotorGearing(double reductionRatio) {
+  return WithMotorGearing(gearing::MechanismGearing{reductionRatio});
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithCascadingElevatorStages(int stages) {
+  if (!m_motorGearing)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Gearing is undefined", "Cannot apply cascading elevator stages.",
+        "WithMotorGearing(MechanismGearing) before WithCascadingElevatorStages(int)");
+  m_motorGearing->Div(static_cast<double>(stages));
   return *this;
 }
 
@@ -362,6 +451,10 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
         "WithContinuousWrapping() should be removed");
+  if (lower >= upper)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Lower limit is higher than upper limit", "Cannot configure SmartMotorController",
+        "WithMechanismLimits(lower, upper) where lower < upper");
   m_mechLowerLimit = lower;
   m_mechUpperLimit = upper;
   return *this;
@@ -369,9 +462,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMeasurementLimits(
     wpi::units::meter_t lower, wpi::units::meter_t upper) {
-  m_measLowerLimit = lower;
-  m_measUpperLimit = upper;
-  return *this;
+  RequireCircumference("Cannot set soft limits.");
+  return WithMechanismLimits(ConvertToMechanism(lower), ConvertToMechanism(upper));
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStatorCurrentLimit(
@@ -394,6 +486,21 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopMaxVoltage
   m_closedLoopMaxVoltage = maxV;
   return *this;
 }
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithVoltageCompensation(
+    wpi::units::volt_t voltage) {
+  m_voltageCompensation = voltage;
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedbackSynchronizationThreshold(
+    wpi::units::turn_t threshold) {
+  if (m_mechanismCircumference)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Auto-synchronization is unavailable when using distance based mechanisms",
+        "Cannot set synchronization threshold.",
+        "WithMechanismCircumference(meter_t) should be removed.");
+  m_feedbackSynchronizationThreshold = threshold;
+  return *this;
+}
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     wpi::units::turn_t min, wpi::units::turn_t max) {
@@ -401,14 +508,14 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping",
         "WithMechanismLimits() should be removed");
-  if (m_measLowerLimit || m_measUpperLimit)
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "Measurement soft limits set while configuring continuous wrapping",
-        "Cannot set continuous wrapping", "WithMeasurementLimits() should be removed");
-  if (m_mechanismCircumference)
+  if (GetLinearClosedLoopControllerUse())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Distance based mechanism used with continuous wrapping", "Cannot set continuous wrapping",
         "WithMechanismCircumference() should be removed");
+  if (!HasClosedLoopController())
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "No closed loop controller used", "Cannot set continuous wrapping!",
+        "WithFeedback() or WithLQR()");
   m_continuousWrappingMin = min;
   m_continuousWrappingMax = max;
   return *this;
@@ -431,6 +538,10 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithOpenLoopMode() {
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithClosedLoopControlPeriod(
     wpi::units::second_t p) {
   m_closedLoopPeriod = p;
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithResetPreviousConfig(bool reset) {
+  m_resetPreviousConfig = reset;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithOpenLoopRampRate(
@@ -471,8 +582,15 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderConve
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderZeroOffset(
     wpi::units::turn_t o) {
+  // Zero offsets cannot be negative.
+  if (o < 0_tr) o += 1_tr;
   m_externalEncoderZeroOffset = o;
   return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderZeroOffset(
+    wpi::units::meter_t distance) {
+  RequireCircumference("Cannot set zero offset.");
+  return WithExternalEncoderZeroOffset(ConvertToMechanism(distance));
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGearing(
     const gearing::MechanismGearing& gearing) {
@@ -509,13 +627,34 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
   m_verbosity = verbosity;
   return *this;
 }
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
+    TelemetryVerbosity verbosity) {
+  return WithTelemetry("motor", verbosity);
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
+    const std::string& name, const telemetry::SmartMotorControllerTelemetryConfig& telemetryConfig) {
+  m_telemetryName = name;
+  m_verbosity = TelemetryVerbosity::HIGH;
+  m_telemetryConfig =
+      std::make_shared<const telemetry::SmartMotorControllerTelemetryConfig>(telemetryConfig);
+  return *this;
+}
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSubsystem(
     wpi::cmd::SubsystemBase* sys) {
+  if (m_subsystem != nullptr)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Subsystem has already been set", "Cannot set subsystem",
+        "WithSubsystem(subsystem) should only be called once");
   m_subsystem = sys;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimMotor(wpi::math::DCMotor motor) {
   m_simMotor = motor;
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimulationPeriod(
+    wpi::units::second_t period) {
+  m_simulationPeriod = period;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
@@ -596,6 +735,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimFeedforward(
   sim.elevatorFF = ff;
   sim.armFF.reset();
   sim.simpleFF.reset();
+  m_linearClosedLoopController = true;
   return *this;
 }
 
@@ -614,6 +754,17 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimClosedLoopControl
   sim.kP = kP;
   sim.kI = kI;
   sim.kD = kD;
+  sim.lqr.reset();
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimClosedLoopController(
+    const math::LQRConfig& lqrConfig, ClosedLoopControllerSlot slot) {
+  auto& sim = m_simGains[SlotIndex(slot)];
+  sim.lqr = lqrConfig;
+  sim.kP.reset();
+  sim.kI.reset();
+  sim.kD.reset();
   return *this;
 }
 
@@ -629,6 +780,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimTrapezoidProfile(
     wpi::units::meters_per_second_squared_t maxAcceleration) {
   m_simLinearTrapProfile =
       wpi::math::TrapezoidProfile<wpi::units::meters>{{maxVelocity, maxAcceleration}};
+  m_linearClosedLoopController = true;
   return *this;
 }
 
@@ -650,6 +802,10 @@ SmartMotorControllerConfig::PIDGains SmartMotorControllerConfig::GetSlotGains(
     if (sim.kP) result.kP = *sim.kP;
     if (sim.kI) result.kI = *sim.kI;
     if (sim.kD) result.kD = *sim.kD;
+    if (sim.lqr) {
+      result.lqr = sim.lqr;
+      result.kP = result.kI = result.kD = 0.0;
+    }
     if (sim.armFF) {
       result.armFF = sim.armFF;
       result.elevatorFF.reset();
@@ -691,6 +847,8 @@ SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) 
 std::optional<math::LQRConfig> SmartMotorControllerConfig::GetLQR(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].lqr)
+    return m_simGains[SlotIndex(slot)].lqr;
   return m_slots[SlotIndex(slot)].lqr;
 }
 
@@ -705,7 +863,7 @@ double SmartMotorControllerConfig::GetKd(ClosedLoopControllerSlot slot) const {
 }
 
 bool SmartMotorControllerConfig::GetLinearClosedLoopControllerUse() const {
-  return m_mechanismCircumference.has_value();
+  return m_linearClosedLoopController && m_mechanismCircumference.has_value();
 }
 
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetMechanismLowerLimit() const {
@@ -718,11 +876,13 @@ std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetMechanismUpperL
 }
 std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementLowerLimit() const {
   m_basicOptions.erase(BasicOptions::LowerLimit);
-  return m_measLowerLimit;
+  if (!m_mechLowerLimit || !m_mechanismCircumference) return std::nullopt;
+  return ConvertFromMechanism(*m_mechLowerLimit);
 }
 std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementUpperLimit() const {
   m_basicOptions.erase(BasicOptions::UpperLimit);
-  return m_measUpperLimit;
+  if (!m_mechUpperLimit || !m_mechanismCircumference) return std::nullopt;
+  return ConvertFromMechanism(*m_mechUpperLimit);
 }
 
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
@@ -742,6 +902,18 @@ std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrapp
         "Bounds are not correct!", "Cannot get the continuous wrapping point.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
   return m_continuousWrappingMin;
+}
+
+wpi::units::turn_t SmartMotorControllerConfig::GetContinuousWrappingSetpoint(
+    wpi::units::turn_t setpoint, wpi::units::turn_t current) const {
+  auto max = GetContinuousWrapping();
+  auto min = GetContinuousWrappingMin();
+  if (!max || !min) return setpoint;
+  const double halfRange = (max->value() - min->value()) / 2.0;
+  const double currentRotations = current.value();
+  return wpi::units::turn_t{
+      currentRotations +
+      wpi::math::InputModulus(setpoint.value() - currentRotations, -halfRange, halfRange)};
 }
 
 std::optional<wpi::units::ampere_t> SmartMotorControllerConfig::GetStatorCurrentLimit() const {
@@ -771,16 +943,35 @@ SmartMotorControllerConfig::GetClosedLoopControllerMaximumVoltage() const {
   m_basicOptions.erase(BasicOptions::ClosedLoopMaxVoltage);
   return m_closedLoopMaxVoltage;
 }
+std::optional<wpi::units::volt_t> SmartMotorControllerConfig::GetVoltageCompensation() const {
+  m_basicOptions.erase(BasicOptions::VoltageCompensation);
+  return m_voltageCompensation;
+}
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetFeedbackSynchronizationThreshold()
+    const {
+  m_basicOptions.erase(BasicOptions::FeedbackSynchronizationThreshold);
+  return m_feedbackSynchronizationThreshold;
+}
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetClosedLoopTolerance() const {
+  m_basicOptions.erase(BasicOptions::ClosedLoopTolerance);
+  return m_closedLoopTolerance;
+}
+bool SmartMotorControllerConfig::GetResetPreviousConfig() const {
+  m_basicOptions.erase(BasicOptions::ResetPreviousConfig);
+  return m_resetPreviousConfig;
+}
 
 SmartMotorControllerConfig::ControlMode SmartMotorControllerConfig::GetMotorControllerMode() const {
   m_basicOptions.erase(BasicOptions::ControlMode);
   return m_controlMode;
 }
-SmartMotorControllerConfig::MotorMode SmartMotorControllerConfig::GetZeroPower() const {
+std::optional<SmartMotorControllerConfig::MotorMode> SmartMotorControllerConfig::GetZeroPower()
+    const {
   m_basicOptions.erase(BasicOptions::ZeroPower);
   return m_zeroPower;
 }
 std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetClosedLoopControlPeriod() const {
+  m_basicOptions.erase(BasicOptions::ClosedLoopControlPeriod);
   return m_closedLoopPeriod;
 }
 std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetOpenLoopRampRate() const {
@@ -794,6 +985,7 @@ std::optional<wpi::units::second_t> SmartMotorControllerConfig::GetClosedLoopRam
 
 std::optional<bool> SmartMotorControllerConfig::GetMotorInverted() const {
   m_basicOptions.erase(BasicOptions::MotorInverted);
+  if (wpi::RobotBase::IsSimulation() && m_motorInverted.has_value()) return false;
   return m_motorInverted;
 }
 std::optional<bool> SmartMotorControllerConfig::GetEncoderInverted() const {
@@ -812,9 +1004,22 @@ std::optional<SmartMotorControllerConfig::TelemetryVerbosity>
 SmartMotorControllerConfig::GetVerbosity() const {
   return m_verbosity;
 }
-wpi::cmd::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const { return m_subsystem; }
+wpi::cmd::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const {
+  if (m_subsystem == nullptr)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Subsystem is undefined", "Subsystem cannot be created.", "WithSubsystem(subsystem)");
+  return m_subsystem;
+}
+bool SmartMotorControllerConfig::HasSubsystem() const { return m_subsystem != nullptr; }
+const telemetry::SmartMotorControllerTelemetryConfig*
+SmartMotorControllerConfig::GetSmartControllerTelemetryConfig() const {
+  return m_telemetryConfig.get();
+}
 std::optional<wpi::math::DCMotor> SmartMotorControllerConfig::GetSimMotor() const {
   return m_simMotor;
+}
+wpi::units::second_t SmartMotorControllerConfig::GetSimulationPeriod() const {
+  return m_simulationPeriod.value_or(20_ms);
 }
 wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
@@ -851,6 +1056,7 @@ bool SmartMotorControllerConfig::GetUseExternalFeedback() const {
 }
 std::optional<bool> SmartMotorControllerConfig::GetExternalEncoderInverted() const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::ExternalEncoderInverted);
+  if (wpi::RobotBase::IsSimulation() && m_externalEncoderInverted.has_value()) return false;
   return m_externalEncoderInverted;
 }
 std::optional<double> SmartMotorControllerConfig::GetExternalEncoderConversionFactor() const {
@@ -943,16 +1149,80 @@ std::optional<wpi::units::volt_t> SmartMotorControllerConfig::GetExponentialProf
   return m_expoMaxInput;
 }
 
+void SmartMotorControllerConfig::RequireCircumference(const std::string& action) const {
+  if (!m_mechanismCircumference)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Mechanism circumference is undefined", action, "WithMechanismCircumference(meter_t)");
+}
+
 wpi::units::meter_t SmartMotorControllerConfig::ConvertFromMechanism(
     wpi::units::turn_t mechanismPosition) const {
-  double circ = m_mechanismCircumference.value_or(wpi::units::meter_t{1.0}).value();
-  return wpi::units::meter_t{mechanismPosition.value() * circ};
+  RequireCircumference("Cannot convert Angle to Distance.");
+  return wpi::units::meter_t{mechanismPosition.value() * m_mechanismCircumference->value()};
 }
 
 wpi::units::meters_per_second_t SmartMotorControllerConfig::ConvertFromMechanism(
     wpi::units::turns_per_second_t mechanismVelocity) const {
-  double circ = m_mechanismCircumference.value_or(wpi::units::meter_t{1.0}).value();
-  return wpi::units::meters_per_second_t{mechanismVelocity.value() * circ};
+  RequireCircumference("Cannot convert AngularVelocity to LinearVelocity.");
+  return wpi::units::meters_per_second_t{mechanismVelocity.value() *
+                                         m_mechanismCircumference->value()};
+}
+
+wpi::units::meters_per_second_squared_t SmartMotorControllerConfig::ConvertFromMechanism(
+    wpi::units::turns_per_second_squared_t mechanismAcceleration) const {
+  RequireCircumference("Cannot convert AngularAcceleration to LinearAcceleration.");
+  return wpi::units::meters_per_second_squared_t{mechanismAcceleration.value() *
+                                                 m_mechanismCircumference->value()};
+}
+
+meters_per_second_cubed_t SmartMotorControllerConfig::ConvertFromMechanism(
+    wpi::units::angular_jerk::turns_per_second_cubed_t mechanismJerk) const {
+  RequireCircumference("Cannot convert angular jerk to linear jerk.");
+  return meters_per_second_cubed_t{mechanismJerk.value() * m_mechanismCircumference->value()};
+}
+
+wpi::units::turn_t SmartMotorControllerConfig::ConvertToMechanism(
+    wpi::units::meter_t distance) const {
+  RequireCircumference("Cannot convert Distance to Angle.");
+  return wpi::units::turn_t{distance.value() / m_mechanismCircumference->value()};
+}
+
+wpi::units::turns_per_second_t SmartMotorControllerConfig::ConvertToMechanism(
+    wpi::units::meters_per_second_t velocity) const {
+  RequireCircumference("Cannot convert LinearVelocity to AngularVelocity.");
+  return wpi::units::turns_per_second_t{velocity.value() / m_mechanismCircumference->value()};
+}
+
+wpi::units::turns_per_second_squared_t SmartMotorControllerConfig::ConvertToMechanism(
+    wpi::units::meters_per_second_squared_t acceleration) const {
+  RequireCircumference("Cannot convert LinearAcceleration to AngularAcceleration.");
+  return wpi::units::turns_per_second_squared_t{acceleration.value() /
+                                                m_mechanismCircumference->value()};
+}
+
+wpi::units::angular_jerk::turns_per_second_cubed_t SmartMotorControllerConfig::ConvertToMechanism(
+    meters_per_second_cubed_t jerk) const {
+  RequireCircumference("Cannot convert linear jerk to angular jerk.");
+  return wpi::units::angular_jerk::turns_per_second_cubed_t{jerk.value() /
+                                                            m_mechanismCircumference->value()};
+}
+
+double SmartMotorControllerConfig::ForceToRotorTorque(wpi::units::newton_t feedforwardForce) const {
+  RequireCircumference("Cannot convert feedforward Force to Voltage/Current.");
+  double gearRatio = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
+  double radiusMeters = m_mechanismCircumference->value() / (2.0 * std::numbers::pi);
+  return feedforwardForce.value() * radiusMeters / gearRatio;
+}
+
+wpi::units::volt_t SmartMotorControllerConfig::ConvertToVoltage(
+    const wpi::math::DCMotor& motor, wpi::units::newton_t feedforwardForce) const {
+  return motor.Voltage(wpi::units::newton_meter_t{ForceToRotorTorque(feedforwardForce)},
+                       wpi::units::radians_per_second_t{0.0});
+}
+
+wpi::units::ampere_t SmartMotorControllerConfig::ConvertToCurrent(
+    const wpi::math::DCMotor& motor, wpi::units::newton_t feedforwardForce) const {
+  return motor.Current(wpi::units::newton_meter_t{ForceToRotorTorque(feedforwardForce)});
 }
 
 // ---- Followers ----------------------------------------------------------------
@@ -969,12 +1239,16 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLooselyCoupledFollow
   return *this;
 }
 
+void SmartMotorControllerConfig::ClearFollowers() { m_followers.clear(); }
+
 const std::vector<std::pair<std::any, bool>>& SmartMotorControllerConfig::GetFollowers() const {
+  m_basicOptions.erase(BasicOptions::Followers);
   return m_followers;
 }
 
 const std::vector<SmartMotorController*>& SmartMotorControllerConfig::GetLooselyCoupledFollowers()
     const {
+  m_basicOptions.erase(BasicOptions::LooselyCoupledFollowers);
   return m_looseFollowers;
 }
 

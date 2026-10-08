@@ -30,6 +30,7 @@ import org.wpilib.command2.button.Trigger;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.util.Color;
 import yams.commands2.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -69,12 +70,15 @@ public class RobotContainer {
     }
 
     private void configureDefaultCommands() {
-        // The sticks drive relative to the robot, slower while the left bumper is held.
+        // The sticks drive relative to the field, slower while the left bumper is held.
         final SwerveInputStream normal = swerve.createDriverInput(() -> -driver.getLeftY(), () -> -driver.getLeftX(),
-            () -> -driver.getRightX(), OperatorConstants.kTranslationScale, () -> allianceRelative);
+                () -> -driver.getRightX(), OperatorConstants.kTranslationScale, () -> allianceRelative)
+            .withTelemetry("Driver", TelemetryVerbosity.HIGH);
         final SwerveInputStream slow = swerve.createDriverInput(() -> -driver.getLeftY(), () -> -driver.getLeftX(),
-            () -> -driver.getRightX(), OperatorConstants.kSlowTranslationScale, () -> allianceRelative);
-        swerve.setDefaultCommand(swerve.driveRobotRelative(
+                () -> -driver.getRightX(), OperatorConstants.kSlowTranslationScale, () -> allianceRelative)
+            .withTelemetry("Driver Slow", TelemetryVerbosity.HIGH);
+        // SwerveInputStream output is field relative.
+        swerve.setDefaultCommand(swerve.driveFieldRelative(
             () -> driver.leftBumper().getAsBoolean() ? slow.get() : normal.get()));
 
         // Return the elevator to the bottom and hold the arms where they are.

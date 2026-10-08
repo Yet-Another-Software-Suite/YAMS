@@ -6,6 +6,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <numbers>
 #include <optional>
 #include <stdexcept>
@@ -29,9 +30,14 @@
 
 namespace yams::mechanisms::swerve::utility {
 
+template <size_t NumModules>
+class SwerveInputStreamTelemetry;
+
 template <size_t NumModules = 4>
 class SwerveInputStream {
  public:
+  using TelemetryVerbosity = SwerveDriveConfig::TelemetryVerbosity;
+
   static SwerveInputStream Of(SwerveDrive<NumModules>& drive, std::function<double()> x,
                               std::function<double()> y) {
     return SwerveInputStream{drive, std::move(x), std::move(y)};
@@ -50,7 +56,54 @@ class SwerveInputStream {
     WithControllerHeadingAxis(std::move(headingX), std::move(headingY));
   }
 
-  SwerveInputStream Clone() const { return *this; }
+  /**
+   * Copy this stream. Unlike a plain copy, the clone has no telemetry, so it does not publish under
+   * this stream's name.
+   */
+  SwerveInputStream Clone() const {
+    SwerveInputStream clone = *this;
+    clone.m_telemetry.settings.reset();
+    return clone;
+  }
+
+  /**
+   * Publish this stream's telemetry under SwerveInputStream/<name>, updated every time the stream is
+   * read. At HIGH the stream is also live tunable: see SwerveInputStreamTelemetry. Replaces any
+   * telemetry this stream already had; NONE turns it off.
+   *
+   * The telemetry is created when the stream is first read or GetTelemetry() is called, so copies
+   * made while building the stream do not publish. A copy of a stream with telemetry publishes under
+   * the same name once read; use Clone() for a copy without telemetry.
+   *
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity TelemetryVerbosity to publish at.
+   * @return this, for chaining.
+   */
+  SwerveInputStream& WithTelemetry(std::string name, TelemetryVerbosity verbosity) {
+    m_telemetry.telemetry.reset();
+    if (verbosity == TelemetryVerbosity::NONE) {
+      m_telemetry.settings.reset();
+    } else {
+      m_telemetry.settings.emplace(std::move(name), verbosity);
+    }
+    return *this;
+  }
+
+  /**
+   * Get this stream's telemetry, created by WithTelemetry(name, verbosity).
+   *
+   * @return The SwerveInputStreamTelemetry, or empty if telemetry is not enabled.
+   */
+  std::optional<std::reference_wrapper<SwerveInputStreamTelemetry<NumModules>>> GetTelemetry() {
+    if (!m_telemetry.settings) {
+      return std::nullopt;
+    }
+    if (!m_telemetry.telemetry) {
+      m_telemetry.telemetry = std::make_unique<SwerveInputStreamTelemetry<NumModules>>(
+          *this, m_telemetry.settings->first, m_telemetry.settings->second);
+    }
+    return std::ref(*m_telemetry.telemetry);
+  }
 
   std::string GetCurrentModeName() const {
     switch (m_currentMode) {
@@ -290,7 +343,11 @@ class SwerveInputStream {
     speeds = wpi::math::ChassisVelocities{wpi::units::meters_per_second_t{vx},
                                           wpi::units::meters_per_second_t{vy},
                                           wpi::units::radians_per_second_t{omega}};
-    return ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
+    auto fieldRelativeSpeeds = ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
+    if (auto telemetry = GetTelemetry()) {
+      telemetry->get().UpdateTelemetry();
+    }
+    return fieldRelativeSpeeds;
   }
 
   wpi::math::ChassisVelocities operator()() { return Get(); }
@@ -341,6 +398,40 @@ class SwerveInputStream {
   SwerveInputMode m_currentMode{SwerveInputMode::ANGULAR_VELOCITY};
   wpi::units::meters_per_second_t m_maximumChassisLinearVelocity{4.0};
   wpi::units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
+
+  /**
+   * Telemetry settings and the telemetry created from them. Copies and moves carry the settings but
+   * not the telemetry, which points at the stream that created it; a moved-from stream stops
+   * publishing.
+   */
+  struct TelemetryHolder {
+    std::optional<std::pair<std::string, TelemetryVerbosity>> settings;
+    std::unique_ptr<SwerveInputStreamTelemetry<NumModules>> telemetry;
+
+    TelemetryHolder() = default;
+    TelemetryHolder(const TelemetryHolder& other) : settings{other.settings} {}
+    TelemetryHolder(TelemetryHolder&& other) noexcept : settings{std::move(other.settings)} {
+      other.settings.reset();
+      other.telemetry.reset();
+    }
+    TelemetryHolder& operator=(const TelemetryHolder& other) {
+      if (this != &other) {
+        settings = other.settings;
+        telemetry.reset();
+      }
+      return *this;
+    }
+    TelemetryHolder& operator=(TelemetryHolder&& other) noexcept {
+      if (this != &other) {
+        settings = std::move(other.settings);
+        telemetry.reset();
+        other.settings.reset();
+        other.telemetry.reset();
+      }
+      return *this;
+    }
+  };
+  TelemetryHolder m_telemetry;
 
   wpi::math::PIDController& RequireRotationPID() {
     auto pid = m_swerveDrive->GetConfig().GetRotationPID();
@@ -472,3 +563,6 @@ class SwerveInputStream {
 };
 
 }  // namespace yams::mechanisms::swerve::utility
+
+// The telemetry is a template too, so it only needs to be complete where a stream is used.
+#include "yams/mechanisms/swerve/utility/SwerveInputStreamTelemetry.hpp"

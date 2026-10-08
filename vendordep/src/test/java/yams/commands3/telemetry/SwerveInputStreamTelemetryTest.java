@@ -22,14 +22,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.wpilib.math.controller.PIDController;
-import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Scheduler;
+import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.networktables.BooleanPublisher;
-import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.preferences.Preferences;
@@ -48,13 +48,15 @@ import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 
 /**
- * Tests live tuning of a {@link SwerveInputStream} through {@link SwerveInputStreamTelemetry}: the table shows the
- * stream's configuration, valid dashboard edits are applied to the stream and change its output, invalid edits are
- * replaced with the stream's value, and changes made in code are published without being overridden.
+ * Tests {@link SwerveInputStream#withTelemetry(String, TelemetryVerbosity)}: what each {@link TelemetryVerbosity}
+ * publishes, that reading the stream publishes it, and live tuning at {@link TelemetryVerbosity#HIGH}: the tuning table
+ * shows the stream's configuration, valid dashboard edits are applied to the stream while the {@code Live Tuning}
+ * command runs and change its output, invalid edits are replaced with the stream's value, and changes made in code are
+ * published without being overridden.
  *
  * <p>The drive is a simulated four module drive with a 4.5 m/s, 540 deg/s maximum chassis speed and a rotation
- * controller, built once for the class since the streams only read it. Each test uses its own
- * {@link NetworkTableInstance}; a second publisher on a topic stands in for the dashboard.
+ * controller, built once for the class since the streams only read it. Each test names its stream uniquely; writing to
+ * an entry from the test stands in for the dashboard.
  */
 public class SwerveInputStreamTelemetryTest {
   private static final double kTolerance = 1e-9;
@@ -65,10 +67,13 @@ public class SwerveInputStreamTelemetryTest {
   private static final Mechanism kMechanism = new Mechanism() {};
   private static final List<SmartMotorController> motorControllers = new ArrayList<>();
   private static SwerveDrive drive;
+  /** Numbers each test's stream name. */
+  private static int streamCount = 0;
 
-  private NetworkTableInstance instance;
-  private NetworkTable table;
-  private SwerveInputStreamTelemetry telemetry;
+  /** Streams with telemetry, closed after each test. */
+  private final List<SwerveInputStream> streams = new ArrayList<>();
+  /** This test's stream name. */
+  private String name;
 
   /** Controller axes read by the stream. */
   private double forward;
@@ -127,8 +132,7 @@ public class SwerveInputStreamTelemetryTest {
   @BeforeEach
   void setUp() {
     MockHardwareExtension.beforeAll();
-    instance = NetworkTableInstance.create();
-    table = instance.getTable("SwerveInputStream").getSubTable("test");
+    name = "SISTelemetryTest" + streamCount++;
     forward = 0;
     left = 0;
     rotation = 0;
@@ -136,51 +140,112 @@ public class SwerveInputStreamTelemetryTest {
 
   @AfterEach
   void tearDown() {
-    if (telemetry != null) {
-      telemetry.close();
-      telemetry = null;
+    for (SwerveInputStream stream : streams) {
+      stream.getTelemetry().ifPresent(SwerveInputStreamTelemetry::close);
     }
-    instance.close();
+    streams.clear();
     MockHardwareExtension.afterAll();
   }
 
   private SwerveInputStream stream() {
-    return new SwerveInputStream(drive, () -> forward, () -> left, () -> rotation);
+    return SwerveInputStream.of(drive, () -> forward, () -> left, () -> rotation);
   }
 
-  private void attach(SwerveInputStream stream) {
-    telemetry = new SwerveInputStreamTelemetry(stream, table);
+  /** Enable the stream's telemetry under this test's name. */
+  private SwerveInputStream withTelemetry(SwerveInputStream stream, TelemetryVerbosity verbosity) {
+    streams.add(stream);
+    return stream.withTelemetry(name, verbosity);
+  }
+
+  /** Apply dashboard edits, as one loop of the Live Tuning command does. */
+  private static void tune(SwerveInputStream stream) {
+    stream.getTelemetry().orElseThrow().applyTuningValues();
+  }
+
+  private void runLiveTuning(Command command) {
+    Scheduler.getDefault().schedule(command);
+    Scheduler.getDefault().run();
+  }
+
+  private void stopLiveTuning(Command command) {
+    Scheduler.getDefault().cancel(command);
+    Scheduler.getDefault().run();
+  }
+
+  private static NetworkTable dataTable(String streamName) {
+    return NetworkTableInstance.getDefault().getTable("SwerveInputStream").getSubTable(streamName);
+  }
+
+  private static NetworkTable tuningTable(String streamName) {
+    return NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("SwerveInputStream").getSubTable(streamName);
+  }
+
+  private double data(String key) {
+    return dataTable(name).getEntry(key).getDouble(Double.NaN);
+  }
+
+  private String mode() {
+    return dataTable(name).getEntry("mode").getString("");
   }
 
   private double published(String key) {
-    return table.getDoubleTopic(key).subscribe(Double.NaN).get();
+    return tuningTable(name).getEntry(key).getDouble(Double.NaN);
   }
 
   private boolean publishedBoolean(String key) {
-    return table.getBooleanTopic(key).subscribe(false).get();
+    return tuningTable(name).getEntry(key).getBoolean(false);
   }
 
-  /** Edit a value as the dashboard would. */
+  /** Edit a tuning value as the dashboard would. */
   private void dashboard(String key, double value) {
-    DoublePublisher publisher = table.getDoubleTopic(key).publish();
-    publisher.set(value);
+    tuningTable(name).getEntry(key).setDouble(value);
   }
 
-  /** Edit a value as the dashboard would. */
+  /** Edit a tuning value as the dashboard would. */
   private void dashboard(String key, boolean value) {
-    BooleanPublisher publisher = table.getBooleanTopic(key).publish();
-    publisher.set(value);
+    tuningTable(name).getEntry(key).setBoolean(value);
+  }
+
+  // ---- Verbosity ---------------------------------------------------------------------------------
+
+  @Test
+  void lowPublishesOnlyTheMode() {
+    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1), TelemetryVerbosity.LOW);
+
+    assertEquals("ANGULAR_VELOCITY", mode());
+    assertFalse(dataTable(name).getTopic("deadband").exists());
+    assertTrue(tuningTable(name).getTopics().isEmpty());
+    assertTrue(stream.getTelemetry().orElseThrow().getLiveTuningCommand().isEmpty());
   }
 
   @Test
-  void publishesTheStreamConfiguration() {
-    attach(stream()
-               .withDeadband(0.1)
-               .withScaleTranslation(0.8)
-               .withScaleRotation(0.5)
-               .withCubeTranslationControllerAxis()
-               .withAllianceRelativeControl());
+  void midPublishesTheConfigurationReadOnly() {
+    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1).withScaleTranslation(0.8),
+                                             TelemetryVerbosity.MID);
 
+    assertEquals(0.1, data("deadband"), kTolerance);
+    assertEquals(0.8, data("translationScale"), kTolerance);
+    assertEquals(kConfigMaxLinear, data("maxLinearVelocity"), kTolerance);
+    assertTrue(tuningTable(name).getTopics().isEmpty());
+    assertTrue(stream.getTelemetry().orElseThrow().getLiveTuningCommand().isEmpty());
+
+    // Changes made in code are published when the stream is read.
+    stream.withScaleTranslation(0.5);
+    stream.get();
+    assertEquals(0.5, data("translationScale"), kTolerance);
+  }
+
+  @Test
+  void highPublishesTuningValuesAndTheLiveTuningCommand() {
+    SwerveInputStream stream = withTelemetry(stream()
+                                                 .withDeadband(0.1)
+                                                 .withScaleTranslation(0.8)
+                                                 .withScaleRotation(0.5)
+                                                 .withCubeTranslationControllerAxis()
+                                                 .withAllianceRelativeControl(),
+                                             TelemetryVerbosity.HIGH);
+
+    assertEquals(0.1, data("deadband"), kTolerance);
     assertEquals(0.1, published("deadband"), kTolerance);
     assertEquals(0.8, published("translationScale"), kTolerance);
     assertEquals(0.5, published("rotationScale"), kTolerance);
@@ -190,13 +255,46 @@ public class SwerveInputStreamTelemetryTest {
     assertFalse(publishedBoolean("rotationCube"));
     assertTrue(publishedBoolean("allianceRelative"));
     assertFalse(publishedBoolean("robotRelative"));
-    assertEquals("ANGULAR_VELOCITY", table.getStringTopic("mode").subscribe("").get());
+    assertTrue(stream.getTelemetry().orElseThrow().getLiveTuningCommand().isPresent());
+    assertFalse(tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(), "Live Tuning on the dashboard");
+  }
+
+  @Test
+  void readingTheStreamPublishesTheMode() {
+    boolean[] headingControl = {false};
+    SwerveInputStream stream = withTelemetry(SwerveInputStream.of(drive, () -> forward, () -> left)
+                                                 .withControllerHeadingAxis(() -> 0, () -> 1)
+                                                 .withHeadingControl(() -> headingControl[0]),
+                                             TelemetryVerbosity.LOW);
+
+    headingControl[0] = true;
+    stream.get();
+    assertEquals("HEADING", mode());
+  }
+
+  // ---- Live tuning -------------------------------------------------------------------------------
+
+  @Test
+  void dashboardEditsApplyOnlyWhileLiveTuningRuns() {
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
+    Command liveTuning = stream.getTelemetry().orElseThrow().getLiveTuningCommand().orElseThrow();
+
+    dashboard("deadband", 0.2);
+    stream.get();
+    assertEquals(0, stream.getAxisDeadband(), kTolerance, "not applied before Live Tuning runs");
+
+    runLiveTuning(liveTuning);
+    assertEquals(0.2, stream.getAxisDeadband(), kTolerance, "applied while Live Tuning runs");
+
+    stopLiveTuning(liveTuning);
+    dashboard("deadband", 0.3);
+    stream.get();
+    assertEquals(0.2, stream.getAxisDeadband(), kTolerance, "not applied after Live Tuning stops");
   }
 
   @Test
   void dashboardEditsAreAppliedToTheStream() {
-    SwerveInputStream stream = stream();
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
 
     dashboard("deadband", 0.2);
     dashboard("translationScale", 0.6);
@@ -207,7 +305,7 @@ public class SwerveInputStreamTelemetryTest {
     dashboard("rotationCube", true);
     dashboard("allianceRelative", true);
     dashboard("robotRelative", true);
-    telemetry.update();
+    tune(stream);
 
     assertEquals(0.2, stream.getAxisDeadband(), kTolerance);
     assertEquals(0.6, stream.getTranslationAxisScale(), kTolerance);
@@ -220,63 +318,52 @@ public class SwerveInputStreamTelemetryTest {
     assertTrue(stream.isRobotRelativeEnabled());
 
     // The edits stay applied on later loops.
-    telemetry.update();
+    tune(stream);
     assertEquals(0.2, stream.getAxisDeadband(), kTolerance);
     assertEquals(0.2, published("deadband"), kTolerance);
     assertTrue(stream.isRobotRelativeEnabled());
 
     // Turning a feature back off on the dashboard turns it off in the stream.
     dashboard("translationCube", false);
-    telemetry.update();
+    tune(stream);
     assertFalse(stream.isTranslationCubeEnabled());
   }
 
   @Test
-  void tunedMaximumLinearVelocityOverridesTheDriveConfig() {
-    SwerveInputStream stream = stream();
-    attach(stream);
+  void tunedMaximumVelocitiesOverrideTheDriveConfig() {
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
     forward = 1;
+    rotation = 1;
     assertEquals(kConfigMaxLinear, stream.get().vx, kTolerance);
 
     dashboard("maxLinearVelocity", 2.0);
-    telemetry.update();
-    assertEquals(2.0, stream.get().vx, kTolerance);
-  }
-
-  @Test
-  void tunedMaximumAngularVelocityOverridesTheDriveConfig() {
-    SwerveInputStream stream = stream();
-    attach(stream);
-    rotation = 1;
-    assertEquals(kConfigMaxAngular, stream.get().omega, kTolerance);
-
     dashboard("maxAngularVelocity", 3.0);
-    telemetry.update();
-    assertEquals(3.0, stream.get().omega, kTolerance);
+    tune(stream);
+    var velocities = stream.get();
+    assertEquals(2.0, velocities.vx, kTolerance);
+    assertEquals(3.0, velocities.omega, kTolerance);
   }
 
   @Test
   void tunedDeadbandChangesTheOutput() {
-    SwerveInputStream stream = stream();
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
     forward = 0.3;
     assertTrue(stream.get().vx > 0);
 
     dashboard("deadband", 0.5);
-    telemetry.update();
+    tune(stream);
     assertEquals(0, stream.get().vx, kTolerance);
   }
 
   @Test
   void tunedScalesChangeTheOutput() {
-    SwerveInputStream stream = stream();
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
     forward = 1;
     rotation = 1;
 
     dashboard("translationScale", 0.5);
     dashboard("rotationScale", 0.25);
-    telemetry.update();
+    tune(stream);
     var velocities = stream.get();
     assertEquals(0.5 * kConfigMaxLinear, velocities.vx, kTolerance);
     assertEquals(0.25 * kConfigMaxAngular, velocities.omega, kTolerance);
@@ -284,12 +371,11 @@ public class SwerveInputStreamTelemetryTest {
 
   @Test
   void tunedCubingChangesTheOutput() {
-    SwerveInputStream stream = stream();
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
     rotation = 0.5;
 
     dashboard("rotationCube", true);
-    telemetry.update();
+    tune(stream);
     assertEquals(0.125 * kConfigMaxAngular, stream.get().omega, kTolerance);
   }
 
@@ -309,30 +395,30 @@ public class SwerveInputStreamTelemetryTest {
       "maxAngularVelocity, NaN",
   })
   void invalidDashboardValuesAreReplacedWithTheStreamValue(String key, double value) {
-    attach(stream().withDeadband(0.1).withScaleTranslation(0.8).withScaleRotation(0.5));
+    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1).withScaleTranslation(0.8).withScaleRotation(0.5),
+                                             TelemetryVerbosity.HIGH);
     double before = published(key);
 
     dashboard(key, value);
-    telemetry.update();
+    tune(stream);
 
     assertEquals(before, published(key), kTolerance, "dashboard shows the stream's value again");
-    telemetry.update();
+    tune(stream);
     assertEquals(before, published(key), kTolerance, "the stream is unchanged");
   }
 
   @Test
   void codeChangesArePublishedAndNotOverridden() {
-    SwerveInputStream stream = stream().withScaleTranslation(0.8);
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream().withScaleTranslation(0.8), TelemetryVerbosity.HIGH);
 
     // E.g. a slow mode binding changing the scale while driving.
     stream.withScaleTranslation(0.4);
-    telemetry.update();
+    tune(stream);
     assertEquals(0.4, published("translationScale"), kTolerance);
     assertEquals(0.4, stream.getTranslationAxisScale(), kTolerance);
 
     stream.withScaleTranslation(0.8);
-    telemetry.update();
+    tune(stream);
     assertEquals(0.8, published("translationScale"), kTolerance);
     assertEquals(0.8, stream.getTranslationAxisScale(), kTolerance);
   }
@@ -340,45 +426,61 @@ public class SwerveInputStreamTelemetryTest {
   @Test
   void supplierControlledFeaturesAreNotOverridden() {
     boolean[] allianceRelative = {false};
-    SwerveInputStream stream = stream().withAllianceRelativeControl(() -> allianceRelative[0]);
-    attach(stream);
+    SwerveInputStream stream = withTelemetry(stream().withAllianceRelativeControl(() -> allianceRelative[0]),
+                                             TelemetryVerbosity.HIGH);
 
     allianceRelative[0] = true;
-    telemetry.update();
+    tune(stream);
     assertTrue(publishedBoolean("allianceRelative"));
 
     // The stream still follows the supplier: the telemetry did not replace it with a fixed value.
     allianceRelative[0] = false;
     assertFalse(stream.isAllianceRelativeEnabled());
-    telemetry.update();
+    tune(stream);
     assertFalse(publishedBoolean("allianceRelative"));
   }
 
-  @Test
-  void publishesTheCurrentMode() {
-    boolean[] headingControl = {false};
-    SwerveInputStream stream = SwerveInputStream.of(drive, () -> forward, () -> left)
-        .withControllerHeadingAxis(() -> 0, () -> 1)
-        .withHeadingControl(() -> headingControl[0]);
-    attach(stream);
+  // ---- Lifecycle ---------------------------------------------------------------------------------
 
-    headingControl[0] = true;
-    stream.get();
-    telemetry.update();
-    assertEquals("HEADING", table.getStringTopic("mode").subscribe("").get());
+  @Test
+  void withTelemetryReplacesTheTelemetry() {
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
+    String firstName = name;
+    var first = stream.getTelemetry().orElseThrow();
+
+    name = firstName + "Renamed";
+    withTelemetry(stream, TelemetryVerbosity.HIGH);
+    assertFalse(stream.getTelemetry().orElseThrow() == first);
+    assertFalse(dataTable(firstName).getTopic("mode").exists(), "the first telemetry is closed");
+    assertFalse(tuningTable(firstName).getTopic("deadband").exists());
+    assertEquals("ANGULAR_VELOCITY", mode());
+  }
+
+  @Test
+  void cloneHasNoTelemetry() {
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
+    SwerveInputStream clone = stream.clone();
+
+    assertTrue(clone.getTelemetry().isEmpty());
+    assertTrue(stream.getTelemetry().isPresent());
+    assertTrue(stream().getTelemetry().isEmpty(), "streams have no telemetry until withTelemetry");
   }
 
   @Test
   void closeStopsPublishing() {
-    attach(stream());
-    assertTrue(table.getTopic("deadband").exists());
-    assertTrue(table.getTopic("mode").exists());
+    SwerveInputStream stream = withTelemetry(stream(), TelemetryVerbosity.HIGH);
+    var telemetry = stream.getTelemetry().orElseThrow();
+    Command liveTuning = telemetry.getLiveTuningCommand().orElseThrow();
+    runLiveTuning(liveTuning);
+    assertTrue(dataTable(name).getTopic("deadband").exists());
 
     telemetry.close();
-    telemetry = null;
-    assertFalse(table.getTopic("deadband").exists());
-    assertFalse(table.getTopic("robotRelative").exists());
-    assertFalse(table.getTopic("mode").exists());
+    assertFalse(Scheduler.getDefault().isRunning(liveTuning), "Live Tuning is canceled");
+    assertFalse(dataTable(name).getTopic("mode").exists());
+    assertFalse(dataTable(name).getTopic("deadband").exists());
+    assertFalse(tuningTable(name).getTopic("deadband").exists());
+    assertFalse(tuningTable(name).getTopic("robotRelative").exists());
+    assertTrue(tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(), "Live Tuning is removed");
   }
 
   @Test

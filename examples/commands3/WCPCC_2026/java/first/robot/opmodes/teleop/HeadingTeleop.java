@@ -14,6 +14,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.opmode.OpMode;
 import org.wpilib.opmode.Teleop;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Teleop where the left stick translates field centric and the robot faces the direction the right stick is pushed.
@@ -44,7 +45,8 @@ public class HeadingTeleop implements OpMode {
             .withDeadband(Driving.kJoystickDeadband)
             .withCubeTranslationControllerAxis()
             .withAllianceRelativeControl()
-            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), driver.rightTrigger());
+            .withAim(() -> new Pose2d(Landmarks.hubPosition(), Rotation2d.ZERO), driver.rightTrigger())
+            .withTelemetry("Driver", TelemetryVerbosity.HIGH);
 
         // Opmode-scoped input stream, default command, and bindings: they only exist while this teleop runs.
         swerve.setInputStream(inputStream);

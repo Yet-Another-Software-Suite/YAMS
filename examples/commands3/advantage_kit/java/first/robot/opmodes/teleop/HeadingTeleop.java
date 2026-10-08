@@ -5,6 +5,7 @@ package first.robot.opmodes.teleop;
 
 import first.robot.Robot;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Teleop where the left stick translates and the robot faces the direction the right stick is pushed. Created by
@@ -25,7 +26,8 @@ public class HeadingTeleop {
         .withCubeTranslationControllerAxis()
         // Alliance-relative: forward on the stick always moves toward the opposing
         // alliance wall regardless of which side the robot started on.
-        .withAllianceRelativeControl());
+        .withAllianceRelativeControl()
+        .withTelemetry("Driver", TelemetryVerbosity.HIGH));
 
     robot.drive.setDefaultCommand(robot.drive.driveInputStream());
   }
