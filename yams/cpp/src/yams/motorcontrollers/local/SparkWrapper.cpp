@@ -81,9 +81,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   auto doConfig = [&](SparkBaseConfig& sparkCfg) {
     sparkCfg.DisableFollowerMode();  // Disable follower from the Spark.
     if (auto inv = config.GetMotorInverted(); inv) sparkCfg.Inverted(*inv);
-    sparkCfg.SetIdleMode(config.GetZeroPower() == SmartMotorControllerConfig::MotorMode::BRAKE
-                             ? SparkBaseConfig::IdleMode::kBrake
-                             : SparkBaseConfig::IdleMode::kCoast);
+    if (auto zp = config.GetZeroPower(); zp)
+      sparkCfg.SetIdleMode(*zp == SmartMotorControllerConfig::MotorMode::BRAKE
+                               ? SparkBaseConfig::IdleMode::kBrake
+                               : SparkBaseConfig::IdleMode::kCoast);
 
     if (auto r = config.GetOpenLoopRampRate(); r) sparkCfg.OpenLoopRampRate(r->value());
     if (auto r = config.GetClosedLoopRampRate(); r) sparkCfg.ClosedLoopRampRate(r->value());
@@ -260,6 +261,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_pid.reset();
   }
+  ConfigureSoftwarePID(config);
 
   // SPARK hardware has no native exponential profile or LQR support.  When either is configured,
   // the RoboRIO runs the closed-loop controller via a Notifier and sends voltage commands to the
@@ -321,6 +323,12 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     }
   }
   LoadLooselyCoupledFollowers();
+  config.GetLooselyCoupledFollowers();
+  // Consumed for validation; wrapper-specific handling of these options is not implemented yet.
+  config.GetVoltageCompensation();
+  config.GetFeedbackSynchronizationThreshold();
+  config.GetClosedLoopControlPeriod();
+  config.GetResetPreviousConfig();
 
   config.ValidateBasicOptions();
   config.ValidateExternalEncoderOptions();
@@ -350,9 +358,7 @@ void SparkWrapper::SetupSimulation() {
         *simMotor, m_config->GetMOI(), gearing->GetMechanismToRotorRatio());
     m_motorSim.emplace(plant, *simMotor);
 
-    auto period = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
-    SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
-        *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+    SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
 
     m_sparkSim.emplace(m_spark, &m_motor);
 
@@ -382,12 +388,13 @@ void SparkWrapper::SetupSimulation() {
 void SparkWrapper::SimIterate() {
   // if (!wpi::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
   if (m_simSupplier) {
-    if (m_simSupplier->IsWatchdogExpired()) {
+    // Step the physics only if the mechanism has not already stepped them this loop.
+    if (!m_simSupplier->GetUpdatedSim()) {
       m_simSupplier->UpdateSim();
-      simulation::BatterySim::CalculateVoltage(m_simSupplier.get(),
-                                               m_simSupplier->GetCurrentDrawAmps());
+      m_simSupplier->StarveUpdateSim();
+      simulation::BatterySim::CalculateVoltage(BatterySimKey(), m_simSupplier->GetSupplyCurrent());
     }
-    wpi::units::second_t dt = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
+    wpi::units::second_t dt = m_config->GetSimulationPeriod();
     wpi::units::turns_per_second_t mechVelRps = m_simSupplier->GetMechanismVelocity();
     double vbus = m_simSupplier->GetMechanismSupplyVoltage().value();
     m_sparkSim->iterate(mechVelRps.value(), vbus, dt.value());

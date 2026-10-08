@@ -647,14 +647,16 @@ class SmartMotorControllerConfig {
   /**
    * Enable NetworkTables telemetry with a field-level telemetry configuration.
    *
-   * The verbosity is set to HIGH so that live tuning is available.
+   * The verbosity is set to HIGH so that live tuning is available.  The telemetry configuration
+   * is used by the first motor controller that sets up telemetry with this config (copies made
+   * with Clone() share it), so give each motor controller its own.
    *
    * @param name            Table key for this motor's telemetry.
    * @param telemetryConfig Telemetry configuration specifying the published fields.
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithTelemetry(
-      const std::string& name, const telemetry::SmartMotorControllerTelemetryConfig& telemetryConfig);
+      const std::string& name, telemetry::SmartMotorControllerTelemetryConfig telemetryConfig);
 
   // ---- Subsystem ---------------------------------------------------------
 
@@ -1121,7 +1123,8 @@ class SmartMotorControllerConfig {
    * @return Telemetry configuration set via WithTelemetry(name, telemetryConfig), or nullptr if
    *         none was given.
    */
-  const telemetry::SmartMotorControllerTelemetryConfig* GetSmartControllerTelemetryConfig() const;
+  std::shared_ptr<telemetry::SmartMotorControllerTelemetryConfig>
+  GetSmartControllerTelemetryConfig() const;
   /** @return Optional DC motor model for simulation. */
   std::optional<wpi::math::DCMotor> GetSimMotor() const;
   /** @return Simulation loop period (default 20 ms). */
@@ -1413,8 +1416,8 @@ class SmartMotorControllerConfig {
   // Telemetry
   std::optional<std::string> m_telemetryName;
   std::optional<TelemetryVerbosity> m_verbosity;
-  // shared_ptr so the forward-declared type can be held; copied by value into the SMC on setup.
-  std::shared_ptr<const telemetry::SmartMotorControllerTelemetryConfig> m_telemetryConfig;
+  // shared_ptr so the forward-declared, non-copyable type can be held.
+  std::shared_ptr<telemetry::SmartMotorControllerTelemetryConfig> m_telemetryConfig;
 
   wpi::cmd::SubsystemBase* m_subsystem{nullptr};
   std::optional<wpi::math::DCMotor> m_simMotor;

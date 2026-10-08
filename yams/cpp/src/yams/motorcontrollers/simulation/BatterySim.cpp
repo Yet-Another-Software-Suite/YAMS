@@ -86,6 +86,17 @@ void BatterySim::ResetDischarge() {
   m_lastTimestampSeconds = std::numeric_limits<double>::quiet_NaN();
 }
 
+void BatterySim::RemoveCurrent(const void* id) { m_currents.erase(id); }
+
+void BatterySim::Reset() {
+  m_currents.clear();
+  m_dischargeEnabled = false;
+  m_ampHoursUsed = 0.0;
+  m_lastTimestampSeconds = std::numeric_limits<double>::quiet_NaN();
+}
+
+bool BatterySim::HasCurrent(const void* id) { return m_currents.count(id) > 0; }
+
 double BatterySim::GetStateOfCharge() {
   return std::clamp(1.0 - (m_ampHoursUsed / m_batteryCapacityAmpHours), 0.0, 1.0);
 }

@@ -92,9 +92,8 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
                      wpi::units::radian_t{m_armConfig->GetMaxAngle().value()}, true, startAngle,
                      std::array<double, 2>{0, 0.002 / 4096.0});
 
-    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
-        *m_armSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+        *m_armSim, *m_smc));
 
     // Build Mechanism2d window.
     double armLengthM = m_armConfig->GetArmLength().value().value();
@@ -139,7 +138,7 @@ void Arm::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->StarveWatchdog();
+    ss->StarveUpdateSim();
 
     if (m_armConfig->GetMinAngle() && m_armSim->GetVelocity().value() < 0.0 &&
         GetAngle() < *m_armConfig->GetMinAngle()) {
@@ -150,7 +149,7 @@ void Arm::SimIterate() {
       m_smc->SetEncoderPosition(*m_armConfig->GetMaxAngle());
     }
     wpi::sim::RoboRioSim::SetVInVoltage(
-        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+        wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     VisualizationUpdate();
   }
 }

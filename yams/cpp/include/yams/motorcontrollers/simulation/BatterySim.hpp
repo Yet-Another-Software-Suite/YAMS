@@ -107,6 +107,28 @@ class BatterySim {
    */
   static double GetStateOfCharge();
 
+  /**
+   * Stop counting the given consumer's current draw towards the shared battery load, e.g. once
+   * its SmartMotorController has been closed.
+   *
+   * @param id Key the consumer's current was registered under (the SmartMotorController).
+   */
+  static void RemoveCurrent(const void* id);
+
+  /**
+   * Clear every tracked current draw and reset discharge simulation to a fresh, fully-charged,
+   * disabled state.
+   */
+  static void Reset();
+
+  /**
+   * Whether a current draw is tracked for the given consumer.
+   *
+   * @param id Key the consumer's current was registered under.
+   * @return true if a current is tracked for @p id.
+   */
+  static bool HasCurrent(const void* id);
+
  private:
   static void UpdateDischarge(double totalCurrentAmps);
   static double InterpolateOpenCircuitVoltage(double stateOfCharge);

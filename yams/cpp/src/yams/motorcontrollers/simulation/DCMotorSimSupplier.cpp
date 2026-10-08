@@ -3,39 +3,67 @@
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
-#include <utility>
 #include <wpi/simulation/RoboRioSim.hpp>
 
+#include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
 namespace yams::motorcontrollers::simulation {
 
-DCMotorSimSupplier::DCMotorSimSupplier(wpi::sim::DCMotorSim& sim,
-                                       std::function<double()> dutyCycleSupplier,
-                                       const gearing::MechanismGearing& gearing,
-                                       wpi::units::second_t period)
+DCMotorSimSupplier::DCMotorSimSupplier(wpi::sim::DCMotorSim& sim, SmartMotorController& smc)
     : m_sim(sim),
-      m_dutyCycleSupplier(std::move(dutyCycleSupplier)),
-      m_gearing(gearing),
-      m_period(period) {}
+      m_dutyCycleSupplier([&smc] { return smc.GetDutyCycle(); }),
+      m_gearing(smc.GetConfig().GetMotorGearing().value_or(gearing::MechanismGearing::kOne)),
+      m_period(smc.GetConfig().GetSimulationPeriod()),
+      m_batteryKey(&smc),
+      // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
+      m_supplyCurrentFilter(wpi::math::LinearFilter<double>::SinglePoleIIR(0.1, m_period)) {}
 
 void DCMotorSimSupplier::UpdateSim() {
-  if (!m_inputFed) {
+  if (!IsInputFed()) {
     m_lastInputVoltage =
         wpi::units::volt_t{m_dutyCycleSupplier() * GetMechanismSupplyVoltage().value()};
     m_sim.SetInputVoltage(m_lastInputVoltage);
-    wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(this, m_sim.GetCurrentDraw()));
+    wpi::sim::RoboRioSim::SetVInVoltage(BatterySim::CalculateVoltage(m_batteryKey, GetSupplyCurrent()));
   }
-  m_inputFed = false;
-  m_sim.Update(m_period);
-  StarveWatchdog();
+  if (!m_simUpdated) {
+    StarveInput();
+    m_sim.Update(m_period);
+    FeedUpdateSim();
+  }
+}
+
+bool DCMotorSimSupplier::GetUpdatedSim() { return m_simUpdated; }
+
+void DCMotorSimSupplier::FeedUpdateSim() { m_simUpdated = true; }
+
+void DCMotorSimSupplier::StarveUpdateSim() { m_simUpdated = false; }
+
+bool DCMotorSimSupplier::IsInputFed() { return m_inputFed; }
+
+void DCMotorSimSupplier::FeedInput() { m_inputFed = true; }
+
+void DCMotorSimSupplier::StarveInput() { m_inputFed = false; }
+
+void DCMotorSimSupplier::SetMechanismStatorDutyCycle(double dutyCycle) {
+  SetMechanismStatorVoltage(wpi::units::volt_t{dutyCycle * GetMechanismSupplyVoltage().value()});
+}
+
+wpi::units::volt_t DCMotorSimSupplier::GetMechanismSupplyVoltage() {
+  return wpi::sim::RoboRioSim::GetVInVoltage();
+}
+
+wpi::units::volt_t DCMotorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
+
+void DCMotorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
+  FeedInput();
+  m_lastInputVoltage = volts;
+  m_sim.SetInputVoltage(volts);
 }
 
 wpi::units::turn_t DCMotorSimSupplier::GetMechanismPosition() { return m_sim.GetAngularPosition(); }
 
-wpi::units::turns_per_second_t DCMotorSimSupplier::GetMechanismVelocity() {
-  return m_sim.GetAngularVelocity();
-}
+wpi::units::turns_per_second_t DCMotorSimSupplier::GetMechanismVelocity() { return m_sim.GetAngularVelocity(); }
 
 wpi::units::turns_per_second_squared_t DCMotorSimSupplier::GetMechanismAcceleration() {
   return m_sim.GetAngularAcceleration();
@@ -67,29 +95,14 @@ void DCMotorSimSupplier::SetRotorVelocity(wpi::units::turns_per_second_t velocit
   SetMechanismVelocity(velocity / m_gearing.GetMechanismToRotorRatio());
 }
 
-bool DCMotorSimSupplier::IsWatchdogExpired() { return !m_watchdogFed; }
+wpi::units::ampere_t DCMotorSimSupplier::GetStatorCurrent() { return m_sim.GetCurrentDraw(); }
 
-void DCMotorSimSupplier::FeedWatchdog() { m_watchdogFed = true; }
-
-void DCMotorSimSupplier::StarveWatchdog() { m_watchdogFed = false; }
-
-wpi::units::ampere_t DCMotorSimSupplier::GetCurrentDrawAmps() { return m_sim.GetCurrentDraw(); }
-
-void DCMotorSimSupplier::SetInputVoltage(wpi::units::volt_t volts) {
-  m_lastInputVoltage = volts;
-  m_sim.SetInputVoltage(volts);
-  m_inputFed = true;
-  FeedWatchdog();
-}
-
-wpi::units::volt_t DCMotorSimSupplier::GetMechanismSupplyVoltage() {
-  return wpi::sim::RoboRioSim::GetVInVoltage();
-}
-
-wpi::units::volt_t DCMotorSimSupplier::GetMechanismStatorVoltage() { return m_lastInputVoltage; }
-
-void DCMotorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
-  SetInputVoltage(volts);
+wpi::units::ampere_t DCMotorSimSupplier::GetSupplyCurrent() {
+  // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
+  // transformation, so supplyCurrent = dutyCycle * statorCurrent.
+  double dutyCycle = m_dutyCycleSupplier();
+  return wpi::units::ampere_t{
+      m_supplyCurrentFilter.Calculate(dutyCycle * m_sim.GetCurrentDraw().value())};
 }
 
 }  // namespace yams::motorcontrollers::simulation

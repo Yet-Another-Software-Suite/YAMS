@@ -74,9 +74,10 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     cfg.MotorOutput.Inverted = *inv ? signals::InvertedValue::Clockwise_Positive
                                     : signals::InvertedValue::CounterClockwise_Positive;
 
-  cfg.MotorOutput.NeutralMode = config.GetZeroPower() == SmartMotorControllerConfig::MotorMode::BRAKE
-                                    ? signals::NeutralModeValue::Brake
-                                    : signals::NeutralModeValue::Coast;
+  if (auto zp = config.GetZeroPower(); zp)
+    cfg.MotorOutput.NeutralMode = *zp == SmartMotorControllerConfig::MotorMode::BRAKE
+                                      ? signals::NeutralModeValue::Brake
+                                      : signals::NeutralModeValue::Coast;
 
   // Consume control-mode option for validation tracking
   config.GetMotorControllerMode();
@@ -256,6 +257,7 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_pid.reset();
   }
+  ConfigureSoftwarePID(config);
 
   if (m_lqr.has_value()) {
     int deviceId = static_cast<int>(m_talon->GetDeviceID());
@@ -312,6 +314,12 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     }
   }
   LoadLooselyCoupledFollowers();
+  config.GetLooselyCoupledFollowers();
+  // Consumed for validation; wrapper-specific handling of these options is not implemented yet.
+  config.GetVoltageCompensation();
+  config.GetFeedbackSynchronizationThreshold();
+  config.GetClosedLoopControlPeriod();
+  config.GetResetPreviousConfig();
 
   config.ValidateBasicOptions();
   config.ValidateExternalEncoderOptions();
@@ -331,9 +339,7 @@ void TalonFXSWrapper::SetupSimulation() {
       *simMotor, m_config->GetMOI(), gearing->GetMechanismToRotorRatio());
   m_motorSim.emplace(plant, *simMotor);
 
-  auto period = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
-  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(
-      *m_motorSim, [this]() { return GetDutyCycle(); }, *gearing, period));
+  SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
   if (auto startPos = m_config->GetStartingPosition()) {
     m_simSupplier->SetMechanismPosition(*startPos);
     m_talon->GetSimState().SetRawRotorPosition(
@@ -347,10 +353,11 @@ void TalonFXSWrapper::SimIterate() {
   auto& sim = m_talon->GetSimState();
   sim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
 
-  m_simSupplier->SetInputVoltage(sim.GetMotorVoltage());
+  m_simSupplier->SetMechanismStatorVoltage(sim.GetMotorVoltage());
+  // Steps the physics only if the mechanism has not already stepped them this loop.
   m_simSupplier->UpdateSim();
-  simulation::BatterySim::CalculateVoltage(m_simSupplier.get(),
-                                           m_simSupplier->GetCurrentDrawAmps());
+  m_simSupplier->StarveUpdateSim();
+  simulation::BatterySim::CalculateVoltage(BatterySimKey(), m_simSupplier->GetSupplyCurrent());
 
   sim.SetRawRotorPosition(wpi::units::turn_t{m_simSupplier->GetRotorPosition()});
   sim.SetRotorVelocity(wpi::units::turns_per_second_t{m_simSupplier->GetRotorVelocity()});

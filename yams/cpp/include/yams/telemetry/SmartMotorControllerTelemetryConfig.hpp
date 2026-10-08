@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
@@ -118,6 +119,51 @@ class SmartMotorControllerTelemetryConfig {
   SmartMotorControllerTelemetryConfig& WithSetpointPosition();
   /** Enable setpoint velocity logging (read-only). @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithSetpointVelocity();
+  /**
+   * Enable the feedforward force applied on top of the velocity setpoint.
+   *
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithSetpointForce();
+
+  /**
+   * Escape hatch to enable or disable any double field.
+   *
+   * @param field   Field to configure.
+   * @param enabled true to enable, false to disable.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithCustom(DoubleTelemetryField field, bool enabled);
+
+  /**
+   * Escape hatch to enable or disable any boolean field.
+   *
+   * @param field   Field to configure.
+   * @param enabled true to enable, false to disable.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithCustom(BooleanTelemetryField field, bool enabled);
+
+  /**
+   * Escape hatch to enable or disable several double fields.
+   *
+   * @param fields  Fields to configure.
+   * @param enabled true to enable, false to disable.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithCustom(const std::vector<DoubleTelemetryField>& fields,
+                                                  bool enabled);
+
+  /**
+   * Escape hatch to enable or disable several boolean fields.
+   *
+   * @param fields  Fields to configure.
+   * @param enabled true to enable, false to disable.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithCustom(const std::vector<BooleanTelemetryField>& fields,
+                                                  bool enabled);
+
   /** Enable output voltage logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithOutputVoltage();
   /** Enable stator current logging. @return *this for chaining. */

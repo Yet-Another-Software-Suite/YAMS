@@ -23,6 +23,7 @@
 #include <wpi/units/angular_jerk.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/current.hpp>
+#include <wpi/units/force.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/temperature.hpp>
 #include <wpi/units/time.hpp>
@@ -50,7 +51,8 @@ class SmartMotorController {
   using MotorMode = SmartMotorControllerConfig::MotorMode;
   using ControlMode = SmartMotorControllerConfig::ControlMode;
 
-  virtual ~SmartMotorController() = default;
+  /** Calls Close() so telemetry, battery-sim state and close hooks are always released. */
+  virtual ~SmartMotorController();
 
   // ---- Configuration ------------------------------------------------------
 
@@ -153,6 +155,30 @@ class SmartMotorController {
    * @param velocity Target linear velocity.
    */
   virtual void SetVelocity(wpi::units::meters_per_second_t velocity) = 0;
+
+  /**
+   * Command a mechanism angular velocity setpoint with an additional feedforward force applied on
+   * top, e.g. from a path-following set-point generator.
+   *
+   * The force is converted to a voltage with SmartMotorControllerConfig::ConvertToVoltage and
+   * added by the RoboRIO closed-loop controller, so the mechanism circumference must be set.
+   *
+   * @param velocity         Target mechanism angular velocity.
+   * @param feedforwardForce Additional feedforward force at the mechanism.
+   */
+  virtual void SetVelocity(wpi::units::turns_per_second_t velocity,
+                           wpi::units::newton_t feedforwardForce);
+
+  /**
+   * Command a linear velocity setpoint with an additional feedforward force applied on top.
+   *
+   * Throws SmartMotorControllerConfigurationException if the mechanism circumference is not
+   * configured.
+   *
+   * @param velocity         Target linear velocity.
+   * @param feedforwardForce Additional feedforward force at the mechanism.
+   */
+  void SetVelocity(wpi::units::meters_per_second_t velocity, wpi::units::newton_t feedforwardForce);
 
   // ---- Encoder writes -----------------------------------------------------
 
@@ -501,6 +527,26 @@ class SmartMotorController {
    */
   virtual void SetClosedLoopSlot(ClosedLoopControllerSlot slot) = 0;
 
+  /**
+   * Update the mechanism gearing used for position/velocity conversions.
+   *
+   * The base implementation updates the config and forwards the gearing to loosely coupled
+   * followers; wrappers override it to also reconfigure the hardware.
+   *
+   * @param gearing New mechanism gearing.
+   */
+  virtual void SetMechanismGearing(const gearing::MechanismGearing& gearing);
+
+  /**
+   * Update the mechanism circumference used for linear position/velocity conversions.
+   *
+   * The base implementation updates the config; wrappers override it to also reconfigure the
+   * hardware.
+   *
+   * @param circumference New mechanism circumference.
+   */
+  virtual void SetMechanismCircumference(wpi::units::meter_t circumference);
+
   // ---- Closed-loop controller thread --------------------------------------
 
   /** Start the background closed-loop controller thread. */
@@ -526,8 +572,36 @@ class SmartMotorController {
   /** Set up NetworkTables telemetry using the name configured in the SmartMotorControllerConfig. */
   void SetupTelemetry();
 
-  /** Publish the current sensor readings and setpoints to NetworkTables. */
+  /**
+   * Publish the current sensor readings and setpoints to NetworkTables.
+   *
+   * Does nothing unless a telemetry verbosity is configured; sets telemetry up on first use.
+   * Live-tuned values are not applied here, only by the "Live Tuning" command (or
+   * ApplyTuningValues()).
+   */
   void UpdateTelemetry();
+
+  /**
+   * Whether live tuning is enabled, i.e. whether tunable setpoints are published.
+   *
+   * @return true if live tuning is enabled.
+   */
+  bool TuningEnabled() const;
+
+  /**
+   * Apply the live-tuned values from the Tuning NetworkTable to this motor controller.
+   *
+   * Throws SmartMotorControllerConfigurationException if the control mode is not CLOSED_LOOP.
+   */
+  void ApplyTuningValues();
+
+  /**
+   * Register a hook to run when Close() is called, so helpers (e.g. live tuning) can clean up
+   * resources they registered elsewhere.
+   *
+   * @param hook Callable run once on Close().
+   */
+  void AddCloseHook(std::function<void()> hook);
 
   /**
    * Override the telemetry configuration used when publishing data to NetworkTables.
@@ -592,6 +666,13 @@ class SmartMotorController {
   std::optional<wpi::units::meters_per_second_t> GetMeasurementSetpointVelocity() const;
 
   /**
+   * Get the feedforward force last supplied to SetVelocity(velocity, force).
+   *
+   * @return Optional feedforward force.
+   */
+  std::optional<wpi::units::newton_t> GetSetpointFeedforwardForce() const;
+
+  /**
    * Get a mutable reference to the current configuration.
    *
    * @return Reference to the SmartMotorControllerConfig.
@@ -631,11 +712,19 @@ class SmartMotorController {
   /** Validate the current configuration and throw if safety constraints are violated. */
   void CheckConfigSafety();
 
-  /** Release any hardware resources held by this controller. */
+  /**
+   * Release resources held by this controller: stops the closed-loop thread, closes telemetry,
+   * removes this controller's current from BatterySim, and runs the close hooks.  Safe to call
+   * more than once.
+   */
   void Close();
 
  protected:
-  SmartMotorControllerConfig m_config;
+  /**
+   * Config used by this controller (owned by the caller; set by the wrapper constructor before
+   * anything else uses it).
+   */
+  SmartMotorControllerConfig* m_config{nullptr};
   ClosedLoopControllerSlot m_slot{ClosedLoopControllerSlot::SLOT_0};
   std::shared_ptr<SimSupplier> m_simSupplier;
 
@@ -647,6 +736,15 @@ class SmartMotorController {
    * Call this at the end of each concrete ApplyConfig() implementation.
    */
   void LoadLooselyCoupledFollowers();
+
+  /**
+   * Configure the software PID controller (m_pid) from @p config: continuous input over the
+   * continuous wrapping range and the closed-loop tolerance.  Call in ApplyConfig() right after
+   * m_pid is (re)created; consumes the ClosedLoopTolerance and ContinuousWrapping options.
+   *
+   * @param config Config being applied.
+   */
+  void ConfigureSoftwarePID(const SmartMotorControllerConfig& config);
 
   /**
    * Forward a position setpoint to all loosely coupled followers.
@@ -682,9 +780,30 @@ class SmartMotorController {
 
   // Linear motion profile state
   std::optional<wpi::math::TrapezoidProfile<wpi::units::meters>::State> m_linearTrapState;
+  std::optional<wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>::State>
+      m_linearExpoState;
+
+  /**
+   * Mechanism position the closed-loop controller last used, unwrapped across the continuous
+   * wrapping point.
+   */
+  std::optional<wpi::units::turn_t> m_lastClosedLoopMechanismPosition;
 
   std::optional<wpi::units::turn_t> m_setpointPosition;
   std::optional<wpi::units::turns_per_second_t> m_setpointVelocity;
+  /** Feedforward force applied on top of the velocity setpoint (see SetVelocity(vel, force)). */
+  std::optional<wpi::units::newton_t> m_setpointFeedforwardForce;
+
+  /** Hooks run once by Close(). */
+  std::vector<std::function<void()>> m_closeHooks;
+
+  /**
+   * Key this controller's current draw is tracked under in simulation::BatterySim.  Sim
+   * suppliers built from this controller use the same key.
+   *
+   * @return Battery simulation key.
+   */
+  const void* BatterySimKey() const { return this; }
 
   std::unique_ptr<wpi::Notifier> m_closedLoopControllerThread;
   bool m_closedLoopControllerRunning{false};
@@ -696,11 +815,14 @@ class SmartMotorController {
   telemetry::SmartMotorControllerTelemetry m_telemetry;
   telemetry::SmartMotorControllerTelemetryConfig m_telemetryConfig;
   bool m_telemetryConfigExplicit{false};
+  /** Telemetry config given to SmartMotorControllerConfig::WithTelemetry(name, config), if any. */
+  std::shared_ptr<telemetry::SmartMotorControllerTelemetryConfig> m_specifiedTelemetryConfig;
+  bool m_liveTuningRegistered{false};
+  bool m_closed{false};
 
  private:
-  std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> GetTrapezoidalProfileState();
-  std::optional<wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::State>
-  GetExponentialProfileState();
+  /** Reset the motion profile states to the current mechanism (or measurement) state. */
+  void ResetProfileStates();
 };
 
 }  // namespace yams::motorcontrollers

@@ -67,6 +67,7 @@ bool SmartMotorControllerCommandRegistry::CommandExists(const std::string& cmdNa
 void SmartMotorControllerCommandRegistry::RemoveCommands(wpi::cmd::SubsystemBase* subsystem) {
   for (auto it = s_owners.begin(); it != s_owners.end();) {
     if (it->second == subsystem) {
+      wpi::tunables::Remove("Tuning/" + it->first);
       s_commands.erase(it->first);
       s_callbacks.erase(it->first);
       it = s_owners.erase(it);
@@ -77,6 +78,7 @@ void SmartMotorControllerCommandRegistry::RemoveCommands(wpi::cmd::SubsystemBase
 }
 
 void SmartMotorControllerCommandRegistry::Clear() {
+  for (const auto& [key, cmd] : s_commands) wpi::tunables::Remove("Tuning/" + key);
   s_commands.clear();
   s_callbacks.clear();
   s_owners.clear();

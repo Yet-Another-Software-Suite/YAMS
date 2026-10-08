@@ -632,11 +632,11 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
   return WithTelemetry("motor", verbosity);
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
-    const std::string& name, const telemetry::SmartMotorControllerTelemetryConfig& telemetryConfig) {
+    const std::string& name, telemetry::SmartMotorControllerTelemetryConfig telemetryConfig) {
   m_telemetryName = name;
   m_verbosity = TelemetryVerbosity::HIGH;
   m_telemetryConfig =
-      std::make_shared<const telemetry::SmartMotorControllerTelemetryConfig>(telemetryConfig);
+      std::make_shared<telemetry::SmartMotorControllerTelemetryConfig>(std::move(telemetryConfig));
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSubsystem(
@@ -1011,9 +1011,9 @@ wpi::cmd::SubsystemBase* SmartMotorControllerConfig::GetSubsystem() const {
   return m_subsystem;
 }
 bool SmartMotorControllerConfig::HasSubsystem() const { return m_subsystem != nullptr; }
-const telemetry::SmartMotorControllerTelemetryConfig*
+std::shared_ptr<telemetry::SmartMotorControllerTelemetryConfig>
 SmartMotorControllerConfig::GetSmartControllerTelemetryConfig() const {
-  return m_telemetryConfig.get();
+  return m_telemetryConfig;
 }
 std::optional<wpi::math::DCMotor> SmartMotorControllerConfig::GetSimMotor() const {
   return m_simMotor;

@@ -55,9 +55,8 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
-        *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+        *m_dcMotorSim, *m_smc));
 
     // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.
     wpi::units::meter_t shooterLength =
@@ -80,10 +79,10 @@ void FlyWheel::SimIterate() {
   if (auto* ss = m_smc->GetSimSupplier()) {
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->StarveWatchdog();
+    ss->StarveUpdateSim();
 
     wpi::sim::RoboRioSim::SetVInVoltage(
-        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+        wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     VisualizationUpdate();
   }
 }

@@ -58,6 +58,8 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"closedloop/setpoint/velocity", 0.0, field, true, "tunable_velocity"};
     case DoubleTelemetryField::SetpointVelocity:
       return {"closedloop/setpoint/velocity", 0.0, field, false, "velocity"};
+    case DoubleTelemetryField::SetpointForce:
+      return {"closedloop/setpoint/force", 0.0, field, false, "newtons"};
     case DoubleTelemetryField::OutputVoltage:
       return {"motor/outputVoltage", 0.0, field, false, "volts"};
     case DoubleTelemetryField::StatorCurrent:
@@ -156,6 +158,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::SetpointPosition,
            DoubleTelemetryField::TunableSetpointVelocity,
            DoubleTelemetryField::SetpointVelocity,
+           DoubleTelemetryField::SetpointForce,
            DoubleTelemetryField::OutputVoltage,
            DoubleTelemetryField::StatorCurrent,
            DoubleTelemetryField::StatorCurrentLimit,
@@ -249,6 +252,7 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::kP).Enable();
     m_doubleFields.at(DoubleTelemetryField::kI).Enable();
     m_doubleFields.at(DoubleTelemetryField::kD).Enable();
+    m_doubleFields.at(DoubleTelemetryField::SetpointForce).Enable();
   }
   if (verbosity == V::HIGH || verbosity == V::MEDIUM) {
     m_doubleFields.at(DoubleTelemetryField::OutputVoltage).Enable();
@@ -316,6 +320,30 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithSe
 }
 SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithSetpointVelocity() {
   m_doubleFields.at(DoubleTelemetryField::SetpointVelocity).Enable();
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithSetpointForce() {
+  m_doubleFields.at(DoubleTelemetryField::SetpointForce).Enable();
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCustom(
+    DoubleTelemetryField field, bool enabled) {
+  m_doubleFields.at(field).Display(enabled);
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCustom(
+    BooleanTelemetryField field, bool enabled) {
+  m_boolFields.at(field).Display(enabled);
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCustom(
+    const std::vector<DoubleTelemetryField>& fields, bool enabled) {
+  for (auto f : fields) WithCustom(f, enabled);
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCustom(
+    const std::vector<BooleanTelemetryField>& fields, bool enabled) {
+  for (auto f : fields) WithCustom(f, enabled);
   return *this;
 }
 SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithOutputVoltage() {
@@ -440,6 +468,10 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
     m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxAcceleration).Enable();
 
     if (cfg.GetVelocityTrapezoidalProfileInUse()) {
+      // A velocity profile's acceleration constraint is the jerk limit; publish it in RPM/s².
+      if (auto jerk = cfg.GetTrapMaxAccelTurns())
+        m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxJerk)
+            .SetDefaultValue(jerk->value() * 60.0);
       m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxJerk).Enable();
       m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxVelocity).Disable();
     } else if (cfg.GetLinearClosedLoopControllerUse()) {
@@ -465,15 +497,20 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   }
 
   // Exponential profile
-  if (cfg.HasExponentialProfile()) {
+  if (cfg.HasExponentialProfile() || cfg.HasLinearExponentialProfile()) {
     m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxAcceleration).Disable();
     m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxVelocity).Disable();
     m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxJerk).Disable();
     m_doubleFields.at(DoubleTelemetryField::ExponentialProfileKA).Enable();
     m_doubleFields.at(DoubleTelemetryField::ExponentialProfileKV).Enable();
     m_doubleFields.at(DoubleTelemetryField::ExponentialProfileMaxInput).Enable();
-    // ExponentialProfile constraints are not publicly accessible in WPILib C++ 2026;
-    // defaults remain at 0 and are tuned via NetworkTables.
+    if (auto kV = cfg.GetExponentialProfileKV())
+      m_doubleFields.at(DoubleTelemetryField::ExponentialProfileKV).SetDefaultValue(*kV);
+    if (auto kA = cfg.GetExponentialProfileKA())
+      m_doubleFields.at(DoubleTelemetryField::ExponentialProfileKA).SetDefaultValue(*kA);
+    if (auto maxInput = cfg.GetExponentialProfileMaxInput())
+      m_doubleFields.at(DoubleTelemetryField::ExponentialProfileMaxInput)
+          .SetDefaultValue(maxInput->value());
   }
 
   // LQR: disable PID tuning (LQR computes gains internally)

@@ -73,6 +73,9 @@ namespace yams::motorcontrollers::local {
  */
 class SparkWrapper : public SmartMotorController {
  public:
+  // Expose SetVelocity(velocity, feedforwardForce) from the base class alongside the overrides.
+  using SmartMotorController::SetVelocity;
+
   /**
    * Construct a SparkWrapper around a SPARK Max.
    *
@@ -302,7 +305,6 @@ class SparkWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
  private:
-  SmartMotorControllerConfig* m_config{nullptr};
   rev::spark::SparkBase* m_spark{nullptr};
   rev::spark::SparkClosedLoopController* m_sparkPid{nullptr};
   rev::spark::SparkRelativeEncoder* m_relEncoder{nullptr};

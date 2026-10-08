@@ -161,8 +161,7 @@ TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.SMCDutyCycle", "[ElevatorTes
   for (auto& param : AllMotorParams()) {
     DYNAMIC_SECTION(param.name) {
       auto cfg = MakeElevatorSMCConfig(param.profile, param.hardware, nullptr, param.name);
-      auto subsys = std::make_unique<TestSubsystem>();
-      cfg.WithSubsystem(subsys.get());
+      // MakeBundle sets the subsystem; WithSubsystem may only be called once.
       auto bundle = MakeBundle(param, cfg);
       bundle.smc->SetupSimulation();
       bundle.subsystem->m_testRunning = true;

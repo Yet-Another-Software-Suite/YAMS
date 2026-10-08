@@ -70,6 +70,9 @@ namespace yams::motorcontrollers::remote {
  */
 class TalonFXSWrapper : public SmartMotorController {
  public:
+  // Expose SetVelocity(velocity, feedforwardForce) from the base class alongside the overrides.
+  using SmartMotorController::SetVelocity;
+
   /** Motor type attached to the TalonFXS external motor port. */
   enum class MotorArrangement { Minion, NEO, NEO550, NEOVortex, Brushed_2Wire, Brushed_3Wire };
 
@@ -286,7 +289,6 @@ class TalonFXSWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
  private:
-  SmartMotorControllerConfig* m_config{nullptr};
   ctre::phoenix6::hardware::TalonFXS* m_talon;
   wpi::math::DCMotor m_dcMotor;
   MotorArrangement m_arrangement;

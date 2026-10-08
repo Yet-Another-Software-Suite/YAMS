@@ -99,10 +99,8 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
         m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
         std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
-    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
-        *m_elevatorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, circumference,
-        period));
+        *m_elevatorSim, *m_smc));
 
     // Build Mechanism2d window.
     double maxH = m_elevatorConfig->GetMaxHeight().value().value();
@@ -154,11 +152,11 @@ void Elevator::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->StarveWatchdog();
+    ss->StarveUpdateSim();
 
     if (!m_elevatorConfig->GetMinHeight() || GetHeight() >= *m_elevatorConfig->GetMinHeight()) {
       wpi::sim::RoboRioSim::SetVInVoltage(
-          wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+          wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     }
     VisualizationUpdate();
   }

@@ -86,9 +86,8 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    wpi::units::second_t period = m_smc->GetConfig().GetClosedLoopControlPeriod().value_or(20_ms);
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
-        *m_dcMotorSim, [this]() { return m_smc->GetDutyCycle(); }, gearing, period));
+        *m_dcMotorSim, *m_smc));
 
     // Build Mechanism2d fixed 36-inch ligament length like Java.
     constexpr double kPivotLen = 36.0 * 0.0254;  // 36 inches in metres
@@ -132,7 +131,7 @@ void Pivot::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    ss->StarveWatchdog();
+    ss->StarveUpdateSim();
 
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
     if (m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
@@ -144,7 +143,7 @@ void Pivot::SimIterate() {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMaxAngle());
     }
     wpi::sim::RoboRioSim::SetVInVoltage(
-        wpi::sim::BatterySim::Calculate({ss->GetCurrentDrawAmps()}));
+        wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     VisualizationUpdate();
   }
 }

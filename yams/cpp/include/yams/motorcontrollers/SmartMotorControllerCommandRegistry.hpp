@@ -46,7 +46,8 @@ class SmartMotorControllerCommandRegistry {
   static bool CommandExists(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem);
 
   /**
-   * Remove all commands registered for a specific subsystem instance.
+   * Remove all commands registered for a specific subsystem instance, and unpublish them from
+   * the Tuning tunables.
    *
    * Call this when a subsystem is being torn down (e.g. between tests) so
    * that a new instance with the same name can register without triggering
@@ -57,7 +58,7 @@ class SmartMotorControllerCommandRegistry {
   static void RemoveCommands(wpi::cmd::SubsystemBase* subsystem);
 
   /**
-   * Destroy all registered commands and callbacks.
+   * Destroy all registered commands and callbacks, and unpublish them from the Tuning tunables.
    *
    * Must be called before program exit while WPILib's SendableRegistry is
    * still alive, otherwise the CommandPtr destructors will attempt to lock an

@@ -54,7 +54,7 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
       dt.TransformUnit(cfg);
       dt.SetupNetworkTables(publishTable, tuningTable);
     }
-    if (dataLogName) {
+    if (dataLogName && dt.IsEnabled()) {
       dt.TransformUnit(cfg);
       dt.SetupDataLog(*dataLogName);
     }
@@ -63,7 +63,7 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
     if (nt4Enabled) {
       bt.SetupNetworkTables(publishTable, tuningTable);
     }
-    if (dataLogName) {
+    if (dataLogName && bt.IsEnabled()) {
       bt.SetupDataLog(*dataLogName);
     }
   }
@@ -127,6 +127,9 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
           else
             dt.Set(sv->value());  // turns_per_second_t → rotations/s
         }
+        break;
+      case DoubleTelemetryField::SetpointForce:
+        dt.Set(smc.GetSetpointFeedforwardForce().value_or(wpi::units::newton_t{0}).value());
         break;
       case DoubleTelemetryField::OutputVoltage:
         dt.Set(smc.GetVoltage().value());

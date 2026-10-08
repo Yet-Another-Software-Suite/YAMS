@@ -72,6 +72,9 @@ namespace yams::motorcontrollers::remote {
  */
 class TalonFXWrapper : public SmartMotorController {
  public:
+  // Expose SetVelocity(velocity, feedforwardForce) from the base class alongside the overrides.
+  using SmartMotorController::SetVelocity;
+
   /**
    * Construct a TalonFXWrapper.
    *
@@ -284,7 +287,6 @@ class TalonFXWrapper : public SmartMotorController {
   void* GetMotorControllerConfig() override;
 
  private:
-  SmartMotorControllerConfig* m_config{nullptr};
   ctre::phoenix6::hardware::TalonFX* m_talon;
   wpi::math::DCMotor m_dcMotor;
   // Whether StatusSignal refreshes should report errors; false in simulation, where status
