@@ -5,6 +5,8 @@
 package first.robot.mechanisms;
 
 import static first.robot.Constants.SwerveConstants.*;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Rotations;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -53,6 +55,13 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * current limits are set here in code.
  */
 public class Swerve implements Mechanism {
+    /** Tolerances at a waypoint the robot drives through. */
+    private static final Distance kWaypointTolerance = Meters.of(0.3);
+    private static final Angle kWaypointHeadingTolerance = Degrees.of(15);
+    /** Tolerances at a pose the robot stops at. */
+    private static final Distance kEndTolerance = Meters.of(0.05);
+    private static final Angle kEndHeadingTolerance = Degrees.of(3);
+
     private final OnboardIMU gyro = new OnboardIMU(MountOrientation.FLAT);
     private final SwerveDrive drive;
     /** Active driver input, set by the teleop opmode. */
@@ -235,6 +244,27 @@ public class Swerve implements Mechanism {
                 coroutine.yield();
             }
         }).named("Aim at Hub in Place");
+    }
+
+    /**
+     * Drive through a waypoint: drive toward a blue pose, flipped for the red alliance, ending once the robot is near
+     * it so it carries on into the next waypoint without stopping.
+     *
+     * @param bluePose Field relative {@link Pose2d}, blue alliance origin.
+     * @return {@link Command} that ends near the pose.
+     */
+    public Command driveThroughPose(Pose2d bluePose) {
+        return driveToPose(Field.forAlliance(bluePose), kWaypointTolerance, kWaypointHeadingTolerance);
+    }
+
+    /**
+     * Drive to a blue pose, flipped for the red alliance, and stop there.
+     *
+     * @param bluePose Field relative {@link Pose2d}, blue alliance origin.
+     * @return {@link Command} that ends at the pose.
+     */
+    public Command driveToPose(Pose2d bluePose) {
+        return driveToPose(Field.forAlliance(bluePose), kEndTolerance, kEndHeadingTolerance);
     }
 
     /**

@@ -40,7 +40,7 @@ for Commands v3.
 | --- | --- | --- |
 | `Robot.java`, `RobotContainer.java` | `Robot.java` | `OpModeRobot` holding the mechanisms and default commands |
 | (bindings inside `RobotContainer`) | `opmodes/teleop/HeadingTeleop.java`, `AngularVelocityTeleop.java`, `TeleopBindings.java` | `@Teleop` opmodes that each build a YAMS `SwerveInputStream` for the driver, plus the original bindings they share |
-| `deploy/pathplanner/autos/*.auto`, `paths/*.path`, named commands in `RobotContainer` | `opmodes/auto/LeftAuto.java`, `MiddleAuto.java`, `RightAuto.java`, `AutoSteps.java` | One `@Autonomous` opmode per PathPlanner auto, driving the paths with drive to pose |
+| `deploy/pathplanner/autos/*.auto`, `paths/*.path`, named commands in `RobotContainer` | `opmodes/auto/LeftAuto.java`, `MiddleAuto.java`, `RightAuto.java` | One `@Autonomous` opmode per PathPlanner auto, driving the paths with drive to pose |
 | `subsystems/SwerveSubsystem.java` | `mechanisms/SwerveMechanism.java` | YAMS `SwerveDrive`, Limelight fusion and drive to pose |
 | `subsystems/ShooterSubsystem.java`, `subsystems/IndexerSubsystem.java` | `mechanisms/ShooterMechanism.java`, `mechanisms/IndexerMechanism.java` | YAMS `FlyWheel`s |
 | `commands/IntakeCommand.java`, `OuttakeCommand.java`, `ShootAndIndexCommand.java`, `AutoShoot.java` | `commands/ShooterCommands.java` | Coroutine command factories with the same logic |
@@ -58,14 +58,15 @@ rotationTolerance)`:
 - Every path in these autos was a single segment from one waypoint to the next, so each path is one
   drive to pose to the path's end, facing the path's goal rotation. The poses are written in each
   opmode, blue-origin, and flipped for the red alliance with `AllianceFlipUtil` when the step runs.
-- A path end the auto drives straight on from uses a 0.3 m / 15 degree tolerance, so the robot does
-  not stop there. A path end the robot shoots from, or the last one, uses 0.05 m / 3 degrees.
+- A path end the auto drives straight on from uses `SwerveMechanism.driveThroughPose`, with a 0.3 m /
+  15 degree tolerance, so the robot does not stop there. A path end the robot shoots from, or the last
+  one, uses `SwerveMechanism.driveToPose`, with 0.05 m / 3 degrees.
 - The autos reset odometry to the start of their first path, as `resetOdom` did, through
   `SwerveMechanism.resetPose`.
-- The named commands are called directly: `ShootBalls` is `AutoSteps.shootBalls` (shoot at the
+- The named commands are called directly: `ShootBalls` is each opmode's `shootBalls` (shoot at the
   autonomous RPM for 4 s), `Stop` is `ShooterCommands.stopCommand`, and `wait` is `coroutine.wait`.
   `ShootBallsOdom` was registered but no auto used it.
-- `StartIntake` event markers became `AutoSteps.driveIntaking`, which runs the intake between two
+- `StartIntake` event markers became each opmode's `driveIntaking`, which runs the intake between two
   fractions of the path, measured by the robot's distance to the path's end, and stops it at the end
   of the path at the latest.
 - The drive config gains a translation controller with the same P of 5 as the original

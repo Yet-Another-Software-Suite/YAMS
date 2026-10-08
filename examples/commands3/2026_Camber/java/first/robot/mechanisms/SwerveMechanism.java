@@ -6,6 +6,7 @@ package first.robot.mechanisms;
 
 import static first.robot.Constants.SwerveDrive.Modules.*;
 import static org.wpilib.units.Units.Celsius;
+import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Fahrenheit;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
@@ -64,6 +65,13 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  */
 public class SwerveMechanism implements Mechanism
 {
+
+  /** Tolerances at a waypoint the robot drives through, into the next one. */
+  private static final Distance kWaypointTranslationTolerance = Meters.of(0.3);
+  private static final Angle    kWaypointRotationTolerance    = Degrees.of(15);
+  /** Tolerances at a pose the robot stops at. */
+  private static final Distance kStopTranslationTolerance     = Meters.of(0.05);
+  private static final Angle    kStopRotationTolerance        = Degrees.of(3);
 
   SwerveDrive swerveDrive;
   /** Active driver input, set by the teleop opmode. */
@@ -320,6 +328,29 @@ public class SwerveMechanism implements Mechanism
   public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance)
   {
     return swerveDrive.driveToPose(pose, translationTolerance, rotationTolerance);
+  }
+
+  /**
+   * Drive through a waypoint: drive toward a blue-origin pose, flipped for the red alliance, ending once the robot is
+   * near it so it carries on into the next waypoint without stopping.
+   *
+   * @param bluePose Field relative, blue-origin {@link Pose2d}.
+   * @return {@link Command} that ends near the pose.
+   */
+  public Command driveThroughPose(Pose2d bluePose)
+  {
+    return driveToPose(AllianceFlipUtil.apply(bluePose), kWaypointTranslationTolerance, kWaypointRotationTolerance);
+  }
+
+  /**
+   * Drive to a blue-origin pose, flipped for the red alliance, and stop there.
+   *
+   * @param bluePose Field relative, blue-origin {@link Pose2d}.
+   * @return {@link Command} that ends at the pose.
+   */
+  public Command driveToPose(Pose2d bluePose)
+  {
+    return driveToPose(AllianceFlipUtil.apply(bluePose), kStopTranslationTolerance, kStopRotationTolerance);
   }
 
   /**

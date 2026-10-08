@@ -19,6 +19,7 @@ import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.system.Timer;
 import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Time;
 import yams.commands3.config.SmartMotorControllerConfig;
 import yams.commands3.mechanisms.Arm;
 import yams.core.gearing.MechanismGearing;
@@ -126,6 +127,23 @@ public class IntakeArm implements Mechanism {
     /** Autonomous "ArmDown": drop the intake back down after {@link #wiggleUp()}. */
     public Command wiggleDown() {
         return moveTo(kArmWiggleDown, 1.2, "IntakeArm Wiggle Down");
+    }
+
+    /**
+     * Raise and lower the intake a number of times to push fuel toward the indexer while shooting in autonomous.
+     *
+     * @param times How many times to raise and lower the intake.
+     * @param delay Wait before the first raise.
+     * @return {@link Command} that ends after the last lower.
+     */
+    public Command wiggle(int times, Time delay) {
+        return Command.noRequirements(coroutine -> {
+            coroutine.wait(delay);
+            for (int i = 0; i < times; i++) {
+                coroutine.await(wiggleUp());
+                coroutine.await(wiggleDown());
+            }
+        }).named("Wiggle Intake Arm");
     }
 
     /**
