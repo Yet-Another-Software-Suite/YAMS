@@ -8,6 +8,7 @@
 
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
+#include <thrifty/nova/Nova.h>
 
 #include <atomic>
 #include <stdexcept>
@@ -24,6 +25,7 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/local/NovaWrapper.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXWrapper.hpp"
@@ -58,7 +60,7 @@ inline int NextReservedCanId() {
   return id;
 }
 
-enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX };
+enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX, Nova };
 enum class ProfileType { None, Trapezoid, Exponential };
 
 struct MotorTestParam {
@@ -74,6 +76,7 @@ struct HardwareBundle {
   std::unique_ptr<rev::spark::SparkFlex> sparkFlex;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
+  std::unique_ptr<thrifty::Nova> nova;
 
   // Config must outlive the wrapper; stored here so its address stays stable.
   SmartMotorControllerConfig cfg;
@@ -109,6 +112,8 @@ inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
       return wpi::math::DCMotor::NEO(2);
     case HardwareType::TalonFX:
       return wpi::math::DCMotor::KrakenX60(1);
+    case HardwareType::Nova:
+      return wpi::math::DCMotor::NEO(1);
   }
   return wpi::math::DCMotor::NEO(1);
 }
@@ -156,6 +161,13 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
                                               MotorForHardware(param.hardware), &bundle.cfg);
       break;
     }
+    case HardwareType::Nova: {
+      // Thrifty devices take a bus and a CAN ID; only Novas use the Thrifty simulation on bus 0.
+      bundle.nova = std::make_unique<thrifty::Nova>(0, canId, thrifty::Motor::NEO);
+      bundle.smc = new local::NovaWrapper(bundle.nova.get(), MotorForHardware(param.hardware),
+                                          &bundle.cfg);
+      break;
+    }
   }
 
   bundle.subsystem->SetSMC(bundle.smc);
@@ -178,7 +190,7 @@ inline void CloseBundle(HardwareBundle& b) {
 inline std::vector<MotorTestParam> AllMotorParams() {
   std::vector<MotorTestParam> params;
   for (auto hw : {HardwareType::SparkMax, HardwareType::SparkFlex, HardwareType::TalonFXS,
-                  HardwareType::TalonFX}) {
+                  HardwareType::TalonFX, HardwareType::Nova}) {
     for (auto prof : {ProfileType::None, ProfileType::Trapezoid, ProfileType::Exponential}) {
       std::string hwName;
       switch (hw) {
@@ -193,6 +205,9 @@ inline std::vector<MotorTestParam> AllMotorParams() {
           break;
         case HardwareType::TalonFX:
           hwName = "TalonFX";
+          break;
+        case HardwareType::Nova:
+          hwName = "Nova";
           break;
       }
       std::string profName;
