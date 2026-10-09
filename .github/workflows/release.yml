@@ -331,10 +331,9 @@ jobs:
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
 
-      # Builds the release description: a "What's new" list of every commit since the previous
-      # full (non-prerelease, non-draft) release, followed by installation instructions. GitHub's
-      # generated notes (merged PRs, new contributors, full changelog link) are appended after this
-      # by --generate-notes.
+      # Builds the release description: GitHub's generated notes (merged PRs, new contributors, full
+      # changelog link), then a "What's new" list of every commit since the previous full
+      # (non-prerelease, non-draft) release, then installation instructions.
       - name: Write release notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -358,8 +357,12 @@ jobs:
             RANGE="$TAG"
             SINCE=""
           fi
+          # The same notes `gh release create --generate-notes` would add, which it puts after ours.
+          GENERATED=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
+            -f tag_name="$TAG" --jq .body)
 
           {
+            printf '%s\n\n' "$GENERATED"
             echo "## What's new"
             echo
             if [ -n "$SINCE" ]; then
@@ -437,7 +440,6 @@ jobs:
           gh release create "$TAG" \
             --title "YAMS v${{ inputs.releaseVersion }}" \
             --notes-file release-notes.md \
-            --generate-notes \
             $RELEASE_FLAGS \
             release-artifacts/*
 
