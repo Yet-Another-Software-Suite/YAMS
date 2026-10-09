@@ -3,14 +3,15 @@
 
 #pragma once
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
 #include <rev/SparkMax.h>
-#include <units/angular_velocity.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/hardware/bus/CANPort.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <functional>
 #include <optional>
@@ -37,22 +38,22 @@
 // Setpoint-only variants (SetVelocitySetpoint, SetDutyCycleSetpoint,
 // SetSurfaceSpeedSetpoint) write a setpoint directly without wrapping in a
 // Command -- useful inside a larger sequential command.
-class ShooterSubsystem : public frc2::SubsystemBase {
+class ShooterSubsystem : public wpi::cmd::SubsystemBase {
  public:
   ShooterSubsystem();
 
-  units::degrees_per_second_t GetVelocity() const;
-  bool ReadyToShoot(units::degrees_per_second_t tolerance) const;
+  wpi::units::degrees_per_second_t GetVelocity() const;
+  bool ReadyToShoot(wpi::units::degrees_per_second_t tolerance) const;
 
-  frc2::CommandPtr SetVelocity(units::degrees_per_second_t speed);
-  frc2::CommandPtr SetVelocity(std::function<units::degrees_per_second_t()> speed);
-  frc2::CommandPtr Set(double dutyCycle);
-  frc2::CommandPtr Set(std::function<double()> dutyCycle);
+  wpi::cmd::CommandPtr SetVelocity(wpi::units::degrees_per_second_t speed);
+  wpi::cmd::CommandPtr SetVelocity(std::function<wpi::units::degrees_per_second_t()> speed);
+  wpi::cmd::CommandPtr Set(double dutyCycle);
+  wpi::cmd::CommandPtr Set(std::function<double()> dutyCycle);
 
   // Write a setpoint directly; caller is responsible for scheduling/requirements.
-  void SetVelocitySetpoint(units::degrees_per_second_t speed);
+  void SetVelocitySetpoint(wpi::units::degrees_per_second_t speed);
   void SetDutyCycleSetpoint(double dutyCycle);
-  void SetSurfaceSpeedSetpoint(units::meters_per_second_t speed);
+  void SetSurfaceSpeedSetpoint(wpi::units::meters_per_second_t speed);
 
   void Periodic() override;
   void SimulationPeriodic() override;
@@ -60,8 +61,8 @@ class ShooterSubsystem : public frc2::SubsystemBase {
  private:
   // Both motors must be declared before m_motorConfig so their addresses are
   // stable when WithFollowers stores &m_flywheelMotor2 in std::any.
-  rev::spark::SparkMax m_flywheelMotor1{3, rev::spark::SparkMax::MotorType::kBrushless};
-  rev::spark::SparkMax m_flywheelMotor2{4, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_flywheelMotor1{wpi::CANPort::CAN_S0, 3, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_flywheelMotor2{wpi::CANPort::CAN_S0, 4, rev::spark::SparkMax::MotorType::kBrushless};
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   // SparkWrapper constructed in .cpp after config is fully built; std::optional

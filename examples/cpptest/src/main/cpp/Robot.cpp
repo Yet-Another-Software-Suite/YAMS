@@ -3,7 +3,7 @@
 
 #include "Robot.h"
 
-#include <frc2/command/CommandScheduler.h>
+#include <wpi/commands2/CommandScheduler.hpp>
 
 Robot::Robot() {}
 
@@ -15,7 +15,7 @@ Robot::Robot() {}
  * <p> This runs after the mode specific periodic functions, but before
  * LiveWindow and SmartDashboard integrated updating.
  */
-void Robot::RobotPeriodic() { frc2::CommandScheduler::GetInstance().Run(); }
+void Robot::RobotPeriodic() { wpi::cmd::CommandScheduler::GetInstance().Run(); }
 
 /**
  * This function is called once each time the robot enters Disabled mode. You
@@ -34,7 +34,7 @@ void Robot::AutonomousInit() {
   m_autonomousCommand = m_container.GetAutonomousCommand();
 
   if (m_autonomousCommand) {
-    frc2::CommandScheduler::GetInstance().Schedule(m_autonomousCommand.value());
+    wpi::cmd::CommandScheduler::GetInstance().Schedule(m_autonomousCommand.value());
   }
 }
 
@@ -55,12 +55,12 @@ void Robot::TeleopInit() {
  */
 void Robot::TeleopPeriodic() {}
 
-void Robot::TestInit() { frc2::CommandScheduler::GetInstance().CancelAll(); }
+void Robot::UtilityInit() { wpi::cmd::CommandScheduler::GetInstance().CancelAll(); }
 
 /**
- * This function is called periodically during test mode.
+ * This function is called periodically during utility mode.
  */
-void Robot::TestPeriodic() {}
+void Robot::UtilityPeriodic() {}
 
 /**
  * This function is called once when the robot is first started up.
@@ -73,5 +73,5 @@ void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 
 #ifndef RUNNING_FRC_TESTS
-int main() { return frc::StartRobot<Robot>(); }
+int main() { return wpi::StartRobot<Robot>(); }
 #endif

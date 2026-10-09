@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/angle.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/angle.hpp>
 
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <optional>
@@ -26,21 +26,21 @@
 // Commands exposed:
 //   HoodCmd(dutycycle)   -- open-loop duty cycle, for tuning/override
 //   SetAngle(angle)      -- closed-loop position command, runs until interrupted
-class HoodSubsystem : public frc2::SubsystemBase {
+class HoodSubsystem : public wpi::cmd::SubsystemBase {
  public:
   HoodSubsystem();
 
   // Direct setpoint write -- use when you need non-command periodic control.
-  void SetAngleSetpoint(units::degree_t angle);
+  void SetAngleSetpoint(wpi::units::degree_t angle);
 
-  frc2::CommandPtr HoodCmd(double dutycycle);        // open-loop override; runs continuously
-  frc2::CommandPtr SetAngle(units::degree_t angle);  // closed-loop; ends when interrupted
+  wpi::cmd::CommandPtr HoodCmd(double dutycycle);        // open-loop override; runs continuously
+  wpi::cmd::CommandPtr SetAngle(wpi::units::degree_t angle);  // closed-loop; ends when interrupted
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::TalonFXS m_hoodMotor{9};  // CAN ID 9
+  ctre::phoenix6::hardware::TalonFXS m_hoodMotor{9, ctre::phoenix6::CANBus{}};  // CAN ID 9
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   // optional because TalonFXSWrapper takes a pointer to m_hoodMotor, which must be

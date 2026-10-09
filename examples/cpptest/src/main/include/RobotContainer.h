@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/button/CommandXboxController.h>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/button/CommandXboxController.hpp>
 
 #include "Constants.h"
 #include "subsystems/TurretSubsystem.h"
@@ -22,10 +22,10 @@ class RobotContainer {
  public:
   RobotContainer();
 
-  frc2::CommandPtr GetAutonomousCommand();
+  wpi::cmd::CommandPtr GetAutonomousCommand();
 
  private:
-  frc2::CommandXboxController m_xboxController{OperatorConstants::kDriverControllerPort};
+  wpi::cmd::CommandXboxController m_xboxController{OperatorConstants::kDriverControllerPort};
 
   // TurretSubsystem m_turret;
 

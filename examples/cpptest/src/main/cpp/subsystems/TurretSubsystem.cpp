@@ -7,14 +7,14 @@
 
 #include "subsystems/TurretSubsystem.h"
 
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Transform2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/system/plant/DCMotor.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Transform2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -28,8 +28,8 @@ using Cfg = SmartMotorControllerConfig;
 TurretSubsystem::TurretSubsystem()
     // Pivot is 1.5 ft behind (-X) and 0.5 ft above (+Z) the robot origin; no yaw offset
     // at construction -- the turret's angular setpoint is relative to the robot heading.
-    : m_roboToTurret{frc::Translation3d{units::foot_t{-1.5}, units::foot_t{0}, units::foot_t{0.5}},
-                     frc::Rotation3d{}} {
+    : m_roboToTurret{wpi::math::Translation3d{wpi::units::foot_t{-1.5}, wpi::units::foot_t{0}, wpi::units::foot_t{0.5}},
+                     wpi::math::Rotation3d{}} {
   m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()
       // kP=0 placeholder -- the turret is not yet PID-tuned. Set kP first; add kD for
@@ -47,63 +47,63 @@ TurretSubsystem::TurretSubsystem()
       // WithFeedforward(ArmFeedforward) on a turret: kS=0.5 V overcomes static friction at the
       // worm/gear interface; kV=5.0 V/(turn/s) is the velocity gain for tracking; kA=0 (no accel
       // FF yet); kG=0 because the turret rotates in the horizontal plane -- gravity does no work.
-      .WithFeedforward(frc::ArmFeedforward{units::volt_t{0.5}, units::volt_t{0.0},
-                                           units::unit_t<frc::ArmFeedforward::kv_unit>{5.0},
-                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0}})
+      .WithFeedforward(wpi::math::ArmFeedforward{wpi::units::volt_t{0.5}, wpi::units::volt_t{0.0},
+                                           wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{5.0},
+                                           wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0}})
       // Turret faces forward (0 deg = robot heading) at power-on. If the turret has a
       // hard-stop home position, replace 0 with the measured home angle.
-      .WithStartingPosition(units::degree_t{0})
+      .WithStartingPosition(wpi::units::degree_t{0})
       .WithTelemetry("TurretMotor", Cfg::TelemetryVerbosity::HIGH)
       // Stator limit (output side): 60 A caps peak torque on the output shaft.
       // Using stator (not supply) here because we care about peak force, not battery draw.
-      .WithStatorCurrentLimit(units::ampere_t{60});
+      .WithStatorCurrentLimit(wpi::units::ampere_t{60});
 
   // KrakenX60(1): single-motor sim model for the turret. The (1) is the motor count
   // used to average free-speed and stall torque -- leave it at 1 for a single-motor drive.
-  m_motor.emplace(&m_talonFX, frc::DCMotor::KrakenX60(1), &m_motorConfig);
+  m_motor.emplace(&m_talonFX, wpi::math::DCMotor::KrakenX60(1), &m_motorConfig);
 
   // Soft limits span a full revolution in each direction. This allows 360-degree tracking
   // without a hard stop but prevents winding the cable harness past two full turns.
-  m_pivotConfig.WithMinAngle(units::degree_t{-360})
-      .WithMaxAngle(units::degree_t{360})
+  m_pivotConfig.WithMinAngle(wpi::units::degree_t{-360})
+      .WithMaxAngle(wpi::units::degree_t{360})
       .WithTelemetryName("Turret");
 
   m_turret.emplace(&m_pivotConfig, &m_motor.value());
 }
 
-frc::Pose2d TurretSubsystem::GetPose(frc::Pose2d robotPose) const {
+wpi::math::Pose2d TurretSubsystem::GetPose(wpi::math::Pose2d robotPose) const {
   // Projects the robot-to-turret 3D transform down to 2D for use with field-relative
   // pose estimators. The Z component (height) is discarded; only XY offset and yaw matter.
-  return robotPose.TransformBy(frc::Transform2d{m_roboToTurret.Translation().ToTranslation2d(),
+  return robotPose.TransformBy(wpi::math::Transform2d{m_roboToTurret.Translation().ToTranslation2d(),
                                                 m_roboToTurret.Rotation().ToRotation2d()});
 }
 
-frc::ChassisSpeeds TurretSubsystem::GetVelocity(frc::ChassisSpeeds robotVelocity,
-                                                units::degree_t robotAngle) {
+wpi::math::ChassisVelocities TurretSubsystem::GetVelocity(wpi::math::ChassisVelocities robotVelocity,
+                                                wpi::units::degree_t robotAngle) {
   // Compute the linear velocity at the turret pivot due to the robot's own rotation.
   // v = omega x r: in 2D, vx = -omega * ry, vy = omega * rx (right-hand cross product).
   // rWorld is the pivot offset rotated to the field frame so the cross product is correct.
   auto rRobot = m_roboToTurret.Translation().ToTranslation2d();
-  auto rWorld = rRobot.RotateBy(frc::Rotation2d{robotAngle});
+  auto rWorld = rRobot.RotateBy(wpi::math::Rotation2d{robotAngle});
 
   double omega = robotVelocity.omega.value();  // rad/s
 
   double vRotX = -omega * rWorld.Y().value();
   double vRotY = omega * rWorld.X().value();
 
-  units::meters_per_second_t turretVx{robotVelocity.vx.value() + vRotX};
-  units::meters_per_second_t turretVy{robotVelocity.vy.value() + vRotY};
+  wpi::units::meters_per_second_t turretVx{robotVelocity.vx.value() + vRotX};
+  wpi::units::meters_per_second_t turretVy{robotVelocity.vy.value() + vRotY};
 
   // Add the turret's own rotational velocity (deg/s -> rad/s) to the robot yaw rate
   // so turret-relative omega is correct for a shooter that follows the turret barrel.
   double mecVelDegPerS = m_motor->GetMechanismVelocity().value();
   double mecVelRadPerS = mecVelDegPerS * std::numbers::pi / 180.0;
-  units::radians_per_second_t turretOmega{omega + mecVelRadPerS};
+  wpi::units::radians_per_second_t turretOmega{omega + mecVelRadPerS};
 
-  return frc::ChassisSpeeds{turretVx, turretVy, turretOmega};
+  return wpi::math::ChassisVelocities{turretVx, turretVy, turretOmega};
 }
 
-void TurretSubsystem::SetAngleSetpoint(units::degree_t angle) {
+void TurretSubsystem::SetAngleSetpoint(wpi::units::degree_t angle) {
   // Direct setpoint write -- useful for auto-aim from Periodic without wrapping in a command.
   // If a SetAngle() command is also running, its next iteration will overwrite this.
   m_turret->SetMechanismPositionSetpoint(angle);
@@ -113,7 +113,7 @@ void TurretSubsystem::Periodic() { m_turret->UpdateTelemetry(); }
 
 void TurretSubsystem::SimulationPeriodic() { m_turret->SimIterate(); }
 
-frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) {
+wpi::cmd::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) {
   // Bypasses the Pivot mechanism and writes duty-cycle directly to the motor wrapper.
   // The "HIIII" cout is debug scaffolding -- remove before competition.
   return Run([this, dutycycle] {
@@ -122,4 +122,4 @@ frc2::CommandPtr TurretSubsystem::TurretCmd(double dutycycle) {
   });
 }
 
-frc2::CommandPtr TurretSubsystem::SetAngle(units::degree_t angle) { return m_turret->Run(angle); }
+wpi::cmd::CommandPtr TurretSubsystem::SetAngle(wpi::units::degree_t angle) { return m_turret->Run(angle); }

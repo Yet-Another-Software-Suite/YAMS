@@ -3,15 +3,15 @@
 
 #include "subsystems/SwerveSubsystem.h"
 
-#include <frc/controller/PIDController.h>
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/Commands.h>
-#include <units/angle.h>
-#include <units/current.h>
-#include <units/length.h>
+#include <wpi/math/controller/PIDController.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/Commands.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
 
 #include <numbers>
 #include <string>
@@ -37,7 +37,7 @@ using Cfg = SmartMotorControllerConfig;
 void SwerveSubsystem::SetupModule(
     rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
     ctre::phoenix6::hardware::CANcoder& absoluteEncoder, const std::string& moduleName,
-    frc::Translation2d location,
+    wpi::math::Translation2d location,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
     std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
     SmartMotorControllerConfig& driveCfgMember, SmartMotorControllerConfig& azimuthCfgMember,
@@ -56,10 +56,10 @@ void SwerveSubsystem::SetupModule(
   // kP=50 with kD=4 gives a stiff velocity loop on the drive.  kD suppresses overshoot
   // when the module snaps to a new wheel speed; tune kP down if wheels chatter at low speed.
   driveCfgMember.WithSubsystem(this)
-      .WithMechanismCircumference(units::meter_t{4.0 * 0.0254 * std::numbers::pi})
+      .WithMechanismCircumference(wpi::units::meter_t{4.0 * 0.0254 * std::numbers::pi})
       .WithFeedback(50, 0, 4)
       .WithMotorGearing(driveGearing)
-      .WithStatorCurrentLimit(units::ampere_t{40})
+      .WithStatorCurrentLimit(wpi::units::ampere_t{40})
       .WithTelemetry("driveMotor", Cfg::TelemetryVerbosity::HIGH);
 
   // Same PID shape for the azimuth.  No feedforward needed because the NEO holds angle
@@ -67,13 +67,13 @@ void SwerveSubsystem::SetupModule(
   azimuthCfgMember.WithSubsystem(this)
       .WithFeedback(50, 0, 4)
       .WithMotorGearing(azimuthGearing)
-      .WithStatorCurrentLimit(units::ampere_t{20})
+      .WithStatorCurrentLimit(wpi::units::ampere_t{20})
       .WithTelemetry("angleMotor", Cfg::TelemetryVerbosity::HIGH);
 
   // SparkWrapper takes pointers; pass the address of the member configs and motors,
   // which have stable lifetime as subsystem members.
-  driveSMC.emplace(drive, frc::DCMotor::NEO(1), &driveCfgMember);
-  azimuthSMC.emplace(azimuth, frc::DCMotor::NEO(1), &azimuthCfgMember);
+  driveSMC.emplace(drive, wpi::math::DCMotor::NEO(1), &driveCfgMember);
+  azimuthSMC.emplace(azimuth, wpi::math::DCMotor::NEO(1), &azimuthCfgMember);
 
   // CANcoder: absolute magnetic encoder that gives the true wheel angle in turns on every
   // power cycle.  The lambda converts CANcoder turns to degrees and is called by
@@ -85,8 +85,8 @@ void SwerveSubsystem::SetupModule(
   auto* encoderPtr = &absoluteEncoder;
   moduleCfgMember = SwerveModuleConfig{&driveSMC.value(), &azimuthSMC.value()};
   moduleCfgMember
-      .WithAbsoluteEncoder([encoderPtr]() -> units::degree_t {
-        return units::degree_t{units::turn_t{encoderPtr->GetAbsolutePosition().GetValue()}};
+      .WithAbsoluteEncoder([encoderPtr]() -> wpi::units::degree_t {
+        return wpi::units::degree_t{wpi::units::turn_t{encoderPtr->GetAbsolutePosition().GetValue()}};
       })
       .WithTelemetry(moduleName, Cfg::TelemetryVerbosity::HIGH)
       .WithLocation(location)
@@ -101,16 +101,16 @@ SwerveSubsystem::SwerveSubsystem() {
   // All four corners are 24 in from centre in each axis, so the wheelbase and track
   // width are both 48 in.  Adjust these if the frame dimensions change.
   SetupModule(&m_flDrive, &m_flAzimuth, m_flEncoder, "frontleft",
-              frc::Translation2d{units::inch_t{24}, units::inch_t{24}}, m_flDriveSMC,
+              wpi::math::Translation2d{wpi::units::inch_t{24}, wpi::units::inch_t{24}}, m_flDriveSMC,
               m_flAzimuthSMC, m_flDriveCfg, m_flAzimuthCfg, m_flModuleCfg, m_fl);
   SetupModule(&m_frDrive, &m_frAzimuth, m_frEncoder, "frontright",
-              frc::Translation2d{units::inch_t{24}, units::inch_t{-24}}, m_frDriveSMC,
+              wpi::math::Translation2d{wpi::units::inch_t{24}, wpi::units::inch_t{-24}}, m_frDriveSMC,
               m_frAzimuthSMC, m_frDriveCfg, m_frAzimuthCfg, m_frModuleCfg, m_fr);
   SetupModule(&m_blDrive, &m_blAzimuth, m_blEncoder, "backleft",
-              frc::Translation2d{units::inch_t{-24}, units::inch_t{24}}, m_blDriveSMC,
+              wpi::math::Translation2d{wpi::units::inch_t{-24}, wpi::units::inch_t{24}}, m_blDriveSMC,
               m_blAzimuthSMC, m_blDriveCfg, m_blAzimuthCfg, m_blModuleCfg, m_bl);
   SetupModule(&m_brDrive, &m_brAzimuth, m_brEncoder, "backright",
-              frc::Translation2d{units::inch_t{-24}, units::inch_t{-24}}, m_brDriveSMC,
+              wpi::math::Translation2d{wpi::units::inch_t{-24}, wpi::units::inch_t{-24}}, m_brDriveSMC,
               m_brAzimuthSMC, m_brDriveCfg, m_brAzimuthCfg, m_brModuleCfg, m_br);
 
   // m_driveConfig is a subsystem member so its address is stable; SwerveDrive<4> takes a
@@ -124,47 +124,47 @@ SwerveSubsystem::SwerveSubsystem() {
   // placeholder -- tune these in auto by checking overshoot and settling time.
   m_driveConfig.WithSubsystem(this)
       .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
-      .WithGyro([gyroPtr = &m_gyro]() -> units::degree_t {
-        return units::degree_t{units::turn_t{gyroPtr->GetYaw().GetValue()}};
+      .WithGyro([gyroPtr = &m_gyro]() -> wpi::units::degree_t {
+        return wpi::units::degree_t{wpi::units::turn_t{gyroPtr->GetYaw().GetValue()}};
       })
-      .WithStartingPose(frc::Pose2d{units::meter_t{0}, units::meter_t{0}, frc::Rotation2d{}})
-      .WithTranslationController(frc::PIDController{1, 0, 0})
-      .WithRotationController(frc::PIDController{1, 0, 0});
+      .WithStartingPose(wpi::math::Pose2d{wpi::units::meter_t{0}, wpi::units::meter_t{0}, wpi::math::Rotation2d{}})
+      .WithTranslationController(wpi::math::PIDController{1, 0, 0})
+      .WithRotationController(wpi::math::PIDController{1, 0, 0});
 
   m_drive.emplace(&m_driveConfig);
 }
 
 // Constant-speed command: captures the ChassisSpeeds by value so the command keeps
 // driving at the speed it was given even if the caller changes its local variable.
-frc2::CommandPtr SwerveSubsystem::SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds speeds) {
+wpi::cmd::CommandPtr SwerveSubsystem::SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities speeds) {
   return Run([this, speeds] { m_drive->SetRobotRelativeChassisSpeeds(speeds); });
 }
 
 // DriveToPose uses the translation and rotation PID controllers set in the constructor.
 // It drives field-relative using pose-estimator feedback; vision measurements improve accuracy.
-frc2::CommandPtr SwerveSubsystem::DriveToPose(frc::Pose2d pose) {
+wpi::cmd::CommandPtr SwerveSubsystem::DriveToPose(wpi::math::Pose2d pose) {
   return m_drive->DriveToPose(pose);
 }
 
 // Accepts a supplier so the caller can update speeds each loop (e.g. from a joystick).
-frc2::CommandPtr SwerveSubsystem::DriveRobotRelative(
-    std::function<frc::ChassisSpeeds()> speedsSupplier) {
+wpi::cmd::CommandPtr SwerveSubsystem::DriveRobotRelative(
+    std::function<wpi::math::ChassisVelocities()> speedsSupplier) {
   return m_drive->Drive(speedsSupplier);
 }
 
 // X-lock: points all modules toward the centre of the robot to resist pushing.
 // Useful as a defensive command bound to a button.
-frc2::CommandPtr SwerveSubsystem::Lock() {
+wpi::cmd::CommandPtr SwerveSubsystem::Lock() {
   return Run([this] { m_drive->LockPose(); });
 }
 
-frc::Pose2d SwerveSubsystem::GetPose() { return m_drive->GetPose(); }
+wpi::math::Pose2d SwerveSubsystem::GetPose() { return m_drive->GetPose(); }
 
-frc::ChassisSpeeds SwerveSubsystem::GetFieldOrientedChassisSpeed() {
+wpi::math::ChassisVelocities SwerveSubsystem::GetFieldOrientedChassisSpeed() {
   return m_drive->GetFieldRelativeSpeed();
 }
 
-units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle(); }
+wpi::units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle(); }
 
 // Builds a SwerveInputStream from an Xbox controller with competition-ready defaults:
 //   - Left stick Y -> forward/back (negated: push stick forward = positive X)
@@ -176,7 +176,7 @@ units::degree_t SwerveSubsystem::GetGyroAngle() { return m_drive->GetGyroAngle()
 //   - WithAllianceRelativeControl: rotates the field frame so forward is always away from
 //     your alliance wall regardless of which side of the field you start on
 SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
-    frc2::CommandXboxController& controller) {
+    wpi::cmd::CommandXboxController& controller) {
   return SwerveInputStream<4>::Of(
              m_drive.value(), [&controller] { return -controller.GetLeftY(); },
              [&controller] { return -controller.GetLeftX(); })
@@ -189,7 +189,7 @@ SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
 
 // m_driveStream must outlive the command returned here; it is stored as a subsystem member
 // so the lambdas inside SwerveDrive::Drive remain valid for the command's lifetime.
-frc2::CommandPtr SwerveSubsystem::DriveCommand(frc2::CommandXboxController& controller) {
+wpi::cmd::CommandPtr SwerveSubsystem::DriveCommand(wpi::cmd::CommandXboxController& controller) {
   m_driveStream.emplace(MakeDriveInputStream(controller));
   return m_drive->Drive([this] { return (*m_driveStream)(); });
 }

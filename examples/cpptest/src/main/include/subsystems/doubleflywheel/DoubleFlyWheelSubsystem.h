@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/velocity.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <functional>
@@ -32,25 +32,25 @@
 //   SetVoltage(lower, upper)       -- fixed-voltage open loop
 //   SetVelocity(lower, upper)      -- closed-loop deg/s, static values
 //   SetVelocity(lowerFn, upperFn)  -- closed-loop deg/s, live suppliers (e.g. from Dashboard)
-class DoubleFlyWheelSubsystem : public frc2::SubsystemBase {
+class DoubleFlyWheelSubsystem : public wpi::cmd::SubsystemBase {
  public:
   DoubleFlyWheelSubsystem();
 
-  frc2::CommandPtr SetDutyCycle(double lower, double upper);
-  frc2::CommandPtr SetVoltage(units::volt_t lower, units::volt_t upper);
+  wpi::cmd::CommandPtr SetDutyCycle(double lower, double upper);
+  wpi::cmd::CommandPtr SetVoltage(wpi::units::volt_t lower, wpi::units::volt_t upper);
   // Static setpoints -- command runs until interrupted.
-  frc2::CommandPtr SetVelocity(units::degrees_per_second_t lower,
-                               units::degrees_per_second_t upper);
+  wpi::cmd::CommandPtr SetVelocity(wpi::units::degrees_per_second_t lower,
+                               wpi::units::degrees_per_second_t upper);
   // Supplier overload -- re-evaluates each loop tick; useful for tunable Dashboard targets.
-  frc2::CommandPtr SetVelocity(std::function<units::degrees_per_second_t()> lower,
-                               std::function<units::degrees_per_second_t()> upper);
+  wpi::cmd::CommandPtr SetVelocity(std::function<wpi::units::degrees_per_second_t()> lower,
+                               std::function<wpi::units::degrees_per_second_t()> upper);
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::TalonFX m_talonLower{4};  // CAN ID 4, Kraken X60
-  ctre::phoenix6::hardware::TalonFX m_talonUpper{6};  // CAN ID 6, Kraken X60
+  ctre::phoenix6::hardware::TalonFX m_talonLower{4, ctre::phoenix6::CANBus{}};  // CAN ID 4, Kraken X60
+  ctre::phoenix6::hardware::TalonFX m_talonUpper{6, ctre::phoenix6::CANBus{}};  // CAN ID 6, Kraken X60
 
   yams::motorcontrollers::SmartMotorControllerConfig m_lowerConfig;
   yams::motorcontrollers::SmartMotorControllerConfig m_upperConfig;

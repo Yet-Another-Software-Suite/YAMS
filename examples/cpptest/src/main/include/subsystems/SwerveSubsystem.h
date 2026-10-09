@@ -3,18 +3,19 @@
 
 #pragma once
 
-#include <frc/controller/PIDController.h>
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <frc2/command/button/CommandXboxController.h>
+#include <wpi/math/controller/PIDController.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Translation2d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/commands2/button/CommandXboxController.hpp>
 #include <rev/SparkMax.h>
-#include <units/angle.h>
-#include <units/length.h>
+#include <wpi/hardware/bus/CANPort.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/length.hpp>
 
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/Pigeon2.hpp>
@@ -57,14 +58,14 @@
 //   DriveRobotRelative(supplier)          -- continuous robot-relative drive from a supplier
 //   Lock()                                -- X-lock all modules in place
 //   DriveCommand(controller)              -- field-oriented teleop drive from an XboxController
-class SwerveSubsystem : public frc2::SubsystemBase {
+class SwerveSubsystem : public wpi::cmd::SubsystemBase {
  public:
   SwerveSubsystem();
 
-  frc2::CommandPtr SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds speeds);
-  frc2::CommandPtr DriveToPose(frc::Pose2d pose);
-  frc2::CommandPtr DriveRobotRelative(std::function<frc::ChassisSpeeds()> speedsSupplier);
-  frc2::CommandPtr Lock();
+  wpi::cmd::CommandPtr SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities speeds);
+  wpi::cmd::CommandPtr DriveToPose(wpi::math::Pose2d pose);
+  wpi::cmd::CommandPtr DriveRobotRelative(std::function<wpi::math::ChassisVelocities()> speedsSupplier);
+  wpi::cmd::CommandPtr Lock();
 
   /**
    * Build a SwerveInputStream from an XboxController with typical competition settings:
@@ -75,7 +76,7 @@ class SwerveSubsystem : public frc2::SubsystemBase {
    * default-command lambda: m_drive->Drive([&stream]{ return stream.Get(); }).
    */
   yams::mechanisms::swerve::utility::SwerveInputStream<4> MakeDriveInputStream(
-      frc2::CommandXboxController& controller);
+      wpi::cmd::CommandXboxController& controller);
 
   /**
    * Return a command that drives the robot using MakeDriveInputStream().
@@ -84,37 +85,37 @@ class SwerveSubsystem : public frc2::SubsystemBase {
    * Typical usage in RobotContainer:
    *   m_drive.SetDefaultCommand(m_drive.DriveCommand(m_xboxController));
    */
-  frc2::CommandPtr DriveCommand(frc2::CommandXboxController& controller);
+  wpi::cmd::CommandPtr DriveCommand(wpi::cmd::CommandXboxController& controller);
 
-  frc::Pose2d GetPose();
-  frc::ChassisSpeeds GetFieldOrientedChassisSpeed();
-  units::degree_t GetGyroAngle();
+  wpi::math::Pose2d GetPose();
+  wpi::math::ChassisVelocities GetFieldOrientedChassisSpeed();
+  wpi::units::degree_t GetGyroAngle();
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::Pigeon2 m_gyro{14};  // CAN ID 14; yaw is fed to SwerveDriveConfig
+  ctre::phoenix6::hardware::Pigeon2 m_gyro{14, ctre::phoenix6::CANBus{}};  // CAN ID 14; yaw is fed to SwerveDriveConfig
 
   // Front-left module  (drive CAN 1, azimuth CAN 2, CANcoder CAN 3)
-  rev::spark::SparkMax m_flDrive{1, rev::spark::SparkMax::MotorType::kBrushless};
-  rev::spark::SparkMax m_flAzimuth{2, rev::spark::SparkMax::MotorType::kBrushless};
-  ctre::phoenix6::hardware::CANcoder m_flEncoder{3};
+  rev::spark::SparkMax m_flDrive{wpi::CANPort::CAN_S0, 1, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_flAzimuth{wpi::CANPort::CAN_S0, 2, rev::spark::SparkMax::MotorType::kBrushless};
+  ctre::phoenix6::hardware::CANcoder m_flEncoder{3, ctre::phoenix6::CANBus{}};
 
   // Front-right module  (drive CAN 4, azimuth CAN 5, CANcoder CAN 6)
-  rev::spark::SparkMax m_frDrive{4, rev::spark::SparkMax::MotorType::kBrushless};
-  rev::spark::SparkMax m_frAzimuth{5, rev::spark::SparkMax::MotorType::kBrushless};
-  ctre::phoenix6::hardware::CANcoder m_frEncoder{6};
+  rev::spark::SparkMax m_frDrive{wpi::CANPort::CAN_S0, 4, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_frAzimuth{wpi::CANPort::CAN_S0, 5, rev::spark::SparkMax::MotorType::kBrushless};
+  ctre::phoenix6::hardware::CANcoder m_frEncoder{6, ctre::phoenix6::CANBus{}};
 
   // Back-left module  (drive CAN 7, azimuth CAN 8, CANcoder CAN 9)
-  rev::spark::SparkMax m_blDrive{7, rev::spark::SparkMax::MotorType::kBrushless};
-  rev::spark::SparkMax m_blAzimuth{8, rev::spark::SparkMax::MotorType::kBrushless};
-  ctre::phoenix6::hardware::CANcoder m_blEncoder{9};
+  rev::spark::SparkMax m_blDrive{wpi::CANPort::CAN_S0, 7, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_blAzimuth{wpi::CANPort::CAN_S0, 8, rev::spark::SparkMax::MotorType::kBrushless};
+  ctre::phoenix6::hardware::CANcoder m_blEncoder{9, ctre::phoenix6::CANBus{}};
 
   // Back-right module  (drive CAN 10, azimuth CAN 11, CANcoder CAN 12)
-  rev::spark::SparkMax m_brDrive{10, rev::spark::SparkMax::MotorType::kBrushless};
-  rev::spark::SparkMax m_brAzimuth{11, rev::spark::SparkMax::MotorType::kBrushless};
-  ctre::phoenix6::hardware::CANcoder m_brEncoder{12};
+  rev::spark::SparkMax m_brDrive{wpi::CANPort::CAN_S0, 10, rev::spark::SparkMax::MotorType::kBrushless};
+  rev::spark::SparkMax m_brAzimuth{wpi::CANPort::CAN_S0, 11, rev::spark::SparkMax::MotorType::kBrushless};
+  ctre::phoenix6::hardware::CANcoder m_brEncoder{12, ctre::phoenix6::CANBus{}};
 
   // Config objects must be declared before the wrappers and modules that store pointers
   // into them, so they are fully constructed (and have stable addresses) before those
@@ -167,7 +168,7 @@ class SwerveSubsystem : public frc2::SubsystemBase {
   // the finished SwerveModule into moduleOut.  Called once per corner in the constructor.
   void SetupModule(rev::spark::SparkMax* drive, rev::spark::SparkMax* azimuth,
                    ctre::phoenix6::hardware::CANcoder& absoluteEncoder,
-                   const std::string& moduleName, frc::Translation2d location,
+                   const std::string& moduleName, wpi::math::Translation2d location,
                    std::optional<yams::motorcontrollers::local::SparkWrapper>& driveSMC,
                    std::optional<yams::motorcontrollers::local::SparkWrapper>& azimuthSMC,
                    yams::motorcontrollers::SmartMotorControllerConfig& driveCfgMember,

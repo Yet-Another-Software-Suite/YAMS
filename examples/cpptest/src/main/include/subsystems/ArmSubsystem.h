@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <frc/DigitalInput.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/angle.h>
+#include <wpi/hardware/discrete/DigitalInput.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/angle.hpp>
 
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <ctre/phoenix6/TalonFX.hpp>
@@ -40,22 +40,21 @@
 // Commands:
 //   ArmCmd(dutycycle) -- open-loop percentage output
 //   SetAngle(degree_t) -- closed-loop continuous move (trapezoidal profile active)
-class ArmSubsystem : public frc2::SubsystemBase {
+class ArmSubsystem : public wpi::cmd::SubsystemBase {
  public:
   ArmSubsystem();
 
   bool GetBeamBreak();
 
-  frc2::CommandPtr ArmCmd(double dutycycle);
-  frc2::CommandPtr SetAngle(units::degree_t angle);
+  wpi::cmd::CommandPtr ArmCmd(double dutycycle);
+  wpi::cmd::CommandPtr SetAngle(wpi::units::degree_t angle);
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::CANcoder m_cancoder{
-      2};  // absolute encoder, CAN 2 (not yet wired into feedback)
-  ctre::phoenix6::hardware::TalonFX m_armMotor{1};  // Kraken X60, CAN 1
+  ctre::phoenix6::hardware::CANcoder m_cancoder{2, ctre::phoenix6::CANBus{}};  // absolute encoder, CAN 2 (not yet wired into feedback)
+  ctre::phoenix6::hardware::TalonFX m_armMotor{1, ctre::phoenix6::CANBus{}};  // Kraken X60, CAN 1
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;
@@ -63,5 +62,5 @@ class ArmSubsystem : public frc2::SubsystemBase {
   yams::mechanisms::config::ArmConfig m_armConfig;
   std::optional<yams::mechanisms::positional::Arm> m_arm;
 
-  frc::DigitalInput m_dio{0};  // beam-break sensor on DIO 0
+  wpi::DigitalInput m_dio{0};  // beam-break sensor on DIO 0
 };

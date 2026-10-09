@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/length.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/length.hpp>
 
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <optional>
@@ -29,18 +29,18 @@
 //   ElevCmd(dutycycle)  -- open-loop percentage output for manual jogging
 //   SetHeight(meter_t)  -- closed-loop move, runs continuously (use RunTo variant
 //                          inside the Elevator mechanism if you want a finishing command)
-class ElevatorSubsystem : public frc2::SubsystemBase {
+class ElevatorSubsystem : public wpi::cmd::SubsystemBase {
  public:
   ElevatorSubsystem();
 
-  frc2::CommandPtr ElevCmd(double dutycycle);
-  frc2::CommandPtr SetHeight(units::meter_t height);
+  wpi::cmd::CommandPtr ElevCmd(double dutycycle);
+  wpi::cmd::CommandPtr SetHeight(wpi::units::meter_t height);
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::TalonFX m_elevatorMotor{2};  // Kraken X44, CAN 2
+  ctre::phoenix6::hardware::TalonFX m_elevatorMotor{2, ctre::phoenix6::CANBus{}};  // Kraken X44, CAN 2
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;
