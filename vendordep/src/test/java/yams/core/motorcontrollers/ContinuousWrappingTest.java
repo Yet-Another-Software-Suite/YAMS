@@ -35,6 +35,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.thrifty.canEncoder.CanEncoder;
+import com.thrifty.core.Motor.FeedbackSensorType;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -59,6 +62,7 @@ import yams.core.math.LQRController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -72,8 +76,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  * Tests continuous wrapping: {@link SmartMotorControllerConfig#getContinuousWrappingSetpoint}, and,
  * in simulation, every motor controller wrapper under every closed loop controller, with and without
  * an attached encoder, crossing the wrapping point the short way. The attached encoders are absolute
- * (a CANcoder, a CANdi, a SPARK's absolute encoder, or an absolute encoder a SPARK reads over CAN)
- * or not (a Through Bore Encoder's quadrature output on a SPARK).
+ * (a CANcoder, a CANdi, a SPARK's or Nova's absolute encoder, or an absolute encoder a SPARK or
+ * Nova reads over CAN) or not (a quadrature encoder on a SPARK or Nova).
  *
  * <p>The mechanisms are geared 12:1, so the motor's own encoder turns twelve times per mechanism
  * rotation. A SPARK's onboard position wrapping wraps every rotation of its feedback sensor, so
@@ -284,6 +288,15 @@ public class ContinuousWrappingTest {
                           ? withEncoder(cfg, DeviceCreator.createCANcoderFor(talon))
                           : cfg);
                 }));
+        cases.add(
+            new Case(
+                "Nova" + suffix,
+                controller,
+                cfg ->
+                    new NovaWrapper(
+                        DeviceCreator.createNova(),
+                        DCMotor.getNEO(1),
+                        attachedEncoder ? withEncoder(cfg, FeedbackSensorType.ABS) : cfg)));
       }
       // A Through Bore Encoder on either SPARK, on the mechanism: its quadrature output, which is
       // not
@@ -318,6 +331,27 @@ public class ContinuousWrappingTest {
                           .withUseExternalFeedbackEncoder(true));
                 }));
       }
+      // A Nova with a quadrature encoder on its data port, which is not absolute, or a Thrifty CAN
+      // Encoder.
+      cases.add(
+          new Case(
+              "Nova " + controller + " with quadrature encoder",
+              controller,
+              cfg ->
+                  new NovaWrapper(
+                      DeviceCreator.createNova(),
+                      DCMotor.getNEO(1),
+                      cfg.withExternalEncoder(FeedbackSensorType.QUAD)
+                          .withUseExternalFeedbackEncoder(true))));
+      cases.add(
+          new Case(
+              "Nova " + controller + " with CAN encoder",
+              controller,
+              cfg ->
+                  new NovaWrapper(
+                      DeviceCreator.createNova(),
+                      DCMotor.getNEO(1),
+                      withEncoder(cfg, DeviceCreator.createCanEncoder()))));
       // A CANdi on either Talon, its encoder wired to PWM1.
       final String suffix = " " + controller + " with attached CANdi";
       cases.add(
@@ -393,6 +427,8 @@ public class ContinuousWrappingTest {
                 detachedEncoder.configure(
                     new DetachedEncoderConfig(), ResetMode.kResetSafeParameters);
                 detachedEncoder.close();
+              } else if (encoder instanceof CanEncoder canEncoder) {
+                canEncoder.close();
               }
             });
     Object motorController = smc.getMotorController();
@@ -416,6 +452,9 @@ public class ContinuousWrappingTest {
     } else if (motorController instanceof TalonFX talonFX) {
       talonFX.getConfigurator().apply(new TalonFXConfiguration());
       talonFX.close();
+    } else if (motorController instanceof Nova nova) {
+      // A Nova is put back to factory defaults when YAMS configures it, so only close it.
+      nova.close();
     }
   }
 
@@ -451,7 +490,7 @@ public class ContinuousWrappingTest {
         final Angle[] setpoint = {Degrees.of(170)};
         smc.setPosition(setpoint[0]);
         scheduler.addPeriodic(smc::simIterate, Milliseconds.of(10));
-        if (!(smc instanceof SparkWrapper)) {
+        if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper)) {
           // Phoenix simulates a Talon on its own thread in real time: its onboard motion profiles
           // advance with the wall clock, and its status signals refresh on it. Keep the simulation
           // in

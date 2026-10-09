@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -59,7 +61,7 @@ public class BatterySimTest {
   private static final double VOLTAGE_RISE_TOLERANCE = 0.05;
 
   /**
-   * Build four heavily-loadable {@link SmartMotorController}s (one per supported vendor wrapper),
+   * Build five heavily-loadable {@link SmartMotorController}s (one per supported vendor wrapper),
    * each with its own {@link SmartMotorControllerTestSubsystem} and simulation set up, ready to be
    * commanded to a heavy duty cycle.
    */
@@ -112,6 +114,14 @@ public class BatterySimTest {
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim TalonFX(" + (40 + offset) + ") Kraken", TelemetryVerbosity.LOW)));
+    smcs.add(
+        new NovaWrapper(
+            DeviceCreator.createNova(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(
+                    "BatterySim Nova(" + (50 + offset) + ") NEO", TelemetryVerbosity.LOW)));
 
     for (SmartMotorController smc : smcs) {
       SmartMotorControllerTestSubsystem subsys =
@@ -181,6 +191,8 @@ public class BatterySimTest {
       ((TalonFXS) motorController).close();
     } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
+    } else if (motorController instanceof Nova) {
+      ((Nova) motorController).close();
     }
   }
 

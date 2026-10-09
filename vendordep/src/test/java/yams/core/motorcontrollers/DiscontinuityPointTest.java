@@ -19,6 +19,8 @@ import com.revrobotics.encoder.DetachedEncoder;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.canEncoder.CanEncoder;
+import com.thrifty.core.Motor.FeedbackSensorType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +52,7 @@ import yams.helpers.MockHardwareExtension;
  * 260° for 1 rotation. The encoder then reports that angle, inside its range; the mechanism may have
  * gone either way round to it, since the encoder gives the angle within a rotation. Only 0.5 and 1
  * rotation are accepted. Without an absolute encoder, on the motor's encoder or a quadrature
- * encoder, a SPARK rejects a discontinuity point, and a Talon ignores it.
+ * encoder, a SPARK or Nova rejects a discontinuity point, and a Talon ignores it.
  */
 public class DiscontinuityPointTest {
   private static final Angle kTolerance = Degrees.of(5);
@@ -129,6 +131,9 @@ public class DiscontinuityPointTest {
           point == 0.5,
           detachedEncoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
           name + ": CAN encoder zero-centered");
+    } else if (encoder instanceof CanEncoder || encoder == FeedbackSensorType.ABS) {
+      // A Nova's encoders have no discontinuity point of their own: NovaWrapper wraps their
+      // readings, which the test checks below.
     } else {
       // REVLib's range offset is the middle of the range the encoder reports.
       final SparkBase spark = (SparkBase) smc.getMotorController();
@@ -255,11 +260,11 @@ public class DiscontinuityPointTest {
         AbsoluteEncoderCases.config("DiscontinuityPointTest " + name, testCase.controller())
             .withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint());
     if (!testCase.feedback().talon()) {
-      // A SPARK rejects the option without an absolute encoder to give it to.
+      // A SPARK or Nova rejects the option without an absolute encoder to give it to.
       assertThrows(
           SmartMotorControllerConfigurationException.class,
           () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
-          name + ": a SPARK without an absolute encoder has no discontinuity point");
+          name + ": a SPARK or Nova without an absolute encoder has no discontinuity point");
       return;
     }
     // A Talon alerts that the discontinuity point is not applied without an external encoder. Its

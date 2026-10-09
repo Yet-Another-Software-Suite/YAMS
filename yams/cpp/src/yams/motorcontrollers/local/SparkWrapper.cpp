@@ -496,7 +496,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   if (hasExpo || m_lqr) {
     if (!m_rioControllerAlert) {
       m_rioControllerAlert.emplace("YAMS", AlertId("ClosedLoop"),
-                                   GetName() + " closed loop controller is running on the RIO.",
+                                   GetName() + " closed loop controller is running on the SystemCore.",
                                    wpi::util::Alert::Level::MEDIUM);
     }
     m_rioControllerAlert->Set(true);

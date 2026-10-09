@@ -16,6 +16,8 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.util.CANPorts;
+import com.thrifty.canEncoder.CanEncoder;
+import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
@@ -42,6 +44,16 @@ public class DeviceCreator {
   private static final AtomicInteger detachedId = new AtomicInteger(0);
 
   private static final AtomicInteger ctreId = new AtomicInteger(0);
+
+  /** Highest CAN ID of a Thrifty device; IDs start at 0. */
+  private static final int MAX_THRIFTY_ID = 62;
+
+  /** Number of CAN buses Thrifty devices are spread over. */
+  private static final int kThriftyBuses = 5;
+
+  private static final AtomicInteger thriftyId = new AtomicInteger(0);
+
+  private static final AtomicInteger thriftyEncoderId = new AtomicInteger(0);
 
   /** Simulated CAN buses CTRE devices are spread over. */
   private static final CANPort[] kCtreBuses = {
@@ -85,6 +97,34 @@ public class DeviceCreator {
   public static TalonFXS createTalonFXS() {
     final int device = ctreId.getAndIncrement();
     return fresh(new TalonFXS(ctreDeviceId(device), ctreBus(device)));
+  }
+
+  /**
+   * Create a Thrifty Nova. Like CTRE devices, every CAN ID of a bus is used before the next bus, so
+   * no two Novas in a run share a bus and ID until all of them are used.
+   */
+  public static Nova createNova() {
+    final int device = thriftyId.getAndIncrement();
+    final int idsPerBus = MAX_THRIFTY_ID + 1;
+    if (device > 0 && device % (idsPerBus * kThriftyBuses) == 0) {
+      System.err.println("Warning: used every Thrifty device ID on every bus, reusing them");
+    }
+    return new Nova(device / idsPerBus % kThriftyBuses, device % idsPerBus);
+  }
+
+  /**
+   * Create a Thrifty CAN Encoder. CAN encoders take their buses and IDs in turn like
+   * {@link #createNova()}, from a counter of their own, so no two in a run share a bus and ID until
+   * all of them are used. ThriftyLib's simulation does not link a CAN encoder to a Nova, so it need
+   * not share the Nova's bus.
+   */
+  public static CanEncoder createCanEncoder() {
+    final int device = thriftyEncoderId.getAndIncrement();
+    final int idsPerBus = MAX_THRIFTY_ID + 1;
+    if (device > 0 && device % (idsPerBus * kThriftyBuses) == 0) {
+      System.err.println("Warning: used every Thrifty CAN encoder ID on every bus, reusing them");
+    }
+    return new CanEncoder(device / idsPerBus % kThriftyBuses, device % idsPerBus);
   }
 
   public static Pigeon2 createPigeon2() {

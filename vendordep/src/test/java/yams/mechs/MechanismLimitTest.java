@@ -17,6 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +50,7 @@ import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -222,6 +224,17 @@ public class MechanismLimitTest {
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
+  private static SmartMotorController makePivotNova(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new NovaWrapper(
+            DeviceCreator.createNova(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  }
+
   private static SmartMotorController makeArmSparkMax(Angle startPos, String label) {
     return setupTestSubsystem(
         new SparkWrapper(
@@ -260,6 +273,17 @@ public class MechanismLimitTest {
         new TalonFXWrapper(
             DeviceCreator.createTalonFX(),
             DCMotor.getKrakenX60(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  }
+
+  private static SmartMotorController makeArmNova(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new NovaWrapper(
+            DeviceCreator.createNova(),
+            DCMotor.getNEO(1),
             ((yams.commands2.config.SmartMotorControllerConfig)
                     armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
@@ -310,11 +334,22 @@ public class MechanismLimitTest {
                 .withTelemetry(label, TelemetryVerbosity.HIGH)));
   }
 
+  private static SmartMotorController makeElevNova(Distance startHeight, String label) {
+    return setupTestSubsystem(
+        new NovaWrapper(
+            DeviceCreator.createNova(),
+            DCMotor.getNEO(1),
+            ((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+  }
+
   // ──────────────────────────────────────────────
   // Argument stream factories
   //
-  // Each factory creates 8 Arguments: 4 motor types at a "false" starting
-  // position, then 4 at a "true" (at-limit) starting position. The boolean
+  // Each factory creates 10 Arguments: 5 motor types at a "false" starting
+  // position, then 5 at a "true" (at-limit) starting position. The boolean
   // second parameter tells the test what the trigger should return.
   //
   // ──────────────────────────────────────────────
@@ -344,6 +379,8 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makePivotNova(pos, "Nova(pMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -373,6 +410,8 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makePivotNova(pos, "Nova(pMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -401,6 +440,8 @@ public class MechanismLimitTest {
               makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeArmNova(pos, "Nova(aMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -430,6 +471,8 @@ public class MechanismLimitTest {
               makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeArmNova(pos, "Nova(aMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -458,6 +501,8 @@ public class MechanismLimitTest {
               makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeElevNova(pos, "Nova(eMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -486,6 +531,8 @@ public class MechanismLimitTest {
               makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(
+          Arguments.of(makeElevNova(pos, "Nova(eMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -497,6 +544,7 @@ public class MechanismLimitTest {
     args.add(Arguments.of(makePivotSparkFlex(Degrees.of(45), "SparkFlex(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotTalonFXS(Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotTalonFX(Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotNova(Degrees.of(45), "Nova(spos)[" + offset + "]")));
     return args.stream();
   }
 
@@ -540,6 +588,8 @@ public class MechanismLimitTest {
       ((TalonFXS) motor).close();
     } else if (motor instanceof TalonFX) {
       ((TalonFX) motor).close();
+    } else if (motor instanceof Nova) {
+      ((Nova) motor).close();
     }
   }
 

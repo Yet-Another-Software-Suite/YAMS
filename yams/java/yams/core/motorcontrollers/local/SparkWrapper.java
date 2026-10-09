@@ -237,7 +237,7 @@ public class SparkWrapper extends SmartMotorController {
     m_spark = controller;
     m_sparkPidController = m_spark.getClosedLoopController();
     this.m_config = config;
-    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM));
+    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_externalEncoderGearingDiscontinuityAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ExternalEncoderGearingDiscontinuity"),
         getName() + (" external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; " + "the discontinuity point will NOT be moved by the gearing, wrapping will occur " + "non-uniformly"), Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();

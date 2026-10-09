@@ -160,7 +160,7 @@ public abstract class SmartMotorController {
   private boolean m_closedLoopControllerRunning = false;
 
   /**
-   * Alert shown when the closed loop controller is running on the RIO. Empty until constructed by
+   * Alert shown when the closed loop controller is running on the SystemCore. Empty until constructed by
    * the {@link SmartMotorController} implementation once its telemetry name (or a generated
    * fallback identifier) is known.
    */

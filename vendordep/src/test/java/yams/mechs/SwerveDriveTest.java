@@ -24,6 +24,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,6 +60,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -70,8 +72,9 @@ import yams.helpers.TestWithScheduler;
 /**
  * Four module swerve drive integration test, ported from the C++ SwerveDriveTest. Every drive reads
  * its attitude from a Pigeon2, and the tests that depend on the hardware run against each
- * {@link Layout}: a TalonFX and SPARK MAX drive both ways round, and drives mixing SPARK MAX, SPARK
- * Flex, TalonFXS and TalonFX motor controllers in differing combinations.
+ * {@link Layout}: a TalonFX and SPARK MAX drive both ways round, a Thrifty Nova drive, and drives
+ * mixing SPARK MAX, SPARK Flex, TalonFXS, TalonFX and Nova motor controllers in differing
+ * combinations.
  *
  * <p>In simulation the drive reads its heading from its own simulated gyro, so most tests cover how
  * {@link SwerveDrive} uses {@link SwerveDrive#getGyroRotation3d()}; {@link
@@ -88,7 +91,8 @@ public class SwerveDriveTest {
     SPARK_MAX,
     SPARK_FLEX,
     TALON_FXS,
-    TALON_FX
+    TALON_FX,
+    NOVA
   }
 
   /**
@@ -116,6 +120,7 @@ public class SwerveDriveTest {
   private static final Motor SFLEX = Motor.SPARK_FLEX;
   private static final Motor TFXS = Motor.TALON_FXS;
   private static final Motor TFX = Motor.TALON_FX;
+  private static final Motor NOVA = Motor.NOVA;
 
   /** TalonFX drive motors and SPARK MAX azimuth motors. */
   private static final Layout kTalonFXDriveSparkMaxAzimuth =
@@ -139,7 +144,13 @@ public class SwerveDriveTest {
         new Layout(
             "Pigeon2, mixed: SMAX/SMAX, SFLEX/SFLEX, TFXS/TFXS, TFX/TFX",
             new Motor[] {SMAX, SFLEX, TFXS, TFX},
-            new Motor[] {SMAX, SFLEX, TFXS, TFX}));
+            new Motor[] {SMAX, SFLEX, TFXS, TFX}),
+        Layout.uniform("Pigeon2, Nova drive, Nova azimuth", NOVA, NOVA),
+        // A Nova paired with every other motor controller, as the drive and as the azimuth.
+        new Layout(
+            "Pigeon2, mixed: NOVA/SMAX, SFLEX/NOVA, NOVA/TFXS, TFX/NOVA",
+            new Motor[] {NOVA, SFLEX, NOVA, TFX},
+            new Motor[] {SMAX, NOVA, TFXS, NOVA}));
   }
 
   /** Subsystem that runs the drive's telemetry and simulation, like a robot's swerve subsystem. */
@@ -221,6 +232,7 @@ public class SwerveDriveTest {
           case SparkFlex spark -> spark.close();
           case TalonFXS talon -> talon.close();
           case TalonFX talon -> talon.close();
+          case Nova nova -> nova.close();
           default -> {}
         }
       }
@@ -237,10 +249,13 @@ public class SwerveDriveTest {
   private SwerveModule[] modules;
   private SwerveDrive drive;
 
-  /** The motor each motor controller drives: a NEO, NEO Vortex, NEO on a TalonFXS, or Kraken X60. */
+  /**
+   * The motor each motor controller drives: a NEO, NEO Vortex, NEO on a TalonFXS, Kraken X60, or NEO
+   * on a Nova.
+   */
   private static DCMotor dcMotor(Motor motor) {
     return switch (motor) {
-      case SPARK_MAX, TALON_FXS -> DCMotor.getNEO(1);
+      case SPARK_MAX, TALON_FXS, NOVA -> DCMotor.getNEO(1);
       case SPARK_FLEX -> DCMotor.getNeoVortex(1);
       case TALON_FX -> DCMotor.getKrakenX60(1);
     };
@@ -258,6 +273,7 @@ public class SwerveDriveTest {
               new TalonFXSWrapper(DeviceCreator.createTalonFXS(), dcMotor(motor), config);
           case TALON_FX ->
               new TalonFXWrapper(DeviceCreator.createTalonFX(), dcMotor(motor), config);
+          case NOVA -> new NovaWrapper(DeviceCreator.createNova(), dcMotor(motor), config);
         };
     hardware.motorControllers.add(smc);
     return smc;

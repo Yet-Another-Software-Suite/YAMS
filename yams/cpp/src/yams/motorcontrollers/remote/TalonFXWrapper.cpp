@@ -172,7 +172,7 @@ TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMo
   if (!m_config->GetSimMotor()) m_config->WithSimMotor(dcMotor);
 
   m_rioControllerAlert.emplace("YAMS", AlertId("ClosedLoop"),
-                               GetName() + " closed loop controller is running on the RIO.",
+                               GetName() + " closed loop controller is running on the SystemCore.",
                                wpi::util::Alert::Level::MEDIUM);
   m_startingPositionExternalEncoderAlert.emplace(
       "YAMS", AlertId("StartingPosition"),

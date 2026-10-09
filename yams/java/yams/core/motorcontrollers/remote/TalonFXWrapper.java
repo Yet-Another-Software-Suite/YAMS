@@ -208,7 +208,7 @@ public class TalonFXWrapper extends SmartMotorController {
     this.m_talonfx = controller;
     this.m_dcmotor = motor;
     this.m_config = smartConfig;
-    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the RIO.", Alert.Level.MEDIUM));
+    m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
     m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
     m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);

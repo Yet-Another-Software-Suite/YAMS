@@ -17,6 +17,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -136,7 +138,15 @@ public class ForceFeedforwardTest {
                 ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW))));
+                        "ForceFeedforwardTest TalonFXS(" + offset + ")", TelemetryVerbosity.LOW))),
+        Arguments.of(
+            new NovaWrapper(
+                DeviceCreator.createNova(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry(
+                        "ForceFeedforwardTest Nova(" + offset + ")", TelemetryVerbosity.LOW))));
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -158,6 +168,8 @@ public class ForceFeedforwardTest {
       ((TalonFXS) motorController).close();
     } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
+    } else if (motorController instanceof Nova) {
+      ((Nova) motorController).close();
     }
   }
 
