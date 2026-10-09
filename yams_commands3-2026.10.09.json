@@ -5,7 +5,6 @@
     "wpilibYear": "2027_alpha7",
     "uuid": "9eadd383-6bdc-4107-957a-b50cd3146f17",
     "mavenUrls": [
-        "https://yet-another-software-suite.github.io/YAMS/releases/",
         "https://cdn.yassrobotics.com/"
     ],
     "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams_commands3.json",
