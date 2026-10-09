@@ -27,6 +27,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -50,6 +51,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -144,6 +146,12 @@ public class LiveTuningTest {
                 linear,
                 cfg ->
                     new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg)));
+        cases.add(
+            new Case(
+                "Nova" + suffix,
+                controller,
+                linear,
+                cfg -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), cfg)));
       }
     }
     return cases.stream();
@@ -209,6 +217,10 @@ public class LiveTuningTest {
     } else if (motorController instanceof TalonFX talonFX) {
       talonFX.getConfigurator().apply(new TalonFXConfiguration());
       talonFX.close();
+    } else if (motorController instanceof Nova nova) {
+      // The Nova's closed loop runs on the SystemCore, so it holds no gains to put back to
+      // defaults.
+      nova.close();
     }
   }
 
@@ -227,6 +239,11 @@ public class LiveTuningTest {
   /** The kP on the motor controller itself, in its own units, waiting for an asynchronous apply. */
   private static double deviceKp(SmartMotorController smc, double expected)
       throws InterruptedException {
+    if (smc instanceof NovaWrapper) {
+      // The Nova has no gains to read back; its closed loop runs on the SystemCore with this
+      // controller.
+      return smc.m_pid.orElseThrow().getP();
+    }
     double kP = Double.NaN;
     for (int i = 0; i < 50; i++) {
       final Object motorController = smc.getMotorController();
@@ -367,12 +384,12 @@ public class LiveTuningTest {
       // on
       // a SPARK, volts per mechanism rotation on a Talon, and per meter converted to per rotation
       // for
-      // a linear mechanism.
+      // a linear mechanism. The Nova's SystemCore closed loop holds the entered kP as given.
       final double rotationsPerGainUnit = testCase.linear() ? 1 / kCircumferenceMeters : 1;
       final double expectedDeviceKp =
           smc instanceof SparkWrapper
               ? 2.5 / (12 * kGearing.getMechanismToRotorRatio() * rotationsPerGainUnit)
-              : 2.5 / rotationsPerGainUnit;
+              : smc instanceof NovaWrapper ? 2.5 : 2.5 / rotationsPerGainUnit;
       final double deviceKp = deviceKp(smc, expectedDeviceKp);
       assertTrue(
           Math.abs(deviceKp - expectedDeviceKp) <= 1e-6 * expectedDeviceKp,

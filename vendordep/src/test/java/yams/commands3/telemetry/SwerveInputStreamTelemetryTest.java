@@ -65,56 +65,68 @@ public class SwerveInputStreamTelemetryTest {
 
   /** Mechanism the drive's motor controllers belong to. */
   private static final Mechanism kMechanism = new Mechanism() {};
+
   private static final List<SmartMotorController> motorControllers = new ArrayList<>();
   private static SwerveDrive drive;
+
   /** Numbers each test's stream name. */
   private static int streamCount = 0;
 
   /** Streams with telemetry, closed after each test. */
   private final List<SwerveInputStream> streams = new ArrayList<>();
+
   /** This test's stream name. */
   private String name;
 
   /** Controller axes read by the stream. */
   private double forward;
+
   private double left;
   private double rotation;
 
   private static SwerveModule createModule(String name, double frontInches, double leftInches) {
-    SmartMotorControllerConfig driveCfg = new SmartMotorControllerConfig(kMechanism)
-        .withWheelDiameter(Inches.of(4))
-        .withClosedLoopController(0.4, 0, 0)
-        .withGearing(new MechanismGearing(GearBox.fromReductionStages(6.75)))
-        .withTelemetry(name + "Drive", TelemetryVerbosity.LOW);
-    SmartMotorControllerConfig azimuthCfg = new SmartMotorControllerConfig(kMechanism)
-        .withClosedLoopController(50, 0, 0.5)
-        .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
-        .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
-        .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
-    SmartMotorController driveMotor = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), driveCfg);
-    SmartMotorController azimuthMotor = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), azimuthCfg);
+    SmartMotorControllerConfig driveCfg =
+        new SmartMotorControllerConfig(kMechanism)
+            .withWheelDiameter(Inches.of(4))
+            .withClosedLoopController(0.4, 0, 0)
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(6.75)))
+            .withTelemetry(name + "Drive", TelemetryVerbosity.LOW);
+    SmartMotorControllerConfig azimuthCfg =
+        new SmartMotorControllerConfig(kMechanism)
+            .withClosedLoopController(50, 0, 0.5)
+            .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
+            .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
+    SmartMotorController driveMotor =
+        new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), driveCfg);
+    SmartMotorController azimuthMotor =
+        new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), azimuthCfg);
     motorControllers.add(driveMotor);
     motorControllers.add(azimuthMotor);
-    return new SwerveModule(new SwerveModuleConfig(driveMotor, azimuthMotor)
-                                .withAbsoluteEncoder(() -> Degrees.of(0))
-                                .withLocation(new Translation2d(Inches.of(frontInches), Inches.of(leftInches)))
-                                .withTelemetry(name, TelemetryVerbosity.LOW));
+    return new SwerveModule(
+        new SwerveModuleConfig(driveMotor, azimuthMotor)
+            .withAbsoluteEncoder(() -> Degrees.of(0))
+            .withLocation(new Translation2d(Inches.of(frontInches), Inches.of(leftInches)))
+            .withTelemetry(name, TelemetryVerbosity.LOW));
   }
 
   @BeforeAll
   static void createDrive() {
     MockHardwareExtension.beforeAll();
-    drive = new SwerveDrive(
-        new SwerveDriveConfig(kMechanism,
-                              createModule("SISTelemetryTestFL", 12, 12),
-                              createModule("SISTelemetryTestFR", 12, -12),
-                              createModule("SISTelemetryTestBL", -12, 12),
-                              createModule("SISTelemetryTestBR", -12, -12))
-            .withGyro(Rotation3d::new)
-            .withStartingPose(new Pose2d())
-            .withMaximumChassisSpeed(MetersPerSecond.of(kConfigMaxLinear), DegreesPerSecond.of(540))
-            .withRotationController(new PIDController(1, 0, 0))
-            .withTelemetry("SwerveInputStreamTelemetryTest", TelemetryVerbosity.LOW));
+    drive =
+        new SwerveDrive(
+            new SwerveDriveConfig(
+                    kMechanism,
+                    createModule("SISTelemetryTestFL", 12, 12),
+                    createModule("SISTelemetryTestFR", 12, -12),
+                    createModule("SISTelemetryTestBL", -12, 12),
+                    createModule("SISTelemetryTestBR", -12, -12))
+                .withGyro(Rotation3d::new)
+                .withStartingPose(new Pose2d())
+                .withMaximumChassisSpeed(
+                    MetersPerSecond.of(kConfigMaxLinear), DegreesPerSecond.of(540))
+                .withRotationController(new PIDController(1, 0, 0))
+                .withTelemetry("SwerveInputStreamTelemetryTest", TelemetryVerbosity.LOW));
   }
 
   @AfterAll
@@ -177,7 +189,10 @@ public class SwerveInputStreamTelemetryTest {
   }
 
   private static NetworkTable tuningTable(String streamName) {
-    return NetworkTableInstance.getDefault().getTable("Tuning").getSubTable("SwerveInputStream").getSubTable(streamName);
+    return NetworkTableInstance.getDefault()
+        .getTable("Tuning")
+        .getSubTable("SwerveInputStream")
+        .getSubTable(streamName);
   }
 
   private double data(String key) {
@@ -206,7 +221,8 @@ public class SwerveInputStreamTelemetryTest {
     tuningTable(name).getEntry(key).setBoolean(value);
   }
 
-  // ---- Verbosity ---------------------------------------------------------------------------------
+  // ---- Verbosity
+  // ---------------------------------------------------------------------------------
 
   @Test
   void lowPublishesOnlyTheMode() {
@@ -220,8 +236,8 @@ public class SwerveInputStreamTelemetryTest {
 
   @Test
   void midPublishesTheConfigurationReadOnly() {
-    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1).withScaleTranslation(0.8),
-                                             TelemetryVerbosity.MID);
+    SwerveInputStream stream =
+        withTelemetry(stream().withDeadband(0.1).withScaleTranslation(0.8), TelemetryVerbosity.MID);
 
     assertEquals(0.1, data("deadband"), kTolerance);
     assertEquals(0.8, data("translationScale"), kTolerance);
@@ -237,13 +253,15 @@ public class SwerveInputStreamTelemetryTest {
 
   @Test
   void highPublishesTuningValuesAndTheLiveTuningCommand() {
-    SwerveInputStream stream = withTelemetry(stream()
-                                                 .withDeadband(0.1)
-                                                 .withScaleTranslation(0.8)
-                                                 .withScaleRotation(0.5)
-                                                 .withCubeTranslationControllerAxis()
-                                                 .withAllianceRelativeControl(),
-                                             TelemetryVerbosity.HIGH);
+    SwerveInputStream stream =
+        withTelemetry(
+            stream()
+                .withDeadband(0.1)
+                .withScaleTranslation(0.8)
+                .withScaleRotation(0.5)
+                .withCubeTranslationControllerAxis()
+                .withAllianceRelativeControl(),
+            TelemetryVerbosity.HIGH);
 
     assertEquals(0.1, data("deadband"), kTolerance);
     assertEquals(0.1, published("deadband"), kTolerance);
@@ -256,23 +274,28 @@ public class SwerveInputStreamTelemetryTest {
     assertTrue(publishedBoolean("allianceRelative"));
     assertFalse(publishedBoolean("robotRelative"));
     assertTrue(stream.getTelemetry().orElseThrow().getLiveTuningCommand().isPresent());
-    assertFalse(tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(), "Live Tuning on the dashboard");
+    assertFalse(
+        tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(),
+        "Live Tuning on the dashboard");
   }
 
   @Test
   void readingTheStreamPublishesTheMode() {
     boolean[] headingControl = {false};
-    SwerveInputStream stream = withTelemetry(SwerveInputStream.of(drive, () -> forward, () -> left)
-                                                 .withControllerHeadingAxis(() -> 0, () -> 1)
-                                                 .withHeadingControl(() -> headingControl[0]),
-                                             TelemetryVerbosity.LOW);
+    SwerveInputStream stream =
+        withTelemetry(
+            SwerveInputStream.of(drive, () -> forward, () -> left)
+                .withControllerHeadingAxis(() -> 0, () -> 1)
+                .withHeadingControl(() -> headingControl[0]),
+            TelemetryVerbosity.LOW);
 
     headingControl[0] = true;
     stream.get();
     assertEquals("HEADING", mode());
   }
 
-  // ---- Live tuning -------------------------------------------------------------------------------
+  // ---- Live tuning
+  // -------------------------------------------------------------------------------
 
   @Test
   void dashboardEditsApplyOnlyWhileLiveTuningRuns() {
@@ -381,22 +404,24 @@ public class SwerveInputStreamTelemetryTest {
 
   @ParameterizedTest(name = "{0} = {1}")
   @CsvSource({
-      "deadband, -0.1",
-      "deadband, 1.0",
-      "deadband, NaN",
-      "translationScale, 0",
-      "translationScale, 1.5",
-      "rotationScale, -0.5",
-      "rotationScale, NaN",
-      "maxLinearVelocity, 0",
-      "maxLinearVelocity, -1",
-      "maxLinearVelocity, Infinity",
-      "maxAngularVelocity, 0",
-      "maxAngularVelocity, NaN",
+    "deadband, -0.1",
+    "deadband, 1.0",
+    "deadband, NaN",
+    "translationScale, 0",
+    "translationScale, 1.5",
+    "rotationScale, -0.5",
+    "rotationScale, NaN",
+    "maxLinearVelocity, 0",
+    "maxLinearVelocity, -1",
+    "maxLinearVelocity, Infinity",
+    "maxAngularVelocity, 0",
+    "maxAngularVelocity, NaN",
   })
   void invalidDashboardValuesAreReplacedWithTheStreamValue(String key, double value) {
-    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1).withScaleTranslation(0.8).withScaleRotation(0.5),
-                                             TelemetryVerbosity.HIGH);
+    SwerveInputStream stream =
+        withTelemetry(
+            stream().withDeadband(0.1).withScaleTranslation(0.8).withScaleRotation(0.5),
+            TelemetryVerbosity.HIGH);
     double before = published(key);
 
     dashboard(key, value);
@@ -409,7 +434,8 @@ public class SwerveInputStreamTelemetryTest {
 
   @Test
   void codeChangesArePublishedAndNotOverridden() {
-    SwerveInputStream stream = withTelemetry(stream().withScaleTranslation(0.8), TelemetryVerbosity.HIGH);
+    SwerveInputStream stream =
+        withTelemetry(stream().withScaleTranslation(0.8), TelemetryVerbosity.HIGH);
 
     // E.g. a slow mode binding changing the scale while driving.
     stream.withScaleTranslation(0.4);
@@ -426,8 +452,10 @@ public class SwerveInputStreamTelemetryTest {
   @Test
   void supplierControlledFeaturesAreNotOverridden() {
     boolean[] allianceRelative = {false};
-    SwerveInputStream stream = withTelemetry(stream().withAllianceRelativeControl(() -> allianceRelative[0]),
-                                             TelemetryVerbosity.HIGH);
+    SwerveInputStream stream =
+        withTelemetry(
+            stream().withAllianceRelativeControl(() -> allianceRelative[0]),
+            TelemetryVerbosity.HIGH);
 
     allianceRelative[0] = true;
     tune(stream);
@@ -440,7 +468,8 @@ public class SwerveInputStreamTelemetryTest {
     assertFalse(publishedBoolean("allianceRelative"));
   }
 
-  // ---- Lifecycle ---------------------------------------------------------------------------------
+  // ---- Lifecycle
+  // ---------------------------------------------------------------------------------
 
   @Test
   void withTelemetryReplacesTheTelemetry() {
@@ -480,7 +509,9 @@ public class SwerveInputStreamTelemetryTest {
     assertFalse(dataTable(name).getTopic("deadband").exists());
     assertFalse(tuningTable(name).getTopic("deadband").exists());
     assertFalse(tuningTable(name).getTopic("robotRelative").exists());
-    assertTrue(tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(), "Live Tuning is removed");
+    assertTrue(
+        tuningTable(name).getSubTable("Live Tuning").getTopics().isEmpty(),
+        "Live Tuning is removed");
   }
 
   @Test
@@ -489,10 +520,11 @@ public class SwerveInputStreamTelemetryTest {
     rotation = 1;
     assertEquals(kConfigMaxLinear, stream().get().vx, kTolerance, "defaults to the drive config");
 
-    var velocities = stream()
-        .withMaximumLinearVelocity(MetersPerSecond.of(2))
-        .withMaximumAngularVelocity(RadiansPerSecond.of(1))
-        .get();
+    var velocities =
+        stream()
+            .withMaximumLinearVelocity(MetersPerSecond.of(2))
+            .withMaximumAngularVelocity(RadiansPerSecond.of(1))
+            .get();
     assertEquals(2, velocities.vx, kTolerance);
     assertEquals(1, velocities.omega, kTolerance);
   }

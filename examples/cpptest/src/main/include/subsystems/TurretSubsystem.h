@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <frc/geometry/Pose2d.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Transform3d.h>
-#include <frc/kinematics/ChassisSpeeds.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
-#include <units/angle.h>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/geometry/Transform3d.hpp>
+#include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/units/angle.hpp>
 
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <optional>
@@ -39,23 +39,23 @@
 // Non-command entry point:
 //   SetAngleSetpoint(degree_t) -- call from Periodic if you want to drive setpoint
 //                                 from outside a command (e.g. field-relative auto-aim)
-class TurretSubsystem : public frc2::SubsystemBase {
+class TurretSubsystem : public wpi::cmd::SubsystemBase {
  public:
   TurretSubsystem();
 
-  frc::Pose2d GetPose(frc::Pose2d robotPose) const;
-  frc::ChassisSpeeds GetVelocity(frc::ChassisSpeeds robotVelocity, units::degree_t robotAngle);
+  wpi::math::Pose2d GetPose(wpi::math::Pose2d robotPose) const;
+  wpi::math::ChassisVelocities GetVelocity(wpi::math::ChassisVelocities robotVelocity, wpi::units::degree_t robotAngle);
 
-  void SetAngleSetpoint(units::degree_t angle);
+  void SetAngleSetpoint(wpi::units::degree_t angle);
 
-  frc2::CommandPtr TurretCmd(double dutycycle);
-  frc2::CommandPtr SetAngle(units::degree_t angle);
+  wpi::cmd::CommandPtr TurretCmd(double dutycycle);
+  wpi::cmd::CommandPtr SetAngle(wpi::units::degree_t angle);
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  ctre::phoenix6::hardware::TalonFX m_talonFX{12};  // Kraken X60, CAN 12
+  ctre::phoenix6::hardware::TalonFX m_talonFX{12, ctre::phoenix6::CANBus{}};  // Kraken X60, CAN 12
 
   yams::motorcontrollers::SmartMotorControllerConfig m_motorConfig;
   std::optional<yams::motorcontrollers::remote::TalonFXWrapper> m_motor;
@@ -64,5 +64,5 @@ class TurretSubsystem : public frc2::SubsystemBase {
   std::optional<yams::mechanisms::positional::Pivot> m_turret;
 
   // Transform from robot center to turret pivot (1.5 ft back, 0.5 ft up)
-  frc::Transform3d m_roboToTurret;
+  wpi::math::Transform3d m_roboToTurret;
 };

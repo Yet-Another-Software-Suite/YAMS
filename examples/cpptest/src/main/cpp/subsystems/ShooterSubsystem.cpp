@@ -3,12 +3,12 @@
 
 #include "subsystems/ShooterSubsystem.h"
 
-#include <frc/system/plant/DCMotor.h>
-#include <units/angular_velocity.h>
-#include <units/current.h>
-#include <units/length.h>
-#include <units/time.h>
-#include <units/voltage.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/voltage.hpp>
 
 #include <iostream>
 
@@ -32,9 +32,9 @@ ShooterSubsystem::ShooterSubsystem() {
       .WithTelemetry("ShooterMotor", Cfg::TelemetryVerbosity::HIGH)
       .WithMotorInverted(false)
       // Feedforward zeroed for now; tune kV once actual free-spin RPM is measured.
-      .WithFeedforward(frc::SimpleMotorFeedforward<units::turns>{
-          units::volt_t{0}, units::unit_t<frc::SimpleMotorFeedforward<units::turns>::kv_unit>{0},
-          units::unit_t<frc::SimpleMotorFeedforward<units::turns>::ka_unit>{0}})
+      .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
+          wpi::units::volt_t{0}, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{0},
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0}})
       .WithClosedLoopMode()
       // m_flywheelMotor2 mirrors m_flywheelMotor1 via hardware follower mode.
       // false = not inverted relative to the leader.
@@ -42,34 +42,34 @@ ShooterSubsystem::ShooterSubsystem() {
 
   // NEO(2) tells the simulation plant that two NEO motors are mechanically coupled.
   // At runtime only m_flywheelMotor1 receives commands; motor2 follows via CAN.
-  m_motor.emplace(&m_flywheelMotor1, frc::DCMotor::NEO(2), &m_motorConfig);
+  m_motor.emplace(&m_flywheelMotor1, wpi::math::DCMotor::NEO(2), &m_motorConfig);
 
   // 4-inch diameter wheel; 4.0 * 0.0254 converts inches to meters.
   // WithRollerDiameter enables SetSurfaceSpeedSetpoint (m/s at the wheel rim).
-  m_shooterConfig.WithRollerDiameter(units::meter_t{4.0 * 0.0254}).WithTelemetryName("ShooterMech");
+  m_shooterConfig.WithRollerDiameter(wpi::units::meter_t{4.0 * 0.0254}).WithTelemetryName("ShooterMech");
 
   m_shooter.emplace(&m_shooterConfig, &m_motor.value());
 }
 
-units::degrees_per_second_t ShooterSubsystem::GetVelocity() const {
+wpi::units::degrees_per_second_t ShooterSubsystem::GetVelocity() const {
   return m_shooter->GetVelocity();
 }
 
-frc2::CommandPtr ShooterSubsystem::SetVelocity(units::degrees_per_second_t speed) {
+wpi::cmd::CommandPtr ShooterSubsystem::SetVelocity(wpi::units::degrees_per_second_t speed) {
   return m_shooter->Run(speed);
 }
 
-frc2::CommandPtr ShooterSubsystem::SetVelocity(std::function<units::degrees_per_second_t()> speed) {
+wpi::cmd::CommandPtr ShooterSubsystem::SetVelocity(std::function<wpi::units::degrees_per_second_t()> speed) {
   return m_shooter->Run(speed);
 }
 
-frc2::CommandPtr ShooterSubsystem::Set(double dutyCycle) { return m_shooter->Set(dutyCycle); }
+wpi::cmd::CommandPtr ShooterSubsystem::Set(double dutyCycle) { return m_shooter->Set(dutyCycle); }
 
-frc2::CommandPtr ShooterSubsystem::Set(std::function<double()> dutyCycle) {
+wpi::cmd::CommandPtr ShooterSubsystem::Set(std::function<double()> dutyCycle) {
   return m_shooter->Set(dutyCycle);
 }
 
-void ShooterSubsystem::SetVelocitySetpoint(units::degrees_per_second_t speed) {
+void ShooterSubsystem::SetVelocitySetpoint(wpi::units::degrees_per_second_t speed) {
   m_shooter->SetMechanismVelocitySetpoint(speed);
 }
 
@@ -80,12 +80,12 @@ void ShooterSubsystem::SetDutyCycleSetpoint(double dutyCycle) {
 // Surface speed in m/s is converted internally by FlyWheel using the roller
 // diameter set in m_shooterConfig. Useful when the upstream calculation works
 // in linear ball speed rather than angular motor speed.
-void ShooterSubsystem::SetSurfaceSpeedSetpoint(units::meters_per_second_t speed) {
+void ShooterSubsystem::SetSurfaceSpeedSetpoint(wpi::units::meters_per_second_t speed) {
   m_shooter->SetMeasurementVelocitySetpoint(speed);
 }
 
-bool ShooterSubsystem::ReadyToShoot(units::degrees_per_second_t tolerance) const {
-  // IsNear returns an frc2::Trigger; .Get() evaluates it immediately (no
+bool ShooterSubsystem::ReadyToShoot(wpi::units::degrees_per_second_t tolerance) const {
+  // IsNear returns an wpi::cmd::Trigger; .Get() evaluates it immediately (no
   // scheduler needed) -- fine for a synchronous boolean check in a command.
   return m_shooter->IsNear(GetVelocity(), tolerance).Get();
 }

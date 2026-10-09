@@ -3,10 +3,10 @@
 
 #include "subsystems/HoodSubsystem.h"
 
-#include <frc/system/plant/DCMotor.h>
-#include <units/angle.h>
-#include <units/current.h>
-#include <units/time.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/angle.hpp>
+#include <wpi/units/current.hpp>
+#include <wpi/units/time.hpp>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -37,31 +37,31 @@ HoodSubsystem::HoodSubsystem() {
   // Ramp rates of 0.25 s prevent step-voltage surges on the NEO in both open- and closed-loop.
   m_motorConfig.WithSubsystem(this)
       .WithFeedback(4, 0, 0)
-      .WithTrapezoidProfile(units::turns_per_second_t{0.5}, units::turns_per_second_squared_t{0.25})
-      .WithMechanismLimits(units::degree_t{-30}, units::degree_t{100})
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{0.5}, wpi::units::turns_per_second_squared_t{0.25})
+      .WithMechanismLimits(wpi::units::degree_t{-30}, wpi::units::degree_t{100})
       .WithMotorGearing(MechanismGearing{GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(Cfg::MotorMode::BRAKE)
       .WithTelemetry("HoodMotor", Cfg::TelemetryVerbosity::HIGH)
-      .WithStatorCurrentLimit(units::ampere_t{40})
+      .WithStatorCurrentLimit(wpi::units::ampere_t{40})
       .WithMotorInverted(false)
-      .WithClosedLoopRampRate(units::second_t{0.25})
-      .WithOpenLoopRampRate(units::second_t{0.25})
-      .WithFeedforward(frc::ArmFeedforward{units::volt_t{0}, units::volt_t{0},
-                                           units::unit_t<frc::ArmFeedforward::kv_unit>{0},
-                                           units::unit_t<frc::ArmFeedforward::ka_unit>{0}})
-      .WithStartingPosition(units::degree_t{0})
+      .WithClosedLoopRampRate(wpi::units::second_t{0.25})
+      .WithOpenLoopRampRate(wpi::units::second_t{0.25})
+      .WithFeedforward(wpi::math::ArmFeedforward{wpi::units::volt_t{0}, wpi::units::volt_t{0},
+                                           wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{0},
+                                           wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0}})
+      .WithStartingPosition(wpi::units::degree_t{0})
       .WithClosedLoopMode();
 
   // emplace() deferred until here so m_hoodMotor is fully constructed before we take its address.
   // MotorArrangement::NEO selects the NEO brushless commutation profile inside the TalonFXS.
-  m_motor.emplace(&m_hoodMotor, frc::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
+  m_motor.emplace(&m_hoodMotor, wpi::math::DCMotor::NEO(1), TalonFXSWrapper::MotorArrangement::NEO,
                   &m_motorConfig);
 
   // PivotConfig wires the motor controller to the Pivot mechanism.  WithMin/MaxAngle here are
   // simulation hard-stop bounds used by DCMotorSim -- wider than the firmware soft limits above
   // so the sim doesn't clamp before firmware would.  WithTelemetryName sets the NT4 table key.
-  m_pivotConfig.WithMinAngle(units::degree_t{-100})
-      .WithMaxAngle(units::degree_t{200})
+  m_pivotConfig.WithMinAngle(wpi::units::degree_t{-100})
+      .WithMaxAngle(wpi::units::degree_t{200})
       .WithTelemetryName("HoodExample");
 
   m_hood.emplace(&m_pivotConfig, &m_motor.value());
@@ -69,7 +69,7 @@ HoodSubsystem::HoodSubsystem() {
 
 // Non-command path for periodic callers that manage their own setpoint scheduling.
 // Writes straight to the motor's closed-loop target each loop -- no command overhead.
-void HoodSubsystem::SetAngleSetpoint(units::degree_t angle) {
+void HoodSubsystem::SetAngleSetpoint(wpi::units::degree_t angle) {
   m_hood->SetMechanismPositionSetpoint(angle);
 }
 
@@ -81,8 +81,8 @@ void HoodSubsystem::SimulationPeriodic() { m_hood->SimIterate(); }
 
 // Open-loop override: bypasses the trapezoid profile and sends duty-cycle directly.
 // Useful for manual tuning or operator override during testing.
-frc2::CommandPtr HoodSubsystem::HoodCmd(double dutycycle) { return m_hood->Set(dutycycle); }
+wpi::cmd::CommandPtr HoodSubsystem::HoodCmd(double dutycycle) { return m_hood->Set(dutycycle); }
 
 // Closed-loop position command.  Pivot::Run() runs indefinitely (until interrupted).
 // Use Pivot::RunTo() instead if the command should end once within tolerance.
-frc2::CommandPtr HoodSubsystem::SetAngle(units::degree_t angle) { return m_hood->Run(angle); }
+wpi::cmd::CommandPtr HoodSubsystem::SetAngle(wpi::units::degree_t angle) { return m_hood->Run(angle); }

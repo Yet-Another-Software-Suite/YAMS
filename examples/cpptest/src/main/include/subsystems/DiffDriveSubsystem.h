@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include <frc/drive/DifferentialDrive.h>
-#include <frc/system/plant/DCMotor.h>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/SubsystemBase.h>
+#include <wpi/drive/DifferentialDrive.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
+#include <wpi/commands2/SubsystemBase.hpp>
 #include <rev/SparkMax.h>
+#include <wpi/hardware/bus/CANPort.hpp>
 
 #include <functional>
 #include <optional>
@@ -31,25 +32,22 @@
 //   Stop()                       -- kills output each loop tick
 //   TankDrive(left, right)       -- independent left/right duty-cycle suppliers
 //   ArcadeDrive(xSpeed, zRotation) -- combined translation + rotation suppliers
-class DiffDriveSubsystem : public frc2::SubsystemBase {
+class DiffDriveSubsystem : public wpi::cmd::SubsystemBase {
  public:
   DiffDriveSubsystem();
 
-  frc2::CommandPtr Stop();
-  frc2::CommandPtr TankDrive(std::function<double()> left, std::function<double()> right);
-  frc2::CommandPtr ArcadeDrive(std::function<double()> xSpeed, std::function<double()> zRotation);
+  wpi::cmd::CommandPtr Stop();
+  wpi::cmd::CommandPtr TankDrive(std::function<double()> left, std::function<double()> right);
+  wpi::cmd::CommandPtr ArcadeDrive(std::function<double()> xSpeed, std::function<double()> zRotation);
 
   void Periodic() override;
   void SimulationPeriodic() override;
 
  private:
-  rev::spark::SparkMax m_leftMotor{21, rev::spark::SparkMax::MotorType::kBrushless};  // left leader
-  rev::spark::SparkMax m_rightMotor{24,
-                                    rev::spark::SparkMax::MotorType::kBrushless};  // right leader
-  rev::spark::SparkMax m_leftFollowerMotor{
-      22, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 21
-  rev::spark::SparkMax m_rightFollowerMotor{
-      23, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 24
+  rev::spark::SparkMax m_leftMotor{wpi::CANPort::CAN_S0, 21, rev::spark::SparkMax::MotorType::kBrushless};  // left leader
+  rev::spark::SparkMax m_rightMotor{wpi::CANPort::CAN_S0, 24, rev::spark::SparkMax::MotorType::kBrushless};  // right leader
+  rev::spark::SparkMax m_leftFollowerMotor{wpi::CANPort::CAN_S0, 22, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 21
+  rev::spark::SparkMax m_rightFollowerMotor{wpi::CANPort::CAN_S0, 23, rev::spark::SparkMax::MotorType::kBrushless};  // mirrors CAN 24
 
   yams::motorcontrollers::SmartMotorControllerConfig m_leftConfig;   // inverted=true
   yams::motorcontrollers::SmartMotorControllerConfig m_rightConfig;  // inverted=false
@@ -58,5 +56,5 @@ class DiffDriveSubsystem : public frc2::SubsystemBase {
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_leftSMC;
   std::optional<yams::motorcontrollers::local::SparkWrapper> m_rightSMC;
 
-  std::optional<frc::DifferentialDrive> m_drive;
+  std::optional<wpi::DifferentialDrive> m_drive;
 };

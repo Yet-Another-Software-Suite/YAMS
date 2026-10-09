@@ -16,6 +16,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.encoder.DetachedEncoder;
 import com.revrobotics.spark.SparkBase;
+import com.thrifty.canEncoder.CanEncoder;
+import com.thrifty.core.Motor.FeedbackSensorType;
+import com.thrifty.nova.Nova;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
@@ -28,6 +31,7 @@ import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -38,9 +42,9 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Every absolute external encoder on every motor controller, and every closed loop controller, for
- * the tests of options that apply to absolute encoders: {@link DiscontinuityPointTest} and
- * {@link ZeroOffsetTest}. Each encoder is mounted on the mechanism 1:1, behind 12:1 gearing, and
- * closes the loop.
+ * the tests of options that apply to absolute encoders: {@link DiscontinuityPointTest},
+ * {@link ZeroOffsetTest}, and {@link StartingPositionTest}. Each encoder is mounted on the
+ * mechanism 1:1, behind 12:1 gearing, and closes the loop.
  */
 final class AbsoluteEncoderCases {
   private AbsoluteEncoderCases() {}
@@ -62,7 +66,11 @@ final class AbsoluteEncoderCases {
     /** A CANdi on a TalonFX, its encoder wired to PWM1. */
     TALONFX_CANDI("TalonFX CANdi"),
     /** A CANdi on a TalonFXS, its encoder wired to PWM1. */
-    TALONFXS_CANDI("TalonFXS CANdi");
+    TALONFXS_CANDI("TalonFXS CANdi"),
+    /** An absolute encoder wired to a Nova's data port. */
+    NOVA_ABSOLUTE("Nova absolute encoder"),
+    /** A Thrifty CAN Encoder a Nova reads over CAN. */
+    NOVA_CAN("Nova CAN encoder");
 
     private final String name;
 
@@ -94,7 +102,11 @@ final class AbsoluteEncoderCases {
     /** A Through Bore Encoder's quadrature output on a SPARK MAX's alternate encoder port. */
     SPARK_MAX_QUADRATURE("SparkMax quadrature Through Bore"),
     /** A Through Bore Encoder's quadrature output on a SPARK Flex's external encoder port. */
-    SPARK_FLEX_QUADRATURE("SparkFlex quadrature Through Bore");
+    SPARK_FLEX_QUADRATURE("SparkFlex quadrature Through Bore"),
+    /** A Nova on its motor's encoder. */
+    NOVA("Nova motor encoder"),
+    /** A quadrature encoder on a Nova's data port. */
+    NOVA_QUADRATURE("Nova quadrature encoder");
 
     private final String name;
 
@@ -221,6 +233,16 @@ final class AbsoluteEncoderCases {
             DCMotor.getNEO(1),
             encoderOptions.apply(config.withUseExternalFeedbackEncoder(true)));
       }
+      case NOVA_ABSOLUTE, NOVA_CAN -> {
+        final Nova nova = DeviceCreator.createNova();
+        final Object absoluteEncoder =
+            encoder == Encoder.NOVA_CAN ? DeviceCreator.createCanEncoder() : FeedbackSensorType.ABS;
+        yield new NovaWrapper(
+            nova,
+            DCMotor.getNEO(1),
+            encoderOptions.apply(
+                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
+      }
     };
   }
 
@@ -236,6 +258,24 @@ final class AbsoluteEncoderCases {
       return feedback == RelativeFeedback.TALONFX
           ? new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), config)
           : new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), config);
+    }
+    if (feedback == RelativeFeedback.NOVA || feedback == RelativeFeedback.NOVA_QUADRATURE) {
+      final Nova nova = DeviceCreator.createNova();
+      try {
+        return new NovaWrapper(
+            nova,
+            DCMotor.getNEO(1),
+            feedback == RelativeFeedback.NOVA_QUADRATURE
+                ? config
+                    .withExternalEncoder(FeedbackSensorType.QUAD)
+                    .withUseExternalFeedbackEncoder(true)
+                : config);
+      } catch (RuntimeException e) {
+        // The Nova rejected the config; release it for the tests after this one.
+        CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
+        nova.close();
+        throw e;
+      }
     }
     final boolean flex =
         feedback == RelativeFeedback.SPARK_FLEX
@@ -370,6 +410,9 @@ final class AbsoluteEncoderCases {
       cancoder.getConfigurator().apply(new CANcoderConfiguration());
       cancoder.close();
     }
+    if (encoder instanceof CanEncoder canEncoder) {
+      canEncoder.close();
+    }
     if (encoder instanceof CANdi candi) {
       CANdiTest.closeDevices(smc.getMotorController(), candi);
     } else if (encoder instanceof DetachedEncoder || smc instanceof SparkWrapper) {
@@ -380,6 +423,9 @@ final class AbsoluteEncoderCases {
     } else if (smc.getMotorController() instanceof TalonFX talonFX) {
       talonFX.getConfigurator().apply(new com.ctre.phoenix6.configs.TalonFXConfiguration());
       talonFX.close();
+    } else if (smc.getMotorController() instanceof Nova nova) {
+      // A Nova is put back to factory defaults when YAMS configures it, so only close it.
+      nova.close();
     }
   }
 }

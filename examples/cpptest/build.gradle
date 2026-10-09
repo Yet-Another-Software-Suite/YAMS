@@ -3,11 +3,11 @@ import org.wpilib.toolchain.*
 plugins {
     id "cpp"
     id "google-test-test-suite"
-    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-6"
+    id "org.wpilib.GradleRIO" version "2027.0.0-alpha-7"
     id "org.wpilib.WPILibRepositoriesPlugin" version "2027.0.0"
 }
 
-// The GradleRIO plugin defaults wpi.versions.wpilibVersion to the exact "2027.0.0-alpha-6" tag.
+// The GradleRIO plugin defaults wpi.versions.wpilibVersion to the exact "2027.0.0-alpha-7" tag.
 // Match vendordep/build.gradle's use of a floating "2027.+" range against the development
 // repositories (not just the release repository the GradleRIO plugin wires up by default) so the
 // same WPILib snapshot is used here as everywhere else in this repo.

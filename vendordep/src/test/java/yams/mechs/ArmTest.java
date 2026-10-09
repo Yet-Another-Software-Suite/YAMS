@@ -20,6 +20,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -45,6 +46,7 @@ import yams.core.mechanisms.config.ArmConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -110,6 +112,7 @@ public class ArmTest {
       }
       SparkMax smax = DeviceCreator.createSparkMax();
       SparkFlex sflex = DeviceCreator.createSparkFlex();
+      Nova nova = DeviceCreator.createNova();
       TalonFXS tfxs = DeviceCreator.createTalonFXS();
       TalonFX tfx = DeviceCreator.createTalonFX();
       smcList.add(
@@ -156,6 +159,17 @@ public class ArmTest {
                           .withTelemetry(
                               "TalonFX(" + (40 + offset) + "[" + i + "]) Kraken",
                               TelemetryVerbosity.HIGH)))));
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new NovaWrapper(
+                      nova,
+                      DCMotor.getNEO(1),
+                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                          .withSubsystem(new SmartMotorControllerTestSubsystem())
+                          .withTelemetry(
+                              "Nova(" + (50 + offset) + "[" + i + "]) NEO",
+                              TelemetryVerbosity.HIGH)))));
     }
 
     return smcList.stream();
@@ -188,6 +202,8 @@ public class ArmTest {
       ((TalonFXS) motorController).close();
     } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
+    } else if (motorController instanceof Nova) {
+      ((Nova) motorController).close();
     }
   }
 

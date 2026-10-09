@@ -3,8 +3,8 @@
 
 #include "subsystems/DiffDriveSubsystem.h"
 
-#include <frc/system/plant/DCMotor.h>
-#include <units/length.h>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/length.hpp>
 
 using namespace yams::motorcontrollers;
 using namespace yams::gearing;
@@ -14,7 +14,7 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   // 3:1 then 4:1 in series = 12:1 total rotor-to-wheel reduction.
   // 4-inch wheel diameter (4.0 * 0.0254 m) gives circumference used for distance tracking.
   MechanismGearing gearing{GearBox::FromReductionStages({3.0, 4.0})};
-  const units::meter_t wheelDiameter{4.0 * 0.0254};
+  const wpi::units::meter_t wheelDiameter{4.0 * 0.0254};
 
   // Left side inverted because the left motor is mounted mirrored to the right.
   // Open-loop mode: DifferentialDrive sends duty-cycle directly, no closed-loop PID needed
@@ -43,8 +43,8 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
   // SparkWrapper takes a pointer (CAN IDs 21 and 24 from the header).
   // Followers (22 and 23) are not wired through YAMS here -- configure them via
   // SmartMotorControllerConfig::WithFollowers if you need YAMS to manage them.
-  m_leftSMC.emplace(&m_leftMotor, frc::DCMotor::NEO(2), &m_leftConfig);
-  m_rightSMC.emplace(&m_rightMotor, frc::DCMotor::NEO(2), &m_rightConfig);
+  m_leftSMC.emplace(&m_leftMotor, wpi::math::DCMotor::NEO(2), &m_leftConfig);
+  m_rightSMC.emplace(&m_rightMotor, wpi::math::DCMotor::NEO(2), &m_rightConfig);
 
   // DifferentialDrive's output callbacks: each lambda captures the SparkWrapper by pointer
   // and forwards the duty-cycle from WPILib's tank/arcade math to the actual motor.
@@ -63,19 +63,19 @@ DiffDriveSubsystem::DiffDriveSubsystem() {
 // Actively commands 0% output each loop.  Using Run (not RunOnce) means the subsystem
 // is continuously required, so any command that needs the drivetrain will properly
 // interrupt Stop rather than fighting it.
-frc2::CommandPtr DiffDriveSubsystem::Stop() {
+wpi::cmd::CommandPtr DiffDriveSubsystem::Stop() {
   return Run([this] { m_drive->StopMotor(); });
 }
 
 // Supplier-based overloads let callers pass joystick lambdas; the values are read
 // fresh each loop inside the Run closure so axis changes are picked up immediately.
-frc2::CommandPtr DiffDriveSubsystem::TankDrive(std::function<double()> left,
+wpi::cmd::CommandPtr DiffDriveSubsystem::TankDrive(std::function<double()> left,
                                                std::function<double()> right) {
   return Run([this, left, right] { m_drive->TankDrive(left(), right()); });
 }
 
 // zRotation is the turning rate (positive = turn left per WPILib convention).
-frc2::CommandPtr DiffDriveSubsystem::ArcadeDrive(std::function<double()> xSpeed,
+wpi::cmd::CommandPtr DiffDriveSubsystem::ArcadeDrive(std::function<double()> xSpeed,
                                                  std::function<double()> zRotation) {
   return Run([this, xSpeed, zRotation] { m_drive->ArcadeDrive(xSpeed(), zRotation()); });
 }

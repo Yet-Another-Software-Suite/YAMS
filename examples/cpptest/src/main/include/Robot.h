@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <frc/TimedRobot.h>
-#include <frc2/command/CommandPtr.h>
+#include <wpi/framework/TimedRobot.hpp>
+#include <wpi/commands2/CommandPtr.hpp>
 
 #include <optional>
 
 #include "RobotContainer.h"
 
-class Robot : public frc::TimedRobot {
+class Robot : public wpi::TimedRobot {
  public:
   Robot();
   void RobotPeriodic() override;
@@ -20,15 +20,15 @@ class Robot : public frc::TimedRobot {
   void AutonomousPeriodic() override;
   void TeleopInit() override;
   void TeleopPeriodic() override;
-  void TestInit() override;
-  void TestPeriodic() override;
+  void UtilityInit() override;
+  void UtilityPeriodic() override;
   void SimulationInit() override;
   void SimulationPeriodic() override;
 
  private:
   // Have it empty by default so that if testing teleop it
   // doesn't have undefined behavior and potentially crash.
-  std::optional<frc2::CommandPtr> m_autonomousCommand;
+  std::optional<wpi::cmd::CommandPtr> m_autonomousCommand;
 
   RobotContainer m_container;
 };

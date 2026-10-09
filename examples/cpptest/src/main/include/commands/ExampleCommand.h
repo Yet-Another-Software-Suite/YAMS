@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <frc2/command/Command.h>
-#include <frc2/command/CommandHelper.h>
+#include <wpi/commands2/Command.hpp>
+#include <wpi/commands2/CommandHelper.hpp>
 
 #include "subsystems/ExampleSubsystem.h"
 
@@ -15,7 +15,7 @@
  * directly; this is crucially important, or else the decorator functions in
  * Command will *not* work!
  */
-class ExampleCommand : public frc2::CommandHelper<frc2::Command, ExampleCommand> {
+class ExampleCommand : public wpi::cmd::CommandHelper<wpi::cmd::Command, ExampleCommand> {
  public:
   /**
    * Creates a new ExampleCommand.

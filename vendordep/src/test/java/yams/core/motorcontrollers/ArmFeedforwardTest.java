@@ -11,10 +11,11 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Volts;
 
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -35,6 +36,7 @@ import yams.core.math.LQRConfig;
 import yams.core.math.LQRController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -66,7 +68,8 @@ public class ArmFeedforwardTest {
   /** The last voltage the closed loop controller commanded, captured from setVoltage. */
   private static final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
 
-  private record Case(String name, Function<SmartMotorControllerConfig, SmartMotorController> create) {
+  private record Case(
+      String name, Function<SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
       return name;
@@ -99,6 +102,16 @@ public class ArmFeedforwardTest {
             "TalonFXS",
             cfg ->
                 new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg) {
+                  @Override
+                  public void setVoltage(Voltage voltage) {
+                    commandedVolts.set(voltage.in(Volts));
+                    super.setVoltage(voltage);
+                  }
+                }),
+        new Case(
+            "Nova",
+            cfg ->
+                new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), cfg) {
                   @Override
                   public void setVoltage(Voltage voltage) {
                     commandedVolts.set(voltage.in(Volts));
@@ -151,6 +164,8 @@ public class ArmFeedforwardTest {
       talonFXS.close();
     } else if (motorController instanceof TalonFX talonFX) {
       talonFX.close();
+    } else if (motorController instanceof Nova nova) {
+      nova.close();
     }
   }
 

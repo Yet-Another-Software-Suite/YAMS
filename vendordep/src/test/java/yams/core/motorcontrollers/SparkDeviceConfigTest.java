@@ -62,7 +62,8 @@ public class SparkDeviceConfigTest {
         .withZeroPower(MotorMode.BRAKE)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(1, 0, 0)
-        .withTelemetry("SparkDeviceConfigTest " + name, yams.core.telemetry.enums.TelemetryVerbosity.LOW);
+        .withTelemetry(
+            "SparkDeviceConfigTest " + name, yams.core.telemetry.enums.TelemetryVerbosity.LOW);
   }
 
   private static void close(SmartMotorController smc, SparkMax sparkMax) {
@@ -84,7 +85,9 @@ public class SparkDeviceConfigTest {
       throws InterruptedException {
     assertTrue(
         AbsoluteEncoderCases.eventually(
-            () -> Math.abs(actual.getAsDouble() - expected) <= 1e-4 * Math.max(1, Math.abs(expected))),
+            () ->
+                Math.abs(actual.getAsDouble() - expected)
+                    <= 1e-4 * Math.max(1, Math.abs(expected))),
         what + ": expected " + expected + " on the SPARK but was " + actual.getAsDouble());
   }
 
@@ -178,7 +181,8 @@ public class SparkDeviceConfigTest {
       final double target = -0.3;
       final double expected = smc.getMechanismPosition().in(Rotations) - target;
       smc.setEncoderPosition(Rotations.of(target));
-      assertDevice(expected, absoluteEncoder::getZeroOffset, "zero offset after setEncoderPosition");
+      assertDevice(
+          expected, absoluteEncoder::getZeroOffset, "zero offset after setEncoderPosition");
     } finally {
       close(smc, sparkMax);
     }

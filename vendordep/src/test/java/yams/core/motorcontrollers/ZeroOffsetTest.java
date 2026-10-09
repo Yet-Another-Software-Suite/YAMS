@@ -18,6 +18,8 @@ import com.revrobotics.encoder.DetachedEncoder;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.canEncoder.CanEncoder;
+import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +50,8 @@ import yams.helpers.MockHardwareExtension;
  * after going to 100° the simulated mechanism, the mechanism, and the encoder are all at 100°: the
  * offset is neither applied twice nor the wrong way round. An absolute encoder gives the angle
  * within a rotation, so the mechanism positions are compared within a rotation. Without an absolute
- * encoder, on the motor's encoder or a quadrature encoder, a SPARK rejects a zero offset, and a
- * Talon ignores it.
+ * encoder, on the motor's encoder or a quadrature encoder, a SPARK or Nova rejects a zero offset,
+ * and a Talon ignores it.
  */
 public class ZeroOffsetTest {
   private static final Angle kTolerance = Degrees.of(5);
@@ -110,6 +112,19 @@ public class ZeroOffsetTest {
           detachedEncoder.detachedEncoderAccessor.getDutyCycleOffset(),
           1e-6,
           name + ": CAN encoder duty cycle offset");
+    } else if (encoder instanceof CanEncoder || smc.getMotorController() instanceof Nova) {
+      // ThriftyLib keeps the CAN encoder's offset in 1/16384ths of a rotation.
+      final double[] zeroOffset = new double[1];
+      assertTrue(
+          AbsoluteEncoderCases.eventually(
+              () -> {
+                zeroOffset[0] =
+                    encoder instanceof CanEncoder canEncoder
+                        ? canEncoder.status().getZeroOffset()
+                        : ((Nova) smc.getMotorController()).status().getAbsOffset();
+                return Math.abs(zeroOffset[0] - offset) < 1e-3;
+              }),
+          name + ": Thrifty zero offset expected " + offset + " but was " + zeroOffset[0]);
     } else {
       final SparkBase spark = (SparkBase) smc.getMotorController();
       final double[] zeroOffset = new double[1];
@@ -214,11 +229,11 @@ public class ZeroOffsetTest {
         AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller())
             .withExternalEncoderZeroOffset(kZeroOffset);
     if (!testCase.feedback().talon()) {
-      // A SPARK rejects the option without an absolute encoder to give it to.
+      // A SPARK or Nova rejects the option without an absolute encoder to give it to.
       assertThrows(
           SmartMotorControllerConfigurationException.class,
           () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
-          name + ": a SPARK without an absolute encoder has no zero offset");
+          name + ": a SPARK or Nova without an absolute encoder has no zero offset");
       return;
     }
     // A Talon alerts that the zero offset is not applied without an external encoder: the mechanism

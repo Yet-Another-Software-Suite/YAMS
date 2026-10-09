@@ -13,6 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -51,7 +53,7 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  * publishing telemetry) at 20ms, mirroring a robot whose periodic loop runs at 20ms while
  * simulation physics steps at 10ms. This runs entirely on the calling thread against a virtual
  * timeline no real-time Notifier, no WPILib simulation timing hooks so it is fully
- * deterministic. The test runs across every vendor wrapper (Spark, TalonFXS, TalonFX) so a
+ * deterministic. The test runs across every vendor wrapper (Spark, TalonFXS, TalonFX, Nova) so a
  * regression in any one wrapper's {@code simIterate()} would be caught.
  */
 public class SimulationPeriodTest {
@@ -95,7 +97,14 @@ public class SimulationPeriodTest {
                 DCMotor.getKrakenX60(1),
                 ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
-                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW))));
+                    .withTelemetry("SimulationPeriodTest TalonFX", TelemetryVerbosity.LOW))),
+        Arguments.of(
+            new NovaWrapper(
+                DeviceCreator.createNova(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry("SimulationPeriodTest Nova", TelemetryVerbosity.LOW))));
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -117,6 +126,8 @@ public class SimulationPeriodTest {
       ((TalonFXS) motorController).close();
     } else if (motorController instanceof TalonFX) {
       ((TalonFX) motorController).close();
+    } else if (motorController instanceof Nova) {
+      ((Nova) motorController).close();
     }
   }
 
