@@ -253,16 +253,16 @@ jobs:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
 
+      # Each cross-platform artifact carries a maven-metadata.xml listing only this version. Skip
+      # those so publish adds this version to the gh-pages metadata, which lists every version.
       - name: Merge cross-platform artifacts (pass 2, full history)
         run: |
           for dir in cross/maven-*/; do
-            cp -r "$dir." vendordep/build/maven/
+            rsync -r --exclude 'maven-metadata.xml*' "$dir" vendordep/build/maven/
           done
 
       # The C++ artifacts live on cdn.yassrobotics.com instead of gh-pages, so their version history
-      # comes from the CDN's maven-metadata.xml, which publish adds this version to. This runs after
-      # the merge above: each cross-platform artifact carries a maven-metadata.xml listing only this
-      # version, which would otherwise replace the CDN's history.
+      # comes from the CDN's maven-metadata.xml, which publish adds this version to.
       - name: Fetch C++ maven metadata from the CDN
         if: ${{ env.skipCpp == 'false' }}
         run: |
