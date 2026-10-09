@@ -952,11 +952,17 @@ void TalonFXWrapper::SetEncoderVelocity(wpi::units::meters_per_second_t velocity
 // ---- Encoder reads ----------------------------------------------------------
 
 wpi::units::turn_t TalonFXWrapper::GetMechanismPosition() {
-  return m_talon->GetPosition(false).Refresh(m_reportStatusSignalErrors).GetValue();
+  if (m_config->GetUseExternalFeedback()) {
+    if (auto external = GetExternalEncoderMechanismPosition()) return *external;
+  }
+  return GetRelativeMechanismPosition();
 }
 
 wpi::units::turns_per_second_t TalonFXWrapper::GetMechanismVelocity() {
-  return m_talon->GetVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
+  if (m_config->GetUseExternalFeedback()) {
+    if (auto external = GetExternalEncoderMechanismVelocity()) return *external;
+  }
+  return GetRelativeMechanismVelocity();
 }
 
 wpi::units::turns_per_second_squared_t TalonFXWrapper::GetMechanismAcceleration() {
@@ -971,6 +977,18 @@ wpi::units::turns_per_second_t TalonFXWrapper::GetRotorVelocity() {
   return m_talon->GetRotorVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }
 
+wpi::units::turn_t TalonFXWrapper::GetRelativeMechanismPosition() {
+  return GetRotorPosition() * m_config->GetMotorGearing()
+                                  .value_or(gearing::MechanismGearing::kOne)
+                                  .GetRotorToMechanismRatio();
+}
+
+wpi::units::turns_per_second_t TalonFXWrapper::GetRelativeMechanismVelocity() {
+  return GetRotorVelocity() * m_config->GetMotorGearing()
+                                  .value_or(gearing::MechanismGearing::kOne)
+                                  .GetRotorToMechanismRatio();
+}
+
 wpi::units::meter_t TalonFXWrapper::GetMeasurementPosition() {
   return m_config->ConvertFromMechanism(GetMechanismPosition());
 }
@@ -983,7 +1001,7 @@ wpi::units::meters_per_second_squared_t TalonFXWrapper::GetMeasurementAccelerati
   return m_config->ConvertFromMechanism(GetMechanismAcceleration());
 }
 
-std::optional<wpi::units::degree_t> TalonFXWrapper::GetExternalEncoderPosition() {
+std::optional<wpi::units::turn_t> TalonFXWrapper::GetExternalEncoderSensorPosition() {
   if (m_cancoder)
     return m_cancoder->GetPosition(false).Refresh(m_reportStatusSignalErrors).GetValue();
   if (m_candi) {
@@ -995,7 +1013,7 @@ std::optional<wpi::units::degree_t> TalonFXWrapper::GetExternalEncoderPosition()
   return std::nullopt;
 }
 
-std::optional<wpi::units::degrees_per_second_t> TalonFXWrapper::GetExternalEncoderVelocity() {
+std::optional<wpi::units::turns_per_second_t> TalonFXWrapper::GetExternalEncoderSensorVelocity() {
   if (m_cancoder)
     return m_cancoder->GetVelocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
   if (m_candi) {
@@ -1005,6 +1023,22 @@ std::optional<wpi::units::degrees_per_second_t> TalonFXWrapper::GetExternalEncod
       return m_candi->GetPWM2Velocity(false).Refresh(m_reportStatusSignalErrors).GetValue();
   }
   return std::nullopt;
+}
+
+std::optional<wpi::units::turn_t> TalonFXWrapper::GetExternalEncoderMechanismPosition() {
+  auto external = GetExternalEncoderSensorPosition();
+  if (!external) return std::nullopt;
+  return *external * m_config->GetExternalEncoderGearing()
+                         .value_or(gearing::MechanismGearing::kOne)
+                         .GetRotorToMechanismRatio();
+}
+
+std::optional<wpi::units::turns_per_second_t> TalonFXWrapper::GetExternalEncoderMechanismVelocity() {
+  auto external = GetExternalEncoderSensorVelocity();
+  if (!external) return std::nullopt;
+  return *external * m_config->GetExternalEncoderGearing()
+                         .value_or(gearing::MechanismGearing::kOne)
+                         .GetRotorToMechanismRatio();
 }
 
 // ---- Motor status -----------------------------------------------------------

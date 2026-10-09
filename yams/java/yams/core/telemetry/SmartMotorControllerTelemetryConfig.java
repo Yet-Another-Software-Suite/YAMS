@@ -312,10 +312,10 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.kV).setDefaultValue(e.getKv());
       doubleFields.get(DoubleTelemetryField.kA).setDefaultValue(e.getKa());
     });
-    if (smc.getExternalEncoderPosition().isEmpty()) {
+    if (smc.getExternalEncoderMechanismPosition().isEmpty()) {
       doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).disable();
     }
-    if (smc.getExternalEncoderVelocity().isEmpty()) {
+    if (smc.getExternalEncoderMechanismVelocity().isEmpty()) {
       doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).disable();
     }
     return doubleFields;

@@ -206,6 +206,10 @@ class SparkWrapper : public SmartMotorController {
   wpi::units::turn_t GetMechanismPosition() override;
   /** @copydoc SmartMotorController::GetMechanismVelocity */
   wpi::units::turns_per_second_t GetMechanismVelocity() override;
+  /** @copydoc SmartMotorController::GetRelativeMechanismPosition */
+  wpi::units::turn_t GetRelativeMechanismPosition() override;
+  /** @copydoc SmartMotorController::GetRelativeMechanismVelocity */
+  wpi::units::turns_per_second_t GetRelativeMechanismVelocity() override;
   /** @copydoc SmartMotorController::GetMechanismAcceleration */
   wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override;
   /** @copydoc SmartMotorController::GetRotorPosition */
@@ -218,10 +222,10 @@ class SparkWrapper : public SmartMotorController {
   wpi::units::meters_per_second_t GetMeasurementVelocity() override;
   /** @copydoc SmartMotorController::GetMeasurementAcceleration */
   wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() override;
-  /** @copydoc SmartMotorController::GetExternalEncoderPosition */
-  std::optional<wpi::units::degree_t> GetExternalEncoderPosition() override;
-  /** @copydoc SmartMotorController::GetExternalEncoderVelocity */
-  std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() override;
+  /** @copydoc SmartMotorController::GetExternalEncoderMechanismPosition */
+  std::optional<wpi::units::turn_t> GetExternalEncoderMechanismPosition() override;
+  /** @copydoc SmartMotorController::GetExternalEncoderMechanismVelocity */
+  std::optional<wpi::units::turns_per_second_t> GetExternalEncoderMechanismVelocity() override;
 
   // ---- Motor status -------------------------------------------------------
   /** SPARKs do not report supply current; always empty. */

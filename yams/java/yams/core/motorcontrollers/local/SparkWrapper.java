@@ -1138,11 +1138,13 @@ public class SparkWrapper extends SmartMotorController {
 
   @Override
   public AngularVelocity getMechanismVelocity() {
-    final Optional<AngularVelocity> externalEncoderVelocity = getExternalEncoderVelocity();
-    if (externalEncoderVelocity.isPresent() && m_config.getUseExternalFeedback()) {
-      return externalEncoderVelocity.get();
+    if (m_config.getUseExternalFeedback()) {
+      final Optional<AngularVelocity> externalEncoderVelocity = getExternalEncoderMechanismVelocity();
+      if (externalEncoderVelocity.isPresent()) {
+        return externalEncoderVelocity.get();
+      }
     }
-    return RPM.of(sparkSim.map(SparkSim::getVelocity).orElseGet(() -> m_sparkRelativeEncoder.getVelocity().get())).times(m_config.getGearing().getRotorToMechanismRatio());
+    return getRelativeMechanismVelocity();
   }
 
   @Override
@@ -1152,12 +1154,23 @@ public class SparkWrapper extends SmartMotorController {
 
   @Override
   public Angle getMechanismPosition() {
-    Angle pos = Rotations.of(m_sparkRelativeEncoder.getPosition().get()).times(m_config.getGearing().getRotorToMechanismRatio());
-    final Optional<Angle> externalEncoderPosition = getExternalEncoderPosition();
-    if (externalEncoderPosition.isPresent() && m_config.getUseExternalFeedback()) {
-      pos = externalEncoderPosition.get();
+    if (m_config.getUseExternalFeedback()) {
+      final Optional<Angle> externalEncoderPosition = getExternalEncoderMechanismPosition();
+      if (externalEncoderPosition.isPresent()) {
+        return externalEncoderPosition.get();
+      }
     }
-    return pos;
+    return getRelativeMechanismPosition();
+  }
+
+  @Override
+  public AngularVelocity getRelativeMechanismVelocity() {
+    return RPM.of(sparkSim.map(SparkSim::getVelocity).orElseGet(() -> m_sparkRelativeEncoder.getVelocity().get())).times(m_config.getGearing().getRotorToMechanismRatio());
+  }
+
+  @Override
+  public Angle getRelativeMechanismPosition() {
+    return Rotations.of(m_sparkRelativeEncoder.getPosition().get()).times(m_config.getGearing().getRotorToMechanismRatio());
   }
 
   @Override
@@ -1171,12 +1184,12 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   @Override
-  public Optional<Angle> getExternalEncoderPosition() {
+  public Optional<Angle> getExternalEncoderMechanismPosition() {
     return getExternalEncoderSensorPosition().map(angle -> angle.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio()));
   }
 
   @Override
-  public Optional<AngularVelocity> getExternalEncoderVelocity() {
+  public Optional<AngularVelocity> getExternalEncoderMechanismVelocity() {
     return getExternalEncoderSensorVelocity().map(velocity -> velocity.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio()));
   }
 

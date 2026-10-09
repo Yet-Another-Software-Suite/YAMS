@@ -471,11 +471,11 @@ TEST_CASE_METHOD(TalonParityFixture, "TalonParity.CANcoderExternalEncoder", "[Ta
       [&] { return std::abs(hw.cancoder.GetAbsolutePosition().GetValue().value() - 0.6) < 0.02; }));
 
   // Setting the encoder position sets the CANcoder, and its position (not its absolute
-  // position) is reported.
+  // position) is reported in mechanism rotations.
   smc.SetEncoderPosition(1.3_tr);
   CHECK(WaitFor([&] {
-    auto position = smc.GetExternalEncoderPosition();
-    return position && std::abs(wpi::units::turn_t{*position}.value() - 2.6) < 0.02;
+    auto position = smc.GetExternalEncoderMechanismPosition();
+    return position && std::abs(position->value() - 1.3) < 0.01;
   }));
 }
 

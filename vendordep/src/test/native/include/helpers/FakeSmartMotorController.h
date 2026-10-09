@@ -101,6 +101,8 @@ class FakeSmartMotorController : public SmartMotorController {
   }
   wpi::units::turn_t GetMechanismPosition() override { return pos; }
   wpi::units::turns_per_second_t GetMechanismVelocity() override { return vel; }
+  wpi::units::turn_t GetRelativeMechanismPosition() override { return pos; }
+  wpi::units::turns_per_second_t GetRelativeMechanismVelocity() override { return vel; }
   wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override {
     return wpi::units::turns_per_second_squared_t{0};
   }
@@ -115,10 +117,10 @@ class FakeSmartMotorController : public SmartMotorController {
   wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() override {
     return wpi::units::meters_per_second_squared_t{0};
   }
-  std::optional<wpi::units::degree_t> GetExternalEncoderPosition() override {
+  std::optional<wpi::units::turn_t> GetExternalEncoderMechanismPosition() override {
     return std::nullopt;
   }
-  std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() override {
+  std::optional<wpi::units::turns_per_second_t> GetExternalEncoderMechanismVelocity() override {
     return std::nullopt;
   }
   std::optional<wpi::units::ampere_t> GetSupplyCurrent() override {

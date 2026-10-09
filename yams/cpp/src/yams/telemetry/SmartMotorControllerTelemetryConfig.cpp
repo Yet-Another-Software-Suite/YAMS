@@ -543,10 +543,10 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
   }
 
   // External encoder
-  if (!smc.GetExternalEncoderPosition()) {
+  if (!smc.GetExternalEncoderMechanismPosition()) {
     m_doubleFields.at(DoubleTelemetryField::ExternalEncoderPosition).Disable();
   }
-  if (!smc.GetExternalEncoderVelocity()) {
+  if (!smc.GetExternalEncoderMechanismVelocity()) {
     m_doubleFields.at(DoubleTelemetryField::ExternalEncoderVelocity).Disable();
   }
 

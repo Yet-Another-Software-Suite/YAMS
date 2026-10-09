@@ -367,8 +367,8 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ExternalFeedbackReadsExternalE
     rev::spark::SparkAbsoluteEncoderSim absSim{spark.get()};
     absSim.SetPosition(0.4);
     CHECK(smc.GetMechanismPosition().value() == Catch::Approx(0.2).margin(1e-6));
-    REQUIRE(smc.GetExternalEncoderPosition().has_value());
-    CHECK(smc.GetExternalEncoderPosition()->value() == Catch::Approx(72.0).margin(1e-4));
+    REQUIRE(smc.GetExternalEncoderMechanismPosition().has_value());
+    CHECK(smc.GetExternalEncoderMechanismPosition()->value() == Catch::Approx(0.2).margin(1e-6));
   }
   ResetSpark(*spark);
 }

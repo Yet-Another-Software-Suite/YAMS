@@ -213,18 +213,38 @@ class SmartMotorController {
   // ---- Encoder reads ------------------------------------------------------
 
   /**
-   * Get the mechanism position from the motor encoder (applies gearing).
+   * Get the mechanism position (applies gearing). Uses the external (absolute) encoder when one is
+   * configured with SmartMotorControllerConfig::WithUseExternalFeedbackEncoder(), otherwise the
+   * relative encoder. Use GetRelativeMechanismPosition() to only read the relative encoder.
    *
    * @return Mechanism position in turns.
    */
   virtual wpi::units::turn_t GetMechanismPosition() = 0;
 
   /**
-   * Get the mechanism velocity from the motor encoder (applies gearing).
+   * Get the mechanism velocity (applies gearing). Uses the external (absolute) encoder when one is
+   * configured with SmartMotorControllerConfig::WithUseExternalFeedbackEncoder(), otherwise the
+   * relative encoder. Use GetRelativeMechanismVelocity() to only read the relative encoder.
    *
    * @return Mechanism velocity in turns per second.
    */
   virtual wpi::units::turns_per_second_t GetMechanismVelocity() = 0;
+
+  /**
+   * Get the mechanism position from the relative encoder in the motor (applies gearing). Never uses
+   * the external (absolute) encoder.
+   *
+   * @return Mechanism position in turns from the relative encoder.
+   */
+  virtual wpi::units::turn_t GetRelativeMechanismPosition() = 0;
+
+  /**
+   * Get the mechanism velocity from the relative encoder in the motor (applies gearing). Never uses
+   * the external (absolute) encoder.
+   *
+   * @return Mechanism velocity in turns per second from the relative encoder.
+   */
+  virtual wpi::units::turns_per_second_t GetRelativeMechanismVelocity() = 0;
 
   /**
    * Get the mechanism acceleration (derived from velocity).
@@ -269,18 +289,21 @@ class SmartMotorController {
   virtual wpi::units::meters_per_second_squared_t GetMeasurementAcceleration() = 0;
 
   /**
-   * Get the position of the attached external (absolute) encoder if available.
+   * Get the mechanism position from the external (absolute) encoder (applies the external encoder
+   * gearing). Available whether or not the external encoder is used for feedback.
    *
-   * @return External encoder position, or empty if not present or not configured.
+   * @return Mechanism position in turns from the external encoder, or empty if none is attached.
    */
-  virtual std::optional<wpi::units::degree_t> GetExternalEncoderPosition() = 0;
+  virtual std::optional<wpi::units::turn_t> GetExternalEncoderMechanismPosition() = 0;
 
   /**
-   * Get the velocity of the attached external (absolute) encoder if available.
+   * Get the mechanism velocity from the external (absolute) encoder (applies the external encoder
+   * gearing). Available whether or not the external encoder is used for feedback.
    *
-   * @return External encoder velocity, or empty if not present or not configured.
+   * @return Mechanism velocity in turns per second from the external encoder, or empty if none is
+   * attached.
    */
-  virtual std::optional<wpi::units::degrees_per_second_t> GetExternalEncoderVelocity() = 0;
+  virtual std::optional<wpi::units::turns_per_second_t> GetExternalEncoderMechanismVelocity() = 0;
 
   // ---- Motor status -------------------------------------------------------
 

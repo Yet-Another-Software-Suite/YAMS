@@ -169,12 +169,12 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         dt.Set(smc.GetRotorVelocity().value());
         break;
       case DoubleTelemetryField::ExternalEncoderPosition:
-        dt.Set(smc.GetExternalEncoderPosition().value_or(wpi::units::degree_t{0}).value() / 360.0);
+        dt.Set(smc.GetExternalEncoderMechanismPosition().value_or(wpi::units::turn_t{0}).value());
         break;
       case DoubleTelemetryField::ExternalEncoderVelocity:
-        dt.Set(
-            smc.GetExternalEncoderVelocity().value_or(wpi::units::degrees_per_second_t{0}).value() /
-            360.0);
+        dt.Set(smc.GetExternalEncoderMechanismVelocity()
+                   .value_or(wpi::units::turns_per_second_t{0})
+                   .value());
         break;
       case DoubleTelemetryField::ActiveClosedLoopControllerSlot:
         dt.Set(static_cast<double>(static_cast<int>(smc.GetClosedLoopControllerSlot())));

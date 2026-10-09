@@ -85,8 +85,8 @@ TEST_CASE_METHOD(TalonApiFixture, "TalonApi.CANdiPWMSelection", "[TalonApi]") {
   smc.GetSimSupplier()->SetMechanismPosition(0.25_tr);
   smc.SimIterate();
   CHECK(WaitFor([&] {
-    auto position = smc.GetExternalEncoderPosition();
-    return position && std::abs(wpi::units::turn_t{*position}.value() - 0.25) < 0.02;
+    auto position = smc.GetExternalEncoderMechanismPosition();
+    return position && std::abs(position->value() - 0.25) < 0.02;
   }));
 }
 

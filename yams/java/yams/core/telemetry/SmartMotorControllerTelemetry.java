@@ -163,8 +163,8 @@ public class SmartMotorControllerTelemetry {
         case MechanismAcceleration -> dt.set(smc.getMechanismAcceleration().in(RotationsPerSecondPerSecond));
         case RotorPosition -> dt.set(smc.getRotorPosition().in(Rotations));
         case RotorVelocity -> dt.set(smc.getRotorVelocity().in(RotationsPerSecond));
-        case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderPosition().orElse(Rotations.zero()).in(Rotations));
-        case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderVelocity().orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
+        case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderMechanismPosition().orElse(Rotations.zero()).in(Rotations));
+        case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderMechanismVelocity().orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
         case ActiveClosedLoopControllerSlot -> dt.set(smc.getClosedLoopControllerSlot().ordinal());
       }
     }

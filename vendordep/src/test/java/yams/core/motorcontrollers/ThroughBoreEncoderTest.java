@@ -358,7 +358,7 @@ public class ThroughBoreEncoderTest {
 
         final Angle simulated = smc.getSimSupplier().orElseThrow().getMechanismPosition();
         final Angle mechanism = smc.getMechanismPosition();
-        final Angle encoder = smc.getExternalEncoderPosition().orElseThrow();
+        final Angle encoder = smc.getExternalEncoderMechanismPosition().orElseThrow();
         assertTrue(
             Math.abs(wrappedErrorDegrees(simulated, setpoint)) < kTolerance.in(Degrees),
             name

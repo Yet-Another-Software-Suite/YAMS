@@ -133,7 +133,7 @@ public class StartingPositionTest {
           name + ": simulated mechanism at the start");
       assertNear(
           smc.getMechanismPosition(), kStartingPosition, name + ": mechanism reading at the start");
-      smc.getExternalEncoderPosition()
+      smc.getExternalEncoderMechanismPosition()
           .ifPresent(
               encoder ->
                   assertNear(encoder, kStartingPosition, name + ": encoder reading at the start"));
@@ -151,7 +151,7 @@ public class StartingPositionTest {
               + simulated.in(Degrees)
               + "°");
       assertNear(smc.getMechanismPosition(), kSetpoint, name + ": mechanism reading after moving");
-      smc.getExternalEncoderPosition()
+      smc.getExternalEncoderMechanismPosition()
           .ifPresent(
               encoder -> assertNear(encoder, kSetpoint, name + ": encoder reading after moving"));
     } finally {

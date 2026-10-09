@@ -326,7 +326,7 @@ public class CANdiTest {
         scheduler.runFor(Seconds.of(2.0));
 
         final Angle mechanism = smc.getMechanismPosition();
-        final Angle candi = smc.getExternalEncoderPosition().orElseThrow();
+        final Angle candi = smc.getExternalEncoderMechanismPosition().orElseThrow();
         assertTrue(
             Math.abs(wrappedErrorDegrees(mechanism, setpoint)) < kTolerance.in(Degrees),
             name

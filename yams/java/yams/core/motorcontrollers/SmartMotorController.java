@@ -776,7 +776,10 @@ public abstract class SmartMotorController {
 
   /**
    * Get the Mechanism {@link AngularVelocity} taking the configured {@link MechanismGearing} into
-   * the measurement applied via the {@link SmartMotorControllerConfig}.
+   * the measurement applied via the {@link SmartMotorControllerConfig}. Uses
+   * {@link #getExternalEncoderMechanismVelocity()} when the external (absolute) encoder is enabled
+   * with {@link SmartMotorControllerConfig#withUseExternalFeedbackEncoder(boolean)}, otherwise
+   * {@link #getRelativeMechanismVelocity()}.
    *
    * @return Mechanism {@link AngularVelocity}
    */
@@ -792,11 +795,30 @@ public abstract class SmartMotorController {
 
   /**
    * Get the mechanism {@link Angle} taking the configured {@link MechanismGearing} from
-   * {@link SmartMotorControllerConfig}.
+   * {@link SmartMotorControllerConfig}. Uses {@link #getExternalEncoderMechanismPosition()} when the
+   * external (absolute) encoder is enabled with
+   * {@link SmartMotorControllerConfig#withUseExternalFeedbackEncoder(boolean)}, otherwise
+   * {@link #getRelativeMechanismPosition()}.
    *
    * @return Mechanism {@link Angle}
    */
   public abstract Angle getMechanismPosition();
+
+  /**
+   * Get the mechanism {@link AngularVelocity} from the relative encoder in the motor, scaled by the
+   * configured {@link MechanismGearing}. Never uses the external (absolute) encoder.
+   *
+   * @return Mechanism {@link AngularVelocity} from the relative encoder.
+   */
+  public abstract AngularVelocity getRelativeMechanismVelocity();
+
+  /**
+   * Get the mechanism {@link Angle} from the relative encoder in the motor, scaled by the configured
+   * {@link MechanismGearing}. Never uses the external (absolute) encoder.
+   *
+   * @return Mechanism {@link Angle} from the relative encoder.
+   */
+  public abstract Angle getRelativeMechanismPosition();
 
   /**
    * Gets the angular velocity of the motor.
@@ -814,18 +836,23 @@ public abstract class SmartMotorController {
   public abstract Angle getRotorPosition();
 
   /**
-   * Get the rotations of the mechanism according to the external encoder.
+   * Get the mechanism {@link Angle} from the external (absolute) encoder, scaled by the configured
+   * external encoder {@link MechanismGearing}. Available whether or not the external encoder is used
+   * for feedback.
    *
-   * @return {@link Angle} of the external encoder in the mechanism.
+   * @return Mechanism {@link Angle} from the external encoder, or empty if none is attached.
    */
-  public abstract Optional<Angle> getExternalEncoderPosition();
+  public abstract Optional<Angle> getExternalEncoderMechanismPosition();
 
   /**
-   * Get the velocity of the mechanism according to the external encoder.
+   * Get the mechanism {@link AngularVelocity} from the external (absolute) encoder, scaled by the
+   * configured external encoder {@link MechanismGearing}. Available whether or not the external
+   * encoder is used for feedback.
    *
-   * @return {@link AngularVelocity} of the external encoder in the mechanism.
+   * @return Mechanism {@link AngularVelocity} from the external encoder, or empty if none is
+   *         attached.
    */
-  public abstract Optional<AngularVelocity> getExternalEncoderVelocity();
+  public abstract Optional<AngularVelocity> getExternalEncoderMechanismVelocity();
 
   /**
    * Update the telemetry under the motor name under the given {@link NetworkTable}

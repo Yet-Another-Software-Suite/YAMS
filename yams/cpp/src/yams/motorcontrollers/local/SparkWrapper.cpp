@@ -1102,19 +1102,26 @@ void SparkWrapper::SetEncoderVelocity(wpi::units::meters_per_second_t velocity) 
 
 wpi::units::turn_t SparkWrapper::GetMechanismPosition() {
   if (m_config->GetUseExternalFeedback()) {
-    if (auto external = GetExternalEncoderPosition()) return wpi::units::turn_t{*external};
+    if (auto external = GetExternalEncoderMechanismPosition()) return *external;
   }
+  return GetRelativeMechanismPosition();
+}
+
+wpi::units::turns_per_second_t SparkWrapper::GetMechanismVelocity() {
+  if (m_config->GetUseExternalFeedback()) {
+    if (auto external = GetExternalEncoderMechanismVelocity()) return *external;
+  }
+  return GetRelativeMechanismVelocity();
+}
+
+wpi::units::turn_t SparkWrapper::GetRelativeMechanismPosition() {
   return wpi::units::turn_t{m_relEncoder->GetPosition().Get() *
                             m_config->GetMotorGearing()
                                 .value_or(gearing::MechanismGearing::kOne)
                                 .GetRotorToMechanismRatio()};
 }
 
-wpi::units::turns_per_second_t SparkWrapper::GetMechanismVelocity() {
-  if (m_config->GetUseExternalFeedback()) {
-    if (auto external = GetExternalEncoderVelocity())
-      return wpi::units::turns_per_second_t{*external};
-  }
+wpi::units::turns_per_second_t SparkWrapper::GetRelativeMechanismVelocity() {
   const double rotorRPM = m_sparkSim ? m_sparkSim->GetVelocity() : m_relEncoder->GetVelocity().Get();
   return wpi::units::turns_per_second_t{rotorRPM / 60.0 *
                                         m_config->GetMotorGearing()
@@ -1149,17 +1156,16 @@ wpi::units::meters_per_second_squared_t SparkWrapper::GetMeasurementAcceleration
   return m_config->ConvertFromMechanism(GetMechanismAcceleration());
 }
 
-std::optional<wpi::units::degree_t> SparkWrapper::GetExternalEncoderPosition() {
+std::optional<wpi::units::turn_t> SparkWrapper::GetExternalEncoderMechanismPosition() {
   auto sensor = GetExternalEncoderSensorPosition();
   if (!sensor) return std::nullopt;
-  return wpi::units::degree_t{wpi::units::turn_t{sensor->value() / MechanismToExternalEncoderRatio()}};
+  return wpi::units::turn_t{sensor->value() / MechanismToExternalEncoderRatio()};
 }
 
-std::optional<wpi::units::degrees_per_second_t> SparkWrapper::GetExternalEncoderVelocity() {
+std::optional<wpi::units::turns_per_second_t> SparkWrapper::GetExternalEncoderMechanismVelocity() {
   auto sensor = GetExternalEncoderSensorVelocity();
   if (!sensor) return std::nullopt;
-  return wpi::units::degrees_per_second_t{
-      wpi::units::turns_per_second_t{sensor->value() / MechanismToExternalEncoderRatio()}};
+  return wpi::units::turns_per_second_t{sensor->value() / MechanismToExternalEncoderRatio()};
 }
 
 // ---- Motor status -----------------------------------------------------------

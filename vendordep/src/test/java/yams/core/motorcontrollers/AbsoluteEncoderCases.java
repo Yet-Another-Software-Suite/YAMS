@@ -278,7 +278,7 @@ final class AbsoluteEncoderCases {
     if (encoder instanceof CANdi candi) {
       return candi.getPWM1Position().refresh().getValue();
     }
-    return smc.getExternalEncoderPosition().orElseThrow();
+    return smc.getExternalEncoderMechanismPosition().orElseThrow();
   }
 
   /** Let 10ms of real time pass. */

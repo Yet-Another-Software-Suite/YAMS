@@ -1226,22 +1226,13 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public AngularVelocity getMechanismVelocity() {
-    /*if (m_cancoder.isPresent())
-    {
-      return m_cancoder.get().getVelocity(false).refresh(m_reportStatusSignalErrors).getValue();
+    if (m_config.getUseExternalFeedback()) {
+      final Optional<AngularVelocity> externalEncoderVelocity = getExternalEncoderMechanismVelocity();
+      if (externalEncoderVelocity.isPresent()) {
+        return externalEncoderVelocity.get();
+      }
     }
-    if (m_candi.isPresent())
-    {
-      if (useCANdiPWM1())
-      {
-        return m_candi.get().getPWM1Velocity(false).refresh(m_reportStatusSignalErrors).getValue();
-      }
-      if (useCANdiPWM2())
-      {
-        return m_candi.get().getPWM2Velocity(false).refresh(m_reportStatusSignalErrors).getValue();
-      }
-    }*/
-    return m_mechanismVelocity.refresh(m_reportStatusSignalErrors).getValue();
+    return getRelativeMechanismVelocity();
   }
 
   @Override
@@ -1251,22 +1242,13 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public Angle getMechanismPosition() {
-    /*if (m_cancoder.isPresent())
-    {
-      return m_cancoder.get().getPosition(false).refresh(m_reportStatusSignalErrors).getValue();
+    if (m_config.getUseExternalFeedback()) {
+      final Optional<Angle> externalEncoderPosition = getExternalEncoderMechanismPosition();
+      if (externalEncoderPosition.isPresent()) {
+        return externalEncoderPosition.get();
+      }
     }
-    if (m_candi.isPresent())
-    {
-      if (useCANdiPWM1())
-      {
-        return m_candi.get().getPWM1Position(false).refresh(m_reportStatusSignalErrors).getValue();
-      }
-      if (useCANdiPWM2())
-      {
-        return m_candi.get().getPWM2Position(false).refresh(m_reportStatusSignalErrors).getValue();
-      }
-    }*/
-    return m_mechanismPosition.refresh(m_reportStatusSignalErrors).getValue();
+    return getRelativeMechanismPosition();
   }
 
   @Override
@@ -1280,7 +1262,21 @@ public class TalonFXWrapper extends SmartMotorController {
   }
 
   @Override
-  public Optional<Angle> getExternalEncoderPosition() {
+  public AngularVelocity getRelativeMechanismVelocity() {
+    return getRotorVelocity().times(m_config.getGearing().getRotorToMechanismRatio());
+  }
+
+  @Override
+  public Angle getRelativeMechanismPosition() {
+    return getRotorPosition().times(m_config.getGearing().getRotorToMechanismRatio());
+  }
+
+  /**
+   * Get the position of the external encoder's shaft, before the external encoder gearing.
+   *
+   * @return Angle of the external encoder, or empty if none is attached.
+   */
+  private Optional<Angle> getExternalEncoderSensorPosition() {
     if (m_cancoder.isPresent()) {
       return Optional.ofNullable(m_cancoder.get().getPosition(false).refresh(m_reportStatusSignalErrors).getValue());
     }
@@ -1295,8 +1291,12 @@ public class TalonFXWrapper extends SmartMotorController {
     return Optional.empty();
   }
 
-  @Override
-  public Optional<AngularVelocity> getExternalEncoderVelocity() {
+  /**
+   * Get the velocity of the external encoder's shaft, before the external encoder gearing.
+   *
+   * @return AngularVelocity of the external encoder, or empty if none is attached.
+   */
+  private Optional<AngularVelocity> getExternalEncoderSensorVelocity() {
     if (m_cancoder.isPresent()) {
       return Optional.ofNullable(m_cancoder.get().getVelocity(false).refresh(m_reportStatusSignalErrors).getValue());
     }
@@ -1309,6 +1309,16 @@ public class TalonFXWrapper extends SmartMotorController {
       }
     }
     return Optional.empty();
+  }
+
+  @Override
+  public Optional<Angle> getExternalEncoderMechanismPosition() {
+    return getExternalEncoderSensorPosition().map(angle -> angle.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio()));
+  }
+
+  @Override
+  public Optional<AngularVelocity> getExternalEncoderMechanismVelocity() {
+    return getExternalEncoderSensorVelocity().map(velocity -> velocity.times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio()));
   }
 
   @Override
