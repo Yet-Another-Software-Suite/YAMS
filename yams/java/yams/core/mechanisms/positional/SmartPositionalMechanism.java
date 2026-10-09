@@ -90,6 +90,9 @@ public abstract class SmartPositionalMechanism extends SmartMechanism {
    */
   protected MechanismLigament2d m_mechanismLigament;
 
+  /** Create the positional mechanism, subclasses set up the motor and telemetry. */
+  protected SmartPositionalMechanism() {}
+
   /**
    * {@link SmartPositionalMechanism} is at max, defined by the soft limit or hard limit on the
    * {@link SmartPositionalMechanism}.

@@ -28,6 +28,9 @@ public class BatterySim {
   /** Battery resistance. */
   private static Resistance batteryResistance = MilliOhms.of(20);
 
+  /** Static utility class, not instantiable. */
+  private BatterySim() {}
+
   /**
    * Open circuit voltage of the battery as a function of state of charge (0 to 1), based on a
    * typical FRC sealed lead-acid battery discharge curve. Voltage stays relatively flat for most of

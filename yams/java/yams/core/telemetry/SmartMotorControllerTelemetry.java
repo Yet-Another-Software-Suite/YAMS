@@ -75,6 +75,9 @@ public class SmartMotorControllerTelemetry {
   /** Telemetry config */
   private SmartMotorControllerTelemetryConfig config;
 
+  /** Create motor controller telemetry, publish it with {@link #setupTelemetry}. */
+  public SmartMotorControllerTelemetry() {}
+
   /**
    * Setup Telemetry Pub/Sub fields.
    *

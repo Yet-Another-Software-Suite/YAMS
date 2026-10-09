@@ -78,6 +78,9 @@ public abstract class SmartMechanism {
    */
   protected Mechanism2d          m_mechanismWindow;
 
+  /** Create the mechanism, subclasses set up the motor and telemetry. */
+  protected SmartMechanism() {}
+
   /**
    * Set the {@link SmartMotorController} to the given speed.
    *

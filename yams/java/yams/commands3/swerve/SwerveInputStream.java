@@ -72,11 +72,29 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     drive.getConfig().getMaximumChassisAngularVelocity().ifPresent(velocity -> maximumChassisAngularVelocity = velocity);
   }
 
+  /**
+   * Create a {@link SwerveInputStream} that rotates the robot with an angular velocity axis.
+   *
+   * @param drive {@link SwerveDrive} the stream drives.
+   * @param x     Field relative X (forward) translation axis, in [-1, 1].
+   * @param y     Field relative Y (left) translation axis, in [-1, 1].
+   * @param rot   Angular velocity axis, counter-clockwise positive, in [-1, 1].
+   */
   public SwerveInputStream(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
     this(drive, x, y);
     controllerOmega = Optional.of(rot);
   }
 
+  /**
+   * Create a {@link SwerveInputStream} that turns the robot to face the direction a controller stick points.
+   * Heading control is only used while {@link #withHeadingControl(BooleanSupplier)} is true.
+   *
+   * @param drive    {@link SwerveDrive} the stream drives.
+   * @param x        Field relative X (forward) translation axis, in [-1, 1].
+   * @param y        Field relative Y (left) translation axis, in [-1, 1].
+   * @param headingX Heading stick X axis, in [-1, 1].
+   * @param headingY Heading stick Y axis, in [-1, 1].
+   */
   public SwerveInputStream(
       SwerveDrive drive,
       DoubleSupplier x,
@@ -87,10 +105,29 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     withControllerHeadingAxis(headingX, headingY);
   }
 
+  /**
+   * Create a {@link SwerveInputStream} with only translation axes. Add rotation with
+   * {@link #withControllerRotationAxis(DoubleSupplier)} or
+   * {@link #withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)}.
+   *
+   * @param drive {@link SwerveDrive} the stream drives.
+   * @param x     Field relative X (forward) translation axis, in [-1, 1].
+   * @param y     Field relative Y (left) translation axis, in [-1, 1].
+   * @return A new {@link SwerveInputStream}.
+   */
   public static SwerveInputStream of(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y) {
     return new SwerveInputStream(drive, x, y);
   }
 
+  /**
+   * Create a {@link SwerveInputStream} that rotates the robot with an angular velocity axis.
+   *
+   * @param drive {@link SwerveDrive} the stream drives.
+   * @param x     Field relative X (forward) translation axis, in [-1, 1].
+   * @param y     Field relative Y (left) translation axis, in [-1, 1].
+   * @param rot   Angular velocity axis, counter-clockwise positive, in [-1, 1].
+   * @return A new {@link SwerveInputStream}.
+   */
   public static SwerveInputStream of(SwerveDrive drive, DoubleSupplier x, DoubleSupplier y, DoubleSupplier rot) {
     return new SwerveInputStream(drive, x, y, rot);
   }
@@ -128,78 +165,173 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return new SwerveInputStream(this);
   }
 
+  /**
+   * Get the name of the drive mode used by the last {@link #get()} call.
+   *
+   * @return Mode name, e.g. {@code ANGULAR_VELOCITY}, {@code HEADING}, {@code AIM} or {@code TRANSLATION_ONLY}.
+   */
   public String getCurrentModeName() {
     return currentMode.name();
   }
 
+  /**
+   * Get the controller axis deadband.
+   *
+   * @return Axis deadband, 0 when none is applied.
+   */
   public double getAxisDeadband() {
     return axisDeadband.orElse(0.0);
   }
 
+  /**
+   * Set the controller axis deadband.
+   *
+   * @param deadband Deadband applied to every axis, 0 to disable.
+   */
   public void setAxisDeadband(double deadband) {
     axisDeadband = deadband == 0 ? Optional.empty() : Optional.of(deadband);
   }
 
+  /**
+   * Get the translation axis scalar.
+   *
+   * @return Translation axis scalar, 1 when unscaled.
+   */
   public double getTranslationAxisScale() {
     return translationAxisScale.orElse(1.0);
   }
 
+  /**
+   * Set the translation axis scalar.
+   *
+   * @param scale Scalar in (0, 1] applied to the translation axes, 0 to disable.
+   */
   public void setTranslationAxisScale(double scale) {
     translationAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
   }
 
+  /**
+   * Get the angular velocity axis scalar.
+   *
+   * @return Angular velocity axis scalar, 1 when unscaled.
+   */
   public double getOmegaAxisScale() {
     return omegaAxisScale.orElse(1.0);
   }
 
+  /**
+   * Set the angular velocity axis scalar.
+   *
+   * @param scale Scalar in (0, 1] applied to the angular velocity axis, 0 to disable.
+   */
   public void setOmegaAxisScale(double scale) {
     omegaAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
   }
 
+  /**
+   * Get the chassis linear velocity a full translation axis maps to.
+   *
+   * @return Maximum chassis linear velocity.
+   */
   public LinearVelocity getMaximumChassisLinearVelocity() {
     return maximumChassisLinearVelocity;
   }
 
+  /**
+   * Set the chassis linear velocity a full translation axis maps to.
+   *
+   * @param velocity Maximum chassis linear velocity.
+   */
   public void setMaximumChassisLinearVelocity(LinearVelocity velocity) {
     maximumChassisLinearVelocity = velocity;
   }
 
+  /**
+   * Get the chassis angular velocity a full angular velocity axis maps to.
+   *
+   * @return Maximum chassis angular velocity.
+   */
   public AngularVelocity getMaximumChassisAngularVelocity() {
     return maximumChassisAngularVelocity;
   }
 
+  /**
+   * Set the chassis angular velocity a full angular velocity axis maps to.
+   *
+   * @param velocity Maximum chassis angular velocity.
+   */
   public void setMaximumChassisAngularVelocity(AngularVelocity velocity) {
     maximumChassisAngularVelocity = velocity;
   }
 
+  /**
+   * Check if the translation magnitude is cubed, for finer control near the center of the stick.
+   *
+   * @return True if translation cubing is enabled.
+   */
   public boolean isTranslationCubeEnabled() {
     return translationCube.isPresent() && translationCube.get().getAsBoolean();
   }
 
+  /**
+   * Enable or disable cubing the translation magnitude.
+   *
+   * @param enabled True to cube the translation magnitude.
+   */
   public void setTranslationCubeEnabled(boolean enabled) {
     translationCube = enabled ? Optional.of(() -> true) : Optional.empty();
   }
 
+  /**
+   * Check if the angular velocity axis is cubed, for finer control near the center of the stick.
+   *
+   * @return True if angular velocity cubing is enabled.
+   */
   public boolean isOmegaCubeEnabled() {
     return omegaCube.isPresent() && omegaCube.get().getAsBoolean();
   }
 
+  /**
+   * Enable or disable cubing the angular velocity axis.
+   *
+   * @param enabled True to cube the angular velocity axis.
+   */
   public void setOmegaCubeEnabled(boolean enabled) {
     omegaCube = enabled ? Optional.of(() -> true) : Optional.empty();
   }
 
+  /**
+   * Check if translation is flipped 180 degrees while on the red alliance.
+   *
+   * @return True if alliance relative control is enabled.
+   */
   public boolean isAllianceRelativeEnabled() {
     return allianceRelative.isPresent() && allianceRelative.get().getAsBoolean();
   }
 
+  /**
+   * Enable or disable flipping translation 180 degrees while on the red alliance.
+   *
+   * @param enabled True to enable alliance relative control.
+   */
   public void setAllianceRelativeEnabled(boolean enabled) {
     allianceRelative = enabled ? Optional.of(() -> true) : Optional.empty();
   }
 
+  /**
+   * Check if the translation axes are treated as robot relative.
+   *
+   * @return True if robot relative control is enabled.
+   */
   public boolean isRobotRelativeEnabled() {
     return robotRelative.isPresent() && robotRelative.get().getAsBoolean();
   }
 
+  /**
+   * Enable or disable treating the translation axes as robot relative.
+   *
+   * @param enabled True to enable robot relative control.
+   */
   public void setRobotRelativeEnabled(boolean enabled) {
     robotRelative = enabled ? Optional.of(() -> true) : Optional.empty();
   }
@@ -228,67 +360,153 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return telemetry;
   }
 
+  /**
+   * Set the chassis linear velocity a full translation axis maps to. Defaults to the drive's maximum chassis linear
+   * velocity.
+   *
+   * @param velocity Maximum chassis linear velocity.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withMaximumLinearVelocity(LinearVelocity velocity) {
     maximumChassisLinearVelocity = velocity;
     return this;
   }
 
+  /**
+   * Set the chassis angular velocity a full angular velocity axis maps to. Defaults to the drive's maximum chassis
+   * angular velocity.
+   *
+   * @param velocity Maximum chassis angular velocity.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withMaximumAngularVelocity(AngularVelocity velocity) {
     maximumChassisAngularVelocity = velocity;
     return this;
   }
 
+  /**
+   * Treat the translation axes as robot relative while enabled. The output is still field relative, and alliance
+   * relative flipping is skipped.
+   *
+   * @param enabled Robot relative control is used while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withRobotRelative(BooleanSupplier enabled) {
     robotRelative = Optional.of(enabled);
     return this;
   }
 
+  /**
+   * Always treat the translation axes as robot relative.
+   *
+   * @return this, for chaining.
+   */
   public SwerveInputStream withRobotRelative() {
     return withRobotRelative(() -> true);
   }
 
+  /**
+   * Rotate the output translation by an offset while enabled.
+   *
+   * @param angle   Offset to rotate the translation by.
+   * @param enabled The offset is applied while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withTranslationHeadingOffset(Rotation2d angle, BooleanSupplier enabled) {
     translationHeadingOffset = Optional.of(angle);
     translationHeadingOffsetEnabled = Optional.of(enabled);
     return this;
   }
 
+  /**
+   * Always rotate the output translation by an offset.
+   *
+   * @param angle Offset to rotate the translation by.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withTranslationHeadingOffset(Rotation2d angle) {
     return withTranslationHeadingOffset(angle, () -> true);
   }
 
+  /**
+   * Always flip translation 180 degrees while on the red alliance, so forward is away from the driver station.
+   *
+   * @return this, for chaining.
+   */
   public SwerveInputStream withAllianceRelativeControl() {
     return withAllianceRelativeControl(() -> true);
   }
 
+  /**
+   * Flip translation 180 degrees while on the red alliance, so forward is away from the driver station.
+   *
+   * @param enabled Alliance relative control is used while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withAllianceRelativeControl(BooleanSupplier enabled) {
     allianceRelative = Optional.ofNullable(enabled);
     return this;
   }
 
+  /**
+   * Cube the angular velocity axis while enabled, for finer control near the center of the stick.
+   *
+   * @param enabled The axis is cubed while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withCubeRotationControllerAxis(BooleanSupplier enabled) {
     omegaCube = Optional.of(enabled);
     return this;
   }
 
+  /**
+   * Always cube the angular velocity axis, for finer control near the center of the stick.
+   *
+   * @return this, for chaining.
+   */
   public SwerveInputStream withCubeRotationControllerAxis() {
     return withCubeRotationControllerAxis(() -> true);
   }
 
+  /**
+   * Cube the translation magnitude while enabled, for finer control near the center of the stick.
+   *
+   * @param enabled The magnitude is cubed while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withCubeTranslationControllerAxis(BooleanSupplier enabled) {
     translationCube = Optional.of(enabled);
     return this;
   }
 
+  /**
+   * Always cube the translation magnitude, for finer control near the center of the stick.
+   *
+   * @return this, for chaining.
+   */
   public SwerveInputStream withCubeTranslationControllerAxis() {
     return withCubeTranslationControllerAxis(() -> true);
   }
 
+  /**
+   * Set the axis used for angular velocity control.
+   *
+   * @param rot Angular velocity axis, counter-clockwise positive, in [-1, 1].
+   * @return this, for chaining.
+   */
   public SwerveInputStream withControllerRotationAxis(DoubleSupplier rot) {
     controllerOmega = Optional.of(rot);
     return this;
   }
 
+  /**
+   * Face the direction a controller stick points while heading control is enabled. The robot stops turning while
+   * the stick is inside the deadband. Replaces any heading from {@link #withHeading(Supplier)}.
+   *
+   * @param headingX Heading stick X axis, in [-1, 1].
+   * @param headingY Heading stick Y axis, in [-1, 1].
+   * @return this, for chaining.
+   */
   public SwerveInputStream withControllerHeadingAxis(DoubleSupplier headingX, DoubleSupplier headingY) {
     withHeading(() -> Radians.of(Math.atan2(headingX.getAsDouble(), headingY.getAsDouble())));
     controllerHeadingX = Optional.of(headingX);
@@ -296,30 +514,68 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return this;
   }
 
+  /**
+   * Set the deadband applied to every controller axis.
+   *
+   * @param deadband Axis deadband, 0 to disable.
+   * @return this, for chaining.
+   */
   public SwerveInputStream deadband(double deadband) {
     axisDeadband = deadband == 0 ? Optional.empty() : Optional.of(deadband);
     return this;
   }
 
+  /**
+   * Set the deadband applied to every controller axis.
+   *
+   * @param deadband Axis deadband, 0 to disable.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withDeadband(double deadband) {
     return deadband(deadband);
   }
 
+  /**
+   * Scale the translation axes.
+   *
+   * @param scaleTranslation Scalar in (0, 1], 0 to disable.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withScaleTranslation(double scaleTranslation) {
     translationAxisScale = scaleTranslation == 0 ? Optional.empty() : Optional.of(scaleTranslation);
     return this;
   }
 
+  /**
+   * Scale the angular velocity axis.
+   *
+   * @param scaleRotation Scalar in (0, 1], 0 to disable.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withScaleRotation(double scaleRotation) {
     omegaAxisScale = scaleRotation == 0 ? Optional.empty() : Optional.of(scaleRotation);
     return this;
   }
 
+  /**
+   * Face the heading from {@link #withHeading(Supplier)} or
+   * {@link #withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)} while enabled. Requires a rotation controller
+   * on the {@link SwerveDrive}.
+   *
+   * @param trigger Heading control is used while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withHeadingControl(BooleanSupplier trigger) {
     headingEnabled = Optional.of(trigger);
     return this;
   }
 
+  /**
+   * Set the field relative heading to face while heading control is enabled. Replaces any controller heading axis.
+   *
+   * @param heading Field relative heading supplier.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withHeading(Supplier<Angle> heading) {
     headingSupplier = Optional.ofNullable(heading);
     controllerHeadingX = Optional.empty();
@@ -327,12 +583,26 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     return this;
   }
 
+  /**
+   * Face a target pose while enabled. Requires a rotation controller on the {@link SwerveDrive}.
+   *
+   * @param aimTarget Field relative pose to aim at, null for no target.
+   * @param trigger   Aiming is used while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withAim(Supplier<Pose2d> aimTarget, BooleanSupplier trigger) {
-    this.aimTarget = aimTarget.equals(Pose2d.ZERO) ? Optional.empty() : Optional.of(aimTarget);
+    this.aimTarget = Optional.ofNullable(aimTarget);
     aimEnabled = Optional.of(trigger);
     return this;
   }
 
+  /**
+   * Hold the heading the robot had when enabled and only translate. Requires a rotation controller on the
+   * {@link SwerveDrive}.
+   *
+   * @param trigger Translation only control is used while this is true.
+   * @return this, for chaining.
+   */
   public SwerveInputStream withTranslationOnly(BooleanSupplier trigger) {
     translationOnlyEnabled = Optional.of(trigger);
     return this;

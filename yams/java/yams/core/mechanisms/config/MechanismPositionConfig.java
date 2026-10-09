@@ -65,6 +65,9 @@ public class MechanismPositionConfig {
    */
   protected Plane plane = Plane.XZ;
 
+  /** Create a {@link MechanismPositionConfig} with no relative position or robot size limits. */
+  public MechanismPositionConfig() {}
+
   /**
    * Set the position of the {@link SmartPositionalMechanism} relative to the robot.
    *

@@ -17,6 +17,7 @@ import org.wpilib.util.struct.Struct;
 import yams.core.mechanisms.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
 
+/** Publishes {@link SwerveDrive} telemetry to NetworkTables and DataLog, and applies live tuning values. */
 public class SwerveDriveTelemetry {
   private final SwerveDriveTelemetryConfig                                                   m_config;
   private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>                   m_doubleTelemetry;
@@ -26,7 +27,11 @@ public class SwerveDriveTelemetry {
   private NetworkTable                                                                       m_dataNt;
   private NetworkTable                                                                       m_tuningNt;
 
-  /** Create SwerveDrive telemetry for logging in NetworkTables and DataLog. */
+  /**
+   * Create SwerveDrive telemetry for logging in NetworkTables and DataLog.
+   *
+   * @param config {@link SwerveDriveTelemetryConfig} selecting what to publish.
+   */
   public SwerveDriveTelemetry(SwerveDriveTelemetryConfig config) {
     m_config = config;
   }

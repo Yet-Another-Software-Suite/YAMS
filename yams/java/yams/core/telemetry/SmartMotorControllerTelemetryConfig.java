@@ -69,6 +69,9 @@ public class SmartMotorControllerTelemetryConfig {
   /** {@link DoubleTelemetryField} to enable or disable. */
   private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> doubleFields = Arrays.stream(DoubleTelemetryField.values()).collect(Collectors.toMap(e -> e, DoubleTelemetryField::create));
 
+  /** Create a {@link SmartMotorControllerTelemetryConfig} with the default fields. */
+  public SmartMotorControllerTelemetryConfig() {}
+
   /**
    * Set up a DataLog entry for this {@link SmartMotorController}
    *

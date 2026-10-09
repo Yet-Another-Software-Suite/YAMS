@@ -41,6 +41,9 @@ public abstract class SmartVelocityMechanism extends SmartMechanism {
    */
   protected MechanismLigament2d mechanismLigament;
 
+  /** Create the velocity mechanism, subclasses set up the motor and telemetry. */
+  protected SmartVelocityMechanism() {}
+
   /**
    * Get the ligament of the 2D mechanism model. Used to change the position of the mechanism model
    * in the SmartDashboard.

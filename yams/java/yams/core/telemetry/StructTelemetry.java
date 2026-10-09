@@ -40,6 +40,7 @@ import org.wpilib.util.struct.Struct;
  * }</pre>
  *
  * @param <T> Type of the value being published, must be {@link Struct} serializable.
+ * @param <F> Enum type identifying which field this telemetry entry represents.
  */
 public class StructTelemetry<T, F> {
   /**
@@ -271,6 +272,11 @@ public class StructTelemetry<T, F> {
     tuningTable.ifPresent(table -> table.getEntry(key).unpublish());
   }
 
+  /**
+   * Get the field.
+   *
+   * @return field.
+   */
   public F getField() {
     return field;
   }

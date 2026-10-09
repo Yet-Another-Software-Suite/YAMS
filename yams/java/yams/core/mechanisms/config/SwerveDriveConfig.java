@@ -186,6 +186,11 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   protected SwerveDriveConfig() {
   }
 
+  /**
+   * Copy a {@link SwerveDriveConfig}.
+   *
+   * @param cfg {@link SwerveDriveConfig} to copy.
+   */
   protected SwerveDriveConfig(SwerveDriveConfig<T> cfg) {
     this.telemetryVerbosity = cfg.telemetryVerbosity;
     this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;

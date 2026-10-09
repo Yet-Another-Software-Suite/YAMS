@@ -81,6 +81,9 @@ public class MechanismTelemetry {
    */
   private Optional<String>          dataLogName       = Optional.empty();
 
+  /** Create mechanism telemetry, publish it with {@link #setupTelemetry(String)}. */
+  public MechanismTelemetry() {}
+
   /**
    * Setup loop time publisher.
    */

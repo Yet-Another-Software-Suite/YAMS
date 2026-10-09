@@ -84,6 +84,9 @@ public abstract class SmartMotorController {
   /** Telemetry. */
   protected SmartMotorControllerTelemetry telemetry = new SmartMotorControllerTelemetry();
 
+  /** Create the motor controller, subclasses wrap the vendor device. */
+  protected SmartMotorController() {}
+
   /** {@link SmartMotorControllerConfig} for the motor. */
   protected SmartMotorControllerConfig<?> m_config;
 

@@ -49,6 +49,9 @@ public class SmartMath {
     return sensorToMechanismRatio;
   }
 
+  /** Static utility class, not instantiable. */
+  private SmartMath() {}
+
   /**
    * Create the gear ratio based off of the stages in the gear box.
    *

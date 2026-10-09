@@ -82,6 +82,8 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *     .withMechanismLowerLimit(Degrees.of(-90))
  *     .withGearing(new GearBox(12.0, 60.0));
  * }</pre>
+ *
+ * @param <T> Concrete config type, so chained {@code with} calls keep the subclass type.
  */
 public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerConfig<T>> {
   /**

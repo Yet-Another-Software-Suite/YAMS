@@ -229,10 +229,11 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS* talon, wpi::math::DCMotor d
 
 TalonFXSWrapper::~TalonFXSWrapper() {
   Close();
-  m_rioControllerAlert.reset();
-  m_startingPositionExternalEncoderAlert.reset();
-  m_zeroOffsetNoExternalEncoderAlert.reset();
-  m_discontinuityPointNoExternalEncoderAlert.reset();
+  if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
+  if (m_startingPositionExternalEncoderAlert) m_startingPositionExternalEncoderAlert->Set(false);
+  if (m_zeroOffsetNoExternalEncoderAlert) m_zeroOffsetNoExternalEncoderAlert->Set(false);
+  if (m_discontinuityPointNoExternalEncoderAlert)
+    m_discontinuityPointNoExternalEncoderAlert->Set(false);
 }
 
 // ---- Helpers ----------------------------------------------------------------

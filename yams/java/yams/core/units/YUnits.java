@@ -65,6 +65,9 @@ import org.wpilib.units.TimeUnit;
  * }</pre>
  */
 public class YUnits {
+  /** Static unit constants, not instantiable. */
+  private YUnits() {}
+
   // Angular Momentum Units
   /**
    * Pounds * Feet/Second

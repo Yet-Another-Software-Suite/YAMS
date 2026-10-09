@@ -34,6 +34,9 @@ public class SmartMotorControllerCommandRegistry {
    */
   private static Map<String, Mechanism>      commandOwners    = new HashMap<>();
 
+  /** Static registry, not instantiable. */
+  private SmartMotorControllerCommandRegistry() {}
+
   /**
    * Create the {@link Command} and publish it to NetworkTables.
    *
