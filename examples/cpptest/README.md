@@ -102,9 +102,7 @@ A tank-drive differential drivetrain.
 |-------------------|---------------------------------------|
 | Phoenix6          | TalonFX, TalonFXS, CANcoder, Pigeon 2 |
 | REVLib            | SparkMax brushless motor controllers  |
-| ReduxLib          | NetworkTables data compression        |
-| ThriftyLib        | Utility helpers                       |
-| StudicaLib        | Studia hardware support               |
+| ThriftyLib        | Thrifty Nova motor controllers        |
 | WPILibNewCommands | Command-based robot framework         |
 
 ## Building and deploying
