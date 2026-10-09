@@ -1077,6 +1077,23 @@ std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetExternalEncoder
   return m_externalEncoderDiscontinuityPoint;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearExponentialProfile(
+    double kV, double kA, wpi::units::volt_t maxInput) {
+  RequireCircumference("set a linear exponential profile");
+  using LinearProfile = wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>;
+  m_linearExpoProfile = LinearProfile{
+      LinearProfile::Constraints{maxInput, LinearProfile::kV_t{kV}, LinearProfile::kA_t{kA}}};
+  m_linearClosedLoopController = true;
+  m_expoMaxInput = maxInput;
+  m_expoProfile = std::nullopt;
+  m_trapProfile = std::nullopt;
+  m_linearTrapProfile = std::nullopt;
+  // Per mechanism rotation: V/(m/s) * m/rotation.
+  m_expoMotionMagicKV = kV * m_mechanismCircumference->value();
+  m_expoMotionMagicKA = kA * m_mechanismCircumference->value();
+  return *this;
+}
+
 bool SmartMotorControllerConfig::HasTrapezoidProfile() const {
   m_basicOptions.erase(BasicOptions::TrapezoidProfile);
   return m_trapProfile.has_value() || m_linearTrapProfile.has_value();

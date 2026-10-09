@@ -24,13 +24,15 @@
 #include <ctre/phoenix6/controls/VelocityTorqueCurrentFOC.hpp>
 #include <ctre/phoenix6/controls/VelocityVoltage.hpp>
 #include <ctre/phoenix6/controls/VoltageOut.hpp>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <variant>
 #include <wpi/simulation/DCMotorSim.hpp>
+#include <wpi/units/frequency.hpp>
 #include <wpi/util/Alert.hpp>
 
-#include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 
 namespace yams::motorcontrollers::remote {
@@ -78,6 +80,9 @@ class TalonFXWrapper : public SmartMotorController {
   /**
    * Construct a TalonFXWrapper.
    *
+   * Throws SmartMotorControllerConfigurationException (or std::invalid_argument) if ApplyConfig()
+   * rejects the config; anything already started is released first.
+   *
    * @param talon   TalonFX hardware object (must outlive this wrapper).
    * @param dcMotor DC motor model used for simulation.
    * @param config  Initial SmartMotorControllerConfig to apply.
@@ -85,7 +90,55 @@ class TalonFXWrapper : public SmartMotorController {
   TalonFXWrapper(ctre::phoenix6::hardware::TalonFX* talon, wpi::math::DCMotor dcMotor,
                  SmartMotorControllerConfig* config);
 
+  /** Calls Close() and releases the alerts. */
   ~TalonFXWrapper();
+
+  // ---- TalonFX specific ---------------------------------------------------
+  /**
+   * Enable FOC for the position and velocity control requests; ignored by unlicensed devices.
+   *
+   * Throws SmartMotorControllerConfigurationException if a request is a TorqueCurrentFOC request
+   * (set through WithVendorControlRequest), which cannot toggle FOC.
+   *
+   * @return *this for chaining.
+   */
+  TalonFXWrapper& EnableFOC();
+  /**
+   * Disable FOC for the position and velocity control requests.
+   *
+   * Throws SmartMotorControllerConfigurationException if a request is a TorqueCurrentFOC request.
+   *
+   * @return *this for chaining.
+   */
+  TalonFXWrapper& DisableFOC();
+  /**
+   * Whether CANdi PWM1 is the feedback sensor of the configuration being applied.
+   *
+   * Throws std::invalid_argument if it is but no CANdi is configured as the external encoder.
+   *
+   * @return true if the feedback sensor source is a CANdi PWM1 source.
+   */
+  bool UseCANdiPWM1() const;
+  /**
+   * Whether CANdi PWM2 is the feedback sensor of the configuration being applied.
+   *
+   * Throws std::invalid_argument if it is but no CANdi is configured as the external encoder.
+   *
+   * @return true if the feedback sensor source is a CANdi PWM2 source.
+   */
+  bool UseCANdiPWM2() const;
+  /**
+   * Set the update frequency of the status signals this controller reads.
+   *
+   * @param frequency Update frequency.
+   */
+  void SetUpdateFrequency(wpi::units::hertz_t frequency);
+  /**
+   * Apply the whole TalonFX configuration, retrying every 10 ms up to 10 times.
+   *
+   * @return Status of the last attempt.
+   */
+  ctre::phoenix::StatusCode ForceConfigApply();
 
   // ---- Telemetry ----------------------------------------------------------
   /** @copydoc SmartMotorController::GetUnsupportedTelemetryFields */
@@ -104,7 +157,7 @@ class TalonFXWrapper : public SmartMotorController {
   // ---- Encoder sync -------------------------------------------------------
   /** TalonFX uses an absolute sensor internally; has no effect. */
   void SeedRelativeEncoder() override;
-  /** CANcoder fusion is handled automatically by Phoenix 6; has no effect. */
+  /** The TalonFX fuses its feedback sources on the device; has no effect. */
   void SynchronizeRelativeEncoder() override;
 
   // ---- Open-loop outputs --------------------------------------------------
@@ -136,6 +189,18 @@ class TalonFXWrapper : public SmartMotorController {
    * @param velocity Target linear velocity.
    */
   void SetVelocity(wpi::units::meters_per_second_t velocity) override;
+  /**
+   * Command a velocity setpoint with an additional feedforward force, applied by the TalonFX as
+   * an arbitrary feedforward (duty cycle, volts or TorqueCurrentFOC amps depending on the
+   * request).  With an LQR the RoboRIO loop adds it instead.
+   *
+   * Throws SmartMotorControllerConfigurationException if the mechanism circumference is not set.
+   *
+   * @param velocity         Target mechanism angular velocity.
+   * @param feedforwardForce Additional feedforward force at the mechanism.
+   */
+  void SetVelocity(wpi::units::turns_per_second_t velocity,
+                   wpi::units::newton_t feedforwardForce) override;
 
   // ---- Encoder writes -----------------------------------------------------
   /** @copydoc SmartMotorController::SetEncoderPosition(wpi::units::turn_t) */
@@ -248,7 +313,9 @@ class TalonFXWrapper : public SmartMotorController {
    * @param maxVelocity Maximum linear velocity.
    */
   void SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t maxVelocity) override;
-  /** @copydoc SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t) */
+  /** @copydoc
+   * SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t)
+   */
   void SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t maxAcc) override;
   /**
    * Set the maximum linear acceleration for the motion profile.
@@ -264,12 +331,25 @@ class TalonFXWrapper : public SmartMotorController {
   void SetExponentialProfile(std::optional<double> kV, std::optional<double> kA,
                              std::optional<wpi::units::volt_t> maxInput) override;
   /**
-   * Select the active closed-loop gain slot.
-   * TalonFX supports 3 slots (SLOT_0 through SLOT_2); SLOT_3 is silently ignored.
+   * Select the active closed-loop gain slot and forward it to loosely coupled followers.
+   * TalonFX supports 3 slots (SLOT_0 through SLOT_2); throws std::invalid_argument for SLOT_3.
    *
    * @param slot Gain slot to activate.
    */
   void SetClosedLoopSlot(ClosedLoopControllerSlot slot) override;
+  /**
+   * Update the mechanism gearing and the TalonFX sensor ratios that depend on it.
+   *
+   * @param gearing New mechanism gearing.
+   */
+  void SetMechanismGearing(const gearing::MechanismGearing& gearing) override;
+  /**
+   * Update the mechanism circumference, rewrite the values converted with it (linear gains and
+   * motion profile constraints) and forward it to loosely coupled followers.
+   *
+   * @param circumference New mechanism circumference.
+   */
+  void SetMechanismCircumference(wpi::units::meter_t circumference) override;
 
   /** @copydoc SmartMotorController::GetConfig */
   SmartMotorControllerConfig& GetConfig() override;
@@ -316,20 +396,50 @@ class TalonFXWrapper : public SmartMotorController {
   ctre::phoenix6::controls::DutyCycleOut m_dutyCycleReq{0.0};
 
   // External sensors
-  std::optional<std::reference_wrapper<ctre::phoenix6::hardware::CANcoder>> m_cancoder;
-  std::optional<std::reference_wrapper<ctre::phoenix6::hardware::CANdi>> m_candi;
+  ctre::phoenix6::hardware::CANcoder* m_cancoder{nullptr};
+  ctre::phoenix6::hardware::CANdi* m_candi{nullptr};
 
   // Simulation
   std::optional<wpi::sim::DCMotorSim> m_motorSim;
 
-  math::DerivativeTimeFilter m_accelFilter{20_ms};
-
+  /** Shown while the closed loop controller runs on the RoboRIO. */
   std::optional<wpi::util::Alert> m_rioControllerAlert;
+  /** Shown when the starting position is not applied because an external encoder is used. */
+  std::optional<wpi::util::Alert> m_startingPositionExternalEncoderAlert;
+  /** Shown when a zero offset is set without an external encoder. */
+  std::optional<wpi::util::Alert> m_zeroOffsetNoExternalEncoderAlert;
+  /** Shown when a discontinuity point is set without an external encoder. */
+  std::optional<wpi::util::Alert> m_discontinuityPointNoExternalEncoderAlert;
 
-  void ApplyPIDConfig();
-  void ApplyFeedforwardConfig();
-  void ApplyLimitsConfig();
-  void ApplyMotionMagicConfig();
+  /** Unique alert id, like the Java buildAlertId. */
+  std::string AlertId(const std::string& alertType) const;
+  /** Send a control request, retrying up to 8 times until it is accepted. */
+  void EnsureRequest(const std::function<ctre::phoenix::StatusCode()>& request);
+  /** Apply one configuration group, retrying every 10 ms up to 10 times. */
+  template <typename Group>
+  ctre::phoenix::StatusCode ApplyGroup(const Group& group);
+  /** Set FOC on the position and velocity requests. */
+  void SetFOC(bool foc);
+  /** Mechanism rotations per linear gain unit (1 when the closed loop is not linear). */
+  double PositionGainUnitsPerRotation() const;
+  /** Mechanism rotations/s per linear velocity gain unit (1 when not linear). */
+  double VelocityGainUnitsPerRotation() const;
+  /** Mechanism rotations/s² per linear acceleration gain unit (1 when not linear). */
+  double AccelerationGainUnitsPerRotation() const;
+  /** Write PID gains (YAMS units) to a TalonFX slot; throws for SLOT_3. */
+  void WriteSlotPID(ClosedLoopControllerSlot slot, double kP, double kI, double kD);
+  /** Write the gains of every slot that has PID or feedforward configured. */
+  void WriteSlotGains(const SmartMotorControllerConfig& config);
+  /** Write the Motion Magic constraints from the config's profiles. */
+  void WriteMotionMagic(const SmartMotorControllerConfig& config);
+  /** Write the sensor ratios that depend on the mechanism and external encoder gearing. */
+  void WriteSensorRatios(const SmartMotorControllerConfig& config);
+  /** Configure the external encoder, or the rotor sensor when none is used. */
+  void ApplyExternalEncoder(const SmartMotorControllerConfig& config);
+  /** Configure the tightly coupled followers. */
+  void ApplyFollowers(const SmartMotorControllerConfig& config);
+  /** Use the vendor control request from the config, if any. */
+  void ApplyVendorControlRequest(const SmartMotorControllerConfig& config);
 };
 
 }  // namespace yams::motorcontrollers::remote

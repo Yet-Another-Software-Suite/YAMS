@@ -239,6 +239,20 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithExponentialProfile(
       wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>::Constraints constraints);
 
+  /**
+   * Set a linear (meters based) exponential motion profile directly from its gains.
+   *
+   * Requires a mechanism circumference (throws SmartMotorControllerConfigurationException
+   * otherwise) and switches the closed-loop controller to linear units.
+   *
+   * @param kV       Velocity constant in volts per meter per second.
+   * @param kA       Acceleration constant in volts per meter per second squared.
+   * @param maxInput Maximum voltage input.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithLinearExponentialProfile(double kV, double kA,
+                                                           wpi::units::volt_t maxInput);
+
   // ---- LQR ---------------------------------------------------------------
 
   /**

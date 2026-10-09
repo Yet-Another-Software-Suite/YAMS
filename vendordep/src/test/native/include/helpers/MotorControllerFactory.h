@@ -37,11 +37,16 @@ using namespace motorcontrollers;
 // the same Phoenix/REV simulation state.
 inline constexpr int kReservedCanIdStart = 55;
 
+// CAN IDs kTalonTestCanIdStart-(kReservedCanIdStart - 1) are used by the Phoenix devices shared by
+// the TalonFX/TalonFXS wrapper tests (see TalonTestHardware.h). Phoenix's simulation identifies
+// devices by type and ID only, so per-test hardware must not reuse them either.
+inline constexpr int kTalonTestCanIdStart = 52;
+
 // Unique CAN IDs across per-test instances, incremented atomically.
-// Wraps within 1-(kReservedCanIdStart - 1).
+// Wraps within 1-(kTalonTestCanIdStart - 1).
 inline std::atomic<int> gCanIdCounter{0};
 
-inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kReservedCanIdStart - 1)) + 1; }
+inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kTalonTestCanIdStart - 1)) + 1; }
 
 // CAN IDs for hardware kept alive for the whole test binary (e.g. shared swerve hardware).
 // Never wraps; running out of reserved IDs is a test setup bug.
