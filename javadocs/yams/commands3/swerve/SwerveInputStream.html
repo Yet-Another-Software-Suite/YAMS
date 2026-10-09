@@ -53,17 +53,11 @@ loadScripts(document, 'script');</script>
 <nav role="navigation" class="toc" aria-label="Table of contents">
 <div class="toc-header">Contents&nbsp;<input type="text" class="filter-input" disabled placeholder="Filter contents (type .)" aria-label="Filter table of contents" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="Reset"></div>
 <ol class="toc-list" tabindex="-1">
-<li><a href="#" tabindex="0">Description</a>
-<ol class="toc-list">
-<li><a href="#joystick-to-yams-core-mechanisms-swerve-swervedrive-adapter-heading" tabindex="0">Joystick-to-yams.core.mechanisms.swerve.SwerveDrive adapter</a></li>
-<li><a href="#typical-usage-heading" tabindex="0">Typical usage</a></li>
-</ol>
-</li>
+<li><a href="#" tabindex="0">Description</a></li>
 <li><a href="#constructor-summary" tabindex="0">Constructor Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a></li>
 </ol>
@@ -73,46 +67,49 @@ loadScripts(document, 'script');</script>
 <li><a href="#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">of(SwerveDrive, DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">of(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#clone()" tabindex="0">clone()</a></li>
-<li><a href="#copy()" tabindex="0">copy()</a></li>
+<li><a href="#getCurrentModeName()" tabindex="0">getCurrentModeName()</a></li>
+<li><a href="#getAxisDeadband()" tabindex="0">getAxisDeadband()</a></li>
+<li><a href="#setAxisDeadband(double)" tabindex="0">setAxisDeadband(double)</a></li>
+<li><a href="#getTranslationAxisScale()" tabindex="0">getTranslationAxisScale()</a></li>
+<li><a href="#setTranslationAxisScale(double)" tabindex="0">setTranslationAxisScale(double)</a></li>
+<li><a href="#getOmegaAxisScale()" tabindex="0">getOmegaAxisScale()</a></li>
+<li><a href="#setOmegaAxisScale(double)" tabindex="0">setOmegaAxisScale(double)</a></li>
+<li><a href="#getMaximumChassisLinearVelocity()" tabindex="0">getMaximumChassisLinearVelocity()</a></li>
+<li><a href="#setMaximumChassisLinearVelocity(org.wpilib.units.measure.LinearVelocity)" tabindex="0">setMaximumChassisLinearVelocity(LinearVelocity)</a></li>
+<li><a href="#getMaximumChassisAngularVelocity()" tabindex="0">getMaximumChassisAngularVelocity()</a></li>
+<li><a href="#setMaximumChassisAngularVelocity(org.wpilib.units.measure.AngularVelocity)" tabindex="0">setMaximumChassisAngularVelocity(AngularVelocity)</a></li>
+<li><a href="#isTranslationCubeEnabled()" tabindex="0">isTranslationCubeEnabled()</a></li>
+<li><a href="#setTranslationCubeEnabled(boolean)" tabindex="0">setTranslationCubeEnabled(boolean)</a></li>
+<li><a href="#isOmegaCubeEnabled()" tabindex="0">isOmegaCubeEnabled()</a></li>
+<li><a href="#setOmegaCubeEnabled(boolean)" tabindex="0">setOmegaCubeEnabled(boolean)</a></li>
+<li><a href="#isAllianceRelativeEnabled()" tabindex="0">isAllianceRelativeEnabled()</a></li>
+<li><a href="#setAllianceRelativeEnabled(boolean)" tabindex="0">setAllianceRelativeEnabled(boolean)</a></li>
+<li><a href="#isRobotRelativeEnabled()" tabindex="0">isRobotRelativeEnabled()</a></li>
+<li><a href="#setRobotRelativeEnabled(boolean)" tabindex="0">setRobotRelativeEnabled(boolean)</a></li>
+<li><a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)" tabindex="0">withTelemetry(String, TelemetryVerbosity)</a></li>
+<li><a href="#getTelemetry()" tabindex="0">getTelemetry()</a></li>
 <li><a href="#withMaximumLinearVelocity(org.wpilib.units.measure.LinearVelocity)" tabindex="0">withMaximumLinearVelocity(LinearVelocity)</a></li>
 <li><a href="#withMaximumAngularVelocity(org.wpilib.units.measure.AngularVelocity)" tabindex="0">withMaximumAngularVelocity(AngularVelocity)</a></li>
-<li><a href="#setRobotRelative(java.util.function.BooleanSupplier)" tabindex="0">setRobotRelative(BooleanSupplier)</a></li>
-<li><a href="#setRobotRelative(boolean)" tabindex="0">setRobotRelative(boolean)</a></li>
-<li><a href="#setRobotRelative()" tabindex="0">setRobotRelative()</a></li>
+<li><a href="#withRobotRelative(java.util.function.BooleanSupplier)" tabindex="0">withRobotRelative(BooleanSupplier)</a></li>
+<li><a href="#withRobotRelative()" tabindex="0">withRobotRelative()</a></li>
+<li><a href="#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d,java.util.function.BooleanSupplier)" tabindex="0">withTranslationHeadingOffset(Rotation2d, BooleanSupplier)</a></li>
 <li><a href="#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d)" tabindex="0">withTranslationHeadingOffset(Rotation2d)</a></li>
-<li><a href="#setTranslationHeadingOffset(java.util.function.BooleanSupplier)" tabindex="0">setTranslationHeadingOffset(BooleanSupplier)</a></li>
-<li><a href="#setTranslationHeadingOffset(boolean)" tabindex="0">setTranslationHeadingOffset(boolean)</a></li>
-<li><a href="#setTranslationHeadingOffset()" tabindex="0">setTranslationHeadingOffset()</a></li>
-<li><a href="#setAllianceRelativeControl()" tabindex="0">setAllianceRelativeControl()</a></li>
-<li><a href="#setAllianceRelativeControl(java.util.function.BooleanSupplier)" tabindex="0">setAllianceRelativeControl(BooleanSupplier)</a></li>
-<li><a href="#setAllianceRelativeControl(boolean)" tabindex="0">setAllianceRelativeControl(boolean)</a></li>
-<li><a href="#setCubeRotationControllerAxis(java.util.function.BooleanSupplier)" tabindex="0">setCubeRotationControllerAxis(BooleanSupplier)</a></li>
-<li><a href="#setCubeRotationControllerAxis(boolean)" tabindex="0">setCubeRotationControllerAxis(boolean)</a></li>
-<li><a href="#setCubeRotationControllerAxis()" tabindex="0">setCubeRotationControllerAxis()</a></li>
-<li><a href="#setCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" tabindex="0">setCubeTranslationControllerAxis(BooleanSupplier)</a></li>
-<li><a href="#setCubeTranslationControllerAxis(boolean)" tabindex="0">setCubeTranslationControllerAxis(boolean)</a></li>
-<li><a href="#setCubeTranslationControllerAxis()" tabindex="0">setCubeTranslationControllerAxis()</a></li>
+<li><a href="#withAllianceRelativeControl()" tabindex="0">withAllianceRelativeControl()</a></li>
+<li><a href="#withAllianceRelativeControl(java.util.function.BooleanSupplier)" tabindex="0">withAllianceRelativeControl(BooleanSupplier)</a></li>
+<li><a href="#withCubeRotationControllerAxis(java.util.function.BooleanSupplier)" tabindex="0">withCubeRotationControllerAxis(BooleanSupplier)</a></li>
+<li><a href="#withCubeRotationControllerAxis()" tabindex="0">withCubeRotationControllerAxis()</a></li>
+<li><a href="#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" tabindex="0">withCubeTranslationControllerAxis(BooleanSupplier)</a></li>
+<li><a href="#withCubeTranslationControllerAxis()" tabindex="0">withCubeTranslationControllerAxis()</a></li>
 <li><a href="#withControllerRotationAxis(java.util.function.DoubleSupplier)" tabindex="0">withControllerRotationAxis(DoubleSupplier)</a></li>
 <li><a href="#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#deadband(double)" tabindex="0">deadband(double)</a></li>
 <li><a href="#withDeadband(double)" tabindex="0">withDeadband(double)</a></li>
 <li><a href="#withScaleTranslation(double)" tabindex="0">withScaleTranslation(double)</a></li>
-<li><a href="#withScaleTranslation(java.util.function.DoubleSupplier)" tabindex="0">withScaleTranslation(DoubleSupplier)</a></li>
 <li><a href="#withScaleRotation(double)" tabindex="0">withScaleRotation(double)</a></li>
-<li><a href="#withScaleRotation(java.util.function.DoubleSupplier)" tabindex="0">withScaleRotation(DoubleSupplier)</a></li>
-<li><a href="#setHeadingControl(java.util.function.BooleanSupplier)" tabindex="0">setHeadingControl(BooleanSupplier)</a></li>
-<li><a href="#setHeadingControl(boolean)" tabindex="0">setHeadingControl(boolean)</a></li>
-<li><a href="#setHeadingControl()" tabindex="0">setHeadingControl()</a></li>
+<li><a href="#withHeadingControl(java.util.function.BooleanSupplier)" tabindex="0">withHeadingControl(BooleanSupplier)</a></li>
 <li><a href="#withHeading(java.util.function.Supplier)" tabindex="0">withHeading(Supplier)</a></li>
-<li><a href="#withHeading(org.wpilib.units.measure.Angle)" tabindex="0">withHeading(Angle)</a></li>
-<li><a href="#withAimTarget(java.util.function.Supplier)" tabindex="0">withAimTarget(Supplier)</a></li>
-<li><a href="#withAimTarget(org.wpilib.math.geometry.Pose2d)" tabindex="0">withAimTarget(Pose2d)</a></li>
-<li><a href="#setAim(java.util.function.BooleanSupplier)" tabindex="0">setAim(BooleanSupplier)</a></li>
-<li><a href="#setAim(boolean)" tabindex="0">setAim(boolean)</a></li>
-<li><a href="#setAim()" tabindex="0">setAim()</a></li>
-<li><a href="#setTranslationOnly(java.util.function.BooleanSupplier)" tabindex="0">setTranslationOnly(BooleanSupplier)</a></li>
-<li><a href="#setTranslationOnly(boolean)" tabindex="0">setTranslationOnly(boolean)</a></li>
-<li><a href="#setTranslationOnly()" tabindex="0">setTranslationOnly()</a></li>
+<li><a href="#withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)" tabindex="0">withAim(Supplier, BooleanSupplier)</a></li>
+<li><a href="#withTranslationOnly(java.util.function.BooleanSupplier)" tabindex="0">withTranslationOnly(BooleanSupplier)</a></li>
 <li><a href="#get()" tabindex="0">get()</a></li>
 </ol>
 </li>
@@ -129,48 +126,14 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Implemented Interfaces:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Cloneable.html" title="class or interface in java.lang" class="external-link">Cloneable</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.kinematics.ChassisVelocities&gt;</code></dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.kinematics.ChassisVelocities&gt;</code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SwerveInputStream</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>
-implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.kinematics.ChassisVelocities&gt;, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Cloneable.html" title="class or interface in java.lang" class="external-link">Cloneable</a></span></div>
-<div class="block">Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
-easily create an interface that generates <code>ChassisVelocities</code> from
-<code>NiDsXboxController</code>
-
-<p>Inspired by SciBorgs FRC 1155.
-
-<h2 id="joystick-to-yams-core-mechanisms-swerve-swervedrive-adapter-heading">Joystick-to-<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> adapter</h2>
-<p>
-<a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> acts as a bridge between raw controller axis suppliers (in the range
-<code>[-1, 1]</code>) and the <code>ChassisVelocities</code> that
-<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> expects. It handles deadbands, axis scaling, non-linear
-(cubed) response curves, field-relative / alliance-relative flipping, and multiple drive modes
-(angular-velocity, heading-snap, translation-only, aim-at-target). Because it implements
-<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a><code>&lt;</code><code>ChassisVelocities</code><code>&gt;</code> it can be passed
-directly to a command or called in a coroutine loop via <a href="#get()"><code>get()</code></a>.
-</p>
-
-<h2 id="typical-usage-heading">Typical usage</h2>
-<pre><code>NiDsXboxController driver = new NiDsXboxController(0);
-
-// Angular-velocity stream: left stick translates, right stick X rotates
-SwerveInputStream angularVelocityStream =
-    SwerveInputStream.of(swerveDrive,
-                         () -&gt; -driver.getLeftY(),   // forward/back
-                         () -&gt; -driver.getLeftX())   // strafe
-                     .withControllerRotationAxis(() -&gt; -driver.getRightX())
-                     .withDeadband(0.05)
-                     .withScaleTranslation(0.8)
-                     .withScaleRotation(0.6)
-                     .setAllianceRelativeControl(true)  // auto-flip for Red alliance
-                     .setCubeTranslationControllerAxis(true); // non-linear response
-
-// In your coroutine or command, call .get() to obtain ChassisVelocities:
-swerveDrive.setFieldRelativeChassisSpeeds(angularVelocityStream.get());
-</code></pre></div>
+implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.kinematics.ChassisVelocities&gt;</span></div>
+<div class="block">Helper class to transform controller inputs into workable Chassis speeds for the Commands v3 API.</div>
 </div>
 </section>
 <section class="summary">
@@ -183,30 +146,17 @@ swerveDrive.setFieldRelativeChassisSpeeds(angularVelocityStream.get());
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y)</code></div>
-<div class="col-last even-row-color">
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</code></div>
-<div class="col-last odd-row-color">
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</code></div>
-<div class="col-last even-row-color">
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-</div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -223,235 +173,158 @@ driver controller.</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Copy the <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> object.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#copy()" class="member-name-link">copy</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Copy the <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> object.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#deadband(double)" class="member-name-link">deadband</a><wbr>(double&nbsp;deadband)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#deadband(double)" class="member-name-link">deadband</a><wbr>(double&nbsp;deadband)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.ChassisVelocities</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAxisDeadband()" class="member-name-link">getAxisDeadband</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentModeName()" class="member-name-link">getCurrentModeName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.AngularVelocity</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.LinearVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOmegaAxisScale()" class="member-name-link">getOmegaAxisScale</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../telemetry/SwerveInputStreamTelemetry.html" title="class in yams.commands3.telemetry">SwerveInputStreamTelemetry</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetry()" class="member-name-link">getTelemetry</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set a deadband for all controller axis.</div>
+<div class="block">Get this stream's telemetry, created by <a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)"><code>withTelemetry(String, TelemetryVerbosity)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.ChassisVelocities</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Calculate the <code>ChassisVelocities</code> for the current controller inputs and active mode.</div>
-</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTranslationAxisScale()" class="member-name-link">getTranslationAxisScale</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAllianceRelativeEnabled()" class="member-name-link">isAllianceRelativeEnabled</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isOmegaCubeEnabled()" class="member-name-link">isOmegaCubeEnabled</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRobotRelativeEnabled()" class="member-name-link">isRobotRelativeEnabled</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isTranslationCubeEnabled()" class="member-name-link">isTranslationCubeEnabled</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Create basic <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> without any rotation components.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of</a><wbr>(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Create basic <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> with angular velocity rotation component.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAim()" class="member-name-link">setAim</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enable aiming the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAllianceRelativeEnabled(boolean)" class="member-name-link">setAllianceRelativeEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAxisDeadband(double)" class="member-name-link">setAxisDeadband</a><wbr>(double&nbsp;deadband)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaximumChassisAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMaximumChassisAngularVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMaximumChassisLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setMaximumChassisLinearVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setOmegaAxisScale(double)" class="member-name-link">setOmegaAxisScale</a><wbr>(double&nbsp;scale)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setOmegaCubeEnabled(boolean)" class="member-name-link">setOmegaCubeEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeEnabled(boolean)" class="member-name-link">setRobotRelativeEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationAxisScale(double)" class="member-name-link">setTranslationAxisScale</a><wbr>(double&nbsp;scale)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationCubeEnabled(boolean)" class="member-name-link">setTranslationCubeEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAim(boolean)" class="member-name-link">setAim</a><wbr>(boolean&nbsp;trigger)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Aim the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target while the boolean is True.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)" class="member-name-link">withAim</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose2d&gt;&nbsp;aimTarget,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAim(java.util.function.BooleanSupplier)" class="member-name-link">setAim</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Aim the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target while the trigger is True.</div>
-</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAllianceRelativeControl()" class="member-name-link">withAllianceRelativeControl</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAllianceRelativeControl()" class="member-name-link">setAllianceRelativeControl</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAllianceRelativeControl(boolean)" class="member-name-link">setAllianceRelativeControl</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAllianceRelativeControl(java.util.function.BooleanSupplier)" class="member-name-link">setAllianceRelativeControl</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeRotationControllerAxis()" class="member-name-link">setCubeRotationControllerAxis</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeRotationControllerAxis(boolean)" class="member-name-link">setCubeRotationControllerAxis</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeRotationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">setCubeRotationControllerAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeTranslationControllerAxis()" class="member-name-link">setCubeTranslationControllerAxis</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeTranslationControllerAxis(boolean)" class="member-name-link">setCubeTranslationControllerAxis</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">setCubeTranslationControllerAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHeadingControl()" class="member-name-link">setHeadingControl</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Output <code>ChassisVelocities</code> based on heading.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHeadingControl(boolean)" class="member-name-link">setHeadingControl</a><wbr>(boolean&nbsp;trigger)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Output <code>ChassisVelocities</code> based on heading while the boolean is True.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setHeadingControl(java.util.function.BooleanSupplier)" class="member-name-link">setHeadingControl</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Output <code>ChassisVelocities</code> based on heading while the supplier is True.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelative()" class="member-name-link">setRobotRelative</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelative(boolean)" class="member-name-link">setRobotRelative</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelative(java.util.function.BooleanSupplier)" class="member-name-link">setRobotRelative</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationHeadingOffset()" class="member-name-link">setTranslationHeadingOffset</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enable translation heading offset.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationHeadingOffset(boolean)" class="member-name-link">setTranslationHeadingOffset</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the translation heading offset enabled state.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationHeadingOffset(java.util.function.BooleanSupplier)" class="member-name-link">setTranslationHeadingOffset</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the translation heading offset enabled state.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationOnly()" class="member-name-link">setTranslationOnly</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationOnly(boolean)" class="member-name-link">setTranslationOnly</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationOnly(java.util.function.BooleanSupplier)" class="member-name-link">setTranslationOnly</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAimTarget(java.util.function.Supplier)" class="member-name-link">withAimTarget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose2d&gt;&nbsp;aimTarget)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the target <code>Pose2d</code> to aim at.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAimTarget(org.wpilib.math.geometry.Pose2d)" class="member-name-link">withAimTarget</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;aimTarget)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the target <code>Pose2d</code> to aim at.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAllianceRelativeControl(java.util.function.BooleanSupplier)" class="member-name-link">withAllianceRelativeControl</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">withControllerHeadingAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add heading axis for Heading based control.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withControllerRotationAxis(java.util.function.DoubleSupplier)" class="member-name-link">withControllerRotationAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add a rotation axis for Angular Velocity control</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCubeRotationControllerAxis()" class="member-name-link">withCubeRotationControllerAxis</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCubeRotationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeRotationControllerAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCubeTranslationControllerAxis()" class="member-name-link">withCubeTranslationControllerAxis</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeTranslationControllerAxis</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDeadband(double)" class="member-name-link">withDeadband</a><wbr>(double&nbsp;deadband)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set a deadband for all controller axis.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHeading(java.util.function.Supplier)" class="member-name-link">withHeading</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.units.measure.Angle&gt;&nbsp;heading)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Supply the field relative heading to face in heading mode, which is enabled with
-<a href="#setHeadingControl(java.util.function.BooleanSupplier)"><code>setHeadingControl(BooleanSupplier)</code></a>.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHeading(org.wpilib.units.measure.Angle)" class="member-name-link">withHeading</a><wbr>(org.wpilib.units.measure.Angle&nbsp;heading)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Supply the field relative heading to face in heading mode.</div>
-</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHeadingControl(java.util.function.BooleanSupplier)" class="member-name-link">withHeadingControl</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Maximum angular velocity to use for the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to
-Rotations per Second.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withMaximumLinearVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Maximum linear velocity to use for the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters
-per Second.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRobotRelative()" class="member-name-link">withRobotRelative</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRobotRelative(java.util.function.BooleanSupplier)" class="member-name-link">withRobotRelative</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleRotation(double)" class="member-name-link">withScaleRotation</a><wbr>(double&nbsp;scaleRotation)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleTranslation(double)" class="member-name-link">withScaleTranslation</a><wbr>(double&nbsp;scaleTranslation)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="../../core/telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to reduce the range in which they
-operate.</div>
+<div class="block">Publish this stream's telemetry under <code>SwerveInputStream/&lt;name&gt;</code>, updated every time the stream is read.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleRotation(java.util.function.DoubleSupplier)" class="member-name-link">withScaleRotation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;scaleRotation)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to reduce the range in which they
-operate.</div>
-</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">withTranslationHeadingOffset</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleTranslation(double)" class="member-name-link">withScaleTranslation</a><wbr>(double&nbsp;scaleTranslation)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Scale the translation axis for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> by a constant scalar value.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d,java.util.function.BooleanSupplier)" class="member-name-link">withTranslationHeadingOffset</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withScaleTranslation(java.util.function.DoubleSupplier)" class="member-name-link">withScaleTranslation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;scaleTranslation)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Scale the translation axis for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> by a supplier.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">withTranslationHeadingOffset</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the translation heading offset angle.</div>
-</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationOnly(java.util.function.BooleanSupplier)" class="member-name-link">withTranslationOnly</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -470,24 +343,6 @@ operate.</div>
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)">
-<h3>SwerveInputStream</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SwerveInputStream</span><wbr><span class="parameters">(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y)</span></div>
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drive</code> - <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - Translation X input in range of [-1, 1]</dd>
-<dd><code>y</code> - Translation Y input in range of [-1, 1]</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="&lt;init&gt;(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)">
 <h3>SwerveInputStream</h3>
 <div class="horizontal-scroll">
@@ -495,15 +350,6 @@ driver controller.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</span></div>
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drive</code> - <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - Translation X input in range of [-1, 1]</dd>
-<dd><code>y</code> - Translation Y input in range of [-1, 1]</dd>
-<dd><code>rot</code> - Rotation input in range of [-1, 1]</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -516,16 +362,6 @@ driver controller.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</span></div>
-<div class="block">Create a <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> for an easy way to generate <code>ChassisVelocities</code> from a
-driver controller.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drive</code> - <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - Translation X input in range of [-1, 1]</dd>
-<dd><code>y</code> - Translation Y input in range of [-1, 1]</dd>
-<dd><code>headingX</code> - Heading X input in range of [-1, 1]</dd>
-<dd><code>headingY</code> - Heading Y input in range of [-1, 1]</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -544,17 +380,6 @@ driver controller.</div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">of</span><wbr><span class="parameters">(<a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y)</span></div>
-<div class="block">Create basic <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> without any rotation components.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drive</code> - <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
-             use.</dd>
-<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation Y axis of the controller joystick to
-             use.</dd>
-<dt>Returns:</dt>
-<dd><a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -566,18 +391,6 @@ driver controller.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;x,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;y,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</span></div>
-<div class="block">Create basic <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> with angular velocity rotation component.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>drive</code> - <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object for transformation.</dd>
-<dd><code>x</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation X axis of the controller joystick to
-             use.</dd>
-<dd><code>y</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the translation Y axis of the controller joystick to
-             use.</dd>
-<dd><code>rot</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link"><code>DoubleSupplier</code></a> of the rotation axis of the controller joystick to use.</dd>
-<dt>Returns:</dt>
-<dd><a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -586,25 +399,193 @@ driver controller.</div>
 <h3>clone</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">clone</span>()</div>
-<div class="block">Copy the <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> object.</div>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></dd>
-<dt>Returns:</dt>
-<dd>Clone of current <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a></dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="copy()">
-<h3>copy</h3>
+<section class="detail" id="getCurrentModeName()">
+<h3>getCurrentModeName</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">copy</span>()</div>
-<div class="block">Copy the <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> object.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getCurrentModeName</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAxisDeadband()">
+<h3>getAxisDeadband</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getAxisDeadband</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setAxisDeadband(double)">
+<h3>setAxisDeadband</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAxisDeadband</span><wbr><span class="parameters">(double&nbsp;deadband)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getTranslationAxisScale()">
+<h3>getTranslationAxisScale</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTranslationAxisScale</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setTranslationAxisScale(double)">
+<h3>setTranslationAxisScale</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setTranslationAxisScale</span><wbr><span class="parameters">(double&nbsp;scale)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getOmegaAxisScale()">
+<h3>getOmegaAxisScale</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getOmegaAxisScale</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setOmegaAxisScale(double)">
+<h3>setOmegaAxisScale</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setOmegaAxisScale</span><wbr><span class="parameters">(double&nbsp;scale)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMaximumChassisLinearVelocity()">
+<h3>getMaximumChassisLinearVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.LinearVelocity</span>&nbsp;<span class="element-name">getMaximumChassisLinearVelocity</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMaximumChassisLinearVelocity(org.wpilib.units.measure.LinearVelocity)">
+<h3>setMaximumChassisLinearVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMaximumChassisLinearVelocity</span><wbr><span class="parameters">(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMaximumChassisAngularVelocity()">
+<h3>getMaximumChassisAngularVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.AngularVelocity</span>&nbsp;<span class="element-name">getMaximumChassisAngularVelocity</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMaximumChassisAngularVelocity(org.wpilib.units.measure.AngularVelocity)">
+<h3>setMaximumChassisAngularVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMaximumChassisAngularVelocity</span><wbr><span class="parameters">(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isTranslationCubeEnabled()">
+<h3>isTranslationCubeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isTranslationCubeEnabled</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setTranslationCubeEnabled(boolean)">
+<h3>setTranslationCubeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setTranslationCubeEnabled</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isOmegaCubeEnabled()">
+<h3>isOmegaCubeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isOmegaCubeEnabled</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setOmegaCubeEnabled(boolean)">
+<h3>setOmegaCubeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setOmegaCubeEnabled</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isAllianceRelativeEnabled()">
+<h3>isAllianceRelativeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isAllianceRelativeEnabled</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setAllianceRelativeEnabled(boolean)">
+<h3>setAllianceRelativeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAllianceRelativeEnabled</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isRobotRelativeEnabled()">
+<h3>isRobotRelativeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isRobotRelativeEnabled</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setRobotRelativeEnabled(boolean)">
+<h3>setRobotRelativeEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setRobotRelativeEnabled</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)">
+<h3>withTelemetry</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withTelemetry</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+ <a href="../../core/telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</span></div>
+<div class="block">Publish this stream's telemetry under <code>SwerveInputStream/&lt;name&gt;</code>, updated every time the stream is read. At
+<a href="../../core/telemetry/enums/TelemetryVerbosity.html#HIGH"><code>TelemetryVerbosity.HIGH</code></a> the stream is also live tunable: see <a href="../telemetry/SwerveInputStreamTelemetry.html" title="class in yams.commands3.telemetry"><code>SwerveInputStreamTelemetry</code></a>. Replaces
+any telemetry this stream already had. A <a href="#clone()"><code>clone()</code></a> does not copy the telemetry.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>name</code> - Name of the stream in NetworkTables (e.g., "drive").</dd>
+<dd><code>verbosity</code> - <a href="../../core/telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums"><code>TelemetryVerbosity</code></a> to publish at.</dd>
+<dt>Returns:</dt>
+<dd>this, for chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getTelemetry()">
+<h3>getTelemetry</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../telemetry/SwerveInputStreamTelemetry.html" title="class in yams.commands3.telemetry">SwerveInputStreamTelemetry</a>&gt;</span>&nbsp;<span class="element-name">getTelemetry</span>()</div>
+<div class="block">Get this stream's telemetry, created by <a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)"><code>withTelemetry(String, TelemetryVerbosity)</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>Clone of current <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a></dd>
+<dd>The <a href="../telemetry/SwerveInputStreamTelemetry.html" title="class in yams.commands3.telemetry"><code>SwerveInputStreamTelemetry</code></a>, or empty if telemetry is not enabled.</dd>
 </dl>
 </div>
 </section>
@@ -614,14 +595,6 @@ driver controller.</div>
 <h3>withMaximumLinearVelocity</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withMaximumLinearVelocity</span><wbr><span class="parameters">(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</span></div>
-<div class="block">Maximum linear velocity to use for the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to Meters
-per Second. Default is 4 Meters per Second.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>velocity</code> - Linear velocity to use.</dd>
-<dt>Returns:</dt>
-<dd><a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -630,57 +603,31 @@ per Second. Default is 4 Meters per Second.</div>
 <h3>withMaximumAngularVelocity</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withMaximumAngularVelocity</span><wbr><span class="parameters">(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</span></div>
-<div class="block">Maximum angular velocity to use for the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> object, will be translated to
-Rotations per Second. Default is 1 Rotation per Second.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>velocity</code> - Angular velocity to use.</dd>
-<dt>Returns:</dt>
-<dd><a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to use as you see fit.</dd>
-</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setRobotRelative(java.util.function.BooleanSupplier)">
-<h3>setRobotRelative</h3>
+<section class="detail" id="withRobotRelative(java.util.function.BooleanSupplier)">
+<h3>withRobotRelative</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setRobotRelative</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Robot-Relative <code>ChassisVelocities</code> output.</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withRobotRelative</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setRobotRelative(boolean)">
-<h3>setRobotRelative</h3>
+<section class="detail" id="withRobotRelative()">
+<h3>withRobotRelative</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setRobotRelative</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Robot-Relative <code>ChassisVelocities</code> output.</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withRobotRelative</span>()</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setRobotRelative()">
-<h3>setRobotRelative</h3>
+<section class="detail" id="withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d,java.util.function.BooleanSupplier)">
+<h3>withTranslationHeadingOffset</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setRobotRelative</span>()</div>
-<div class="block">Set the stream to output robot relative <code>ChassisVelocities</code></div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withTranslationHeadingOffset</span><wbr><span class="parameters">(org.wpilib.math.geometry.Rotation2d&nbsp;angle,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
 </div>
 </section>
 </li>
@@ -689,188 +636,54 @@ Rotations per Second. Default is 1 Rotation per Second.</div>
 <h3>withTranslationHeadingOffset</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withTranslationHeadingOffset</span><wbr><span class="parameters">(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</span></div>
-<div class="block">Set the translation heading offset angle.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>angle</code> - <code>Rotation2d</code> offset to apply</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setTranslationHeadingOffset(java.util.function.BooleanSupplier)">
-<h3>setTranslationHeadingOffset</h3>
+<section class="detail" id="withAllianceRelativeControl()">
+<h3>withAllianceRelativeControl</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationHeadingOffset</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
-<div class="block">Set the translation heading offset enabled state.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enable state</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withAllianceRelativeControl</span>()</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setTranslationHeadingOffset(boolean)">
-<h3>setTranslationHeadingOffset</h3>
+<section class="detail" id="withAllianceRelativeControl(java.util.function.BooleanSupplier)">
+<h3>withAllianceRelativeControl</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationHeadingOffset</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Set the translation heading offset enabled state.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enable state</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withAllianceRelativeControl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setTranslationHeadingOffset()">
-<h3>setTranslationHeadingOffset</h3>
+<section class="detail" id="withCubeRotationControllerAxis(java.util.function.BooleanSupplier)">
+<h3>withCubeRotationControllerAxis</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationHeadingOffset</span>()</div>
-<div class="block">Enable translation heading offset.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withCubeRotationControllerAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setAllianceRelativeControl()">
-<h3>setAllianceRelativeControl</h3>
+<section class="detail" id="withCubeRotationControllerAxis()">
+<h3>withCubeRotationControllerAxis</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAllianceRelativeControl</span>()</div>
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.
-Has no effect while robot relative control is enabled.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withCubeRotationControllerAxis</span>()</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setAllianceRelativeControl(java.util.function.BooleanSupplier)">
-<h3>setAllianceRelativeControl</h3>
+<section class="detail" id="withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)">
+<h3>withCubeTranslationControllerAxis</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAllianceRelativeControl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.
-Has no effect while robot relative control is enabled.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Alliance aware <code>ChassisVelocities</code> output.</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withCubeTranslationControllerAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="setAllianceRelativeControl(boolean)">
-<h3>setAllianceRelativeControl</h3>
+<section class="detail" id="withCubeTranslationControllerAxis()">
+<h3>withCubeTranslationControllerAxis</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAllianceRelativeControl</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Modify the output <code>ChassisVelocities</code> so that it is always relative to your alliance.
-Has no effect while robot relative control is enabled.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Alliance aware <code>ChassisVelocities</code> output.</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeRotationControllerAxis(java.util.function.BooleanSupplier)">
-<h3>setCubeRotationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeRotationControllerAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enabled state for the stream.</dd>
-<dt>Returns:</dt>
-<dd>self.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeRotationControllerAxis(boolean)">
-<h3>setCubeRotationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeRotationControllerAxis</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enabled state for the stream.</dd>
-<dt>Returns:</dt>
-<dd>self.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeRotationControllerAxis()">
-<h3>setCubeRotationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeRotationControllerAxis</span>()</div>
-<div class="block">Cube the angular velocity controller axis for a non-linear controls scheme.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>self.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeTranslationControllerAxis(java.util.function.BooleanSupplier)">
-<h3>setCubeTranslationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeTranslationControllerAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;enabled)</span></div>
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enabled state for the stream</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeTranslationControllerAxis(boolean)">
-<h3>setCubeTranslationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeTranslationControllerAxis</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Enabled state for the stream</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setCubeTranslationControllerAxis()">
-<h3>setCubeTranslationControllerAxis</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setCubeTranslationControllerAxis</span>()</div>
-<div class="block">Cube the translation axis magnitude for a non-linear control scheme</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withCubeTranslationControllerAxis</span>()</div>
 </div>
 </section>
 </li>
@@ -879,13 +692,6 @@ Has no effect while robot relative control is enabled.</div>
 <h3>withControllerRotationAxis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withControllerRotationAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;rot)</span></div>
-<div class="block">Add a rotation axis for Angular Velocity control</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>rot</code> - Rotation axis with values from [-1, 1]</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -895,14 +701,6 @@ Has no effect while robot relative control is enabled.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withControllerHeadingAxis</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingX,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;headingY)</span></div>
-<div class="block">Add heading axis for Heading based control.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>headingX</code> - Heading X axis with values from [-1, 1]</dd>
-<dd><code>headingY</code> - Heading Y axis with values from [-1, 1]</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -911,13 +709,6 @@ Has no effect while robot relative control is enabled.</div>
 <h3>deadband</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">deadband</span><wbr><span class="parameters">(double&nbsp;deadband)</span></div>
-<div class="block">Set a deadband for all controller axis.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deadband</code> - Deadband to set, should be between [0, 1)</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -926,13 +717,6 @@ Has no effect while robot relative control is enabled.</div>
 <h3>withDeadband</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withDeadband</span><wbr><span class="parameters">(double&nbsp;deadband)</span></div>
-<div class="block">Set a deadband for all controller axis.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>deadband</code> - Deadband to set, should be between [0, 1)</dd>
-<dt>Returns:</dt>
-<dd>self</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -941,28 +725,6 @@ Has no effect while robot relative control is enabled.</div>
 <h3>withScaleTranslation</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withScaleTranslation</span><wbr><span class="parameters">(double&nbsp;scaleTranslation)</span></div>
-<div class="block">Scale the translation axis for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> by a constant scalar value.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>scaleTranslation</code> - Translation axis scalar value. (0, 1]</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="withScaleTranslation(java.util.function.DoubleSupplier)">
-<h3>withScaleTranslation</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withScaleTranslation</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;scaleTranslation)</span></div>
-<div class="block">Scale the translation axis for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> by a supplier.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>scaleTranslation</code> - Translation axis scalar supplier.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -971,73 +733,14 @@ Has no effect while robot relative control is enabled.</div>
 <h3>withScaleRotation</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withScaleRotation</span><wbr><span class="parameters">(double&nbsp;scaleRotation)</span></div>
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to reduce the range in which they
-operate.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>scaleRotation</code> - Angular velocity axis scalar value. (0, 1]</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="withScaleRotation(java.util.function.DoubleSupplier)">
-<h3>withScaleRotation</h3>
+<section class="detail" id="withHeadingControl(java.util.function.BooleanSupplier)">
+<h3>withHeadingControl</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withScaleRotation</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/DoubleSupplier.html" title="class or interface in java.util.function" class="external-link">DoubleSupplier</a>&nbsp;scaleRotation)</span></div>
-<div class="block">Scale the rotation axis input for <a href="SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> to reduce the range in which they
-operate.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>scaleRotation</code> - Angular velocity axis scalar supplier.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setHeadingControl(java.util.function.BooleanSupplier)">
-<h3>setHeadingControl</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setHeadingControl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
-<div class="block">Output <code>ChassisVelocities</code> based on heading while the supplier is True.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>trigger</code> - Supplier to use.</dd>
-<dt>Returns:</dt>
-<dd>this.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setHeadingControl(boolean)">
-<h3>setHeadingControl</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setHeadingControl</span><wbr><span class="parameters">(boolean&nbsp;trigger)</span></div>
-<div class="block">Output <code>ChassisVelocities</code> based on heading while the boolean is True.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>trigger</code> - Boolean to use.</dd>
-<dt>Returns:</dt>
-<dd>this.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setHeadingControl()">
-<h3>setHeadingControl</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setHeadingControl</span>()</div>
-<div class="block">Output <code>ChassisVelocities</code> based on heading.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>this.</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withHeadingControl</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
 </div>
 </section>
 </li>
@@ -1046,146 +749,23 @@ operate.</div>
 <h3>withHeading</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withHeading</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.units.measure.Angle&gt;&nbsp;heading)</span></div>
-<div class="block">Supply the field relative heading to face in heading mode, which is enabled with
-<a href="#setHeadingControl(java.util.function.BooleanSupplier)"><code>setHeadingControl(BooleanSupplier)</code></a>. Replaces any controller heading axis.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>heading</code> - Field relative heading to face, blue-origin where 0 degrees faces the red
-               alliance wall.</dd>
-<dt>Returns:</dt>
-<dd>this.</dd>
-</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="withHeading(org.wpilib.units.measure.Angle)">
-<h3>withHeading</h3>
+<section class="detail" id="withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)">
+<h3>withAim</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withHeading</span><wbr><span class="parameters">(org.wpilib.units.measure.Angle&nbsp;heading)</span></div>
-<div class="block">Supply the field relative heading to face in heading mode.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>heading</code> - Field relative heading to face.</dd>
-<dt>Returns:</dt>
-<dd>this.</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withAim</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose2d&gt;&nbsp;aimTarget,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="withAimTarget(java.util.function.Supplier)">
-<h3>withAimTarget</h3>
+<section class="detail" id="withTranslationOnly(java.util.function.BooleanSupplier)">
+<h3>withTranslationOnly</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withAimTarget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose2d&gt;&nbsp;aimTarget)</span></div>
-<div class="block">Set the target <code>Pose2d</code> to aim at.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>aimTarget</code> - Target pose supplier.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="withAimTarget(org.wpilib.math.geometry.Pose2d)">
-<h3>withAimTarget</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withAimTarget</span><wbr><span class="parameters">(org.wpilib.math.geometry.Pose2d&nbsp;aimTarget)</span></div>
-<div class="block">Set the target <code>Pose2d</code> to aim at.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>aimTarget</code> - Target pose.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setAim(java.util.function.BooleanSupplier)">
-<h3>setAim</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAim</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
-<div class="block">Aim the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target while the trigger is True.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>trigger</code> - When True will enable aiming at the current target.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setAim(boolean)">
-<h3>setAim</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAim</span><wbr><span class="parameters">(boolean&nbsp;trigger)</span></div>
-<div class="block">Aim the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target while the boolean is True.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>trigger</code> - When True will enable aiming at the current target.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setAim()">
-<h3>setAim</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setAim</span>()</div>
-<div class="block">Enable aiming the <a href="../../core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> at the configured target.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setTranslationOnly(java.util.function.BooleanSupplier)">
-<h3>setTranslationOnly</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationOnly</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>trigger</code> - Translation only while returns true.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setTranslationOnly(boolean)">
-<h3>setTranslationOnly</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationOnly</span><wbr><span class="parameters">(boolean&nbsp;enabled)</span></div>
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>enabled</code> - Translation only while true.</dd>
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="setTranslationOnly()">
-<h3>setTranslationOnly</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">setTranslationOnly</span>()</div>
-<div class="block">Enable locking of rotation and only translating, overrides everything.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>this</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></span>&nbsp;<span class="element-name">withTranslationOnly</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/BooleanSupplier.html" title="class or interface in java.util.function" class="external-link">BooleanSupplier</a>&nbsp;trigger)</span></div>
 </div>
 </section>
 </li>
@@ -1194,29 +774,9 @@ operate.</div>
 <h3>get</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.kinematics.ChassisVelocities</span>&nbsp;<span class="element-name">get</span>()</div>
-<div class="block">Calculate the <code>ChassisVelocities</code> for the current controller inputs and active mode.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html#get()" title="class or interface in java.util.function" class="external-link">get</a></code>&nbsp;in interface&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.kinematics.ChassisVelocities&gt;</code></dd>
-<dt>Returns:</dt>
-<dd>Field relative <code>ChassisVelocities</code> for the current inputs.</dd>
-<dt>Throws:</dt>
-<dd><code><a href="../../core/exceptions/SwerveDriveConfigurationException.html" title="class in yams.core.exceptions">SwerveDriveConfigurationException</a></code> - if translation only mode is active (including the
-                                          fallback to translation only mode when no
-                                          controller rotation axis is set) and no rotation PID
-                                          controller is configured.</dd>
-<dd><code><a href="../../core/exceptions/SwerveDriveConfigurationException.html" title="class in yams.core.exceptions">SwerveDriveConfigurationException</a></code> - if heading mode is active and no rotation PID
-                                          controller is configured.</dd>
-<dd><code><a href="../../core/exceptions/SwerveDriveConfigurationException.html" title="class in yams.core.exceptions">SwerveDriveConfigurationException</a></code> - if aim mode is active and no rotation PID controller
-                                          is configured.</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if heading mode is requested without a heading
-                                          configured and no controller rotation axis is set,
-                                          so the stream falls back to angular velocity mode
-                                          without an axis.</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if aim mode is requested without an aim target
-                                          configured and no controller rotation axis is set,
-                                          so the stream falls back to angular velocity mode
-                                          without an axis.</dd>
 </dl>
 </div>
 </section>

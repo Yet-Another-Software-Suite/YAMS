@@ -105,12 +105,30 @@ Collaboration diagram for yams::motorcontrollers::simulation::DCMotorSimSupplier
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0d9fb58467e777ad629f7310d912665e" id="r_a0d9fb58467e777ad629f7310d912665e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a0d9fb58467e777ad629f7310d912665e">DCMotorSimSupplier</a> (wpi::sim::DCMotorSim &amp;sim, std::function&lt; double()&gt; dutyCycleSupplier, const <a class="el" href="classyams_1_1gearing_1_1MechanismGearing.html">gearing::MechanismGearing</a> &amp;gearing, wpi::units::second_t period)</td></tr>
-<tr class="separator:a0d9fb58467e777ad629f7310d912665e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3194a18bb2ce849627f1a2385133dcc" id="r_ae3194a18bb2ce849627f1a2385133dcc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ae3194a18bb2ce849627f1a2385133dcc">DCMotorSimSupplier</a> (wpi::sim::DCMotorSim &amp;sim, <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> &amp;smc)</td></tr>
+<tr class="separator:ae3194a18bb2ce849627f1a2385133dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6d8e69b7f90137a125fa4b39bb7ff05" id="r_af6d8e69b7f90137a125fa4b39bb7ff05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#af6d8e69b7f90137a125fa4b39bb7ff05">UpdateSim</a> () override</td></tr>
 <tr class="separator:af6d8e69b7f90137a125fa4b39bb7ff05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad26902028e01c1fb0ba015db29ef5c21" id="r_ad26902028e01c1fb0ba015db29ef5c21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad26902028e01c1fb0ba015db29ef5c21">SetInputVoltage</a> (wpi::units::volt_t volts) override</td></tr>
-<tr class="separator:ad26902028e01c1fb0ba015db29ef5c21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5bb4f2818bd72d0f18752b27a407d1f" id="r_ae5bb4f2818bd72d0f18752b27a407d1f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ae5bb4f2818bd72d0f18752b27a407d1f">GetUpdatedSim</a> () override</td></tr>
+<tr class="separator:ae5bb4f2818bd72d0f18752b27a407d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa012557ba866836eb2cef088ed8c0d98" id="r_aa012557ba866836eb2cef088ed8c0d98"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aa012557ba866836eb2cef088ed8c0d98">FeedUpdateSim</a> () override</td></tr>
+<tr class="separator:aa012557ba866836eb2cef088ed8c0d98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad34d64bbbc8ca48d01018ece2cfbac94" id="r_ad34d64bbbc8ca48d01018ece2cfbac94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad34d64bbbc8ca48d01018ece2cfbac94">StarveUpdateSim</a> () override</td></tr>
+<tr class="separator:ad34d64bbbc8ca48d01018ece2cfbac94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35240c574e0636b966aaefd85367e853" id="r_a35240c574e0636b966aaefd85367e853"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a35240c574e0636b966aaefd85367e853">IsInputFed</a> () override</td></tr>
+<tr class="separator:a35240c574e0636b966aaefd85367e853"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a595f13131c9d4adac59bb73f5e6107e3" id="r_a595f13131c9d4adac59bb73f5e6107e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a595f13131c9d4adac59bb73f5e6107e3">FeedInput</a> () override</td></tr>
+<tr class="separator:a595f13131c9d4adac59bb73f5e6107e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14d22e2c1d56c90f5610b2ebb2d95112" id="r_a14d22e2c1d56c90f5610b2ebb2d95112"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a14d22e2c1d56c90f5610b2ebb2d95112">StarveInput</a> () override</td></tr>
+<tr class="separator:a14d22e2c1d56c90f5610b2ebb2d95112"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8989d6c496482e50678ac6dab67eca62" id="r_a8989d6c496482e50678ac6dab67eca62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a8989d6c496482e50678ac6dab67eca62">SetMechanismStatorDutyCycle</a> (double dutyCycle) override</td></tr>
+<tr class="separator:a8989d6c496482e50678ac6dab67eca62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6af17fe481f261c084ce9a9d76d089a" id="r_aa6af17fe481f261c084ce9a9d76d089a"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aa6af17fe481f261c084ce9a9d76d089a">GetMechanismSupplyVoltage</a> () override</td></tr>
+<tr class="separator:aa6af17fe481f261c084ce9a9d76d089a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a654e6a04693a4e0f21e5d79c2d110f16" id="r_a654e6a04693a4e0f21e5d79c2d110f16"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a654e6a04693a4e0f21e5d79c2d110f16">GetMechanismStatorVoltage</a> () override</td></tr>
+<tr class="separator:a654e6a04693a4e0f21e5d79c2d110f16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a697900fabcc0ad40190d964a6dba913f" id="r_a697900fabcc0ad40190d964a6dba913f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a697900fabcc0ad40190d964a6dba913f">SetMechanismStatorVoltage</a> (wpi::units::volt_t volts) override</td></tr>
+<tr class="separator:a697900fabcc0ad40190d964a6dba913f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba877187a9cd476043fc1a1dcf0f2d04" id="r_aba877187a9cd476043fc1a1dcf0f2d04"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aba877187a9cd476043fc1a1dcf0f2d04">GetMechanismPosition</a> () override</td></tr>
 <tr class="separator:aba877187a9cd476043fc1a1dcf0f2d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f7e74e117780b17bebcfe7964dfdb58" id="r_a2f7e74e117780b17bebcfe7964dfdb58"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a2f7e74e117780b17bebcfe7964dfdb58">GetMechanismVelocity</a> () override</td></tr>
@@ -131,30 +149,20 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afed306b830fc1d63e49606900427db7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcf0b822897ef3409cd1496fcafd9c30" id="r_abcf0b822897ef3409cd1496fcafd9c30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#abcf0b822897ef3409cd1496fcafd9c30">SetRotorVelocity</a> (wpi::units::turns_per_second_t velocity) override</td></tr>
 <tr class="separator:abcf0b822897ef3409cd1496fcafd9c30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa214de688c73fa28ead5558614d28563" id="r_aa214de688c73fa28ead5558614d28563"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aa214de688c73fa28ead5558614d28563">IsWatchdogExpired</a> () override</td></tr>
-<tr class="separator:aa214de688c73fa28ead5558614d28563"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3c3903abe52be98f6ad6d6bae4f9119" id="r_ad3c3903abe52be98f6ad6d6bae4f9119"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad3c3903abe52be98f6ad6d6bae4f9119">FeedWatchdog</a> () override</td></tr>
-<tr class="separator:ad3c3903abe52be98f6ad6d6bae4f9119"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0246aa84b58b063d6679742220144a72" id="r_a0246aa84b58b063d6679742220144a72"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a0246aa84b58b063d6679742220144a72">StarveWatchdog</a> () override</td></tr>
-<tr class="separator:a0246aa84b58b063d6679742220144a72"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f678d0531a886c8b245f17257135096" id="r_a7f678d0531a886c8b245f17257135096"><td class="memItemLeft" align="right" valign="top">wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a7f678d0531a886c8b245f17257135096">GetCurrentDrawAmps</a> () override</td></tr>
-<tr class="separator:a7f678d0531a886c8b245f17257135096"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6af17fe481f261c084ce9a9d76d089a" id="r_aa6af17fe481f261c084ce9a9d76d089a"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aa6af17fe481f261c084ce9a9d76d089a">GetMechanismSupplyVoltage</a> () override</td></tr>
-<tr class="separator:aa6af17fe481f261c084ce9a9d76d089a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a654e6a04693a4e0f21e5d79c2d110f16" id="r_a654e6a04693a4e0f21e5d79c2d110f16"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a654e6a04693a4e0f21e5d79c2d110f16">GetMechanismStatorVoltage</a> () override</td></tr>
-<tr class="separator:a654e6a04693a4e0f21e5d79c2d110f16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a697900fabcc0ad40190d964a6dba913f" id="r_a697900fabcc0ad40190d964a6dba913f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a697900fabcc0ad40190d964a6dba913f">SetMechanismStatorVoltage</a> (wpi::units::volt_t volts) override</td></tr>
-<tr class="separator:a697900fabcc0ad40190d964a6dba913f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fbb9fb7e66d05959601077aa536da67" id="r_a8fbb9fb7e66d05959601077aa536da67"><td class="memItemLeft" align="right" valign="top">wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a8fbb9fb7e66d05959601077aa536da67">GetStatorCurrent</a> () override</td></tr>
+<tr class="separator:a8fbb9fb7e66d05959601077aa536da67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff13a3a9a26e243ec0f9d87b83e9ef56" id="r_aff13a3a9a26e243ec0f9d87b83e9ef56"><td class="memItemLeft" align="right" valign="top">wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#aff13a3a9a26e243ec0f9d87b83e9ef56">GetSupplyCurrent</a> () override</td></tr>
+<tr class="separator:aff13a3a9a26e243ec0f9d87b83e9ef56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyams_1_1motorcontrollers_1_1SimSupplier"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classyams_1_1motorcontrollers_1_1SimSupplier')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html">yams::motorcontrollers::SimSupplier</a></td></tr>
 <tr class="memitem:a4c96ea1541e6065aedae58d4aa687ec5 inherit pub_methods_classyams_1_1motorcontrollers_1_1SimSupplier" id="r_a4c96ea1541e6065aedae58d4aa687ec5"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a4c96ea1541e6065aedae58d4aa687ec5">~SimSupplier</a> ()=default</td></tr>
 <tr class="separator:a4c96ea1541e6065aedae58d4aa687ec5 inherit pub_methods_classyams_1_1motorcontrollers_1_1SimSupplier"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html">SimSupplier</a> backed by a WPILib DCMotorSim.</p>
-<p>Suitable for flywheel- and pivot-style mechanisms that use a simple DC motor physics model. The duty cycle is read from the motor controller each iteration unless an explicit input voltage has been set externally. </p>
+<p>Suitable for flywheel- and pivot-style mechanisms that use a simple DC motor physics model. The duty cycle is read from the motor controller each iteration unless an input voltage has been fed this loop. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a0d9fb58467e777ad629f7310d912665e" name="a0d9fb58467e777ad629f7310d912665e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d9fb58467e777ad629f7310d912665e">&#9670;&#160;</a></span>DCMotorSimSupplier()</h2>
+<a id="ae3194a18bb2ce849627f1a2385133dcc" name="ae3194a18bb2ce849627f1a2385133dcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3194a18bb2ce849627f1a2385133dcc">&#9670;&#160;</a></span>DCMotorSimSupplier()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -168,20 +176,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::function&lt; double()&gt;&#160;</td>
-          <td class="paramname"><em>dutyCycleSupplier</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classyams_1_1gearing_1_1MechanismGearing.html">gearing::MechanismGearing</a> &amp;&#160;</td>
-          <td class="paramname"><em>gearing</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">wpi::units::second_t&#160;</td>
-          <td class="paramname"><em>period</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> &amp;&#160;</td>
+          <td class="paramname"><em>smc</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -191,12 +187,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Create a <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html">DCMotorSimSupplier</a>.</p>
+<p>The duty cycle, gearing, simulation period and DC motor are read from <code>smc</code> and its config. The supplier's current draw is tracked in <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html">BatterySim</a> under <code>smc</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">sim</td><td>WPILib DCMotorSim to advance each loop. </td></tr>
-    <tr><td class="paramname">dutyCycleSupplier</td><td>Callable returning the current motor duty cycle in [-1, 1]. </td></tr>
-    <tr><td class="paramname">gearing</td><td>Mechanism gearing used to derive rotor position/velocity. </td></tr>
-    <tr><td class="paramname">period</td><td>Simulation update period. </td></tr>
+    <tr><td class="paramname">sim</td><td>WPILib simulation to advance each loop (must outlive this supplier). </td></tr>
+    <tr><td class="paramname">smc</td><td><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> driving the simulation (must outlive this supplier). </td></tr>
   </table>
   </dd>
 </dl>
@@ -204,8 +199,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad3c3903abe52be98f6ad6d6bae4f9119" name="ad3c3903abe52be98f6ad6d6bae4f9119"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3c3903abe52be98f6ad6d6bae4f9119">&#9670;&#160;</a></span>FeedWatchdog()</h2>
+<a id="a595f13131c9d4adac59bb73f5e6107e3" name="a595f13131c9d4adac59bb73f5e6107e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a595f13131c9d4adac59bb73f5e6107e3">&#9670;&#160;</a></span>FeedInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -214,7 +209,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::FeedWatchdog </td>
+          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::FeedInput </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -226,14 +221,14 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Feed the simulation watchdog to indicate the sim state is current. </p>
+<p>Mark the input as supplied directly for this loop. </p>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#abccc8f3defe375bdfe2783ade32326e1">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a24aaa23172787b444ce46dfcf11096ad">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="a7f678d0531a886c8b245f17257135096" name="a7f678d0531a886c8b245f17257135096"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f678d0531a886c8b245f17257135096">&#9670;&#160;</a></span>GetCurrentDrawAmps()</h2>
+<a id="aa012557ba866836eb2cef088ed8c0d98" name="aa012557ba866836eb2cef088ed8c0d98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa012557ba866836eb2cef088ed8c0d98">&#9670;&#160;</a></span>FeedUpdateSim()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -242,7 +237,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::units::ampere_t yams::motorcontrollers::simulation::DCMotorSimSupplier::GetCurrentDrawAmps </td>
+          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::FeedUpdateSim </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -254,10 +249,9 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the current draw from the simulated motor.</p>
-<dl class="section return"><dt>Returns</dt><dd>Current draw in amperes. </dd></dl>
+<p>Mark the simulation as stepped for this loop. </p>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#adba7c8d27fb6f431010beda7f449b293">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a0c2f342d5fccd8dd96714ba95c40c7c3">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
@@ -341,7 +335,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the last voltage applied to the simulated motor.</p>
+<p>Get the voltage applied to the simulated motor.</p>
 <dl class="section return"><dt>Returns</dt><dd>Stator voltage in volts. </dd></dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#adba18540cb212c7527234074b139c433">yams::motorcontrollers::SimSupplier</a>.</p>
@@ -493,8 +487,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aa214de688c73fa28ead5558614d28563" name="aa214de688c73fa28ead5558614d28563"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa214de688c73fa28ead5558614d28563">&#9670;&#160;</a></span>IsWatchdogExpired()</h2>
+<a id="a8fbb9fb7e66d05959601077aa536da67" name="a8fbb9fb7e66d05959601077aa536da67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fbb9fb7e66d05959601077aa536da67">&#9670;&#160;</a></span>GetStatorCurrent()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -503,7 +497,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool yams::motorcontrollers::simulation::DCMotorSimSupplier::IsWatchdogExpired </td>
+          <td class="memname">wpi::units::ampere_t yams::motorcontrollers::simulation::DCMotorSimSupplier::GetStatorCurrent </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -515,15 +509,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return true if the simulation watchdog has expired (sim state is stale).</p>
-<dl class="section return"><dt>Returns</dt><dd>true if the watchdog has not been fed within the required period. </dd></dl>
+<p>Get the simulated stator (motor) current.</p>
+<dl class="section return"><dt>Returns</dt><dd>Stator current in amperes. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a95c736bc90c3fc5ea45890e77811993e">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#af5887dd94fbf7f1d1910dc135a887dd3">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
-<a id="ad26902028e01c1fb0ba015db29ef5c21" name="ad26902028e01c1fb0ba015db29ef5c21"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad26902028e01c1fb0ba015db29ef5c21">&#9670;&#160;</a></span>SetInputVoltage()</h2>
+<a id="aff13a3a9a26e243ec0f9d87b83e9ef56" name="aff13a3a9a26e243ec0f9d87b83e9ef56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff13a3a9a26e243ec0f9d87b83e9ef56">&#9670;&#160;</a></span>GetSupplyCurrent()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -532,10 +526,9 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::SetInputVoltage </td>
+          <td class="memname">wpi::units::ampere_t yams::motorcontrollers::simulation::DCMotorSimSupplier::GetSupplyCurrent </td>
           <td>(</td>
-          <td class="paramtype">wpi::units::volt_t&#160;</td>
-          <td class="paramname"><em>volts</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -545,15 +538,68 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Directly set the motor input voltage, bypassing the duty-cycle supplier. Used when the hardware sim state (e.g. TalonFX) provides voltage directly.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">volts</td><td>Input voltage to inject. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Get the simulated supply (battery) current: duty cycle times stator current, filtered by a 0.1 s single-pole IIR filter.</p>
+<dl class="section return"><dt>Returns</dt><dd>Supply current in amperes. </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#aef17699b31bf9f94d2dff331501c08b4">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#afee3674f2ca62b4ce904b852ce14b75e">yams::motorcontrollers::SimSupplier</a>.</p>
+
+</div>
+</div>
+<a id="ae5bb4f2818bd72d0f18752b27a407d1f" name="ae5bb4f2818bd72d0f18752b27a407d1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5bb4f2818bd72d0f18752b27a407d1f">&#9670;&#160;</a></span>GetUpdatedSim()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::simulation::DCMotorSimSupplier::GetUpdatedSim </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether the simulation has already been stepped this loop.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#af6d8e69b7f90137a125fa4b39bb7ff05">UpdateSim()</a> stepped the physics since the last <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad34d64bbbc8ca48d01018ece2cfbac94">StarveUpdateSim()</a>. </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a0032b02148c2738dcc9e5953aae4d2d8">yams::motorcontrollers::SimSupplier</a>.</p>
+
+</div>
+</div>
+<a id="a35240c574e0636b966aaefd85367e853" name="a35240c574e0636b966aaefd85367e853"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35240c574e0636b966aaefd85367e853">&#9670;&#160;</a></span>IsInputFed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::simulation::DCMotorSimSupplier::IsInputFed </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether an input voltage was supplied directly this loop (e.g. from a hardware sim state).</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the input was fed since the simulation last stepped. </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a3a691bbcf13c3932690e34209248809b">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
@@ -592,6 +638,41 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a8989d6c496482e50678ac6dab67eca62" name="a8989d6c496482e50678ac6dab67eca62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8989d6c496482e50678ac6dab67eca62">&#9670;&#160;</a></span>SetMechanismStatorDutyCycle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::SetMechanismStatorDutyCycle </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dutyCycle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Apply a duty cycle of the supply voltage as the motor input (feeds the input).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dutyCycle</td><td>Duty cycle in [-1, 1]. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#ac627131012ab64ef4950a5a983906912">yams::motorcontrollers::SimSupplier</a>.</p>
+
+</div>
+</div>
 <a id="a697900fabcc0ad40190d964a6dba913f" name="a697900fabcc0ad40190d964a6dba913f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a697900fabcc0ad40190d964a6dba913f">&#9670;&#160;</a></span>SetMechanismStatorVoltage()</h2>
 
@@ -615,7 +696,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Set the motor input voltage directly (e.g. from a hardware sim state).</p>
+<p>Set the motor input voltage directly, e.g. from a hardware sim state (feeds the input).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">volts</td><td>Voltage to apply. </td></tr>
@@ -732,8 +813,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a0246aa84b58b063d6679742220144a72" name="a0246aa84b58b063d6679742220144a72"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0246aa84b58b063d6679742220144a72">&#9670;&#160;</a></span>StarveWatchdog()</h2>
+<a id="a14d22e2c1d56c90f5610b2ebb2d95112" name="a14d22e2c1d56c90f5610b2ebb2d95112"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14d22e2c1d56c90f5610b2ebb2d95112">&#9670;&#160;</a></span>StarveInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -742,7 +823,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::StarveWatchdog </td>
+          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::StarveInput </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -754,9 +835,37 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Stale the simulation watchdog so the next SimIterate triggers an update. </p>
+<p>Clear the input-fed flag so <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#af6d8e69b7f90137a125fa4b39bb7ff05">UpdateSim()</a> falls back to the duty-cycle supplier. </p>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a5c15086ea33d2cbf4e55177229d1782a">yams::motorcontrollers::SimSupplier</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#ab7c2b5141ad20b768c60cd9708298696">yams::motorcontrollers::SimSupplier</a>.</p>
+
+</div>
+</div>
+<a id="ad34d64bbbc8ca48d01018ece2cfbac94" name="ad34d64bbbc8ca48d01018ece2cfbac94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad34d64bbbc8ca48d01018ece2cfbac94">&#9670;&#160;</a></span>StarveUpdateSim()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::simulation::DCMotorSimSupplier::StarveUpdateSim </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clear the stepped flag so the next <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#af6d8e69b7f90137a125fa4b39bb7ff05">UpdateSim()</a> steps the physics again. </p>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a88cce2265aefb7cfa578f53296ecc595">yams::motorcontrollers::SimSupplier</a>.</p>
 
 </div>
 </div>
@@ -782,7 +891,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Advance the simulation by one loop iteration. </p>
+<p>Advance the simulation by one loop iteration.</p>
+<p>When the input has not been fed this loop (see <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#a595f13131c9d4adac59bb73f5e6107e3">FeedInput()</a>), the motor duty cycle times the supply voltage is applied as the input and the battery voltage is updated. The physics are only stepped if the simulation has not already been updated this loop (see <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ae5bb4f2818bd72d0f18752b27a407d1f">GetUpdatedSim()</a>); stepping marks it updated, so a mechanism and its motor controller calling <a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#af6d8e69b7f90137a125fa4b39bb7ff05">UpdateSim()</a> in the same loop step the physics once. </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1SimSupplier.html#a40a2d451cfb9e63495a99b9f777ce349">yams::motorcontrollers::SimSupplier</a>.</p>
 

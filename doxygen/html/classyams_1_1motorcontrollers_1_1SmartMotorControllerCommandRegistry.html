@@ -173,7 +173,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Destroy all registered commands and callbacks.</p>
+<p>Destroy all registered commands and callbacks, and unpublish them from the Tuning tunables.</p>
 <p>Must be called before program exit while WPILib's SendableRegistry is still alive, otherwise the CommandPtr destructors will attempt to lock an already-destroyed mutex and crash (SIGSEGV/exit 139). </p>
 
 </div>
@@ -246,7 +246,7 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Remove all commands registered for a specific subsystem instance.</p>
+<p>Remove all commands registered for a specific subsystem instance, and unpublish them from the Tuning tunables.</p>
 <p>Call this when a subsystem is being torn down (e.g. between tests) so that a new instance with the same name can register without triggering the conflict check.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

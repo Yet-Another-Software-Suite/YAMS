@@ -4,5 +4,5 @@ var searchData=
   ['talonfxwrapper_1',['TalonFXWrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a1758459620a97c17847eae3295705be9',1,'yams::motorcontrollers::remote::TalonFXWrapper']]],
   ['times_2',['times',['../classyams_1_1gearing_1_1GearBox.html#aeeb3312ed70524f0dac845f0f63f79d2',1,'yams::gearing::GearBox::Times()'],['../classyams_1_1gearing_1_1Sprocket.html#a0060c1048f0b91eb266acb24e33bed2f',1,'yams::gearing::Sprocket::Times()']]],
   ['transformunit_3',['TransformUnit',['../classyams_1_1telemetry_1_1DoubleTelemetry.html#a3b18023311bde305553bbfd145675cd9',1,'yams::telemetry::DoubleTelemetry']]],
-  ['tuningenabled_4',['TuningEnabled',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html#aea15afadf8180621a6e5964c44f1a93f',1,'yams::telemetry::SmartMotorControllerTelemetry']]]
+  ['tuningenabled_4',['tuningenabled',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#ad9532221ba058e13dff2b946ddae059b',1,'yams::motorcontrollers::SmartMotorController::TuningEnabled()'],['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetry.html#aea15afadf8180621a6e5964c44f1a93f',1,'yams::telemetry::SmartMotorControllerTelemetry::TuningEnabled()']]]
 ];

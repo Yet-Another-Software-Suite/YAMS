@@ -1,5 +1,8 @@
 <map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/utility/SwerveInputStream.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/utility/SwerveInputStream.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,229,75"/>
-<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="25,123,210,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,88,120,122,115,122,115,88"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="246,5,470,75"/>
+<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="5,130,191,185"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="271,83,158,132,156,128,269,78"/>
+<area shape="rect" id="Node000003" href="$SwerveInputStreamTelemetry_8hpp.html" title=" " alt="" coords="215,123,501,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="352,89,352,122,347,123,346,89"/>
+<area shape="poly" id="edge3_Node000003_Node000001" title=" " alt="" coords="364,109,364,75,369,75,370,109"/>
 </map>

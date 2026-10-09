@@ -100,6 +100,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a86380ad47196073e6081669324406eb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c8d89fde3e172ddf8f445b3ba1482cc" id="r_a4c8d89fde3e172ddf8f445b3ba1482cc"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html#a4c8d89fde3e172ddf8f445b3ba1482cc">GetStateOfCharge</a> ()</td></tr>
 <tr class="separator:a4c8d89fde3e172ddf8f445b3ba1482cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3af4da9c7a09760332bab23567794b94" id="r_a3af4da9c7a09760332bab23567794b94"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html#a3af4da9c7a09760332bab23567794b94">RemoveCurrent</a> (const void *id)</td></tr>
+<tr class="separator:a3af4da9c7a09760332bab23567794b94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a494fc2bf14ba57f25519c1573657f2a2" id="r_a494fc2bf14ba57f25519c1573657f2a2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html#a494fc2bf14ba57f25519c1573657f2a2">Reset</a> ()</td></tr>
+<tr class="separator:a494fc2bf14ba57f25519c1573657f2a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac88cf26935eb29fd1689decf1ef4c17" id="r_aac88cf26935eb29fd1689decf1ef4c17"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html#aac88cf26935eb29fd1689decf1ef4c17">HasCurrent</a> (const void *id)</td></tr>
+<tr class="separator:aac88cf26935eb29fd1689decf1ef4c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -261,6 +267,73 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="aac88cf26935eb29fd1689decf1ef4c17" name="aac88cf26935eb29fd1689decf1ef4c17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac88cf26935eb29fd1689decf1ef4c17">&#9670;&#160;</a></span>HasCurrent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool yams::motorcontrollers::simulation::BatterySim::HasCurrent </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether a current draw is tracked for the given consumer.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>Key the consumer's current was registered under. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if a current is tracked for <code>id</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a3af4da9c7a09760332bab23567794b94" name="a3af4da9c7a09760332bab23567794b94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3af4da9c7a09760332bab23567794b94">&#9670;&#160;</a></span>RemoveCurrent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void yams::motorcontrollers::simulation::BatterySim::RemoveCurrent </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Stop counting the given consumer's current draw towards the shared battery load, e.g. once its <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> has been closed.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>Key the consumer's current was registered under (the <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ab2d25d519e7e77c49101a9aa4f3006de" name="ab2d25d519e7e77c49101a9aa4f3006de"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2d25d519e7e77c49101a9aa4f3006de">&#9670;&#160;</a></span>ReplaceCapacityDerating()</h2>
 
@@ -340,6 +413,32 @@ Static Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a494fc2bf14ba57f25519c1573657f2a2" name="a494fc2bf14ba57f25519c1573657f2a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a494fc2bf14ba57f25519c1573657f2a2">&#9670;&#160;</a></span>Reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void yams::motorcontrollers::simulation::BatterySim::Reset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clear every tracked current draw and reset discharge simulation to a fresh, fully-charged, disabled state. </p>
 
 </div>
 </div>

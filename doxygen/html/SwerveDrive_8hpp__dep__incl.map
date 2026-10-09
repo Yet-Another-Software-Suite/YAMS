@@ -1,8 +1,11 @@
 <map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/SwerveDrive.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/swerve/SwerveDrive.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,205,75"/>
-<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="13,240,198,295"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,87,59,123,52,157,59,191,70,216,85,238,80,241,65,219,53,193,47,157,53,122,70,85"/>
-<area shape="rect" id="Node000003" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="68,123,292,192"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="137,85,160,121,156,124,132,88"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="151,205,126,241,121,238,147,202"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="127,5,327,75"/>
+<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="5,247,191,302"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,89,115,248,110,246,199,86"/>
+<area shape="rect" id="Node000003" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="218,123,442,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="269,83,302,121,298,124,265,87"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="251,201,152,250,150,245,249,196"/>
+<area shape="rect" id="Node000004" href="$SwerveInputStreamTelemetry_8hpp.html" title=" " alt="" coords="215,240,501,309"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="335,205,344,239,339,240,330,206"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="353,227,344,193,349,192,358,226"/>
 </map>
