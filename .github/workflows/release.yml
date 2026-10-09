@@ -163,6 +163,8 @@ jobs:
       workingDirectory: ${{ github.workspace }}/vendordep
     environment:
       name: github-pages
+    outputs:
+      has_cpp: ${{ steps.cpp.outputs.has_cpp }}
     steps:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
 
@@ -251,6 +253,31 @@ jobs:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
 
+      # The C++ artifacts live on cdn.yassrobotics.com instead of gh-pages, so their version history
+      # comes from the CDN's maven-metadata.xml. Before the first CDN release that file does not
+      # exist yet, and the C++ history still on gh-pages is used (and moved to the CDN below).
+      - name: Fetch C++ maven metadata from the CDN
+        if: ${{ env.skipCpp == 'false' }}
+        run: |
+          dir="${{ env.workingDirectory }}/build/maven/releases/yams/YAMS-cpp"
+          url="https://cdn.yassrobotics.com/yams/YAMS-cpp/maven-metadata.xml"
+          status=$(curl -sS --retry 3 -o metadata.xml -w '%{http_code}' "$url")
+          case "$status" in
+            200)
+              mkdir -p "$dir"
+              mv metadata.xml "$dir/maven-metadata.xml"
+              ;;
+            404)
+              echo "No C++ maven metadata on the CDN yet; using the gh-pages history."
+              rm -f metadata.xml
+              ;;
+            *)
+              # Publishing without the CDN's history would drop every older version from the metadata.
+              echo "Could not download $url (HTTP $status)" >&2
+              exit 1
+              ;;
+          esac
+
       - name: Merge cross-platform artifacts (pass 2, full history)
         run: |
           for dir in cross/maven-*/; do
@@ -272,8 +299,29 @@ jobs:
             cp "yams_${variant}.json" "${{ github.workspace }}/release-artifacts/yams_${variant}.json"
           done
 
+      # Moves the C++ artifacts out of the gh-pages tree to keep it small: publish-maven-cdn uploads
+      # them to cdn.yassrobotics.com. The first time, this also moves every older C++ version that
+      # was still on gh-pages.
+      - name: Move C++ artifacts off gh-pages
+        id: cpp
+        run: |
+          src="${{ env.workingDirectory }}/build/maven/releases/yams/YAMS-cpp"
+          if [ -d "$src" ]; then
+            mkdir -p cdn/yams
+            mv "$src" cdn/yams/
+            echo "has_cpp=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_cpp=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ steps.cpp.outputs.has_cpp == 'true' }}
+        with:
+          name: maven-cdn
+          path: cdn/
+
       - name: Push to gh-pages
-        run: git add . && git commit -m "Automatically add YAMS version ${{ inputs.releaseVersion }}" && git push
+        run: git add -A && git commit -m "Automatically add YAMS version ${{ inputs.releaseVersion }}" && git push
         working-directory: ${{ env.workingDirectory }}/build/maven/
 
       - name: Setup Pages
@@ -428,3 +476,49 @@ jobs:
           pr_title: "Automatically add YAMS (Commands v3) version ${{ inputs.releaseVersion }}"
           pr_branch: "publish_yams_commands3_${{ inputs.releaseVersion }}"
         continue-on-error: true
+
+  # Uploads the C++ artifacts the release job moved off gh-pages to cdn.yassrobotics.com. The
+  # yams-deploy account only accepts MAVEN_SSH_KEY through `rrsync -wo /srv/maven`: it can write
+  # files under /srv/maven, but cannot read them back, run commands or reach anything else. The
+  # secrets live in the maven-cloud environment, which only deploys from master and 2026.
+  # If this job fails, re-run it: gh-pages no longer has the C++ artifacts, the maven-cdn artifact does.
+  publish-maven-cdn:
+    name: Release - Maven CDN
+    needs: [release]
+    if: ${{ needs.release.outputs.has_cpp == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    environment:
+      name: maven-cloud
+      url: https://cdn.yassrobotics.com/
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: maven-cdn
+          path: cdn/
+
+      # The host key is pinned in MAVEN_KNOWN_HOSTS, so ssh never trusts an unknown server.
+      # --checksum skips files the CDN already has, no --delete keeps older versions, and
+      # --delay-updates puts every file in place only after the whole upload succeeds, so nobody
+      # downloads metadata for binaries that are not there yet.
+      - name: Upload to the Maven CDN
+        env:
+          SSH_KEY: ${{ secrets.MAVEN_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.MAVEN_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          (umask 077; printf '%s\n' "$SSH_KEY" > ~/.ssh/yams-ci)
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          rsync -rl --checksum --delay-updates \
+            -e "ssh -i $HOME/.ssh/yams-ci -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes" \
+            cdn/ yams-deploy@159.223.199.132:
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/yams-ci
+
+      - name: Check the C++ artifacts are served
+        run: |
+          curl -fsS -o /dev/null https://cdn.yassrobotics.com/yams/YAMS-cpp/maven-metadata.xml
+          curl -fsS -o /dev/null "https://cdn.yassrobotics.com/yams/YAMS-cpp/${{ inputs.releaseVersion }}/YAMS-cpp-${{ inputs.releaseVersion }}.pom"
