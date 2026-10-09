@@ -116,6 +116,11 @@ public class NovaWrapper extends SmartMotorController {
   private Angle m_absoluteEncoderDiscontinuityPoint = Rotations.of(1);
   /** Acceleration filter. */
   private final DerivativeTimeFilter m_accelerationFilter = new DerivativeTimeFilter(Milliseconds.of(20));
+  /**
+   * Duty cycle last applied to the simulated motor. The simulation holds it between commands, as the
+   * Nova holds its output, so it must be what was commanded and not read back from the motor model.
+   */
+  private volatile double m_simDutyCycle = 0;
 
   /**
    * Construct the Nova Wrapper for the generic {@link SmartMotorController}.
@@ -581,13 +586,16 @@ public class NovaWrapper extends SmartMotorController {
 
   @Override
   public double getDutyCycle() {
-    return m_simSupplier.map(simSupplier -> simSupplier.getMechanismStatorVoltage().in(Volts) / simSupplier.getMechanismSupplyVoltage().in(Volts)).orElseGet(() -> m_nova.status().getAppliedPower());
+    return m_simSupplier.isPresent() ? m_simDutyCycle : m_nova.status().getAppliedPower();
   }
 
   @Override
   public void setDutyCycle(double dutyCycle) {
     m_nova.setThrottle(dutyCycle);
-    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorDutyCycle(dutyCycle));
+    m_simSupplier.ifPresent(simSupplier -> {
+      m_simDutyCycle = Math.clamp(dutyCycle, -1, 1);
+      simSupplier.setMechanismStatorDutyCycle(m_simDutyCycle);
+    });
     if (dutyCycle == 0.0) {
       m_looseFollowers.ifPresent(looseFollower -> {
         for (var follower : looseFollower) {
@@ -609,13 +617,18 @@ public class NovaWrapper extends SmartMotorController {
 
   @Override
   public Voltage getVoltage() {
-    return m_simSupplier.map(simSupplier -> simSupplier.getMechanismStatorVoltage()).orElseGet(() -> Volts.of(m_nova.status().getAppliedVoltage()));
+    return m_simSupplier.map(simSupplier -> simSupplier.getMechanismSupplyVoltage().times(m_simDutyCycle)).orElseGet(() -> Volts.of(m_nova.status().getAppliedVoltage()));
   }
 
   @Override
   public void setVoltage(Voltage voltage) {
     m_nova.setVoltage(voltage);
-    m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismStatorVoltage(voltage));
+    m_simSupplier.ifPresent(simSupplier -> {
+      // The Nova cannot apply more than its supply voltage.
+      final Voltage supplyVoltage = simSupplier.getMechanismSupplyVoltage();
+      m_simDutyCycle = Math.clamp(voltage.in(Volts) / supplyVoltage.in(Volts), -1, 1);
+      simSupplier.setMechanismStatorVoltage(supplyVoltage.times(m_simDutyCycle));
+    });
   }
 
   @Override
