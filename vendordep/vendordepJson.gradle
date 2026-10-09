@@ -59,7 +59,7 @@ ext.createVendordepJsonTask = { variant ->
         vendordep.fileName = variant.fileName
         vendordep.name = variant.name
         vendordep.uuid = variant.uuid
-        vendordep.jsonUrl = "https://yet-another-software-suite.github.io/YAMS/${variant.fileName}"
+        vendordep.jsonUrl = "https://cdn.yassrobotics.com/${variant.fileName}"
         vendordep.javaDependencies << [
             groupId   : artifactGroupId,
             artifactId: "${baseArtifactId}-${variant.javaArtifactSuffix}",

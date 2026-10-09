@@ -383,10 +383,10 @@ jobs:
 
           | Command framework | Vendordep URL |
           | --- | --- |
-          | Commands v2 | `https://yet-another-software-suite.github.io/YAMS/yams_commands2.json` |
-          | Commands v3 | `https://yet-another-software-suite.github.io/YAMS/yams_commands3.json` |
+          | Commands v2 | `https://cdn.yassrobotics.com/yams_commands2.json` |
+          | Commands v3 | `https://cdn.yassrobotics.com/yams_commands3.json` |
 
-          Pinned to this release: `https://yet-another-software-suite.github.io/YAMS/yams_commands2-${{ inputs.releaseVersion }}.json` and `https://yet-another-software-suite.github.io/YAMS/yams_commands3-${{ inputs.releaseVersion }}.json`.
+          Pinned to this release: `https://cdn.yassrobotics.com/yams_commands2-${{ inputs.releaseVersion }}.json` and `https://cdn.yassrobotics.com/yams_commands3-${{ inputs.releaseVersion }}.json`.
 
           ### Offline
 
