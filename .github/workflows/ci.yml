@@ -83,7 +83,7 @@ jobs:
           path: vendordep/build/maven/
 
   test-cpp:
-    name: C++ unit tests
+    name: C++ unit tests - ${{ matrix.group }}
     needs: [build-linux]
     runs-on: ubuntu-latest
     container: wpilib/systemcore-cross-debian:trixie
@@ -92,6 +92,17 @@ jobs:
     defaults:
       run:
         working-directory: vendordep
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in
+          # real time, so they can time out on a busy runner: they run on their own.
+          - group: talon-parity
+            catch-filter: '[TalonParity]'
+          # Everything else. New tags run here unless they get their own group and are excluded.
+          - group: other
+            catch-filter: '~[TalonParity]'
     steps:
       - uses: actions/checkout@v7
       - run: chmod +x gradlew
@@ -101,8 +112,8 @@ jobs:
         with:
           name: maven-linux
           path: vendordep/build/maven/
-      - name: C++ unit tests
-        run: ./gradlew catchTests
+      - name: C++ unit tests - ${{ matrix.group }}
+        run: ./gradlew catchTests "-PcatchFilter=${{ matrix.catch-filter }}"
 
   test-java:
     name: Java unit tests - ${{ matrix.group }}
