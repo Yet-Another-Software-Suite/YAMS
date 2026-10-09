@@ -253,36 +253,26 @@ jobs:
           ref: gh-pages
           path: ${{ env.workingDirectory }}/build/maven/
 
+      # Each cross-platform artifact carries a maven-metadata.xml listing only this version. Skip
+      # those so publish adds this version to the gh-pages metadata, which lists every version.
+      - name: Merge cross-platform artifacts (pass 2, full history)
+        run: |
+          for dir in cross/maven-*/; do
+            rsync -r --exclude 'maven-metadata.xml*' "$dir" vendordep/build/maven/
+          done
+
       # The C++ artifacts live on cdn.yassrobotics.com instead of gh-pages, so their version history
-      # comes from the CDN's maven-metadata.xml. Before the first CDN release that file does not
-      # exist yet, and the C++ history still on gh-pages is used (and moved to the CDN below).
+      # comes from the CDN's maven-metadata.xml, which publish adds this version to.
       - name: Fetch C++ maven metadata from the CDN
         if: ${{ env.skipCpp == 'false' }}
         run: |
           dir="${{ env.workingDirectory }}/build/maven/releases/yams/YAMS-cpp"
           url="https://cdn.yassrobotics.com/yams/YAMS-cpp/maven-metadata.xml"
-          status=$(curl -sS --retry 3 -o metadata.xml -w '%{http_code}' "$url")
-          case "$status" in
-            200)
-              mkdir -p "$dir"
-              mv metadata.xml "$dir/maven-metadata.xml"
-              ;;
-            404)
-              echo "No C++ maven metadata on the CDN yet; using the gh-pages history."
-              rm -f metadata.xml
-              ;;
-            *)
-              # Publishing without the CDN's history would drop every older version from the metadata.
-              echo "Could not download $url (HTTP $status)" >&2
-              exit 1
-              ;;
-          esac
-
-      - name: Merge cross-platform artifacts (pass 2, full history)
-        run: |
-          for dir in cross/maven-*/; do
-            cp -r "$dir." vendordep/build/maven/
-          done
+          # Publishing without the CDN's history would drop every older version from the metadata.
+          curl -fsS --retry 3 -o metadata.xml "$url"
+          mkdir -p "$dir"
+          rm -f "$dir"/maven-metadata.xml*
+          mv metadata.xml "$dir/maven-metadata.xml"
 
       - name: Build and publish (Linux, fixes maven metadata for all versions)
         run: ./gradlew publish -Ponlylinuxx64 -PskipCpp=${{ env.skipCpp }}
