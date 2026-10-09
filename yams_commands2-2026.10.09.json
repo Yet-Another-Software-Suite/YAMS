@@ -7,7 +7,7 @@
     "mavenUrls": [
         "https://cdn.yassrobotics.com/"
     ],
-    "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams_commands2.json",
+    "jsonUrl": "https://cdn.yassrobotics.com/yams_commands2.json",
     "javaDependencies": [
         {
             "groupId": "yams",
