@@ -1,30 +1,5 @@
 var searchData=
 [
-  ['sensor_2ehpp_0',['Sensor.hpp',['../Sensor_8hpp.html',1,'']]],
-  ['sensordata_2ehpp_1',['SensorData.hpp',['../SensorData_8hpp.html',1,'']]],
-  ['simsensorconfig_2ehpp_2',['SimSensorConfig.hpp',['../SimSensorConfig_8hpp.html',1,'']]],
-  ['simsupplier_2ehpp_3',['SimSupplier.hpp',['../SimSupplier_8hpp.html',1,'']]],
-  ['smartmath_2ehpp_4',['SmartMath.hpp',['../SmartMath_8hpp.html',1,'']]],
-  ['smartmechanism_2ehpp_5',['SmartMechanism.hpp',['../SmartMechanism_8hpp.html',1,'']]],
-  ['smartmotorcontroller_2ehpp_6',['SmartMotorController.hpp',['../SmartMotorController_8hpp.html',1,'']]],
-  ['smartmotorcontrollercommandregistry_2ehpp_7',['SmartMotorControllerCommandRegistry.hpp',['../SmartMotorControllerCommandRegistry_8hpp.html',1,'']]],
-  ['smartmotorcontrollerconfig_2ehpp_8',['SmartMotorControllerConfig.hpp',['../SmartMotorControllerConfig_8hpp.html',1,'']]],
-  ['smartmotorcontrollertelemetry_2ehpp_9',['SmartMotorControllerTelemetry.hpp',['../SmartMotorControllerTelemetry_8hpp.html',1,'']]],
-  ['smartmotorcontrollertelemetryconfig_2ehpp_10',['SmartMotorControllerTelemetryConfig.hpp',['../SmartMotorControllerTelemetryConfig_8hpp.html',1,'']]],
-  ['smartpositionalmechanism_2ehpp_11',['SmartPositionalMechanism.hpp',['../SmartPositionalMechanism_8hpp.html',1,'']]],
-  ['smartvelocitymechanism_2ehpp_12',['SmartVelocityMechanism.hpp',['../SmartVelocityMechanism_8hpp.html',1,'']]],
-  ['sparkwrapper_2ehpp_13',['SparkWrapper.hpp',['../SparkWrapper_8hpp.html',1,'']]],
-  ['sprocket_2ehpp_14',['Sprocket.hpp',['../Sprocket_8hpp.html',1,'']]],
-  ['structarraytelemetry_2ehpp_15',['StructArrayTelemetry.hpp',['../StructArrayTelemetry_8hpp.html',1,'']]],
-  ['structtelemetry_2ehpp_16',['StructTelemetry.hpp',['../StructTelemetry_8hpp.html',1,'']]],
-  ['swervedrive_2ehpp_17',['SwerveDrive.hpp',['../SwerveDrive_8hpp.html',1,'']]],
-  ['swervedriveconfig_2ehpp_18',['SwerveDriveConfig.hpp',['../SwerveDriveConfig_8hpp.html',1,'']]],
-  ['swervedrivetelemetry_2ehpp_19',['SwerveDriveTelemetry.hpp',['../SwerveDriveTelemetry_8hpp.html',1,'']]],
-  ['swervedrivetelemetryconfig_2ehpp_20',['SwerveDriveTelemetryConfig.hpp',['../SwerveDriveTelemetryConfig_8hpp.html',1,'']]],
-  ['swerveinputstream_2ehpp_21',['SwerveInputStream.hpp',['../SwerveInputStream_8hpp.html',1,'']]],
-  ['swerveinputstreamtelemetry_2ehpp_22',['SwerveInputStreamTelemetry.hpp',['../SwerveInputStreamTelemetry_8hpp.html',1,'']]],
-  ['swervemodule_2ehpp_23',['SwerveModule.hpp',['../SwerveModule_8hpp.html',1,'']]],
-  ['swervemoduleconfig_2ehpp_24',['SwerveModuleConfig.hpp',['../SwerveModuleConfig_8hpp.html',1,'']]],
-  ['swervemoduletelemetry_2ehpp_25',['SwerveModuleTelemetry.hpp',['../SwerveModuleTelemetry_8hpp.html',1,'']]],
-  ['swervemoduletelemetryconfig_2ehpp_26',['SwerveModuleTelemetryConfig.hpp',['../SwerveModuleTelemetryConfig_8hpp.html',1,'']]]
+  ['talonfxswrapper_2ehpp_0',['TalonFXSWrapper.hpp',['../TalonFXSWrapper_8hpp.html',1,'']]],
+  ['talonfxwrapper_2ehpp_1',['TalonFXWrapper.hpp',['../TalonFXWrapper_8hpp.html',1,'']]]
 ];

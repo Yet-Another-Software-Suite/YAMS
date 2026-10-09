@@ -82,19 +82,27 @@ $(function() {
   <div class="headertitle"><div class="title">SparkWrapper.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;rev/SparkAbsoluteEncoder.h&gt;</code><br />
+<div class="textblock"><code>#include &lt;rev/DetachedEncoder.h&gt;</code><br />
+<code>#include &lt;rev/RelativeEncoder.h&gt;</code><br />
+<code>#include &lt;rev/SparkAbsoluteEncoder.h&gt;</code><br />
 <code>#include &lt;rev/SparkClosedLoopController.h&gt;</code><br />
 <code>#include &lt;rev/SparkFlex.h&gt;</code><br />
+<code>#include &lt;rev/SparkFlexExternalEncoder.h&gt;</code><br />
 <code>#include &lt;rev/SparkMax.h&gt;</code><br />
+<code>#include &lt;rev/SparkMaxAlternateEncoder.h&gt;</code><br />
 <code>#include &lt;rev/SparkRelativeEncoder.h&gt;</code><br />
 <code>#include &lt;rev/SparkSim.h&gt;</code><br />
 <code>#include &lt;rev/config/SparkFlexConfig.h&gt;</code><br />
 <code>#include &lt;rev/config/SparkMaxConfig.h&gt;</code><br />
 <code>#include &lt;rev/sim/SparkAbsoluteEncoderSim.h&gt;</code><br />
+<code>#include &lt;rev/sim/SparkExternalEncoderSim.h&gt;</code><br />
+<code>#include &lt;rev/sim/SparkMaxAlternateEncoderSim.h&gt;</code><br />
 <code>#include &lt;rev/sim/SparkRelativeEncoderSim.h&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;variant&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;wpi/math/trajectory/TrapezoidProfile.hpp&gt;</code><br />
 <code>#include &lt;wpi/simulation/DCMotorSim.hpp&gt;</code><br />
 <code>#include &lt;wpi/util/Alert.hpp&gt;</code><br />
 <code>#include &quot;<a class="el" href="_derivative_time_filter_8hpp_source.html">yams/math/DerivativeTimeFilter.hpp</a>&quot;</code><br />

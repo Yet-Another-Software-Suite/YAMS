@@ -128,6 +128,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae5c23b8a0c6ad50262ff8de63b886c8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1215532d010a2b3f32f9ed731aef68d7" id="r_a1215532d010a2b3f32f9ed731aef68d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1215532d010a2b3f32f9ed731aef68d7">SetVelocity</a> (wpi::units::turns_per_second_t velocity) override</td></tr>
 <tr class="separator:a1215532d010a2b3f32f9ed731aef68d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdda5a23124862e6c21dd880ae0d2479" id="r_abdda5a23124862e6c21dd880ae0d2479"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abdda5a23124862e6c21dd880ae0d2479">SetVelocity</a> (wpi::units::turns_per_second_t velocity, wpi::units::newton_t feedforwardForce) override</td></tr>
+<tr class="separator:abdda5a23124862e6c21dd880ae0d2479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8036a42cab9d5f85d43ec5098e819be" id="r_ab8036a42cab9d5f85d43ec5098e819be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8036a42cab9d5f85d43ec5098e819be">SetVelocity</a> (wpi::units::meters_per_second_t velocity) override</td></tr>
 <tr class="separator:ab8036a42cab9d5f85d43ec5098e819be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae1d2eba30e092f9b8684de2dc23b99b" id="r_aae1d2eba30e092f9b8684de2dc23b99b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae1d2eba30e092f9b8684de2dc23b99b">SetEncoderPosition</a> (wpi::units::turn_t angle) override</td></tr>
@@ -224,6 +226,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a139880cc61ed60ac45e9a140f6962bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3680accec9980a1184eae5872f06feac" id="r_a3680accec9980a1184eae5872f06feac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3680accec9980a1184eae5872f06feac">SetClosedLoopSlot</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#acdc3626942088138de81d50081b979c4">ClosedLoopControllerSlot</a> slot) override</td></tr>
 <tr class="separator:a3680accec9980a1184eae5872f06feac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40d34498c7e6a4635782130416e856be" id="r_a40d34498c7e6a4635782130416e856be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40d34498c7e6a4635782130416e856be">SetMechanismGearing</a> (const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing) override</td></tr>
+<tr class="separator:a40d34498c7e6a4635782130416e856be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8202c2371cd07ea92fb82c24ac31ff4d" id="r_a8202c2371cd07ea92fb82c24ac31ff4d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8202c2371cd07ea92fb82c24ac31ff4d">SetMechanismCircumference</a> (wpi::units::meter_t circumference) override</td></tr>
+<tr class="separator:a8202c2371cd07ea92fb82c24ac31ff4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31917b4a52b557eaf025d45f0a6358ef" id="r_a31917b4a52b557eaf025d45f0a6358ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31917b4a52b557eaf025d45f0a6358ef">GetConfig</a> () override</td></tr>
 <tr class="separator:a31917b4a52b557eaf025d45f0a6358ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbe39e0930fff3321baacddbcb7e22fc" id="r_acbe39e0930fff3321baacddbcb7e22fc"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acbe39e0930fff3321baacddbcb7e22fc">GetMotorController</a> () override</td></tr>
@@ -247,10 +253,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2026dd192b4f903f41aed09bb4332da3 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a82c193dc7dd1b4119d3c6425b6002906"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a82c193dc7dd1b4119d3c6425b6002906">SetVelocity</a> (wpi::units::meters_per_second_t velocity, wpi::units::newton_t feedforwardForce)</td></tr>
 <tr class="separator:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51121e909c52fac8f5a2dd8ad01e58b7 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a51121e909c52fac8f5a2dd8ad01e58b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a51121e909c52fac8f5a2dd8ad01e58b7">SetMechanismGearing</a> (const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing)</td></tr>
-<tr class="separator:a51121e909c52fac8f5a2dd8ad01e58b7 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0a9bf0420c2532ee250f507966e07db inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_ab0a9bf0420c2532ee250f507966e07db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab0a9bf0420c2532ee250f507966e07db">SetMechanismCircumference</a> (wpi::units::meter_t circumference)</td></tr>
-<tr class="separator:ab0a9bf0420c2532ee250f507966e07db inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aac0e6aa284a745bc0f126af1fd63b2c9">StartClosedLoopController</a> ()</td></tr>
 <tr class="separator:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ee466e963009350506cadc018c3dfc4 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a2ee466e963009350506cadc018c3dfc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a2ee466e963009350506cadc018c3dfc4">StopClosedLoopController</a> ()</td></tr>
@@ -373,6 +375,9 @@ Additional Inherited Members</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">SmartMotorController</a> implementation for REV SPARK Max and SPARK Flex motor controllers.</p>
 <p>Supports both SPARK Max and SPARK Flex hardware via a common internal interface. Wraps REV SparkBase, SparkClosedLoopController, and encoder objects to satisfy the <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">SmartMotorController</a> contract.</p>
+<p>The SPARK runs in the raw units of its feedback sensor (rotations and RPM of the motor's encoder, or of the external encoder when it is used for feedback); no conversion factors are configured. Gains, setpoints, MAXMotion constraints, tolerances and soft limits are scaled from YAMS mechanism units by the mechanism-to-feedback-sensor ratio.</p>
+<p>Supported external encoders (WithExternalEncoder): <code>rev::spark::SparkAbsoluteEncoder*</code>, <code>rev::spark::SparkMaxAlternateEncoder*</code> / <code>rev::spark::SparkFlexExternalEncoder*</code> (quadrature), and <code>rev::detached::DetachedEncoder*</code> / <code>rev::detached::SplineEncoder*</code> (read over CAN).</p>
+<p>External encoder discontinuity point (absolute and detached encoders): 0.5 rotations reports [-0.5, 0.5), 1 rotation (the default) reports [0, 1).</p>
 <h3><a class="anchor" id="autotoc_md10"></a>
 Example usage SPARK Max (inside a subsystem constructor)</h3>
 <div class="fragment"><div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a>;</div>
@@ -411,7 +416,7 @@ Example usage SPARK Max (inside a subsystem constructor)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_ab805136bec30f6df6248dc451b03711a"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ab805136bec30f6df6248dc451b03711a">yams::motorcontrollers::SmartMotorControllerConfig::WithMechanismCircumference</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMechanismCircumference(wpi::units::meter_t circumference)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1local_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a></div><div class="ttdef"><b>Definition</b> RevConfigCompat.hpp:10</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1local_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a></div><div class="ttdef"><b>Definition</b> SparkWrapper.hpp:34</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
 Example usage SPARK Flex</h3>
@@ -1061,10 +1066,7 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p></p>
-<p>Get the supply (input) current draw.</p>
-<dl class="section return"><dt>Returns</dt><dd>Supply current, or empty if not supported by the hardware.   </dd></dl>
+<p>SPARKs do not report supply current; always empty. </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a930601274c2d1beae02f8ab19fb49c59">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -1430,7 +1432,13 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Not supported by SPARK hardware; has no effect. </p>
+<p>Linear version of SetEncoderVelocity(turns_per_second_t); throws without a mechanism circumference.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">velocity</td><td>Mechanism linear velocity. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a732cae17ea2622f07d1e16cd2095898a">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -1458,7 +1466,13 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Not supported by SPARK hardware; has no effect. </p>
+<p>Set the simulated encoder velocities. Throws std::runtime_error outside of simulation, since SPARKs do not support setting the encoder velocity.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">velocity</td><td>Mechanism velocity. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a9ada11b2f258860cbf3a52965827e5ac">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -1495,7 +1509,7 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Exponential profiles are not supported by SPARK hardware; has no effect. </p>
+<p>Update the exponential profile (run on the RoboRIO, SPARKs have no exponential profile). Missing values keep the configured ones. </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab30f8fc1f8bb9947cce0dc503e55f2b0">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -1922,6 +1936,74 @@ Example usage SPARK Flex</h3>
 
 </div>
 </div>
+<a id="a8202c2371cd07ea92fb82c24ac31ff4d" name="a8202c2371cd07ea92fb82c24ac31ff4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8202c2371cd07ea92fb82c24ac31ff4d">&#9670;&#160;</a></span>SetMechanismCircumference()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::local::SparkWrapper::SetMechanismCircumference </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>circumference</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Update the mechanism circumference and rewrite the SPARK values that depend on it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">circumference</td><td>New mechanism circumference. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab0a9bf0420c2532ee250f507966e07db">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="a40d34498c7e6a4635782130416e856be" name="a40d34498c7e6a4635782130416e856be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40d34498c7e6a4635782130416e856be">&#9670;&#160;</a></span>SetMechanismGearing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::local::SparkWrapper::SetMechanismGearing </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>gearing</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Update the mechanism gearing and rewrite the SPARK values that depend on it (gains, MAXMotion constraints, tolerance and soft limits).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gearing</td><td>New mechanism gearing. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a51121e909c52fac8f5a2dd8ad01e58b7">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
 <a id="a487c52433f31fee6bbe3b240fd8ff804" name="a487c52433f31fee6bbe3b240fd8ff804"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a487c52433f31fee6bbe3b240fd8ff804">&#9670;&#160;</a></span>SetMechanismLimits()</h2>
 
@@ -2163,7 +2245,13 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>SPARK MAXMotion does not expose jerk limiting; has no effect. </p>
+<p>Set the maximum jerk of a velocity trapezoidal profile (its acceleration constraint). Has no effect on position profiles. MAXMotion has no jerk limit, so only the RoboRIO profile changes.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">maxJerk</td><td>Maximum angular jerk. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a98c3f61f5147d43f123501570244e780">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -2439,15 +2527,7 @@ Example usage SPARK Flex</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p></p>
-<p>Set the supply (input) current limit.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">currentLimit</td><td>Maximum supply current.   </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Supply current limits are not supported on SPARKs; has no effect. </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a51e95eab9250a3bb451c21d11ea6fa56">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -2484,7 +2564,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="ab8036a42cab9d5f85d43ec5098e819be" name="ab8036a42cab9d5f85d43ec5098e819be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8036a42cab9d5f85d43ec5098e819be">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[1/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8036a42cab9d5f85d43ec5098e819be">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[1/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2518,7 +2598,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="ae99f5da7b181b51e013ceaae6d915caa" name="ae99f5da7b181b51e013ceaae6d915caa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae99f5da7b181b51e013ceaae6d915caa">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[2/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae99f5da7b181b51e013ceaae6d915caa">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[2/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2552,7 +2632,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="a82c193dc7dd1b4119d3c6425b6002906" name="a82c193dc7dd1b4119d3c6425b6002906"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82c193dc7dd1b4119d3c6425b6002906">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[3/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c193dc7dd1b4119d3c6425b6002906">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[3/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2582,7 +2662,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="a1215532d010a2b3f32f9ed731aef68d7" name="a1215532d010a2b3f32f9ed731aef68d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1215532d010a2b3f32f9ed731aef68d7">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[4/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1215532d010a2b3f32f9ed731aef68d7">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[4/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2618,7 +2698,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="aa76a9e2999cb2023df34757bc73bb3ce" name="aa76a9e2999cb2023df34757bc73bb3ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa76a9e2999cb2023df34757bc73bb3ce">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[5/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa76a9e2999cb2023df34757bc73bb3ce">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[5/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2652,7 +2732,7 @@ Example usage SPARK Flex</h3>
 </div>
 </div>
 <a id="a9dd1d9c3ec604dc8ce6017c7ad5d8354" name="a9dd1d9c3ec604dc8ce6017c7ad5d8354"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9dd1d9c3ec604dc8ce6017c7ad5d8354">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[6/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dd1d9c3ec604dc8ce6017c7ad5d8354">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[6/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2679,6 +2759,45 @@ Example usage SPARK Flex</h3>
 </div><div class="memdoc">
 <p>Command a mechanism angular velocity setpoint with an additional feedforward force applied on top, e.g. from a path-following set-point generator.</p>
 <p>The force is converted to a voltage with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a6ab1154f8256a9ce7de092b8b8edd1f3">SmartMotorControllerConfig::ConvertToVoltage</a> and added by the RoboRIO closed-loop controller, so the mechanism circumference must be set.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">velocity</td><td>Target mechanism angular velocity. </td></tr>
+    <tr><td class="paramname">feedforwardForce</td><td>Additional feedforward force at the mechanism. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="abdda5a23124862e6c21dd880ae0d2479" name="abdda5a23124862e6c21dd880ae0d2479"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdda5a23124862e6c21dd880ae0d2479">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[7/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::local::SparkWrapper::SetVelocity </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::newton_t</td>          <td class="paramname"><span class="paramname"><em>feedforwardForce</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Command a velocity setpoint with an additional feedforward force, sent to the SPARK as an arbitrary feedforward voltage (or added by the RoboRIO loop when an LQR is used).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">velocity</td><td>Target mechanism angular velocity. </td></tr>
