@@ -96,6 +96,9 @@ public class SparkDeviceConfigTest {
             sparkMax,
             DCMotor.getNEO(1),
             baseConfig("angular", kGearing).withSoftLimits(Rotations.of(-0.5), Rotations.of(0.75)));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     try {
       final var softLimit = sparkMax.configAccessor.softLimit;
       // applyConfig
@@ -126,6 +129,9 @@ public class SparkDeviceConfigTest {
             baseConfig("linear", kGearing)
                 .withMechanismCircumference(Meters.of(kCircumferenceMeters))
                 .withSoftLimits(Meters.of(-0.1), Meters.of(0.2)));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     try {
       final var softLimit = sparkMax.configAccessor.softLimit;
       assertDevice(
@@ -162,6 +168,9 @@ public class SparkDeviceConfigTest {
             DCMotor.getNEO(1),
             baseConfig("zero offset", new MechanismGearing(GearBox.fromReductionStages(1)))
                 .withExternalEncoder(sparkMax.getAbsoluteEncoder()));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     try {
       final var absoluteEncoder = sparkMax.configAccessor.absoluteEncoder;
       assertDevice(0, absoluteEncoder::getZeroOffset, "initial zero offset");

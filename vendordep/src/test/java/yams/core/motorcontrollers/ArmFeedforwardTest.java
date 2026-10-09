@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Voltage;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
 import yams.core.gearing.GearBox;
@@ -61,6 +63,9 @@ public class ArmFeedforwardTest {
     Preferences.removeAll();
   }
 
+  /** The last voltage the closed loop controller commanded, captured from setVoltage. */
+  private static final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
+
   private record Case(String name, Function<SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
@@ -72,14 +77,34 @@ public class ArmFeedforwardTest {
     return Stream.of(
         new Case(
             "SparkMax",
-            cfg -> new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), cfg)),
+            cfg ->
+                new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1), cfg) {
+                  @Override
+                  public void setVoltage(Voltage voltage) {
+                    commandedVolts.set(voltage.in(Volts));
+                    super.setVoltage(voltage);
+                  }
+                }),
         new Case(
             "TalonFX",
             cfg ->
-                new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), cfg)),
+                new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), cfg) {
+                  @Override
+                  public void setVoltage(Voltage voltage) {
+                    commandedVolts.set(voltage.in(Volts));
+                    super.setVoltage(voltage);
+                  }
+                }),
         new Case(
             "TalonFXS",
-            cfg -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg)));
+            cfg ->
+                new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg) {
+                  @Override
+                  public void setVoltage(Voltage voltage) {
+                    commandedVolts.set(voltage.in(Volts));
+                    super.setVoltage(voltage);
+                  }
+                }));
   }
 
   private static LQRController lqr() {
@@ -141,14 +166,10 @@ public class ArmFeedforwardTest {
       ((SmartMotorControllerTestSubsystem)
               ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
           .setSMC(smc);
-      smc.setupSimulation();
       smc.setPosition(Degrees.of(0));
+      commandedVolts.set(Double.NaN);
       smc.iterateClosedLoopController();
-      smc.simIterate();
-      final double volts = smc.getVoltage().in(Volts);
-      final double dutyCycle = smc.getDutyCycle();
-      System.out.println(
-          testCase.name() + ": voltage=" + volts + " V, duty cycle=" + dutyCycle);
+      final double volts = commandedVolts.get();
       assertTrue(
           volts > kG * 0.75 && volts < kG * 1.25,
           testCase.name()

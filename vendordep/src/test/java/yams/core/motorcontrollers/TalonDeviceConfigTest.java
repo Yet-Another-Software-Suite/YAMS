@@ -140,6 +140,9 @@ public class TalonDeviceConfigTest {
   void rampRateSettersSetEveryRamp(Case testCase) {
     final String name = testCase.name();
     final SmartMotorController smc = testCase.create().apply(config(name));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     try {
       smc.setOpenLoopRampRate(Seconds.of(0.3));
       smc.setClosedLoopRampRate(Seconds.of(0.4));
@@ -174,6 +177,9 @@ public class TalonDeviceConfigTest {
                     .withTrapezoidalProfile(
                         RotationsPerSecondPerSecond.of(10),
                         RotationsPerSecondPerSecond.per(Second).of(100)));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
     try {
       final MotionMagicConfigs motionMagic = new MotionMagicConfigs();
       refresh(smc, motionMagic);
