@@ -11,10 +11,10 @@ import groovy.json.JsonSlurper
 // uuid/name/fileName/jsonUrl are hardcoded per variant below (not read from the base file) so
 // each vendordep's identity stays fixed regardless of what the base yams.json's own fields say.
 //
-// Each variant also requires the WPILib command framework vendordep it is built against, and
-// conflicts with the other variant, since a project should only ever install one of them. The
-// WPILib command vendordeps ship with the WPILib installer and have no online jsonUrl, so their
-// onlineUrl is left empty.
+// Each variant conflicts with the other, since a project should only ever install one of them.
+// Neither lists the WPILib command framework vendordep it is built against in "requires": those
+// ship with the WPILib installer and have no online jsonUrl, and WPILib's vendor-json-repo
+// rejects a "requires" entry with an empty onlineUrl.
 def baseVendorFile = "yams.json"
 
 def vendordepVariants = [
@@ -25,12 +25,6 @@ def vendordepVariants = [
         uuid              : 'a1051e86-a979-4880-a28b-a0d5362d1d96',
         javaArtifactSuffix: 'commands2',
         includeCpp        : true,
-        requires          : [
-            uuid           : '111e20f7-815e-48f8-9dd6-e675ce75b266',
-            errorMessage   : 'Commands V2 is required! Install it from the WPILib vendor libraries.',
-            offlineFileName: 'CommandsV2.json',
-            onlineUrl      : '',
-        ],
         conflictsWith     : 'commands3',
     ],
     commands3: [
@@ -40,12 +34,6 @@ def vendordepVariants = [
         uuid              : '9eadd383-6bdc-4107-957a-b50cd3146f17',
         javaArtifactSuffix: 'commands3',
         includeCpp        : false,
-        requires          : [
-            uuid           : '4decdc05-a056-46cf-9561-39449bbb0130',
-            errorMessage   : 'Commands v3 is required! Install it from the WPILib vendor libraries.',
-            offlineFileName: 'CommandsV3.json',
-            onlineUrl      : '',
-        ],
         conflictsWith     : 'commands2',
     ],
 ]
@@ -80,7 +68,7 @@ ext.createVendordepJsonTask = { variant ->
         // skipCpp strips cppDependencies from the compiled build entirely; a variant that never
         // ships cpp deps (commands3) stays empty either way.
         vendordep.cppDependencies = (variant.includeCpp && !skipCpp) ? vendordep.cppDependencies : []
-        vendordep.requires = [variant.requires]
+        vendordep.requires = []
         def other = vendordepVariants[variant.conflictsWith]
         vendordep.conflictsWith = [
             [
