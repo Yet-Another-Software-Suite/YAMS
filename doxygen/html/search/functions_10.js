@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['talonfxswrapper_0',['TalonFXSWrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a875db623400e5a18db20c2f48f93f81f',1,'yams::motorcontrollers::remote::TalonFXSWrapper']]],
+  ['talonfxswrapper_0',['talonfxswrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a54fa66bd1426bcc2a8ea8aaab64eb777',1,'yams::motorcontrollers::remote::TalonFXSWrapper::TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS *talon, wpi::math::DCMotor dcMotor, SmartMotorControllerConfig *config)'],['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a875db623400e5a18db20c2f48f93f81f',1,'yams::motorcontrollers::remote::TalonFXSWrapper::TalonFXSWrapper(ctre::phoenix6::hardware::TalonFXS *talon, wpi::math::DCMotor dcMotor, MotorArrangement arrangement, SmartMotorControllerConfig *config)']]],
   ['talonfxwrapper_1',['TalonFXWrapper',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a1758459620a97c17847eae3295705be9',1,'yams::motorcontrollers::remote::TalonFXWrapper']]],
   ['times_2',['times',['../classyams_1_1gearing_1_1GearBox.html#aeeb3312ed70524f0dac845f0f63f79d2',1,'yams::gearing::GearBox::Times()'],['../classyams_1_1gearing_1_1Sprocket.html#a0060c1048f0b91eb266acb24e33bed2f',1,'yams::gearing::Sprocket::Times()']]],
   ['transformunit_3',['TransformUnit',['../classyams_1_1telemetry_1_1DoubleTelemetry.html#a3b18023311bde305553bbfd145675cd9',1,'yams::telemetry::DoubleTelemetry']]],

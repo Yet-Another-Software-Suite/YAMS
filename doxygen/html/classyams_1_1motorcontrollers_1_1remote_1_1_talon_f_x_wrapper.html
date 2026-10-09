@@ -100,6 +100,18 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1758459620a97c17847eae3295705be9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeba1c348d42df7464be3167d2fbed9f9" id="r_aeba1c348d42df7464be3167d2fbed9f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeba1c348d42df7464be3167d2fbed9f9">~TalonFXWrapper</a> ()</td></tr>
 <tr class="separator:aeba1c348d42df7464be3167d2fbed9f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a005c823a6831f3bdbf77597eb445dd28" id="r_a005c823a6831f3bdbf77597eb445dd28"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html">TalonFXWrapper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a005c823a6831f3bdbf77597eb445dd28">EnableFOC</a> ()</td></tr>
+<tr class="separator:a005c823a6831f3bdbf77597eb445dd28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19a71880189711d284b50ff5f0be6122" id="r_a19a71880189711d284b50ff5f0be6122"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html">TalonFXWrapper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19a71880189711d284b50ff5f0be6122">DisableFOC</a> ()</td></tr>
+<tr class="separator:a19a71880189711d284b50ff5f0be6122"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac524bb99f156fa96c83ce58954000260" id="r_ac524bb99f156fa96c83ce58954000260"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac524bb99f156fa96c83ce58954000260">UseCANdiPWM1</a> () const</td></tr>
+<tr class="separator:ac524bb99f156fa96c83ce58954000260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a430302c3175927c49fa1d22b91703acb" id="r_a430302c3175927c49fa1d22b91703acb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a430302c3175927c49fa1d22b91703acb">UseCANdiPWM2</a> () const</td></tr>
+<tr class="separator:a430302c3175927c49fa1d22b91703acb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a136b758d8628a6ab4b4d6db0b7c86b38" id="r_a136b758d8628a6ab4b4d6db0b7c86b38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a136b758d8628a6ab4b4d6db0b7c86b38">SetUpdateFrequency</a> (wpi::units::hertz_t frequency)</td></tr>
+<tr class="separator:a136b758d8628a6ab4b4d6db0b7c86b38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4000543276d48e71c3f2a5abb3c9bbea" id="r_a4000543276d48e71c3f2a5abb3c9bbea"><td class="memItemLeft" align="right" valign="top">ctre::phoenix::StatusCode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4000543276d48e71c3f2a5abb3c9bbea">ForceConfigApply</a> ()</td></tr>
+<tr class="separator:a4000543276d48e71c3f2a5abb3c9bbea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac00bcb7cfe5c91d4852c8aa540d67a49" id="r_ac00bcb7cfe5c91d4852c8aa540d67a49"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structyams_1_1telemetry_1_1_unsupported_telemetry_fields.html">telemetry::UnsupportedTelemetryFields</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac00bcb7cfe5c91d4852c8aa540d67a49">GetUnsupportedTelemetryFields</a> () override</td></tr>
 <tr class="separator:ac00bcb7cfe5c91d4852c8aa540d67a49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca4905318b401c1786afd93d8b94d6c3" id="r_aca4905318b401c1786afd93d8b94d6c3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca4905318b401c1786afd93d8b94d6c3">ApplyConfig</a> (const <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;config) override</td></tr>
@@ -128,6 +140,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aef84625394d0777c38f096a445ac67d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ec2c9ca061739d55fb10e89117b070a" id="r_a2ec2c9ca061739d55fb10e89117b070a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ec2c9ca061739d55fb10e89117b070a">SetVelocity</a> (wpi::units::meters_per_second_t velocity) override</td></tr>
 <tr class="separator:a2ec2c9ca061739d55fb10e89117b070a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac06afcebd26af3f6d9ccbce50b59b4aa" id="r_ac06afcebd26af3f6d9ccbce50b59b4aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac06afcebd26af3f6d9ccbce50b59b4aa">SetVelocity</a> (wpi::units::turns_per_second_t velocity, wpi::units::newton_t feedforwardForce) override</td></tr>
+<tr class="separator:ac06afcebd26af3f6d9ccbce50b59b4aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a915033f0338c9fa69b7de4355b46f3e8" id="r_a915033f0338c9fa69b7de4355b46f3e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a915033f0338c9fa69b7de4355b46f3e8">SetEncoderPosition</a> (wpi::units::turn_t angle) override</td></tr>
 <tr class="separator:a915033f0338c9fa69b7de4355b46f3e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96ad4854f107da346d651e490ea32418" id="r_a96ad4854f107da346d651e490ea32418"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96ad4854f107da346d651e490ea32418">SetEncoderPosition</a> (wpi::units::meter_t distance) override</td></tr>
@@ -140,6 +154,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a350118c78831db22ab500142471bec43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1dbec502a8c019bc41525b6e9da53cf4" id="r_a1dbec502a8c019bc41525b6e9da53cf4"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1dbec502a8c019bc41525b6e9da53cf4">GetMechanismVelocity</a> () override</td></tr>
 <tr class="separator:a1dbec502a8c019bc41525b6e9da53cf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff33069fa6c57fe8753296ae906c53ef" id="r_aff33069fa6c57fe8753296ae906c53ef"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff33069fa6c57fe8753296ae906c53ef">GetRelativeMechanismPosition</a> () override</td></tr>
+<tr class="separator:aff33069fa6c57fe8753296ae906c53ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb7d11d7ee2af6864697fd8cb2d4d9a2" id="r_aeb7d11d7ee2af6864697fd8cb2d4d9a2"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb7d11d7ee2af6864697fd8cb2d4d9a2">GetRelativeMechanismVelocity</a> () override</td></tr>
+<tr class="separator:aeb7d11d7ee2af6864697fd8cb2d4d9a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afabde9ea9fd5fae2161420b2a7a2ebc1" id="r_afabde9ea9fd5fae2161420b2a7a2ebc1"><td class="memItemLeft" align="right" valign="top">wpi::units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afabde9ea9fd5fae2161420b2a7a2ebc1">GetMechanismAcceleration</a> () override</td></tr>
 <tr class="separator:afabde9ea9fd5fae2161420b2a7a2ebc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a170ceef8c3b75cd2c0720b1a30be2692" id="r_a170ceef8c3b75cd2c0720b1a30be2692"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a170ceef8c3b75cd2c0720b1a30be2692">GetRotorPosition</a> () override</td></tr>
@@ -152,10 +170,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a997f6dbdddd52873a2cbc6e83e45f887"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99a8261d2d81f3b350dd15bc76292e12" id="r_a99a8261d2d81f3b350dd15bc76292e12"><td class="memItemLeft" align="right" valign="top">wpi::units::meters_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99a8261d2d81f3b350dd15bc76292e12">GetMeasurementAcceleration</a> () override</td></tr>
 <tr class="separator:a99a8261d2d81f3b350dd15bc76292e12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2cfc1f4859460d4a9a6d7a5a0b4a2ae" id="r_ac2cfc1f4859460d4a9a6d7a5a0b4a2ae"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::degree_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2cfc1f4859460d4a9a6d7a5a0b4a2ae">GetExternalEncoderPosition</a> () override</td></tr>
-<tr class="separator:ac2cfc1f4859460d4a9a6d7a5a0b4a2ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abff14014c754b2a4a20e4486e904bb82" id="r_abff14014c754b2a4a20e4486e904bb82"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::degrees_per_second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abff14014c754b2a4a20e4486e904bb82">GetExternalEncoderVelocity</a> () override</td></tr>
-<tr class="separator:abff14014c754b2a4a20e4486e904bb82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc9174252a701b1bc1021037293754e4" id="r_acc9174252a701b1bc1021037293754e4"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc9174252a701b1bc1021037293754e4">GetExternalEncoderMechanismPosition</a> () override</td></tr>
+<tr class="separator:acc9174252a701b1bc1021037293754e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02a7e9a0873fed1f2ebcc962f51f6396" id="r_a02a7e9a0873fed1f2ebcc962f51f6396"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turns_per_second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02a7e9a0873fed1f2ebcc962f51f6396">GetExternalEncoderMechanismVelocity</a> () override</td></tr>
+<tr class="separator:a02a7e9a0873fed1f2ebcc962f51f6396"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1e83932e90c2c892adeea47ea2f31b5" id="r_af1e83932e90c2c892adeea47ea2f31b5"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::ampere_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af1e83932e90c2c892adeea47ea2f31b5">GetSupplyCurrent</a> () override</td></tr>
 <tr class="separator:af1e83932e90c2c892adeea47ea2f31b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af426520b0150a59ce8478e449e5d899b" id="r_af426520b0150a59ce8478e449e5d899b"><td class="memItemLeft" align="right" valign="top">wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af426520b0150a59ce8478e449e5d899b">GetStatorCurrent</a> () override</td></tr>
@@ -222,6 +240,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2540b827fec5f056c4b62a2a98abb94d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac23f032e8482e5aad6409069ac235156" id="r_ac23f032e8482e5aad6409069ac235156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac23f032e8482e5aad6409069ac235156">SetClosedLoopSlot</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#acdc3626942088138de81d50081b979c4">ClosedLoopControllerSlot</a> slot) override</td></tr>
 <tr class="separator:ac23f032e8482e5aad6409069ac235156"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac36259baf343b6818506c48a5308ad34" id="r_ac36259baf343b6818506c48a5308ad34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac36259baf343b6818506c48a5308ad34">SetMechanismGearing</a> (const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing) override</td></tr>
+<tr class="separator:ac36259baf343b6818506c48a5308ad34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaaa613aeba7269f88bb3a867f112b885" id="r_aaaa613aeba7269f88bb3a867f112b885"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaaa613aeba7269f88bb3a867f112b885">SetMechanismCircumference</a> (wpi::units::meter_t circumference) override</td></tr>
+<tr class="separator:aaaa613aeba7269f88bb3a867f112b885"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c33c7f4950233209cefcd07b6500fe4" id="r_a1c33c7f4950233209cefcd07b6500fe4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1c33c7f4950233209cefcd07b6500fe4">GetConfig</a> () override</td></tr>
 <tr class="separator:a1c33c7f4950233209cefcd07b6500fe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a445c5cc779f88590b5f14bc204ad8a79" id="r_a445c5cc779f88590b5f14bc204ad8a79"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a445c5cc779f88590b5f14bc204ad8a79">GetMotorController</a> () override</td></tr>
@@ -245,10 +267,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2026dd192b4f903f41aed09bb4332da3 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a82c193dc7dd1b4119d3c6425b6002906"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a82c193dc7dd1b4119d3c6425b6002906">SetVelocity</a> (wpi::units::meters_per_second_t velocity, wpi::units::newton_t feedforwardForce)</td></tr>
 <tr class="separator:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51121e909c52fac8f5a2dd8ad01e58b7 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a51121e909c52fac8f5a2dd8ad01e58b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a51121e909c52fac8f5a2dd8ad01e58b7">SetMechanismGearing</a> (const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;gearing)</td></tr>
-<tr class="separator:a51121e909c52fac8f5a2dd8ad01e58b7 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0a9bf0420c2532ee250f507966e07db inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_ab0a9bf0420c2532ee250f507966e07db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab0a9bf0420c2532ee250f507966e07db">SetMechanismCircumference</a> (wpi::units::meter_t circumference)</td></tr>
-<tr class="separator:ab0a9bf0420c2532ee250f507966e07db inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aac0e6aa284a745bc0f126af1fd63b2c9">StartClosedLoopController</a> ()</td></tr>
 <tr class="separator:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ee466e963009350506cadc018c3dfc4 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a2ee466e963009350506cadc018c3dfc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a2ee466e963009350506cadc018c3dfc4">StopClosedLoopController</a> ()</td></tr>
@@ -408,7 +426,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_a9882003657846f6e7d5791875af5d37b"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a9882003657846f6e7d5791875af5d37b">yams::motorcontrollers::SmartMotorControllerConfig::WithStatorCurrentLimit</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithStatorCurrentLimit(wpi::units::ampere_t limit)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:34</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:38</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1758459620a97c17847eae3295705be9" name="a1758459620a97c17847eae3295705be9"></a>
@@ -435,6 +453,7 @@ Example usage (inside a subsystem constructor)</h3>
       </table>
 </div><div class="memdoc">
 <p>Construct a <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html">TalonFXWrapper</a>.</p>
+<p>Throws SmartMotorControllerConfigurationException (or std::invalid_argument) if <a class="el" href="#aca4905318b401c1786afd93d8b94d6c3">ApplyConfig()</a> rejects the config; anything already started is released first.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">talon</td><td>TalonFX hardware object (must outlive this wrapper). </td></tr>
@@ -460,6 +479,7 @@ Example usage (inside a subsystem constructor)</h3>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Calls <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a7d4c4a7f768484bc817aae56aa885e6b">Close()</a> and releases the alerts. </p>
 
 </div>
 </div>
@@ -498,6 +518,65 @@ Example usage (inside a subsystem constructor)</h3>
 <dl class="section return"><dt>Returns</dt><dd>true if the configuration was applied successfully.   </dd></dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#acb133dee1a3413e5d245a659c318665b">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="a19a71880189711d284b50ff5f0be6122" name="a19a71880189711d284b50ff5f0be6122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19a71880189711d284b50ff5f0be6122">&#9670;&#160;</a></span>DisableFOC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html">TalonFXWrapper</a> &amp; yams::motorcontrollers::remote::TalonFXWrapper::DisableFOC </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Disable FOC for the position and velocity control requests.</p>
+<p>Throws SmartMotorControllerConfigurationException if a request is a TorqueCurrentFOC request.</p>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a005c823a6831f3bdbf77597eb445dd28" name="a005c823a6831f3bdbf77597eb445dd28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a005c823a6831f3bdbf77597eb445dd28">&#9670;&#160;</a></span>EnableFOC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html">TalonFXWrapper</a> &amp; yams::motorcontrollers::remote::TalonFXWrapper::EnableFOC </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Enable FOC for the position and velocity control requests; ignored by unlicensed devices.</p>
+<p>Throws SmartMotorControllerConfigurationException if a request is a TorqueCurrentFOC request (set through WithVendorControlRequest), which cannot toggle FOC.</p>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a4000543276d48e71c3f2a5abb3c9bbea" name="a4000543276d48e71c3f2a5abb3c9bbea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4000543276d48e71c3f2a5abb3c9bbea">&#9670;&#160;</a></span>ForceConfigApply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ctre::phoenix::StatusCode yams::motorcontrollers::remote::TalonFXWrapper::ForceConfigApply </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Apply the whole TalonFX configuration, retrying every 10 ms up to 10 times.</p>
+<dl class="section return"><dt>Returns</dt><dd>Status of the last attempt. </dd></dl>
 
 </div>
 </div>
@@ -594,8 +673,8 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
-<a id="ac2cfc1f4859460d4a9a6d7a5a0b4a2ae" name="ac2cfc1f4859460d4a9a6d7a5a0b4a2ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac2cfc1f4859460d4a9a6d7a5a0b4a2ae">&#9670;&#160;</a></span>GetExternalEncoderPosition()</h2>
+<a id="acc9174252a701b1bc1021037293754e4" name="acc9174252a701b1bc1021037293754e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc9174252a701b1bc1021037293754e4">&#9670;&#160;</a></span>GetExternalEncoderMechanismPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -604,7 +683,7 @@ Example usage (inside a subsystem constructor)</h3>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; wpi::units::degree_t &gt; yams::motorcontrollers::remote::TalonFXWrapper::GetExternalEncoderPosition </td>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::remote::TalonFXWrapper::GetExternalEncoderMechanismPosition </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -618,15 +697,15 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 
 <p></p>
-<p>Get the position of the attached external (absolute) encoder if available.</p>
-<dl class="section return"><dt>Returns</dt><dd>External encoder position, or empty if not present or not configured.   </dd></dl>
+<p>Get the mechanism position from the external (absolute) encoder (applies the external encoder gearing). Available whether or not the external encoder is used for feedback.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns from the external encoder, or empty if none is attached.   </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab18a4fb57d4b6e9efea364fc82b7028d">yams::motorcontrollers::SmartMotorController</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a8e83dabfaeb0b8675ffcd939f6b033b4">yams::motorcontrollers::SmartMotorController</a>.</p>
 
 </div>
 </div>
-<a id="abff14014c754b2a4a20e4486e904bb82" name="abff14014c754b2a4a20e4486e904bb82"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abff14014c754b2a4a20e4486e904bb82">&#9670;&#160;</a></span>GetExternalEncoderVelocity()</h2>
+<a id="a02a7e9a0873fed1f2ebcc962f51f6396" name="a02a7e9a0873fed1f2ebcc962f51f6396"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02a7e9a0873fed1f2ebcc962f51f6396">&#9670;&#160;</a></span>GetExternalEncoderMechanismVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -635,7 +714,7 @@ Example usage (inside a subsystem constructor)</h3>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; wpi::units::degrees_per_second_t &gt; yams::motorcontrollers::remote::TalonFXWrapper::GetExternalEncoderVelocity </td>
+          <td class="memname">std::optional&lt; wpi::units::turns_per_second_t &gt; yams::motorcontrollers::remote::TalonFXWrapper::GetExternalEncoderMechanismVelocity </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -649,10 +728,10 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 
 <p></p>
-<p>Get the velocity of the attached external (absolute) encoder if available.</p>
-<dl class="section return"><dt>Returns</dt><dd>External encoder velocity, or empty if not present or not configured.   </dd></dl>
+<p>Get the mechanism velocity from the external (absolute) encoder (applies the external encoder gearing). Available whether or not the external encoder is used for feedback.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second from the external encoder, or empty if none is attached.   </dd></dl>
 
-<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a292573420514a61e3a8784c59fb8e8f5">yams::motorcontrollers::SmartMotorController</a>.</p>
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aeb6a0fcc71e7ebc64d6d48efbaf0c600">yams::motorcontrollers::SmartMotorController</a>.</p>
 
 </div>
 </div>
@@ -804,7 +883,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 
 <p></p>
-<p>Get the mechanism position from the motor encoder (applies gearing).</p>
+<p>Get the mechanism position (applies gearing). Uses the external (absolute) encoder when one is configured with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ae199e9dcfdccbe16f2ff5a1fe63be8b3">SmartMotorControllerConfig::WithUseExternalFeedbackEncoder()</a>, otherwise the relative encoder. Use <a class="el" href="#aff33069fa6c57fe8753296ae906c53ef">GetRelativeMechanismPosition()</a> to only read the relative encoder.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns.   </dd></dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ac4ad490e328dfe477453f49c5d353465">yams::motorcontrollers::SmartMotorController</a>.</p>
@@ -835,7 +914,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 
 <p></p>
-<p>Get the mechanism velocity from the motor encoder (applies gearing).</p>
+<p>Get the mechanism velocity (applies gearing). Uses the external (absolute) encoder when one is configured with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ae199e9dcfdccbe16f2ff5a1fe63be8b3">SmartMotorControllerConfig::WithUseExternalFeedbackEncoder()</a>, otherwise the relative encoder. Use <a class="el" href="#aeb7d11d7ee2af6864697fd8cb2d4d9a2">GetRelativeMechanismVelocity()</a> to only read the relative encoder.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second.   </dd></dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aae28f39be5b9d9d4116bfc45ec9543e1">yams::motorcontrollers::SmartMotorController</a>.</p>
@@ -897,6 +976,68 @@ Example usage (inside a subsystem constructor)</h3>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the ctre::phoenix6::configs::TalonFXConfiguration instance. </dd></dl>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a99a1235bb9db267aa26a3b08cfd9edd0">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="aff33069fa6c57fe8753296ae906c53ef" name="aff33069fa6c57fe8753296ae906c53ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff33069fa6c57fe8753296ae906c53ef">&#9670;&#160;</a></span>GetRelativeMechanismPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::units::turn_t yams::motorcontrollers::remote::TalonFXWrapper::GetRelativeMechanismPosition </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p></p>
+<p>Get the mechanism position from the relative encoder in the motor (applies gearing). Never uses the external (absolute) encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns from the relative encoder.   </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ac7c92541aeccc16bc97729417084fd7d">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="aeb7d11d7ee2af6864697fd8cb2d4d9a2" name="aeb7d11d7ee2af6864697fd8cb2d4d9a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb7d11d7ee2af6864697fd8cb2d4d9a2">&#9670;&#160;</a></span>GetRelativeMechanismVelocity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::units::turns_per_second_t yams::motorcontrollers::remote::TalonFXWrapper::GetRelativeMechanismVelocity </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p></p>
+<p>Get the mechanism velocity from the relative encoder in the motor (applies gearing). Never uses the external (absolute) encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second from the relative encoder.   </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a96735ae1713b77a81ce3d6432766fd60">yams::motorcontrollers::SmartMotorController</a>.</p>
 
 </div>
 </div>
@@ -1204,7 +1345,7 @@ Example usage (inside a subsystem constructor)</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Select the active closed-loop gain slot. TalonFX supports 3 slots (SLOT_0 through SLOT_2); SLOT_3 is silently ignored.</p>
+<p>Select the active closed-loop gain slot and forward it to loosely coupled followers. TalonFX supports 3 slots (SLOT_0 through SLOT_2); throws std::invalid_argument for SLOT_3.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">slot</td><td>Gain slot to activate. </td></tr>
@@ -1873,6 +2014,74 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
+<a id="aaaa613aeba7269f88bb3a867f112b885" name="aaaa613aeba7269f88bb3a867f112b885"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaaa613aeba7269f88bb3a867f112b885">&#9670;&#160;</a></span>SetMechanismCircumference()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::remote::TalonFXWrapper::SetMechanismCircumference </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>circumference</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Update the mechanism circumference, rewrite the values converted with it (linear gains and motion profile constraints) and forward it to loosely coupled followers.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">circumference</td><td>New mechanism circumference. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#ab0a9bf0420c2532ee250f507966e07db">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="ac36259baf343b6818506c48a5308ad34" name="ac36259baf343b6818506c48a5308ad34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac36259baf343b6818506c48a5308ad34">&#9670;&#160;</a></span>SetMechanismGearing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::remote::TalonFXWrapper::SetMechanismGearing </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>gearing</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Update the mechanism gearing and the TalonFX sensor ratios that depend on it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gearing</td><td>New mechanism gearing. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a51121e909c52fac8f5a2dd8ad01e58b7">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
 <a id="a929e773d05ff8da718503d4806b9e8dd" name="a929e773d05ff8da718503d4806b9e8dd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a929e773d05ff8da718503d4806b9e8dd">&#9670;&#160;</a></span>SetMechanismLimits()</h2>
 
@@ -2080,13 +2289,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 
 <p></p>
-<p>Set the maximum angular acceleration for the motion profile.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">maxAcc</td><td>Maximum mechanism angular acceleration.   </td></tr>
-  </table>
-  </dd>
-</dl>
+<p><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a6237fdce1917023e79123d3e75390ea4">SmartMotorController::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_squared_t)</a> </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a6237fdce1917023e79123d3e75390ea4">yams::motorcontrollers::SmartMotorController</a>.</p>
 
@@ -2412,6 +2615,30 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
+<a id="a136b758d8628a6ab4b4d6db0b7c86b38" name="a136b758d8628a6ab4b4d6db0b7c86b38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a136b758d8628a6ab4b4d6db0b7c86b38">&#9670;&#160;</a></span>SetUpdateFrequency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::remote::TalonFXWrapper::SetUpdateFrequency </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::hertz_t</td>          <td class="paramname"><span class="paramname"><em>frequency</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the update frequency of the status signals this controller reads.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frequency</td><td>Update frequency. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="af2c1276ab56d6ea4c35836717413a7f6" name="af2c1276ab56d6ea4c35836717413a7f6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af2c1276ab56d6ea4c35836717413a7f6">&#9670;&#160;</a></span>SetupSimulation()</h2>
 
@@ -2443,7 +2670,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="a2ec2c9ca061739d55fb10e89117b070a" name="a2ec2c9ca061739d55fb10e89117b070a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2ec2c9ca061739d55fb10e89117b070a">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[1/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ec2c9ca061739d55fb10e89117b070a">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[1/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2477,7 +2704,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="ae99f5da7b181b51e013ceaae6d915caa" name="ae99f5da7b181b51e013ceaae6d915caa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae99f5da7b181b51e013ceaae6d915caa">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[2/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae99f5da7b181b51e013ceaae6d915caa">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[2/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2511,7 +2738,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="a82c193dc7dd1b4119d3c6425b6002906" name="a82c193dc7dd1b4119d3c6425b6002906"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82c193dc7dd1b4119d3c6425b6002906">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[3/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a82c193dc7dd1b4119d3c6425b6002906">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[3/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2541,7 +2768,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="aef84625394d0777c38f096a445ac67d6" name="aef84625394d0777c38f096a445ac67d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef84625394d0777c38f096a445ac67d6">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[4/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aef84625394d0777c38f096a445ac67d6">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[4/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2577,7 +2804,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="aa76a9e2999cb2023df34757bc73bb3ce" name="aa76a9e2999cb2023df34757bc73bb3ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa76a9e2999cb2023df34757bc73bb3ce">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[5/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa76a9e2999cb2023df34757bc73bb3ce">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[5/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2611,7 +2838,7 @@ Example usage (inside a subsystem constructor)</h3>
 </div>
 </div>
 <a id="a9dd1d9c3ec604dc8ce6017c7ad5d8354" name="a9dd1d9c3ec604dc8ce6017c7ad5d8354"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9dd1d9c3ec604dc8ce6017c7ad5d8354">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[6/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dd1d9c3ec604dc8ce6017c7ad5d8354">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[6/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2638,6 +2865,46 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 <p>Command a mechanism angular velocity setpoint with an additional feedforward force applied on top, e.g. from a path-following set-point generator.</p>
 <p>The force is converted to a voltage with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a6ab1154f8256a9ce7de092b8b8edd1f3">SmartMotorControllerConfig::ConvertToVoltage</a> and added by the RoboRIO closed-loop controller, so the mechanism circumference must be set.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">velocity</td><td>Target mechanism angular velocity. </td></tr>
+    <tr><td class="paramname">feedforwardForce</td><td>Additional feedforward force at the mechanism. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="ac06afcebd26af3f6d9ccbce50b59b4aa" name="ac06afcebd26af3f6d9ccbce50b59b4aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac06afcebd26af3f6d9ccbce50b59b4aa">&#9670;&#160;</a></span>SetVelocity() <span class="overload">[7/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::remote::TalonFXWrapper::SetVelocity </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::turns_per_second_t</td>          <td class="paramname"><span class="paramname"><em>velocity</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::newton_t</td>          <td class="paramname"><span class="paramname"><em>feedforwardForce</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Command a velocity setpoint with an additional feedforward force, applied by the TalonFX as an arbitrary feedforward (duty cycle, volts or TorqueCurrentFOC amps depending on the request). With an LQR the RoboRIO loop adds it instead.</p>
+<p>Throws SmartMotorControllerConfigurationException if the mechanism circumference is not set.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">velocity</td><td>Target mechanism angular velocity. </td></tr>
@@ -2774,9 +3041,49 @@ Example usage (inside a subsystem constructor)</h3>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>CANcoder fusion is handled automatically by Phoenix 6; has no effect. </p>
+<p>The TalonFX fuses its feedback sources on the device; has no effect. </p>
 
 <p>Implements <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a5f14a31c983206a771b08ec0b37167ac">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="ac524bb99f156fa96c83ce58954000260" name="ac524bb99f156fa96c83ce58954000260"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac524bb99f156fa96c83ce58954000260">&#9670;&#160;</a></span>UseCANdiPWM1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::remote::TalonFXWrapper::UseCANdiPWM1 </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Whether CANdi PWM1 is the feedback sensor of the configuration being applied.</p>
+<p>Throws std::invalid_argument if it is but no CANdi is configured as the external encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the feedback sensor source is a CANdi PWM1 source. </dd></dl>
+
+</div>
+</div>
+<a id="a430302c3175927c49fa1d22b91703acb" name="a430302c3175927c49fa1d22b91703acb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a430302c3175927c49fa1d22b91703acb">&#9670;&#160;</a></span>UseCANdiPWM2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::remote::TalonFXWrapper::UseCANdiPWM2 </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Whether CANdi PWM2 is the feedback sensor of the configuration being applied.</p>
+<p>Throws std::invalid_argument if it is but no CANdi is configured as the external encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>true if the feedback sensor source is a CANdi PWM2 source. </dd></dl>
 
 </div>
 </div>

@@ -255,8 +255,6 @@ controllers.</div>
 <div class="block">Battery Simulation that takes the entirety of the robot into account by storing all currently
 used currents on the robot.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/simulation/BatterySim.html#%3Cinit%3E()" class="member-name-link">BatterySim()</a> - Constructor for class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/BatterySim.html" title="class in yams.core.motorcontrollers.simulation">BatterySim</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/commands2/mechanisms/Arm.html#between(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">between(Angle, Angle)</a> - Method in class yams.commands2.mechanisms.<a href="yams/commands2/mechanisms/Arm.html" title="class in yams.commands2.mechanisms">Arm</a></dt>
 <dd>
 <div class="block">Between two angles.</div>
@@ -718,9 +716,13 @@ using WPILib's <code>DCMotorSim</code>.</div>
 <div class="block">Construct the DCMotorSim supplier</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#deadband(double)" class="member-name-link">deadband(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the deadband applied to every controller axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#deadband(double)" class="member-name-link">deadband(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the deadband applied to every controller axis.</div>
+</dd>
 <dt><a href="yams/core/math/DerivativeTimeFilter.html#derivative(double)" class="member-name-link">derivative(double)</a> - Method in class yams.core.math.<a href="yams/core/math/DerivativeTimeFilter.html" title="class in yams.core.math">DerivativeTimeFilter</a></dt>
 <dd>
 <div class="block">Get the derivative of the current value over the time since the last call to this function.</div>
@@ -1519,9 +1521,13 @@ configuration is supported.</div>
 <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#attachController(yams.core.motorcontrollers.SmartMotorController)"><code>SmartMotorControllerConfig.attachController(SmartMotorController)</code></a>, if any.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getAxisDeadband()" class="member-name-link">getAxisDeadband()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the controller axis deadband.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getAxisDeadband()" class="member-name-link">getAxisDeadband()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the controller axis deadband.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveModuleConfig.html#getAzimuthMotor()" class="member-name-link">getAzimuthMotor()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the azimuth <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> for the <a href="yams/core/mechanisms/swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
@@ -1627,9 +1633,13 @@ current azimuth angle.</div>
 <div class="block">Get the current angle.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getCurrentModeName()" class="member-name-link">getCurrentModeName()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the name of the drive mode used by the last <a href="yams/commands2/swerve/SwerveInputStream.html#get()"><code>SwerveInputStream.get()</code></a> call.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getCurrentModeName()" class="member-name-link">getCurrentModeName()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the name of the drive mode used by the last <a href="yams/commands3/swerve/SwerveInputStream.html#get()"><code>SwerveInputStream.get()</code></a> call.</div>
+</dd>
 <dt><a href="yams/core/math/ExponentialProfilePIDController.html#getCurrentState()" class="member-name-link">getCurrentState()</a> - Method in class yams.core.math.<a href="yams/core/math/ExponentialProfilePIDController.html" title="class in yams.core.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Get the current state of the <code>ExponentialProfile</code>.</div>
@@ -1771,25 +1781,27 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get whether or not the external encoder is inverted.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
-<div class="block">Get the rotations of the mechanism according to the external encoder.</div>
+<div class="block">Get the mechanism <code>Angle</code> from the external (absolute) encoder, scaled by the configured
+external encoder <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
-<div class="block">Get the velocity of the mechanism according to the external encoder.</div>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the external (absolute) encoder, scaled by the
+configured external encoder <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderZeroOffset()" class="member-name-link">getExternalEncoderZeroOffset()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -1812,7 +1824,9 @@ current azimuth angle.</div>
 <div class="block">Get the field.</div>
 </dd>
 <dt><a href="yams/core/telemetry/StructTelemetry.html#getField()" class="member-name-link">getField()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/StructTelemetry.html" title="class in yams.core.telemetry">StructTelemetry</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the field.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/Sensor.html#getField(java.lang.String)" class="member-name-link">getField(String)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/Sensor.html" title="class in yams.core.motorcontrollers.simulation">Sensor</a></dt>
 <dd>
 <div class="block">Get a field from the simulated or real sensor.</div>
@@ -1998,17 +2012,25 @@ drive in place.</div>
 <div class="block">Returns the maximum allowed modular error between predicted and measured encoder 2.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the maximum angular speed of the chassis.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the maximum speed of the chassis.</div>
@@ -2432,9 +2454,13 @@ the given distance.</div>
 <div class="block">Log telemetry to NT4?</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getOmegaAxisScale()" class="member-name-link">getOmegaAxisScale()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the angular velocity axis scalar.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getOmegaAxisScale()" class="member-name-link">getOmegaAxisScale()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the angular velocity axis scalar.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getOpenLoopRampRate()" class="member-name-link">getOpenLoopRampRate()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the open loop ramp rate.</div>
@@ -2542,6 +2568,28 @@ in the
 <div class="block">Get the relative position of the mechanism, taking into account the relative position defined
 in the
 <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the mechanism <code>Angle</code> from the relative encoder in the motor, scaled by the configured
+<a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the relative encoder in the motor, scaled by the
+configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#getRelativePosition()" class="member-name-link">getRelativePosition()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
@@ -2935,9 +2983,13 @@ speed.</div>
 <div class="block">Get the starting angle of the <a href="yams/core/mechanisms/positional/DifferentialMechanism.html" title="class in yams.core.mechanisms.positional"><code>DifferentialMechanism</code></a> tilt.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getTranslationAxisScale()" class="member-name-link">getTranslationAxisScale()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the translation axis scalar.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#getTranslationAxisScale()" class="member-name-link">getTranslationAxisScale()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Get the translation axis scalar.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getTranslationPID()" class="member-name-link">getTranslationPID()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the translation PID controller used for drive to pose.</div>
@@ -3183,9 +3235,13 @@ stage string is not in the required <code>"IN:OUT"</code> format.</div>
 <div class="block">Constructs exception for failure to provide stages.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#isAllianceRelativeEnabled()" class="member-name-link">isAllianceRelativeEnabled()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if translation is flipped 180 degrees while on the red alliance.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#isAllianceRelativeEnabled()" class="member-name-link">isAllianceRelativeEnabled()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if translation is flipped 180 degrees while on the red alliance.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/positional/Arm.html#isAtMax()" class="member-name-link">isAtMax()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Arm.html" title="class in yams.core.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Whether the arm is at or above its maximum angle, defined by the motor controller upper soft
@@ -3334,17 +3390,29 @@ the
 <div class="block">Elevator is near a height.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#isOmegaCubeEnabled()" class="member-name-link">isOmegaCubeEnabled()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the angular velocity axis is cubed, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#isOmegaCubeEnabled()" class="member-name-link">isOmegaCubeEnabled()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the angular velocity axis is cubed, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#isRobotRelativeEnabled()" class="member-name-link">isRobotRelativeEnabled()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the translation axes are treated as robot relative.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#isRobotRelativeEnabled()" class="member-name-link">isRobotRelativeEnabled()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the translation axes are treated as robot relative.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#isTranslationCubeEnabled()" class="member-name-link">isTranslationCubeEnabled()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the translation magnitude is cubed, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#isTranslationCubeEnabled()" class="member-name-link">isTranslationCubeEnabled()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Check if the translation magnitude is cubed, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/FlyWheelConfig.html#isUsingSpeedometerSimulation()" class="member-name-link">isUsingSpeedometerSimulation()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/FlyWheelConfig.html" title="class in yams.core.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Check if the shooter is using the speedometer simulation.</div>
@@ -3705,7 +3773,9 @@ motor.</div>
 relative to a robot in a 3D coordinate system.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#%3Cinit%3E()" class="member-name-link">MechanismPositionConfig()</a> - Constructor for class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a> with no relative position or robot size limits.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.Plane.html" class="type-name-link" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a> - Enum Class in <a href="yams/core/mechanisms/config/package-summary.html">yams.core.mechanisms.config</a></dt>
 <dd>
 <div class="block">The planes that the mechanism could be on, used for position calculations.</div>
@@ -3719,7 +3789,9 @@ relative to a robot in a 3D coordinate system.</div>
 <div class="block">Mechanism telemetry.</div>
 </dd>
 <dt><a href="yams/core/telemetry/MechanismTelemetry.html#%3Cinit%3E()" class="member-name-link">MechanismTelemetry()</a> - Constructor for class yams.core.telemetry.<a href="yams/core/telemetry/MechanismTelemetry.html" title="class in yams.core.telemetry">MechanismTelemetry</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create mechanism telemetry, publish it with <a href="yams/core/telemetry/MechanismTelemetry.html#setupTelemetry(java.lang.String)"><code>MechanismTelemetry.setupTelemetry(String)</code></a>.</div>
+</dd>
 <dt><a href="yams/core/telemetry/package-summary.html#mechanism-telemetry-heading" class="search-tag-link">Mechanism telemetry</a> - Section in package yams.core.telemetry</dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html#MechanismUpperLimit" class="member-name-link">MechanismUpperLimit</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></dt>
@@ -3950,13 +4022,21 @@ supplied.</div>
 <h2 class="title" id="I:O">O</h2>
 <dl class="index">
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of(SwerveDrive, DoubleSupplier, DoubleSupplier)</a> - Static method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve"><code>SwerveInputStream</code></a> with only translation axes.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of(SwerveDrive, DoubleSupplier, DoubleSupplier)</a> - Static method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> with only translation axes.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Static method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve"><code>SwerveInputStream</code></a> that rotates the robot with an angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">of(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Static method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> that rotates the robot with an angular velocity axis.</div>
+</dd>
 <dt><a href="yams/core/units/EasyCRT.CRTStatus.html#OK" class="member-name-link">OK</a> - Enum constant in enum class yams.core.units.<a href="yams/core/units/EasyCRT.CRTStatus.html" title="enum class in yams.core.units">EasyCRT.CRTStatus</a></dt>
 <dd>
 <div class="block">The previous solve succeeded.</div>
@@ -4619,9 +4699,13 @@ Simulation GUI data when connected to Sim.</div>
 <div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setAllianceRelativeEnabled(boolean)" class="member-name-link">setAllianceRelativeEnabled(boolean)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable flipping translation 180 degrees while on the red alliance.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setAllianceRelativeEnabled(boolean)" class="member-name-link">setAllianceRelativeEnabled(boolean)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable flipping translation 180 degrees while on the red alliance.</div>
+</dd>
 <dt><a href="yams/commands2/mechanisms/Arm.html#setAngle(java.util.function.Supplier)" class="member-name-link">setAngle(Supplier)</a> - Method in class yams.commands2.mechanisms.<a href="yams/commands2/mechanisms/Arm.html" title="class in yams.commands2.mechanisms">Arm</a></dt>
 <dd>
 <div class="block">Set the arm to the given angle via a supplier.</div>
@@ -4663,9 +4747,13 @@ Simulation GUI data when connected to Sim.</div>
 <div class="block">Set the shoulder and elbow angle of the DoubleJointedArm.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setAxisDeadband(double)" class="member-name-link">setAxisDeadband(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the controller axis deadband.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setAxisDeadband(double)" class="member-name-link">setAxisDeadband(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the controller axis deadband.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
@@ -4937,13 +5025,21 @@ Simulation GUI data when connected to Sim.</div>
 <div class="block">Velocity feedforward element.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setMaximumChassisAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMaximumChassisAngularVelocity(AngularVelocity)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setMaximumChassisAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMaximumChassisAngularVelocity(AngularVelocity)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setMaximumChassisLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setMaximumChassisLinearVelocity(LinearVelocity)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setMaximumChassisLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setMaximumChassisLinearVelocity(LinearVelocity)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMeasurementLowerLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>
 <div class="block">Set the measurement lower limit, only works if mechanism circumference is defined.</div>
@@ -5191,13 +5287,21 @@ Simulation GUI data when connected to Sim.</div>
 <div class="block">Set the inversion state of the motor.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setOmegaAxisScale(double)" class="member-name-link">setOmegaAxisScale(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the angular velocity axis scalar.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setOmegaAxisScale(double)" class="member-name-link">setOmegaAxisScale(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the angular velocity axis scalar.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setOmegaCubeEnabled(boolean)" class="member-name-link">setOmegaCubeEnabled(boolean)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable cubing the angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setOmegaCubeEnabled(boolean)" class="member-name-link">setOmegaCubeEnabled(boolean)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable cubing the angular velocity axis.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setOpenLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setOpenLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#setOpenLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setOpenLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
@@ -5309,9 +5413,13 @@ Simulation GUI data when connected to Sim.</div>
 applied per module, e.g.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setRobotRelativeEnabled(boolean)" class="member-name-link">setRobotRelativeEnabled(boolean)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable treating the translation axes as robot relative.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setRobotRelativeEnabled(boolean)" class="member-name-link">setRobotRelativeEnabled(boolean)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable treating the translation axes as robot relative.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#setRotationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setRotationPID(PIDController)</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Set the auto-align rotational PID controller.</div>
@@ -5369,13 +5477,21 @@ wheel feedforward <code>Force</code> applied per module, e.g.</div>
 <div class="block">Sets the error which is considered tolerable for use with atSetpoint().</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setTranslationAxisScale(double)" class="member-name-link">setTranslationAxisScale(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the translation axis scalar.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setTranslationAxisScale(double)" class="member-name-link">setTranslationAxisScale(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the translation axis scalar.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#setTranslationCubeEnabled(boolean)" class="member-name-link">setTranslationCubeEnabled(boolean)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable cubing the translation magnitude.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setTranslationCubeEnabled(boolean)" class="member-name-link">setTranslationCubeEnabled(boolean)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Enable or disable cubing the translation magnitude.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#setTranslationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setTranslationPID(PIDController)</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Sets the auto-align translation PID controller.</div>
@@ -5677,20 +5793,22 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <dd>
 <div class="block">SmartMath class to handle math operations.</div>
 </dd>
-<dt><a href="yams/core/math/SmartMath.html#%3Cinit%3E()" class="member-name-link">SmartMath()</a> - Constructor for class yams.core.math.<a href="yams/core/math/SmartMath.html" title="class in yams.core.math">SmartMath</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/SmartMechanism.html" class="type-name-link" title="class in yams.core.mechanisms">SmartMechanism</a> - Class in <a href="yams/core/mechanisms/package-summary.html">yams.core.mechanisms</a></dt>
 <dd>
 <div class="block">Generic implementation of a mechanism with advanced telemetry.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/SmartMechanism.html#%3Cinit%3E()" class="member-name-link">SmartMechanism()</a> - Constructor for class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create the mechanism, subclasses set up the motor and telemetry.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html" class="type-name-link" title="class in yams.core.motorcontrollers">SmartMotorController</a> - Class in <a href="yams/core/motorcontrollers/package-summary.html">yams.core.motorcontrollers</a></dt>
 <dd>
 <div class="block">Smart motor controller wrapper for motor controllers.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#%3Cinit%3E()" class="member-name-link">SmartMotorController()</a> - Constructor for class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create the motor controller, subclasses wrap the vendor device.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.ClosedLoopControllerSlot.html" class="type-name-link" title="enum class in yams.core.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a> - Enum Class in <a href="yams/core/motorcontrollers/package-summary.html">yams.core.motorcontrollers</a></dt>
 <dd>
 <div class="block">Current closed loop controller slot.</div>
@@ -5705,10 +5823,6 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <div class="block">Registry for <code>Command</code> instances associated with a
 <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
-<dt><a href="yams/commands2/telemetry/SmartMotorControllerCommandRegistry.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerCommandRegistry()</a> - Constructor for class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SmartMotorControllerCommandRegistry.html" title="class in yams.commands2.telemetry">SmartMotorControllerCommandRegistry</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="yams/commands3/telemetry/SmartMotorControllerCommandRegistry.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerCommandRegistry()</a> - Constructor for class yams.commands3.telemetry.<a href="yams/commands3/telemetry/SmartMotorControllerCommandRegistry.html" title="class in yams.commands3.telemetry">SmartMotorControllerCommandRegistry</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/commands2/config/SmartMotorControllerConfig.html" class="type-name-link" title="class in yams.commands2.config">SmartMotorControllerConfig</a> - Class in <a href="yams/commands2/config/package-summary.html">yams.commands2.config</a></dt>
 <dd>
 <div class="block">Command-based extension of <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> that
@@ -5766,7 +5880,9 @@ conflicting, incomplete, or incompatible settings.</div>
 <div class="block">Smart motor controller telemetry.</div>
 </dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerTelemetry()</a> - Constructor for class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.html" title="class in yams.core.telemetry">SmartMotorControllerTelemetry</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create motor controller telemetry, publish it with <a href="yams/core/telemetry/SmartMotorControllerTelemetry.html#setupTelemetry(yams.core.motorcontrollers.SmartMotorController,org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable,yams.core.telemetry.SmartMotorControllerTelemetryConfig)"><code>SmartMotorControllerTelemetry.setupTelemetry(SmartMotorController, NetworkTable, NetworkTable, SmartMotorControllerTelemetryConfig)</code></a>.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" class="type-name-link" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a> - Enum Class in <a href="yams/core/telemetry/package-summary.html">yams.core.telemetry</a></dt>
 <dd>
 <div class="block">Boolean telemetry for <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>s</div>
@@ -5780,19 +5896,25 @@ conflicting, incomplete, or incompatible settings.</div>
 <div class="block">Smart motor controller telemetry configuration.</div>
 </dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html#%3Cinit%3E()" class="member-name-link">SmartMotorControllerTelemetryConfig()</a> - Constructor for class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.core.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.core.telemetry"><code>SmartMotorControllerTelemetryConfig</code></a> with the default fields.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/positional/SmartPositionalMechanism.html" class="type-name-link" title="class in yams.core.mechanisms.positional">SmartPositionalMechanism</a> - Class in <a href="yams/core/mechanisms/positional/package-summary.html">yams.core.mechanisms.positional</a></dt>
 <dd>
 <div class="block">Abstract intermediate base class for all closed-loop positional mechanisms in YAMS.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/positional/SmartPositionalMechanism.html#%3Cinit%3E()" class="member-name-link">SmartPositionalMechanism()</a> - Constructor for class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/SmartPositionalMechanism.html" title="class in yams.core.mechanisms.positional">SmartPositionalMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create the positional mechanism, subclasses set up the motor and telemetry.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/velocity/SmartVelocityMechanism.html" class="type-name-link" title="class in yams.core.mechanisms.velocity">SmartVelocityMechanism</a> - Class in <a href="yams/core/mechanisms/velocity/package-summary.html">yams.core.mechanisms.velocity</a></dt>
 <dd>
 <div class="block">Abstract intermediate base class for all closed-loop velocity mechanisms in YAMS.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/velocity/SmartVelocityMechanism.html#%3Cinit%3E()" class="member-name-link">SmartVelocityMechanism()</a> - Constructor for class yams.core.mechanisms.velocity.<a href="yams/core/mechanisms/velocity/SmartVelocityMechanism.html" title="class in yams.core.mechanisms.velocity">SmartVelocityMechanism</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create the velocity mechanism, subclasses set up the motor and telemetry.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html" class="type-name-link" title="class in yams.core.motorcontrollers.local">SparkWrapper</a> - Class in <a href="yams/core/motorcontrollers/local/package-summary.html">yams.core.motorcontrollers.local</a></dt>
 <dd>
 <div class="block">Spark wrapper for REV Spark Motor controllers.</div>
@@ -5959,7 +6081,9 @@ this <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams
 <div class="block">Create the <a href="yams/commands3/config/SwerveDriveConfig.html" title="class in yams.commands3.config"><code>SwerveDriveConfig</code></a> for the <a href="yams/commands3/swerve/SwerveDrive.html" title="class in yams.commands3.swerve"><code>SwerveDrive</code></a></div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#%3Cinit%3E(yams.core.mechanisms.config.SwerveDriveConfig)" class="member-name-link">SwerveDriveConfig(SwerveDriveConfig)</a> - Constructor for class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Copy a <a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a>.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveModule...)" class="member-name-link">SwerveDriveConfig(SwerveModule...)</a> - Constructor for class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Create the <a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> for the <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a></div>
@@ -5975,7 +6099,9 @@ invariant is violated.</div>
 <div class="block">SwerveDrive configuration exception.</div>
 </dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.html" class="type-name-link" title="class in yams.core.telemetry">SwerveDriveTelemetry</a> - Class in <a href="yams/core/telemetry/package-summary.html">yams.core.telemetry</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Publishes <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> telemetry to NetworkTables and DataLog, and applies live tuning values.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.html#%3Cinit%3E(yams.core.telemetry.SwerveDriveTelemetryConfig)" class="member-name-link">SwerveDriveTelemetry(SwerveDriveTelemetryConfig)</a> - Constructor for class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.html" title="class in yams.core.telemetry">SwerveDriveTelemetry</a></dt>
 <dd>
 <div class="block">Create SwerveDrive telemetry for logging in NetworkTables and DataLog.</div>
@@ -6017,13 +6143,21 @@ invariant is violated.</div>
 <div class="block">Helper class to transform controller inputs into workable Chassis speeds for the Commands v3 API.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve"><code>SwerveInputStream</code></a> that rotates the robot with an angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> that rotates the robot with an angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve"><code>SwerveInputStream</code></a> that turns the robot to face the direction a controller stick points.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#%3Cinit%3E(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">SwerveInputStream(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a> - Constructor for class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Create a <a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a> that turns the robot to face the direction a controller stick points.</div>
+</dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.html" class="type-name-link" title="class in yams.commands2.telemetry">SwerveInputStreamTelemetry</a> - Class in <a href="yams/commands2/telemetry/package-summary.html">yams.commands2.telemetry</a></dt>
 <dd>
 <div class="block">Telemetry and live tuning for a <a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve"><code>SwerveInputStream</code></a>, created by
@@ -6654,17 +6788,29 @@ absolute encoder reads 0 while the wheel is facing forwards and bevel to the lef
 <div class="block">Aggressiveness of the LQR, how fast it will attempt to achieve the desired state.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Supplier, BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face a target pose while enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withAim(java.util.function.Supplier,java.util.function.BooleanSupplier)" class="member-name-link">withAim(Supplier, BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face a target pose while enabled.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withAllianceRelativeControl()" class="member-name-link">withAllianceRelativeControl()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always flip translation 180 degrees while on the red alliance, so forward is away from the driver station.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withAllianceRelativeControl()" class="member-name-link">withAllianceRelativeControl()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always flip translation 180 degrees while on the red alliance, so forward is away from the driver station.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withAllianceRelativeControl(java.util.function.BooleanSupplier)" class="member-name-link">withAllianceRelativeControl(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Flip translation 180 degrees while on the red alliance, so forward is away from the driver station.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withAllianceRelativeControl(java.util.function.BooleanSupplier)" class="member-name-link">withAllianceRelativeControl(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Flip translation 180 degrees while on the red alliance, so forward is away from the driver station.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#withAngle(org.wpilib.units.measure.Angle)" class="member-name-link">withAngle(Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
 <div class="block">Configure the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>s angle for simulation.</div>
@@ -6775,13 +6921,21 @@ configured), outputs are in Volts.</div>
 <div class="block">Set the control effort for the LQR.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face the direction a controller stick points while heading control is enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" class="member-name-link">withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face the direction a controller stick points while heading control is enabled.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withControllerRotationAxis(java.util.function.DoubleSupplier)" class="member-name-link">withControllerRotationAxis(DoubleSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the axis used for angular velocity control.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withControllerRotationAxis(java.util.function.DoubleSupplier)" class="member-name-link">withControllerRotationAxis(DoubleSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the axis used for angular velocity control.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withControlMode(yams.core.motorcontrollers.enums.ControlMode)" class="member-name-link">withControlMode(ControlMode)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the control mode for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
@@ -6809,21 +6963,37 @@ configured), outputs are in Volts.</div>
 <div class="block">Sets the stage1 gear teeth and stage2 ratio inputs used for gear recommendations.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withCubeRotationControllerAxis()" class="member-name-link">withCubeRotationControllerAxis()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always cube the angular velocity axis, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withCubeRotationControllerAxis()" class="member-name-link">withCubeRotationControllerAxis()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always cube the angular velocity axis, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withCubeRotationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeRotationControllerAxis(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Cube the angular velocity axis while enabled, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withCubeRotationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeRotationControllerAxis(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Cube the angular velocity axis while enabled, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withCubeTranslationControllerAxis()" class="member-name-link">withCubeTranslationControllerAxis()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always cube the translation magnitude, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withCubeTranslationControllerAxis()" class="member-name-link">withCubeTranslationControllerAxis()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always cube the translation magnitude, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeTranslationControllerAxis(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Cube the translation magnitude while enabled, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withCubeTranslationControllerAxis(java.util.function.BooleanSupplier)" class="member-name-link">withCubeTranslationControllerAxis(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Cube the translation magnitude while enabled, for finer control near the center of the stick.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withCurrentModuleStates()" class="member-name-link">withCurrentModuleStates()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the measured module states logging.</div>
@@ -6909,9 +7079,13 @@ configured), outputs are in Volts.</div>
 <div class="block">Set up a DataLog entry for this <a href="yams/core/mechanisms/swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a></div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withDeadband(double)" class="member-name-link">withDeadband(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the deadband applied to every controller axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withDeadband(double)" class="member-name-link">withDeadband(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the deadband applied to every controller axis.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withDesiredModuleStates()" class="member-name-link">withDesiredModuleStates()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the last-commanded desired module states logging.</div>
@@ -7114,13 +7288,23 @@ shows up as its roll or pitch instead of its yaw.</div>
 <div class="block">Set the Hard Limits for simulation</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withHeading(java.util.function.Supplier)" class="member-name-link">withHeading(Supplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the field relative heading to face while heading control is enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withHeading(java.util.function.Supplier)" class="member-name-link">withHeading(Supplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the field relative heading to face while heading control is enabled.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withHeadingControl(java.util.function.BooleanSupplier)" class="member-name-link">withHeadingControl(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face the heading from <a href="yams/commands2/swerve/SwerveInputStream.html#withHeading(java.util.function.Supplier)"><code>SwerveInputStream.withHeading(Supplier)</code></a> or
+<a href="yams/commands2/swerve/SwerveInputStream.html#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)"><code>SwerveInputStream.withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</code></a> while enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withHeadingControl(java.util.function.BooleanSupplier)" class="member-name-link">withHeadingControl(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Face the heading from <a href="yams/commands3/swerve/SwerveInputStream.html#withHeading(java.util.function.Supplier)"><code>SwerveInputStream.withHeading(Supplier)</code></a> or
+<a href="yams/commands3/swerve/SwerveInputStream.html#withControllerHeadingAxis(java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)"><code>SwerveInputStream.withControllerHeadingAxis(DoubleSupplier, DoubleSupplier)</code></a> while enabled.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#withHorizontalElevator()" class="member-name-link">withHorizontalElevator()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
 <div class="block">Set elevator as horizontal to avoid gravity simulation</div>
@@ -7162,17 +7346,25 @@ shows up as its roll or pitch instead of its yaw.</div>
 <div class="block">Sets the match tolerance for encoder 2 modular error (in rotations).</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withMaximumAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity(AngularVelocity)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withMaximumAngularVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">withMaximumAngularVelocity(AngularVelocity)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis angular velocity a full angular velocity axis maps to.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withMaximumChassisSpeed(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.AngularVelocity)" class="member-name-link">withMaximumChassisSpeed(LinearVelocity, AngularVelocity)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Maximum speed of the chassis to desaturate towards.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withMaximumLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withMaximumLinearVelocity(LinearVelocity)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withMaximumLinearVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withMaximumLinearVelocity(LinearVelocity)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Set the chassis linear velocity a full translation axis maps to.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withMaximumModuleSpeed(LinearVelocity)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Set the maximum speed of the modules to desaturate towards.</div>
@@ -7363,13 +7555,21 @@ each state: turn the wheel at most 90 degrees and reverse the drive instead.</di
 given to <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withRobotRelative()" class="member-name-link">withRobotRelative()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always treat the translation axes as robot relative.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withRobotRelative()" class="member-name-link">withRobotRelative()</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always treat the translation axes as robot relative.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withRobotRelative(java.util.function.BooleanSupplier)" class="member-name-link">withRobotRelative(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Treat the translation axes as robot relative while enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withRobotRelative(java.util.function.BooleanSupplier)" class="member-name-link">withRobotRelative(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Treat the translation axes as robot relative while enabled.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withRotationController(PIDController)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Set the rotation PID controller.</div>
@@ -7383,13 +7583,21 @@ given to <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" ti
 <div class="block">Enables the rotor velocity logging if available.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withScaleRotation(double)" class="member-name-link">withScaleRotation(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Scale the angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withScaleRotation(double)" class="member-name-link">withScaleRotation(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Scale the angular velocity axis.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withScaleTranslation(double)" class="member-name-link">withScaleTranslation(double)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Scale the translation axes.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withScaleTranslation(double)" class="member-name-link">withScaleTranslation(double)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Scale the translation axes.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html#withSetpointForce()" class="member-name-link">withSetpointForce()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.core.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the setpoint feedforward force logging if available.</div>
@@ -7693,17 +7901,29 @@ steps the simulated physics forward.</div>
 <div class="block">Set the translation PID controller.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">withTranslationHeadingOffset(Rotation2d)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always rotate the output translation by an offset.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">withTranslationHeadingOffset(Rotation2d)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Always rotate the output translation by an offset.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d,java.util.function.BooleanSupplier)" class="member-name-link">withTranslationHeadingOffset(Rotation2d, BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Rotate the output translation by an offset while enabled.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withTranslationHeadingOffset(org.wpilib.math.geometry.Rotation2d,java.util.function.BooleanSupplier)" class="member-name-link">withTranslationHeadingOffset(Rotation2d, BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Rotate the output translation by an offset while enabled.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#withTranslationOnly(java.util.function.BooleanSupplier)" class="member-name-link">withTranslationOnly(BooleanSupplier)</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Hold the heading the robot had when enabled and only translate.</div>
+</dd>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withTranslationOnly(java.util.function.BooleanSupplier)" class="member-name-link">withTranslationOnly(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Hold the heading the robot had when enabled and only translate.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withTrapezoidalProfile(org.wpilib.units.measure.AngularAcceleration,org.wpilib.units.measure.Velocity)" class="member-name-link">withTrapezoidalProfile(AngularAcceleration, Velocity)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the angular velocity trapezoidal profile for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
@@ -7918,8 +8138,6 @@ mode and zero power mode.</div>
 <dd>
 <div class="block">YUnits that are fun and useful!</div>
 </dd>
-<dt><a href="yams/core/units/YUnits.html#%3Cinit%3E()" class="member-name-link">YUnits()</a> - Constructor for class yams.core.units.<a href="yams/core/units/YUnits.html" title="class in yams.core.units">YUnits</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.Plane.html#YZ" class="member-name-link">YZ</a> - Enum constant in enum class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a></dt>
 <dd>
 <div class="block">Y-Z Plane</div>

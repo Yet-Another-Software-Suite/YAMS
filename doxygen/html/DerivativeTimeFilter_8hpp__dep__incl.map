@@ -1,20 +1,16 @@
 <map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/DerivativeTimeFilter.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/math/DerivativeTimeFilter.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="459,5,724,60"/>
-<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="879,225,1064,280"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="445,46,315,56,184,71,77,89,42,99,23,110,12,126,8,143,12,159,23,175,39,186,66,196,147,212,258,225,386,234,657,245,879,248,879,254,656,250,386,240,257,230,147,217,64,201,36,191,19,179,7,161,3,143,7,124,19,106,39,94,76,84,183,65,315,51,445,40"/>
-<area shape="rect" id="Node000003" href="$SparkWrapper_8hpp.html" title=" " alt="" coords="34,108,219,177"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="446,63,232,111,220,114,218,109,231,105,445,58"/>
-<area shape="rect" id="Node000004" href="$TalonFXSWrapper_8hpp.html" title=" " alt="" coords="244,108,462,177"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="522,68,428,110,426,105,520,63"/>
-<area shape="rect" id="Node000005" href="$TalonFXWrapper_8hpp.html" title=" " alt="" coords="486,108,697,177"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="594,74,594,108,589,108,589,74"/>
-<area shape="rect" id="Node000006" href="$ArmSimSupplier_8hpp.html" title=" " alt="" coords="722,108,952,177"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="665,63,761,105,759,110,663,68"/>
-<area shape="rect" id="Node000007" href="$DCMotorSimSupplier_8hpp.html" title=" " alt="" coords="977,108,1238,177"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="738,59,964,105,977,108,976,113,963,111,737,65"/>
-<area shape="rect" id="Node000008" href="$ElevatorSimSupplier_8hpp.html" title=" " alt="" coords="1262,108,1521,177"/>
-<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="738,43,979,67,1116,84,1251,105,1262,107,1261,113,1250,111,1115,90,979,72,738,48"/>
-<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="891,184,940,223,937,227,888,188"/>
-<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="1056,188,1006,227,1003,223,1053,184"/>
-<area shape="poly" id="edge10_Node000008_Node000002" title=" " alt="" coords="1249,183,1065,230,1064,225,1248,178"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="225,5,490,60"/>
+<area shape="rect" id="Node000002" href="$YAMS_8hpp.html" title=" " alt="" coords="399,225,585,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,51,152,60,96,73,50,90,22,110,12,127,8,143,11,159,22,176,46,194,83,209,129,222,182,231,295,243,399,248,399,253,294,248,181,236,128,227,81,214,44,199,18,179,6,161,3,143,7,125,18,106,48,85,94,68,151,55,210,45"/>
+<area shape="rect" id="Node000003" href="$SparkWrapper_8hpp.html" title=" " alt="" coords="33,108,218,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="289,68,199,110,197,105,287,64"/>
+<area shape="rect" id="Node000004" href="$ArmSimSupplier_8hpp.html" title=" " alt="" coords="242,108,473,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="360,74,360,108,355,108,355,74"/>
+<area shape="rect" id="Node000005" href="$DCMotorSimSupplier_8hpp.html" title=" " alt="" coords="497,108,759,177"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="437,63,545,105,543,110,435,68"/>
+<area shape="rect" id="Node000006" href="$ElevatorSimSupplier_8hpp.html" title=" " alt="" coords="783,108,1041,177"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="504,56,771,105,783,108,782,113,770,111,503,61"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="412,184,461,223,458,227,408,188"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="577,188,527,227,524,223,573,184"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="770,183,586,230,584,225,769,178"/>
 </map>

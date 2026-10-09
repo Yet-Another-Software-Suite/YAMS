@@ -135,10 +135,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMechanismVelocity()" tabindex="0">getMechanismVelocity()</a></li>
 <li><a href="#getMechanismAcceleration()" tabindex="0">getMechanismAcceleration()</a></li>
 <li><a href="#getMechanismPosition()" tabindex="0">getMechanismPosition()</a></li>
+<li><a href="#getRelativeMechanismVelocity()" tabindex="0">getRelativeMechanismVelocity()</a></li>
+<li><a href="#getRelativeMechanismPosition()" tabindex="0">getRelativeMechanismPosition()</a></li>
 <li><a href="#getRotorVelocity()" tabindex="0">getRotorVelocity()</a></li>
 <li><a href="#getRotorPosition()" tabindex="0">getRotorPosition()</a></li>
-<li><a href="#getExternalEncoderPosition()" tabindex="0">getExternalEncoderPosition()</a></li>
-<li><a href="#getExternalEncoderVelocity()" tabindex="0">getExternalEncoderVelocity()</a></li>
+<li><a href="#getExternalEncoderMechanismPosition()" tabindex="0">getExternalEncoderMechanismPosition()</a></li>
+<li><a href="#getExternalEncoderMechanismVelocity()" tabindex="0">getExternalEncoderMechanismVelocity()</a></li>
 <li><a href="#setupTelemetry(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" tabindex="0">setupTelemetry(NetworkTable, NetworkTable)</a></li>
 <li><a href="#tuningEnabled()" tabindex="0">tuningEnabled()</a></li>
 <li><a href="#applyTuningValues()" tabindex="0">applyTuningValues()</a></li>
@@ -382,11 +384,15 @@ wrapping point.</div>
 <section class="constructor-summary" id="constructor-summary">
 <h2>Constructor Summary</h2>
 <div class="caption"><span>Constructors</span></div>
-<div class="summary-table two-column-summary">
-<div class="table-header col-first">Constructor</div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier</div>
+<div class="table-header col-second">Constructor</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>protected </code></div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">SmartMotorController</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Create the motor controller, subclasses wrap the vendor device.</div>
+</div>
 </div>
 </section>
 </li>
@@ -467,14 +473,16 @@ wrapping point.</div>
 <div class="block">Get the current encoder exponential profile state for the closed loop controller.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderPosition()" class="member-name-link">getExternalEncoderPosition</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the rotations of the mechanism according to the external encoder.</div>
+<div class="block">Get the mechanism <code>Angle</code> from the external (absolute) encoder, scaled by the configured
+external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderVelocity()" class="member-name-link">getExternalEncoderVelocity</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the velocity of the mechanism according to the external encoder.</div>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the external (absolute) encoder, scaled by the
+configured external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.LinearAcceleration</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration</a>()</code></div>
@@ -537,6 +545,18 @@ the measurement applied via the <a href="SmartMotorControllerConfig.html" title=
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Get the mechanism <code>Angle</code> from the relative encoder in the motor, scaled by the configured
+<a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the relative encoder in the motor, scaled by the
+configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorPosition()" class="member-name-link">getRotorPosition</a>()</code></div>
@@ -1132,7 +1152,8 @@ fallback identifier) is known.</div>
 <section class="detail" id="&lt;init&gt;()">
 <h3>SmartMotorController</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SmartMotorController</span>()</div>
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="element-name">SmartMotorController</span>()</div>
+<div class="block">Create the motor controller, subclasses wrap the vendor device.</div>
 </div>
 </section>
 </li>
@@ -1709,7 +1730,10 @@ with the <a href="SmartMotorControllerConfig.html" title="class in yams.core.mot
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.units.measure.AngularVelocity</span>&nbsp;<span class="element-name">getMechanismVelocity</span>()</div>
 <div class="block">Get the Mechanism <code>AngularVelocity</code> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> into
-the measurement applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+the measurement applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>. Uses
+<a href="#getExternalEncoderMechanismVelocity()"><code>getExternalEncoderMechanismVelocity()</code></a> when the external (absolute) encoder is enabled
+with <a href="SmartMotorControllerConfig.html#withUseExternalFeedbackEncoder(boolean)"><code>SmartMotorControllerConfig.withUseExternalFeedbackEncoder(boolean)</code></a>, otherwise
+<a href="#getRelativeMechanismVelocity()"><code>getRelativeMechanismVelocity()</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism <code>AngularVelocity</code></dd>
@@ -1737,10 +1761,41 @@ necessary by taking the derivative of the velocity.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.units.measure.Angle</span>&nbsp;<span class="element-name">getMechanismPosition</span>()</div>
 <div class="block">Get the mechanism <code>Angle</code> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> from
-<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
+<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>. Uses <a href="#getExternalEncoderMechanismPosition()"><code>getExternalEncoderMechanismPosition()</code></a> when the
+external (absolute) encoder is enabled with
+<a href="SmartMotorControllerConfig.html#withUseExternalFeedbackEncoder(boolean)"><code>SmartMotorControllerConfig.withUseExternalFeedbackEncoder(boolean)</code></a>, otherwise
+<a href="#getRelativeMechanismPosition()"><code>getRelativeMechanismPosition()</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mechanism <code>Angle</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRelativeMechanismVelocity()">
+<h3>getRelativeMechanismVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.units.measure.AngularVelocity</span>&nbsp;<span class="element-name">getRelativeMechanismVelocity</span>()</div>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the relative encoder in the motor, scaled by the
+configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>. Never uses the external (absolute) encoder.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Mechanism <code>AngularVelocity</code> from the relative encoder.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRelativeMechanismPosition()">
+<h3>getRelativeMechanismPosition</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.units.measure.Angle</span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
+<div class="block">Get the mechanism <code>Angle</code> from the relative encoder in the motor, scaled by the configured
+<a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>. Never uses the external (absolute) encoder.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Mechanism <code>Angle</code> from the relative encoder.</dd>
 </dl>
 </div>
 </section>
@@ -1773,27 +1828,32 @@ scaled to the mechanism rotations.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="getExternalEncoderPosition()">
-<h3>getExternalEncoderPosition</h3>
+<section class="detail" id="getExternalEncoderMechanismPosition()">
+<h3>getExternalEncoderMechanismPosition</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Angle&gt;</span>&nbsp;<span class="element-name">getExternalEncoderPosition</span>()</div>
-<div class="block">Get the rotations of the mechanism according to the external encoder.</div>
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Angle&gt;</span>&nbsp;<span class="element-name">getExternalEncoderMechanismPosition</span>()</div>
+<div class="block">Get the mechanism <code>Angle</code> from the external (absolute) encoder, scaled by the configured
+external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>. Available whether or not the external encoder is used
+for feedback.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd><code>Angle</code> of the external encoder in the mechanism.</dd>
+<dd>Mechanism <code>Angle</code> from the external encoder, or empty if none is attached.</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="getExternalEncoderVelocity()">
-<h3>getExternalEncoderVelocity</h3>
+<section class="detail" id="getExternalEncoderMechanismVelocity()">
+<h3>getExternalEncoderMechanismVelocity</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.AngularVelocity&gt;</span>&nbsp;<span class="element-name">getExternalEncoderVelocity</span>()</div>
-<div class="block">Get the velocity of the mechanism according to the external encoder.</div>
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.AngularVelocity&gt;</span>&nbsp;<span class="element-name">getExternalEncoderMechanismVelocity</span>()</div>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the external (absolute) encoder, scaled by the
+configured external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>. Available whether or not the external
+encoder is used for feedback.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd><code>AngularVelocity</code> of the external encoder in the mechanism.</dd>
+<dd>Mechanism <code>AngularVelocity</code> from the external encoder, or empty if none is
+        attached.</dd>
 </dl>
 </div>
 </section>

@@ -158,6 +158,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac4ad490e328dfe477453f49c5d353465"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae28f39be5b9d9d4116bfc45ec9543e1" id="r_aae28f39be5b9d9d4116bfc45ec9543e1"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae28f39be5b9d9d4116bfc45ec9543e1">GetMechanismVelocity</a> ()=0</td></tr>
 <tr class="separator:aae28f39be5b9d9d4116bfc45ec9543e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7c92541aeccc16bc97729417084fd7d" id="r_ac7c92541aeccc16bc97729417084fd7d"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac7c92541aeccc16bc97729417084fd7d">GetRelativeMechanismPosition</a> ()=0</td></tr>
+<tr class="separator:ac7c92541aeccc16bc97729417084fd7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96735ae1713b77a81ce3d6432766fd60" id="r_a96735ae1713b77a81ce3d6432766fd60"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::turns_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96735ae1713b77a81ce3d6432766fd60">GetRelativeMechanismVelocity</a> ()=0</td></tr>
+<tr class="separator:a96735ae1713b77a81ce3d6432766fd60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5989b28b0862e9233ab12d0c3d4758fe" id="r_a5989b28b0862e9233ab12d0c3d4758fe"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::turns_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5989b28b0862e9233ab12d0c3d4758fe">GetMechanismAcceleration</a> ()=0</td></tr>
 <tr class="separator:a5989b28b0862e9233ab12d0c3d4758fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a351d3e3a9f00d3fdcb1a9f59438d6547" id="r_a351d3e3a9f00d3fdcb1a9f59438d6547"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a351d3e3a9f00d3fdcb1a9f59438d6547">GetRotorPosition</a> ()=0</td></tr>
@@ -170,10 +174,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0837e3738ad9fd9a221fb2e8e61d56df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a781d8fa8dbbcc18234ffc14ed1ac3f3e" id="r_a781d8fa8dbbcc18234ffc14ed1ac3f3e"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::meters_per_second_squared_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a781d8fa8dbbcc18234ffc14ed1ac3f3e">GetMeasurementAcceleration</a> ()=0</td></tr>
 <tr class="separator:a781d8fa8dbbcc18234ffc14ed1ac3f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab18a4fb57d4b6e9efea364fc82b7028d" id="r_ab18a4fb57d4b6e9efea364fc82b7028d"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::degree_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab18a4fb57d4b6e9efea364fc82b7028d">GetExternalEncoderPosition</a> ()=0</td></tr>
-<tr class="separator:ab18a4fb57d4b6e9efea364fc82b7028d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a292573420514a61e3a8784c59fb8e8f5" id="r_a292573420514a61e3a8784c59fb8e8f5"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::degrees_per_second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a292573420514a61e3a8784c59fb8e8f5">GetExternalEncoderVelocity</a> ()=0</td></tr>
-<tr class="separator:a292573420514a61e3a8784c59fb8e8f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e83dabfaeb0b8675ffcd939f6b033b4" id="r_a8e83dabfaeb0b8675ffcd939f6b033b4"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e83dabfaeb0b8675ffcd939f6b033b4">GetExternalEncoderMechanismPosition</a> ()=0</td></tr>
+<tr class="separator:a8e83dabfaeb0b8675ffcd939f6b033b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb6a0fcc71e7ebc64d6d48efbaf0c600" id="r_aeb6a0fcc71e7ebc64d6d48efbaf0c600"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::turns_per_second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb6a0fcc71e7ebc64d6d48efbaf0c600">GetExternalEncoderMechanismVelocity</a> ()=0</td></tr>
+<tr class="separator:aeb6a0fcc71e7ebc64d6d48efbaf0c600"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a930601274c2d1beae02f8ab19fb49c59" id="r_a930601274c2d1beae02f8ab19fb49c59"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::ampere_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a930601274c2d1beae02f8ab19fb49c59">GetSupplyCurrent</a> ()=0</td></tr>
 <tr class="separator:a930601274c2d1beae02f8ab19fb49c59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c9c23ccc6cfbba4aed85954f6fc70ab" id="r_a5c9c23ccc6cfbba4aed85954f6fc70ab"><td class="memItemLeft" align="right" valign="top">virtual wpi::units::ampere_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c9c23ccc6cfbba4aed85954f6fc70ab">GetStatorCurrent</a> ()=0</td></tr>
@@ -822,8 +826,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ab18a4fb57d4b6e9efea364fc82b7028d" name="ab18a4fb57d4b6e9efea364fc82b7028d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab18a4fb57d4b6e9efea364fc82b7028d">&#9670;&#160;</a></span>GetExternalEncoderPosition()</h2>
+<a id="a8e83dabfaeb0b8675ffcd939f6b033b4" name="a8e83dabfaeb0b8675ffcd939f6b033b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e83dabfaeb0b8675ffcd939f6b033b4">&#9670;&#160;</a></span>GetExternalEncoderMechanismPosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -832,7 +836,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::optional&lt; wpi::units::degree_t &gt; yams::motorcontrollers::SmartMotorController::GetExternalEncoderPosition </td>
+          <td class="memname">virtual std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorController::GetExternalEncoderMechanismPosition </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -844,15 +848,15 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the position of the attached external (absolute) encoder if available.</p>
-<dl class="section return"><dt>Returns</dt><dd>External encoder position, or empty if not present or not configured. </dd></dl>
+<p>Get the mechanism position from the external (absolute) encoder (applies the external encoder gearing). Available whether or not the external encoder is used for feedback.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns from the external encoder, or empty if none is attached. </dd></dl>
 
-<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a7b7b2695c3e291d2be90c18b3744b621">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a0b4e6fd5c845ddb95b7fcc3975dd02e6">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#ac2cfc1f4859460d4a9a6d7a5a0b4a2ae">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#aaeb114fb043289dff841b307ba2b778a">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#abe050fa39e18b2a48679493ca1b7267f">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#acc9174252a701b1bc1021037293754e4">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
-<a id="a292573420514a61e3a8784c59fb8e8f5" name="a292573420514a61e3a8784c59fb8e8f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a292573420514a61e3a8784c59fb8e8f5">&#9670;&#160;</a></span>GetExternalEncoderVelocity()</h2>
+<a id="aeb6a0fcc71e7ebc64d6d48efbaf0c600" name="aeb6a0fcc71e7ebc64d6d48efbaf0c600"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb6a0fcc71e7ebc64d6d48efbaf0c600">&#9670;&#160;</a></span>GetExternalEncoderMechanismVelocity()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -861,7 +865,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::optional&lt; wpi::units::degrees_per_second_t &gt; yams::motorcontrollers::SmartMotorController::GetExternalEncoderVelocity </td>
+          <td class="memname">virtual std::optional&lt; wpi::units::turns_per_second_t &gt; yams::motorcontrollers::SmartMotorController::GetExternalEncoderMechanismVelocity </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -873,10 +877,10 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the velocity of the attached external (absolute) encoder if available.</p>
-<dl class="section return"><dt>Returns</dt><dd>External encoder velocity, or empty if not present or not configured. </dd></dl>
+<p>Get the mechanism velocity from the external (absolute) encoder (applies the external encoder gearing). Available whether or not the external encoder is used for feedback.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second from the external encoder, or empty if none is attached. </dd></dl>
 
-<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a228885615b9f52091d60c05153ecad07">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#af31b44e4e45f27479b67c25a82b97a7a">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#abff14014c754b2a4a20e4486e904bb82">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a6d4d2a5e809a0ba0a049c21adc2415b3">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a7e8766cda278c85a6d12ef83ab2c39bf">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#a02a7e9a0873fed1f2ebcc962f51f6396">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -1056,7 +1060,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the mechanism position from the motor encoder (applies gearing).</p>
+<p>Get the mechanism position (applies gearing). Uses the external (absolute) encoder when one is configured with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ae199e9dcfdccbe16f2ff5a1fe63be8b3">SmartMotorControllerConfig::WithUseExternalFeedbackEncoder()</a>, otherwise the relative encoder. Use <a class="el" href="#ac7c92541aeccc16bc97729417084fd7d">GetRelativeMechanismPosition()</a> to only read the relative encoder.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns. </dd></dl>
 
 <p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a8e714962929e691d32e23b7e870c9402">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#ada3a72a688de3ed46bd0a3a3b346ff42">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#a350118c78831db22ab500142471bec43">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
@@ -1123,7 +1127,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the mechanism velocity from the motor encoder (applies gearing).</p>
+<p>Get the mechanism velocity (applies gearing). Uses the external (absolute) encoder when one is configured with <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ae199e9dcfdccbe16f2ff5a1fe63be8b3">SmartMotorControllerConfig::WithUseExternalFeedbackEncoder()</a>, otherwise the relative encoder. Use <a class="el" href="#a96735ae1713b77a81ce3d6432766fd60">GetRelativeMechanismVelocity()</a> to only read the relative encoder.</p>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second. </dd></dl>
 
 <p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#ae5212db8815f6629fa98d05f797af3a6">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a72850bbaaa1ffd575edf1d4d753f8930">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#a1dbec502a8c019bc41525b6e9da53cf4">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
@@ -1204,6 +1208,64 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>Get the telemetry name of this motor controller.</p>
 <dl class="section return"><dt>Returns</dt><dd>Name string from the configuration. </dd></dl>
+
+</div>
+</div>
+<a id="ac7c92541aeccc16bc97729417084fd7d" name="ac7c92541aeccc16bc97729417084fd7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7c92541aeccc16bc97729417084fd7d">&#9670;&#160;</a></span>GetRelativeMechanismPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual wpi::units::turn_t yams::motorcontrollers::SmartMotorController::GetRelativeMechanismPosition </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the mechanism position from the relative encoder in the motor (applies gearing). Never uses the external (absolute) encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism position in turns from the relative encoder. </dd></dl>
+
+<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a04af019105452661b365e1782e32e9b5">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#ad477dec1442ce7b95472269be573e4ff">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#aff33069fa6c57fe8753296ae906c53ef">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+
+</div>
+</div>
+<a id="a96735ae1713b77a81ce3d6432766fd60" name="a96735ae1713b77a81ce3d6432766fd60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96735ae1713b77a81ce3d6432766fd60">&#9670;&#160;</a></span>GetRelativeMechanismVelocity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual wpi::units::turns_per_second_t yams::motorcontrollers::SmartMotorController::GetRelativeMechanismVelocity </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the mechanism velocity from the relative encoder in the motor (applies gearing). Never uses the external (absolute) encoder.</p>
+<dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second from the relative encoder. </dd></dl>
+
+<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a83a46b3d857fe00c7daafba7765c8385">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#af35cc2c1136fda183140b201382ec63e">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#aeb7d11d7ee2af6864697fd8cb2d4d9a2">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -2301,7 +2363,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a8202c2371cd07ea92fb82c24ac31ff4d">yams::motorcontrollers::local::SparkWrapper</a>.</p>
+<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a8202c2371cd07ea92fb82c24ac31ff4d">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a4d0ade0f9875c9e0864fd27aa1b10159">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#aaaa613aeba7269f88bb3a867f112b885">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -2336,7 +2398,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a40d34498c7e6a4635782130416e856be">yams::motorcontrollers::local::SparkWrapper</a>.</p>
+<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a40d34498c7e6a4635782130416e856be">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a6fff8f55f4b1c89bc0e156dda57feebd">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#ac36259baf343b6818506c48a5308ad34">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -3088,7 +3150,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::remote::TalonFXSWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::remote::TalonFXWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#abdda5a23124862e6c21dd880ae0d2479">yams::motorcontrollers::local::SparkWrapper</a>.</p>
+<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::remote::TalonFXSWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#a9dd1d9c3ec604dc8ce6017c7ad5d8354">yams::motorcontrollers::remote::TalonFXWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#abdda5a23124862e6c21dd880ae0d2479">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#adb52fac1f0a334143eab0001575656d6">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#ac06afcebd26af3f6d9ccbce50b59b4aa">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>

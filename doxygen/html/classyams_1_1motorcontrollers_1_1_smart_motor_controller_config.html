@@ -143,6 +143,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab9f0c730342a7ffe9ea0d6dd1d8ccc45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abca84ff85146847cc407d7b18711584a" id="r_abca84ff85146847cc407d7b18711584a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abca84ff85146847cc407d7b18711584a">WithExponentialProfile</a> (wpi::math::ExponentialProfile&lt; wpi::units::turns, wpi::units::volts &gt;::Constraints constraints)</td></tr>
 <tr class="separator:abca84ff85146847cc407d7b18711584a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77fb24ed278c7fc692d07c3c6acf7588" id="r_a77fb24ed278c7fc692d07c3c6acf7588"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77fb24ed278c7fc692d07c3c6acf7588">WithLinearExponentialProfile</a> (double kV, double kA, wpi::units::volt_t maxInput)</td></tr>
+<tr class="separator:a77fb24ed278c7fc692d07c3c6acf7588"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad00a6897866f6983910fd38373e48642" id="r_ad00a6897866f6983910fd38373e48642"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad00a6897866f6983910fd38373e48642">WithLQR</a> (const <a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">math::LQRConfig</a> &amp;lqrConfig, <a class="el" href="#acdc3626942088138de81d50081b979c4">ClosedLoopControllerSlot</a> slot=<a class="el" href="#acdc3626942088138de81d50081b979c4a81078b5ffe742dc7d1c26cdbc05bdf34">ClosedLoopControllerSlot::SLOT_0</a>)</td></tr>
 <tr class="separator:ad00a6897866f6983910fd38373e48642"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad843ed8a85a45a14fd1d807687c426bc" id="r_ad843ed8a85a45a14fd1d807687c426bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad843ed8a85a45a14fd1d807687c426bc">WithLinearClosedLoopController</a> (bool linear)</td></tr>
@@ -3055,6 +3057,43 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">linear</td><td>true for meters-based closed-loop control, false for rotations. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a77fb24ed278c7fc692d07c3c6acf7588" name="a77fb24ed278c7fc692d07c3c6acf7588"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77fb24ed278c7fc692d07c3c6acf7588">&#9670;&#160;</a></span>WithLinearExponentialProfile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp; yams::motorcontrollers::SmartMotorControllerConfig::WithLinearExponentialProfile </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>kV</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>kA</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::volt_t</td>          <td class="paramname"><span class="paramname"><em>maxInput</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set a linear (meters based) exponential motion profile directly from its gains.</p>
+<p>Requires a mechanism circumference (throws SmartMotorControllerConfigurationException otherwise) and switches the closed-loop controller to linear units.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">kV</td><td>Velocity constant in volts per meter per second. </td></tr>
+    <tr><td class="paramname">kA</td><td>Acceleration constant in volts per meter per second squared. </td></tr>
+    <tr><td class="paramname">maxInput</td><td>Maximum voltage input. </td></tr>
   </table>
   </dd>
 </dl>
