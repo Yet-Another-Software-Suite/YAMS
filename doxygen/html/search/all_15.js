@@ -2,7 +2,7 @@ var searchData=
 [
   ['week_5ft_0',['week_t',['../namespaceyams_1_1units.html#ab474516d1a9f552d4dfb49f04b41d4d3',1,'yams::units']]],
   ['weekunit_1',['WeekUnit',['../namespaceyams_1_1units.html#a3f9626e6cf19fdd46aa436671aa2b014',1,'yams::units']]],
-  ['with_20a_20custom_20field_20selection_2',['Logging-only (no NT4) with a custom field selection',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md19',1,'']]],
+  ['with_20a_20custom_20field_20selection_2',['Logging-only (no NT4) with a custom field selection',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md20',1,'']]],
   ['withabsoluteencoder_3',['withabsoluteencoder',['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#aaf391d3411206501ea459b11a786b08e',1,'yams::telemetry::SwerveModuleTelemetryConfig::WithAbsoluteEncoder()'],['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ab47ef85f42aecc6034f89fa9ccda7413',1,'yams::mechanisms::config::SwerveModuleConfig::WithAbsoluteEncoder(std::function&lt; wpi::units::degree_t()&gt; supplier)']]],
   ['withabsoluteencodergearing_4',['WithAbsoluteEncoderGearing',['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#ab356c0884e2a857fd29b7e91d49898c2',1,'yams::mechanisms::config::SwerveModuleConfig']]],
   ['withabsoluteencoderoffset_5',['WithAbsoluteEncoderOffset',['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html#a034853f66efb285f36befacafe2e2fac',1,'yams::mechanisms::config::SwerveModuleConfig']]],

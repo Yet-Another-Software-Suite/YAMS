@@ -205,7 +205,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>Direct Known Subclasses:</dt>
-<dd><code><a href="local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a>, <a href="remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a>, <a href="remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></code></dd>
+<dd><code><a href="local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a>, <a href="local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a>, <a href="remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a>, <a href="remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -324,7 +324,7 @@ wrapping point.</div>
 <div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.util.Alert&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#m_systemCoreClosedLoopAlert" class="member-name-link">m_systemCoreClosedLoopAlert</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Alert shown when the closed loop controller is running on the RIO.</div>
+<div class="block">Alert shown when the closed loop controller is running on the SystemCore.</div>
 </div>
 <div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.TrapezoidProfile&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#m_trapezoidProfile" class="member-name-link">m_trapezoidProfile</a></code></div>
@@ -1125,7 +1125,7 @@ cleanup without core depending on any command framework types.</div>
 <h3>m_systemCoreClosedLoopAlert</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.util.Alert&gt;</span>&nbsp;<span class="element-name">m_systemCoreClosedLoopAlert</span></div>
-<div class="block">Alert shown when the closed loop controller is running on the RIO. Empty until constructed by
+<div class="block">Alert shown when the closed loop controller is running on the SystemCore. Empty until constructed by
 the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> implementation once its telemetry name (or a generated
 fallback identifier) is known.</div>
 </div>

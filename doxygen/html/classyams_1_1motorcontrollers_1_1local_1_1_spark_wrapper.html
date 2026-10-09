@@ -382,7 +382,7 @@ Additional Inherited Members</h2></td></tr>
 <p>The SPARK runs in the raw units of its feedback sensor (rotations and RPM of the motor's encoder, or of the external encoder when it is used for feedback); no conversion factors are configured. Gains, setpoints, MAXMotion constraints, tolerances and soft limits are scaled from YAMS mechanism units by the mechanism-to-feedback-sensor ratio.</p>
 <p>Supported external encoders (WithExternalEncoder): <code>rev::spark::SparkAbsoluteEncoder*</code>, <code>rev::spark::SparkMaxAlternateEncoder*</code> / <code>rev::spark::SparkFlexExternalEncoder*</code> (quadrature), and <code>rev::detached::DetachedEncoder*</code> / <code>rev::detached::SplineEncoder*</code> (read over CAN).</p>
 <p>External encoder discontinuity point (absolute and detached encoders): 0.5 rotations reports [-0.5, 0.5), 1 rotation (the default) reports [0, 1).</p>
-<h3><a class="anchor" id="autotoc_md10"></a>
+<h3><a class="anchor" id="autotoc_md11"></a>
 Example usage SPARK Max (inside a subsystem constructor)</h3>
 <div class="fragment"><div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a>;</div>
 <div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a>;</div>
@@ -420,9 +420,9 @@ Example usage SPARK Max (inside a subsystem constructor)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_ab805136bec30f6df6248dc451b03711a"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ab805136bec30f6df6248dc451b03711a">yams::motorcontrollers::SmartMotorControllerConfig::WithMechanismCircumference</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMechanismCircumference(wpi::units::meter_t circumference)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1local_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a></div><div class="ttdef"><b>Definition</b> SparkWrapper.hpp:34</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1local_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1local.html">yams::motorcontrollers::local</a></div><div class="ttdef"><b>Definition</b> NovaWrapper.hpp:18</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md12"></a>
 Example usage SPARK Flex</h3>
 <div class="fragment"><div class="line"><span class="comment">// Declare as subsystem members:</span></div>
 <div class="line"><span class="comment">//   rev::spark::SparkFlex        m_sparkFlex{4,</span></div>

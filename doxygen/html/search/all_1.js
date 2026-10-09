@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['based_20override_0',['Trigger-based override',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md16',1,'']]],
-  ['basic_20usage_20construct_20directly_1',['Basic usage (construct directly)',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md14',1,'']]],
+  ['based_20override_0',['Trigger-based override',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md17',1,'']]],
+  ['basic_20usage_20construct_20directly_1',['Basic usage (construct directly)',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md15',1,'']]],
   ['batteryresistance_2',['BatteryResistance',['../classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html#a59023cc012e9d1b2997472425db0fb1a',1,'yams::motorcontrollers::simulation::BatterySim']]],
   ['batterysim_3',['BatterySim',['../classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html',1,'yams::motorcontrollers::simulation']]],
   ['batterysim_2ehpp_4',['BatterySim.hpp',['../BatterySim_8hpp.html',1,'']]],
@@ -14,5 +14,5 @@ var searchData=
   ['brake_11',['BRAKE',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#aefe3e39d1d0073649bc288c817d3de5ba0c206573cf0e27e92aa30ae9c13de668',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
   ['brushed_5f2wire_12',['Brushed_2Wire',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014fa98e5d12293d9c6a6fdb433de5b04f28e',1,'yams::motorcontrollers::remote::TalonFXSWrapper']]],
   ['brushed_5f3wire_13',['Brushed_3Wire',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014fa39466b2786649bbc14ba04a9c049e3f8',1,'yams::motorcontrollers::remote::TalonFXSWrapper']]],
-  ['builder_20usage_20simsensorconfig_14',['Builder usage (SimSensorConfig)',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md15',1,'']]]
+  ['builder_20usage_20simsensorconfig_14',['Builder usage (SimSensorConfig)',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md16',1,'']]]
 ];
