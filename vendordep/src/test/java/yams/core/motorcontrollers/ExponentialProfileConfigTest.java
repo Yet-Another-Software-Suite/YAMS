@@ -62,17 +62,13 @@ public class ExponentialProfileConfigTest {
     final double drumRadius = 0.025;
     final ExponentialProfile.Constraints constraints =
         baseConfig()
-            .withExponentialProfile(
-                Volts.of(10), motor, Kilograms.of(mass), Meters.of(drumRadius))
+            .withExponentialProfile(Volts.of(10), motor, Kilograms.of(mass), Meters.of(drumRadius))
             .getExponentialProfile()
             .orElseThrow();
 
     // Velocity dynamics of the elevator, in meters: dv/dt = A v + B u.
     final double a =
-        -kGearRatio
-            * kGearRatio
-            * motor.Kt
-            / (motor.R * drumRadius * drumRadius * mass * motor.Kv);
+        -kGearRatio * kGearRatio * motor.Kt / (motor.R * drumRadius * drumRadius * mass * motor.Kv);
     final double b = kGearRatio * motor.Kt / (motor.R * drumRadius * mass);
     final double expectedKv = -a / b;
     final double expectedKa = 1.0 / b;

@@ -379,8 +379,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makePivotNova(pos, "Nova(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotNova(pos, "Nova(pMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -410,8 +409,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makePivotNova(pos, "Nova(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotNova(pos, "Nova(pMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -440,8 +438,7 @@ public class MechanismLimitTest {
               makeArmTalonFXS(pos, "TalonFXS(aMin" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makeArmNova(pos, "Nova(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmNova(pos, "Nova(aMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -471,8 +468,7 @@ public class MechanismLimitTest {
               makeArmTalonFXS(pos, "TalonFXS(aMax" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makeArmNova(pos, "Nova(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmNova(pos, "Nova(aMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -501,8 +497,7 @@ public class MechanismLimitTest {
               makeElevTalonFXS(pos, "TalonFXS(eMin" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makeElevNova(pos, "Nova(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevNova(pos, "Nova(eMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -531,8 +526,7 @@ public class MechanismLimitTest {
               makeElevTalonFXS(pos, "TalonFXS(eMax" + sfx + ")[" + offset + "]"), expected));
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
-      args.add(
-          Arguments.of(makeElevNova(pos, "Nova(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevNova(pos, "Nova(eMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }

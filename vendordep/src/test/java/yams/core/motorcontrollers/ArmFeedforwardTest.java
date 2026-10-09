@@ -11,10 +11,10 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Volts;
 
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -68,7 +68,8 @@ public class ArmFeedforwardTest {
   /** The last voltage the closed loop controller commanded, captured from setVoltage. */
   private static final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
 
-  private record Case(String name, Function<SmartMotorControllerConfig, SmartMotorController> create) {
+  private record Case(
+      String name, Function<SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
       return name;

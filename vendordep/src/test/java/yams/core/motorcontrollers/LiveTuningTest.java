@@ -218,7 +218,8 @@ public class LiveTuningTest {
       talonFX.getConfigurator().apply(new TalonFXConfiguration());
       talonFX.close();
     } else if (motorController instanceof Nova nova) {
-      // The Nova's closed loop runs on the SystemCore, so it holds no gains to put back to defaults.
+      // The Nova's closed loop runs on the SystemCore, so it holds no gains to put back to
+      // defaults.
       nova.close();
     }
   }
@@ -239,7 +240,8 @@ public class LiveTuningTest {
   private static double deviceKp(SmartMotorController smc, double expected)
       throws InterruptedException {
     if (smc instanceof NovaWrapper) {
-      // The Nova has no gains to read back; its closed loop runs on the SystemCore with this controller.
+      // The Nova has no gains to read back; its closed loop runs on the SystemCore with this
+      // controller.
       return smc.m_pid.orElseThrow().getP();
     }
     double kP = Double.NaN;
