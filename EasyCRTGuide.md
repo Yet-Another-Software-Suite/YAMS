@@ -109,8 +109,16 @@ its angle. What changes is whether that angle is already the turret angle.
 
 The drawing is not to scale.
 
-In all three, `motor` is the turret's `SmartMotorController`, set up with the full motor to turret
-`MechanismGearing`. `setEncoderPosition(...)` takes the turret angle. The tooth counts are examples.
+Each example sets up the turret's `SmartMotorController` with its gearing and then sets its encoder
+position from `EasyCRT`. Two gearings are involved, and they are not the same thing:
+
+- **The motor's gearing** (`motorToTurret`) goes in the `SmartMotorControllerConfig` with
+  `withGearing(...)`. It is the whole reduction from the motor to the turret, and it is the same in
+  all three layouts because the motor drives the turret the same way.
+- **The shared gear's gearing** (`driveToTurret`, `commonToTurret`) is only used to turn the solved
+  angle into the turret angle, in layouts 2 and 3.
+
+`setEncoderPosition(...)` always takes the turret angle. The tooth counts are examples.
 
 ### Layout 1: CRT gears on the turret gear
 
@@ -118,16 +126,33 @@ The motor's drive gear and both encoder pinions mesh with the turret gear. The t
 shared gear, so there is nothing to convert.
 
 ```java
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+MechanismGearing motorToTurret = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 40));
+
+SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+    .withGearing(motorToTurret)
+    .withControlMode(ControlMode.CLOSED_LOOP)
+    .withClosedLoopController(20, 0, 0);
+SmartMotorController motor = new SparkWrapper(sparkMax, DCMotor.getNEO(1), motorConfig);
+
 EasyCRT crt = new EasyCRT(200, 19, 21); // turret gear, pinion A, pinion B
 
 // The turret gear is the shared gear, so the solved angle is the turret angle.
+// setEncoderPosition takes the turret angle and applies motorToTurret itself.
 crt.solve(encoderA.get(), encoderB.get()).ifPresent(motor::setEncoderPosition);
 ```
 
 ```cpp
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+yams::gearing::MechanismGearing motorToTurret{
+    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 40.0})};
+motorConfig.WithMotorGearing(motorToTurret);
+// ... finish motorConfig and build the SmartMotorController `motor` with it.
+
 yams::units::EasyCRT crt{200, 19, 21};  // turret gear, pinion A, pinion B
 
 // The turret gear is the shared gear, so the solved angle is the turret angle.
+// SetEncoderPosition takes the turret angle and applies motorToTurret itself.
 if (auto turretAngle = crt.Solve(encoderA, encoderB)) {
   motor.SetEncoderPosition(*turretAngle);
 }
@@ -142,24 +167,39 @@ is the shared gear, so `solve` returns the drive gear angle. Describe the drive 
 as a `MechanismGearing` and multiply by `getRotorToMechanismRatio()` to get the turret angle.
 
 ```java
-// 40 tooth drive gear on the motor output, meshing with the 200 tooth turret gear: 5:1.
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+MechanismGearing motorToTurret = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 40));
+
+SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+    .withGearing(motorToTurret)
+    .withControlMode(ControlMode.CLOSED_LOOP)
+    .withClosedLoopController(20, 0, 0);
+SmartMotorController motor = new SparkWrapper(sparkMax, DCMotor.getNEO(1), motorConfig);
+
+// The pinions mesh with the 40 tooth drive gear, which turns 5 times per turret turn.
 MechanismGearing driveToTurret = new MechanismGearing(GearBox.fromTeeth(40, 200));
 EasyCRT crt = new EasyCRT(40, 19, 21); // drive gear, pinion A, pinion B
 
 crt.solve(encoderA.get(), encoderB.get()).ifPresent(driveGearAngle -> {
-  // The drive gear turns 5 times per turret turn, so scale its angle down to the turret.
+  // Scale the drive gear angle down to the turret, then seed the motor with the turret angle.
   Angle turretAngle = driveGearAngle.times(driveToTurret.getRotorToMechanismRatio());
   motor.setEncoderPosition(turretAngle);
 });
 ```
 
 ```cpp
-// 40 tooth drive gear on the motor output, meshing with the 200 tooth turret gear: 5:1.
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+yams::gearing::MechanismGearing motorToTurret{
+    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 40.0})};
+motorConfig.WithMotorGearing(motorToTurret);
+// ... finish motorConfig and build the SmartMotorController `motor` with it.
+
+// The pinions mesh with the 40 tooth drive gear, which turns 5 times per turret turn.
 yams::gearing::MechanismGearing driveToTurret{yams::gearing::GearBox::FromTeeth({40, 200})};
 yams::units::EasyCRT crt{40, 19, 21};  // drive gear, pinion A, pinion B
 
 if (auto driveGearAngle = crt.Solve(encoderA, encoderB)) {
-  // The drive gear turns 5 times per turret turn, so scale its angle down to the turret.
+  // Scale the drive gear angle down to the turret, then seed the motor with the turret angle.
   wpi::units::turn_t turretAngle = *driveGearAngle * driveToTurret.GetRotorToMechanismRatio();
   motor.SetEncoderPosition(turretAngle);
 }
@@ -174,24 +214,39 @@ also meshes with the turret gear. The common gear is the shared gear, so `solve`
 gear angle, and the conversion works the same way as layout 2.
 
 ```java
-// 30 tooth common gear meshing with the 200 tooth turret gear: 6.67:1.
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+MechanismGearing motorToTurret = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 40));
+
+SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+    .withGearing(motorToTurret)
+    .withControlMode(ControlMode.CLOSED_LOOP)
+    .withClosedLoopController(20, 0, 0);
+SmartMotorController motor = new SparkWrapper(sparkMax, DCMotor.getNEO(1), motorConfig);
+
+// The pinions mesh with a 30 tooth common gear, which turns 6.67 times per turret turn.
 MechanismGearing commonToTurret = new MechanismGearing(GearBox.fromTeeth(30, 200));
 EasyCRT crt = new EasyCRT(30, 19, 21); // common gear, pinion A, pinion B
 
 crt.solve(encoderA.get(), encoderB.get()).ifPresent(commonGearAngle -> {
-  // The common gear turns 6.67 times per turret turn, so scale its angle down to the turret.
+  // Scale the common gear angle down to the turret, then seed the motor with the turret angle.
   Angle turretAngle = commonGearAngle.times(commonToTurret.getRotorToMechanismRatio());
   motor.setEncoderPosition(turretAngle);
 });
 ```
 
 ```cpp
-// 30 tooth common gear meshing with the 200 tooth turret gear: 6.67:1.
+// Motor: 10:1 gearbox, then the 40 tooth drive gear on the 200 tooth turret gear (5:1).
+yams::gearing::MechanismGearing motorToTurret{
+    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 40.0})};
+motorConfig.WithMotorGearing(motorToTurret);
+// ... finish motorConfig and build the SmartMotorController `motor` with it.
+
+// The pinions mesh with a 30 tooth common gear, which turns 6.67 times per turret turn.
 yams::gearing::MechanismGearing commonToTurret{yams::gearing::GearBox::FromTeeth({30, 200})};
 yams::units::EasyCRT crt{30, 19, 21};  // common gear, pinion A, pinion B
 
 if (auto commonGearAngle = crt.Solve(encoderA, encoderB)) {
-  // The common gear turns 6.67 times per turret turn, so scale its angle down to the turret.
+  // Scale the common gear angle down to the turret, then seed the motor with the turret angle.
   wpi::units::turn_t turretAngle = *commonGearAngle * commonToTurret.GetRotorToMechanismRatio();
   motor.SetEncoderPosition(turretAngle);
 }
@@ -266,8 +321,8 @@ The motor's relative encoder counts rotor rotations, which is the turret angle m
 
 ```java
 // Three gears mesh with the 200 tooth turret gear: the two encoder pinions and the motor's
-// 20 tooth pinion, which is driven through a 10:1 gearbox.
-MechanismGearing turretGearing = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 20));
+// 40 tooth drive gear, which is driven through a 10:1 gearbox.
+MechanismGearing turretGearing = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 40));
 EasyCRT crt = new EasyCRT(200, 19, 21);
 
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
@@ -289,9 +344,9 @@ crt.solve(encoderA.get(), encoderB.get()).ifPresent(turretAngle -> {
 
 ```cpp
 // Three gears mesh with the 200 tooth turret gear: the two encoder pinions and the motor's
-// 20 tooth pinion, which is driven through a 10:1 gearbox.
+// 40 tooth drive gear, which is driven through a 10:1 gearbox.
 yams::gearing::MechanismGearing turretGearing{
-    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 20.0})};
+    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 40.0})};
 yams::units::EasyCRT crt{200, 19, 21};
 
 // motor is a yams::motorcontrollers::SmartMotorController whose config has
