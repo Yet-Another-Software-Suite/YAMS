@@ -122,6 +122,8 @@ position from `EasyCRT`. Two gearings are involved, and they are not the same th
 
 ### Layout 1: CRT gears on the turret gear
 
+<img src="docs/easycrt-layout-1.png" alt="EasyCRT layout 1: the drive gear and both encoder pinions mesh with the turret gear, which is the shared gear" width="380">
+
 The motor's drive gear and both encoder pinions mesh with the turret gear. The turret gear is the
 shared gear, so there is nothing to convert.
 
@@ -161,6 +163,8 @@ if (auto turretAngle = crt.Solve(encoderA, encoderB)) {
 Each pinion turns the opposite way to the turret, so both encoders usually need inverting.
 
 ### Layout 2: CRT gears on the drive gear
+
+<img src="docs/easycrt-layout-2.png" alt="EasyCRT layout 2: both encoder pinions mesh with the motor drive gear, which is the shared gear and drives the turret gear" width="380">
 
 Both pinions mesh with the gear on the motor's output, which drives the turret gear. The drive gear
 is the shared gear, so `solve` returns the drive gear angle. Describe the drive gear to turret stage
@@ -208,6 +212,8 @@ if (auto driveGearAngle = crt.Solve(encoderA, encoderB)) {
 The pinions are two meshes away from the turret, so they turn the same way as the turret.
 
 ### Layout 3: CRT gears on a common gear
+
+<img src="docs/easycrt-layout-3.png" alt="EasyCRT layout 3: both encoder pinions mesh with their own common gear, the shared gear, which meshes with the turret gear alongside the drive gear" width="380">
 
 Both pinions mesh with their own gear, which meshes with the turret gear. The motor's drive gear
 also meshes with the turret gear. The common gear is the shared gear, so `solve` returns the common
