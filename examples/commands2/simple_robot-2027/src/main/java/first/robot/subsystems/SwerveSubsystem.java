@@ -158,7 +158,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     drive.simIterate();
-    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getRadians());
+    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getDegrees());
   }
 
   public Pose2d getPose() {

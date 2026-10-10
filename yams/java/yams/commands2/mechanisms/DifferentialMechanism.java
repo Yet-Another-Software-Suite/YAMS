@@ -97,19 +97,19 @@ public class DifferentialMechanism extends yams.core.mechanisms.positional.Diffe
   /**
    * Set the dutycycle of the differential mechanism.
    *
-   * @param twist Twist dutycycle.
    * @param tilt  Tilt dutycycle.
+   * @param twist Twist dutycycle.
    * @return {@link Command} to set the differential mechanism duty cycle.
    */
-  public Command set(double twist, double tilt) {
+  public Command set(double tilt, double twist) {
     SmartMotorController left = getLeftMotorController();
     SmartMotorController right = getRightMotorController();
     return Commands.startRun(() -> {
       left.stopClosedLoopController();
       right.stopClosedLoopController();
     }, () -> {
-      left.setDutyCycle(tilt - twist);
-      right.setDutyCycle(tilt + twist);
+      left.setDutyCycle(tilt + twist);
+      right.setDutyCycle(tilt - twist);
     }, subsystem).finallyDo(() -> {
       left.startClosedLoopController();
       right.startClosedLoopController();

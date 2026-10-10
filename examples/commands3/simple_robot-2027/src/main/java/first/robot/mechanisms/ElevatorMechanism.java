@@ -69,6 +69,7 @@ public class ElevatorMechanism implements Mechanism
                                      gearing))
 //      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5)) // Trapezoidal Profile PID Controller
       .withSoftLimits(Meters.of(0), Meters.of(2))
+      .withStartingPosition(Meters.of(0)) // Required to simulate the elevator
       .withGearing(gearing)
 //      .withExternalEncoder(armMotor.getAbsoluteEncoder()) // External Encoder if you need one, really shouldn't be used for Elevators
       .withZeroPower(MotorMode.BRAKE)
@@ -90,6 +91,7 @@ public class ElevatorMechanism implements Mechanism
       .withRelativePosition(new Translation3d(Meters.of(-0.25), Meters.of(0), Meters.of(0.5)));
   private       ElevatorConfig             m_config           = new ElevatorConfig()
       .withHardLimits(Meters.of(0), Meters.of(3))
+      .withCarriageWeight(weight) // Required to simulate the elevator
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
       .withMechanismPositionConfig(m_robotToMechanism);
   private final Elevator                   m_elevator         = new Elevator(m_config, motor);

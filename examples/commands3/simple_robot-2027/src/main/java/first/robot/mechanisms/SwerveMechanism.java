@@ -197,7 +197,7 @@ public class SwerveMechanism implements Mechanism {
 
   public void simulationPeriodic() {
     drive.simIterate();
-    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getRadians());
+    gyro.getSimState().setRawYaw(drive.getSimPose().getRotation().getDegrees());
   }
 
   /**

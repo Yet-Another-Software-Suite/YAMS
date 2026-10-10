@@ -93,7 +93,8 @@ public class ExponentiallyProfiledElevatorSubsystem extends SubsystemBase
                   radius,
                   gearing))
       .withFeedforward(elevatorFeedforward)
-      .withSoftLimits(softLowerLimit, softUpperLimit);
+      .withSoftLimits(softLowerLimit, softUpperLimit)
+      .withStartingPosition(softLowerLimit); // Required to simulate the elevator
   /// Generic Smart Motor Controller with our options and vendor motor.
   private final SmartMotorController motor         = new SparkWrapper(elevatorMotor, dcMotor, motorConfig);
   /// Elevator-specific options
