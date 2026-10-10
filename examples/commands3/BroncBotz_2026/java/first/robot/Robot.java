@@ -14,6 +14,7 @@ import first.robot.mechanisms.IntakeRoller;
 import first.robot.mechanisms.Kicker;
 import first.robot.mechanisms.Shooter;
 import first.robot.mechanisms.Swerve;
+import first.robot.mechanisms.Turret;
 import first.robot.opmodes.auto.Auto2PreloadAuto;
 import first.robot.opmodes.auto.Auto3WithWiggleAuto;
 import first.robot.opmodes.auto.AutoOneAdvancedAuto;
@@ -44,6 +45,7 @@ public class Robot extends OpModeRobot {
     public final Agitator agitator = new Agitator();
     public final Kicker kicker = new Kicker();
     public final Hood hood = new Hood();
+    public final Turret turret = new Turret();
 
     public final CommandNiDsXboxController driver = new CommandNiDsXboxController(OperatorConstants.kDriverControllerPort);
     public final CommandNiDsXboxController operator = new CommandNiDsXboxController(OperatorConstants.kOperatorControllerPort);
@@ -69,6 +71,7 @@ public class Robot extends OpModeRobot {
         agitator.setDefaultCommand(agitator.stop());
         intakeRoller.setDefaultCommand(intakeRoller.stop());
         hood.setDefaultCommand(hood.holdDown());
+        turret.setDefaultCommand(turret.holdForward());
         intakeArm.setDefaultCommand(intakeArm.manual(operator::getLeftY, operator::getRightY));
 
         addMirroredAutos();
@@ -105,6 +108,7 @@ public class Robot extends OpModeRobot {
         agitator.periodic();
         kicker.periodic();
         hood.periodic();
+        turret.periodic();
         hubTracker.update();
 
         scheduler.run();
@@ -121,5 +125,6 @@ public class Robot extends OpModeRobot {
         agitator.simulationPeriodic();
         kicker.simulationPeriodic();
         hood.simulationPeriodic();
+        turret.simulationPeriodic();
     }
 }

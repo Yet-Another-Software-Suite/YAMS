@@ -7,7 +7,7 @@
  * <p>{@link yams.core.units.YUnits} provides additional FRC-relevant unit constants and conversions
  * beyond the standard WPILib units (e.g., rotations per minute, inches per second).
  *
- * <p>{@link yams.core.units.EasyCRT} and {@link yams.core.units.EasyCRTConfig} simplify common
- * conversion-ratio-transform operations used when configuring motor encoder scaling.
+ * <p>{@link yams.core.units.EasyCRT} finds the absolute angle of a mechanism that turns more than
+ * once from two absolute encoders on pinions with different tooth counts.
  */
 package yams.core.units;

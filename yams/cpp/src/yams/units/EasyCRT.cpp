@@ -4,127 +4,103 @@
 #include "yams/units/EasyCRT.hpp"
 
 #include <cmath>
-#include <cstdint>
 #include <limits>
-#include <utility>
-#include <wpi/math/util/MathUtil.hpp>
+#include <numeric>
+#include <stdexcept>
 
 namespace yams::units {
 
 namespace {
 
-int ModInverse(int a, int m) {
-  int m0 = m, x0 = 0, x1 = 1;
-  while (a > 1) {
-    int q = a / m, t = m;
-    m = a % m;
-    a = t;
-    t = x0;
-    x0 = x1 - q * x0;
-    x1 = t;
-  }
-  return x1 < 0 ? x1 + m0 : x1;
+/** Fraction of the gap between neighboring candidates that a match may be off by. */
+constexpr double kToleranceFraction = 0.25;
+
+/** Wrap a value in rotations into [0, 1). */
+double WrapRotation(double rotations) { return rotations - std::floor(rotations); }
+
+/** Distance in rotations between two readings, at most half a rotation. */
+double RotationError(double a, double b) {
+  const double difference = WrapRotation(a - b);
+  return difference > 0.5 ? 1.0 - difference : difference;
 }
 
 }  // namespace
 
-EasyCRT::EasyCRT(EasyCRTConfig cfg) : m_cfg{std::move(cfg)} {
-  const int m1 = m_cfg.enc1Teeth, m2 = m_cfg.enc2Teeth;
-  m_crtMod = m1 * m2;
-  m_crtW1 = (ModInverse(m2, m1) * m2) % m_crtMod;
-  m_crtW2 = (ModInverse(m1, m2) * m1) % m_crtMod;
+EasyCRT::EasyCRT(int sharedGearTeeth, int encoderATeeth, int encoderBTeeth) {
+  if (sharedGearTeeth <= 0 || encoderATeeth <= 0 || encoderBTeeth <= 0) {
+    throw std::invalid_argument("Gear tooth counts must be positive");
+  }
+  const int commonTeeth = std::gcd(encoderATeeth, encoderBTeeth);
+  m_ratioA = static_cast<double>(sharedGearTeeth) / encoderATeeth;
+  m_ratioB = static_cast<double>(sharedGearTeeth) / encoderBTeeth;
+  // The readings repeat together every lcm(A, B) teeth of the shared gear.
+  m_uniqueRangeRotations =
+      static_cast<double>(encoderATeeth) / commonTeeth * encoderBTeeth / sharedGearTeeth;
+  // Neighboring candidates predict encoder B readings this many rotations apart.
+  m_toleranceRotations = kToleranceFraction * commonTeeth / encoderBTeeth;
 }
 
-std::optional<wpi::units::turn_t> EasyCRT::GetAngle() {
-  m_lastIter = 4;
-  m_lastErr = std::numeric_limits<double>::quiet_NaN();
+std::optional<wpi::units::turn_t> EasyCRT::Solve(wpi::units::turn_t encoderA,
+                                                 wpi::units::turn_t encoderB) const {
+  return SolveRotations(encoderA.value(), encoderB.value(), -m_uniqueRangeRotations / 2.0,
+                        m_uniqueRangeRotations / 2.0);
+}
 
-  // Read, offset, wrap, then optionally invert into the CRT coordinate frame.
-  const double r1 = wpi::math::InputModulus(m_cfg.enc1().value() + m_cfg.offset1, 0.0, 1.0);
-  const double r2 = wpi::math::InputModulus(m_cfg.enc2().value() + m_cfg.offset2, 0.0, 1.0);
-  const double abs1 = m_cfg.inv1 ? wpi::math::InputModulus(1.0 - r1, 0.0, 1.0) : r1;
-  const double abs2 = m_cfg.inv2 ? wpi::math::InputModulus(1.0 - r2, 0.0, 1.0) : r2;
+std::optional<wpi::units::turn_t> EasyCRT::Solve(wpi::units::turn_t encoderA,
+                                                 wpi::units::turn_t encoderB,
+                                                 wpi::units::turn_t minAngle,
+                                                 wpi::units::turn_t maxAngle) const {
+  const double minRotations = minAngle.value();
+  const double maxRotations = maxAngle.value();
+  if (maxRotations < minRotations) {
+    throw std::invalid_argument("maxAngle must not be below minAngle");
+  }
+  if (maxRotations - minRotations > m_uniqueRangeRotations + 1e-9) {
+    throw std::invalid_argument("Travel is longer than the range these gears can tell apart");
+  }
+  return SolveRotations(encoderA.value(), encoderB.value(), minRotations, maxRotations);
+}
 
-  // Single flat validity check.
-  if (!std::isfinite(abs1) || !std::isfinite(abs2) || !std::isfinite(m_cfg.commonK) ||
-      m_cfg.commonK < 1e-12 || m_cfg.minRot > m_cfg.maxRot || m_cfg.tolerance < 0.0 ||
-      m_cfg.enc1Teeth < 1 || m_cfg.enc2Teeth < 1) {
-    m_status = Status::InvalidConfig;
+wpi::units::turn_t EasyCRT::GetUniqueRange() const {
+  return wpi::units::turn_t{m_uniqueRangeRotations};
+}
+
+std::optional<wpi::units::turn_t> EasyCRT::SolveRotations(double encoderA, double encoderB,
+                                                          double minRotations,
+                                                          double maxRotations) const {
+  if (!std::isfinite(encoderA) || !std::isfinite(encoderB)) {
     return std::nullopt;
   }
+  const double a = WrapRotation(encoderA);
+  const double b = WrapRotation(encoderB);
 
-  const double k = m_cfg.commonK;
-  const double period = m_crtMod / k;
-  const double raw1 = abs1 * m_cfg.enc1Teeth;  // [0, enc1Teeth)
-  const double raw2 = abs2 * m_cfg.enc2Teeth;  // [0, enc2Teeth)
-  const int64_t f1 = static_cast<int64_t>(std::floor(raw1));
-  const int64_t f2 = static_cast<int64_t>(std::floor(raw2));
+  // a = (ratioA * gear) mod 1, so gear = (a + turns) / ratioA for a whole number of turns.
+  const int minTurns = static_cast<int>(std::floor(m_ratioA * minRotations - a)) - 1;
+  const int maxTurns = static_cast<int>(std::ceil(m_ratioA * maxRotations - a)) + 1;
 
-  double bestErr = std::numeric_limits<double>::max();
-  double secondErr = std::numeric_limits<double>::max();
-  double bestRot = std::numeric_limits<double>::quiet_NaN();
-
-  for (int i = 0; i < 2; ++i) {
-    const int a1 = static_cast<int>((f1 + i) % m_cfg.enc1Teeth);
-    for (int j = 0; j < 2; ++j) {
-      const int a2 = static_cast<int>((f2 + j) % m_cfg.enc2Teeth);
-
-      // Closed-form CRT: directly recovers the mechanism position for this candidate.
-      const int64_t residue =
-          (static_cast<int64_t>(a1) * m_crtW1 + static_cast<int64_t>(a2) * m_crtW2) % m_crtMod;
-      double mechRot = residue / k;
-
-      // Shift into [minRot, maxRot] valid when range ≤ period.
-      const double shifts = std::ceil((m_cfg.minRot - mechRot) / period);
-      if (shifts > 0.0) mechRot += shifts * period;
-      if (mechRot < m_cfg.minRot - 1e-6 || mechRot > m_cfg.maxRot + 1e-6) continue;
-
-      const double pred1 =
-          std::fmod(mechRot * k, static_cast<double>(m_cfg.enc1Teeth)) / m_cfg.enc1Teeth;
-      const double pred2 =
-          std::fmod(mechRot * k, static_cast<double>(m_cfg.enc2Teeth)) / m_cfg.enc2Teeth;
-      const double err = ModularError(pred1, abs1) + ModularError(pred2, abs2);
-
-      if (err < bestErr) {
-        secondErr = bestErr;
-        bestErr = err;
-        bestRot = mechRot;
-      } else if (err < secondErr) {
-        secondErr = err;
-      }
+  double bestError = std::numeric_limits<double>::max();
+  double secondError = std::numeric_limits<double>::max();
+  double bestRotations = std::numeric_limits<double>::quiet_NaN();
+  for (int turns = minTurns; turns <= maxTurns; ++turns) {
+    const double gearRotations = (a + turns) / m_ratioA;
+    if (gearRotations < minRotations - 1e-6 || gearRotations > maxRotations + 1e-6) {
+      continue;
+    }
+    const double error = RotationError(m_ratioB * gearRotations, b);
+    if (error < bestError) {
+      secondError = bestError;
+      bestError = error;
+      bestRotations = gearRotations;
+    } else if (error < secondError) {
+      secondError = error;
     }
   }
 
-  m_lastErr = bestErr;
-
-  if (!std::isfinite(bestRot) || bestErr > m_cfg.tolerance) {
-    m_status = Status::NoSolution;
+  // No candidate is close enough, or two are, which happens at the very ends of the range.
+  if (bestError > m_toleranceRotations || secondError <= m_toleranceRotations) {
     return std::nullopt;
   }
-  if (secondErr <= m_cfg.tolerance && std::abs(secondErr - bestErr) < 1e-6) {
-    m_status = Status::Ambiguous;
-    return std::nullopt;
-  }
-
-  // Sub-tooth interpolation from enc2 adds fractional-tooth precision.
-  const double pred2_teeth = std::fmod(bestRot * k, static_cast<double>(m_cfg.enc2Teeth));
-  bestRot += CenteredMod(raw2 - pred2_teeth, 0.5) / k;
-
-  m_status = Status::Ok;
-  return wpi::units::turn_t{bestRot};
-}
-
-double EasyCRT::ModularError(double a, double b) {
-  const double d = std::abs(a - b);
-  return d > 0.5 ? 1.0 - d : d;
-}
-
-double EasyCRT::CenteredMod(double v, double halfRange) {
-  const double mod = 2.0 * halfRange;
-  v = std::fmod(v, mod);
-  if (v > halfRange) v -= mod;
-  if (v < -halfRange) v += mod;
-  return v;
+  return wpi::units::turn_t{bestRotations};
 }
 
 }  // namespace yams::units

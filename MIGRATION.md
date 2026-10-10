@@ -146,6 +146,33 @@ New alongside the renames:
 - `TalonFXWrapper` and `TalonFXSWrapper` no longer set a rotor offset from the zero offset.
 - `NovaWrapper` (`yams.core.motorcontrollers.local.NovaWrapper`) supports the Thrifty Nova.
 
+### EasyCRT
+
+`EasyCRTConfig` is gone. `EasyCRT` now takes the three tooth counts and the two readings, and works
+out its own tolerance:
+
+```java
+// Before
+EasyCRTConfig config = new EasyCRTConfig(encoderA::get, encoderB::get)
+    .withCommonDriveGear(1.0, 100, 19, 21)
+    .withAbsoluteEncoderOffsets(offsetA, offsetB)
+    .withMechanismRange(Rotations.of(-1.5), Rotations.of(1.5))
+    .withMatchTolerance(Rotations.of(0.006));
+Optional<Angle> angle = new EasyCRT(config).getAngleOptional();
+
+// After
+Optional<Angle> angle = new EasyCRT(100, 19, 21).solve(encoderA.get(), encoderB.get());
+```
+
+- Offsets and inversion are no longer EasyCRT settings. Set them on the encoders, or adjust the
+  readings before passing them in. The old offsets were added to the raw reading.
+- `solve(a, b)` assumes travel centered on zero. Use `solve(a, b, min, max)` otherwise.
+- The solved angle is the angle of the gear both pinions mesh with. If the mechanism is geared to
+  that gear (the old `commonRatio`), divide the result by the ratio.
+- The status, error and iteration getters and the gear recommender are removed. `EasyCRTGuide.md`
+  shows how to choose gears and check your margin yourself.
+- C++ changed the same way: `EasyCRT{100, 19, 21}.Solve(a, b)`.
+
 ### Swerve gyro (Java)
 
 `getGyroRotation3d()` returns the robot's attitude, and the heading is its yaw, so it wraps at

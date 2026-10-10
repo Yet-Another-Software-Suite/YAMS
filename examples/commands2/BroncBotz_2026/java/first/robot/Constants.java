@@ -149,6 +149,22 @@ public final class Constants {
         public static final Angle kPass = Degrees.of(20108.75);
     }
 
+    /**
+     * The turret is not on the original robot. A 200 tooth ring is driven by a NEO through 100:1, and
+     * carries two CANcoders on 19 and 21 tooth pinions for EasyCRT.
+     */
+    public static class TurretConstants {
+        public static final int kRingTeeth = 200;
+        public static final int kEncoderATeeth = 19;
+        public static final int kEncoderBTeeth = 21;
+        public static final double kGearing = 100;
+        public static final Angle kForward = Degrees.of(0);
+        public static final Angle kMin = Degrees.of(-200);
+        public static final Angle kMax = Degrees.of(200);
+        public static final Angle kHardMin = Degrees.of(-210);
+        public static final Angle kHardMax = Degrees.of(210);
+    }
+
     private Constants() {
     }
 }
