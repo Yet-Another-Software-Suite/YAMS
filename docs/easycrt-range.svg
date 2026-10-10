@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 316" width="760" height="316" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
-<title id="t">Range: the same 399 teeth in every layout</title>
+<title id="t">Range: 399 teeth before the readings repeat</title>
 <desc id="d">A number line of the turret angle. The unique range is 399 teeth, which is 1.995 turret turns centered on zero. The turret travel of plus or minus 200 degrees and its hard stops at plus or minus 210 degrees fit inside it. Beyond the unique range the readings repeat.</desc>
 <rect width="760" height="316" fill="#f5f7fa"/>
 <rect x="16" y="16" width="728" height="284" rx="10" fill="#ffffff" stroke="#cbd2d9"/>
-<text x="34" y="46" font-size="15" font-weight="700" fill="#1f2933">Range: the same 399 teeth in every layout</text>
-<text x="34" y="65" font-size="11.5" fill="#52606d">Meshing gears pass the same number of teeth, so the unique range in turret turns does not depend on the layout.</text>
+<text x="34" y="46" font-size="15" font-weight="700" fill="#1f2933">Range: 399 teeth before the readings repeat</text>
+<text x="34" y="65" font-size="11.5" fill="#52606d">Gears that mesh pass the same teeth, so layouts 1, 2 and 3 share this range. Layout 4 is shorter.</text>
 <rect x="70.0" y="96" width="52.3" height="92" fill="#fbe9e9"/>
 <rect x="637.7" y="96" width="52.3" height="92" fill="#fbe9e9"/>
 <text x="74.0" y="112.0" font-size="10.5" font-weight="700" text-anchor="start" fill="#d64545" >repeats</text>
@@ -29,5 +29,5 @@
 <text x="638.3" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >+1 turn</text>
 <text x="380.0" y="246.0" font-size="11" font-weight="400" text-anchor="middle" fill="#52606d" >turret angle</text>
 <line x1="34" y1="262" x2="726" y2="262" stroke="#cbd2d9"/>
-<text x="34.0" y="286.0" font-size="12" font-weight="400" text-anchor="start" fill="#1f2933" >19 teeth × 21 teeth = 399 teeth pass before both encoders line up again, on whichever gear you count them.</text>
+<text x="34.0" y="286.0" font-size="12" font-weight="400" text-anchor="start" fill="#1f2933" >19 teeth × 21 teeth = 399 teeth pass before both encoders line up again, on whichever meshing gear you count them.</text>
 </svg>
