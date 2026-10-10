@@ -150,8 +150,45 @@ The accuracy of the result comes from encoder A alone: an error on encoder A sho
 Use the solved angle to tell the motor where the mechanism is, once, at startup:
 
 ```java
+// motor is a YAMS SmartMotorController. Give it the mechanism angle; YAMS applies the gearing.
 crt.solve(encoderA.get(), encoderB.get()).ifPresent(motor::setEncoderPosition);
 ```
+
+To set the motor's own relative encoder yourself, convert the turret angle to the angle of the motor's rotor with the `MechanismGearing` between the motor and the turret. `getMechanismToRotorRatio()` is the reduction, so multiply the solved angle by it with `.times(...)`. This is the usual layout when three gears mesh with the turret gear: the two encoder pinions and the motor's pinion.
+
+```java
+// Three gears mesh with the 200 tooth turret gear: the two encoder pinions and the motor's
+// 20 tooth pinion, which is driven through a 10:1 gearbox.
+MechanismGearing turretGearing = new MechanismGearing(GearBox.fromReductionStages(10, 200.0 / 20));
+EasyCRT crt = new EasyCRT(200, 19, 21);
+
+crt.solve(encoderA.get(), encoderB.get()).ifPresent(turretAngle -> {
+  // The turret gear is the shared gear, so the solved angle is already the turret angle.
+  // Turret angle times the reduction is the angle of the motor's rotor.
+  Angle rotorAngle = turretAngle.times(turretGearing.getMechanismToRotorRatio());
+
+  sparkMax.getEncoder().setPosition(rotorAngle.in(Rotations)); // REV
+  // talonFX.setPosition(rotorAngle);                           // CTRE
+});
+```
+
+```cpp
+// Three gears mesh with the 200 tooth turret gear: the two encoder pinions and the motor's
+// 20 tooth pinion, which is driven through a 10:1 gearbox.
+yams::gearing::MechanismGearing turretGearing{
+    yams::gearing::GearBox::FromReductionStages({10.0, 200.0 / 20.0})};
+yams::units::EasyCRT crt{200, 19, 21};
+
+if (auto turretAngle = crt.Solve(encoderA, encoderB)) {
+  // The turret gear is the shared gear, so the solved angle is already the turret angle.
+  // Turret angle times the reduction is the angle of the motor's rotor.
+  wpi::units::turn_t rotorAngle = *turretAngle * turretGearing.GetMechanismToRotorRatio();
+
+  talonFX.SetPosition(rotorAngle);
+}
+```
+
+Use the same `MechanismGearing` you pass to `SmartMotorControllerConfig.withGearing(...)`, so the seeded position and the closed loop agree. If the pinions mesh with a gear that is not the mechanism, convert the solved angle to the mechanism angle first (see Gear trains), then multiply.
 
 Decide what happens when the result is empty. Raising an alert and refusing to move the mechanism is
 safer than assuming it is at zero. The `BroncBotz_2026` examples under `examples/commands2` and
