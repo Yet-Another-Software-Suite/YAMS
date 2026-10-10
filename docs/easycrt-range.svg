@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 316" width="760" height="316" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Range: the same 399 teeth in every layout</title>
+<desc id="d">A number line of the turret angle. The unique range is 399 teeth, which is 1.995 turret turns centered on zero. The turret travel of plus or minus 200 degrees and its hard stops at plus or minus 210 degrees fit inside it. Beyond the unique range the readings repeat.</desc>
+<rect width="760" height="316" fill="#f5f7fa"/>
+<rect x="16" y="16" width="728" height="284" rx="10" fill="#ffffff" stroke="#cbd2d9"/>
+<text x="34" y="46" font-size="15" font-weight="700" fill="#1f2933">Range: the same 399 teeth in every layout</text>
+<text x="34" y="65" font-size="11.5" fill="#52606d">Meshing gears pass the same number of teeth, so the unique range in turret turns does not depend on the layout.</text>
+<rect x="70.0" y="96" width="52.3" height="92" fill="#fbe9e9"/>
+<rect x="637.7" y="96" width="52.3" height="92" fill="#fbe9e9"/>
+<text x="74.0" y="112.0" font-size="10.5" font-weight="700" text-anchor="start" fill="#d64545" >repeats</text>
+<text x="686.0" y="112.0" font-size="10.5" font-weight="700" text-anchor="end" fill="#d64545" >repeats</text>
+<rect x="122.3" y="100.0" width="515.4" height="30" rx="5" fill="#d5f0ea" stroke="#147d6f" stroke-width="1.5"/>
+<text x="380.0" y="119.5" font-size="12" font-weight="700" text-anchor="middle" fill="#1f2933" >unique range: 399 teeth = 399 / 200 = 1.995 turret turns</text>
+<rect x="229.3" y="142.0" width="301.4" height="18" rx="5" fill="#eef2f7" stroke="#9aa5b1" stroke-width="1.5"/>
+<rect x="236.5" y="142.0" width="287.0" height="18" rx="5" fill="#dbe7f5" stroke="#3e6da8" stroke-width="1.5"/>
+<text x="380.0" y="155.5" font-size="11.5" font-weight="700" text-anchor="middle" fill="#1f2933" >turret travel ±200°</text>
+<text x="538.7" y="155.5" font-size="11" font-weight="400" text-anchor="start" fill="#52606d" >hard stops ±210°</text>
+<text x="380.0" y="180.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#52606d" >the travel has to fit inside the unique range, with room to spare</text>
+<line x1="70.0" y1="206" x2="690.0" y2="206" stroke="#1f2933" stroke-width="1.4"/>
+<line x1="121.7" y1="201" x2="121.7" y2="211" stroke="#1f2933" stroke-width="1.2"/>
+<text x="121.7" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >-1 turn</text>
+<line x1="250.8" y1="201" x2="250.8" y2="211" stroke="#1f2933" stroke-width="1.2"/>
+<text x="250.8" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >-0.5</text>
+<line x1="380.0" y1="201" x2="380.0" y2="211" stroke="#1f2933" stroke-width="1.2"/>
+<text x="380.0" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >0</text>
+<line x1="509.2" y1="201" x2="509.2" y2="211" stroke="#1f2933" stroke-width="1.2"/>
+<text x="509.2" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >+0.5</text>
+<line x1="638.3" y1="201" x2="638.3" y2="211" stroke="#1f2933" stroke-width="1.2"/>
+<text x="638.3" y="227.0" font-size="11.5" font-weight="400" text-anchor="middle" fill="#1f2933" >+1 turn</text>
+<text x="380.0" y="246.0" font-size="11" font-weight="400" text-anchor="middle" fill="#52606d" >turret angle</text>
+<line x1="34" y1="262" x2="726" y2="262" stroke="#cbd2d9"/>
+<text x="34.0" y="286.0" font-size="12" font-weight="400" text-anchor="start" fill="#1f2933" >19 teeth × 21 teeth = 399 teeth pass before both encoders line up again, on whichever gear you count them.</text>
+</svg>

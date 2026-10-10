@@ -34,6 +34,8 @@ margin) is something you do yourself, and the rest of this guide shows how.
 
 ## How the solver works
 
+
+<img src="docs/easycrt-how-it-works.gif" alt="Animation: as the turret turns, encoder A and encoder B readings wrap at different rates, and EasyCRT reports the one turret angle that fits both" width="720">
 1. Encoder A's reading fits several shared gear angles, one for each number of whole turns the
    pinion could have made. `EasyCRT` lists every one inside the travel.
 2. For each candidate it predicts what encoder B should read.
@@ -44,6 +46,8 @@ keeps working with backlash and sensor noise. Created by team 6911.
 
 ## Before you call solve
 
+
+<img src="docs/easycrt-encoder-direction.gif" alt="Animation: with encoder B counting down, solve returns empty; after inverting encoder B so both count up, solve returns the turret angle" width="720">
 `EasyCRT` takes the two readings as they are, so the encoders have to be set up first:
 
 - **Zero both encoders with the mechanism at zero.** Use the vendor tool to set each encoder's
@@ -123,6 +127,8 @@ position from `EasyCRT`. Two gearings are involved, and they are not the same th
 ### Layout 1: CRT gears on the turret gear
 
 <img src="docs/easycrt-layout-1.png" alt="EasyCRT layout 1: the drive gear and both encoder pinions mesh with the turret gear, which is the shared gear" width="380">
+
+<img src="docs/easycrt-layout-1-motion.gif" alt="Animation of layout 1: the turret gear turns the drive gear and both encoder pinions, and solve returns the turret angle" width="720">
 
 The motor's drive gear and both encoder pinions mesh with the turret gear. The turret gear is the
 shared gear, so there is nothing to convert.
@@ -215,6 +221,8 @@ The pinions are two meshes away from the turret, so they turn the same way as th
 
 <img src="docs/easycrt-layout-3.png" alt="EasyCRT layout 3: both encoder pinions mesh with their own common gear, the shared gear, which meshes with the turret gear alongside the drive gear" width="380">
 
+<img src="docs/easycrt-layout-3-motion.gif" alt="Animation of layout 3: the turret gear turns the common gear, which turns both encoder pinions, and the common gear angle is scaled to the turret angle" width="720">
+
 Both pinions mesh with their own gear, which meshes with the turret gear. The motor's drive gear
 also meshes with the turret gear. The common gear is the shared gear, so `solve` returns the common
 gear angle, and the conversion works the same way as layout 2.
@@ -262,6 +270,8 @@ As in layout 2, the pinions turn the same way as the turret.
 
 ### Travel, range and shortcuts
 
+<img src="docs/easycrt-travel.png" alt="Turret travel of minus 200 to plus 200 degrees is the same motion as minus 1000 to plus 1000 degrees of a drive gear that turns 5 times per turret turn" width="720">
+
 `solve(a, b)` and `solve(a, b, min, max)` work in shared gear angles. In layouts 2 and 3 that is
 not the turret, so convert the turret's travel before passing it in:
 
@@ -272,15 +282,21 @@ crt.solve(encoderA.get(), encoderB.get(),
     Degrees.of(-200).times(driveTurnsPerTurretTurn), Degrees.of(200).times(driveTurnsPerTurretTurn));
 ```
 
+<img src="docs/easycrt-range.png" alt="Number line of the turret angle showing the 1.995 turn unique range with the turret travel and hard stops inside it" width="720">
+
 The unique range is the same in all three layouts. Meshing gears pass the same number of teeth,
 so the readings repeat every `lcm(19, 21) = 399` teeth on whichever gear you look at, which is
 `399 / 200 = 1.995` turns of the turret.
+
+<img src="docs/easycrt-shortcut.png" alt="Turret gear, drive gear and encoder pinion in a row: 200 over 40 times 40 over 19 is 200 over 19, so the drive gear cancels" width="720">
 
 **Shortcut for layouts 2 and 3.** When every gear between the pinions and the turret simply meshes
 with the next one, the gears in between cancel out: each pinion turns `200 / 19` or `200 / 21`
 times per turret turn no matter which gear it touches. So you can use the turret tooth count,
 `new EasyCRT(200, 19, 21)`, and the result is the turret angle with no conversion. Only the encoder
 directions differ between layouts.
+
+<img src="docs/easycrt-compound.png" alt="A 60 tooth shared gear and a 20 tooth gear on the same shaft, with the 20 tooth gear meshing with the turret gear, so the tooth counts do not cancel" width="720">
 
 **When you need the ratio.** The shortcut does not work if the shared gear sits on a shaft with a
 different gear, for example a common gear on the same shaft as the motor's drive pinion, or a shared
@@ -376,6 +392,12 @@ safer than assuming it is at zero. The `BroncBotz_2026` examples under `examples
 
 ## Troubleshooting
 
+
+Two failures are worth seeing in motion.
+
+<img src="docs/easycrt-out-of-range.gif" alt="Animation: as the real turret angle moves past the end of the unique range, the solved angle jumps to the other end of the range" width="720">
+
+<img src="docs/easycrt-backlash.gif" alt="Animation: as encoder B drifts from its predicted reading, solve goes from the correct angle, to empty, to a wrong angle a different turn away" width="720">
 | Symptom | Likely cause |
 | ------- | ------------ |
 | Always empty | An encoder is not zeroed at the mechanism's zero, or one encoder counts the wrong way. |
