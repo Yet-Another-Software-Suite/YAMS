@@ -99,23 +99,136 @@ Optional<Angle> angle = crt.solve(encoderA.get(), encoderB.get(), Degrees.of(0),
 Give the real travel, not the whole unique range. A tighter range leaves fewer candidates, and it
 keeps a reading taken slightly past an end stop from wrapping to the other end.
 
-## Gear trains
+## Gear layouts
 
-The solved angle is the angle of the gear both pinions mesh with. If that gear is the mechanism,
-you are done. If the mechanism is geared to it, convert the result yourself.
+There are three common places to put the two encoder pinions on a turret. In every one, the gear
+both pinions mesh with is the **shared gear**: give `EasyCRT` its tooth count, and `solve` returns
+its angle. What changes is whether that angle is already the turret angle.
 
-Example: the pinions mesh with a 50 tooth drive gear that turns 12 times per turret rotation.
+![Three EasyCRT gear layouts: pinions on the turret gear, on the drive gear, or on a common gear](docs/easycrt-layouts.png)
+
+The drawing is not to scale.
+
+In all three, `motor` is the turret's `SmartMotorController`, set up with the full motor to turret
+`MechanismGearing`. `setEncoderPosition(...)` takes the turret angle. The tooth counts are examples.
+
+### Layout 1: CRT gears on the turret gear
+
+The motor's drive gear and both encoder pinions mesh with the turret gear. The turret gear is the
+shared gear, so there is nothing to convert.
 
 ```java
-EasyCRT crt = new EasyCRT(50, 19, 23);
-Optional<Angle> turretAngle = crt.solve(encoderA.get(), encoderB.get()).map(driveGear -> driveGear.div(12));
+EasyCRT crt = new EasyCRT(200, 19, 21); // turret gear, pinion A, pinion B
+
+// The turret gear is the shared gear, so the solved angle is the turret angle.
+crt.solve(encoderA.get(), encoderB.get()).ifPresent(motor::setEncoderPosition);
 ```
 
-The unique range shrinks by the same ratio: `lcm(19, 23) / 50 = 8.74` turns of the drive gear is
-`8.74 / 12 = 0.73` turns of the turret.
+```cpp
+yams::units::EasyCRT crt{200, 19, 21};  // turret gear, pinion A, pinion B
 
-If the encoders are driven through their own extra stages, work out how many teeth of the shared
-gear pass per encoder rotation and use that as the pinion tooth count.
+// The turret gear is the shared gear, so the solved angle is the turret angle.
+if (auto turretAngle = crt.Solve(encoderA, encoderB)) {
+  motor.SetEncoderPosition(*turretAngle);
+}
+```
+
+Each pinion turns the opposite way to the turret, so both encoders usually need inverting.
+
+### Layout 2: CRT gears on the drive gear
+
+Both pinions mesh with the gear on the motor's output, which drives the turret gear. The drive gear
+is the shared gear, so `solve` returns the drive gear angle. Describe the drive gear to turret stage
+as a `MechanismGearing` and multiply by `getRotorToMechanismRatio()` to get the turret angle.
+
+```java
+// 40 tooth drive gear on the motor output, meshing with the 200 tooth turret gear: 5:1.
+MechanismGearing driveToTurret = new MechanismGearing(GearBox.fromTeeth(40, 200));
+EasyCRT crt = new EasyCRT(40, 19, 21); // drive gear, pinion A, pinion B
+
+crt.solve(encoderA.get(), encoderB.get()).ifPresent(driveGearAngle -> {
+  // The drive gear turns 5 times per turret turn, so scale its angle down to the turret.
+  Angle turretAngle = driveGearAngle.times(driveToTurret.getRotorToMechanismRatio());
+  motor.setEncoderPosition(turretAngle);
+});
+```
+
+```cpp
+// 40 tooth drive gear on the motor output, meshing with the 200 tooth turret gear: 5:1.
+yams::gearing::MechanismGearing driveToTurret{yams::gearing::GearBox::FromTeeth({40, 200})};
+yams::units::EasyCRT crt{40, 19, 21};  // drive gear, pinion A, pinion B
+
+if (auto driveGearAngle = crt.Solve(encoderA, encoderB)) {
+  // The drive gear turns 5 times per turret turn, so scale its angle down to the turret.
+  wpi::units::turn_t turretAngle = *driveGearAngle * driveToTurret.GetRotorToMechanismRatio();
+  motor.SetEncoderPosition(turretAngle);
+}
+```
+
+The pinions are two meshes away from the turret, so they turn the same way as the turret.
+
+### Layout 3: CRT gears on a common gear
+
+Both pinions mesh with their own gear, which meshes with the turret gear. The motor's drive gear
+also meshes with the turret gear. The common gear is the shared gear, so `solve` returns the common
+gear angle, and the conversion works the same way as layout 2.
+
+```java
+// 30 tooth common gear meshing with the 200 tooth turret gear: 6.67:1.
+MechanismGearing commonToTurret = new MechanismGearing(GearBox.fromTeeth(30, 200));
+EasyCRT crt = new EasyCRT(30, 19, 21); // common gear, pinion A, pinion B
+
+crt.solve(encoderA.get(), encoderB.get()).ifPresent(commonGearAngle -> {
+  // The common gear turns 6.67 times per turret turn, so scale its angle down to the turret.
+  Angle turretAngle = commonGearAngle.times(commonToTurret.getRotorToMechanismRatio());
+  motor.setEncoderPosition(turretAngle);
+});
+```
+
+```cpp
+// 30 tooth common gear meshing with the 200 tooth turret gear: 6.67:1.
+yams::gearing::MechanismGearing commonToTurret{yams::gearing::GearBox::FromTeeth({30, 200})};
+yams::units::EasyCRT crt{30, 19, 21};  // common gear, pinion A, pinion B
+
+if (auto commonGearAngle = crt.Solve(encoderA, encoderB)) {
+  // The common gear turns 6.67 times per turret turn, so scale its angle down to the turret.
+  wpi::units::turn_t turretAngle = *commonGearAngle * commonToTurret.GetRotorToMechanismRatio();
+  motor.SetEncoderPosition(turretAngle);
+}
+```
+
+As in layout 2, the pinions turn the same way as the turret.
+
+### Travel, range and shortcuts
+
+`solve(a, b)` and `solve(a, b, min, max)` work in shared gear angles. In layouts 2 and 3 that is
+not the turret, so convert the turret's travel before passing it in:
+
+```java
+// Turret travel of -200 to 200 degrees, expressed as drive gear angles.
+double driveTurnsPerTurretTurn = driveToTurret.getMechanismToRotorRatio(); // 5
+crt.solve(encoderA.get(), encoderB.get(),
+    Degrees.of(-200).times(driveTurnsPerTurretTurn), Degrees.of(200).times(driveTurnsPerTurretTurn));
+```
+
+The unique range is the same in all three layouts. Meshing gears pass the same number of teeth,
+so the readings repeat every `lcm(19, 21) = 399` teeth on whichever gear you look at, which is
+`399 / 200 = 1.995` turns of the turret.
+
+**Shortcut for layouts 2 and 3.** When every gear between the pinions and the turret simply meshes
+with the next one, the gears in between cancel out: each pinion turns `200 / 19` or `200 / 21`
+times per turret turn no matter which gear it touches. So you can use the turret tooth count,
+`new EasyCRT(200, 19, 21)`, and the result is the turret angle with no conversion. Only the encoder
+directions differ between layouts.
+
+**When you need the ratio.** The shortcut does not work if the shared gear sits on a shaft with a
+different gear, for example a common gear on the same shaft as the motor's drive pinion, or a shared
+gear behind a gearbox stage. Then use the shared gear's own tooth count and a `MechanismGearing` for
+everything between that shaft and the turret, as in layouts 2 and 3. The unique range in turret
+turns is `getUniqueRange()` multiplied by the same `getRotorToMechanismRatio()`.
+
+In every layout, check the encoder directions on the robot instead of assuming them: both must
+count up when the turret moves in its positive direction.
 
 ## Margin: how much backlash is too much
 
@@ -194,7 +307,7 @@ if (auto turretAngle = crt.Solve(encoderA, encoderB)) {
 }
 ```
 
-Pass `setEncoderPosition(...)` the mechanism angle, not the rotor angle: it applies the `MechanismGearing` from the config, so multiplying first would apply the gearing twice. `turretAngle.times(turretGearing.getMechanismToRotorRatio())` is the rotor angle it ends up setting. If the pinions mesh with a gear that is not the mechanism, convert the solved angle to the mechanism angle first (see Gear trains).
+Pass `setEncoderPosition(...)` the mechanism angle, not the rotor angle: it applies the `MechanismGearing` from the config, so multiplying first would apply the gearing twice. `turretAngle.times(turretGearing.getMechanismToRotorRatio())` is the rotor angle it ends up setting. If the pinions mesh with a gear that is not the mechanism, convert the solved angle to the mechanism angle first (see Gear layouts).
 
 Decide what happens when the result is empty. Raising an alert and refusing to move the mechanism is
 safer than assuming it is at zero. The `BroncBotz_2026` examples under `examples/commands2` and
