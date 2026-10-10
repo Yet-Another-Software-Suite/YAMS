@@ -11,15 +11,16 @@ import yams.core.exceptions.NoStagesGivenException;
  * configuration is supported.
  *
  * <p>A {@link GearBox} models a multi-stage gear reduction (or increase). Each stage is defined by
- * a ratio (driver teeth / driven teeth) or a plain ratio double. The overall ratio is the product
- * of all individual stage ratios.
+ * a reduction, such as {@code 5.0} or {@code "5:1"} for a 5:1 reduction. The overall reduction is
+ * the product of all individual stage reductions.
  *
  * <p>You can construct a {@link GearBox} in several ways:
  *
  * <ul>
- * <li><b>{@code fromTeeth(int...)}</b> provide alternating driver/driven tooth counts
- * <li><b>{@code fromStages(String...)}</b> provide stages as {@code "IN:OUT"} strings
- * <li><b>{@code fromReductionStages(double...)}</b> provide per-stage ratios directly
+ * <li><b>{@code fromTeeth(int...)}</b> provide the tooth counts of a train of meshing gears, from
+ *     the driving gear to the last driven gear. Gears in between are idlers.
+ * <li><b>{@code fromStages(String...)}</b> provide stage reductions as {@code "IN:OUT"} strings
+ * <li><b>{@code fromReductionStages(double...)}</b> provide per-stage reductions directly
  * </ul>
  *
  * <h2>Example</h2>
@@ -28,14 +29,14 @@ import yams.core.exceptions.NoStagesGivenException;
  * // 5:1 single-stage gearbox (12-tooth driver meshing with a 60-tooth driven gear)
  * GearBox fiveToOne = GearBox.fromTeeth(12, 60);
  *
- * // 25:1 two-stage gearbox (each stage is 5:1)
- * GearBox twoStage = GearBox.fromTeeth(12, 60, 12, 60);
+ * // Still 5:1: every gear meshes with the next one, so the 30-tooth gear is an idler
+ * GearBox withIdler = GearBox.fromTeeth(12, 30, 60);
  *
- * // Equivalent using "IN:OUT" stage strings
- * GearBox fromStrings = GearBox.fromStages("12:60", "12:60");
+ * // 25:1 two-stage gearbox (each stage is 5:1) using "IN:OUT" stage strings
+ * GearBox twoStage = GearBox.fromStages("5:1", "5:1");
  *
- * // Equivalent using raw reduction ratios (driver/driven per stage)
- * GearBox fromRatios = GearBox.fromReductionStages(12.0 / 60.0, 12.0 / 60.0);
+ * // Equivalent using reductions (driven teeth / driver teeth per stage)
+ * GearBox fromRatios = GearBox.fromReductionStages(60.0 / 12.0, 60.0 / 12.0);
  *
  * // Get the overall input-to-output conversion factor (< 1.0 means reduction)
  * double factor = fiveToOne.getInputToOutputConversionFactor(); // 0.2  (1/5)
@@ -108,9 +109,12 @@ public class GearBox {
   }
 
   /**
-   * Create the gearbox given the teeth of each gear.
+   * Create the gearbox given the teeth of each gear in a train of meshing gears. Every gear meshes
+   * with the next one, so the reduction is the last tooth count divided by the first and the gears
+   * in between are idlers. For compound stages, where two gears share a shaft, use
+   * {@link #fromReductionStages(double...)} or {@link #fromStages(String...)} instead.
    *
-   * @param teeth Gear teeth from driven gear to drive gear.
+   * @param teeth Gear teeth from the driving gear to the last driven gear.
    * @return {@link GearBox}
    * @throws IllegalArgumentException if {@code teeth} is null.
    * @throws IllegalArgumentException if {@code teeth} has fewer than two entries.

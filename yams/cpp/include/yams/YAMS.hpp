@@ -7,7 +7,7 @@
  * @brief Convenience header that includes the entire YAMS C++ library.
  *
  * YAMS Yet Another Mechanism System (C++ port).
- * Requires WPILib 2026, REVLib, and CTRE Phoenix 6.
+ * Requires WPILib 2027. REVLib, CTRE Phoenix 6 and ThriftyLib are needed only for the wrappers that use them.
  *
  * Include this single header to access all gearing, math, unit, motor-controller,
  * mechanism, and exception types provided by YAMS.

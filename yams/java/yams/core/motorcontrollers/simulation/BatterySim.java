@@ -116,7 +116,7 @@ public class BatterySim {
    *
    * BatterySim.replaceSOCInterpolation(wornBatteryCurve);
    * // Pair with a reduced usable capacity and higher resistance to match a worn battery.
-   * BatterySim.enableDischarge(15.0, Volts.of(12.6), Milliohms.of(28));
+   * BatterySim.enableDischarge(15.0, Volts.of(12.6), MilliOhms.of(28));
    * }</pre>
    *
    * @param socToVoltage Interpolation table mapping state of charge {@code [0, 1]} to open circuit

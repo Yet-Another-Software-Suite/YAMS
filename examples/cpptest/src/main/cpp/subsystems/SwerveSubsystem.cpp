@@ -191,7 +191,11 @@ SwerveInputStream<4> SwerveSubsystem::MakeDriveInputStream(
 // so the lambdas inside SwerveDrive::Drive remain valid for the command's lifetime.
 wpi::cmd::CommandPtr SwerveSubsystem::DriveCommand(wpi::cmd::CommandXboxController& controller) {
   m_driveStream.emplace(MakeDriveInputStream(controller));
-  return m_drive->Drive([this] { return (*m_driveStream)(); });
+  // The stream outputs field-relative speeds and SwerveDrive::Drive takes robot-relative speeds.
+  return m_drive->Drive([this] {
+    return (*m_driveStream)().ToRobotRelative(
+        wpi::math::Rotation2d{wpi::units::radian_t{m_drive->GetGyroAngle()}});
+  });
 }
 
 // UpdateTelemetry also updates the pose estimator from module positions + gyro.
