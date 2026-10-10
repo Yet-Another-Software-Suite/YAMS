@@ -183,16 +183,18 @@ arm.near(Degrees.of(80), Degrees.of(2)).onTrue(indexer.run());
 ## Live Tuning
 
 A "Live Tuning" command is registered automatically, against the Subsystem (Commands v2) or
-Mechanism (Commands v3) the config holds, when the motor controller sets up telemetry with
-`TelemetryVerbosity.HIGH`. For other setups, such as a custom
-`SmartMotorControllerTelemetryConfig` with tunable fields enabled, opt in explicitly. Call
-`setupLiveTuning()` after the motor controller has been created with the config; before that the
-config has no controller attached and the call does nothing.
+Mechanism (Commands v3) the config holds, when the motor controller sets up its telemetry with
+`TelemetryVerbosity.HIGH` through `setupTelemetry()`, which is what YAMS mechanisms call. If you
+set up telemetry yourself with `setupTelemetry(NetworkTable, NetworkTable)`, opt in explicitly.
+Call `setupLiveTuning()` after the telemetry is set up; before that the config has no controller
+attached and the call does nothing.
 
 ```java
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-    .withTelemetry("ArmMotor", telemetryConfig);
+    .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH);
 SmartMotorController motor = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), motorConfig);
+
+motor.setupTelemetry(telemetryTable, tuningTable);
 motorConfig.setupLiveTuning();
 ```
 
@@ -220,8 +222,8 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
 6. Apply the renames: `withZeroPower`, `getExternalEncoderZeroOffset`,
    `getExternalEncoderMechanismPosition` / `Velocity`, `getGyroRotation3d`, and `near(...)` for
    Triggers.
-7. If you relied on live tuning without `TelemetryVerbosity.HIGH`, call `setupLiveTuning()` after
-   creating the motor controller.
+7. If you set up motor controller telemetry yourself, call `setupLiveTuning()` after
+   `setupTelemetry(...)` to get the "Live Tuning" command.
 
 ## Why this split
 
