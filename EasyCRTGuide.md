@@ -46,6 +46,8 @@ keeps working with backlash and sensor noise. Created by team 6911.
 
 ## Before you call solve
 
+<img src="docs/easycrt-zeroing.gif" alt="Animation: the turret is moved to the middle of its travel, both absolute encoders are zeroed there, and solve then reports angles either side of zero" width="720">
+
 <img src="docs/easycrt-encoder-direction.gif" alt="Animation: with encoder B counting down, solve returns empty; after inverting encoder B so both count up, solve returns the turret angle" width="720">
 
 `EasyCRT` takes the two readings as they are, so the encoders have to be set up first:
