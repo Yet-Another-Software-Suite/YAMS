@@ -40,6 +40,9 @@ public final class Ports {
     public static final int kShooterFollower = 37; // TalonFX, Kraken X60
     public static final int kIntakeArmLeader = 40;   // SPARK MAX, NEO
     public static final int kIntakeArmFollower = 41; // SPARK MAX, NEO
+    public static final int kTurret = 42;          // SPARK MAX, NEO
+    public static final int kTurretEncoderA = 43;  // CANcoder, 19 tooth pinion
+    public static final int kTurretEncoderB = 44;  // CANcoder, 21 tooth pinion
 
     private Ports() {
     }

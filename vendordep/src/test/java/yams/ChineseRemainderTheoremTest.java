@@ -3,120 +3,102 @@
 
 package yams;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Rotations;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
-import yams.core.gearing.MechanismGearing;
 import yams.core.units.EasyCRT;
-import yams.core.units.EasyCRTConfig;
 
 public class ChineseRemainderTheoremTest {
-  private Angle readingTolerance = Degrees.of(0.001);
-  private double precision = 10.0;
-  private Angle absoluteEncoder1Reading = Degrees.of(0);
-  private Angle absoluteEncoder2Reading = Degrees.of(0);
+  private static final int SHARED_TEETH = 100;
+  private static final int A_TEETH = 19;
+  private static final int B_TEETH = 21;
 
-  private Angle getAbs1() {
-    return Degrees.of(absoluteEncoder1Reading.in(Degrees) % 360.0);
+  /** The reading an ideal absolute encoder gives, wrapped into one rotation. */
+  private static Angle reading(double gearRotations, int pinionTeeth) {
+    double encoderRotations = gearRotations * SHARED_TEETH / pinionTeeth;
+    return Rotations.of(encoderRotations - Math.floor(encoderRotations));
   }
 
-  private Angle getAbs2() {
-    return Degrees.of(absoluteEncoder2Reading.in(Degrees) % 360.0);
-  }
-
-  /**
-   * Verifies that the common-drive gearing helper produces the expected encoder ratios.
-   *
-   * <p>Builds the encoder gearing from the shared turret gearbox (12->50, 10->110 with 30T/31T
-   * encoder pinions) and checks that the config's computed ratios match the MechanismGearing
-   * ratios.
-   */
   @Test
-  void testCRTGearingCalc() {
-    double commonRatio = 11.0; // 10 -> 110
-    int driveGearTeeth = 50; // shared gear driving both encoders
-    int encoder1Pinion = 30;
-    int encoder2Pinion = 31;
-
-    var absoluteEncoder1Gearing =
-        new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder1Pinion));
-    var absoluteEncoder2Gearing =
-        new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder2Pinion));
-
-    var config =
-        new EasyCRTConfig(this::getAbs1, this::getAbs2)
-            .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
-
-    assertTrue(
-        MathUtil.isNear(
-            absoluteEncoder1Gearing.getMechanismToRotorRatio(),
-            config.getEncoder1RotationsPerMechanismRotation(),
-            0.0000001));
-    assertTrue(
-        MathUtil.isNear(
-            absoluteEncoder2Gearing.getMechanismToRotorRatio(),
-            config.getEncoder2RotationsPerMechanismRotation(),
-            0.0000001));
+  void uniqueRangeIsLcmOverSharedGear() {
+    assertEquals(3.99, new EasyCRT(100, 19, 21).getUniqueRange().in(Rotations), 1e-9);
+    // 20 and 30 share a factor of 10, so they only cover lcm(20, 30) = 60 teeth.
+    assertEquals(0.6, new EasyCRT(100, 20, 30).getUniqueRange().in(Rotations), 1e-9);
   }
 
-  /**
-   * Runs a sweep within the unique coverage range, checking that the solver returns the true
-   * mechanism angle.
-   */
   @Test
-  void testCRT() {
-    System.out.println("Starting CRT Test");
-    double commonRatio = 180.0 / 60.0; // 60 -> 180
-    int driveGearTeeth = 60; // shared gear driving both encoders (60 in this case)
-    int encoder1Pinion = 19; // 19t attached to 60t drive gear
-    int encoder2Pinion = 21; // 21t attached to 60t drive gear
-
-    var absoluteEncoder1Gearing =
-        new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder1Pinion));
-    var absoluteEncoder2Gearing =
-        new MechanismGearing(commonRatio * ((double) driveGearTeeth / encoder2Pinion));
-
-    var config =
-        new EasyCRTConfig(this::getAbs1, this::getAbs2)
-            .withCommonDriveGear(commonRatio, driveGearTeeth, encoder1Pinion, encoder2Pinion);
-
-    config
-        .getUniqueCoverage()
-        .ifPresent(angle -> System.out.println("Unique Coverage(rots): " + angle.in(Rotations)));
-
-    // Limit the sweep to the unique coverage
-    double coverageRotations =
-        config.getUniqueCoverage().map(angle -> angle.in(Rotations)).orElse(2.0);
-    double sweepRotations = Math.max(0.5, Math.min(coverageRotations - 0.05, coverageRotations));
-    config.withMechanismRange(Rotations.of(0), Rotations.of(sweepRotations));
-    int maxIterations = (int) Math.round(sweepRotations * 360 * precision);
-    var encoder = new EasyCRT(config);
-    for (int i = 0; i < maxIterations; i++) {
-      var turretAngle = Degrees.of(i / precision);
-      absoluteEncoder1Reading =
-          turretAngle.times(absoluteEncoder1Gearing.getMechanismToRotorRatio());
-      absoluteEncoder2Reading =
-          turretAngle.times(absoluteEncoder2Gearing.getMechanismToRotorRatio());
-      var estimatedAngleOpt = encoder.getAngleOptional();
-      if (estimatedAngleOpt.isEmpty()) {
-        System.out.println(
-            "Solver returned empty at turret angle(degrees): " + turretAngle.in(Degrees));
-        break;
-      }
-      var estimatedAngle = estimatedAngleOpt.get();
-      var testing = turretAngle.isNear(estimatedAngle, readingTolerance);
-      if (!testing) {
-        System.out.println("Absolute Encoder Reading: " + getAbs1() + " " + getAbs2());
-        System.out.println("Turret Angle(degrees): " + turretAngle.in(Degrees));
-        System.out.println("CRT Angle(degrees): " + estimatedAngle.in(Degrees));
-        break;
-      }
-      assertTrue(testing);
-      //      System.out.println("CRT Angle(rots): " + encoder.getAngleOptional());
+  void solvesAcrossTheCenteredRange() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    double half = crt.getUniqueRange().in(Rotations) / 2.0;
+    for (double gear = -half + 0.01; gear < half - 0.01; gear += 0.0137) {
+      Optional<Angle> solved = crt.solve(reading(gear, A_TEETH), reading(gear, B_TEETH));
+      assertTrue(solved.isPresent(), "No solution at " + gear);
+      assertEquals(gear, solved.get().in(Rotations), 1e-6);
     }
+  }
+
+  @Test
+  void solvesAcrossAnOffCenterRange() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    for (double gear = 0.0; gear <= 3.5; gear += 0.0137) {
+      Optional<Angle> solved = crt.solve(reading(gear, A_TEETH), reading(gear, B_TEETH), Rotations.of(0), Rotations.of(3.5));
+      assertTrue(solved.isPresent(), "No solution at " + gear);
+      assertEquals(gear, solved.get().in(Rotations), 1e-6);
+    }
+  }
+
+  @Test
+  void acceptsUnwrappedAndNegativeReadings() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    double gear = -1.3;
+    Angle a = Rotations.of(gear * SHARED_TEETH / A_TEETH);
+    Angle b = Rotations.of(gear * SHARED_TEETH / B_TEETH);
+    assertEquals(gear, crt.solve(a, b).orElseThrow().in(Rotations), 1e-6);
+  }
+
+  @Test
+  void toleratesBacklashOnEitherEncoder() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    Angle slop = Degrees.of(2);
+    for (double gear = -1.9; gear < 1.9; gear += 0.0137) {
+      Optional<Angle> solved = crt.solve(reading(gear, A_TEETH).plus(slop), reading(gear, B_TEETH).minus(slop));
+      assertTrue(solved.isPresent(), "No solution at " + gear);
+      // The result follows encoder A, so its error is the slop seen through A's gearing.
+      assertEquals(gear, solved.get().in(Rotations), slop.in(Rotations) * A_TEETH / SHARED_TEETH + 1e-6);
+    }
+  }
+
+  @Test
+  void emptyWhenTheEncodersDisagree() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    // Halfway between two candidates: 1 / (2 * 21) of a rotation off on encoder B.
+    Angle wrong = reading(0.5, B_TEETH).plus(Rotations.of(0.5 / B_TEETH));
+    assertTrue(crt.solve(reading(0.5, A_TEETH), wrong).isEmpty());
+  }
+
+  @Test
+  void emptyForReadingsThatAreNotNumbers() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    assertTrue(crt.solve(Rotations.of(Double.NaN), Rotations.of(0.1)).isEmpty());
+  }
+
+  @Test
+  void rejectsTravelLongerThanTheUniqueRange() {
+    EasyCRT crt = new EasyCRT(SHARED_TEETH, A_TEETH, B_TEETH);
+    assertThrows(IllegalArgumentException.class, () -> crt.solve(Rotations.of(0), Rotations.of(0), Rotations.of(0), Rotations.of(4.0)));
+    assertThrows(IllegalArgumentException.class, () -> crt.solve(Rotations.of(0), Rotations.of(0), Rotations.of(1), Rotations.of(0)));
+  }
+
+  @Test
+  void rejectsToothCountsThatAreNotPositive() {
+    assertThrows(IllegalArgumentException.class, () -> new EasyCRT(0, 19, 21));
+    assertThrows(IllegalArgumentException.class, () -> new EasyCRT(100, -19, 21));
+    assertThrows(IllegalArgumentException.class, () -> new EasyCRT(100, 19, 0));
   }
 }

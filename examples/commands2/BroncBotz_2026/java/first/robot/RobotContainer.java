@@ -16,6 +16,7 @@ import first.robot.Constants.DriveConstants;
 import first.robot.Constants.HoodConstants;
 import first.robot.Constants.OperatorConstants;
 import first.robot.Constants.ShooterConstants;
+import first.robot.Constants.TurretConstants;
 import first.robot.commands.SuperstructureCommands;
 import first.robot.subsystems.Agitator;
 import first.robot.subsystems.Hood;
@@ -25,6 +26,7 @@ import first.robot.subsystems.IntakeRoller;
 import first.robot.subsystems.Kicker;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.Swerve;
+import first.robot.subsystems.Turret;
 import java.util.stream.Stream;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
@@ -52,6 +54,7 @@ public class RobotContainer {
     private final Agitator agitator = new Agitator();
     private final Kicker kicker = new Kicker();
     private final Hood hood = new Hood();
+    private final Turret turret = new Turret();
 
     private final CommandNiDsXboxController driver = new CommandNiDsXboxController(OperatorConstants.kDriverControllerPort);
     private final CommandNiDsXboxController operator = new CommandNiDsXboxController(OperatorConstants.kOperatorControllerPort);
@@ -129,6 +132,7 @@ public class RobotContainer {
         agitator.setDefaultCommand(agitator.stop());
         intakeRoller.setDefaultCommand(intakeRoller.stop());
         hood.setDefaultCommand(hood.holdAt(HoodConstants.kDown));
+        turret.setDefaultCommand(turret.holdAt(TurretConstants.kForward));
         intakeArm.setDefaultCommand(intakeArm.manual(operator::getLeftY, operator::getRightY));
     }
 
