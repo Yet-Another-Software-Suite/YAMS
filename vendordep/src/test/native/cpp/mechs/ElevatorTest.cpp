@@ -214,6 +214,10 @@ TEST_CASE_METHOD(ElevatorTestFixture, "ElevatorTest.ElevatorPositionPID", "[Elev
       bundle.subsystem->m_testRunning = true;
 
       auto elevator = CreateElevator(bundle.smc, bundle.subsystem.get());
+      // The measurement setpoint is the mechanism setpoint as a distance.
+      elevator->SetMeasurementPositionSetpoint(0.5_m);
+      REQUIRE(elevator->GetMeasurementSetpoint().has_value());
+      CHECK(std::abs(elevator->GetMeasurementSetpoint()->value() - 0.5) < 1e-9);
       auto highPid = elevator->RunTo(2.0_m);
       wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
