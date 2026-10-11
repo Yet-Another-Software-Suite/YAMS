@@ -3,7 +3,13 @@
 
 package yams.core.motorcontrollers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wpilib.units.Units.Celsius;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Volts;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Rotations;
@@ -21,6 +27,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
@@ -186,5 +193,41 @@ public class SparkDeviceConfigTest {
     } finally {
       close(smc, sparkMax);
     }
+  }
+  /**
+   * The temperature cutoff is checked by the closed loop on the SystemCore, so a SPARK must reject
+   * it with a trapezoidal profile, which runs on the SPARK, and accept it with an exponential
+   * profile, which runs on the SystemCore.
+   */
+  @Test
+  void temperatureCutoffNeedsTheSystemCoreClosedLoop() {
+    final SparkMax trapezoidSpark = DeviceCreator.createSparkMax();
+    assertThrows(
+        SmartMotorControllerConfigurationException.class,
+        () ->
+            new SparkWrapper(
+                trapezoidSpark,
+                DCMotor.getNEO(1),
+                baseConfig("cutoff trapezoid", kGearing)
+                    .withTrapezoidalProfile(RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2))
+                    .withTemperatureCutoff(Celsius.of(80))),
+        "a trapezoidal profile runs on the SPARK, where the cutoff is never checked");
+    trapezoidSpark.configure(
+        new SparkMaxConfig(), ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    trapezoidSpark.close();
+
+    final SparkMax exponentialSpark = DeviceCreator.createSparkMax();
+    final SmartMotorController smc =
+        new SparkWrapper(
+            exponentialSpark,
+            DCMotor.getNEO(1),
+            baseConfig("cutoff exponential", kGearing)
+                .withExponentialProfile(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(40))
+                .withTemperatureCutoff(Celsius.of(80)));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
+    assertEquals(80, smc.getConfig().getTemperatureCutoff().orElseThrow().in(Celsius), 1e-9);
+    close(smc, exponentialSpark);
   }
 }
