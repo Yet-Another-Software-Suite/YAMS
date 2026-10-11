@@ -170,6 +170,7 @@ jobs:
           - group: other
             test-filter: >-
               --tests "yams.core.mechanisms.*"
+              --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"
               --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
               --tests "yams.core.motorcontrollers.LiveTuningTest"
               --tests "yams.core.motorcontrollers.SimulationPeriodTest"
