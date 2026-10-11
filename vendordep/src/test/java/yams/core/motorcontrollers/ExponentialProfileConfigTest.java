@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Volts;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.trajectory.ExponentialProfile;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
+import yams.core.math.ExponentialProfilePIDController;
 
 /**
  * Tests the exponential profile constraints derived from physical constants: kV and kA must be
@@ -76,5 +79,39 @@ public class ExponentialProfileConfigTest {
     assertFiniteAndClose(expectedKv, -constraints.A / constraints.B, "elevator kV");
     assertFiniteAndClose(expectedKa, 1.0 / constraints.B, "elevator kA");
     assertEquals(10, constraints.maxInput, 1e-9);
+  }
+
+  @Test
+  void profileFromMaximumVelocityAndAccelerationHasMatchingGains() {
+    final ExponentialProfile.Constraints constraints =
+        baseConfig()
+            .withExponentialProfile(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(40))
+            .getExponentialProfile()
+            .orElseThrow();
+
+    // kV and kA reach the maximum velocity and acceleration at the maximum voltage.
+    assertFiniteAndClose(12.0 / 10.0, -constraints.A / constraints.B, "kV");
+    assertFiniteAndClose(12.0 / 40.0, 1.0 / constraints.B, "kA");
+    assertEquals(12, constraints.maxInput, 1e-9);
+  }
+
+  @Test
+  void createConstraintsMatchesTheConfig() {
+    final ExponentialProfile.Constraints fromConfig =
+        baseConfig()
+            .withExponentialProfile(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(40))
+            .getExponentialProfile()
+            .orElseThrow();
+    final ExponentialProfile.Constraints created =
+        ExponentialProfilePIDController.createConstraints(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(40));
+
+    assertFiniteAndClose(12.0 / 10.0, -created.A / created.B, "kV");
+    assertFiniteAndClose(12.0 / 40.0, 1.0 / created.B, "kA");
+    assertFiniteAndClose(fromConfig.A, created.A, "A");
+    assertFiniteAndClose(fromConfig.B, created.B, "B");
+    assertEquals(12, created.maxInput, 1e-9);
+    // A stable profile settles at the maximum velocity; A must be negative for that.
+    assertTrue(created.A < 0, "A should be negative but was " + created.A);
+    assertEquals(10, created.maxVelocity(), 1e-9);
   }
 }
