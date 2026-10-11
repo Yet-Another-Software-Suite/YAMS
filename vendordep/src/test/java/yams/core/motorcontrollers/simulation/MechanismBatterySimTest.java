@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Yet Another Software Suite
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-package yams.mechs;
+package yams.core.motorcontrollers.simulation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,7 +45,6 @@ import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.local.SparkWrapper;
-import yams.core.motorcontrollers.simulation.BatterySim;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
