@@ -3,6 +3,7 @@
 
 package yams.mechs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Inches;
@@ -12,6 +13,7 @@ import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.Millisecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -410,6 +413,35 @@ public class ElevatorTest {
       Command lowPid = elevator.setHeight(Meters.of(0.5));
 
       positionPidTest(smc, highPid, lowPid);
+    } finally {
+      closeSMC(smc);
+    }
+  }
+
+  /**
+   * The measurement setpoint is the mechanism setpoint as a distance: empty until a position is
+   * set, and then the height that was asked for.
+   */
+  @Test
+  void measurementSetpointIsTheMechanismSetpointAsADistance() {
+    final SmartMotorController smc =
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) createSMCConfig())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry("MeasurementSetpoint SparkMax", TelemetryVerbosity.LOW)));
+    try {
+      final Elevator elevator = createElevator(smc);
+      assertTrue(elevator.getMeasurementSetpoint().isEmpty(), "no setpoint has been set yet");
+
+      elevator.setMeasurementPositionSetpoint(Meters.of(0.5));
+      assertEquals(0.5, elevator.getMeasurementSetpoint().orElseThrow().in(Meters), 1e-9);
+      // The same setpoint, in rotations of the drum.
+      final double circumference = Inches.of(0.25).in(Meters) * 22;
+      assertEquals(
+          0.5 / circumference, elevator.getMechanismSetpoint().orElseThrow().in(Rotations), 1e-9);
     } finally {
       closeSMC(smc);
     }

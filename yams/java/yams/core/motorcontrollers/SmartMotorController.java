@@ -1219,6 +1219,19 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Get the Mechanism setpoint position as a {@link Distance}.
+   *
+   * @return Measurement setpoint position, empty when there is no position setpoint or the
+   *         mechanism circumference is not configured.
+   */
+  public Optional<Distance> getMeasurementPositionSetpoint() {
+    if (setpointPosition.isEmpty() || m_config.getMechanismCircumference().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(m_config.convertFromMechanism(setpointPosition.get()));
+  }
+
+  /**
    * Get the Mechanism velocity setpoint.
    *
    * @return Mechanism velocity setpoint.

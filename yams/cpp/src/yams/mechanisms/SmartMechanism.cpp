@@ -77,6 +77,10 @@ std::optional<wpi::units::turn_t> SmartMechanism::GetMechanismSetpoint() {
   return m_smc->GetMechanismPositionSetpoint();
 }
 
+std::optional<wpi::units::meter_t> SmartMechanism::GetMeasurementSetpoint() {
+  return m_smc->GetMeasurementPositionSetpoint();
+}
+
 wpi::Mechanism2d* SmartMechanism::GetMechanismWindow() {
   if (m_mechanismWindow) {
     return &(*m_mechanismWindow);

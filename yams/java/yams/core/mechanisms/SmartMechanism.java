@@ -160,6 +160,17 @@ public abstract class SmartMechanism {
   }
 
   /**
+   * Get the {@link SmartMechanism}'s setpoint as a {@link Distance} if it exists: the mechanism
+   * setpoint converted with the mechanism circumference.
+   *
+   * @return {@link Optional} setpoint {@link Distance} of the mechanism, empty when there is no
+   *         position setpoint or the mechanism circumference is not configured.
+   */
+  public Optional<Distance> getMeasurementSetpoint() {
+    return m_smc.getMeasurementPositionSetpoint();
+  }
+
+  /**
    * Iterate sim
    */
   public abstract void simIterate();

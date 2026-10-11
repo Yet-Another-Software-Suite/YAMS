@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -382,6 +383,30 @@ public class ArmTest {
       Command lowPid = arm.setAngle(Degrees.of(-80));
 
       positionPidTest(smc, highPid, lowPid);
+    } finally {
+      closeSMC(smc);
+    }
+  }
+
+  /**
+   * An arm has no mechanism circumference, so its setpoint cannot be given as a distance: the
+   * measurement setpoint stays empty while the mechanism setpoint is set.
+   */
+  @Test
+  void measurementSetpointIsEmptyWithoutACircumference() {
+    final SmartMotorController smc =
+        setupTestSubsystem(
+            new SparkWrapper(
+                DeviceCreator.createSparkMax(),
+                DCMotor.getNEO(1),
+                ((yams.commands2.config.SmartMotorControllerConfig) createPIDSMCConfig())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry("MeasurementSetpoint Arm SparkMax", TelemetryVerbosity.LOW)));
+    try {
+      final Arm arm = createArm(smc);
+      arm.setMechanismPositionSetpoint(Degrees.of(20));
+      assertTrue(arm.getMechanismSetpoint().isPresent());
+      assertTrue(arm.getMeasurementSetpoint().isEmpty());
     } finally {
       closeSMC(smc);
     }

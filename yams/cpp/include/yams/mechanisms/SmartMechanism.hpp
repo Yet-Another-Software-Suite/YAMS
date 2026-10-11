@@ -121,6 +121,15 @@ class SmartMechanism {
   std::optional<wpi::units::turn_t> GetMechanismSetpoint();
 
   /**
+   * Get the current setpoint as a distance: the mechanism setpoint converted with the mechanism
+   * circumference.
+   *
+   * @return Optional distance setpoint, empty when there is no position setpoint or the mechanism
+   *         circumference is not configured.
+   */
+  std::optional<wpi::units::meter_t> GetMeasurementSetpoint();
+
+  /**
    * Get a pointer to the Mechanism2d window, or nullptr if not initialised.
    *
    * @return Pointer to the Mechanism2d window.
