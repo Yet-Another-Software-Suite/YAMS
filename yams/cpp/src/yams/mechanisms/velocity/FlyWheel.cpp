@@ -14,8 +14,6 @@
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/math/system/Models.hpp>
-#include <wpi/simulation/BatterySim.hpp>
-#include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -80,9 +78,6 @@ void FlyWheel::SimIterate() {
     ss->UpdateSim();
     m_smc->SimIterate();
     ss->StarveUpdateSim();
-
-    wpi::sim::RoboRioSim::SetVInVoltage(
-        wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     VisualizationUpdate();
   }
 }

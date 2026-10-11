@@ -12,9 +12,7 @@ import java.util.Optional;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.ElevatorSim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.units.measure.Distance;
@@ -144,13 +142,6 @@ public class Elevator extends SmartPositionalMechanism {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
-      // It is impossible for an elevator to go below the minimum height, it would break...
-      if (m_config.getMinimumHeight().isPresent() && getHeight().lt(m_config.getMinimumHeight().get())) {
-        //        m_motor.simIterate(RotationsPerSecond.of(0));
-        //        m_motor.setEncoderPosition(m_config.getMinimumHeight().get());
-      } else {
-        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDraw()));
-      }
       visualizationUpdate();
     }
   }

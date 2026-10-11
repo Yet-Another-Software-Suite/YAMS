@@ -16,9 +16,7 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.Models;
-import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.DCMotorSim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.smartdashboard.MechanismRoot2d;
@@ -241,7 +239,6 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
       m_rightSMC.getSimSupplier().get().updateSimState();
       m_rightSMC.simIterate();
       m_rightSMC.getSimSupplier().get().starveUpdateSim();
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_leftSim.get().getCurrentDraw(), m_rightSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }

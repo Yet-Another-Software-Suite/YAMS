@@ -12,8 +12,6 @@
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
-#include <wpi/simulation/BatterySim.hpp>
-#include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -153,11 +151,6 @@ void Elevator::SimIterate() {
     ss->UpdateSim();
     m_smc->SimIterate();
     ss->StarveUpdateSim();
-
-    if (!m_elevatorConfig->GetMinHeight() || GetHeight() >= *m_elevatorConfig->GetMinHeight()) {
-      wpi::sim::RoboRioSim::SetVInVoltage(
-          wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
-    }
     VisualizationUpdate();
   }
 }

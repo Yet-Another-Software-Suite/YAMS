@@ -14,9 +14,7 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
-import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.DCMotorSim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.units.measure.AngularVelocity;
@@ -175,7 +173,6 @@ public class FlyWheel extends SmartVelocityMechanism {
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
 
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }

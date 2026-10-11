@@ -14,8 +14,6 @@ import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.simulation.BatterySim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
@@ -141,7 +139,6 @@ public class Arm extends SmartPositionalMechanism {
       if (m_config.getUpperHardLimit().isPresent() && m_sim.get().getVelocity() > 0 && m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
       }
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_sim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }

@@ -14,9 +14,7 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
-import org.wpilib.simulation.BatterySim;
 import org.wpilib.simulation.DCMotorSim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.units.measure.Angle;
@@ -213,7 +211,6 @@ public class Pivot extends SmartPositionalMechanism {
       if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 && m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
       }
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_dcmotorSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }
