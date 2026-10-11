@@ -1026,8 +1026,10 @@ public class SparkWrapper extends SmartMotorController {
           "withClosedLoopControllerMaximumVoltage");
     }
 
-    if (config.getTemperatureCutoff().isPresent() && m_expoProfile.isEmpty() && m_trapezoidProfile.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Temperature cutoff is only available for exponentially profiled closed loop controllers", "Temperature cutoff could not be applied", "withTemperatureCutoff");
+    // The cutoff is checked by iterateClosedLoopController(), which only runs with an exponential
+    // profile or an LQR controller: a trapezoidal profile runs on the SPARK and never reaches it.
+    if (config.getTemperatureCutoff().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+      throw new SmartMotorControllerConfigurationException("Temperature cutoff is only available for exponentially profiled or LQR closed loop controllers", "Temperature cutoff could not be applied", "withTemperatureCutoff");
     }
 
     if (config.getFeedbackSynchronizationThreshold().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
