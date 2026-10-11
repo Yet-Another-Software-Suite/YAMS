@@ -3,12 +3,20 @@
 
 package yams.core.motorcontrollers;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.wpilib.units.Units.Celsius;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Volts;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 
+import yams.core.math.LQRConfig;
+import yams.core.math.LQRController;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -194,5 +202,45 @@ public class TalonDeviceConfigTest {
     } finally {
       close(smc);
     }
+  }
+  /**
+   * The temperature cutoff is checked by the closed loop on the SystemCore. A Talon only runs that
+   * loop for an LQR controller, so the cutoff is rejected with PID, which runs on the Talon, and
+   * accepted with an LQR controller.
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("createControllers")
+  void temperatureCutoffNeedsAnLqrController(Case testCase) {
+    final String name = testCase.name();
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> testCase.create().apply(config(name + " cutoff pid").withTemperatureCutoff(Celsius.of(80))),
+        "PID runs on the Talon, where the cutoff is never checked");
+
+    final SmartMotorController smc =
+        testCase
+            .create()
+            .apply(
+                config(name + " cutoff lqr")
+                    .withClosedLoopController(
+                        new LQRController(
+                            new LQRConfig(
+                                    DCMotor.getNEO(1),
+                                    new MechanismGearing(GearBox.fromReductionStages(3, 4)),
+                                    KilogramSquareMeters.of(0.02))
+                                .withArm(
+                                    Radians.of(0.01),
+                                    RadiansPerSecond.of(0.5),
+                                    Radians.of(0.05),
+                                    RadiansPerSecond.of(0.5),
+                                    Radians.of(0.01))
+                                .withControlEffort(Volts.of(12))
+                                .withMaxVoltage(Volts.of(12))))
+                    .withTemperatureCutoff(Celsius.of(80)));
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+        .setSMC(smc);
+    assertEquals(80, smc.getConfig().getTemperatureCutoff().orElseThrow().in(Celsius), 1e-9);
+    close(smc);
   }
 }
