@@ -11,8 +11,6 @@
 #include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/math/system/DCMotor.hpp>
-#include <wpi/simulation/BatterySim.hpp>
-#include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -148,8 +146,6 @@ void Arm::SimIterate() {
         GetAngle() > *m_armConfig->GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_armConfig->GetMaxAngle());
     }
-    wpi::sim::RoboRioSim::SetVInVoltage(
-        wpi::sim::BatterySim::Calculate({ss->GetStatorCurrent()}));
     VisualizationUpdate();
   }
 }

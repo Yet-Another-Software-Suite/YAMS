@@ -13,6 +13,7 @@
 #include <thread>
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/Commands.hpp>
+#include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
@@ -23,6 +24,7 @@
 #include "helpers/SchedulerHelper.h"
 #include "yams/mechanisms/config/FlyWheelConfig.hpp"
 #include "yams/mechanisms/velocity/FlyWheel.hpp"
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
 namespace yams::test {
 
@@ -198,6 +200,35 @@ TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterDutyCycle", "[ShooterTe
       delete shooter;
     }
   }
+}
+
+// The battery is shared by the whole robot, so an idle mechanism must not replace the
+// simulated battery voltage with the voltage its own current draw alone would give.
+TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SimIterateKeepsSharedBatteryVoltage",
+                 "[ShooterTest]") {
+  using motorcontrollers::simulation::BatterySim;
+  auto param = AllMotorParams().front();
+  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+  auto bundle = MakeBundle(param, cfg);
+  bundle.smc->SetupSimulation();
+  auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
+  BatterySim::Reset();
+
+  // The shooter is idle, so this is the resting voltage.
+  shooter->SimIterate();
+  double restingVoltage = wpi::sim::RoboRioSim::GetVInVoltage().value();
+
+  // Something else on the robot starts drawing a lot of current from the same battery.
+  int restOfRobot = 0;
+  double sharedVoltage = BatterySim::CalculateVoltage(&restOfRobot, 100.0_A).value();
+  CHECK(sharedVoltage < restingVoltage - 1.0);
+
+  shooter->SimIterate();
+  CHECK(std::abs(wpi::sim::RoboRioSim::GetVInVoltage().value() - sharedVoltage) < 0.5);
+
+  BatterySim::RemoveCurrent(&restOfRobot);
+  CloseBundle(bundle);
+  delete shooter;
 }
 
 TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterVelocityPID", "[ShooterTest]") {

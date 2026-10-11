@@ -11,8 +11,6 @@ import java.util.Optional;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.simulation.BatterySim;
-import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
@@ -327,7 +325,6 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
       m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
       m_upperSMC.getSimSupplier().get().starveUpdateSim();
-      RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_lowerArmSim.get().getCurrentDraw(), m_upperArmSim.get().getCurrentDraw()));
       visualizationUpdate();
     }
   }
