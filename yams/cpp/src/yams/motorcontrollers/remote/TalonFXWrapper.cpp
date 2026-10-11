@@ -556,8 +556,10 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // Unsupported options.
   if (config.GetClosedLoopControlPeriod())
     throw std::invalid_argument("[ERROR] ClosedLoopControlPeriod is not supported");
-  if (config.GetTemperatureCutoff())
-    throw std::invalid_argument("[ERROR] TemperatureCutoff is not supported");
+  // The cutoff is checked by IterateClosedLoopController(), which only runs with an LQR controller:
+  // PID and motion profiles run on the Talon and never reach it.
+  if (config.GetTemperatureCutoff() && !m_lqr)
+    throw std::invalid_argument("[ERROR] TemperatureCutoff is only supported with an LQR controller");
   if (config.GetFeedbackSynchronizationThreshold())
     throw std::invalid_argument("[ERROR] FeedbackSynchronizationThreshold is not supported");
   if (config.GetVoltageCompensation())
