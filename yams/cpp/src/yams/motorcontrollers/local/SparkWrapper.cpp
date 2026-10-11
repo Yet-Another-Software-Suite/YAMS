@@ -600,9 +600,11 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         "closed loop controllers",
         "Closed loop controller maximum voltage could not be applied",
         "WithClosedLoopMaxVoltage");
-  if (config.GetTemperatureCutoff() && !hasExpo && !hasTrap)
+  // The cutoff is checked by IterateClosedLoopController(), which only runs with an exponential
+  // profile or an LQR controller: a trapezoidal profile runs on the SPARK and never reaches it.
+  if (config.GetTemperatureCutoff() && !hasExpo && !m_lqr)
     throw exceptions::SmartMotorControllerConfigurationException(
-        "Temperature cutoff is only available for exponentially profiled closed loop "
+        "Temperature cutoff is only available for exponentially profiled or LQR closed loop "
         "controllers",
         "Temperature cutoff could not be applied", "WithTemperatureCutoff");
   if (config.GetFeedbackSynchronizationThreshold() && !hasExpo && !m_lqr)

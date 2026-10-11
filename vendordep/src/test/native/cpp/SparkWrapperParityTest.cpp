@@ -558,6 +558,12 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.UnsupportedOptionsThrow", "[Sp
     cfg.WithTemperatureCutoff(wpi::units::celsius_t{80});
     CHECK_THROWS_AS(SparkWrapper(spark.get(), wpi::math::DCMotor::NEO(1), &cfg), ConfigException);
   }
+  SECTION("Temperature cutoff with a trapezoidal profile, which runs on the SPARK") {
+    cfg.WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                             wpi::units::turns_per_second_squared_t{2.0})
+        .WithTemperatureCutoff(wpi::units::celsius_t{80});
+    CHECK_THROWS_AS(SparkWrapper(spark.get(), wpi::math::DCMotor::NEO(1), &cfg), ConfigException);
+  }
   SECTION("Unknown follower type") {
     int notASpark = 0;
     cfg.WithFollowers({{std::any(&notASpark), false}});

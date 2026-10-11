@@ -1129,8 +1129,10 @@ public class TalonFXWrapper extends SmartMotorController {
     if (config.getClosedLoopControlPeriod().isPresent()) {
       throw new IllegalArgumentException("[ERROR] ClosedLoopControlPeriod is not supported");
     }
-    if (config.getTemperatureCutoff().isPresent()) {
-      throw new IllegalArgumentException("[ERROR] TemperatureCutoff is not supported");
+    // The cutoff is checked by iterateClosedLoopController(), which only runs with an LQR controller:
+    // PID and motion profiles run on the Talon and never reach it.
+    if (config.getTemperatureCutoff().isPresent() && m_lqr.isEmpty()) {
+      throw new IllegalArgumentException("[ERROR] TemperatureCutoff is only supported with an LQR controller");
     }
     if (config.getFeedbackSynchronizationThreshold().isPresent()) {
       throw new IllegalArgumentException("[ERROR] FeedbackSynchronizationThreshold is not supported");
