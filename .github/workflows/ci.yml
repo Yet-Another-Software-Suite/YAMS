@@ -164,16 +164,24 @@ jobs:
             test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
           - group: zero-offsets
             test-filter: '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
-          # Everything else: swerve config tests, motor controller / battery sim unit tests, and the
-          # standalone math test. Gradle's --tests cannot exclude the groups above,
-          # so each class is listed: add new test classes here unless they get their own group.
-          - group: other
+          # Motor controller unit tests that are not about an external encoder: the configuration
+          # each vendor's device is given, feedforwards, exponential profiles, live tuning and the
+          # simulation period. Add new motor controller test classes here.
+          - group: motor-controllers
             test-filter: >-
-              --tests "yams.core.mechanisms.*"
+              --tests "yams.core.motorcontrollers.ArmFeedforwardTest"
               --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"
               --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
               --tests "yams.core.motorcontrollers.LiveTuningTest"
               --tests "yams.core.motorcontrollers.SimulationPeriodTest"
+              --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"
+              --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"
+          # Everything else: swerve config tests, the battery and motor simulation unit tests, and
+          # the standalone math test. Gradle's --tests cannot exclude the groups above,
+          # so each class is listed: add new test classes here unless they get their own group.
+          - group: other
+            test-filter: >-
+              --tests "yams.core.mechanisms.*"
               --tests "yams.core.motorcontrollers.simulation.*"
               --tests "yams.ChineseRemainderTheoremTest"
     steps:
