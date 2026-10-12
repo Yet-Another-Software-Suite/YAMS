@@ -203,8 +203,8 @@ public class SwerveDriveTelemetryConfig {
   public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SwerveDrive drive) {
     var cfg = drive.getConfig();
     // A drive may have no auto-align controllers: show zero gains until some are given.
-    var translationPID = cfg.hasTranslationPID() ? cfg.getTranslationPID() : new PIDController(0, 0, 0);
-    var rotationPID = cfg.hasRotationPID() ? cfg.getRotationPID() : new PIDController(0, 0, 0);
+    var translationPID = cfg.getTranslationPID().orElseGet(() -> new PIDController(0, 0, 0));
+    var rotationPID = cfg.getRotationPID().orElseGet(() -> new PIDController(0, 0, 0));
     doubleFields.get(DoubleTelemetryField.TranslationP).setDefaultValue(translationPID.getP());
     doubleFields.get(DoubleTelemetryField.TranslationI).setDefaultValue(translationPID.getI());
     doubleFields.get(DoubleTelemetryField.TranslationD).setDefaultValue(translationPID.getD());

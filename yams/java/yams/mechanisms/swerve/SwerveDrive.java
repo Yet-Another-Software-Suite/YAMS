@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
+import yams.exceptions.SwerveDriveConfigurationException;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.telemetry.MechanismTelemetry;
@@ -172,7 +173,7 @@ public class SwerveDrive {
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
     m_kinematics = getKinematics();
-    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()), getModulePositions(), m_config.getInitialPose());
+    m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getGyroRotation3d().toRotation2d(), getModulePositions(), m_config.getInitialPose());
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
     resetOdometry(m_config.getInitialPose());
     setupTelemetry();
@@ -217,24 +218,6 @@ public class SwerveDrive {
   }
 
   /**
-   * Get the Gyro Angle.
-   *
-   * @return Gyro angle, or maple sim odometry gyro angle.
-   */
-  public Angle getGyroAngle() {
-    if (RobotBase.isSimulation()) {
-      //      if (m_config.getMapleDriveSim().isPresent())
-      //      {
-      //        return
-      //
-      // m_config.getMapleDriveSim().get().getOdometryEstimatedPose().getRotation().getMeasure();
-      //      }
-      return m_simGyroAngle;
-    }
-    return m_config.getGyroAngle();
-  }
-
-  /**
    * Get the simulated pose of the robot, assuming the {@link SwerveModuleState}s commanded to the
    * modules are met perfectly. Useful for feeding a simulated vision system with ground-truth poses
    * under perfect-world conditions.
@@ -253,7 +236,7 @@ public class SwerveDrive {
    */
   public void lockPose() {
     // Turn each wheel toward the robot center without driving it. SwerveModule#lock skips the
-    // minimum velocity, which would otherwise hold these zero speed states where the wheels are.
+    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
     for (int i = 0; i < m_modules.length; i++) {
       m_desiredModuleStates[i] = m_modules[i].lock(m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
     }
@@ -366,7 +349,7 @@ public class SwerveDrive {
    * @param fieldRelativeChassisSpeeds Field relative chassis speeds.
    */
   public void setFieldRelativeChassisSpeeds(ChassisSpeeds fieldRelativeChassisSpeeds) {
-    setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeChassisSpeeds, new Rotation2d(getGyroAngle())));
+    setRobotRelativeChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeChassisSpeeds, getGyroRotation3d().toRotation2d()));
   }
 
   /**
@@ -421,8 +404,8 @@ public class SwerveDrive {
   }
 
   /**
-   * Make {@link #getGyroAngle()} read the given heading from now on. On a real robot the gyro offset
-   * is adjusted; in simulation the simulated gyro angle is set directly.
+   * Make {@link #getGyroRotation3d()} read the given heading as its yaw from now on. On a real robot
+   * the gyro offset is adjusted; in simulation the simulated gyro angle is set directly.
    *
    * @param heading Heading the gyro should report.
    */
@@ -431,7 +414,7 @@ public class SwerveDrive {
       m_simGyroAngle = heading;
       return;
     }
-    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()).minus(heading));
+    m_config.withGyroOffset(getGyroRotation3d().getMeasureZ().plus(m_config.getGyroOffset()).minus(heading));
   }
 
   /**
@@ -472,7 +455,7 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
     setGyroAngle(pose.getRotation().getMeasure());
-    m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
+    m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisSpeeds();
     m_desiredModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds());
     m_simPose = pose;
@@ -480,16 +463,12 @@ public class SwerveDrive {
 
   /** Resets the auto-align rotational PID controller. */
   public void resetRotationPID() {
-    if (m_config.hasRotationPID()) {
-      m_config.getRotationPID().reset();
-    }
+    m_config.getRotationPID().ifPresent(PIDController::reset);
   }
 
   /** Resets the auto-align translation PID controller. */
   public void resetTranslationPID() {
-    if (m_config.hasTranslationPID()) {
-      m_config.getTranslationPID().reset();
-    }
+    m_config.getTranslationPID().ifPresent(PIDController::reset);
   }
 
   /**
@@ -498,8 +477,8 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to use, units given is in Radians.
    */
   public void setRotationPID(PIDController controller) {
-    var currentRotationPID = m_config.hasRotationPID() ? m_config.getRotationPID() : null;
-    if (currentRotationPID == null || currentRotationPID.getP() != controller.getP() || currentRotationPID.getI() != controller.getI() || currentRotationPID.getD() != controller.getD()) {
+    var currentRotationPID = m_config.getRotationPID();
+    if (currentRotationPID.isEmpty() || currentRotationPID.get().getP() != controller.getP() || currentRotationPID.get().getI() != controller.getI() || currentRotationPID.get().getD() != controller.getD()) {
       controller.reset();
       m_config.withRotationController(controller);
     }
@@ -511,8 +490,8 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to reset, Units given is in Meters.
    */
   public void setTranslationPID(PIDController controller) {
-    var currentTranslationPID = m_config.hasTranslationPID() ? m_config.getTranslationPID() : null;
-    if (currentTranslationPID == null || currentTranslationPID.getP() != controller.getP() || currentTranslationPID.getI() != controller.getI() || currentTranslationPID.getD() != controller.getD()) {
+    var currentTranslationPID = m_config.getTranslationPID();
+    if (currentTranslationPID.isEmpty() || currentTranslationPID.get().getP() != controller.getP() || currentTranslationPID.get().getI() != controller.getI() || currentTranslationPID.get().getD() != controller.getD()) {
       controller.reset();
       m_config.withTranslationController(controller);
     }
@@ -551,7 +530,7 @@ public class SwerveDrive {
     return Commands.startRun(() -> {
       resetTranslationPID();
       resetRotationPID();
-    }, () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
+    }, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
                    .finallyDo(() -> setRobotRelativeChassisSpeeds(new ChassisSpeeds()))
                    .withName("Drive to Pose");
   }
@@ -571,7 +550,7 @@ public class SwerveDrive {
     return Commands.startRun(() -> {
       resetTranslationPID();
       resetRotationPID();
-    }, () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
+    }, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
                    .until(() -> isNear(pose, translationTolerance, rotationTolerance))
                    .finallyDo(this::stop)
                    .withName("Drive to Pose");
@@ -602,12 +581,28 @@ public class SwerveDrive {
    * @param targetPose Pose to drive towards.
    * @implNote Remember to call {@link #resetRotationPID()} and {@link #resetTranslationPID()}
    *           before calling this method in a loop.
-   * @return field-relative {@link ChassisSpeeds} to drive the robot to the given pose.
+   * @return robot-relative {@link ChassisSpeeds} to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
+   *                                           configured.
    */
   public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose) {
-    var rotationPID = m_config.getRotationPID();
-    var translationPID = m_config.getTranslationPID();
-    var currentPose = getPose();
+    return driveToPoseSetpoint(targetPose, getPose(), getGyroRotation3d().toRotation2d());
+  }
+
+  /**
+   * Drive to the target pose from a given pose and heading, for callers that keep their own pose,
+   * such as AdvantageKit replay.
+   *
+   * @param targetPose  Pose to drive towards.
+   * @param currentPose Pose the robot is at.
+   * @param heading     Heading of the robot, to turn the field relative speeds to robot relative.
+   * @return robot-relative {@link ChassisSpeeds} to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is not
+   *                                           configured.
+   */
+  public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose, Pose2d currentPose, Rotation2d heading) {
+    var rotationPID = m_config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Cannot drive to pose", "withRotationController(PIDController)"));
+    var translationPID = m_config.getTranslationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No translation PID controller configured", "Cannot drive to pose", "withTranslationController(PIDController)"));
     var toTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
     var distance = toTarget.getNorm();
     // The controller sees the distance as its measurement with a setpoint of 0, so its output is
@@ -615,7 +610,7 @@ public class SwerveDrive {
     var speed = -translationPID.calculate(distance, 0);
     // Drive at that speed along the unit vector toward the target.
     var velocity = distance > 1e-9 ? toTarget.div(distance).times(speed) : new Translation2d();
-    return new ChassisSpeeds(velocity.getX(), velocity.getY(), rotationPID.calculate(currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians()));
+    return ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(velocity.getX(), velocity.getY(), rotationPID.calculate(currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians())), heading);
   }
 
   /**
@@ -664,7 +659,7 @@ public class SwerveDrive {
    * Update the {@link SwerveDrivePoseEstimator} with the current gyro angle and {@link SwerveModulePosition}
    */
   private void updatePoseEstimator() {
-    m_poseEstimator.update(new Rotation2d(getGyroAngle()), getModulePositions());
+    m_poseEstimator.update(getGyroRotation3d().toRotation2d(), getModulePositions());
   }
 
   /** Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive. */
@@ -724,7 +719,7 @@ public class SwerveDrive {
    * @return Field relative speed of the drive.
    */
   public ChassisSpeeds getFieldRelativeSpeed() {
-    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeed(), new Rotation2d(getGyroAngle()));
+    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeed(), getGyroRotation3d().toRotation2d());
   }
 
   /**

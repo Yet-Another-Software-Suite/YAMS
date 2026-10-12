@@ -181,7 +181,7 @@ public class SwerveSubsystem extends SubsystemBase
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        .withGyro(gyro.getYaw().asSupplier())
+        .withGyro(gyro::getRotation3d)
         // Starting at (0,0) facing 0 deg places the robot at the blue-alliance wall origin.
         // Override in auto init if your starting position differs.
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))

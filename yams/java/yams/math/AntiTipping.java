@@ -9,9 +9,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
- * A proportional correction that drives the robot back under itself when it starts to tip. It
- * behaves like the {@code AntiTipping} controller WPILib ships from 2027 on, which this WPILib does
- * not have.
+ * A proportional correction that drives the robot back under itself when it starts to tip. It is a
+ * port of the {@code AntiTipping} controller WPILib ships from 2027 on, which this WPILib does not
+ * have: <a
+ * href="https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/org/wpilib/math/controller/AntiTipping.java">
+ * wpimath/src/main/java/org/wpilib/math/controller/AntiTipping.java</a> in wpilibsuite/allwpilib,
+ * which is under the WPILib BSD license.
  *
  * <p>Give it the robot's attitude every loop and add the correction it returns to the drive's
  * speeds. The correction is zero until the robot is tilted past the threshold. Past it, the robot

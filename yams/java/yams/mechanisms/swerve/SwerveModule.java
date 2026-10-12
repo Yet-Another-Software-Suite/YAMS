@@ -163,7 +163,7 @@ public class SwerveModule {
 
   /**
    * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
-   * minimum velocity, which holds a wheel commanded too slowly to steer by where it is, does not
+   * velocity deadband, which holds a wheel commanded too slowly to steer by where it is, does not
    * apply (see {@link SwerveModuleConfig#getLockedState(Rotation2d)}).
    *
    * @param angle Angle to turn the wheel to.

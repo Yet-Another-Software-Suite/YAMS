@@ -109,7 +109,7 @@ public class SwerveSubsystem extends SubsystemBase {
             new Translation2d(Inches.of(-10), Inches.of(-10)));
     SwerveDriveConfig config =
         new SwerveDriveConfig(this, fl, fr, bl, br)
-            .withGyro(gyro.getYaw().asSupplier())
+            .withGyro(gyro::getRotation3d)
             // .withGyroVelocity(gyro.getAngularVelocityZDevice().asSupplier())
             // .withGyroAngularVelocityScaleFactor(1)
             .withMaximumChassisSpeed(MetersPerSecond.of(4), RotationsPerSecond.of(360))
@@ -153,7 +153,7 @@ public class SwerveSubsystem extends SubsystemBase {
     return drive.drive(
         () ->
             ChassisSpeeds.fromFieldRelativeSpeeds(
-                inputStream.get(), new Rotation2d(drive.getGyroAngle())));
+                inputStream.get(), drive.getGyroRotation3d().toRotation2d()));
   }
 
   public Command lock() {
@@ -181,6 +181,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Angle getGyroAngle() {
-    return drive.getGyroAngle();
+    return drive.getGyroRotation3d().getMeasureZ();
   }
 }

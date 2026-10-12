@@ -149,7 +149,7 @@ public class SwerveDriveTest {
     MockHardwareExtension.afterAll();
   }
 
-  /** Build a drive on the shared motors, with every module given the minimum velocity. */
+  /** Build a drive on the shared motors, with or without the velocity deadband on every module. */
   private void build(boolean minimumVelocity) {
     driveCount++;
     modules = new SwerveModule[4];
@@ -160,8 +160,10 @@ public class SwerveDriveTest {
               .withTelemetry(kNames[i] + driveCount, TelemetryVerbosity.LOW)
               .withLocation(kLocations[i])
               .withOptimization(true);
-      if (minimumVelocity) {
-        config.withMinimumVelocity(MetersPerSecond.of(0.1));
+      if (!minimumVelocity) {
+        config.withVelocityDeadband(null);
+      } else {
+        config.withVelocityDeadband(MetersPerSecond.of(0.1));
       }
       modules[i] = new SwerveModule(config);
     }
@@ -221,12 +223,16 @@ public class SwerveDriveTest {
     assertEquals(90, drive.getPose().getRotation().getDegrees(), 0.1);
     assertEquals(
         90,
-        drive.getGyroAngle().in(Degrees),
+        Math.toDegrees(drive.getGyroRotation3d().getZ()),
         0.1,
         "the gyro should read the pose's heading, so field relative driving agrees with the pose");
 
     drive.zeroGyro();
-    assertEquals(0, drive.getGyroAngle().in(Degrees), 0.1, "zeroGyro should make the gyro read 0");
+    assertEquals(
+        0,
+        Math.toDegrees(drive.getGyroRotation3d().getZ()),
+        0.1,
+        "zeroGyro should make the gyro read 0");
     assertEquals(0, drive.getPose().getRotation().getDegrees(), 0.1);
     assertEquals(1, drive.getPose().getX(), 0.01, "zeroGyro should keep the position");
     assertEquals(2, drive.getPose().getY(), 0.01, "zeroGyro should keep the position");
@@ -268,7 +274,7 @@ public class SwerveDriveTest {
   }
 
   @Test
-  void lockPoseTurnsTheWheelsEvenWithAMinimumVelocity() {
+  void lockPoseTurnsTheWheelsEvenWithAVelocityDeadband() {
     build(true);
     final Command lock = subsystem.run(drive::lockPose);
     TestWithScheduler.schedule(lock);
@@ -351,8 +357,8 @@ public class SwerveDriveTest {
     final SwerveDriveConfig config =
         new SwerveDriveConfig(subsystem, plainModules)
             .withTelemetry("SwerveDriveTest" + driveCount, TelemetryVerbosity.HIGH);
-    assertFalse(config.hasTranslationPID());
-    assertFalse(config.hasRotationPID());
+    assertTrue(config.getTranslationPID().isEmpty());
+    assertTrue(config.getRotationPID().isEmpty());
     final SwerveDrive plain = new SwerveDrive(config);
     assertDoesNotThrow(plain::updateTelemetry);
     assertDoesNotThrow(plain::simIterate);
@@ -383,21 +389,21 @@ public class SwerveDriveTest {
   @Test
   void gyroRotation3dAppliesTheAxisInversionAndOffset() {
     final Rotation3d[] reading = {new Rotation3d(0, 0, Math.toRadians(50))};
-    final SwerveDriveConfig config = new SwerveDriveConfig().withGyroRotation3d(() -> reading[0]);
-    assertEquals(50, config.getGyroAngle().in(Degrees), 1e-6);
+    final SwerveDriveConfig config = new SwerveDriveConfig().withGyro(() -> reading[0]);
+    assertEquals(50, Math.toDegrees(config.getGyroRotation3d().getZ()), 1e-6);
     config.withGyroOffset(Degrees.of(20));
-    assertEquals(30, config.getGyroAngle().in(Degrees), 1e-6, "the offset is subtracted");
-    assertEquals(30, Math.toDegrees(config.getGyroRotation3d().getZ()), 1e-6);
+    assertEquals(30, Math.toDegrees(config.getGyroRotation3d().getZ()), 1e-6, "the offset is subtracted");
     config.withGyroInverted(true);
-    assertEquals(-70, config.getGyroAngle().in(Degrees), 1e-6, "inverted, then offset");
+    assertEquals(-70, Math.toDegrees(config.getGyroRotation3d().getZ()), 1e-6, "inverted, then offset");
     // A gyro on its side, with its Y axis up: the robot turning is the pitch of the gyro.
     config.withGyroInverted(false).withGyroOffset(Degrees.of(0)).withGyroHeadingAxis(GyroAxis.PITCH);
     reading[0] = new Rotation3d(0, Math.toRadians(35), 0);
-    assertEquals(35, Math.abs(config.getGyroAngle().in(Degrees)), 1e-6, "the pitch of the gyro is the heading");
-    // A gyro given as an angle has no tilt.
-    final SwerveDriveConfig angleOnly = new SwerveDriveConfig().withGyro(() -> Degrees.of(15));
-    assertEquals(15, Math.toDegrees(angleOnly.getGyroRotation3d().getZ()), 1e-6);
-    assertEquals(0, angleOnly.getGyroRotation3d().getX(), 1e-9);
+    assertEquals(
+        35,
+        Math.abs(Math.toDegrees(config.getGyroRotation3d().getZ())),
+        1e-6,
+        "the pitch of the gyro is the heading");
+    assertThrows(IllegalStateException.class, () -> new SwerveDriveConfig().getGyroRotation3d());
   }
 
   @Test
@@ -408,9 +414,13 @@ public class SwerveDriveTest {
     assertEquals(3.5, config.getCouplingRatio().orElseThrow().getOutputToInputConversionFactor(), 1e-9);
     config.withCouplingRatio(0);
     assertTrue(config.getCouplingRatio().isEmpty(), "0 means no coupling");
+    assertEquals(
+        0.1,
+        config.getVelocityDeadband().orElseThrow().in(MetersPerSecond),
+        1e-9,
+        "the deadband is 0.1 m/s by default");
+    config.withVelocityDeadband(null);
     assertTrue(config.getVelocityDeadband().isEmpty());
-    config.withVelocityDeadband(MetersPerSecond.of(0.1));
-    assertEquals(0.1, config.getVelocityDeadband().orElseThrow().in(MetersPerSecond), 1e-9);
   }
 
   @Test

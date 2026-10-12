@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
-import yams.exceptions.SwerveDriveConfigurationException;
 import yams.math.AntiTipping;
 import yams.math.DerivativeTimeFilter;
 import yams.mechanisms.swerve.SwerveDrive;
@@ -133,11 +132,8 @@ public class SwerveDriveConfig {
    */
   private Optional<SwerveDriveTelemetryConfig> specifiedTelemetryConfig = Optional.empty();
 
-  /** Gyro supplier. */
-  private Optional<Supplier<Angle>> gyroSupplier = Optional.empty();
-
-  /** Supplier of the gyro's full attitude, see {@link #withGyroRotation3d(Supplier)}. */
-  private Optional<Supplier<Rotation3d>> gyroRotation3dSupplier = Optional.empty();
+  /** Supplier of the gyro's attitude, see {@link #withGyro(Supplier)}. */
+  private Optional<Supplier<Rotation3d>> gyroSupplier = Optional.empty();
 
   /** Axis of the gyro that points up through the robot, see {@link #withGyroHeadingAxis(GyroAxis)}. */
   private GyroAxis gyroHeadingAxis = GyroAxis.YAW;
@@ -152,7 +148,7 @@ public class SwerveDriveConfig {
   private Optional<Supplier<AngularVelocity>> gyroAngularVelocitySupplier = Optional.empty();
 
   /**
-   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
+   * Derives the gyro angular velocity from the gyro angle ({@link #getGyroRotation3d()}) when {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
   private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
 
@@ -252,7 +248,6 @@ public class SwerveDriveConfig {
     this.simRotationController = cfg.simRotationController;
     this.simDiscretizationSeconds = cfg.simDiscretizationSeconds;
     this.simAngularVelocityScaleFactor = cfg.simAngularVelocityScaleFactor;
-    this.gyroRotation3dSupplier = cfg.gyroRotation3dSupplier;
     this.gyroHeadingAxis = cfg.gyroHeadingAxis;
     this.antiTipping = cfg.antiTipping;
     this.moduleStateOptimization = cfg.moduleStateOptimization;
@@ -429,38 +424,24 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Get the {@link SwerveModule}s for the {@link SwerveDrive}.
+   * Set the gyro, as its full attitude. The attitude's yaw is the robot's heading, and its roll and
+   * pitch are what anti-tipping (see {@link #withAntiTipping(AntiTipping)}) reads the tilt from. For
+   * a gyro that is not mounted flat, say which of its axes points up with
+   * {@link #withGyroHeadingAxis(GyroAxis)}.
    *
-   * @param gyro {@link Supplier} for the gyro.
+   * @param gyro {@link Supplier} of the gyro's attitude, such as {@code pigeon::getRotation3d}.
    * @return {@link SwerveDriveConfig} for chaining.
    */
-  public SwerveDriveConfig withGyro(Supplier<Angle> gyro) {
+  public SwerveDriveConfig withGyro(Supplier<Rotation3d> gyro) {
     gyroSupplier = Optional.ofNullable(gyro);
     continuousGyroAngleRead = false;
     return this;
   }
 
   /**
-   * Set the gyro as its full attitude instead of a heading angle. It is used in place of
-   * {@link #withGyro(Supplier)}: the attitude's yaw is the robot's heading, and its roll and pitch
-   * are what anti-tipping (see {@link #withAntiTipping(AntiTipping)}) reads the tilt from. For a gyro
-   * that is not mounted flat, say which of its axes points up with
-   * {@link #withGyroHeadingAxis(GyroAxis)}.
-   *
-   * @param gyro {@link Supplier} of the gyro's attitude, such as {@code pigeon::getRotation3d}.
-   * @return {@link SwerveDriveConfig} for chaining.
-   */
-  public SwerveDriveConfig withGyroRotation3d(Supplier<Rotation3d> gyro) {
-    gyroRotation3dSupplier = Optional.ofNullable(gyro);
-    continuousGyroAngleRead = false;
-    return this;
-  }
-
-  /**
    * Set which axis of the gyro points up through the robot, for a gyro that is not mounted flat.
-   * The attitude from {@link #withGyroRotation3d(Supplier)} is rotated into the robot's frame
-   * before the heading and anti-tipping read it. It has no effect on a gyro given as an angle with
-   * {@link #withGyro(Supplier)}.
+   * The attitude from {@link #withGyro(Supplier)} is rotated into the robot's frame before the
+   * heading and anti-tipping read it.
    *
    * @param axis {@link GyroAxis} that points up. {@link GyroAxis#YAW} by default.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -474,7 +455,7 @@ public class SwerveDriveConfig {
   /**
    * Drive the robot back under itself when it starts to tip. Past the tipping threshold the robot
    * is driven toward the side it is falling to at {@code kP * sin(tilt)}, up to the maximum
-   * correction speed. It needs the gyro's attitude: see {@link #withGyroRotation3d(Supplier)}.
+   * correction speed. It reads the tilt from the gyro, see {@link #withGyro(Supplier)}.
    *
    * @param kP                 Correction speed for a robot on its side.
    * @param tippingThreshold   Tilt past which the correction starts, between 0 and 90 degrees.
@@ -498,8 +479,8 @@ public class SwerveDriveConfig {
 
   /**
    * Drive the robot back under itself when it starts to tip, with an {@link AntiTipping} you made,
-   * which can be retuned while the robot runs. It needs the gyro's attitude: see
-   * {@link #withGyroRotation3d(Supplier)}.
+   * which can be retuned while the robot runs. It reads the tilt from the gyro, see
+   * {@link #withGyro(Supplier)}.
    *
    * @param antiTipping {@link AntiTipping} to correct with, or null for none.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -513,10 +494,10 @@ public class SwerveDriveConfig {
    * Get the anti-tipping correction for the robot's current attitude.
    *
    * @return Robot relative {@link ChassisSpeeds} to add to the drive's speeds. Zero when anti-tipping
-   *         is not configured or the gyro's attitude is not given.
+   *         is not configured or no gyro is set.
    */
   public ChassisSpeeds getAntiTippingCorrection() {
-    if (antiTipping.isEmpty() || gyroRotation3dSupplier.isEmpty()) {
+    if (antiTipping.isEmpty() || gyroSupplier.isEmpty()) {
       return new ChassisSpeeds();
     }
     final Rotation3d attitude = getGyroRotation3d();
@@ -705,33 +686,17 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Get the gyro angle with inversions and offsets applied.
-   *
-   * @return {@link Angle} of the gyro.
-   */
-  public Angle getGyroAngle() {
-    if (gyroRotation3dSupplier.isPresent()) {
-      return getGyroRotation3d().getMeasureZ();
-    }
-    if (gyroSupplier.isEmpty()) {
-      throw new IllegalStateException("Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
-    }
-    return (gyroInverted ? gyroSupplier.get().get().unaryMinus() : gyroSupplier.get().get()).minus(gyroOffset.orElse(Rotations.of(0)));
-  }
-
-  /**
    * Get the robot's attitude from the gyro, with the heading axis, inversion and offset applied:
-   * its yaw is the robot's heading. A gyro given as an angle with {@link #withGyro(Supplier)} has
-   * no tilt.
+   * its yaw is the robot's heading.
    *
    * @return The robot's attitude.
    * @throws IllegalStateException if no gyro is set.
    */
   public Rotation3d getGyroRotation3d() {
-    if (gyroRotation3dSupplier.isEmpty()) {
-      return new Rotation3d(0, 0, getGyroAngle().in(Radians));
+    if (gyroSupplier.isEmpty()) {
+      throw new IllegalStateException("Gyro supplier is not set! Please use .withGyro() to set the gyro supplier!");
     }
-    Rotation3d attitude = gyroHeadingAxis.toRobotAttitude(gyroRotation3dSupplier.get().get());
+    Rotation3d attitude = gyroHeadingAxis.toRobotAttitude(gyroSupplier.get().get());
     if (gyroInverted) {
       attitude = new Rotation3d(attitude.getX(), attitude.getY(), -attitude.getZ());
     }
@@ -790,8 +755,8 @@ public class SwerveDriveConfig {
             getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + "supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro angle instead.", Alert.AlertType.kInfo);
         noGyroAngularVelocitySupplierAlert.set(true);
       }
-      // Follow the gyro angle across a wrap, so the derivative does not see a full turn in one loop.
-      final double gyroAngleRadians = getGyroAngle().in(Radians);
+      // Follow the heading across a wrap, so the derivative does not see a full turn in one loop.
+      final double gyroAngleRadians = getGyroRotation3d().getZ();
       continuousGyroAngleRadians = continuousGyroAngleRead
                                    ? continuousGyroAngleRadians + MathUtil.angleModulus(gyroAngleRadians - continuousGyroAngleRadians)
                                    : gyroAngleRadians;
@@ -801,7 +766,7 @@ public class SwerveDriveConfig {
     var angularVelocityScale = (RobotBase.isSimulation() ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) : angularVelocityScaleFactor.orElseThrow());
     var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);
     if (angularVelocity.getRadians() != 0.0) {
-      var gyroRotation = new Rotation2d(getGyroAngle());
+      var gyroRotation = getGyroRotation3d().toRotation2d();
       ChassisSpeeds fieldRelativeVelocity = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeVelocity, gyroRotation);
       robotRelativeVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeVelocity, gyroRotation.plus(angularVelocity));
     }
@@ -837,50 +802,24 @@ public class SwerveDriveConfig {
   }
 
   /**
-   * Whether a translation PID controller is configured. The drive runs without one; only driving to
-   * a pose needs it.
+   * Get the translation PID controller, if one is configured. The drive runs without one; only
+   * driving to a pose needs it.
    *
-   * @return True if {@link #getTranslationPID()} has a controller to return.
+   * @return Translation PID controller, or empty if none is configured.
    */
-  public boolean hasTranslationPID() {
-    return translationController.isPresent() || (RobotBase.isSimulation() && simTranslationController.isPresent());
+  public Optional<PIDController> getTranslationPID() {
+    return RobotBase.isSimulation() ? simTranslationController.or(() -> translationController) : translationController;
   }
 
   /**
-   * Whether a rotation PID controller is configured. The drive runs without one; only driving to a
-   * pose and the heading, aim and translation only modes of
+   * Get the rotation PID controller, if one is configured. The drive runs without one; only driving
+   * to a pose and the heading, aim and translation only modes of
    * {@link yams.mechanisms.swerve.utility.SwerveInputStream} need it.
    *
-   * @return True if {@link #getRotationPID()} has a controller to return.
+   * @return Rotation PID controller, or empty if none is configured.
    */
-  public boolean hasRotationPID() {
-    return rotationController.isPresent() || (RobotBase.isSimulation() && simRotationController.isPresent());
-  }
-
-  /**
-   * Get the translation PID controller.
-   *
-   * @return Translation PID controller.
-   * @throws SwerveDriveConfigurationException if no translation PID controller is configured.
-   */
-  public PIDController getTranslationPID() {
-    if (!hasTranslationPID()) {
-      throw new SwerveDriveConfigurationException("No translation PID controller configured", "Cannot drive to a pose", "withTranslationController(PIDController)");
-    }
-    return (RobotBase.isSimulation() ? simTranslationController.orElseGet(translationController::get) : translationController.get());
-  }
-
-  /**
-   * Get the rotation PID controller.
-   *
-   * @return Rotation PID controller.
-   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
-   */
-  public PIDController getRotationPID() {
-    if (!hasRotationPID()) {
-      throw new SwerveDriveConfigurationException("No rotation PID controller configured", "Cannot drive to a pose or hold a heading", "withRotationController(PIDController)");
-    }
-    return (RobotBase.isSimulation() ? simRotationController.orElseGet(rotationController::get) : rotationController.get());
+  public Optional<PIDController> getRotationPID() {
+    return RobotBase.isSimulation() ? simRotationController.or(() -> rotationController) : rotationController;
   }
 
   /**

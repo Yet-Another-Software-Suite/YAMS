@@ -8,6 +8,8 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import yams.exceptions.SwerveDriveConfigurationException;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -123,8 +125,6 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
   /** Target to aim at. */
   private Optional<Supplier<Pose2d>> aimTarget = Optional.empty();
 
-  /** Target {@link Supplier<Pose2d>} to drive towards when driveToPose is enabled. */
-  private Optional<Supplier<Pose2d>> driveToPose = Optional.empty();
 
   /** Output {@link ChassisSpeeds} based on heading while this is True. */
   private Optional<BooleanSupplier> headingEnabled = Optional.empty();
@@ -135,8 +135,6 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
   /** Output {@link ChassisSpeeds} based on aim while this is True. */
   private Optional<BooleanSupplier> aimEnabled = Optional.empty();
 
-  /** Output {@link ChassisSpeeds} to move to a specific {@link Pose2d}. */
-  private Optional<BooleanSupplier> driveToPoseEnabled = Optional.empty();
 
   /** Maintain current heading and drive without rotating, ideally. */
   private Optional<BooleanSupplier> translationOnlyEnabled = Optional.empty();
@@ -255,11 +253,9 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
     axisDeadband = cfg.axisDeadband;
     translationAxisScale = cfg.translationAxisScale;
     omegaAxisScale = cfg.omegaAxisScale;
-    driveToPose = cfg.driveToPose;
     aimTarget = cfg.aimTarget;
     headingEnabled = cfg.headingEnabled;
     aimEnabled = cfg.aimEnabled;
-    driveToPoseEnabled = cfg.driveToPoseEnabled;
     currentMode = cfg.currentMode;
     translationOnlyEnabled = cfg.translationOnlyEnabled;
     lockedHeading = cfg.lockedHeading;
@@ -582,7 +578,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
     // Transitioning to new mode
     switch (newMode) {
       case TRANSLATION_ONLY -> {
-        lockedHeading = Optional.of(new Rotation2d(swerveDrive.getGyroAngle()));
+        lockedHeading = Optional.of(swerveDrive.getGyroRotation3d().toRotation2d());
         swerveDrive.resetRotationPID();
         break;
       }
@@ -594,6 +590,17 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
         break;
       }
     }
+  }
+
+  /**
+   * Get the rotation PID controller the heading, aim and translation only modes need.
+   *
+   * @param config {@link SwerveDriveConfig} of the drive.
+   * @return The rotation {@link PIDController}.
+   * @throws SwerveDriveConfigurationException if no rotation PID controller is configured.
+   */
+  private static PIDController requireRotationPID(SwerveDriveConfig config) {
+    return config.getRotationPID().orElseThrow(() -> new SwerveDriveConfigurationException("No rotation PID controller configured", "Heading, aim, and translation only control are unavailable", "withRotationController(PIDController)"));
   }
 
   /**
@@ -664,7 +671,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
    */
   private ChassisSpeeds applyRobotRelativeTranslation(ChassisSpeeds fieldRelativeSpeeds) {
     if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
-      return ChassisSpeeds.fromRobotRelativeSpeeds(fieldRelativeSpeeds, new Rotation2d(swerveDrive.getGyroAngle()));
+      return ChassisSpeeds.fromRobotRelativeSpeeds(fieldRelativeSpeeds, swerveDrive.getGyroRotation3d().toRotation2d());
     }
     return fieldRelativeSpeeds;
   }
@@ -731,9 +738,9 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
     }
     switch (newMode) {
       case TRANSLATION_ONLY -> {
-        var azimuthPIDs = config.getRotationPID();
+        var azimuthPIDs = requireRotationPID(config);
 
-        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), lockedHeading.orElseThrow().getRadians());
+        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroRotation3d().getZ(), lockedHeading.orElseThrow().getRadians());
         speeds = new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
         break;
       }
@@ -743,8 +750,8 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
         break;
       }
       case HEADING -> {
-        var azimuthPIDs = config.getRotationPID();
-        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), headingSupplier.orElseThrow().get().in(Radians));
+        var azimuthPIDs = requireRotationPID(config);
+        omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroRotation3d().getZ(), headingSupplier.orElseThrow().get().in(Radians));
 
         // Prevent rotation if controller heading inputs are not past axisDeadband
         if (controllerHeadingX.isPresent() && controllerHeadingY.isPresent() && axisDeadband.isPresent() && Math.abs(controllerHeadingX.get().getAsDouble()) + Math.abs(controllerHeadingY.get().getAsDouble()) < axisDeadband.get()) {
@@ -754,8 +761,8 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
         break;
       }
       case AIM -> {
-        var azimuthPIDs = config.getRotationPID();
-        Rotation2d currentHeading = new Rotation2d(swerveDrive.getGyroAngle());
+        var azimuthPIDs = requireRotationPID(config);
+        Rotation2d currentHeading = swerveDrive.getGyroRotation3d().toRotation2d();
         Translation2d relativeTrl = aimTarget.orElseThrow().get().relativeTo(swerveDrive.getPose()).getTranslation();
         Rotation2d target = new Rotation2d(relativeTrl.getX(), relativeTrl.getY()).plus(currentHeading);
         omegaRadiansPerSecond = azimuthPIDs.calculate(currentHeading.getRadians(), target.getRadians());

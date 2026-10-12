@@ -210,9 +210,9 @@ public class SwerveSubsystem extends SubsystemBase
                           "backright",
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
     SwerveDriveConfig config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        // gyro.getYaw() gives the heading used to rotate the velocity vector for field-relative
+        // The yaw of gyro.getRotation3d() is the heading used to rotate the velocity vector for field-relative
         // driving; without this, forward on the stick always means "robot nose direction".
-        .withGyro(gyro.getYaw().asSupplier())
+        .withGyro(gyro::getRotation3d)
         .withStartingPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         // Translation and rotation PIDs are used by driveToPose(); kP=1 is a conservative start.
         .withTranslationController(new PIDController(1, 0, 0))

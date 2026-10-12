@@ -14,6 +14,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -230,7 +231,7 @@ public class SwerveSubsystem extends SubsystemBase
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
     config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        .withGyro(() -> getGyroAngle().getMeasure())
+        .withGyro(() -> new Rotation3d(0, 0, getGyroAngle().getRadians()))
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
         .withStartingPose(swerveInputs.estimatedPose)
@@ -294,8 +295,8 @@ public class SwerveSubsystem extends SubsystemBase
       drive.resetTranslationPID();
       drive.resetRotationPID();
     }, () -> {
-      var azimuthPID        = config.getRotationPID();
-      var translationPID    = config.getTranslationPID();
+      var azimuthPID        = config.getRotationPID().orElseThrow();
+      var translationPID    = config.getTranslationPID().orElseThrow();
       var distance          = drive.getDistanceFromPose(pose);
       var angleDifference   = drive.getAngleDifferenceFromPose(pose);
       var translationScalar = translationPID.calculate(distance.in(Meters), 0);
