@@ -6,6 +6,7 @@ package yams.telemetry;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -137,8 +138,9 @@ public class SwerveDriveTelemetry {
   @SuppressWarnings("unchecked")
   public void applyTuningValues(SwerveDrive drive) {
     var cfg = drive.getConfig();
-    var translationPID = cfg.getTranslationPID();
-    var rotationPID = cfg.getRotationPID();
+    // A drive may have no auto-align controllers: show zero gains until some are given.
+    var translationPID = cfg.hasTranslationPID() ? cfg.getTranslationPID() : new PIDController(0, 0, 0);
+    var rotationPID = cfg.hasRotationPID() ? cfg.getRotationPID() : new PIDController(0, 0, 0);
     boolean nt4Enabled = m_config.getNT4Enabled();
 
     var autoAlignBt = m_boolTelemetry.get(BooleanTelemetryField.AutoAlignEnabled);

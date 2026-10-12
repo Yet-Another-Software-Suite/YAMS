@@ -6,6 +6,7 @@ package yams.mechanisms.swerve;
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.hal.HAL;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -164,6 +166,8 @@ public class SwerveDrive {
   public SwerveDrive(SwerveDriveConfig config) {
     m_config = config;
     m_modules = config.getModules();
+    // Covers modules given to the config after withModuleStateOptimization was called.
+    config.getModuleStateOptimization().ifPresent(enabled -> Arrays.stream(m_modules).forEach(module -> module.getConfig().withOptimization(enabled)));
     m_desiredModuleStates = new SwerveModuleState[m_modules.length];
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
@@ -302,7 +306,17 @@ public class SwerveDrive {
     SwerveModuleState[] states = m_config.getCenterOfRotation().isPresent() ? m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds, m_config.getCenterOfRotation().get()) : m_kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
     // Scale all modules down together so none exceeds its maximum speed. Saturating modules individually would
     // break the speed ratios between them and make them fight each other.
-    m_config.getMaximumModuleLinearVelocity().ifPresent(maxSpeed -> SwerveDriveKinematics.desaturateWheelSpeeds(states, maxSpeed));
+    final ChassisSpeeds desiredSpeeds = robotRelativeChassisSpeeds;
+    m_config.getMaximumModuleLinearVelocity().ifPresent(maxSpeed -> {
+      var maxLinear = m_config.getMaximumChassisLinearVelocity();
+      var maxAngular = m_config.getMaximumChassisAngularVelocity();
+      if (maxLinear.isPresent() && maxAngular.isPresent()) {
+        // With the chassis limits known, also scale for how much of them the request asks for.
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, desiredSpeeds, maxSpeed, maxLinear.get(), maxAngular.get());
+      } else {
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, maxSpeed);
+      }
+    });
     return states;
   }
 
@@ -421,6 +435,19 @@ public class SwerveDrive {
   }
 
   /**
+   * Get the robot's attitude from the gyro (see {@link SwerveDriveConfig#getGyroRotation3d()}): its
+   * yaw is the robot's heading. In simulation, the simulated heading with no tilt.
+   *
+   * @return The robot's attitude.
+   */
+  public Rotation3d getGyroRotation3d() {
+    if (RobotBase.isSimulation()) {
+      return new Rotation3d(0, 0, m_simGyroAngle.in(Radians));
+    }
+    return m_config.getGyroRotation3d();
+  }
+
+  /**
    * Get the name of the drive.
    *
    * @return Name of the drive.
@@ -453,12 +480,16 @@ public class SwerveDrive {
 
   /** Resets the auto-align rotational PID controller. */
   public void resetRotationPID() {
-    m_config.getRotationPID().reset();
+    if (m_config.hasRotationPID()) {
+      m_config.getRotationPID().reset();
+    }
   }
 
   /** Resets the auto-align translation PID controller. */
   public void resetTranslationPID() {
-    m_config.getTranslationPID().reset();
+    if (m_config.hasTranslationPID()) {
+      m_config.getTranslationPID().reset();
+    }
   }
 
   /**
@@ -467,8 +498,8 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to use, units given is in Radians.
    */
   public void setRotationPID(PIDController controller) {
-    var currentRotationPID = m_config.getRotationPID();
-    if (currentRotationPID.getP() != controller.getP() || currentRotationPID.getI() != controller.getI() || currentRotationPID.getD() != controller.getD()) {
+    var currentRotationPID = m_config.hasRotationPID() ? m_config.getRotationPID() : null;
+    if (currentRotationPID == null || currentRotationPID.getP() != controller.getP() || currentRotationPID.getI() != controller.getI() || currentRotationPID.getD() != controller.getD()) {
       controller.reset();
       m_config.withRotationController(controller);
     }
@@ -480,8 +511,8 @@ public class SwerveDrive {
    * @param controller {@link PIDController} to reset, Units given is in Meters.
    */
   public void setTranslationPID(PIDController controller) {
-    var currentTranslationPID = m_config.getTranslationPID();
-    if (currentTranslationPID.getP() != controller.getP() || currentTranslationPID.getI() != controller.getI() || currentTranslationPID.getD() != controller.getD()) {
+    var currentTranslationPID = m_config.hasTranslationPID() ? m_config.getTranslationPID() : null;
+    if (currentTranslationPID == null || currentTranslationPID.getP() != controller.getP() || currentTranslationPID.getI() != controller.getI() || currentTranslationPID.getD() != controller.getD()) {
       controller.reset();
       m_config.withTranslationController(controller);
     }
@@ -523,6 +554,45 @@ public class SwerveDrive {
     }, () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
                    .finallyDo(() -> setRobotRelativeChassisSpeeds(new ChassisSpeeds()))
                    .withName("Drive to Pose");
+  }
+
+  /**
+   * Drive the robot to the given pose, ending once the robot is within the given tolerances. The
+   * drive is stopped when the command ends or is interrupted.
+   *
+   * @param pose                 {@link Pose2d} to drive the robot to. Field relative, blue-origin
+   *                             where 0deg is facing towards RED
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return {@link Command} to drive the robot to the given pose.
+   * @implNote Not compatible with AdvantageKit
+   */
+  public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    return Commands.startRun(() -> {
+      resetTranslationPID();
+      resetRotationPID();
+    }, () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
+                   .until(() -> isNear(pose, translationTolerance, rotationTolerance))
+                   .finallyDo(this::stop)
+                   .withName("Drive to Pose");
+  }
+
+  /**
+   * Whether the robot is within the given tolerances of a pose.
+   *
+   * @param pose                 {@link Pose2d} to compare against.
+   * @param translationTolerance Maximum distance from the pose.
+   * @param rotationTolerance    Maximum heading error from the pose.
+   * @return True if the robot is within both tolerances of the pose.
+   */
+  public boolean isNear(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    return getDistanceFromPose(pose).lte(translationTolerance) &&
+           Math.abs(getAngleDifferenceFromPose(pose).in(Radians)) <= rotationTolerance.in(Radians);
+  }
+
+  /** Stop the drive by commanding zero chassis speeds. */
+  public void stop() {
+    setRobotRelativeChassisSpeeds(new ChassisSpeeds());
   }
 
   /**

@@ -117,8 +117,8 @@ public class SwerveModuleConfig {
   /** Swerve module cosine compensation. */
   private boolean cosineCompensation = false;
 
-  /** Coupling ratio for the {@link SwerveModule}. */
-  private GearBox couplingRatio;
+  /** Coupling ratio for the {@link SwerveModule}, see {@link #withCouplingRatio(GearBox)}. */
+  private Optional<GearBox> couplingRatio = Optional.empty();
 
   /** Swerve module minimum velocity. */
   private Optional<LinearVelocity> minimumVelocity = Optional.empty();
@@ -380,10 +380,73 @@ public class SwerveModuleConfig {
    *
    * @param speed Minimum velocity for the {@link SmartMotorController}.
    * @return {@link SwerveModuleConfig} for chaining.
+   * @deprecated Use {@link #withVelocityDeadband(LinearVelocity)}, the name this has from 2027 on.
    */
+  @Deprecated
   public SwerveModuleConfig withMinimumVelocity(LinearVelocity speed) {
+    return withVelocityDeadband(speed);
+  }
+
+  /**
+   * Set the velocity deadband: a wheel commanded at or below this speed is held where it is, at zero
+   * speed, instead of being turned to an angle it is too slow to steer by. This keeps the wheels
+   * from snapping back to forward when the driver lets go of the sticks.
+   *
+   * @param speed Speed at or below which the wheel is held where it is, or null for no deadband.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withVelocityDeadband(LinearVelocity speed) {
     minimumVelocity = Optional.ofNullable(speed);
     return this;
+  }
+
+  /**
+   * Get the velocity deadband.
+   *
+   * @return Speed at or below which the wheel is held where it is, empty when there is no deadband.
+   */
+  public Optional<LinearVelocity> getVelocityDeadband() {
+    return minimumVelocity;
+  }
+
+  /**
+   * Set the coupling between the azimuth and the drive: on most modules turning the azimuth also
+   * turns the wheel a little, because the drive gearing rides on the azimuth. With the ratio set,
+   * the module takes that out of the drive velocity and distance it reports, and adds it to the
+   * drive velocity it commands, so turning the wheels does not read as driving.
+   *
+   * @param couplingRatio {@link GearBox} from azimuth rotations to drive motor rotations, or null
+   *                      for no coupling.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withCouplingRatio(GearBox couplingRatio) {
+    this.couplingRatio = Optional.ofNullable(couplingRatio);
+    return this;
+  }
+
+  /**
+   * Set the coupling between the azimuth and the drive, see {@link #withCouplingRatio(GearBox)}.
+   *
+   * @param driveMotorRotationsPerAzimuthRotation How many rotations the drive motor makes for one
+   *                                              rotation of the azimuth with the wheel held still.
+   *                                              0 for no coupling.
+   * @return {@link SwerveModuleConfig} for chaining.
+   */
+  public SwerveModuleConfig withCouplingRatio(double driveMotorRotationsPerAzimuthRotation) {
+    if (driveMotorRotationsPerAzimuthRotation == 0) {
+      this.couplingRatio = Optional.empty();
+      return this;
+    }
+    return withCouplingRatio(GearBox.fromReductionStages(driveMotorRotationsPerAzimuthRotation));
+  }
+
+  /**
+   * Get the coupling between the azimuth and the drive.
+   *
+   * @return Empty when no coupling ratio is set.
+   */
+  public Optional<GearBox> getCouplingRatio() {
+    return couplingRatio;
   }
 
   /**

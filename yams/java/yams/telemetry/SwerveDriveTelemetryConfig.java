@@ -3,6 +3,7 @@
 
 package yams.telemetry;
 
+import edu.wpi.first.math.controller.PIDController;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -201,8 +202,9 @@ public class SwerveDriveTelemetryConfig {
    */
   public Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> getDoubleFields(SwerveDrive drive) {
     var cfg = drive.getConfig();
-    var translationPID = cfg.getTranslationPID();
-    var rotationPID = cfg.getRotationPID();
+    // A drive may have no auto-align controllers: show zero gains until some are given.
+    var translationPID = cfg.hasTranslationPID() ? cfg.getTranslationPID() : new PIDController(0, 0, 0);
+    var rotationPID = cfg.hasRotationPID() ? cfg.getRotationPID() : new PIDController(0, 0, 0);
     doubleFields.get(DoubleTelemetryField.TranslationP).setDefaultValue(translationPID.getP());
     doubleFields.get(DoubleTelemetryField.TranslationI).setDefaultValue(translationPID.getI());
     doubleFields.get(DoubleTelemetryField.TranslationD).setDefaultValue(translationPID.getD());
