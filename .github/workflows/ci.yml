@@ -80,7 +80,7 @@ jobs:
           path: vendordep/build/maven/
 
   test-cpp:
-    name: C++ unit tests
+    name: C++ unit tests - ${{ matrix.group }}
     needs: [build-linux]
     runs-on: ubuntu-latest
     permissions:
@@ -88,6 +88,20 @@ jobs:
     defaults:
       run:
         working-directory: vendordep
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The same groups as the Java unit tests. A colon in a Google Test filter means "or",
+          # and everything after the "-" is excluded.
+          # Mechanism-level integration tests (Arm/Elevator/Pivot/Shooter/Swerve).
+          - group: mechanisms
+            gtest-filter: '*ArmTest*:*ElevatorTest*:*PivotTest*:*ShooterTest*:Swerve*'
+          # Everything else: there are no C++ motor controller unit tests yet, so this is the
+          # standalone math tests. New suites run here unless they are added to the group above
+          # and excluded here.
+          - group: motorcontrollers
+            gtest-filter: '-*ArmTest*:*ElevatorTest*:*PivotTest*:*ShooterTest*:Swerve*'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
@@ -115,8 +129,8 @@ jobs:
         with:
           name: maven-linux
           path: vendordep/build/maven/
-      - name: C++ unit tests
-        run: ./gradlew googleTest
+      - name: C++ unit tests - ${{ matrix.group }}
+        run: ./gradlew googleTest "-PgtestFilter=${{ matrix.gtest-filter }}"
         continue-on-error: true
 
   test-java:
