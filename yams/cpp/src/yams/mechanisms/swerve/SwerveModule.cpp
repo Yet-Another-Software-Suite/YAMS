@@ -81,6 +81,13 @@ void SwerveModule::SetSwerveModuleState(frc::SwerveModuleState state) {
   m_azimuthMotorController->SetPosition(units::degree_t{state.angle.Degrees()});
 }
 
+frc::SwerveModuleState SwerveModule::Lock(frc::Rotation2d angle) {
+  auto state = m_config->GetLockedState(angle);
+  m_driveMotorController->SetVelocity(state.speed);
+  m_azimuthMotorController->SetPosition(units::degree_t{state.angle.Degrees()});
+  return state;
+}
+
 frc::SwerveModuleState SwerveModule::GetState() const {
   return frc::SwerveModuleState{
       m_driveMotorController->GetMeasurementVelocity(),

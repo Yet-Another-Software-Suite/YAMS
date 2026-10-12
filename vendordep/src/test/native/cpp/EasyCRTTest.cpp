@@ -34,9 +34,9 @@ constexpr int kBTeeth = 21;
 }  // namespace
 
 TEST(EasyCRTTest, UniqueRangeIsLcmOverTheSharedGear) {
-  EXPECT_NEAR(EasyCRT{100, 19, 21}.GetUniqueRange().value(), 3.99, 1e-9);
+  EXPECT_NEAR((EasyCRT{100, 19, 21}.GetUniqueRange().value()), 3.99, 1e-9);
   // 20 and 30 share a factor of 10, so they only cover lcm(20, 30) = 60 teeth.
-  EXPECT_NEAR(EasyCRT{100, 20, 30}.GetUniqueRange().value(), 0.6, 1e-9);
+  EXPECT_NEAR((EasyCRT{100, 20, 30}.GetUniqueRange().value()), 0.6, 1e-9);
 }
 
 TEST(EasyCRTTest, SolvesAcrossTheCenteredRange) {

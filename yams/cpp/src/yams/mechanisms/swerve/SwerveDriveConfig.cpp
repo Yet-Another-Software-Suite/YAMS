@@ -224,20 +224,24 @@ frc::ChassisSpeeds SwerveDriveConfig::OptimizeRobotRelativeChassisSpeeds(
   return speeds;
 }
 
-frc::PIDController& SwerveDriveConfig::GetTranslationPID() {
+std::optional<std::reference_wrapper<frc::PIDController>> SwerveDriveConfig::GetTranslationPID() {
   if (frc::RobotBase::IsSimulation() && m_simTranslationController) {
-    return *m_simTranslationController;
+    return std::ref(*m_simTranslationController);
   }
-  if (!m_translationController) throw std::logic_error("Translation PID controller not set.");
-  return *m_translationController;
+  if (m_translationController) {
+    return std::ref(*m_translationController);
+  }
+  return std::nullopt;
 }
 
-frc::PIDController& SwerveDriveConfig::GetRotationPID() {
+std::optional<std::reference_wrapper<frc::PIDController>> SwerveDriveConfig::GetRotationPID() {
   if (frc::RobotBase::IsSimulation() && m_simRotationController) {
-    return *m_simRotationController;
+    return std::ref(*m_simRotationController);
   }
-  if (!m_rotationController) throw std::logic_error("Rotation PID controller not set.");
-  return *m_rotationController;
+  if (m_rotationController) {
+    return std::ref(*m_rotationController);
+  }
+  return std::nullopt;
 }
 
 frc::Translation2d SwerveDriveConfig::CubeTranslation(frc::Translation2d translation) {

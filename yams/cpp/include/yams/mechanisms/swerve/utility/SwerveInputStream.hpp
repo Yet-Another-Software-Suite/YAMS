@@ -17,15 +17,20 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <numbers>
 #include <optional>
-#include <stdexcept>
+#include <string>
 #include <utility>
 
+#include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 
 namespace yams::mechanisms::swerve::utility {
+
+template <size_t NumModules>
+class SwerveInputStreamTelemetry;
 
 /**
  * Transforms controller axis inputs into ChassisSpeeds with built-in support for
@@ -88,6 +93,20 @@ class SwerveInputStream {
   }
 
   /**
+   * Create a SwerveInputStream with an angular-velocity rotation axis.
+   *
+   * @param drive SwerveDrive to query pose and gyro from.
+   * @param x     Translation X axis supplier, range [-1, 1].
+   * @param y     Translation Y axis supplier, range [-1, 1].
+   * @param rot   Rotation axis supplier, range [-1, 1].
+   * @return New SwerveInputStream instance.
+   */
+  static SwerveInputStream Of(SwerveDrive<NumModules>& drive, std::function<double()> x,
+                              std::function<double()> y, std::function<double()> rot) {
+    return SwerveInputStream{drive, std::move(x), std::move(y), std::move(rot)};
+  }
+
+  /**
    * Construct with an angular-velocity rotation axis (enables ANGULAR_VELOCITY mode).
    *
    * @param drive SwerveDrive to query from.
@@ -114,13 +133,151 @@ class SwerveInputStream {
                     std::function<double()> y, std::function<double()> headingX,
                     std::function<double()> headingY)
       : SwerveInputStream{drive, std::move(x), std::move(y)} {
-    m_controllerHeadingX = std::move(headingX);
-    m_controllerHeadingY = std::move(headingY);
+    WithControllerHeadingAxis(std::move(headingX), std::move(headingY));
   }
 
-  /** Return a copy of this stream; subsequent With* calls on the copy do not affect the original.
+  using TelemetryVerbosity = SwerveDriveConfig::TelemetryVerbosity;
+
+  /**
+   * Return a copy of this stream; subsequent With* calls on the copy do not affect the original.
+   * Unlike a plain copy, the clone has no telemetry, so it does not publish under this stream's
+   * name.
    */
-  SwerveInputStream Clone() const { return *this; }
+  SwerveInputStream Clone() const {
+    SwerveInputStream clone = *this;
+    clone.m_telemetry.settings.reset();
+    return clone;
+  }
+
+  // ---- Telemetry and live tuning ---------------------------------------------
+
+  /**
+   * Publish this stream's telemetry under SwerveInputStream/<name>, updated every time the stream
+   * is read. At HIGH the stream is also live tunable: see SwerveInputStreamTelemetry. Replaces any
+   * telemetry this stream already had; NONE turns it off.
+   *
+   * The telemetry is created when the stream is first read or GetTelemetry() is called, so copies
+   * made while building the stream do not publish. A copy of a stream with telemetry publishes
+   * under the same name once read; use Clone() for a copy without telemetry.
+   *
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity TelemetryVerbosity to publish at.
+   * @return *this for chaining.
+   */
+  SwerveInputStream& WithTelemetry(std::string name, TelemetryVerbosity verbosity) {
+    m_telemetry.telemetry.reset();
+    if (verbosity == TelemetryVerbosity::NONE) {
+      m_telemetry.settings.reset();
+    } else {
+      m_telemetry.settings.emplace(std::move(name), verbosity);
+    }
+    return *this;
+  }
+
+  /**
+   * Get this stream's telemetry, created by WithTelemetry(name, verbosity).
+   *
+   * @return The SwerveInputStreamTelemetry, or empty if telemetry is not enabled.
+   */
+  std::optional<std::reference_wrapper<SwerveInputStreamTelemetry<NumModules>>> GetTelemetry() {
+    if (!m_telemetry.settings) {
+      return std::nullopt;
+    }
+    if (!m_telemetry.telemetry) {
+      m_telemetry.telemetry = std::make_unique<SwerveInputStreamTelemetry<NumModules>>(
+          *this, m_telemetry.settings->first, m_telemetry.settings->second);
+    }
+    return std::ref(*m_telemetry.telemetry);
+  }
+
+  /** Get the name of the drive mode used by the last Get() call, e.g. "ANGULAR_VELOCITY". */
+  std::string GetCurrentModeName() const {
+    switch (m_currentMode) {
+      case SwerveInputMode::TRANSLATION_ONLY:
+        return "TRANSLATION_ONLY";
+      case SwerveInputMode::ANGULAR_VELOCITY:
+        return "ANGULAR_VELOCITY";
+      case SwerveInputMode::HEADING:
+        return "HEADING";
+      case SwerveInputMode::AIM:
+        return "AIM";
+    }
+    return "UNKNOWN";
+  }
+
+  /** Get the controller axis deadband, 0 when none is applied. */
+  double GetAxisDeadband() const { return m_axisDeadband.value_or(0.0); }
+
+  /** Set the deadband applied to every axis, 0 to disable. */
+  void SetAxisDeadband(double deadband) {
+    m_axisDeadband = (deadband == 0.0) ? std::nullopt : std::optional<double>{deadband};
+  }
+
+  /** Get the translation axis scalar, 1 when unscaled. */
+  double GetTranslationAxisScale() const { return m_translationAxisScale.value_or(1.0); }
+
+  /** Set the scalar in (0, 1] applied to the translation axes, 0 to disable. */
+  void SetTranslationAxisScale(double scale) {
+    m_translationAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
+  }
+
+  /** Get the angular velocity axis scalar, 1 when unscaled. */
+  double GetOmegaAxisScale() const { return m_omegaAxisScale.value_or(1.0); }
+
+  /** Set the scalar in (0, 1] applied to the angular velocity axis, 0 to disable. */
+  void SetOmegaAxisScale(double scale) {
+    m_omegaAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
+  }
+
+  /** Get the chassis linear velocity a full translation axis maps to. */
+  units::meters_per_second_t GetMaximumChassisLinearVelocity() const {
+    return m_maximumChassisLinearVelocity;
+  }
+
+  /** Set the chassis linear velocity a full translation axis maps to. */
+  void SetMaximumChassisLinearVelocity(units::meters_per_second_t velocity) {
+    m_maximumChassisLinearVelocity = velocity;
+  }
+
+  /** Get the chassis angular velocity a full angular velocity axis maps to. */
+  units::radians_per_second_t GetMaximumChassisAngularVelocity() const {
+    return m_maximumChassisAngularVelocity;
+  }
+
+  /** Set the chassis angular velocity a full angular velocity axis maps to. */
+  void SetMaximumChassisAngularVelocity(units::radians_per_second_t velocity) {
+    m_maximumChassisAngularVelocity = velocity;
+  }
+
+  /** Check if the translation magnitude is cubed. */
+  bool IsTranslationCubeEnabled() const {
+    return m_translationCube.has_value() && m_translationCube.value()();
+  }
+
+  /** Enable or disable cubing the translation magnitude. */
+  void SetTranslationCubeEnabled(bool enabled) { m_translationCube = Constant(enabled); }
+
+  /** Check if the angular velocity axis is cubed. */
+  bool IsOmegaCubeEnabled() const { return m_omegaCube.has_value() && m_omegaCube.value()(); }
+
+  /** Enable or disable cubing the angular velocity axis. */
+  void SetOmegaCubeEnabled(bool enabled) { m_omegaCube = Constant(enabled); }
+
+  /** Check if translation is flipped 180 degrees while on the red alliance. */
+  bool IsAllianceRelativeEnabled() const {
+    return m_allianceRelative.has_value() && m_allianceRelative.value()();
+  }
+
+  /** Enable or disable flipping translation 180 degrees while on the red alliance. */
+  void SetAllianceRelativeEnabled(bool enabled) { m_allianceRelative = Constant(enabled); }
+
+  /** Check if the translation axes are treated as robot relative. */
+  bool IsRobotRelativeEnabled() const {
+    return m_robotRelative.has_value() && m_robotRelative.value()();
+  }
+
+  /** Enable or disable treating the translation axes as robot relative. */
+  void SetRobotRelativeEnabled(bool enabled) { m_robotRelative = Constant(enabled); }
 
   // ---- Builder methods -------------------------------------------------------
 
@@ -158,7 +315,8 @@ class SwerveInputStream {
   }
 
   /**
-   * Add heading X/Y axes (enables HEADING mode when WithHeadingControl() is active).
+   * Add heading X/Y axes (enables HEADING mode when WithHeadingControl() is active). The robot
+   * stops turning while the stick is inside the deadband. Replaces any heading from WithHeading().
    *
    * @param headingX Supplier for the heading X component, range [-1, 1].
    * @param headingY Supplier for the heading Y component, range [-1, 1].
@@ -166,8 +324,23 @@ class SwerveInputStream {
    */
   SwerveInputStream& WithControllerHeadingAxis(std::function<double()> headingX,
                                                std::function<double()> headingY) {
+    WithHeading([headingX, headingY] { return units::radian_t{std::atan2(headingX(), headingY())}; });
     m_controllerHeadingX = std::move(headingX);
     m_controllerHeadingY = std::move(headingY);
+    return *this;
+  }
+
+  /**
+   * Set the field relative heading to face while heading control is enabled, from any source such
+   * as a fixed angle or the angle to a target. Replaces any controller heading axis.
+   *
+   * @param heading Supplier of the field relative heading.
+   * @return *this for chaining.
+   */
+  SwerveInputStream& WithHeading(std::function<units::radian_t()> heading) {
+    m_headingSupplier = std::move(heading);
+    m_controllerHeadingX.reset();
+    m_controllerHeadingY.reset();
     return *this;
   }
 
@@ -207,7 +380,7 @@ class SwerveInputStream {
   /**
    * Enable heading-based control while the supplier returns true.
    *
-   * Requires WithControllerHeadingAxis() to be configured.
+   * Requires WithHeading() or WithControllerHeadingAxis() to be configured.
    *
    * @param trigger Supplier that enables HEADING mode when true.
    * @return *this for chaining.
@@ -359,7 +532,7 @@ class SwerveInputStream {
 
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
+        auto& pid = RequireRotationPID();
         omega = pid.Calculate(units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
                               m_lockedHeading.value().Radians().value());
         break;
@@ -370,12 +543,12 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::HEADING: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
-        double headingTarget =
-            std::atan2(m_controllerHeadingX.value()(), m_controllerHeadingY.value()());
-        omega =
-            pid.Calculate(units::radian_t{m_swerveDrive->GetGyroAngle()}.value(), headingTarget);
-        if (m_axisDeadband.has_value() &&
+        auto& pid = RequireRotationPID();
+        omega = pid.Calculate(units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
+                              m_headingSupplier.value()().value());
+        // Do not turn while the heading stick is inside the deadband.
+        if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value() &&
+            m_axisDeadband.has_value() &&
             std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
                 m_axisDeadband.value()) {
           omega = 0.0;
@@ -383,7 +556,7 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::AIM: {
-        auto& pid = m_swerveDrive->GetConfig().GetRotationPID();
+        auto& pid = RequireRotationPID();
         auto currentHeading = frc::Rotation2d{units::radian_t{m_swerveDrive->GetGyroAngle()}};
         auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
         auto target = relativeTrl.Angle() + currentHeading;
@@ -395,7 +568,11 @@ class SwerveInputStream {
     m_currentMode = newMode;
     speeds = frc::ChassisSpeeds{units::meters_per_second_t{vx}, units::meters_per_second_t{vy},
                                 units::radians_per_second_t{omega}};
-    return ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
+    auto fieldRelativeSpeeds = ApplyTranslationHeadingOffset(ApplyRobotRelativeTranslation(speeds));
+    if (auto telemetry = GetTelemetry()) {
+      telemetry->get().UpdateTelemetry();
+    }
+    return fieldRelativeSpeeds;
   }
 
   /**
@@ -433,6 +610,7 @@ class SwerveInputStream {
   std::optional<std::function<double()>> m_controllerOmega;
   std::optional<std::function<double()>> m_controllerHeadingX;
   std::optional<std::function<double()>> m_controllerHeadingY;
+  std::optional<std::function<units::radian_t()>> m_headingSupplier;
   std::optional<double> m_axisDeadband;
   std::optional<double> m_translationAxisScale;
   std::optional<double> m_omegaAxisScale;
@@ -451,7 +629,61 @@ class SwerveInputStream {
   units::meters_per_second_t m_maximumChassisLinearVelocity{4.0};
   units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
 
+  /**
+   * Telemetry settings and the telemetry created from them. Copies and moves carry the settings
+   * but not the telemetry, which points at the stream that created it; a moved-from stream stops
+   * publishing.
+   */
+  struct TelemetryHolder {
+    std::optional<std::pair<std::string, TelemetryVerbosity>> settings;
+    std::unique_ptr<SwerveInputStreamTelemetry<NumModules>> telemetry;
+
+    TelemetryHolder() = default;
+    TelemetryHolder(const TelemetryHolder& other) : settings{other.settings} {}
+    TelemetryHolder(TelemetryHolder&& other) noexcept : settings{std::move(other.settings)} {
+      other.settings.reset();
+      other.telemetry.reset();
+    }
+    TelemetryHolder& operator=(const TelemetryHolder& other) {
+      if (this != &other) {
+        settings = other.settings;
+        telemetry.reset();
+      }
+      return *this;
+    }
+    TelemetryHolder& operator=(TelemetryHolder&& other) noexcept {
+      if (this != &other) {
+        settings = std::move(other.settings);
+        telemetry.reset();
+        other.settings.reset();
+        other.telemetry.reset();
+      }
+      return *this;
+    }
+  };
+  TelemetryHolder m_telemetry;
+
   // ---- Private helpers -------------------------------------------------------
+
+  /** A supplier that is always true, or no supplier when disabled. */
+  static std::optional<std::function<bool()>> Constant(bool enabled) {
+    if (!enabled) {
+      return std::nullopt;
+    }
+    return std::function<bool()>{[] { return true; }};
+  }
+
+  /** Get the rotation PID controller the heading, aim and translation only modes need. */
+  frc::PIDController& RequireRotationPID() {
+    auto pid = m_swerveDrive->GetConfig().GetRotationPID();
+    if (!pid) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No rotation PID controller configured, heading, aim, and translation only control are "
+          "unavailable. Use SwerveDriveConfig::WithRotationController(PIDController) to fix this "
+          "error.");
+    }
+    return pid->get();
+  }
 
   SwerveInputMode FindMode() {
     if (m_translationOnlyEnabled.has_value() && m_translationOnlyEnabled.value()()) {
@@ -465,11 +697,11 @@ class SwerveInputStream {
                    "Call WithAim() first.\n";
     }
     if (m_headingEnabled.has_value() && m_headingEnabled.value()()) {
-      if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value()) {
+      if (m_headingSupplier.has_value()) {
         return SwerveInputMode::HEADING;
       }
-      std::cerr << "[YAMS SwerveInputStream] HEADING mode enabled but no heading axes set. "
-                   "Call WithControllerHeadingAxis() first.\n";
+      std::cerr << "[YAMS SwerveInputStream] HEADING mode enabled but no heading set. "
+                   "Call WithHeading() or WithControllerHeadingAxis() first.\n";
     }
     if (!m_controllerOmega.has_value()) {
       std::cerr << "[YAMS SwerveInputStream] No rotation axis configured. "
@@ -547,10 +779,11 @@ class SwerveInputStream {
   }
 
   frc::Translation2d ApplyAllianceAwareTranslation(frc::Translation2d translation) {
+    // Robot relative translation is not on the field, so there is nothing to flip for the alliance.
+    if (m_robotRelative.has_value() && m_robotRelative.value()()) {
+      return translation;
+    }
     if (m_allianceRelative.has_value() && m_allianceRelative.value()()) {
-      if (m_robotRelative.has_value() && m_robotRelative.value()()) {
-        throw std::runtime_error{"Cannot use robot-oriented control with alliance-aware movement!"};
-      }
       auto alliance = frc::DriverStation::GetAlliance();
       if (alliance.has_value() && alliance.value() == frc::DriverStation::Alliance::kRed) {
         return translation.RotateBy(frc::Rotation2d{units::degree_t{180.0}});
@@ -572,3 +805,6 @@ class SwerveInputStream {
 };
 
 }  // namespace yams::mechanisms::swerve::utility
+
+// The telemetry is a template too, so it only needs to be complete where a stream is used.
+#include "yams/mechanisms/swerve/utility/SwerveInputStreamTelemetry.hpp"

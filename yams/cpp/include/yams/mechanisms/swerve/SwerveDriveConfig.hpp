@@ -284,16 +284,16 @@ class SwerveDriveConfig {
   /**
    * Get the active translation PID controller (sim variant if in simulation and configured).
    *
-   * @throws std::logic_error if no translation controller has been set.
+   * @return The controller, or empty if no translation controller has been set.
    */
-  frc::PIDController& GetTranslationPID();
+  std::optional<std::reference_wrapper<frc::PIDController>> GetTranslationPID();
 
   /**
    * Get the active rotation PID controller (sim variant if in simulation and configured).
    *
-   * @throws std::logic_error if no rotation controller has been set.
+   * @return The controller, or empty if no rotation controller has been set.
    */
-  frc::PIDController& GetRotationPID();
+  std::optional<std::reference_wrapper<frc::PIDController>> GetRotationPID();
 
   /** Cube the polar-coordinate magnitude of a Translation2d. */
   static frc::Translation2d CubeTranslation(frc::Translation2d translation);

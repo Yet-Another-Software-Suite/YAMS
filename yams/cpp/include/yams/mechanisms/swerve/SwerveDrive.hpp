@@ -36,6 +36,7 @@
 #include <utility>
 #include <vector>
 
+#include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/telemetry/MechanismTelemetry.hpp"
@@ -145,6 +146,8 @@ class SwerveDrive {
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
     m_simPose = m_config->GetInitialPose();
+    // Also sets the gyro to read the starting heading, so field relative driving agrees with it.
+    ResetOdometry(m_config->GetInitialPose());
 
     SetupTelemetry();
 
@@ -170,21 +173,70 @@ class SwerveDrive {
   }
 
   /**
-   * Create a command that drives the robot to a target field-relative pose using PID.
+   * Create a command that drives the robot to a target field-relative pose using PID. It keeps
+   * driving to the pose until it is interrupted, and stops the drive when it ends.
    *
    * Requires translation and rotation PID controllers to be configured.
    *
    * @param pose Target field-relative pose.
-   * @return Command sequence.
+   * @return Command requiring the configured subsystem.
    */
   frc2::CommandPtr DriveToPose(frc::Pose2d pose) {
-    return frc2::cmd::RunOnce([this] {
-             ResetTranslationPID();
-             ResetRotationPID();
-           })
-        .AndThen(Drive([this, pose] { return DriveToPoseSetpoint(pose); }))
+    return frc2::cmd::StartRun(
+               [this] {
+                 ResetTranslationPID();
+                 ResetRotationPID();
+               },
+               [this, pose] { SetRobotRelativeChassisSpeeds(DriveToPoseSetpoint(pose)); },
+               {m_config->GetSubsystem()})
+        .FinallyDo([this] { Stop(); })
         .WithName("Drive to Pose");
   }
+
+  /**
+   * Create a command that drives the robot to a target field-relative pose using PID, ending once
+   * the robot is within the given tolerances. The drive is stopped when the command ends or is
+   * interrupted.
+   *
+   * Requires translation and rotation PID controllers to be configured.
+   *
+   * @param pose                 Target field-relative pose.
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return Command requiring the configured subsystem.
+   */
+  frc2::CommandPtr DriveToPose(frc::Pose2d pose, units::meter_t translationTolerance,
+                               units::degree_t rotationTolerance) {
+    return frc2::cmd::StartRun(
+               [this] {
+                 ResetTranslationPID();
+                 ResetRotationPID();
+               },
+               [this, pose] { SetRobotRelativeChassisSpeeds(DriveToPoseSetpoint(pose)); },
+               {m_config->GetSubsystem()})
+        .Until([this, pose, translationTolerance, rotationTolerance] {
+          return IsNear(pose, translationTolerance, rotationTolerance);
+        })
+        .FinallyDo([this] { Stop(); })
+        .WithName("Drive to Pose");
+  }
+
+  /**
+   * Whether the robot is within the given tolerances of a pose.
+   *
+   * @param pose                 Pose to compare against.
+   * @param translationTolerance Maximum distance from the pose.
+   * @param rotationTolerance    Maximum heading error from the pose.
+   * @return True if the robot is within both tolerances of the pose.
+   */
+  bool IsNear(frc::Pose2d pose, units::meter_t translationTolerance,
+              units::degree_t rotationTolerance) {
+    return GetDistanceFromPose(pose) <= translationTolerance &&
+           units::math::abs(GetAngleDifferenceFromPose(pose)) <= rotationTolerance;
+  }
+
+  /** Stop the drive by commanding zero chassis speeds. */
+  void Stop() { SetRobotRelativeChassisSpeeds(frc::ChassisSpeeds{}); }
 
   /**
    * Drive to the target pose, primarily for use in Live Tuning; could also be used for setpoint
@@ -192,27 +244,61 @@ class SwerveDrive {
    *
    * @param targetPose Pose to drive towards.
    * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
-   * @implNote Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
+   * @note Remember to call ResetTranslationPID() and ResetRotationPID() before calling this
    *     method in a loop.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is
+   *     not configured.
    */
   frc::ChassisSpeeds DriveToPoseSetpoint(frc::Pose2d targetPose) {
-    auto& rotationPID = m_config->GetRotationPID();
-    auto& translationPID = m_config->GetTranslationPID();
-    auto distance = GetDistanceFromPose(targetPose);
-    auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
-    auto currentPose = GetPose();
+    return DriveToPoseSetpoint(targetPose, GetPose(),
+                               frc::Rotation2d{units::radian_t{GetGyroAngle()}});
+  }
+
+  /**
+   * Robot-relative chassis speeds that drive from a given pose to the target pose, for callers
+   * that have their own pose or heading, such as a simulated ground truth.
+   *
+   * @param targetPose  Pose to drive towards.
+   * @param currentPose Pose the robot is at.
+   * @param heading     Heading used to turn the field-relative speeds into robot-relative ones.
+   * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is
+   *     not configured.
+   */
+  frc::ChassisSpeeds DriveToPoseSetpoint(frc::Pose2d targetPose, frc::Pose2d currentPose,
+                                         frc::Rotation2d heading) {
+    auto rotationPIDRef = m_config->GetRotationPID();
+    if (!rotationPIDRef) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No rotation PID controller configured, cannot drive to pose. Use "
+          "SwerveDriveConfig::WithRotationController(PIDController) to fix this error.");
+    }
+    auto translationPIDRef = m_config->GetTranslationPID();
+    if (!translationPIDRef) {
+      throw exceptions::SwerveDriveConfigurationException(
+          "No translation PID controller configured, cannot drive to pose. Use "
+          "SwerveDriveConfig::WithTranslationController(PIDController) to fix this error.");
+    }
+    auto& rotationPID = rotationPIDRef->get();
+    auto& translationPID = translationPIDRef->get();
     // Plain field-frame translation delta (not RelativeTo/operator-, which expresses the result
     // in targetPose's rotated frame and would skew the commanded direction whenever targetPose's
     // heading is non-zero).
-    auto translationDiff = currentPose.Translation() - targetPose.Translation();
+    auto toTarget = targetPose.Translation() - currentPose.Translation();
+    double distance = toTarget.Norm().value();
+    // The controller sees the distance as its measurement with a setpoint of 0, so its output is
+    // negative while there is distance left: the speed toward the target is the negative of it.
+    double speed = -translationPID.Calculate(distance, 0.0);
+    // Drive at that speed along the unit vector toward the target.
+    double vx = distance > 1e-9 ? toTarget.X().value() / distance * speed : 0.0;
+    double vy = distance > 1e-9 ? toTarget.Y().value() / distance * speed : 0.0;
     return frc::ChassisSpeeds::FromFieldRelativeSpeeds(
         frc::ChassisSpeeds{
-            units::meters_per_second_t{translationDiff.X().value() * translationScalar},
-            units::meters_per_second_t{translationDiff.Y().value() * translationScalar},
+            units::meters_per_second_t{vx}, units::meters_per_second_t{vy},
             units::radians_per_second_t{
                 rotationPID.Calculate(currentPose.Rotation().Radians().value(),
                                       targetPose.Rotation().Radians().value())}},
-        frc::Rotation2d{units::radian_t{GetGyroAngle()}});
+        heading);
   }
 
   // ---- Core drive methods ---------------------------------------------------
@@ -279,13 +365,12 @@ class SwerveDrive {
    * Lock all modules to an X-pattern to resist being pushed.
    */
   void LockPose() {
-    wpi::array<frc::SwerveModuleState, NumModules> states{wpi::empty_array};
+    // Turn each wheel toward the robot center without driving it. SwerveModule::Lock skips the
+    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
     for (size_t i = 0; i < NumModules; ++i) {
-      states[i] =
-          frc::SwerveModuleState{units::meters_per_second_t{0},
-                                 m_config->GetModules()[i]->GetConfig().GetLocation()->Angle()};
+      auto* module = m_config->GetModules()[i];
+      m_desiredModuleStates[i] = module->Lock(module->GetConfig().GetLocation()->Angle());
     }
-    SetSwerveModuleStates(states);
     m_desiredChassisSpeeds = frc::ChassisSpeeds{};
   }
 
@@ -297,11 +382,14 @@ class SwerveDrive {
   frc::Pose2d GetPose() { return m_poseEstimator.GetEstimatedPosition(); }
 
   /**
-   * Reset odometry to the given pose.
+   * Reset odometry to the given pose, and set the gyro to read the pose's heading. Field relative
+   * driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
+   * with the reset pose.
    *
    * @param pose New field-relative pose (blue-origin, 0° facing red alliance wall).
    */
   void ResetOdometry(frc::Pose2d pose) {
+    SetGyroAngle(pose.Rotation().Degrees());
     m_poseEstimator.ResetPosition(frc::Rotation2d{units::radian_t{GetGyroAngle()}},
                                   GetModulePositions(), pose);
     m_desiredChassisSpeeds = frc::ChassisSpeeds{};
@@ -313,7 +401,7 @@ class SwerveDrive {
    * Zero the gyro and reset odometry to the current translation with 0° heading.
    */
   void ZeroGyro() {
-    m_config->WithGyroOffset(GetGyroAngle() + m_config->GetGyroOffset());
+    // ResetOdometry also sets the gyro to read the new heading.
     ResetOdometry(frc::Pose2d{GetPose().Translation(), frc::Rotation2d{}});
   }
 
@@ -479,8 +567,15 @@ class SwerveDrive {
     return std::nullopt;
   }
 
-  void ResetRotationPID() { m_config->GetRotationPID().Reset(); }
-  void ResetTranslationPID() { m_config->GetTranslationPID().Reset(); }
+  /** Reset the auto-align rotational PID controller, if one is configured. */
+  void ResetRotationPID() {
+    if (auto pid = m_config->GetRotationPID()) pid->get().Reset();
+  }
+
+  /** Reset the auto-align translation PID controller, if one is configured. */
+  void ResetTranslationPID() {
+    if (auto pid = m_config->GetTranslationPID()) pid->get().Reset();
+  }
 
   /**
    * Set the auto-align rotational PID controller.
@@ -488,10 +583,10 @@ class SwerveDrive {
    * @param controller PIDController to use, input units are radians.
    */
   void SetRotationPID(frc::PIDController controller) {
-    auto& currentRotationPID = m_config->GetRotationPID();
-    if (currentRotationPID.GetP() != controller.GetP() ||
-        currentRotationPID.GetI() != controller.GetI() ||
-        currentRotationPID.GetD() != controller.GetD()) {
+    auto currentRotationPID = m_config->GetRotationPID();
+    if (!currentRotationPID || currentRotationPID->get().GetP() != controller.GetP() ||
+        currentRotationPID->get().GetI() != controller.GetI() ||
+        currentRotationPID->get().GetD() != controller.GetD()) {
       controller.Reset();
       m_config->WithRotationController(std::move(controller));
     }
@@ -503,10 +598,10 @@ class SwerveDrive {
    * @param controller PIDController to use, input units are metres.
    */
   void SetTranslationPID(frc::PIDController controller) {
-    auto& currentTranslationPID = m_config->GetTranslationPID();
-    if (currentTranslationPID.GetP() != controller.GetP() ||
-        currentTranslationPID.GetI() != controller.GetI() ||
-        currentTranslationPID.GetD() != controller.GetD()) {
+    auto currentTranslationPID = m_config->GetTranslationPID();
+    if (!currentTranslationPID || currentTranslationPID->get().GetP() != controller.GetP() ||
+        currentTranslationPID->get().GetI() != controller.GetI() ||
+        currentTranslationPID->get().GetD() != controller.GetD()) {
       controller.Reset();
       m_config->WithTranslationController(std::move(controller));
     }
@@ -599,16 +694,19 @@ class SwerveDrive {
     m_swerveTelemetry.emplace(std::move(telemetryCfg));
     m_swerveTelemetry->SetupTelemetry(this);
 
-    m_driveToPoseTuningCommand.emplace(frc2::cmd::StartRun(
-        [this] {
-          std::puts(
-              "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
-          ResetTranslationPID();
-          ResetRotationPID();
-        },
-        [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
-    frc::SmartDashboard::PutData("Mechanisms/" + GetName() + "/tuning/driveToPose",
-                                 m_driveToPoseTuningCommand->get());
+    // Drive to pose tuning needs both controllers, so only offer it when they are configured.
+    if (m_config->GetTranslationPID() && m_config->GetRotationPID()) {
+      m_driveToPoseTuningCommand.emplace(frc2::cmd::StartRun(
+          [this] {
+            std::puts(
+                "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
+            ResetTranslationPID();
+            ResetRotationPID();
+          },
+          [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
+      frc::SmartDashboard::PutData("Mechanisms/" + GetName() + "/tuning/driveToPose",
+                                   m_driveToPoseTuningCommand->get());
+    }
   }
 
   void UpdatePoseEstimator() {
@@ -622,6 +720,20 @@ class SwerveDrive {
       locations[i] = *config.GetModules()[i]->GetConfig().GetLocation();
     }
     return frc::SwerveDriveKinematics<NumModules>{locations};
+  }
+
+  /**
+   * Make GetGyroAngle() read the given heading from now on. On a real robot the gyro offset is
+   * adjusted; in simulation the simulated gyro angle is set directly.
+   *
+   * @param heading Heading the gyro should report.
+   */
+  void SetGyroAngle(units::degree_t heading) {
+    if (frc::RobotBase::IsSimulation()) {
+      m_simGyroAngle = heading;
+      return;
+    }
+    m_config->WithGyroOffset(GetGyroAngle() + m_config->GetGyroOffset() - heading);
   }
 
   static frc::Rotation2d ComputeInitialRotation(const SwerveDriveConfig& config) {
@@ -664,26 +776,38 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
   auto dataLogName = m_config.GetDataLogName();
 
   {
-    auto& translationPID = drive->GetConfig().GetTranslationPID();
-    auto& rotationPID = drive->GetConfig().GetRotationPID();
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationP)
-        .SetDefaultValue(translationPID.GetP());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationI)
-        .SetDefaultValue(translationPID.GetI());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::TranslationD)
-        .SetDefaultValue(translationPID.GetD());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationP)
-        .SetDefaultValue(rotationPID.GetP());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationI)
-        .SetDefaultValue(rotationPID.GetI());
-    m_config.GetDoubleFields()
-        .at(DoubleTelemetryField::RotationD)
-        .SetDefaultValue(rotationPID.GetD());
+    // Only publish the drive to pose gains and auto-align fields for controllers that exist.
+    auto translationPID = drive->GetConfig().GetTranslationPID();
+    auto rotationPID = drive->GetConfig().GetRotationPID();
+    auto& doubleFields = m_config.GetDoubleFields();
+    if (translationPID) {
+      doubleFields.at(DoubleTelemetryField::TranslationP)
+          .SetDefaultValue(translationPID->get().GetP());
+      doubleFields.at(DoubleTelemetryField::TranslationI)
+          .SetDefaultValue(translationPID->get().GetI());
+      doubleFields.at(DoubleTelemetryField::TranslationD)
+          .SetDefaultValue(translationPID->get().GetD());
+    } else {
+      doubleFields.at(DoubleTelemetryField::TranslationP).Disable();
+      doubleFields.at(DoubleTelemetryField::TranslationI).Disable();
+      doubleFields.at(DoubleTelemetryField::TranslationD).Disable();
+    }
+    if (rotationPID) {
+      doubleFields.at(DoubleTelemetryField::RotationP).SetDefaultValue(rotationPID->get().GetP());
+      doubleFields.at(DoubleTelemetryField::RotationI).SetDefaultValue(rotationPID->get().GetI());
+      doubleFields.at(DoubleTelemetryField::RotationD).SetDefaultValue(rotationPID->get().GetD());
+    } else {
+      doubleFields.at(DoubleTelemetryField::RotationP).Disable();
+      doubleFields.at(DoubleTelemetryField::RotationI).Disable();
+      doubleFields.at(DoubleTelemetryField::RotationD).Disable();
+    }
+    // Auto-align drives to a pose, which needs both controllers.
+    if (!translationPID || !rotationPID) {
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Disable();
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Disable();
+      doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Disable();
+      m_config.GetBoolFields().at(BooleanTelemetryField::AutoAlignEnabled).Disable();
+    }
 
     auto& modules = drive->GetConfig().GetModules();
     if (!modules.empty()) {
@@ -906,34 +1030,49 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
     drive->SetSwerveModuleStates(states);
   }
 
-  auto translationPID = drive->GetConfig().GetTranslationPID();
-  auto rotationPID = drive->GetConfig().GetRotationPID();
+  // Copies of the configured controllers; gain fields for missing controllers are disabled.
+  std::optional<frc::PIDController> translationPID;
+  if (auto pid = drive->GetConfig().GetTranslationPID()) translationPID = pid->get();
+  std::optional<frc::PIDController> rotationPID;
+  if (auto pid = drive->GetConfig().GetRotationPID()) rotationPID = pid->get();
   for (auto& [field, dt] : m_config.GetDoubleFields()) {
     if (!dt.IsTunable()) continue;
     switch (field) {
       case DoubleTelemetryField::TranslationP:
-        translationPID.SetP(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetP(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::TranslationI:
-        translationPID.SetI(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetI(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::TranslationD:
-        translationPID.SetD(dt.Get());
-        drive->SetTranslationPID(translationPID);
+        if (translationPID) {
+          translationPID->SetD(dt.Get());
+          drive->SetTranslationPID(*translationPID);
+        }
         break;
       case DoubleTelemetryField::RotationP:
-        rotationPID.SetP(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetP(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::RotationI:
-        rotationPID.SetI(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetI(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::RotationD:
-        rotationPID.SetD(dt.Get());
-        drive->SetRotationPID(rotationPID);
+        if (rotationPID) {
+          rotationPID->SetD(dt.Get());
+          drive->SetRotationPID(*rotationPID);
+        }
         break;
       case DoubleTelemetryField::ModulesDriveP:
         for (auto* module : drive->GetConfig().GetModules()) {

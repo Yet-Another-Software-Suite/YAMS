@@ -133,12 +133,13 @@ class SwerveModuleConfig {
   SwerveModuleConfig& WithWheelDiameter(units::meter_t diameter);
 
   /**
-   * Minimum speed below which the module holds its current azimuth instead of tracking.
+   * Speed below which the module holds its current azimuth instead of tracking, so the wheels do
+   * not snap back to 0 degrees when the drive is commanded to stop.
    *
-   * @param speed Minimum speed threshold.
+   * @param speed Velocity deadband.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithMinimumVelocity(units::meters_per_second_t speed);
+  SwerveModuleConfig& WithVelocityDeadband(units::meters_per_second_t speed);
 
   /**
    * Enable or disable WPILib SwerveModuleState optimization (flip by 180° to minimise rotation).
@@ -221,13 +222,25 @@ class SwerveModuleConfig {
   std::optional<telemetry::SwerveModuleTelemetryConfig> GetSwerveModuleTelemetryConfig();
 
   /**
-   * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
+   * Apply all enabled optimizations (velocity deadband, state optimization, cosine compensation)
    * and return the resulting state.
    *
    * @param state Input state.
    * @return Optimized state.
    */
   frc::SwerveModuleState GetOptimizedState(frc::SwerveModuleState state) const;
+
+  /**
+   * Get the state that turns the wheel to the given angle without driving it, as for locking the
+   * drive in place. Unlike GetOptimizedState(), the velocity deadband does not hold the wheel
+   * where it is, since the wheel is meant to turn without driving. With optimization enabled the
+   * wheel turns to whichever of the angle and its opposite is nearer, as either holds the drive
+   * the same way.
+   *
+   * @param angle Angle to turn the wheel to.
+   * @return Zero speed state at the angle to turn the wheel to.
+   */
+  frc::SwerveModuleState GetLockedState(frc::Rotation2d angle) const;
 
  private:
   motorcontrollers::SmartMotorController* m_driveMotor{nullptr};
@@ -240,7 +253,9 @@ class SwerveModuleConfig {
   gearing::GearBox m_absoluteEncoderGearbox{1.0};
   bool m_stateOptimization{true};
   bool m_cosineCompensation{false};
-  std::optional<units::meters_per_second_t> m_minimumVelocity;
+  std::optional<units::meters_per_second_t> m_velocityDeadband;
+  /** Angle the wheel was last sent to, so optimization does not reverse it back and forth. */
+  mutable std::optional<frc::Rotation2d> m_lastCommandedAngle;
   std::optional<frc::Translation2d> m_location;
   std::optional<units::meter_t> m_wheelCircumference;
 
@@ -254,6 +269,28 @@ class SwerveModuleConfig {
    */
   double GetCosineCompensatedVelocity(const frc::SwerveModuleState& desiredState,
                                       const frc::Rotation2d& currentAngle) const;
+
+  /**
+   * Angle the azimuth controller is closing its loop on (seeded from the absolute encoder), so
+   * optimization, cosine compensation and the azimuth setpoint agree on where the wheel points.
+   */
+  frc::Rotation2d GetAzimuthAngle() const;
+
+  /**
+   * Optimize a module state like frc::SwerveModuleState::Optimize(), keeping the orientation the
+   * wheel was last sent to unless the other is better by more than 30 degrees. A wheel still
+   * turning can be near 90 degrees from both orientations of a target that keeps moving, such as
+   * a path starting off in a new direction; choosing by its angle alone would reverse it back and
+   * forth.
+   *
+   * @param desired       Module state to optimize.
+   * @param currentAngle  Angle the wheel is at.
+   * @param lastCommanded Angle the wheel was last sent to, if it has been sent anywhere.
+   * @return The optimized module state.
+   */
+  static frc::SwerveModuleState Optimize(frc::SwerveModuleState desired,
+                                         const frc::Rotation2d& currentAngle,
+                                         const std::optional<frc::Rotation2d>& lastCommanded);
 };
 
 }  // namespace yams::mechanisms::config
