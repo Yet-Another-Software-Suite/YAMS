@@ -7,6 +7,7 @@
 #include <frc/geometry/Rotation2d.h>
 #include <units/math.h>
 
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
@@ -89,8 +90,8 @@ SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(units::meter_t diamete
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithMinimumVelocity(units::meters_per_second_t speed) {
-  m_minimumVelocity = speed;
+SwerveModuleConfig& SwerveModuleConfig::WithVelocityDeadband(units::meters_per_second_t speed) {
+  m_velocityDeadband = speed;
   return *this;
 }
 
@@ -191,25 +192,59 @@ double SwerveModuleConfig::GetCosineCompensatedVelocity(const frc::SwerveModuleS
   // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
   // the sign of the applied speed so the wheel drives backward at its current heading instead
   // of losing that direction to a forced-positive scalar.
-  double cosineScalar = (desiredState.angle - currentAngle).Cos();
-  if (cosineScalar < 0.0) cosineScalar = 1.0;
+  // Optimization keeps the wheel within 90 degrees of its target except while it holds the
+  // orientation it was last sent to (see Optimize), where the wheel is still turning toward it and
+  // driving would push the robot the wrong way, so apply nothing there.
+  double cosineScalar = std::max((desiredState.angle - currentAngle).Cos(), 0.0);
   return desiredState.speed.value() * cosineScalar;
 }
 
-frc::SwerveModuleState SwerveModuleConfig::GetOptimizedState(frc::SwerveModuleState state) const {
-  frc::Rotation2d currentAngle{units::radian_t{GetAbsoluteEncoderAngle()}};
-  if (m_minimumVelocity) {
-    if (units::math::abs(state.speed) <= *m_minimumVelocity) {
-      state = frc::SwerveModuleState{units::meters_per_second_t{0}, currentAngle};
-    }
+frc::Rotation2d SwerveModuleConfig::GetAzimuthAngle() const {
+  if (m_azimuthMotor) {
+    return frc::Rotation2d{units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
   }
-  if (m_stateOptimization) {
-    state.Optimize(currentAngle);
+  return frc::Rotation2d{units::radian_t{GetAbsoluteEncoderAngle()}};
+}
+
+frc::SwerveModuleState SwerveModuleConfig::Optimize(
+    frc::SwerveModuleState desired, const frc::Rotation2d& currentAngle,
+    const std::optional<frc::Rotation2d>& lastCommanded) {
+  frc::SwerveModuleState state = desired;
+  state.Optimize(currentAngle);
+  if (!lastCommanded ||
+      units::math::abs((state.angle - *lastCommanded).Degrees()) <= units::degree_t{90}) {
+    return state;
+  }
+  frc::SwerveModuleState lastOrientation{-state.speed,
+                                         state.angle.RotateBy(frc::Rotation2d{units::degree_t{180}})};
+  return units::math::abs((lastOrientation.angle - currentAngle).Degrees()) <
+                 units::degree_t{90 + 30}
+             ? lastOrientation
+             : state;
+}
+
+frc::SwerveModuleState SwerveModuleConfig::GetOptimizedState(frc::SwerveModuleState state) const {
+  frc::Rotation2d currentAngle = GetAzimuthAngle();
+  if (m_velocityDeadband && units::math::abs(state.speed) <= *m_velocityDeadband) {
+    // Too slow to steer by: hold the wheel where it is.
+    state = frc::SwerveModuleState{units::meters_per_second_t{0}, currentAngle};
+    m_lastCommandedAngle = currentAngle;
+  } else if (m_stateOptimization) {
+    state = Optimize(state, currentAngle, m_lastCommandedAngle);
+    m_lastCommandedAngle = state.angle;
   }
   if (m_cosineCompensation) {
-    frc::Rotation2d azimuthAngle{units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
-    state.speed = units::meters_per_second_t{GetCosineCompensatedVelocity(state, azimuthAngle)};
+    state.speed = units::meters_per_second_t{GetCosineCompensatedVelocity(state, currentAngle)};
   }
+  return state;
+}
+
+frc::SwerveModuleState SwerveModuleConfig::GetLockedState(frc::Rotation2d angle) const {
+  frc::SwerveModuleState state{units::meters_per_second_t{0}, angle};
+  if (m_stateOptimization) {
+    state = Optimize(state, GetAzimuthAngle(), m_lastCommandedAngle);
+  }
+  m_lastCommandedAngle = state.angle;
   return state;
 }
 

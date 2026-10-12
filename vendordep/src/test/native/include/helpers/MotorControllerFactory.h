@@ -15,6 +15,7 @@
 #include <ctre/phoenix6/TalonFXS.hpp>
 #include <memory>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -31,11 +32,26 @@ namespace yams::test {
 
 using namespace motorcontrollers;
 
-// Unique CAN IDs across all test instances, incremented atomically.
-// Wraps within 1-62 (the valid Phoenix 6 / REV CAN device ID range).
+// CAN IDs kReservedCanIdStart-62 are reserved for hardware that lives for the whole test binary
+// (see NextReservedCanId()); per-test hardware must never reuse them, or two devices would share
+// the same Phoenix/REV simulation state.
+inline constexpr int kReservedCanIdStart = 55;
+
+// Unique CAN IDs across per-test instances, incremented atomically.
+// Wraps within 1-(kReservedCanIdStart - 1).
 inline std::atomic<int> gCanIdCounter{0};
 
-inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % 62) + 1; }
+inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kReservedCanIdStart - 1)) + 1; }
+
+// CAN IDs for hardware that lives for the whole test binary, from kReservedCanIdStart to 62.
+// Never wraps; running out of reserved IDs is a test setup bug.
+inline std::atomic<int> gReservedCanIdCounter{kReservedCanIdStart};
+
+inline int NextReservedCanId() {
+  int id = gReservedCanIdCounter.fetch_add(1);
+  if (id > 62) throw std::runtime_error("Out of reserved test CAN IDs");
+  return id;
+}
 
 enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX };
 enum class ProfileType { None, Trapezoid, Exponential };

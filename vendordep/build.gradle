@@ -117,6 +117,10 @@ task googleTest {
 tasks.whenTaskAdded { task ->
     if (task instanceof RunTestExecutable) {
         task.enabled = !gradle.startParameter.taskNames.contains('build')
+        // Optional Google Test filter, e.g. -PgtestFilter="*ArmTest*" or "-*ArmTest*:*PivotTest*"
+        if (project.hasProperty('gtestFilter')) {
+            task.args "--gtest_filter=${project.property('gtestFilter')}"
+        }
         if (task.name.contains(NativePlatforms.desktop.capitalize()) && task.name.contains('Debug')) {
             googleTest.dependsOn task
         }
