@@ -151,6 +151,21 @@ public class SwerveModule {
   }
 
   /**
+   * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
+   * minimum velocity, which holds a wheel commanded too slowly to steer by where it is, does not
+   * apply (see {@link SwerveModuleConfig#getLockedState(Rotation2d)}).
+   *
+   * @param angle Angle to turn the wheel to.
+   * @return The zero speed {@link SwerveModuleState} the module was set to.
+   */
+  public SwerveModuleState lock(Rotation2d angle) {
+    final SwerveModuleState state = m_config.getLockedState(angle);
+    m_driveMotorController.setVelocity(MetersPerSecond.of(0));
+    m_azimuthMotorController.setPosition(state.angle.getMeasure());
+    return state;
+  }
+
+  /**
    * Set the {@link SwerveModuleState} of the module.
    *
    * @param state State to set.
@@ -173,7 +188,15 @@ public class SwerveModule {
    * @return The optimized {@link SwerveModuleState}.
    */
   public SwerveModuleState setSwerveModuleState(SwerveModuleState state, Force feedforwardForce) {
+    final Rotation2d requestedAngle = state.angle;
     state = m_config.getOptimizedState(state);
+    // The force is along the requested direction of travel. Optimization may have turned the wheel
+    // around and reversed its velocity, in which case the force must be reversed with it.
+    if (state.angle.minus(requestedAngle).getCos() < 0) {
+      feedforwardForce = feedforwardForce.unaryMinus();
+    }
+    // Scale the force like the velocity, so a wheel still turning to its angle is not pushed.
+    feedforwardForce = feedforwardForce.times(m_config.getCosineCompensationScalar(state.angle));
     m_driveMotorController.setVelocity(MetersPerSecond.of(state.speedMetersPerSecond), feedforwardForce);
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
     return state;

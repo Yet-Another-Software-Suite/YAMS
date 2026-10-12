@@ -213,7 +213,9 @@ public class ExponentialProfilePIDController {
    */
   public static Constraints createConstraints(Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
-    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
+    // kV and kA, in volts per rotation per second (per second), reach the maximum velocity and
+    // acceleration at the maximum voltage.
+    return ExponentialProfile.Constraints.fromCharacteristics(maxV, maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond));
   }
 
   /**

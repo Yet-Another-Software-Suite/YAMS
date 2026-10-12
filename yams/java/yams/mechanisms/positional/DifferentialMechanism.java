@@ -225,18 +225,19 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
   /**
    * Set the dutycycle of the differential mechanism.
    *
-   * @param twist Twist dutycycle.
    * @param tilt  Tilt dutycycle.
+   * @param twist Twist dutycycle.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand} to set the differential mechanism
    *         duty cycle.
    */
-  public Command set(double twist, double tilt) {
+  public Command set(double tilt, double twist) {
     return Commands.startRun(() -> {
       m_leftSMC.stopClosedLoopController();
       m_rightSMC.stopClosedLoopController();
     }, () -> {
-      var left = tilt - twist;
-      var right = tilt + twist;
+      // The same mixing as the position setpoints: left = tilt + twist, right = tilt - twist.
+      var left = tilt + twist;
+      var right = tilt - twist;
       m_leftSMC.setDutyCycle(left);
       m_rightSMC.setDutyCycle(right);
     }, m_subsystem).finallyDo(() -> {

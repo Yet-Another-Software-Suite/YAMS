@@ -191,6 +191,21 @@ public abstract class SmartMechanism {
     return m_smc.getMechanismPositionSetpoint();
   }
 
+  /**
+   * Get the {@link SmartMechanism}'s setpoint as a {@link Distance} if it exists: the mechanism
+   * setpoint converted with the mechanism circumference.
+   *
+   * @return {@link Optional} setpoint {@link Distance} of the mechanism, empty when there is no
+   *         position setpoint or the mechanism circumference is not configured.
+   */
+  public Optional<Distance> getMeasurementSetpoint() {
+    Optional<Angle> setpoint = m_smc.getMechanismPositionSetpoint();
+    if (setpoint.isEmpty() || m_smc.getConfig().getMechanismCircumference().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(m_smc.getConfig().convertFromMechanism(setpoint.get()));
+  }
+
   /** Iterate sim */
   public abstract void simIterate();
 

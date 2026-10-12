@@ -510,17 +510,58 @@ public class SwerveModuleConfig {
     /* To reduce the "skew" that occurs when changing direction */
     /* If error is close to 0 rotations, we're already there, so apply full power */
     /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at all */
-    // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
-    // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
-    // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
-    // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
-    // the sign of the applied speed so the wheel drives backward at its current heading instead
-    // of losing that direction to a forced-positive scalar.
-    double cosineScalar = desiredState.angle.minus(currentAngle).getCos();
-    if (cosineScalar < 0.0)
-      cosineScalar = 1.0;
+    return desiredState.speedMetersPerSecond * getCosineScalar(desiredState.angle, currentAngle);
+  }
 
-    return desiredState.speedMetersPerSecond * cosineScalar;
+  /**
+   * How much of the commanded drive output to apply while the wheel is {@code currentAngle} away
+   * from {@code desiredAngle}: all of it when aligned, none of it at 90 degrees or more.
+   *
+   * @param desiredAngle Angle the wheel is commanded to.
+   * @param currentAngle Angle the wheel is at.
+   * @return Scalar in [0, 1].
+   */
+  private static double getCosineScalar(Rotation2d desiredAngle, Rotation2d currentAngle) {
+    // Optimization keeps the wheel within 90 degrees of its target except while it holds the
+    // orientation it was last sent to (see optimize), where the wheel is still turning toward it
+    // and driving would push the robot the wrong way.
+    return Math.max(desiredAngle.minus(currentAngle).getCos(), 0.0);
+  }
+
+  /**
+   * Get the scalar cosine compensation applies to the drive output for a wheel commanded to the
+   * given angle, so that a feedforward given alongside the velocity can be scaled the same way.
+   *
+   * @param desiredAngle Angle the wheel is commanded to, after optimization.
+   * @return Scalar in [0, 1]; 1 when cosine compensation is disabled.
+   */
+  public double getCosineCompensationScalar(Rotation2d desiredAngle) {
+    if (!cosineCompensation) {
+      return 1.0;
+    }
+    return getCosineScalar(desiredAngle, new Rotation2d(azimuthMotor.orElseThrow().getMechanismPosition()));
+  }
+
+  /**
+   * Optimize a module state like {@link SwerveModuleState#optimize(Rotation2d)}, keeping the
+   * orientation the wheel was last sent to unless the other is better by more than 30 degrees. A
+   * wheel still turning can be near 90 degrees from both orientations of a target that keeps
+   * moving, such as a path starting off in a new direction; choosing by its angle alone would
+   * reverse it back and forth.
+   *
+   * @param desired       Module state to optimize.
+   * @param currentAngle  Angle the wheel is at.
+   * @param lastCommanded Angle the wheel was last sent to, or null if it has not been sent anywhere.
+   * @return The optimized module state.
+   */
+  private static SwerveModuleState optimize(SwerveModuleState desired, Rotation2d currentAngle, Rotation2d lastCommanded) {
+    final SwerveModuleState state = new SwerveModuleState(desired.speedMetersPerSecond, desired.angle);
+    state.optimize(currentAngle);
+    if (lastCommanded == null || Math.abs(state.angle.minus(lastCommanded).getDegrees()) <= 90) {
+      return state;
+    }
+    final SwerveModuleState lastOrientation = new SwerveModuleState(-state.speedMetersPerSecond, state.angle.rotateBy(Rotation2d.kPi));
+    return Math.abs(lastOrientation.angle.minus(currentAngle).getDegrees()) < 90 + 30 ? lastOrientation : state;
   }
 
   /**
@@ -534,22 +575,38 @@ public class SwerveModuleConfig {
     // cosine compensation, and the azimuth setpoint all agree on where the module is pointing.
     Rotation2d currentAngle = new Rotation2d(azimuthMotor.map(SmartMotorController::getMechanismPosition)
                                                          .orElseGet(this::getAbsoluteEncoderAngle));
-    if (minimumVelocity.isPresent()) {
-      if (MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get())) {
-        //        state = new SwerveModuleState(0, state.angle);
-        state = new SwerveModuleState(0, currentAngle);
-      }
-    }
-    if (swerveModuleStateOptimization) {
-      if (lastCommandedAngle == null) {
-        lastCommandedAngle = currentAngle;
-      }
-      state.optimize(currentAngle);
+    if (minimumVelocity.isPresent() && MetersPerSecond.of(Math.abs(state.speedMetersPerSecond)).lte(minimumVelocity.get())) {
+      // Too slow to steer by: hold the wheel where it is.
+      state = new SwerveModuleState(0, currentAngle);
+      lastCommandedAngle = currentAngle;
+    } else if (swerveModuleStateOptimization) {
+      state = optimize(state, currentAngle, lastCommandedAngle);
       lastCommandedAngle = state.angle;
     }
     if (cosineCompensation) {
       state.speedMetersPerSecond = getCosineCompensatedVelocity(state, currentAngle);
     }
+    return state;
+  }
+
+  /**
+   * Get the state that turns the wheel to {@code angle} without driving it, as for locking the
+   * drive in place. Unlike {@link #getOptimizedState(SwerveModuleState)}, the minimum velocity does
+   * not hold the wheel where it is, since the wheel is meant to turn without driving. With
+   * optimization enabled the wheel turns to whichever of {@code angle} and its opposite is nearer,
+   * as either holds the drive the same way.
+   *
+   * @param angle Angle to turn the wheel to.
+   * @return Zero speed {@link SwerveModuleState} at the angle to turn the wheel to.
+   */
+  public SwerveModuleState getLockedState(Rotation2d angle) {
+    SwerveModuleState state = new SwerveModuleState(0, angle);
+    if (swerveModuleStateOptimization) {
+      Rotation2d currentAngle = new Rotation2d(azimuthMotor.map(SmartMotorController::getMechanismPosition)
+                                                           .orElseGet(this::getAbsoluteEncoderAngle));
+      state = optimize(state, currentAngle, lastCommandedAngle);
+    }
+    lastCommandedAngle = state.angle;
     return state;
   }
 

@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -138,6 +139,12 @@ public class SwerveDriveConfig {
    * Derives the gyro angular velocity from the gyro angle ({@link #getGyroAngle()}) when {@link #gyroAngularVelocitySupplier} is not configured, in both simulation and real robot code.
    */
   private final DerivativeTimeFilter gyroAngularVelocityFilter = new DerivativeTimeFilter(Milliseconds.of(20));
+
+  /** Gyro angle with its wraps removed, in radians, for deriving the gyro angular velocity. */
+  private double continuousGyroAngleRadians = 0;
+
+  /** Whether {@link #continuousGyroAngleRadians} has been read yet. */
+  private boolean continuousGyroAngleRead = false;
 
   /**
    * Alert shown once if {@link #angularVelocitySkewCorrection(ChassisSpeeds)} runs without a {@link #gyroAngularVelocitySupplier} configured, warning that the gyro angular velocity is being
@@ -630,7 +637,13 @@ public class SwerveDriveConfig {
             getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + "supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro angle instead.", Alert.AlertType.kInfo);
         noGyroAngularVelocitySupplierAlert.set(true);
       }
-      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(getGyroAngle().in(Radians)));
+      // Follow the gyro angle across a wrap, so the derivative does not see a full turn in one loop.
+      final double gyroAngleRadians = getGyroAngle().in(Radians);
+      continuousGyroAngleRadians = continuousGyroAngleRead
+                                   ? continuousGyroAngleRadians + MathUtil.angleModulus(gyroAngleRadians - continuousGyroAngleRadians)
+                                   : gyroAngleRadians;
+      continuousGyroAngleRead = true;
+      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(continuousGyroAngleRadians));
     }
     var angularVelocityScale = (RobotBase.isSimulation() ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) : angularVelocityScaleFactor.orElseThrow());
     var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);

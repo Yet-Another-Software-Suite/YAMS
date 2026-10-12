@@ -644,13 +644,11 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
    * @return Alliance-oriented {@link Translation2d}
    */
   private Translation2d applyAllianceAwareTranslation(Translation2d fieldRelativeTranslation) {
+    // Robot relative translation is not on the field, so there is nothing to flip for the alliance.
+    if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
+      return fieldRelativeTranslation;
+    }
     if (allianceRelative.isPresent() && allianceRelative.get().getAsBoolean()) {
-      if (robotRelative.isPresent() && robotRelative.get().getAsBoolean()) {
-        if (driveToPoseEnabled.isPresent() && driveToPoseEnabled.get().getAsBoolean()) {
-          return fieldRelativeTranslation;
-        }
-        throw new RuntimeException("Cannot use robot oriented control with Alliance aware movement!");
-      }
       if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
         return fieldRelativeTranslation.rotateBy(Rotation2d.k180deg);
       }
@@ -716,7 +714,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
         omegaRadiansPerSecond = azimuthPIDs.calculate(swerveDrive.getGyroAngle().in(Radians), Rotation2d.fromRadians(Math.atan2(controllerHeadingX.orElseThrow().getAsDouble(), controllerHeadingY.orElseThrow().getAsDouble())).getRadians());
 
         // Prevent rotation if controller heading inputs are not past axisDeadband
-        if (Math.abs(controllerHeadingX.get().getAsDouble()) + Math.abs(controllerHeadingY.get().getAsDouble()) < axisDeadband.orElseThrow()) {
+        if (axisDeadband.isPresent() && Math.abs(controllerHeadingX.get().getAsDouble()) + Math.abs(controllerHeadingY.get().getAsDouble()) < axisDeadband.get()) {
           omegaRadiansPerSecond = 0;
         }
         speeds = new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
