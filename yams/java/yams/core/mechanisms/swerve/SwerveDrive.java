@@ -509,6 +509,29 @@ public class SwerveDrive {
   }
 
   /**
+   * Whether the robot is within the given tolerances of a pose.
+   *
+   * @param pose                 {@link Pose2d} to compare against.
+   * @param translationTolerance Maximum distance from the pose.
+   * @param rotationTolerance    Maximum heading error from the pose.
+   * @return True if the robot is within both tolerances of the pose.
+   */
+  public boolean isNear(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    return getDistanceFromPose(pose).lte(translationTolerance) &&
+           Math.abs(getAngleDifferenceFromPose(pose).in(Radians)) <= rotationTolerance.in(Radians);
+  }
+
+  /**
+   * Stop the drive by commanding zero chassis speeds.
+   *
+   * @throws IllegalStateException if a gyro angular velocity scale factor is configured but no gyro
+   *                               supplier was set with {@code withGyro(Supplier)}.
+   */
+  public void stop() {
+    setRobotRelativeChassisSpeeds(new ChassisVelocities());
+  }
+
+  /**
    * Drive to the target pose, primarily for use in Live Tuning, could also be used for setpoint
    * commands.
    *
