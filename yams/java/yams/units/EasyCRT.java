@@ -5,240 +5,175 @@ package yams.units;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import java.util.Optional;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
-import java.util.Optional;
 
 /**
- * A CRT style absolute mechanism angle estimator using two absolute encoders.
+ * Finds the absolute angle of a gear that turns more than once, from two absolute encoders on
+ * pinions with different tooth counts that both mesh with it.
  *
- * <ol>
- * <li>Generate all mechanism angle candidates consistent with encoder 1 within the allowed range.
- * <li>For each candidate, predict what encoder 2 should read and score the modular error.
- * <li>Select the best unique match within a configurable tolerance.
- * </ol>
+ * <p>Each encoder only knows its angle within one of its own rotations, but the two readings
+ * together are unique over {@link #getUniqueRange()}, which is
+ * {@code lcm(encoderATeeth, encoderBTeeth) / sharedGearTeeth} rotations of the shared gear.
  *
- * <p>This is <b>not</b> a textbook Chinese Remainder Theorem solve; it is a "CRT-inspired"
- * unwrapping method that is easier to keep stable with backlash and sensor noise.
+ * <p>Both encoders must be zeroed with the mechanism at zero, and both must read increasing angles
+ * when the mechanism moves in its positive direction. Set the offset and inversion on the encoders
+ * themselves, or adjust the readings before passing them in.
  *
- * <p>Created by team 6911.
- *
- * <h2>Usage</h2>
- *
- * <p>Construct an {@code EasyCRT} from a fully-configured {@link EasyCRTConfig}, then call {@link #getAngleOptional()} periodically. The return value is an {@link java.util.Optional} containing
- * the resolved mechanism {@link edu.wpi.first.units.measure.Angle} when a unique solution is found,
- * or {@link java.util.Optional#empty()} when the solve fails or is ambiguous. Inspect {@link #getLastStatus()} and {@link #getLastErrorRotations()} for diagnostics.
+ * <p>This is not a textbook Chinese Remainder Theorem solve. Every angle consistent with encoder A
+ * is tried, and the one whose predicted encoder B reading is closest to the real one wins, which
+ * stays stable with backlash and sensor noise. Created by team 6911.
  *
  * <pre>{@code
- * import static edu.wpi.first.units.Units.Rotations;
- * import yams.units.EasyCRT;
- * import yams.units.EasyCRTConfig;
+ * // 100 tooth turret gear, 19 tooth pinion on encoder A, 21 tooth pinion on encoder B.
+ * EasyCRT crt = new EasyCRT(100, 19, 21);
  *
- * // Build the configuration once (e.g., in robotInit)
- * EasyCRTConfig config = new EasyCRTConfig(
- *         encoder1::getAbsolutePosition,
- *         encoder2::getAbsolutePosition)
- *     .withCommonDriveGear(11.0, 50, 30, 31)
- *     .withMechanismRange(Rotations.of(0.0), Rotations.of(5.0))
- *     .withMatchTolerance(Rotations.of(0.006));
- *
- * EasyCRT crt = new EasyCRT(config);
- *
- * // Call periodically (e.g., in periodic())
- * crt.getAngleOptional().ifPresent(angle -> {
- *     double mechanismRotations = angle.in(Rotations);
- *     // seed the motor controller with the resolved absolute position
- * });
- *
- * // Diagnostics
- * EasyCRT.CRTStatus status = crt.getLastStatus();   // OK, NO_SOLUTION, AMBIGUOUS, ...
- * double errorRot = crt.getLastErrorRotations();    // modular error from the best candidate
+ * // Read once at startup, while the mechanism is not moving.
+ * Optional<Angle> turretAngle = crt.solve(encoderA.get(), encoderB.get());
  * }</pre>
  */
 public class EasyCRT {
-  /** The list of possible statuses from the previous solve attempt. */
-  public enum CRTStatus {
-    /** The previous solve succeeded. */
-    OK,
-    /** The previous solve attempt could not find a solution. */
-    NO_SOLUTION,
-    /** The previous solve attempt resulted in two nearly-equal matches within tolerance. */
-    AMBIGUOUS,
-    /** No solve attempts have occurred. */
-    NOT_ATTEMPTED,
-    /** A solve was not attempted, as the solver was not configured correctly. */
-    INVALID_CONFIG
-  }
+  /** Fraction of the gap between neighboring candidates that a match may be off by. */
+  private static final double TOLERANCE_FRACTION = 0.25;
 
-  /** Configuration containing ratios, limits, and encoder suppliers. */
-  private final EasyCRTConfig easyCrtConfig;
+  /** Encoder A rotations per rotation of the shared gear. */
+  private final double ratioA;
 
-  /** Last solve status string (e.g., OK / NO_SOLUTION / AMBIGUOUS / INVALID_CONFIG). */
-  private CRTStatus lastStatus = CRTStatus.NOT_ATTEMPTED;
+  /** Encoder B rotations per rotation of the shared gear. */
+  private final double ratioB;
 
-  /** Last best-match modular error in rotations. */
-  private double lastErrorRot = Double.NaN;
+  /** Rotations of the shared gear over which the pair of encoder readings is unique. */
+  private final double uniqueRangeRotations;
 
-  /** Number of candidates evaluated in the most recent solve attempt. */
-  private int lastIterations = 0;
+  /** Largest difference, in encoder B rotations, between its predicted and real reading. */
+  private final double toleranceRotations;
 
   /**
-   * Creates an EasyCRT solver.
+   * Create a solver from the tooth counts of the three gears.
    *
-   * @param easyCrtConfig configuration describing encoder ratios, offsets, and limits
+   * @param sharedGearTeeth Teeth on the gear both encoder pinions mesh with. The solved angle is
+   *                        the angle of this gear.
+   * @param encoderATeeth   Teeth on encoder A's pinion.
+   * @param encoderBTeeth   Teeth on encoder B's pinion.
+   * @throws IllegalArgumentException if any tooth count is zero or negative.
    */
-  public EasyCRT(EasyCRTConfig easyCrtConfig) {
-    this.easyCrtConfig = easyCrtConfig;
+  public EasyCRT(int sharedGearTeeth, int encoderATeeth, int encoderBTeeth) {
+    if (sharedGearTeeth <= 0 || encoderATeeth <= 0 || encoderBTeeth <= 0) {
+      throw new IllegalArgumentException("Gear tooth counts must be positive");
+    }
+    int commonTeeth = gcd(encoderATeeth, encoderBTeeth);
+    ratioA = (double) sharedGearTeeth / encoderATeeth;
+    ratioB = (double) sharedGearTeeth / encoderBTeeth;
+    // The readings repeat together every lcm(A, B) teeth of the shared gear.
+    uniqueRangeRotations = (double) encoderATeeth / commonTeeth * encoderBTeeth / sharedGearTeeth;
+    // Neighboring candidates predict encoder B readings this many rotations apart.
+    toleranceRotations = TOLERANCE_FRACTION * commonTeeth / encoderBTeeth;
   }
 
   /**
-   * Returns the mechanism angle if a unique solution is found.
+   * Solve for the angle of the shared gear, assuming its travel is centered on zero. The result is
+   * within half of {@link #getUniqueRange()} either side of zero.
    *
-   * <p>If no unique solution is found (outside tolerance or ambiguous), returns {@link Optional#empty()}.
-   *
-   * @return optional containing mechanism angle when uniquely resolved
+   * @param encoderA Encoder A reading.
+   * @param encoderB Encoder B reading.
+   * @return The shared gear's angle, or empty if the two readings do not agree on one.
    */
-  public Optional<Angle> getAngleOptional() {
-    final double ratio1 = easyCrtConfig.getEncoder1RotationsPerMechanismRotation();
-    final double ratio2 = easyCrtConfig.getEncoder2RotationsPerMechanismRotation();
-    final double minMechRot = easyCrtConfig.getMinMechanismAngle().in(Rotations);
-    final double maxMechRot = easyCrtConfig.getMaxMechanismAngle().in(Rotations);
-    final double tolRot = easyCrtConfig.getMatchTolerance().in(Rotations);
+  public Optional<Angle> solve(Angle encoderA, Angle encoderB) {
+    return solve(encoderA, encoderB, -uniqueRangeRotations / 2.0, uniqueRangeRotations / 2.0);
+  }
 
-    // Read + wrap into [0, 1).
-    final double abs1 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder1Angle().plus(easyCrtConfig.getAbsoluteEncoder1Offset()).in(Rotations), 0.0, 1.0);
-    final double abs2 = MathUtil.inputModulus(easyCrtConfig.getAbsoluteEncoder2Angle().plus(easyCrtConfig.getAbsoluteEncoder2Offset()).in(Rotations), 0.0, 1.0);
+  /**
+   * Solve for the angle of the shared gear when its travel is not centered on zero.
+   *
+   * @param encoderA Encoder A reading.
+   * @param encoderB Encoder B reading.
+   * @param minAngle Lowest angle the shared gear can be at.
+   * @param maxAngle Highest angle the shared gear can be at.
+   * @return The shared gear's angle, or empty if the two readings do not agree on one.
+   * @throws IllegalArgumentException if the travel is longer than {@link #getUniqueRange()}, or
+   *                                  {@code maxAngle} is below {@code minAngle}.
+   */
+  public Optional<Angle> solve(Angle encoderA, Angle encoderB, Angle minAngle, Angle maxAngle) {
+    double minRotations = minAngle.in(Rotations);
+    double maxRotations = maxAngle.in(Rotations);
+    if (maxRotations < minRotations) {
+      throw new IllegalArgumentException("maxAngle must not be below minAngle");
+    }
+    if (maxRotations - minRotations > uniqueRangeRotations + 1e-9) {
+      throw new IllegalArgumentException("Travel of " + (maxRotations - minRotations) + " rotations is longer than the " + uniqueRangeRotations + " rotations these gears can tell apart");
+    }
+    return solve(encoderA, encoderB, minRotations, maxRotations);
+  }
 
-    CrtSolution sol = resolveFromSensors(abs1, abs2, ratio1, ratio2, minMechRot, maxMechRot, tolRot);
+  /**
+   * Get how far the shared gear can turn before the pair of encoder readings repeats.
+   *
+   * @return The unique range of the shared gear.
+   */
+  public Angle getUniqueRange() {
+    return Rotations.of(uniqueRangeRotations);
+  }
 
-    if (sol == null) {
+  /**
+   * Try every shared gear angle consistent with encoder A and keep the one that best predicts
+   * encoder B.
+   *
+   * @param encoderA     Encoder A reading.
+   * @param encoderB     Encoder B reading.
+   * @param minRotations Lowest shared gear angle in rotations.
+   * @param maxRotations Highest shared gear angle in rotations.
+   * @return The shared gear's angle, or empty if no single candidate matches.
+   */
+  private Optional<Angle> solve(Angle encoderA, Angle encoderB, double minRotations, double maxRotations) {
+    double a = MathUtil.inputModulus(encoderA.in(Rotations), 0.0, 1.0);
+    double b = MathUtil.inputModulus(encoderB.in(Rotations), 0.0, 1.0);
+    if (!Double.isFinite(a) || !Double.isFinite(b)) {
       return Optional.empty();
     }
-    return Optional.of(Rotations.of(sol.mechanismRotations()));
-  }
 
-  /**
-   * Returns the last solver status string.
-   *
-   * @return status from the previous solve attempt
-   */
-  public CRTStatus getLastStatus() {
-    return lastStatus;
-  }
+    // a = (ratioA * gear) mod 1, so gear = (a + turns) / ratioA for a whole number of turns.
+    int minTurns = (int) Math.floor(ratioA * minRotations - a) - 1;
+    int maxTurns = (int) Math.ceil(ratioA * maxRotations - a) + 1;
 
-  /**
-   * Returns the last best-match modular error in rotations.
-   *
-   * @return last modular error, or NaN if not solved
-   */
-  public double getLastErrorRotations() {
-    return lastErrorRot;
-  }
-
-  /**
-   * Returns the number of candidates evaluated in the last solve attempt.
-   *
-   * @return iteration count from the previous solve attempt
-   */
-  public int getLastIterations() {
-    return lastIterations;
-  }
-
-  /**
-   * Solves for mechanism rotations using wrapped encoder readings and configured ratios.
-   *
-   * @param abs1                  wrapped absolute encoder 1 reading in rotations
-   * @param abs2                  wrapped absolute encoder 2 reading in rotations
-   * @param ratio1                encoder 1 rotations per mechanism rotation
-   * @param ratio2                encoder 2 rotations per mechanism rotation
-   * @param minMechanismRotations minimum allowed mechanism rotations
-   * @param maxMechanismRotations maximum allowed mechanism rotations
-   * @param matchTolerance        maximum allowed modular error to accept a solution
-   * @return solution containing mechanism rotations and error, or null when not found or ambiguous
-   */
-  private CrtSolution resolveFromSensors(double abs1, double abs2, double ratio1, double ratio2, double minMechanismRotations, double maxMechanismRotations, double matchTolerance) {
-    lastIterations = 0;
-    lastErrorRot = Double.NaN;
-
-    if (!Double.isFinite(abs1) || !Double.isFinite(abs2) || !Double.isFinite(ratio1) || !Double.isFinite(ratio2) || Math.abs(ratio1) < 1e-12 || !Double.isFinite(minMechanismRotations) || !Double.isFinite(
-        maxMechanismRotations) || minMechanismRotations > maxMechanismRotations || !Double.isFinite(matchTolerance) || matchTolerance < 0.0) {
-      lastStatus = CRTStatus.INVALID_CONFIG;
-      return null;
-    }
-
-    double bestErr = Double.MAX_VALUE;
-    double secondErr = Double.MAX_VALUE;
-    double bestRot = Double.NaN;
-
-    // Derive integer wrap-count bounds from the allowed mechanism angle range.
-    //
-    // abs1 = (ratio1 * mechRot) mod 1
-    // ratio1 * mechRot = abs1 + n, where n is an integer.
-    // mechRot = (abs1 + n) / ratio1
-    //
-    // For mechRot within [min, max], n lies within [ratio1*min - abs1, ratio1*max - abs1]
-    // (endpoints swap if ratio1 is negative).
-    double nMinD = Math.min(ratio1 * minMechanismRotations, ratio1 * maxMechanismRotations) - abs1;
-    double nMaxD = Math.max(ratio1 * minMechanismRotations, ratio1 * maxMechanismRotations) - abs1;
-    int minN = (int) Math.floor(nMinD) - 1;
-    int maxN = (int) Math.ceil(nMaxD) + 1;
-
-    for (int n = minN; n <= maxN; n++) {
-      lastIterations++;
-
-      double mechRot = (abs1 + n) / ratio1;
-      if (mechRot < minMechanismRotations - 1e-6 || mechRot > maxMechanismRotations + 1e-6) {
+    double bestError = Double.MAX_VALUE;
+    double secondError = Double.MAX_VALUE;
+    double bestRotations = Double.NaN;
+    for (int turns = minTurns; turns <= maxTurns; turns++) {
+      double gearRotations = (a + turns) / ratioA;
+      if (gearRotations < minRotations - 1e-6 || gearRotations > maxRotations + 1e-6) {
         continue;
       }
-
-      double predicted2 = MathUtil.inputModulus(ratio2 * mechRot, 0.0, 1.0);
-      double err = modularError(predicted2, abs2);
-
-      if (err < bestErr) {
-        secondErr = bestErr;
-        bestErr = err;
-        bestRot = mechRot;
-      } else if (err < secondErr) {
-        secondErr = err;
+      double error = Math.abs(MathUtil.inputModulus(ratioB * gearRotations - b, -0.5, 0.5));
+      if (error < bestError) {
+        secondError = bestError;
+        bestError = error;
+        bestRotations = gearRotations;
+      } else if (error < secondError) {
+        secondError = error;
       }
     }
 
-    if (!Double.isFinite(bestRot) || bestErr > matchTolerance) {
-      lastStatus = CRTStatus.NO_SOLUTION;
-      lastErrorRot = bestErr;
-      return null;
+    // No candidate is close enough, or two are, which happens at the very ends of the range.
+    if (bestError > toleranceRotations || secondError <= toleranceRotations) {
+      return Optional.empty();
     }
-
-    // If there are two nearly-equal matches within tolerance, the solution is ambiguous.
-    if (secondErr <= matchTolerance && Math.abs(secondErr - bestErr) < 1e-3) {
-      lastStatus = CRTStatus.AMBIGUOUS;
-      lastErrorRot = bestErr;
-      return null;
-    }
-
-    lastStatus = CRTStatus.OK;
-    lastErrorRot = bestErr;
-    return new CrtSolution(bestRot, bestErr);
+    return Optional.of(Rotations.of(bestRotations));
   }
 
   /**
-   * Computes the minimal modular difference between two wrapped values.
+   * Greatest common divisor of two positive integers.
    *
-   * @param a first wrapped value
-   * @param b second wrapped value
-   * @return minimal modular error in rotations
+   * @param a First integer.
+   * @param b Second integer.
+   * @return Greatest common divisor.
    */
-  private static double modularError(double a, double b) {
-    double diff = Math.abs(a - b);
-    return diff > 0.5 ? 1.0 - diff : diff;
-  }
-
-  /**
-   * Container for a CRT solve result.
-   *
-   * @param mechanismRotations solved mechanism rotations
-   * @param errorRotations     modular error associated with the solution
-   */
-  private static record CrtSolution(double mechanismRotations, double errorRotations) {
+  private static int gcd(int a, int b) {
+    while (b != 0) {
+      int remainder = a % b;
+      a = b;
+      b = remainder;
+    }
+    return a;
   }
 }

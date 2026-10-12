@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 326" width="760" height="326" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">Travel: give solve the shared gear's travel</title>
+<desc id="d">The turret's travel of minus 200 to plus 200 degrees is the same motion as minus 1000 to plus 1000 degrees of a drive gear that turns 5 times per turret turn. solve takes the drive gear numbers.</desc>
+<rect width="760" height="326" fill="#f5f7fa"/>
+<rect x="16" y="16" width="728" height="294" rx="10" fill="#ffffff" stroke="#cbd2d9"/>
+<text x="34" y="46" font-size="15" font-weight="700" fill="#1f2933">Travel: give solve the shared gear's travel</text>
+<text x="34" y="65" font-size="11.5" fill="#52606d">In layouts 2 and 3 the shared gear is not the turret, so the same motion is a bigger angle.</text>
+<text x="34.0" y="108.0" font-size="12.5" font-weight="700" text-anchor="start" fill="#1f2933" >Turret travel</text>
+<text x="34.0" y="124.0" font-size="11" font-weight="400" text-anchor="start" fill="#52606d" >what you know</text>
+<rect x="190.0" y="92.0" width="510.0" height="30" rx="5" fill="#dbe7f5" stroke="#3e6da8" stroke-width="1.5"/>
+<text x="445.0" y="111.5" font-size="12" font-weight="700" text-anchor="middle" fill="#1f2933" >the turret moves through 400°</text>
+<line x1="190.0" y1="122" x2="190.0" y2="132" stroke="#3e6da8" stroke-width="1.2"/>
+<text x="190.0" y="146.0" font-size="12" font-weight="700" text-anchor="middle" fill="#3e6da8" >-200°</text>
+<line x1="445.0" y1="122" x2="445.0" y2="132" stroke="#3e6da8" stroke-width="1.2"/>
+<text x="445.0" y="146.0" font-size="12" font-weight="700" text-anchor="middle" fill="#3e6da8" >0°</text>
+<line x1="700.0" y1="122" x2="700.0" y2="132" stroke="#3e6da8" stroke-width="1.2"/>
+<text x="700.0" y="146.0" font-size="12" font-weight="700" text-anchor="middle" fill="#3e6da8" >+200°</text>
+<line x1="295.0" y1="152" x2="295.0" y2="184" stroke="#c2630b" stroke-width="1.6"/><path d="M290.0,183 L300.0,183 L295.0,190 Z" fill="#c2630b"/>
+<text x="307.0" y="176.0" font-size="12" font-weight="700" text-anchor="start" fill="#c2630b" >× 5, the drive gear turns per turret turn</text>
+<text x="34.0" y="216.0" font-size="12.5" font-weight="700" text-anchor="start" fill="#1f2933" >Drive gear travel</text>
+<text x="34.0" y="232.0" font-size="11" font-weight="400" text-anchor="start" fill="#52606d" >what solve needs</text>
+<rect x="190.0" y="200.0" width="510.0" height="30" rx="5" fill="#fde3c8" stroke="#c2630b" stroke-width="1.5"/>
+<text x="445.0" y="219.5" font-size="12" font-weight="700" text-anchor="middle" fill="#1f2933" >the drive gear moves through 2000°</text>
+<line x1="190.0" y1="230" x2="190.0" y2="240" stroke="#c2630b" stroke-width="1.2"/>
+<text x="190.0" y="254.0" font-size="12" font-weight="700" text-anchor="middle" fill="#c2630b" >-1000°</text>
+<line x1="445.0" y1="230" x2="445.0" y2="240" stroke="#c2630b" stroke-width="1.2"/>
+<text x="445.0" y="254.0" font-size="12" font-weight="700" text-anchor="middle" fill="#c2630b" >0°</text>
+<line x1="700.0" y1="230" x2="700.0" y2="240" stroke="#c2630b" stroke-width="1.2"/>
+<text x="700.0" y="254.0" font-size="12" font-weight="700" text-anchor="middle" fill="#c2630b" >+1000°</text>
+<line x1="34" y1="272" x2="726" y2="272" stroke="#cbd2d9"/>
+<text x="34.0" y="296.0" font-size="12" font-weight="400" text-anchor="start" fill="#1f2933" font-family="Consolas, Menlo, monospace">Degrees.of(-200).times(driveToTurret.getMechanismToRotorRatio())  // -1000 degrees</text>
+</svg>
