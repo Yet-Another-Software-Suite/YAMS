@@ -6,9 +6,7 @@ package yams.mechanisms.swerve;
 import static edu.wpi.first.hal.FRCNetComm.tInstances.kRobotDriveSwerve_YAGSL;
 import static edu.wpi.first.hal.FRCNetComm.tResourceType.kResourceType_RobotDrive;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Second;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
@@ -171,6 +169,8 @@ public class SwerveDrive {
     Arrays.fill(m_desiredModuleStates, new SwerveModuleState());
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(getGyroAngle()), getModulePositions(), m_config.getInitialPose());
+    // Start with the gyro reading the starting pose's heading so field relative driving matches it.
+    resetOdometry(m_config.getInitialPose());
     setupTelemetry();
   }
 
@@ -248,12 +248,11 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public void lockPose() {
-    // Sets states
-    SwerveModuleState[] desiredStates = new SwerveModuleState[m_modules.length];
+    // Turn each wheel toward the robot center without driving it. SwerveModule#lock skips the
+    // minimum velocity, which would otherwise hold these zero speed states where the wheels are.
     for (int i = 0; i < m_modules.length; i++) {
-      desiredStates[i] = new SwerveModuleState(0, m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
+      m_desiredModuleStates[i] = m_modules[i].lock(m_modules[i].getConfig().getLocation().orElseThrow().getAngle());
     }
-    setSwerveModuleStates(desiredStates);
     m_desiredChassisSpeeds = new ChassisSpeeds();
   }
 
@@ -400,12 +399,25 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public void zeroGyro() {
-    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()));
     // If in sim reset to the simulated drive.
     //    resetOdometry(
     //        RobotBase.isSimulation() ? getMapleSimPose() : new Pose2d(getPose().getTranslation(),
     //        Rotation2d.kZero));
     resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
+  }
+
+  /**
+   * Make {@link #getGyroAngle()} read the given heading from now on. On a real robot the gyro offset
+   * is adjusted; in simulation the simulated gyro angle is set directly.
+   *
+   * @param heading Heading the gyro should report.
+   */
+  private void setGyroAngle(Angle heading) {
+    if (RobotBase.isSimulation()) {
+      m_simGyroAngle = heading;
+      return;
+    }
+    m_config.withGyroOffset(getGyroAngle().plus(m_config.getGyroOffset()).minus(heading));
   }
 
   /**
@@ -418,9 +430,10 @@ public class SwerveDrive {
   }
 
   /**
-   * Resets odometry to the given pose. Gyro angle and module positions do not need to be reset when
-   * calling this method. However, if either gyro angle or module position is reset, this must be
-   * called in order for odometry to keep working.
+   * Resets odometry to the given pose, and the gyro to the pose's heading so that field relative
+   * driving agrees with the pose. Module positions do not need to be reset when calling this method.
+   * However, if a module position is reset, this must be called in order for odometry to keep
+   * working.
    *
    * @param pose The pose to set the odometry to. Field relative, blue-origin where 0deg is facing
    *             towards RED alliance.
@@ -431,6 +444,7 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().resetOdometry(pose);
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
+    setGyroAngle(pose.getRotation().getMeasure());
     m_poseEstimator.resetPosition(new Rotation2d(getGyroAngle()), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisSpeeds();
     m_desiredModuleStates = m_kinematics.toSwerveModuleStates(new ChassisSpeeds());
@@ -494,18 +508,21 @@ public class SwerveDrive {
   }
 
   /**
-   * Drive the robot to the given pose.
+   * Drive the robot to the given pose. The command runs until it is interrupted and stops the drive
+   * when it is.
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is
    *             facing towards RED
-   * @return {@link Command} to drive the robot to the given pose.
+   * @return {@link Command} that drives the robot toward the given pose until interrupted.
    * @implNote Not compatible with AdvantageKit
    */
   public Command driveToPose(Pose2d pose) {
-    return Commands.runOnce(() -> {
+    return Commands.startRun(() -> {
       resetTranslationPID();
       resetRotationPID();
-    }).andThen(() -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem()).withName("Drive to Pose");
+    }, () -> setFieldRelativeChassisSpeeds(driveToPoseSetpoint(pose)), m_config.getSubsystem())
+                   .finallyDo(() -> setRobotRelativeChassisSpeeds(new ChassisSpeeds()))
+                   .withName("Drive to Pose");
   }
 
   /**
@@ -520,13 +537,15 @@ public class SwerveDrive {
   public ChassisSpeeds driveToPoseSetpoint(Pose2d targetPose) {
     var rotationPID = m_config.getRotationPID();
     var translationPID = m_config.getTranslationPID();
-    var distance = getDistanceFromPose(targetPose);
-    var angleDifference = getAngleDifferenceFromPose(targetPose);
-    var translationScalar = translationPID.calculate(distance.in(Meters), 0);
     var currentPose = getPose();
-    var translationDifference = currentPose.getTranslation().minus(targetPose.getTranslation());
-    return new ChassisSpeeds(translationDifference.getMeasureX().per(Second).times(translationScalar), translationDifference.getMeasureY().per(Second).times(translationScalar), RadiansPerSecond.of(rotationPID.calculate(currentPose.getRotation()
-        .getRadians(), targetPose.getRotation().getRadians())));
+    var toTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
+    var distance = toTarget.getNorm();
+    // The controller sees the distance as its measurement with a setpoint of 0, so its output is
+    // negative while there is distance left: the speed toward the target is the negative of it.
+    var speed = -translationPID.calculate(distance, 0);
+    // Drive at that speed along the unit vector toward the target.
+    var velocity = distance > 1e-9 ? toTarget.div(distance).times(speed) : new Translation2d();
+    return new ChassisSpeeds(velocity.getX(), velocity.getY(), rotationPID.calculate(currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians()));
   }
 
   /**
