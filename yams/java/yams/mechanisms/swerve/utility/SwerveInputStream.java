@@ -27,6 +27,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import yams.mechanisms.config.SwerveDriveConfig;
 import yams.mechanisms.swerve.SwerveDrive;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
+import yams.telemetry.SwerveInputStreamTelemetry;
 
 /**
  * Helper class to easily transform Controller inputs into workable Chassis speeds. Intended to
@@ -166,6 +168,9 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
   /** Maximum chassis angular velocity, defaults to 1 Rotation per Second. */
   private AngularVelocity maximumChassisAngularVelocity = RotationsPerSecond.of(1);
 
+  /** Telemetry and live tuning, see {@link #withTelemetry(String, TelemetryVerbosity)}. */
+  private Optional<SwerveInputStreamTelemetry> telemetry = Optional.empty();
+
   /**
    * Create a {@link SwerveInputStream} for an easy way to generate {@link ChassisSpeeds} from a
    * driver controller.
@@ -267,6 +272,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
     translationHeadingOffset = cfg.translationHeadingOffset;
     maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
     maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
+    // Telemetry is bound to the stream it was created for, so a clone starts without any.
   }
 
   /**
@@ -277,6 +283,201 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
   @Override
   public SwerveInputStream clone() {
     return new SwerveInputStream(this);
+  }
+
+  /**
+   * Get the name of the drive mode used by the last {@link #get()} call.
+   *
+   * @return Mode name, e.g. {@code ANGULAR_VELOCITY}, {@code HEADING}, {@code AIM} or {@code TRANSLATION_ONLY}.
+   */
+  public String getCurrentModeName() {
+    return currentMode.name();
+  }
+
+  /**
+   * Get the controller axis deadband.
+   *
+   * @return Axis deadband, 0 when none is applied.
+   */
+  public double getAxisDeadband() {
+    return axisDeadband.orElse(0.0);
+  }
+
+  /**
+   * Set the controller axis deadband.
+   *
+   * @param deadband Deadband applied to every axis, 0 to disable.
+   */
+  public void setAxisDeadband(double deadband) {
+    axisDeadband = deadband == 0 ? Optional.empty() : Optional.of(deadband);
+  }
+
+  /**
+   * Get the translation axis scalar.
+   *
+   * @return Translation axis scalar, 1 when unscaled.
+   */
+  public double getTranslationAxisScale() {
+    return translationAxisScale.orElse(1.0);
+  }
+
+  /**
+   * Set the translation axis scalar.
+   *
+   * @param scale Scalar in (0, 1] applied to the translation axes, 0 to disable.
+   */
+  public void setTranslationAxisScale(double scale) {
+    translationAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
+  }
+
+  /**
+   * Get the angular velocity axis scalar.
+   *
+   * @return Angular velocity axis scalar, 1 when unscaled.
+   */
+  public double getOmegaAxisScale() {
+    return omegaAxisScale.orElse(1.0);
+  }
+
+  /**
+   * Set the angular velocity axis scalar.
+   *
+   * @param scale Scalar in (0, 1] applied to the angular velocity axis, 0 to disable.
+   */
+  public void setOmegaAxisScale(double scale) {
+    omegaAxisScale = scale == 0 ? Optional.empty() : Optional.of(scale);
+  }
+
+  /**
+   * Get the chassis linear velocity a full translation axis maps to.
+   *
+   * @return Maximum chassis linear velocity.
+   */
+  public LinearVelocity getMaximumChassisLinearVelocity() {
+    return maximumChassisLinearVelocity;
+  }
+
+  /**
+   * Set the chassis linear velocity a full translation axis maps to.
+   *
+   * @param velocity Maximum chassis linear velocity.
+   */
+  public void setMaximumChassisLinearVelocity(LinearVelocity velocity) {
+    maximumChassisLinearVelocity = velocity;
+  }
+
+  /**
+   * Get the chassis angular velocity a full angular velocity axis maps to.
+   *
+   * @return Maximum chassis angular velocity.
+   */
+  public AngularVelocity getMaximumChassisAngularVelocity() {
+    return maximumChassisAngularVelocity;
+  }
+
+  /**
+   * Set the chassis angular velocity a full angular velocity axis maps to.
+   *
+   * @param velocity Maximum chassis angular velocity.
+   */
+  public void setMaximumChassisAngularVelocity(AngularVelocity velocity) {
+    maximumChassisAngularVelocity = velocity;
+  }
+
+  /**
+   * Check if the translation magnitude is cubed, for finer control near the center of the stick.
+   *
+   * @return True if translation cubing is enabled.
+   */
+  public boolean isTranslationCubeEnabled() {
+    return translationCube.isPresent() && translationCube.get().getAsBoolean();
+  }
+
+  /**
+   * Enable or disable cubing the translation magnitude.
+   *
+   * @param enabled True to cube the translation magnitude.
+   */
+  public void setTranslationCubeEnabled(boolean enabled) {
+    translationCube = enabled ? Optional.of(() -> true) : Optional.empty();
+  }
+
+  /**
+   * Check if the angular velocity axis is cubed, for finer control near the center of the stick.
+   *
+   * @return True if angular velocity cubing is enabled.
+   */
+  public boolean isOmegaCubeEnabled() {
+    return omegaCube.isPresent() && omegaCube.get().getAsBoolean();
+  }
+
+  /**
+   * Enable or disable cubing the angular velocity axis.
+   *
+   * @param enabled True to cube the angular velocity axis.
+   */
+  public void setOmegaCubeEnabled(boolean enabled) {
+    omegaCube = enabled ? Optional.of(() -> true) : Optional.empty();
+  }
+
+  /**
+   * Check if translation is flipped 180 degrees while on the red alliance.
+   *
+   * @return True if alliance relative control is enabled.
+   */
+  public boolean isAllianceRelativeEnabled() {
+    return allianceRelative.isPresent() && allianceRelative.get().getAsBoolean();
+  }
+
+  /**
+   * Enable or disable flipping translation 180 degrees while on the red alliance.
+   *
+   * @param enabled True to enable alliance relative control.
+   */
+  public void setAllianceRelativeEnabled(boolean enabled) {
+    allianceRelative = enabled ? Optional.of(() -> true) : Optional.empty();
+  }
+
+  /**
+   * Check if the translation axes are treated as robot relative.
+   *
+   * @return True if robot relative control is enabled.
+   */
+  public boolean isRobotRelativeEnabled() {
+    return robotRelative.isPresent() && robotRelative.get().getAsBoolean();
+  }
+
+  /**
+   * Enable or disable treating the translation axes as robot relative.
+   *
+   * @param enabled True to enable robot relative control.
+   */
+  public void setRobotRelativeEnabled(boolean enabled) {
+    robotRelative = enabled ? Optional.of(() -> true) : Optional.empty();
+  }
+
+  /**
+   * Publish this stream's telemetry under {@code SwerveInputStream/<name>}, updated every time the stream is read. At
+   * {@link TelemetryVerbosity#HIGH} the stream is also live tunable: see {@link SwerveInputStreamTelemetry}. Replaces
+   * any telemetry this stream already had. A {@link #clone()} does not copy the telemetry.
+   *
+   * @param name      Name of the stream in NetworkTables (e.g., "drive").
+   * @param verbosity {@link TelemetryVerbosity} to publish at.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withTelemetry(String name, TelemetryVerbosity verbosity) {
+    telemetry.ifPresent(SwerveInputStreamTelemetry::close);
+    telemetry = Optional.of(new SwerveInputStreamTelemetry(this, name, verbosity));
+    return this;
+  }
+
+  /**
+   * Get this stream's telemetry, created by {@link #withTelemetry(String, TelemetryVerbosity)}.
+   *
+   * @return The {@link SwerveInputStreamTelemetry}, or empty if telemetry is not enabled.
+   */
+  public Optional<SwerveInputStreamTelemetry> getTelemetry() {
+    return telemetry;
   }
 
   /**
@@ -505,11 +706,11 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
    * Aim the {@link SwerveDrive} at this pose while driving.
    *
    * @param trigger   When True will enable aiming at the current target.
-   * @param aimTarget {@link Pose2d} to point at.
+   * @param aimTarget {@link Pose2d} to point at, null for no target.
    * @return this
    */
   public SwerveInputStream withAim(Supplier<Pose2d> aimTarget, BooleanSupplier trigger) {
-    this.aimTarget = aimTarget.equals(Pose2d.kZero) ? Optional.empty() : Optional.of(aimTarget);
+    this.aimTarget = Optional.ofNullable(aimTarget);
     aimEnabled = Optional.of(trigger);
     return this;
   }
@@ -538,7 +739,7 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
       if (aimTarget.isPresent()) {
         return SwerveInputMode.AIM;
       } else {
-        DriverStation.reportError("Attempting to enter AIM mode without target, please use " + "SwerveInputStream.aim() to select a target first!", false);
+        DriverStation.reportError("Attempting to enter AIM mode without target, please use " + "SwerveInputStream.withAim to select a target first!", false);
       }
     } else if (headingEnabled.isPresent() && headingEnabled.get().getAsBoolean()) {
       if (headingSupplier.isPresent()) {
@@ -773,7 +974,9 @@ public class SwerveInputStream implements Supplier<ChassisSpeeds> {
 
     currentMode = newMode;
 
-    return applyTranslationHeadingOffset(applyRobotRelativeTranslation(speeds));
+    ChassisSpeeds fieldRelativeSpeeds = applyTranslationHeadingOffset(applyRobotRelativeTranslation(speeds));
+    telemetry.ifPresent(SwerveInputStreamTelemetry::updateTelemetry);
+    return fieldRelativeSpeeds;
   }
 
   /** Drive modes to keep track of. */
