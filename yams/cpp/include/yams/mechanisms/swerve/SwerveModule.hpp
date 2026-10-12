@@ -113,12 +113,21 @@ class SwerveModule {
   /**
    * Command the module to a target state.
    *
-   * Applies optimization (direction flip, min-velocity clamp, cosine compensation)
+   * Applies optimization (direction flip, velocity deadband, cosine compensation)
    * before setting drive velocity and azimuth position.
    *
    * @param state Target module state.
    */
   void SetSwerveModuleState(wpi::math::SwerveModuleVelocity state);
+
+  /**
+   * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
+   * velocity deadband is skipped, since it would hold the wheel where it is.
+   *
+   * @param angle Angle to turn the wheel to.
+   * @return The state the module was commanded to.
+   */
+  wpi::math::SwerveModuleVelocity Lock(wpi::math::Rotation2d angle);
 
   /** Get the current measured module state (speed and heading). */
   wpi::math::SwerveModuleVelocity GetState() const;

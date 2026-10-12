@@ -80,6 +80,13 @@ void SwerveModule::SetSwerveModuleState(wpi::math::SwerveModuleVelocity state) {
   m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
 }
 
+wpi::math::SwerveModuleVelocity SwerveModule::Lock(wpi::math::Rotation2d angle) {
+  auto state = m_config->GetLockedState(angle);
+  m_driveMotorController->SetVelocity(state.velocity);
+  m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
+  return state;
+}
+
 wpi::math::SwerveModuleVelocity SwerveModule::GetState() const {
   return wpi::math::SwerveModuleVelocity{m_driveMotorController->GetMeasurementVelocity(),
                                          wpi::math::Rotation2d{wpi::units::radian_t{
