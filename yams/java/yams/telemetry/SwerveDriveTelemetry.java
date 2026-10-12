@@ -6,6 +6,7 @@ package yams.telemetry;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -114,7 +115,7 @@ public class SwerveDriveTelemetry {
       if (!dt.enabled)
         continue;
       switch (dt.getField()) {
-        case Gyro -> dt.set(drive.getGyroAngle().in(Degrees));
+        case Gyro -> dt.set(Math.toDegrees(drive.getGyroRotation3d().getZ()));
       }
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
@@ -137,8 +138,9 @@ public class SwerveDriveTelemetry {
   @SuppressWarnings("unchecked")
   public void applyTuningValues(SwerveDrive drive) {
     var cfg = drive.getConfig();
-    var translationPID = cfg.getTranslationPID();
-    var rotationPID = cfg.getRotationPID();
+    // A drive may have no auto-align controllers: show zero gains until some are given.
+    var translationPID = cfg.getTranslationPID().orElseGet(() -> new PIDController(0, 0, 0));
+    var rotationPID = cfg.getRotationPID().orElseGet(() -> new PIDController(0, 0, 0));
     boolean nt4Enabled = m_config.getNT4Enabled();
 
     var autoAlignBt = m_boolTelemetry.get(BooleanTelemetryField.AutoAlignEnabled);
@@ -173,7 +175,8 @@ public class SwerveDriveTelemetry {
       var poseY = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY);
       var poseRotation = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation);
       var targetPose = new Pose2d(poseX.get(), poseY.get(), Rotation2d.fromDegrees(poseRotation.get()));
-      drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
+      // driveToPoseSetpoint already returns robot relative speeds.
+      drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
     }
 
     if (driveTuningBt.enabled && nt4Enabled) {
