@@ -163,7 +163,9 @@ jobs:
           - group: discontinuity-points
             test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
           - group: zero-offsets
-            test-filter: '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
+            test-filter: >-
+              --tests "yams.core.motorcontrollers.ZeroOffsetTest"
+              --tests "yams.core.motorcontrollers.ZeroOffsetDiscontinuityPointTest"
           # Motor controller unit tests that are not about an external encoder: the configuration
           # each vendor's device is given, feedforwards, exponential profiles, live tuning and the
           # simulation period. Add new motor controller test classes here.

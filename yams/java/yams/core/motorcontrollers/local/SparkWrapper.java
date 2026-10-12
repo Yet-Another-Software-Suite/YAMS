@@ -95,11 +95,15 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
  *
  * <ul>
- * <li>{@code 0.5} rotations sensor range is [-0.5, 0.5), {@code zeroCentered = true}
- * <li>{@code 1.0} rotations sensor range is [0, 1), {@code zeroCentered = false}
+ * <li>{@code 0.5} rotations sensor range is [-0.5, 0.5), {@code rangeOffset(0)}
+ * <li>{@code 1.0} rotations sensor range is [0, 1), {@code rangeOffset(0.5)}
  * </ul>
  *
- * A discontinuity point <b>must</b> be configured via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
+ * REVLib's {@code zeroCentered} is deprecated for removal in 2027, so the SPARK's absolute encoder
+ * is given a range offset. An absolute encoder read over CAN has no range offset, and is still given
+ * {@code dutyCycleZeroCentered}.
+ *
+ * <p>A discontinuity point <b>must</b> be configured via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
  * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
  *
  * <h2>Example</h2>
