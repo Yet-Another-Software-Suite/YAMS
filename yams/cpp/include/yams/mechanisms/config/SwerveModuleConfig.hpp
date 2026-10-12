@@ -221,13 +221,25 @@ class SwerveModuleConfig {
   std::optional<telemetry::SwerveModuleTelemetryConfig> GetSwerveModuleTelemetryConfig();
 
   /**
-   * Apply all enabled optimizations (min-velocity clamp, state optimization, cosine compensation)
+   * Apply all enabled optimizations (velocity deadband, state optimization, cosine compensation)
    * and return the resulting state.
    *
    * @param state Input state.
    * @return Optimized state.
    */
   wpi::math::SwerveModuleVelocity GetOptimizedState(wpi::math::SwerveModuleVelocity state) const;
+
+  /**
+   * Get the state that turns the wheel to the given angle without driving it, as for locking the
+   * drive in place. Unlike GetOptimizedState(), the velocity deadband does not hold the wheel
+   * where it is, since the wheel is meant to turn without driving. With optimization enabled the
+   * wheel turns to whichever of the angle and its opposite is nearer, as either holds the drive
+   * the same way.
+   *
+   * @param angle Angle to turn the wheel to.
+   * @return Zero speed state at the angle to turn the wheel to.
+   */
+  wpi::math::SwerveModuleVelocity GetLockedState(wpi::math::Rotation2d angle) const;
 
  private:
   motorcontrollers::SmartMotorController* m_driveMotor{nullptr};
@@ -241,6 +253,8 @@ class SwerveModuleConfig {
   bool m_stateOptimization{true};
   bool m_cosineCompensation{false};
   std::optional<wpi::units::meters_per_second_t> m_velocityDeadband;
+  /** Angle the wheel was last sent to, so optimization does not reverse it back and forth. */
+  mutable std::optional<wpi::math::Rotation2d> m_lastCommandedAngle;
   std::optional<wpi::math::Translation2d> m_location;
   std::optional<wpi::units::meter_t> m_wheelCircumference;
 
@@ -254,6 +268,28 @@ class SwerveModuleConfig {
    */
   double GetCosineCompensatedVelocity(const wpi::math::SwerveModuleVelocity& desiredState,
                                       const wpi::math::Rotation2d& currentAngle) const;
+
+  /**
+   * Angle the azimuth controller is closing its loop on (seeded from the absolute encoder), so
+   * optimization, cosine compensation and the azimuth setpoint agree on where the wheel points.
+   */
+  wpi::math::Rotation2d GetAzimuthAngle() const;
+
+  /**
+   * Optimize a module state like SwerveModuleVelocity::Optimize(), keeping the orientation the
+   * wheel was last sent to unless the other is better by more than 30 degrees. A wheel still
+   * turning can be near 90 degrees from both orientations of a target that keeps moving, such as
+   * a path starting off in a new direction; choosing by its angle alone would reverse it back and
+   * forth.
+   *
+   * @param desired       Module state to optimize.
+   * @param currentAngle  Angle the wheel is at.
+   * @param lastCommanded Angle the wheel was last sent to, if it has been sent anywhere.
+   * @return The optimized module state.
+   */
+  static wpi::math::SwerveModuleVelocity Optimize(
+      wpi::math::SwerveModuleVelocity desired, const wpi::math::Rotation2d& currentAngle,
+      const std::optional<wpi::math::Rotation2d>& lastCommanded);
 };
 
 }  // namespace yams::mechanisms::config

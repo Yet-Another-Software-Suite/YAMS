@@ -174,21 +174,71 @@ class SwerveDrive {
   }
 
   /**
-   * Create a command that drives the robot to a target field-relative pose using PID.
+   * Create a command that drives the robot to a target field-relative pose using PID. It keeps
+   * driving to the pose until it is interrupted, and stops the drive when it ends.
    *
    * Requires translation and rotation PID controllers to be configured.
    *
    * @param pose Target field-relative pose.
-   * @return Command sequence.
+   * @return Command requiring the configured subsystem.
    */
   wpi::cmd::CommandPtr DriveToPose(wpi::math::Pose2d pose) {
-    return wpi::cmd::RunOnce([this] {
-             ResetTranslationPID();
-             ResetRotationPID();
-           })
-        .AndThen(Drive([this, pose] { return DriveToPoseSetpoint(pose); }))
+    return wpi::cmd::StartRun(
+               [this] {
+                 ResetTranslationPID();
+                 ResetRotationPID();
+               },
+               [this, pose] { SetRobotRelativeChassisSpeeds(DriveToPoseSetpoint(pose)); },
+               {m_config->GetSubsystem()})
+        .FinallyDo([this] { Stop(); })
         .WithName("Drive to Pose");
   }
+
+  /**
+   * Create a command that drives the robot to a target field-relative pose using PID, ending once
+   * the robot is within the given tolerances. The drive is stopped when the command ends or is
+   * interrupted.
+   *
+   * Requires translation and rotation PID controllers to be configured.
+   *
+   * @param pose                 Target field-relative pose.
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return Command requiring the configured subsystem.
+   */
+  wpi::cmd::CommandPtr DriveToPose(wpi::math::Pose2d pose,
+                                   wpi::units::meter_t translationTolerance,
+                                   wpi::units::degree_t rotationTolerance) {
+    return wpi::cmd::StartRun(
+               [this] {
+                 ResetTranslationPID();
+                 ResetRotationPID();
+               },
+               [this, pose] { SetRobotRelativeChassisSpeeds(DriveToPoseSetpoint(pose)); },
+               {m_config->GetSubsystem()})
+        .Until([this, pose, translationTolerance, rotationTolerance] {
+          return IsNear(pose, translationTolerance, rotationTolerance);
+        })
+        .FinallyDo([this] { Stop(); })
+        .WithName("Drive to Pose");
+  }
+
+  /**
+   * Whether the robot is within the given tolerances of a pose.
+   *
+   * @param pose                 Pose to compare against.
+   * @param translationTolerance Maximum distance from the pose.
+   * @param rotationTolerance    Maximum heading error from the pose.
+   * @return True if the robot is within both tolerances of the pose.
+   */
+  bool IsNear(wpi::math::Pose2d pose, wpi::units::meter_t translationTolerance,
+              wpi::units::degree_t rotationTolerance) {
+    return GetDistanceFromPose(pose) <= translationTolerance &&
+           wpi::units::math::abs(GetAngleDifferenceFromPose(pose)) <= rotationTolerance;
+  }
+
+  /** Stop the drive by commanding zero chassis speeds. */
+  void Stop() { SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{}); }
 
   /**
    * Drive to the target pose, primarily for use in Live Tuning; could also be used for setpoint
@@ -202,6 +252,24 @@ class SwerveDrive {
    *     not configured.
    */
   wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose) {
+    return DriveToPoseSetpoint(targetPose, GetPose(),
+                               wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
+  }
+
+  /**
+   * Robot-relative chassis speeds that drive from a given pose to the target pose, for callers
+   * that have their own pose or heading, such as a simulated ground truth.
+   *
+   * @param targetPose  Pose to drive towards.
+   * @param currentPose Pose the robot is at.
+   * @param heading     Heading used to turn the field-relative speeds into robot-relative ones.
+   * @return robot-relative ChassisSpeeds to drive the robot to the given pose.
+   * @throws SwerveDriveConfigurationException if the translation or rotation PID controller is
+   *     not configured.
+   */
+  wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose,
+                                                   wpi::math::Pose2d currentPose,
+                                                   wpi::math::Rotation2d heading) {
     auto rotationPIDRef = m_config->GetRotationPID();
     if (!rotationPIDRef) {
       throw exceptions::SwerveDriveConfigurationException(
@@ -216,20 +284,23 @@ class SwerveDrive {
     }
     auto& rotationPID = rotationPIDRef->get();
     auto& translationPID = translationPIDRef->get();
-    auto distance = GetDistanceFromPose(targetPose);
-    auto translationScalar = translationPID.Calculate(distance.value(), 0.0);
-    auto currentPose = GetPose();
     // Plain field-frame translation delta (not RelativeTo/operator-, which expresses the result
     // in targetPose's rotated frame and would skew the commanded direction whenever targetPose's
     // heading is non-zero).
-    auto translationDiff = currentPose.Translation() - targetPose.Translation();
+    auto toTarget = targetPose.Translation() - currentPose.Translation();
+    double distance = toTarget.Norm().value();
+    // The controller sees the distance as its measurement with a setpoint of 0, so its output is
+    // negative while there is distance left: the speed toward the target is the negative of it.
+    double speed = -translationPID.Calculate(distance, 0.0);
+    // Drive at that speed along the unit vector toward the target.
+    double vx = distance > 1e-9 ? toTarget.X().value() / distance * speed : 0.0;
+    double vy = distance > 1e-9 ? toTarget.Y().value() / distance * speed : 0.0;
     return (wpi::math::ChassisVelocities{
-                wpi::units::meters_per_second_t{translationDiff.X().value() * translationScalar},
-                wpi::units::meters_per_second_t{translationDiff.Y().value() * translationScalar},
+                wpi::units::meters_per_second_t{vx}, wpi::units::meters_per_second_t{vy},
                 wpi::units::radians_per_second_t{
                     rotationPID.Calculate(currentPose.Rotation().Radians().value(),
                                           targetPose.Rotation().Radians().value())}})
-        .ToRobotRelative(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
+        .ToRobotRelative(heading);
   }
 
   // ---- Core drive methods ---------------------------------------------------
@@ -297,14 +368,13 @@ class SwerveDrive {
    * Lock all modules to an X-pattern to resist being pushed.
    */
   void LockPose() {
-    wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
+    // Turn each wheel toward the robot center without driving it. SwerveModule::Lock skips the
+    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
     for (size_t i = 0; i < NumModules; ++i) {
-      states[i] = wpi::math::SwerveModuleVelocity{
-          wpi::units::meters_per_second_t{0},
-          m_config->GetModules()[i]->GetConfig().GetLocation()->Angle().value_or(
-              wpi::math::Rotation2d{})};
+      auto* module = m_config->GetModules()[i];
+      m_desiredModuleStates[i] = module->Lock(
+          module->GetConfig().GetLocation()->Angle().value_or(wpi::math::Rotation2d{}));
     }
-    SetSwerveModuleStates(states);
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
   }
 

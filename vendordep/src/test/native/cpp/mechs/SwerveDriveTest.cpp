@@ -15,6 +15,7 @@
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
+#include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/CommandScheduler.hpp>
@@ -519,6 +520,120 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.SecondDriveCommandInte
   CHECK(secondCalls >= 1);
   INFO("cmd1 should have been cancelled");
   CHECK(firstCalls == firstCallsAtInterrupt);
+}
+
+// The drive to pose setpoint is the controller output along the unit vector toward the target.
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.DriveToPoseSetpointIsProportionalToTheDistance",
+                 "[SwerveDriveTest]") {
+  m_drive->ResetTranslationPID();
+  m_drive->ResetRotationPID();
+  // kP of 2 and 5 m to go is 10 m/s toward the target, along (0.6, 0.8).
+  auto speeds =
+      m_drive->DriveToPoseSetpoint(wpi::math::Pose2d{3.0_m, 4.0_m, wpi::math::Rotation2d{}});
+  CHECK(speeds.vx.value() == Catch::Approx(6.0).margin(0.01));
+  CHECK(speeds.vy.value() == Catch::Approx(8.0).margin(0.01));
+  CHECK(speeds.omega.value() == Catch::Approx(0.0).margin(0.01));
+  // At the pose there is nowhere to go.
+  auto atPose = m_drive->DriveToPoseSetpoint(wpi::math::Pose2d{});
+  CHECK(atPose.vx.value() == Catch::Approx(0.0).margin(1e-6));
+  CHECK(atPose.vy.value() == Catch::Approx(0.0).margin(1e-6));
+}
+
+// The setpoint is robot relative: with the robot facing +Y, a target ahead in +Y is straight ahead.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DriveToPoseSetpointIsRobotRelative",
+                 "[SwerveDriveTest]") {
+  m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{90.0_deg}});
+  auto speeds = m_drive->DriveToPoseSetpoint(
+      wpi::math::Pose2d{0_m, 1.0_m, wpi::math::Rotation2d{90.0_deg}});
+  CHECK(speeds.vx.value() == Catch::Approx(2.0).margin(0.01));
+  CHECK(speeds.vy.value() == Catch::Approx(0.0).margin(0.01));
+}
+
+// DriveToPose keeps driving until it is interrupted, then stops the drive.
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.DriveToPoseKeepsDrivingUntilInterruptedAndThenStops",
+                 "[SwerveDriveTest]") {
+  auto cmd = m_drive->DriveToPose(wpi::math::Pose2d{30.0_m, 0_m, wpi::math::Rotation2d{}});
+  auto& scheduler = wpi::cmd::CommandScheduler::GetInstance();
+  scheduler.Schedule(cmd);
+  SchedulerHelper::RunForDuration(0.2_s);
+  INFO("should still be driving to the pose");
+  CHECK(scheduler.IsScheduled(cmd));
+  CHECK(m_drive->GetDesiredChassisSpeeds().vx.value() > 0.0);
+
+  scheduler.Cancel(cmd);
+  INFO("the drive should be stopped when the command ends");
+  CHECK(m_drive->GetDesiredChassisSpeeds().vx.value() == Catch::Approx(0.0).margin(1e-9));
+}
+
+// DriveToPose with tolerances ends once the robot is within them, and stops the drive.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DriveToPoseWithTolerancesEndsAtThePose",
+                 "[SwerveDriveTest]") {
+  wpi::math::Pose2d pose{0.02_m, 0_m, wpi::math::Rotation2d{1.0_deg}};
+  auto cmd = m_drive->DriveToPose(pose, 5.0_cm, 3.0_deg);
+  auto& scheduler = wpi::cmd::CommandScheduler::GetInstance();
+  scheduler.Schedule(cmd);
+  SchedulerHelper::RunForDuration(0.1_s);
+  INFO("should end once within the tolerances");
+  CHECK_FALSE(scheduler.IsScheduled(cmd));
+  CHECK(m_drive->GetDesiredChassisSpeeds().vx.value() == Catch::Approx(0.0).margin(1e-9));
+}
+
+// IsNear checks both the distance and the heading.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.IsNearChecksDistanceAndHeading",
+                 "[SwerveDriveTest]") {
+  m_drive->ResetOdometry(wpi::math::Pose2d{1.0_m, 2.0_m, wpi::math::Rotation2d{90.0_deg}});
+  CHECK(m_drive->IsNear(wpi::math::Pose2d{1.03_m, 2.0_m, wpi::math::Rotation2d{92.0_deg}}, 5.0_cm,
+                        3.0_deg));
+  CHECK_FALSE(m_drive->IsNear(wpi::math::Pose2d{1.2_m, 2.0_m, wpi::math::Rotation2d{90.0_deg}},
+                              5.0_cm, 3.0_deg));
+  CHECK_FALSE(m_drive->IsNear(wpi::math::Pose2d{1.0_m, 2.0_m, wpi::math::Rotation2d{100.0_deg}},
+                              5.0_cm, 3.0_deg));
+}
+
+// LockPose turns the wheels even with a velocity deadband, which holds zero speed states in place.
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.LockPoseTurnsTheWheelsEvenWithAVelocityDeadband",
+                 "[SwerveDriveTest]") {
+  for (auto* cfg : {&m_flCfg, &m_frCfg, &m_blCfg, &m_brCfg}) {
+    cfg->WithVelocityDeadband(0.1_mps);
+  }
+  // Point every wheel forward first, so the lock has somewhere to turn them to.
+  m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{1.0_mps, 0_mps, 0_rad_per_s});
+  SchedulerHelper::RunForDuration(0.5_s);
+  m_drive->LockPose();
+  SchedulerHelper::RunForDuration(0.5_s);
+
+  auto modules = m_drive->GetConfig().GetModules();
+  for (size_t i = 0; i < 4; ++i) {
+    double expected = modules[i]->GetConfig().GetLocation()->Angle()->Degrees().value();
+    double actual = modules[i]->GetState().angle.Degrees().value();
+    // Module optimization may reverse the wheel, so angles 180° apart are equivalent.
+    double error = std::remainder(actual - expected, 180.0);
+    INFO("module " << i << " is at " << actual << " degrees");
+    CHECK(error == Catch::Approx(0.0).margin(10.0));
+  }
+}
+
+// Optimization reverses the wheel when that is the shorter turn, and then keeps the orientation the
+// wheel was sent to instead of reversing it back for a target that moved a little.
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.OptimizationKeepsTheOrientationTheWheelWasSentTo",
+                 "[SwerveDriveTest]") {
+  const auto& cfg = m_fl->GetConfig();
+  auto current = m_fl->GetState().angle;
+  auto first = cfg.GetOptimizedState(
+      wpi::math::SwerveModuleVelocity{1.0_mps, current + wpi::math::Rotation2d{135.0_deg}});
+  INFO("135 degrees away is shorter reversed");
+  CHECK(first.velocity.value() < 0.0);
+  CHECK((first.angle - current).Degrees().value() == Catch::Approx(-45.0).margin(1.0));
+
+  // 80 degrees away would not be reversed on its own, but the wheel was just sent the other way.
+  auto second = cfg.GetOptimizedState(
+      wpi::math::SwerveModuleVelocity{1.0_mps, current + wpi::math::Rotation2d{80.0_deg}});
+  CHECK(second.velocity.value() < 0.0);
+  CHECK((second.angle - current).Degrees().value() == Catch::Approx(-100.0).margin(1.0));
 }
 
 // ---- SwerveInputStream telemetry and live tuning ----------------------------------

@@ -3,6 +3,7 @@
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <stdexcept>
@@ -188,34 +189,61 @@ double SwerveModuleConfig::GetCosineCompensatedVelocity(
   /* If error is close to 0 rotations, we're already there, so apply full power */
   /* If the error is close to 0.25 rotations, then we're 90 degrees, so movement doesn't help us at
    * all */
-  // The azimuth is only meaningful modulo 180 degrees (0 == 180) since the drive motor can spin
-  // either direction. Using the SIGNED cosine of the (correctly wrapped) angle difference
-  // handles that on its own: near 0 degrees it scales close to +1 (drive forward as
-  // commanded), near 90 degrees it goes to 0, and near 180 degrees it goes to -1, which flips
-  // the sign of the applied speed so the wheel drives backward at its current heading instead
-  // of losing that direction to a forced-positive scalar.
-  double cosineScalar = (desiredState.angle - currentAngle).Cos();
-  if (cosineScalar < 0.0) cosineScalar = 1.0;
+  // Optimization keeps the wheel within 90 degrees of its target except while it holds the
+  // orientation it was last sent to (see Optimize), where the wheel is still turning toward it and
+  // driving would push the robot the wrong way, so apply nothing there.
+  double cosineScalar = std::max((desiredState.angle - currentAngle).Cos(), 0.0);
   return desiredState.velocity.value() * cosineScalar;
+}
+
+wpi::math::Rotation2d SwerveModuleConfig::GetAzimuthAngle() const {
+  if (m_azimuthMotor) {
+    return wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
+  }
+  return wpi::math::Rotation2d{wpi::units::radian_t{GetAbsoluteEncoderAngle()}};
+}
+
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::Optimize(
+    wpi::math::SwerveModuleVelocity desired, const wpi::math::Rotation2d& currentAngle,
+    const std::optional<wpi::math::Rotation2d>& lastCommanded) {
+  wpi::math::SwerveModuleVelocity state = desired.Optimize(currentAngle);
+  if (!lastCommanded || wpi::units::math::abs((state.angle - *lastCommanded).Degrees()) <=
+                            wpi::units::degree_t{90}) {
+    return state;
+  }
+  wpi::math::SwerveModuleVelocity lastOrientation{
+      -state.velocity, state.angle.RotateBy(wpi::math::Rotation2d{wpi::units::degree_t{180}})};
+  return wpi::units::math::abs((lastOrientation.angle - currentAngle).Degrees()) <
+                 wpi::units::degree_t{90 + 30}
+             ? lastOrientation
+             : state;
 }
 
 wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
     wpi::math::SwerveModuleVelocity state) const {
-  wpi::math::Rotation2d currentAngle{wpi::units::radian_t{GetAbsoluteEncoderAngle()}};
-  if (m_velocityDeadband) {
-    if (wpi::units::math::abs(state.velocity) <= *m_velocityDeadband) {
-      state = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0}, currentAngle};
-    }
-  }
-  if (m_stateOptimization) {
-    state = state.Optimize(currentAngle);
+  wpi::math::Rotation2d currentAngle = GetAzimuthAngle();
+  if (m_velocityDeadband && wpi::units::math::abs(state.velocity) <= *m_velocityDeadband) {
+    // Too slow to steer by: hold the wheel where it is.
+    state = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0}, currentAngle};
+    m_lastCommandedAngle = currentAngle;
+  } else if (m_stateOptimization) {
+    state = Optimize(state, currentAngle, m_lastCommandedAngle);
+    m_lastCommandedAngle = state.angle;
   }
   if (m_cosineCompensation) {
-    wpi::math::Rotation2d azimuthAngle{
-        wpi::units::radian_t{m_azimuthMotor->GetMechanismPosition()}};
     state.velocity =
-        wpi::units::meters_per_second_t{GetCosineCompensatedVelocity(state, azimuthAngle)};
+        wpi::units::meters_per_second_t{GetCosineCompensatedVelocity(state, currentAngle)};
   }
+  return state;
+}
+
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetLockedState(
+    wpi::math::Rotation2d angle) const {
+  wpi::math::SwerveModuleVelocity state{wpi::units::meters_per_second_t{0}, angle};
+  if (m_stateOptimization) {
+    state = Optimize(state, GetAzimuthAngle(), m_lastCommandedAngle);
+  }
+  m_lastCommandedAngle = state.angle;
   return state;
 }
 

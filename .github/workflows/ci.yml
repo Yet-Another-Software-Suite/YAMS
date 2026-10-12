@@ -96,13 +96,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # The same groups as the Java unit tests, for the groups the C++ tests cover. A comma
+          # in a Catch2 filter means "or".
+          - group: arm
+            catch-filter: '[ArmTest]'
+          - group: elevator
+            catch-filter: '[ElevatorTest]'
+          - group: pivot
+            catch-filter: '[PivotTest]'
+          - group: shooter
+            catch-filter: '[ShooterTest]'
+          # The four module swerve drive, and the SwerveInputStream telemetry that runs on it.
+          - group: swerve-drive
+            catch-filter: '[SwerveDriveTest],[SwerveInputStreamTelemetryTest]'
+          # Motor controller unit tests: the parity and regression tests of each vendor's wrapper.
+          # Add new motor controller tags here and to the exclusions of the other group.
+          - group: motor-controllers
+            catch-filter: '[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[TalonApi]'
           # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in
           # real time, so they can time out on a busy runner: they run on their own.
           - group: talon-parity
             catch-filter: '[TalonParity]'
-          # Everything else. New tags run here unless they get their own group and are excluded.
+          # Everything else: the math tests. New tags run here unless they get their own group and
+          # are excluded.
           - group: other
-            catch-filter: '~[TalonParity]'
+            catch-filter: '~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]~[NovaParity]~[TalonApi]~[TalonParity]'
     steps:
       - uses: actions/checkout@v7
       - run: chmod +x gradlew
