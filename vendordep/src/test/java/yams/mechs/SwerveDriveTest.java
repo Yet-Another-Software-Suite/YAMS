@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Centimeters;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.Inches;
@@ -766,5 +767,75 @@ public class SwerveDriveTest {
     runFor(0.04);
     assertTrue(secondCalls.get() >= 1, "the second command should run after interrupting");
     assertEquals(firstCallsAtInterrupt, firstCalls.get(), "the first command should be cancelled");
+  }
+
+  @Test
+  void isNearChecksDistanceAndHeading() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    drive.resetOdometry(new Pose2d(1, 2, Rotation2d.fromDegrees(90)));
+    assertTrue(
+        drive.isNear(
+            new Pose2d(1.03, 2, Rotation2d.fromDegrees(92)), Centimeters.of(5), Degrees.of(3)));
+    assertFalse(
+        drive.isNear(
+            new Pose2d(1.2, 2, Rotation2d.fromDegrees(90)), Centimeters.of(5), Degrees.of(3)),
+        "20 cm away is outside a 5 cm tolerance");
+    assertFalse(
+        drive.isNear(
+            new Pose2d(1, 2, Rotation2d.fromDegrees(100)), Centimeters.of(5), Degrees.of(3)),
+        "10 degrees off is outside a 3 degree tolerance");
+  }
+
+  @Test
+  void stopBringsTheDriveToRest() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    final DriveResult moving = drive(() -> new ChassisVelocities(1, 0, 0), 1.5);
+    assertTrue(moving.speed().vx > 0.5, "should be moving before the stop");
+    CommandScheduler.getInstance().cancelAll();
+    drive.stop();
+    runFor(1);
+    assertEquals(0, drive.getRobotRelativeSpeed().vx, 0.1, "should have stopped");
+  }
+
+  @Test
+  void driveToPoseRequiresTheSubsystem() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    final Pose2d pose = new Pose2d(1, 0, new Rotation2d());
+    assertTrue(drive.driveToPose(pose).getRequirements().contains(subsystem));
+    assertTrue(
+        drive
+            .driveToPose(pose, Centimeters.of(5), Degrees.of(3))
+            .getRequirements()
+            .contains(subsystem));
+  }
+
+  @Test
+  void driveToPoseWithTolerancesEndsAtThePoseAndStops() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    final Pose2d pose = new Pose2d(0.75, 0, new Rotation2d());
+    final Command command = drive.driveToPose(pose, Centimeters.of(10), Degrees.of(5));
+    TestWithScheduler.schedule(command);
+    runFor(0.1);
+    assertTrue(command.isScheduled(), "should still be driving to the pose");
+    runFor(5);
+    assertFalse(command.isScheduled(), "should end once within the tolerances");
+    assertTrue(
+        drive.isNear(pose, Centimeters.of(15), Degrees.of(5)),
+        "should have ended near the pose, but is at " + drive.getPose());
+    runFor(1);
+    assertEquals(0, drive.getRobotRelativeSpeed().vx, 0.1, "should have stopped at the pose");
+  }
+
+  @Test
+  void driveToPoseWithoutTolerancesRunsUntilInterruptedAndStops() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    final Command command = drive.driveToPose(new Pose2d(30, 0, new Rotation2d()));
+    TestWithScheduler.schedule(command);
+    runFor(1.5);
+    assertTrue(command.isScheduled(), "should run until interrupted");
+    assertTrue(drive.getRobotRelativeSpeed().vx > 0.3, "should be driving toward the pose");
+    command.cancel();
+    runFor(1);
+    assertEquals(0, drive.getRobotRelativeSpeed().vx, 0.1, "should stop when interrupted");
   }
 }

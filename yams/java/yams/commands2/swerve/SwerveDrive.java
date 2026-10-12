@@ -10,6 +10,8 @@ import org.wpilib.command2.Subsystem;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.tunable.Tunables;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
@@ -90,7 +92,8 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
   }
 
   /**
-   * Drive the robot to the given pose.
+   * Drive the robot to the given pose. The command runs until it is interrupted and stops the drive
+   * when it is.
    *
    * @param pose {@link Pose2d} to drive the robot to. Field relative, blue-origin where 0deg is
    *             facing towards RED
@@ -106,6 +109,32 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
    */
   public Command driveToPose(Pose2d pose) {
     // driveToPoseSetpoint already returns robot relative speeds.
-    return Commands.startRun(this::startDriveToPoseTuning, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem).withName("Drive to Pose");
+    return Commands.startRun(this::startDriveToPoseTuning, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem).finallyDo(this::stop).withName("Drive to Pose");
+  }
+
+  /**
+   * Drive the robot to the given pose, ending once the robot is within the given tolerances. The
+   * drive is stopped when the command ends or is interrupted.
+   *
+   * @param pose                 {@link Pose2d} to drive the robot to. Field relative, blue-origin
+   *                             where 0deg is facing towards RED
+   * @param translationTolerance Maximum distance from the pose to be considered at the pose.
+   * @param rotationTolerance    Maximum heading error from the pose to be considered at the pose.
+   * @return {@link Command} to drive the robot to the given pose.
+   * @implNote Not compatible with AdvantageKit
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the
+   *                                           translation PID controller is not configured.
+   * @throws SwerveDriveConfigurationException when the returned command runs, if the rotation
+   *                                           PID controller is not configured.
+   * @throws IllegalStateException when the returned command runs, if a gyro angular velocity
+   *                               scale factor is configured but no gyro supplier was set with
+   *                               {@code withGyro(Supplier)}.
+   */
+  public Command driveToPose(Pose2d pose, Distance translationTolerance, Angle rotationTolerance) {
+    // driveToPoseSetpoint already returns robot relative speeds.
+    return Commands.startRun(this::startDriveToPoseTuning, () -> setRobotRelativeChassisSpeeds(driveToPoseSetpoint(pose)), subsystem)
+                   .until(() -> isNear(pose, translationTolerance, rotationTolerance))
+                   .finallyDo(this::stop)
+                   .withName("Drive to Pose");
   }
 }
