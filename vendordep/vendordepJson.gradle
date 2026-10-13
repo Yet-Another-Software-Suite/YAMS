@@ -12,9 +12,9 @@ import groovy.json.JsonSlurper
 // each vendordep's identity stays fixed regardless of what the base yams.json's own fields say.
 //
 // Each variant conflicts with the other, since a project should only ever install one of them.
-// Neither lists the WPILib command framework vendordep it is built against in "requires": those
-// ship with the WPILib installer and have no online jsonUrl, and WPILib's vendor-json-repo
-// rejects a "requires" entry with an empty onlineUrl.
+// Each lists the WPILib command framework vendordep it is built against in "requires". Those ship
+// with the WPILib installer and have no online jsonUrl, so the entry has no onlineUrl: WPILib's
+// vendor-json-repo rejects an empty one.
 def baseVendorFile = "yams.json"
 
 def vendordepVariants = [
@@ -26,6 +26,11 @@ def vendordepVariants = [
         javaArtifactSuffix: 'commands2',
         includeCpp        : true,
         conflictsWith     : 'commands3',
+        requires          : [
+            uuid           : '111e20f7-815e-48f8-9dd6-e675ce75b266',
+            errorMessage   : 'Commands V2 is required! Install it from the WPILib vendor libraries.',
+            offlineFileName: 'CommandsV2.json',
+        ],
     ],
     commands3: [
         taskSuffix        : 'Commands3',
@@ -35,6 +40,11 @@ def vendordepVariants = [
         javaArtifactSuffix: 'commands3',
         includeCpp        : false,
         conflictsWith     : 'commands2',
+        requires          : [
+            uuid           : '4decdc05-a056-46cf-9561-39449bbb0130',
+            errorMessage   : 'Commands v3 is required! Install it from the WPILib vendor libraries.',
+            offlineFileName: 'CommandsV3.json',
+        ],
     ],
 ]
 
@@ -68,7 +78,7 @@ ext.createVendordepJsonTask = { variant ->
         // skipCpp strips cppDependencies from the compiled build entirely; a variant that never
         // ships cpp deps (commands3) stays empty either way.
         vendordep.cppDependencies = (variant.includeCpp && !skipCpp) ? vendordep.cppDependencies : []
-        vendordep.requires = []
+        vendordep.requires = [variant.requires]
         def other = vendordepVariants[variant.conflictsWith]
         vendordep.conflictsWith = [
             [
