@@ -750,9 +750,11 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleSpeedsAreDesatur
       wpi::math::ChassisVelocities{6.0_mps, 0_mps, 0_rad_per_s});
   CHECK(wpi::units::math::abs(unlimited[0].velocity).value() == Catch::Approx(6.0).margin(1e-6));
 
+  // The request is inside the chassis limits, but translating and turning together asks the outer
+  // wheels for more than a module can do.
   m_driveCfg.WithMaximumModuleSpeed(3.0_mps);
   auto limited = m_drive->GetStateFromRobotRelativeChassisSpeeds(
-      wpi::math::ChassisVelocities{6.0_mps, 0_mps, wpi::units::radians_per_second_t{6.0}});
+      wpi::math::ChassisVelocities{4.0_mps, 0_mps, wpi::units::radians_per_second_t{6.0}});
   for (const auto& state : limited) {
     CHECK(wpi::units::math::abs(state.velocity).value() <= 3.0 + 1e-6);
   }
@@ -797,8 +799,15 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.CouplingRatioIsStoredA
   CHECK_FALSE(m_flCfg.GetCouplingRatio().has_value());
   m_flCfg.WithCouplingRatio(3.5);
   REQUIRE(m_flCfg.GetCouplingRatio().has_value());
-  // With the azimuth still, the coupling adds nothing to what the module reads or commands.
-  CHECK(m_fl->GetState().velocity.value() == Catch::Approx(0.0).margin(1e-3));
+  // The coupled wheel velocity is taken out of what the module reads.
+  double coupled = Hardware().flDriveSMC->GetConfig()
+                       .ConvertFromMechanism(Hardware().flAzimuthSMC->GetMechanismVelocity() *
+                                             m_flCfg.GetCouplingRatio()->GetOutputToInputConversionFactor() *
+                                             Hardware().flDriveSMC->GetConfig().GetMotorGearing()->GetRotorToMechanismRatio())
+                       .value();
+  CHECK(m_fl->GetState().velocity.value() ==
+        Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value() - coupled)
+            .margin(1e-6));
   CHECK_NOTHROW(m_fl->GetPosition());
   CHECK_NOTHROW(m_fl->SetSwerveModuleState(wpi::math::SwerveModuleVelocity{1.0_mps, {}}));
   m_flCfg.WithCouplingRatio(0.0);
@@ -849,9 +858,15 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.CosineCompensationScal
 // The module reports how fast its azimuth is turning along with its state.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleStateCarriesTheAzimuthVelocity",
                  "[SwerveDriveTest]") {
+  // The simulated motors are shared between tests, so compare against the controllers themselves.
   SwerveModuleVelocityWithAzimuth state = m_fl->GetState();
-  CHECK(state.azimuthVelocity.value() == Catch::Approx(0.0).margin(1e-3));
-  CHECK(state.velocity.value() == Catch::Approx(0.0).margin(1e-3));
+  CHECK(state.azimuthVelocity.value() ==
+        Catch::Approx(wpi::units::radians_per_second_t{
+                          Hardware().flAzimuthSMC->GetMechanismVelocity()}
+                          .value())
+            .margin(1e-6));
+  CHECK(state.velocity.value() ==
+        Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value()).margin(1e-6));
 }
 
 // The simulated attitude is the simulated heading with no tilt.
