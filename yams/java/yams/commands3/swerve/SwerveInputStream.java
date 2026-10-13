@@ -8,6 +8,7 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Seconds;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -26,7 +27,10 @@ import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Time;
 import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
+import org.wpilib.command3.Trigger;
 import yams.commands3.telemetry.SwerveInputStreamTelemetry;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
@@ -58,6 +62,16 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   private Optional<BooleanSupplier> allianceRelative = Optional.empty();
   private Optional<BooleanSupplier> translationHeadingOffsetEnabled = Optional.empty();
   private Optional<Rotation2d> translationHeadingOffset = Optional.empty();
+  /** Time to look ahead along the robot's velocity when aiming. */
+  private Optional<Time> aimLookahead = Optional.empty();
+  /** Feedforward added to the aim rotation. */
+  private Optional<SimpleMotorFeedforward> aimFeedforward = Optional.empty();
+  /** Offset applied to the aim heading. */
+  private Optional<Rotation2d> aimHeadingOffset = Optional.empty();
+  /** Aim heading offset enable state. */
+  private Optional<BooleanSupplier> aimHeadingOffsetEnabled = Optional.empty();
+  /** Heading the robot is turning to in {@link SwerveInputMode#AIM}, in the gyro's frame. */
+  private Optional<Rotation2d> aimGoalHeading = Optional.empty();
   private SwerveInputMode currentMode = SwerveInputMode.ANGULAR_VELOCITY;
   private LinearVelocity maximumChassisLinearVelocity = MetersPerSecond.of(4);
   private AngularVelocity maximumChassisAngularVelocity = RotationsPerSecond.of(1);
@@ -155,6 +169,10 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     allianceRelative = cfg.allianceRelative;
     translationHeadingOffsetEnabled = cfg.translationHeadingOffsetEnabled;
     translationHeadingOffset = cfg.translationHeadingOffset;
+    aimLookahead = cfg.aimLookahead;
+    aimFeedforward = cfg.aimFeedforward;
+    aimHeadingOffset = cfg.aimHeadingOffset;
+    aimHeadingOffsetEnabled = cfg.aimHeadingOffsetEnabled;
     maximumChassisLinearVelocity = cfg.maximumChassisLinearVelocity;
     maximumChassisAngularVelocity = cfg.maximumChassisAngularVelocity;
     // Telemetry is bound to the stream it was created for, so a clone starts without any.
@@ -597,6 +615,119 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   }
 
   /**
+   * Aim from where the robot will be after a delay, instead of where it is now. The pose is moved along the robot's
+   * field relative velocity by this time before the direction to the target is worked out.
+   *
+   * <p>A game piece leaves the robot a moment after the aim was calculated: the camera, the loop, the motors and the
+   * feed all take time, and the robot keeps moving through all of it. Add those delays together for a starting
+   * value, then tune it. It is often 100 to 200 milliseconds.
+   *
+   * <p>This assumes the robot keeps its current velocity, so it works best while driving in a straight line.
+   *
+   * @param lookahead How far ahead in time to estimate the robot's position, null for none.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withAimLookahead(Time lookahead) {
+    aimLookahead = Optional.ofNullable(lookahead);
+    return this;
+  }
+
+  /**
+   * Add a feedforward to the aim rotation, so the robot keeps up with a target whose direction is changing. The
+   * feedforward is calculated from the robot's current angular velocity to the angular velocity the rotation
+   * controller asks for, and its result is added to that angular velocity.
+   *
+   * @param feedforward Feedforward in radians, null for none.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withAimFeedforward(SimpleMotorFeedforward feedforward) {
+    aimFeedforward = Optional.ofNullable(feedforward);
+    return this;
+  }
+
+  /**
+   * Rotate the aim heading by an offset while enabled, for a shooter that does not point out of the front of the
+   * robot.
+   *
+   * @param offset  Offset added to the heading that faces the target, counter-clockwise positive.
+   * @param enabled The offset is applied while this is true.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withAimHeadingOffset(Rotation2d offset, BooleanSupplier enabled) {
+    aimHeadingOffset = Optional.ofNullable(offset);
+    aimHeadingOffsetEnabled = Optional.of(enabled);
+    return this;
+  }
+
+  /**
+   * Always rotate the aim heading by an offset, for a shooter that does not point out of the front of the robot.
+   *
+   * @param offset Offset added to the heading that faces the target, counter-clockwise positive.
+   * @return this, for chaining.
+   */
+  public SwerveInputStream withAimHeadingOffset(Rotation2d offset) {
+    return withAimHeadingOffset(offset, () -> true);
+  }
+
+  /**
+   * Check if the robot is aiming and facing its aim heading. Only updates while the stream is being read.
+   *
+   * @param tolerance How far the robot's heading may be from the aim heading.
+   * @return True while aiming is enabled and the heading is within the tolerance.
+   */
+  public boolean isAimLocked(Angle tolerance) {
+    return aimEnabled.isPresent()
+        && aimEnabled.get().getAsBoolean()
+        && aimGoalHeading.isPresent()
+        && Math.abs(aimGoalHeading.get().minus(swerveDrive.getGyroRotation3d().toRotation2d()).getRadians())
+            <= tolerance.in(Radians);
+  }
+
+  /**
+   * {@link Trigger} that is true while the robot is aiming and facing its aim heading.
+   *
+   * @param tolerance How far the robot's heading may be from the aim heading.
+   * @return {@link Trigger} for the aim lock.
+   */
+  public Trigger aimLock(Angle tolerance) {
+    return new Trigger(() -> isAimLocked(tolerance));
+  }
+
+  /**
+   * Get the field relative vector from the robot to a target, from where the robot will be after the
+   * {@link #withAimLookahead(Time)} time if there is one. Useful for shooting on the move.
+   *
+   * @param target Field relative pose of the target.
+   * @return Field relative {@link Translation2d} from the robot to the target.
+   */
+  public Translation2d getTargetVector(Pose2d target) {
+    Translation2d robot = swerveDrive.getPose().getTranslation();
+    if (aimLookahead.isPresent()) {
+      ChassisVelocities fieldVelocity = swerveDrive.getFieldRelativeSpeed();
+      double seconds = aimLookahead.get().in(Seconds);
+      robot = robot.plus(new Translation2d(fieldVelocity.vx * seconds, fieldVelocity.vy * seconds));
+    }
+    return target.getTranslation().minus(robot);
+  }
+
+  /**
+   * Calculate the angular velocity that turns the robot to a heading, with the {@link SwerveDrive}'s rotation
+   * controller and the {@link #withAimFeedforward(SimpleMotorFeedforward)} feedforward if there is one.
+   *
+   * @param target Heading to face, in the same frame as the gyro.
+   * @return {@link AngularVelocity} that turns the robot toward the heading.
+   */
+  public AngularVelocity calculateAngularVelocity(Angle target) {
+    double omegaRadiansPerSecond = requireRotationPID(swerveDrive.getConfig())
+        .calculate(swerveDrive.getGyroRotation3d().toRotation2d().getRadians(), target.in(Radians));
+    if (aimFeedforward.isPresent()) {
+      omegaRadiansPerSecond += aimFeedforward.get()
+          .calculate(swerveDrive.getRobotRelativeSpeed().omega, omegaRadiansPerSecond);
+    }
+    return RadiansPerSecond.of(omegaRadiansPerSecond);
+  }
+
+  /**
    * Hold the heading the robot had when enabled and only translate. Requires a rotation controller on the
    * {@link SwerveDrive}.
    *
@@ -640,6 +771,9 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   }
 
   private void transitionMode(SwerveInputMode newMode) {
+    if (currentMode == SwerveInputMode.AIM) {
+      aimGoalHeading = Optional.empty();
+    }
     switch (currentMode) {
       case TRANSLATION_ONLY -> {
         lockedHeading = Optional.empty();
@@ -788,12 +922,19 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
         break;
       }
       case AIM -> {
-        var azimuthPIDs = requireRotationPID(config);
         Rotation2d currentHeading = swerveDrive.getGyroRotation3d().toRotation2d();
-        Translation2d relativeTrl =
-            aimTarget.orElseThrow().get().relativeTo(swerveDrive.getPose()).getTranslation();
-        Rotation2d target = new Rotation2d(relativeTrl.getX(), relativeTrl.getY()).plus(currentHeading);
-        omegaRadiansPerSecond = azimuthPIDs.calculate(currentHeading.getRadians(), target.getRadians());
+        Translation2d targetVector = getTargetVector(aimTarget.orElseThrow().get());
+        // The vector is field relative. Turn it into a heading in the gyro's frame.
+        Rotation2d target = new Rotation2d(targetVector.getX(), targetVector.getY())
+            .minus(swerveDrive.getPose().getRotation())
+            .plus(currentHeading);
+        if (aimHeadingOffset.isPresent()
+            && aimHeadingOffsetEnabled.isPresent()
+            && aimHeadingOffsetEnabled.get().getAsBoolean()) {
+          target = target.plus(aimHeadingOffset.get());
+        }
+        aimGoalHeading = Optional.of(target);
+        omegaRadiansPerSecond = calculateAngularVelocity(target.getMeasure()).in(RadiansPerSecond);
         speeds = new ChassisVelocities(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
         break;
       }

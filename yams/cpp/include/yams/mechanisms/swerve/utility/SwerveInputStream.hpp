@@ -14,6 +14,7 @@
 #include <utility>
 #include <wpi/driverstation/Alliance.hpp>
 #include <wpi/driverstation/MatchState.hpp>
+#include <wpi/math/controller/SimpleMotorFeedforward.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
@@ -22,6 +23,8 @@
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
+#include <wpi/units/math.hpp>
+#include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 
 #include "yams/exceptions.hpp"
@@ -234,6 +237,94 @@ class SwerveInputStream {
     return *this;
   }
 
+  /**
+   * Aim from where the robot will be after a delay, instead of where it is now. The pose is moved
+   * along the robot's field relative velocity by this time before the direction to the target is
+   * worked out.
+   *
+   * A game piece leaves the robot a moment after the aim was calculated: the camera, the loop, the
+   * motors and the feed all take time, and the robot keeps moving through all of it. Add those
+   * delays together for a starting value, then tune it. It is often 100 to 200 milliseconds.
+   *
+   * This assumes the robot keeps its current velocity, so it works best while driving in a straight
+   * line.
+   */
+  SwerveInputStream& WithAimLookahead(wpi::units::second_t lookahead) {
+    m_aimLookahead = lookahead;
+    return *this;
+  }
+
+  /**
+   * Add a feedforward to the aim rotation, so the robot keeps up with a target whose direction is
+   * changing. The feedforward is calculated from the robot's current angular velocity to the angular
+   * velocity the rotation controller asks for, and its result is added to that angular velocity.
+   */
+  SwerveInputStream& WithAimFeedforward(
+      wpi::math::SimpleMotorFeedforward<wpi::units::radians> feedforward) {
+    m_aimFeedforward = feedforward;
+    return *this;
+  }
+
+  /**
+   * Rotate the aim heading by an offset while enabled, for a shooter that does not point out of the
+   * front of the robot. The offset is counter-clockwise positive.
+   */
+  SwerveInputStream& WithAimHeadingOffset(wpi::math::Rotation2d offset,
+                                         std::function<bool()> enabled) {
+    m_aimHeadingOffset = offset;
+    m_aimHeadingOffsetEnabled = std::move(enabled);
+    return *this;
+  }
+
+  SwerveInputStream& WithAimHeadingOffset(wpi::math::Rotation2d offset) {
+    return WithAimHeadingOffset(offset, [] { return true; });
+  }
+
+  /**
+   * True while aiming is enabled and the robot's heading is within the tolerance of its aim heading.
+   * Only updates while the stream is being read.
+   */
+  bool IsAimLocked(wpi::units::radian_t tolerance) {
+    if (!m_aimEnabled.has_value() || !m_aimEnabled.value()() || !m_aimGoalHeading.has_value()) {
+      return false;
+    }
+    auto currentHeading =
+        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
+    return wpi::units::math::abs((m_aimGoalHeading.value() - currentHeading).Radians()) <=
+           tolerance;
+  }
+
+  /**
+   * Field relative vector from the robot to a target, from where the robot will be after the
+   * WithAimLookahead time if there is one. Useful for shooting on the move.
+   */
+  wpi::math::Translation2d GetTargetVector(const wpi::math::Pose2d& target) {
+    auto robot = m_swerveDrive->GetPose().Translation();
+    if (m_aimLookahead.has_value()) {
+      auto fieldVelocity = m_swerveDrive->GetFieldRelativeSpeed();
+      robot = robot + wpi::math::Translation2d{fieldVelocity.vx * m_aimLookahead.value(),
+                                               fieldVelocity.vy * m_aimLookahead.value()};
+    }
+    return target.Translation() - robot;
+  }
+
+  /**
+   * Angular velocity that turns the robot to a heading in the gyro's frame, from the drive's rotation
+   * controller and the WithAimFeedforward feedforward if there is one.
+   */
+  wpi::units::radians_per_second_t CalculateAngularVelocity(wpi::units::radian_t target) {
+    double omega = RequireRotationPID().Calculate(
+        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}}.Radians().value(),
+        target.value());
+    if (m_aimFeedforward.has_value()) {
+      omega += m_aimFeedforward
+                   ->Calculate(m_swerveDrive->GetRobotRelativeSpeed().omega,
+                               wpi::units::radians_per_second_t{omega})
+                   .value();
+    }
+    return wpi::units::radians_per_second_t{omega};
+  }
+
   SwerveInputStream& WithTranslationOnly(std::function<bool()> trigger) {
     m_translationOnlyEnabled = std::move(trigger);
     return *this;
@@ -332,12 +423,19 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::AIM: {
-        auto& pid = RequireRotationPID();
         auto currentHeading =
             wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
-        auto relativeTrl = m_aimTarget.value()().RelativeTo(m_swerveDrive->GetPose()).Translation();
-        auto target = relativeTrl.Angle().value_or(wpi::math::Rotation2d{}) + currentHeading;
-        omega = pid.Calculate(currentHeading.Radians().value(), target.Radians().value());
+        auto target = currentHeading;
+        // The vector is field relative. Turn it into a heading in the gyro's frame.
+        if (auto fieldAngle = GetTargetVector(m_aimTarget.value()()).Angle()) {
+          target = fieldAngle.value() - m_swerveDrive->GetPose().Rotation() + currentHeading;
+        }
+        if (m_aimHeadingOffset.has_value() && m_aimHeadingOffsetEnabled.has_value() &&
+            m_aimHeadingOffsetEnabled.value()()) {
+          target = target + m_aimHeadingOffset.value();
+        }
+        m_aimGoalHeading = target;
+        omega = CalculateAngularVelocity(target.Radians()).value();
         break;
       }
     }
@@ -398,6 +496,12 @@ class SwerveInputStream {
   std::optional<std::function<bool()>> m_allianceRelative;
   std::optional<std::function<bool()>> m_translationHeadingOffsetEnabled;
   std::optional<wpi::math::Rotation2d> m_translationHeadingOffset;
+  std::optional<wpi::units::second_t> m_aimLookahead;
+  std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::radians>> m_aimFeedforward;
+  std::optional<wpi::math::Rotation2d> m_aimHeadingOffset;
+  std::optional<std::function<bool()>> m_aimHeadingOffsetEnabled;
+  // Heading the robot is turning to in AIM, in the gyro's frame.
+  std::optional<wpi::math::Rotation2d> m_aimGoalHeading;
   SwerveInputMode m_currentMode{SwerveInputMode::ANGULAR_VELOCITY};
   wpi::units::meters_per_second_t m_maximumChassisLinearVelocity{4.0};
   wpi::units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
@@ -474,6 +578,9 @@ class SwerveInputStream {
   }
 
   void TransitionMode(SwerveInputMode newMode) {
+    if (m_currentMode == SwerveInputMode::AIM) {
+      m_aimGoalHeading = std::nullopt;
+    }
     switch (m_currentMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading = std::nullopt;
