@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <any>
 #include <functional>
 #include <optional>
 #include <string>
@@ -14,6 +15,7 @@
 #include <wpi/units/velocity.hpp>
 
 #include "yams/gearing/GearBox.hpp"
+#include "yams/mechanisms/swerve/SwerveModuleVelocityWithAzimuth.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SwerveModuleTelemetryConfig.hpp"
@@ -70,6 +72,46 @@ class SwerveModuleConfig {
    * @return *this for chaining.
    */
   SwerveModuleConfig& WithAbsoluteEncoder(std::function<wpi::units::degree_t()> supplier);
+
+  /**
+   * Use an absolute encoder object from the azimuth motor controller's own vendor as the azimuth's
+   * external encoder, as SmartMotorControllerConfig::WithExternalEncoder does. It replaces a
+   * supplier given with WithAbsoluteEncoder, and is applied when the motor controllers are given
+   * if they have not been yet.
+   *
+   * @param absoluteEncoder The encoder, such as a pointer to a CANcoder.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithExternalAbsoluteEncoder(std::any absoluteEncoder);
+
+  /**
+   * Set the coupling ratio: how far the drive motor turns when the azimuth turns once with the
+   * wheel held still. On most modules turning the azimuth also turns the wheel a little, which
+   * shows up as wheel travel that did not happen. With this set, the module takes it out of the
+   * wheel's position and velocity, and adds it to the velocity it commands.
+   *
+   * @param couplingRatio Drive motor rotations per azimuth rotation, as a gearbox.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithCouplingRatio(std::optional<gearing::GearBox> couplingRatio);
+
+  /**
+   * Set the coupling ratio as a number. Zero turns it off.
+   *
+   * @param driveMotorRotationsPerAzimuthRotation Drive motor rotations per azimuth rotation.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithCouplingRatio(double driveMotorRotationsPerAzimuthRotation);
+
+  /**
+   * Set where the module is, measured from the center of rotation. The same as WithLocation.
+   *
+   * @param front Distance toward the front of the robot.
+   * @param left Distance toward the left of the robot.
+   * @return *this for chaining.
+   */
+  SwerveModuleConfig& WithDistanceFromCenterOfRotation(wpi::units::meter_t front,
+                                                       wpi::units::meter_t left);
 
   /**
    * Set the gearing between the absolute encoder shaft and the azimuth mechanism.
@@ -135,10 +177,12 @@ class SwerveModuleConfig {
    * Velocity deadband: a requested wheel speed at or below it stops the module and holds its
    * current azimuth instead of tracking.
    *
+   * The default is 0.1 m/s. Pass std::nullopt to turn it off.
+   *
    * @param speed Velocity deadband.
    * @return *this for chaining.
    */
-  SwerveModuleConfig& WithVelocityDeadband(wpi::units::meters_per_second_t speed);
+  SwerveModuleConfig& WithVelocityDeadband(std::optional<wpi::units::meters_per_second_t> speed);
 
   /**
    * Enable or disable WPILib SwerveModuleState optimization (flip by 180° to minimise rotation).
@@ -230,6 +274,29 @@ class SwerveModuleConfig {
   wpi::math::SwerveModuleVelocity GetOptimizedState(wpi::math::SwerveModuleVelocity state) const;
 
   /**
+   * Apply all enabled optimizations against a measured state.
+   *
+   * @param state Input state.
+   * @param measured The module's measured state.
+   * @return Optimized state.
+   */
+  wpi::math::SwerveModuleVelocity GetOptimizedState(
+      wpi::math::SwerveModuleVelocity state,
+      const swerve::SwerveModuleVelocityWithAzimuth& measured) const;
+
+  /**
+   * The scale cosine compensation applies to a wheel aimed at the desired angle: the cosine of the
+   * azimuth error, and never below zero. It is 1 when cosine compensation is off.
+   *
+   * @param desiredAngle Angle the wheel is being sent to.
+   * @return Scale from 0 to 1.
+   */
+  double GetCosineCompensationScalar(wpi::math::Rotation2d desiredAngle) const;
+
+  /** Get the coupling ratio, if configured via WithCouplingRatio(). */
+  std::optional<gearing::GearBox> GetCouplingRatio() const;
+
+  /**
    * Get the state that turns the wheel to the given angle without driving it, as for locking the
    * drive in place. Unlike GetOptimizedState(), the velocity deadband does not hold the wheel
    * where it is, since the wheel is meant to turn without driving. With optimization enabled the
@@ -240,6 +307,17 @@ class SwerveModuleConfig {
    * @return Zero speed state at the angle to turn the wheel to.
    */
   wpi::math::SwerveModuleVelocity GetLockedState(wpi::math::Rotation2d angle) const;
+
+  /**
+   * Get the state that turns the wheel to the given angle without driving it, against a measured
+   * state.
+   *
+   * @param angle Angle to turn the wheel to.
+   * @param measured The module's measured state.
+   * @return Zero speed state at the angle to turn the wheel to.
+   */
+  wpi::math::SwerveModuleVelocity GetLockedState(
+      wpi::math::Rotation2d angle, const swerve::SwerveModuleVelocityWithAzimuth& measured) const;
 
  private:
   motorcontrollers::SmartMotorController* m_driveMotor{nullptr};
@@ -252,7 +330,10 @@ class SwerveModuleConfig {
   gearing::GearBox m_absoluteEncoderGearbox{1.0};
   bool m_stateOptimization{true};
   bool m_cosineCompensation{false};
-  std::optional<wpi::units::meters_per_second_t> m_velocityDeadband;
+  std::optional<gearing::GearBox> m_couplingRatio;
+  std::any m_absoluteEncoder;
+  std::optional<wpi::units::meters_per_second_t> m_velocityDeadband{
+      wpi::units::meters_per_second_t{0.1}};
   /** Angle the wheel was last sent to, so optimization does not reverse it back and forth. */
   mutable std::optional<wpi::math::Rotation2d> m_lastCommandedAngle;
   std::optional<wpi::math::Translation2d> m_location;
@@ -274,6 +355,9 @@ class SwerveModuleConfig {
    * optimization, cosine compensation and the azimuth setpoint agree on where the wheel points.
    */
   wpi::math::Rotation2d GetAzimuthAngle() const;
+
+  /** The measured state used when none is given: the azimuth controller's position and velocity. */
+  swerve::SwerveModuleVelocityWithAzimuth GetMeasuredAzimuth() const;
 
   /**
    * Optimize a module state like SwerveModuleVelocity::Optimize(), keeping the orientation the

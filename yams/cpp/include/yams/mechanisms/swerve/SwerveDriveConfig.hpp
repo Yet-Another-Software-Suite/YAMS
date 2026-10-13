@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 #include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/math/controller/AntiTipping.hpp>
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/units/angle.hpp>
@@ -18,7 +20,10 @@
 #include <wpi/units/length.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
+#include <wpi/util/Alert.hpp>
 
+#include "yams/math/DerivativeTimeFilter.hpp"
+#include "yams/mechanisms/config/GyroAxis.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
@@ -55,12 +60,65 @@ class SwerveDriveConfig {
   SwerveDriveConfig& WithModules(std::vector<SwerveModule*> modules);
 
   /**
-   * Supply the gyro angle in degrees.
+   * Supply the gyro's heading in degrees, for a gyro mounted flat.
+   *
+   * The attitude is taken to be this yaw with no roll or pitch, so anti-tipping does nothing and
+   * WithGyroHeadingAxis has nothing to rotate. Use the Rotation3d overload for either.
    *
    * @param gyroSupplier Callable returning the current gyro angle.
    * @return *this for chaining.
    */
   SwerveDriveConfig& WithGyro(std::function<wpi::units::degree_t()> gyroSupplier);
+
+  /**
+   * Supply the gyro's full 3D attitude. See WithGyroHeadingAxis for a gyro that is not mounted flat.
+   *
+   * @param gyroSupplier Callable returning the gyro's attitude.
+   * @return *this for chaining.
+   */
+  SwerveDriveConfig& WithGyro(std::function<wpi::math::Rotation3d()> gyroSupplier);
+
+  /**
+   * Set which gyro axis points up through the robot, for a gyro mounted on its side. The attitude
+   * from WithGyro is rotated into the robot's frame, so GetGyroRotation3d returns the robot's
+   * heading as its yaw and the robot's tilt as its roll and pitch.
+   *
+   * @param axis The gyro axis that points up. GyroAxis::YAW, the default, is a gyro mounted flat.
+   * @return *this for chaining.
+   */
+  SwerveDriveConfig& WithGyroHeadingAxis(config::GyroAxis axis);
+
+  /**
+   * Push back against tipping: when the robot leans by more than the threshold, a chassis velocity
+   * is added in the direction it is leaning, so the drive base moves back under the robot. It needs
+   * the gyro's full attitude, from the Rotation3d overload of WithGyro.
+   *
+   * @param kP Correction speed per radian of lean. Must be positive.
+   * @param tippingThreshold Lean beyond which the correction applies. Between 0 and 90 degrees.
+   * @param maxCorrectionSpeed The largest correction. Must be positive.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if a value is out of range.
+   */
+  SwerveDriveConfig& WithAntiTipping(wpi::units::meters_per_second_t kP,
+                                     wpi::units::degree_t tippingThreshold,
+                                     wpi::units::meters_per_second_t maxCorrectionSpeed);
+
+  /**
+   * Push back against tipping with your own controller, or std::nullopt to turn it off.
+   *
+   * @param antiTipping The anti-tipping controller.
+   * @return *this for chaining.
+   */
+  SwerveDriveConfig& WithAntiTipping(std::optional<wpi::math::AntiTipping> antiTipping);
+
+  /**
+   * Turn swerve module state optimization on or off for every module. It is applied to the modules
+   * given so far, and to all of them when the SwerveDrive is created.
+   *
+   * @param enabled true to optimize module states.
+   * @return *this for chaining.
+   */
+  SwerveDriveConfig& WithModuleStateOptimization(bool enabled);
 
   /**
    * Supply the gyro angular velocity in degrees per second.
@@ -273,6 +331,38 @@ class SwerveDriveConfig {
   wpi::units::degree_t GetGyroAngle() const;
 
   /**
+   * The robot's attitude: the gyro's attitude rotated into the robot's frame (see
+   * WithGyroHeadingAxis), with the gyro inversion and offset applied to its yaw. Its yaw is the
+   * robot's heading, and its roll and pitch are the robot's tilt.
+   *
+   * @return The robot's attitude.
+   * @throws std::runtime_error if no gyro supplier was set with WithGyro.
+   */
+  wpi::math::Rotation3d GetGyroRotation3d() const;
+
+  /**
+   * The anti-tipping correction for the current attitude, robot relative. Zero when anti-tipping
+   * or the gyro is not configured.
+   *
+   * @return The chassis velocity to add.
+   */
+  wpi::math::ChassisVelocities GetAntiTippingCorrection() const;
+
+  /**
+   * The module state optimization setting from WithModuleStateOptimization, if it was set.
+   *
+   * @return true or false if set, or std::nullopt to leave each module's own setting.
+   */
+  std::optional<bool> GetModuleStateOptimization() const;
+
+  /**
+   * The discretization time in use: the simulation one in simulation, the real one otherwise.
+   *
+   * @return The discretization time, if set.
+   */
+  std::optional<wpi::units::second_t> GetDiscretization() const;
+
+  /**
    * Apply angular-velocity skew correction and ChassisSpeeds discretization.
    *
    * @param speeds Raw robot-relative chassis speeds.
@@ -310,7 +400,13 @@ class SwerveDriveConfig {
   std::string m_telemetryName{"swerve"};
   std::optional<TelemetryVerbosity> m_telemetryVerbosity;
   std::optional<telemetry::SwerveDriveTelemetryConfig> m_specifiedTelemetryConfig;
-  std::optional<std::function<wpi::units::degree_t()>> m_gyroSupplier;
+  std::optional<std::function<wpi::math::Rotation3d()>> m_gyroSupplier;
+  config::GyroAxis m_gyroHeadingAxis{config::GyroAxis::YAW};
+  // Heading unwrapped across the half rotation boundary, for deriving the angular velocity.
+  mutable double m_continuousHeadingRadians{0};
+  mutable bool m_continuousHeadingRead{false};
+  mutable math::DerivativeTimeFilter m_gyroAngularVelocityFilter{wpi::units::millisecond_t{20}};
+  mutable std::optional<wpi::util::Alert> m_noGyroAngularVelocitySupplierAlert;
   std::optional<std::function<wpi::units::degrees_per_second_t()>> m_gyroAngularVelocitySupplier;
   std::optional<wpi::units::degree_t> m_gyroOffset;
   bool m_gyroInverted{false};
@@ -318,6 +414,8 @@ class SwerveDriveConfig {
   std::optional<wpi::units::meters_per_second_t> m_maximumChassisLinearVelocity;
   std::optional<wpi::units::degrees_per_second_t> m_maximumChassisAngularVelocity;
   std::optional<wpi::units::meters_per_second_t> m_maximumModuleLinearVelocity;
+  std::optional<bool> m_moduleStateOptimization;
+  std::optional<wpi::math::AntiTipping> m_antiTipping;
   std::optional<wpi::units::second_t> m_discretizationSeconds;
   std::optional<wpi::units::second_t> m_simDiscretizationSeconds;
   std::optional<double> m_angularVelocityScaleFactor;

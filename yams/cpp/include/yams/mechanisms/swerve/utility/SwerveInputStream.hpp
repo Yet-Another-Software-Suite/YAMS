@@ -202,6 +202,9 @@ class SwerveInputStream {
     return *this;
   }
 
+  /** The same as WithDeadband. */
+  SwerveInputStream& Deadband(double deadband) { return WithDeadband(deadband); }
+
   SwerveInputStream& WithScaleTranslation(double scale) {
     m_translationAxisScale = (scale == 0.0) ? std::nullopt : std::optional<double>{scale};
     return *this;
