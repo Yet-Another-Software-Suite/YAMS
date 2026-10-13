@@ -1294,4 +1294,89 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   CHECK(speeds.omega.value() == Catch::Approx(1.0));
 }
 
+// ---- SwerveInputStream aim options ---------------------------------------------------
+//
+// The fixture's rotation controller is proportional with a gain of 4, so the angular velocity it
+// asks for is 4 times the heading error in radians.
+
+namespace {
+
+SwerveInputStream<4> AimAt(SwerveDrive<4>& drive, double x, double y, bool* aiming = nullptr) {
+  SwerveInputStream<4> stream{drive, [] { return 0.0; }, [] { return 0.0; }, [] { return 0.0; }};
+  stream.WithAim(
+      [x, y] {
+        return wpi::math::Pose2d{wpi::units::meter_t{x}, wpi::units::meter_t{y},
+                                 wpi::math::Rotation2d{}};
+      },
+      [aiming] { return aiming == nullptr || *aiming; });
+  return stream;
+}
+
+}  // namespace
+
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveInputStreamAimTest.AimTurnsTowardTheTarget",
+                 "[SwerveInputStreamAimTest]") {
+  // The target is straight to the left, so the heading error is 90 degrees.
+  CHECK(AimAt(*m_drive, 0, 2).Get().omega.value() == Catch::Approx(4.0 * std::numbers::pi / 2));
+  // From a robot that already faces left, the same target needs no turn.
+  m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{90.0_deg}});
+  CHECK(AimAt(*m_drive, 0, 2).Get().omega.value() == Catch::Approx(0.0).margin(1e-9));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamAimTest.TargetVectorIsFromTheRobotToTheTarget",
+                 "[SwerveInputStreamAimTest]") {
+  m_drive->ResetOdometry(wpi::math::Pose2d{1_m, 1_m, wpi::math::Rotation2d{45.0_deg}});
+  auto stream = AimAt(*m_drive, 0, 0);
+  // The robot is not moving, so a lookahead leaves the vector where it is.
+  stream.WithAimLookahead(0.5_s);
+  auto vector = stream.GetTargetVector(wpi::math::Pose2d{3_m, 4_m, wpi::math::Rotation2d{}});
+  CHECK(vector.X().value() == Catch::Approx(2.0));
+  CHECK(vector.Y().value() == Catch::Approx(3.0));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamAimTest.HeadingOffsetRotatesTheAimHeading",
+                 "[SwerveInputStreamAimTest]") {
+  // The target is straight ahead, so only the offset is left to turn.
+  auto offset = AimAt(*m_drive, 2, 0);
+  offset.WithAimHeadingOffset(wpi::math::Rotation2d{90.0_deg});
+  CHECK(offset.Get().omega.value() == Catch::Approx(4.0 * std::numbers::pi / 2));
+
+  auto disabled = AimAt(*m_drive, 2, 0);
+  disabled.WithAimHeadingOffset(wpi::math::Rotation2d{90.0_deg}, [] { return false; });
+  CHECK(disabled.Get().omega.value() == Catch::Approx(0.0).margin(1e-9));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveInputStreamAimTest.FeedforwardIsAddedToTheRotation",
+                 "[SwerveInputStreamAimTest]") {
+  // kV of 0.5 on the controller's output adds half of it again.
+  auto stream = AimAt(*m_drive, 0, 2);
+  stream.WithAimFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::radians>{
+      0_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::radians>::kv_unit>{0.5}});
+  CHECK(stream.Get().omega.value() == Catch::Approx(1.5 * 4.0 * std::numbers::pi / 2));
+  CHECK(stream.CalculateAngularVelocity(wpi::units::radian_t{std::numbers::pi / 2}).value() ==
+        Catch::Approx(1.5 * 4.0 * std::numbers::pi / 2));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamAimTest.AimLockIsTrueOnlyWhileAimingAndFacingTheTarget",
+                 "[SwerveInputStreamAimTest]") {
+  bool aiming = true;
+  auto ahead = AimAt(*m_drive, 2, 0, &aiming);
+  INFO("Not locked before the stream is read");
+  CHECK_FALSE(ahead.IsAimLocked(1.0_deg));
+  ahead.Get();
+  CHECK(ahead.IsAimLocked(1.0_deg));
+
+  auto left = AimAt(*m_drive, 0, 2);
+  left.Get();
+  CHECK_FALSE(left.IsAimLocked(1.0_deg));
+  CHECK(left.IsAimLocked(91.0_deg));
+
+  aiming = false;
+  ahead.Get();
+  CHECK_FALSE(ahead.IsAimLocked(1.0_deg));
+}
+
 }  // namespace yams::test
