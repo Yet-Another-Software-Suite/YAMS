@@ -9,8 +9,10 @@
 #include <wpi/math/kinematics/SwerveModulePosition.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/units/angle.hpp>
+#include <wpi/units/force.hpp>
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
+#include "yams/mechanisms/swerve/SwerveModuleVelocityWithAzimuth.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/telemetry/MechanismTelemetry.hpp"
 #include "yams/telemetry/SwerveModuleTelemetry.hpp"
@@ -118,7 +120,22 @@ class SwerveModule {
    *
    * @param state Target module state.
    */
-  void SetSwerveModuleState(wpi::math::SwerveModuleVelocity state);
+  wpi::math::SwerveModuleVelocity SetSwerveModuleState(wpi::math::SwerveModuleVelocity state);
+
+  /**
+   * Set the swerve module state with a feedforward force on the drive wheel, for following a
+   * trajectory that supplies module forces. The force follows the state: it is reversed when
+   * optimization reverses the wheel, and scaled by cosine compensation.
+   *
+   * @param state Desired module state.
+   * @param feedforwardForce Force the wheel should apply along the requested direction.
+   * @return The state the module was sent, after optimization.
+   */
+  wpi::math::SwerveModuleVelocity SetSwerveModuleState(wpi::math::SwerveModuleVelocity state,
+                                                       wpi::units::newton_t feedforwardForce);
+
+  /** Get the module config for changing it, as WithModuleStateOptimization does. */
+  config::SwerveModuleConfig& GetMutableConfig();
 
   /**
    * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
@@ -130,7 +147,7 @@ class SwerveModule {
   wpi::math::SwerveModuleVelocity Lock(wpi::math::Rotation2d angle);
 
   /** Get the current measured module state (speed and heading). */
-  wpi::math::SwerveModuleVelocity GetState() const;
+  SwerveModuleVelocityWithAzimuth GetState() const;
 
   /** Get the current measured module position (distance and heading). */
   wpi::math::SwerveModulePosition GetPosition() const;
@@ -154,6 +171,16 @@ class SwerveModule {
   telemetry::MechanismTelemetry m_telemetry;
   std::optional<telemetry::SwerveModuleTelemetry> m_swerveModuleTelemetry;
   std::function<wpi::units::degree_t()> m_azimuthEncoderWithoutOffsets;
+  // Azimuth travel, unwrapped, for taking the coupled wheel travel out of the drive position.
+  mutable std::optional<wpi::math::Rotation2d> m_lastAzimuthAngle;
+  mutable wpi::units::turn_t m_azimuthTravel{0};
+
+  /** Wheel travel the drive encoder reads because the azimuth turned by the given angle. */
+  wpi::units::meter_t GetCouplingDistance(wpi::units::turn_t azimuthAngle) const;
+  /** The drive motor's rotor to mechanism ratio, or 1 when no gearing is configured. */
+  double GetDriveRotorToMechanismRatio() const;
+  /** Wheel velocity the drive encoder reads because the azimuth is turning. */
+  wpi::units::meters_per_second_t GetCouplingVelocity() const;
 
  public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).

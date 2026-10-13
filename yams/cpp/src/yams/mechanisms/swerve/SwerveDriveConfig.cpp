@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/util/MathUtil.hpp>
 #include <wpi/units/math.hpp>
 
 namespace yams::mechanisms::swerve {
@@ -26,7 +27,65 @@ SwerveDriveConfig& SwerveDriveConfig::WithModules(std::vector<SwerveModule*> mod
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithGyro(std::function<wpi::units::degree_t()> gyroSupplier) {
-  m_gyroSupplier = std::move(gyroSupplier);
+  if (!gyroSupplier) {
+    m_gyroSupplier.reset();
+    m_continuousHeadingRead = false;
+    return *this;
+  }
+  return WithGyro(std::function<wpi::math::Rotation3d()>{[supplier = std::move(gyroSupplier)] {
+    return wpi::math::Rotation3d{wpi::units::radian_t{0}, wpi::units::radian_t{0}, wpi::units::radian_t{supplier()}};
+  }});
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithGyro(std::function<wpi::math::Rotation3d()> gyroSupplier) {
+  if (gyroSupplier) {
+    m_gyroSupplier = std::move(gyroSupplier);
+  } else {
+    m_gyroSupplier.reset();
+  }
+  m_continuousHeadingRead = false;
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithGyroHeadingAxis(config::GyroAxis axis) {
+  m_gyroHeadingAxis = axis;
+  m_continuousHeadingRead = false;
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithAntiTipping(
+    wpi::units::meters_per_second_t kP, wpi::units::degree_t tippingThreshold,
+    wpi::units::meters_per_second_t maxCorrectionSpeed) {
+  if (kP.value() <= 0) {
+    throw std::invalid_argument("Anti-tipping kP must be positive, but was " +
+                                std::to_string(kP.value()) + " m/s");
+  }
+  if (maxCorrectionSpeed.value() <= 0) {
+    throw std::invalid_argument("Anti-tipping maximum correction speed must be positive, but was " +
+                                std::to_string(maxCorrectionSpeed.value()) + " m/s");
+  }
+  const wpi::units::radian_t threshold{tippingThreshold};
+  if (threshold.value() <= 0 || threshold.value() >= std::numbers::pi / 2) {
+    throw std::invalid_argument(
+        "Anti-tipping threshold must be between 0 and 90 degrees, but was " +
+        std::to_string(tippingThreshold.value()) + " degrees");
+  }
+  return WithAntiTipping(wpi::math::AntiTipping{
+      wpi::units::unit_t<wpi::math::AntiTipping::kp_unit>{kP.value()}, threshold,
+      maxCorrectionSpeed});
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithAntiTipping(
+    std::optional<wpi::math::AntiTipping> antiTipping) {
+  m_antiTipping = std::move(antiTipping);
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithModuleStateOptimization(bool enabled) {
+  m_moduleStateOptimization = enabled;
+  for (auto* module : m_modules) {
+    if (module) module->GetMutableConfig().WithOptimization(enabled);
+  }
   return *this;
 }
 
@@ -186,9 +245,36 @@ wpi::units::degree_t SwerveDriveConfig::GetGyroAngle() const {
     throw std::runtime_error(
         "Gyro supplier is not set! Please use .WithGyro() to set the gyro supplier!");
   }
-  auto rawAngle = (*m_gyroSupplier)();
-  auto angle = m_gyroInverted ? -rawAngle : rawAngle;
-  return angle - GetGyroOffset();
+  return wpi::units::degree_t{GetGyroRotation3d().Z()};
+}
+
+wpi::math::Rotation3d SwerveDriveConfig::GetGyroRotation3d() const {
+  if (!m_gyroSupplier) {
+    throw std::runtime_error(
+        "Gyro supplier is not set! Please use .WithGyro() to set the gyro supplier!");
+  }
+  auto attitude = config::ToRobotAttitude(m_gyroHeadingAxis, (*m_gyroSupplier)());
+  if (m_gyroInverted) {
+    attitude = wpi::math::Rotation3d{attitude.X(), attitude.Y(), -attitude.Z()};
+  }
+  return attitude.RotateBy(
+      wpi::math::Rotation3d{wpi::units::radian_t{0}, wpi::units::radian_t{0}, -wpi::units::radian_t{GetGyroOffset()}});
+}
+
+wpi::math::ChassisVelocities SwerveDriveConfig::GetAntiTippingCorrection() const {
+  if (!m_antiTipping || !m_gyroSupplier) {
+    return wpi::math::ChassisVelocities{};
+  }
+  const auto attitude = GetGyroRotation3d();
+  return m_antiTipping->Calculate(attitude).ToRobotRelative(wpi::math::Rotation2d{attitude.Z()});
+}
+
+std::optional<bool> SwerveDriveConfig::GetModuleStateOptimization() const {
+  return m_moduleStateOptimization;
+}
+
+std::optional<wpi::units::second_t> SwerveDriveConfig::GetDiscretization() const {
+  return wpi::RobotBase::IsSimulation() ? m_simDiscretizationSeconds : m_discretizationSeconds;
 }
 
 wpi::math::ChassisVelocities SwerveDriveConfig::AngularVelocitySkewCorrection(
@@ -198,22 +284,52 @@ wpi::math::ChassisVelocities SwerveDriveConfig::AngularVelocitySkewCorrection(
           ? m_simAngularVelocityScaleFactor.value_or(m_angularVelocityScaleFactor.value_or(0.0))
           : m_angularVelocityScaleFactor.value_or(0.0);
 
-  auto angularVelocityRad = wpi::units::radian_t{
-      wpi::units::radians_per_second_t{(*m_gyroAngularVelocitySupplier)()}.value() * scaleFactor};
+  wpi::units::radians_per_second_t gyroAngularVelocity{0};
+  if (m_gyroAngularVelocitySupplier) {
+    gyroAngularVelocity = (*m_gyroAngularVelocitySupplier)();
+  } else {
+    if (!m_noGyroAngularVelocitySupplierAlert) {
+      m_noGyroAngularVelocitySupplierAlert.emplace(
+          "YAMS", GetTelemetryName() + "/NoGyroAngularVelocitySupplier",
+          GetTelemetryName() +
+              " has an angular velocity scale factor configured but no gyro angular velocity "
+              "supplier (see SwerveDriveConfig::WithGyroVelocity); deriving it from the gyro "
+              "angle instead.",
+          wpi::util::Alert::Level::LOW);
+      m_noGyroAngularVelocitySupplierAlert->Set(true);
+    }
+    // Differentiate the heading kept continuous: wrapped, it jumps a whole rotation when the robot
+    // turns past half a rotation, and the derived angular velocity would spike.
+    const double wrappedHeadingRadians = GetGyroRotation3d().Z().value();
+    m_continuousHeadingRadians =
+        m_continuousHeadingRead
+            ? m_continuousHeadingRadians +
+                  wpi::math::AngleModulus(
+                      wpi::units::radian_t{wrappedHeadingRadians - m_continuousHeadingRadians})
+                      .value()
+            : wrappedHeadingRadians;
+    m_continuousHeadingRead = true;
+    gyroAngularVelocity = wpi::units::radians_per_second_t{
+        m_gyroAngularVelocityFilter.Derivative(m_continuousHeadingRadians)};
+  }
+  auto angularVelocityRad = wpi::units::radian_t{gyroAngularVelocity.value() * scaleFactor};
   auto angularVelocityRotation = wpi::math::Rotation2d{angularVelocityRad};
 
   if (angularVelocityRotation.Radians() == wpi::units::radian_t{0}) {
     return robotRelativeVelocity;
   }
 
-  auto gyroRotation = wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}};
+  auto gyroRotation = GetGyroRotation3d().ToRotation2d();
   auto fieldRelativeVelocity = (robotRelativeVelocity).ToFieldRelative(gyroRotation);
   return (fieldRelativeVelocity).ToRobotRelative(gyroRotation + angularVelocityRotation);
 }
 
 wpi::math::ChassisVelocities SwerveDriveConfig::OptimizeRobotRelativeChassisSpeeds(
     wpi::math::ChassisVelocities speeds) const {
-  if (m_angularVelocityScaleFactor && m_gyroAngularVelocitySupplier) {
+  if (m_antiTipping) {
+    speeds = speeds + GetAntiTippingCorrection();
+  }
+  if (m_angularVelocityScaleFactor) {
     speeds = AngularVelocitySkewCorrection(speeds);
   }
   if (m_discretizationSeconds) {

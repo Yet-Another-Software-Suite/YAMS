@@ -74,29 +74,81 @@ std::string SwerveModule::GetName() const {
 
 const config::SwerveModuleConfig& SwerveModule::GetConfig() const { return *m_config; }
 
-void SwerveModule::SetSwerveModuleState(wpi::math::SwerveModuleVelocity state) {
-  state = m_config->GetOptimizedState(state);
-  m_driveMotorController->SetVelocity(state.velocity);
-  m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
-}
+config::SwerveModuleConfig& SwerveModule::GetMutableConfig() { return *m_config; }
 
-wpi::math::SwerveModuleVelocity SwerveModule::Lock(wpi::math::Rotation2d angle) {
-  auto state = m_config->GetLockedState(angle);
-  m_driveMotorController->SetVelocity(state.velocity);
+wpi::math::SwerveModuleVelocity SwerveModule::SetSwerveModuleState(
+    wpi::math::SwerveModuleVelocity state) {
+  state = m_config->GetOptimizedState(state, GetState());
+  m_driveMotorController->SetVelocity(state.velocity + GetCouplingVelocity());
   m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
   return state;
 }
 
-wpi::math::SwerveModuleVelocity SwerveModule::GetState() const {
-  return wpi::math::SwerveModuleVelocity{m_driveMotorController->GetMeasurementVelocity(),
-                                         wpi::math::Rotation2d{wpi::units::radian_t{
-                                             m_azimuthMotorController->GetMechanismPosition()}}};
+wpi::math::SwerveModuleVelocity SwerveModule::SetSwerveModuleState(
+    wpi::math::SwerveModuleVelocity state, wpi::units::newton_t feedforwardForce) {
+  const wpi::math::Rotation2d requestedAngle = state.angle;
+  state = m_config->GetOptimizedState(state, GetState());
+  // The force is along the requested direction, so it reverses with the wheel.
+  if ((state.angle - requestedAngle).Cos() < 0) {
+    feedforwardForce = -feedforwardForce;
+  }
+  feedforwardForce = feedforwardForce * m_config->GetCosineCompensationScalar(state.angle);
+  m_driveMotorController->SetVelocity(state.velocity + GetCouplingVelocity(), feedforwardForce);
+  m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
+  return state;
+}
+
+wpi::math::SwerveModuleVelocity SwerveModule::Lock(wpi::math::Rotation2d angle) {
+  auto state = m_config->GetLockedState(angle, GetState());
+  m_driveMotorController->SetVelocity(wpi::units::meters_per_second_t{0} + GetCouplingVelocity());
+  m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});
+  return state;
+}
+
+SwerveModuleVelocityWithAzimuth SwerveModule::GetState() const {
+  return SwerveModuleVelocityWithAzimuth{
+      m_driveMotorController->GetMeasurementVelocity() - GetCouplingVelocity(),
+      wpi::math::Rotation2d{wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}},
+      wpi::units::radians_per_second_t{m_azimuthMotorController->GetMechanismVelocity()}};
 }
 
 wpi::math::SwerveModulePosition SwerveModule::GetPosition() const {
-  return wpi::math::SwerveModulePosition{m_driveMotorController->GetMeasurementPosition(),
-                                         wpi::math::Rotation2d{wpi::units::radian_t{
-                                             m_azimuthMotorController->GetMechanismPosition()}}};
+  const wpi::math::Rotation2d azimuthAngle{
+      wpi::units::radian_t{m_azimuthMotorController->GetMechanismPosition()}};
+  if (m_lastAzimuthAngle) {
+    m_azimuthTravel += wpi::units::turn_t{(azimuthAngle - *m_lastAzimuthAngle).Radians()};
+  }
+  m_lastAzimuthAngle = azimuthAngle;
+  return wpi::math::SwerveModulePosition{
+      m_driveMotorController->GetMeasurementPosition() - GetCouplingDistance(m_azimuthTravel),
+      azimuthAngle};
+}
+
+double SwerveModule::GetDriveRotorToMechanismRatio() const {
+  const auto& gearing = m_driveMotorController->GetConfig().GetMotorGearing();
+  return gearing ? gearing->GetRotorToMechanismRatio() : 1.0;
+}
+
+wpi::units::meter_t SwerveModule::GetCouplingDistance(wpi::units::turn_t azimuthAngle) const {
+  const auto couplingRatio = m_config->GetCouplingRatio();
+  if (!couplingRatio) {
+    return wpi::units::meter_t{0};
+  }
+  const auto& driveConfig = m_driveMotorController->GetConfig();
+  return driveConfig.ConvertFromMechanism(azimuthAngle *
+                                          couplingRatio->GetOutputToInputConversionFactor() *
+                                          GetDriveRotorToMechanismRatio());
+}
+
+wpi::units::meters_per_second_t SwerveModule::GetCouplingVelocity() const {
+  const auto couplingRatio = m_config->GetCouplingRatio();
+  if (!couplingRatio) {
+    return wpi::units::meters_per_second_t{0};
+  }
+  const auto& driveConfig = m_driveMotorController->GetConfig();
+  return driveConfig.ConvertFromMechanism(m_azimuthMotorController->GetMechanismVelocity() *
+                                          couplingRatio->GetOutputToInputConversionFactor() *
+                                          GetDriveRotorToMechanismRatio());
 }
 
 wpi::units::degree_t SwerveModule::GetRawAbsoluteEncoderAngle() const {

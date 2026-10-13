@@ -13,6 +13,8 @@
 #include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/units/math.hpp>
 
+#include "yams/gearing/MechanismGearing.hpp"
+
 namespace yams::mechanisms::config {
 
 SwerveModuleConfig::SwerveModuleConfig(motorcontrollers::SmartMotorController* drive,
@@ -26,9 +28,46 @@ SwerveModuleConfig& SwerveModuleConfig::WithSmartMotorController(
   if (m_azimuthMotor) throw std::logic_error("Azimuth motor controller already set.");
   m_driveMotor = driveMotor;
   m_azimuthMotor = azimuthMotor;
+  if (m_absoluteEncoder.has_value() && azimuthMotor) {
+    azimuthMotor->GetConfig().WithExternalEncoder(m_absoluteEncoder);
+  }
   if (m_wheelCircumference && driveMotor) {
     driveMotor->GetConfig().WithMechanismCircumference(*m_wheelCircumference);
   }
+  return *this;
+}
+
+SwerveModuleConfig& SwerveModuleConfig::WithExternalAbsoluteEncoder(std::any absoluteEncoder) {
+  m_absoluteEncoder = std::move(absoluteEncoder);
+  m_absoluteEncoderSupplier.reset();
+  if (m_azimuthMotor && m_absoluteEncoder.has_value()) {
+    m_azimuthMotor->GetConfig().WithExternalEncoder(m_absoluteEncoder);
+  }
+  return *this;
+}
+
+SwerveModuleConfig& SwerveModuleConfig::WithCouplingRatio(
+    std::optional<gearing::GearBox> couplingRatio) {
+  m_couplingRatio = std::move(couplingRatio);
+  return *this;
+}
+
+SwerveModuleConfig& SwerveModuleConfig::WithCouplingRatio(
+    double driveMotorRotationsPerAzimuthRotation) {
+  if (driveMotorRotationsPerAzimuthRotation == 0) {
+    m_couplingRatio.reset();
+    return *this;
+  }
+  return WithCouplingRatio(gearing::GearBox{driveMotorRotationsPerAzimuthRotation});
+}
+
+std::optional<gearing::GearBox> SwerveModuleConfig::GetCouplingRatio() const {
+  return m_couplingRatio;
+}
+
+SwerveModuleConfig& SwerveModuleConfig::WithDistanceFromCenterOfRotation(
+    wpi::units::meter_t front, wpi::units::meter_t left) {
+  m_location = wpi::math::Translation2d{front, left};
   return *this;
 }
 
@@ -46,12 +85,15 @@ SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoder(
 SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderGearing(
     const gearing::GearBox& gearing) {
   m_absoluteEncoderGearbox = gearing;
+  if (m_azimuthMotor && m_azimuthMotor->GetConfig().GetExternalEncoder().has_value()) {
+    m_azimuthMotor->GetConfig().WithExternalEncoderGearing(gearing::MechanismGearing{gearing});
+  }
   return *this;
 }
 
 SwerveModuleConfig& SwerveModuleConfig::WithAbsoluteEncoderOffset(wpi::units::degree_t offset) {
   m_absoluteEncoderOffset = offset;
-  if (m_azimuthMotor) {
+  if (m_azimuthMotor && m_azimuthMotor->GetConfig().GetExternalEncoder().has_value()) {
     m_azimuthMotor->GetConfig().WithExternalEncoderZeroOffset(offset);
   }
   return *this;
@@ -90,7 +132,8 @@ SwerveModuleConfig& SwerveModuleConfig::WithWheelDiameter(wpi::units::meter_t di
   return *this;
 }
 
-SwerveModuleConfig& SwerveModuleConfig::WithVelocityDeadband(wpi::units::meters_per_second_t speed) {
+SwerveModuleConfig& SwerveModuleConfig::WithVelocityDeadband(
+    std::optional<wpi::units::meters_per_second_t> speed) {
   m_velocityDeadband = speed;
   return *this;
 }
@@ -206,28 +249,42 @@ wpi::math::Rotation2d SwerveModuleConfig::GetAzimuthAngle() const {
 wpi::math::SwerveModuleVelocity SwerveModuleConfig::Optimize(
     wpi::math::SwerveModuleVelocity desired, const wpi::math::Rotation2d& currentAngle,
     const std::optional<wpi::math::Rotation2d>& lastCommanded) {
-  wpi::math::SwerveModuleVelocity state = desired.Optimize(currentAngle);
-  if (!lastCommanded || wpi::units::math::abs((state.angle - *lastCommanded).Degrees()) <=
-                            wpi::units::degree_t{90}) {
-    return state;
+  return swerve::SwerveModuleVelocityWithAzimuth::Optimize(
+      desired,
+      swerve::SwerveModuleVelocityWithAzimuth{wpi::units::meters_per_second_t{0}, currentAngle,
+                                              wpi::units::radians_per_second_t{0}},
+      lastCommanded);
+}
+
+swerve::SwerveModuleVelocityWithAzimuth SwerveModuleConfig::GetMeasuredAzimuth() const {
+  return swerve::SwerveModuleVelocityWithAzimuth{
+      wpi::units::meters_per_second_t{0}, GetAzimuthAngle(),
+      m_azimuthMotor ? wpi::units::radians_per_second_t{m_azimuthMotor->GetMechanismVelocity()}
+                     : wpi::units::radians_per_second_t{0}};
+}
+
+double SwerveModuleConfig::GetCosineCompensationScalar(wpi::math::Rotation2d desiredAngle) const {
+  if (!m_cosineCompensation) {
+    return 1.0;
   }
-  wpi::math::SwerveModuleVelocity lastOrientation{
-      -state.velocity, state.angle.RotateBy(wpi::math::Rotation2d{wpi::units::degree_t{180}})};
-  return wpi::units::math::abs((lastOrientation.angle - currentAngle).Degrees()) <
-                 wpi::units::degree_t{90 + 30}
-             ? lastOrientation
-             : state;
+  return std::max((desiredAngle - GetAzimuthAngle()).Cos(), 0.0);
 }
 
 wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
     wpi::math::SwerveModuleVelocity state) const {
-  wpi::math::Rotation2d currentAngle = GetAzimuthAngle();
+  return GetOptimizedState(state, GetMeasuredAzimuth());
+}
+
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
+    wpi::math::SwerveModuleVelocity state,
+    const swerve::SwerveModuleVelocityWithAzimuth& measured) const {
+  wpi::math::Rotation2d currentAngle = measured.angle;
   if (m_velocityDeadband && wpi::units::math::abs(state.velocity) <= *m_velocityDeadband) {
     // Too slow to steer by: hold the wheel where it is.
     state = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0}, currentAngle};
     m_lastCommandedAngle = currentAngle;
   } else if (m_stateOptimization) {
-    state = Optimize(state, currentAngle, m_lastCommandedAngle);
+    state = swerve::SwerveModuleVelocityWithAzimuth::Optimize(state, measured, m_lastCommandedAngle);
     m_lastCommandedAngle = state.angle;
   }
   if (m_cosineCompensation) {
@@ -239,9 +296,14 @@ wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetOptimizedState(
 
 wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetLockedState(
     wpi::math::Rotation2d angle) const {
+  return GetLockedState(angle, GetMeasuredAzimuth());
+}
+
+wpi::math::SwerveModuleVelocity SwerveModuleConfig::GetLockedState(
+    wpi::math::Rotation2d angle, const swerve::SwerveModuleVelocityWithAzimuth& measured) const {
   wpi::math::SwerveModuleVelocity state{wpi::units::meters_per_second_t{0}, angle};
   if (m_stateOptimization) {
-    state = Optimize(state, GetAzimuthAngle(), m_lastCommandedAngle);
+    state = swerve::SwerveModuleVelocityWithAzimuth::Optimize(state, measured, m_lastCommandedAngle);
   }
   m_lastCommandedAngle = state.angle;
   return state;

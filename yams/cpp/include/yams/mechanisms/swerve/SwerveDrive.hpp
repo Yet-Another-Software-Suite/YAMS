@@ -8,6 +8,7 @@
 #include <functional>
 #include <optional>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,6 +18,7 @@
 #include <wpi/math/estimator/SwerveDrivePoseEstimator.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/geometry/Twist2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
@@ -29,6 +31,7 @@
 #include <wpi/system/Timer.hpp>
 #include <wpi/tunables/Tunables.hpp>
 #include <wpi/units/angle.hpp>
+#include <wpi/units/force.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/math.hpp>
 #include <wpi/units/time.hpp>
@@ -145,6 +148,11 @@ class SwerveDrive {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
 
+    if (auto optimization = m_config->GetModuleStateOptimization()) {
+      for (auto* module : m_config->GetModules()) {
+        module->GetMutableConfig().WithOptimization(*optimization);
+      }
+    }
     m_simPose = m_config->GetInitialPose();
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
     ResetOdometry(m_config->GetInitialPose());
@@ -312,9 +320,22 @@ class SwerveDrive {
    */
   void SetSwerveModuleStates(wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states) {
     for (size_t i = 0; i < NumModules; ++i) {
-      m_config->GetModules()[i]->SetSwerveModuleState(states[i]);
+      m_desiredModuleStates[i] = m_config->GetModules()[i]->SetSwerveModuleState(states[i]);
     }
-    m_desiredModuleStates = states;
+  }
+
+  /**
+   * Set the swerve module states with a feedforward force on each drive wheel.
+   *
+   * @param states Module states, in the order the modules were given.
+   * @param feedforwardForces Force for each module, in the same order.
+   */
+  void SetSwerveModuleStates(wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states,
+                             std::span<const wpi::units::newton_t> feedforwardForces) {
+    for (size_t i = 0; i < NumModules; ++i) {
+      m_desiredModuleStates[i] =
+          m_config->GetModules()[i]->SetSwerveModuleState(states[i], feedforwardForces[i]);
+    }
   }
 
   /**
@@ -326,10 +347,23 @@ class SwerveDrive {
   wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules>
   GetStateFromRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities robotRelativeSpeeds) {
     robotRelativeSpeeds = m_config->OptimizeRobotRelativeChassisSpeeds(robotRelativeSpeeds);
-    if (auto cor = m_config->GetCenterOfRotation()) {
-      return m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds, *cor);
+    auto cor = m_config->GetCenterOfRotation();
+    auto states = cor ? m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds, *cor)
+                      : m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds);
+    // Scale the wheels down together when one is asked to go faster than it can.
+    if (auto maxModuleSpeed = m_config->GetMaximumModuleLinearVelocity()) {
+      auto maxLinear = m_config->GetMaximumChassisLinearVelocity();
+      auto maxAngular = m_config->GetMaximumChassisAngularVelocity();
+      if (maxLinear && maxAngular) {
+        states = wpi::math::SwerveDriveKinematics<NumModules>::DesaturateWheelVelocities(
+            states, robotRelativeSpeeds, *maxModuleSpeed, *maxLinear,
+            wpi::units::radians_per_second_t{*maxAngular});
+      } else {
+        states = wpi::math::SwerveDriveKinematics<NumModules>::DesaturateWheelVelocities(
+            states, *maxModuleSpeed);
+      }
     }
-    return m_kinematics.ToSwerveModuleVelocities(robotRelativeSpeeds);
+    return states;
   }
 
   /**
@@ -351,6 +385,29 @@ class SwerveDrive {
   void SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities robotRelativeSpeeds) {
     m_desiredChassisSpeeds = robotRelativeSpeeds;
     SetSwerveModuleStates(GetStateFromRobotRelativeChassisSpeeds(robotRelativeSpeeds));
+  }
+
+  /**
+   * Drive at robot relative chassis speeds with a feedforward force on each drive wheel, as a
+   * trajectory follower supplies.
+   *
+   * @param robotRelativeSpeeds Robot relative chassis speeds.
+   * @param feedforwardForces Empty, or one force per module in the order the modules were given.
+   * @throws std::invalid_argument if the number of forces is not zero or the number of modules.
+   */
+  void SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities robotRelativeSpeeds,
+                                     std::span<const wpi::units::newton_t> feedforwardForces) {
+    m_desiredChassisSpeeds = robotRelativeSpeeds;
+    auto states = GetStateFromRobotRelativeChassisSpeeds(robotRelativeSpeeds);
+    if (feedforwardForces.empty()) {
+      SetSwerveModuleStates(states);
+      return;
+    }
+    if (feedforwardForces.size() != NumModules) {
+      throw std::invalid_argument("feedforwardForces must be empty or have one entry per module (" +
+                                  std::to_string(NumModules) + "), in FL, FR, BL, BR order.");
+    }
+    SetSwerveModuleStates(states, feedforwardForces);
   }
 
   /**
@@ -497,6 +554,26 @@ class SwerveDrive {
   wpi::units::degree_t GetGyroAngle() {
     if (wpi::RobotBase::IsSimulation()) return m_simGyroAngle;
     return m_config->GetGyroAngle();
+  }
+
+  /**
+   * The robot's attitude. Its yaw is the robot's heading, and its roll and pitch are the robot's
+   * tilt. In simulation it is the simulated heading with no tilt.
+   *
+   * @return The robot's attitude.
+   */
+  wpi::math::Rotation3d GetGyroRotation3d() {
+    if (wpi::RobotBase::IsSimulation()) {
+      return wpi::math::Rotation3d{wpi::units::radian_t{0}, wpi::units::radian_t{0},
+                                   wpi::units::radian_t{m_simGyroAngle}};
+    }
+    return m_config->GetGyroRotation3d();
+  }
+
+  /** Reset the drive to pose controllers, as at the start of a drive to pose tuning run. */
+  void StartDriveToPoseTuning() {
+    ResetTranslationPID();
+    ResetRotationPID();
   }
 
   /**

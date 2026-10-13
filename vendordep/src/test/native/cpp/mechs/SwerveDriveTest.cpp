@@ -27,6 +27,11 @@
 #include <wpi/units/velocity.hpp>
 
 #include <cmath>
+#include <stdexcept>
+#include <functional>
+#include <wpi/units/force.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
+#include <wpi/math/controller/AntiTipping.hpp>
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <limits>
 #include <memory>
@@ -43,6 +48,7 @@
 #include "yams/exceptions.hpp"
 #include "yams/gearing/GearBox.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
+#include "yams/mechanisms/config/GyroAxis.hpp"
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveDrive.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
@@ -634,6 +640,243 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
       wpi::math::SwerveModuleVelocity{1.0_mps, current + wpi::math::Rotation2d{80.0_deg}});
   CHECK(second.velocity.value() < 0.0);
   CHECK((second.angle - current).Degrees().value() == Catch::Approx(-100.0).margin(1.0));
+}
+
+// ---- Features shared with the Java swerve drive -------------------------------------
+
+// A gyro mounted flat reports the robot's heading as its yaw, whichever overload supplies it.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.GyroRotation3dMatchesTheHeading",
+                 "[SwerveDriveTest]") {
+  m_simGyro = 35.0_deg;
+  CHECK(m_driveCfg.GetGyroAngle().value() == Catch::Approx(35.0).margin(1e-6));
+  CHECK(wpi::units::degree_t{m_driveCfg.GetGyroRotation3d().Z()}.value() ==
+        Catch::Approx(35.0).margin(1e-6));
+
+  SwerveDriveConfig cfg;
+  cfg.WithGyro(std::function<wpi::math::Rotation3d()>{
+      [] { return wpi::math::Rotation3d{0.1_rad, 0.2_rad, 0.5_rad}; }});
+  auto attitude = cfg.GetGyroRotation3d();
+  CHECK(attitude.X().value() == Catch::Approx(0.1).margin(1e-9));
+  CHECK(attitude.Y().value() == Catch::Approx(0.2).margin(1e-9));
+  CHECK(attitude.Z().value() == Catch::Approx(0.5).margin(1e-9));
+}
+
+// With the gyro on its side, the robot turning shows up as the gyro's roll or pitch, and the
+// heading axis turns that back into the robot's heading.
+TEST_CASE("SwerveDriveTest.GyroHeadingAxisReadsTheHeadingFromRollOrPitch", "[SwerveDriveTest]") {
+  wpi::math::Rotation3d gyro;
+  SwerveDriveConfig cfg;
+  cfg.WithGyro(std::function<wpi::math::Rotation3d()>{[&gyro] { return gyro; }});
+
+  // X up: the robot turning by 40 degrees is a roll of 40 degrees on the gyro.
+  cfg.WithGyroHeadingAxis(GyroAxis::ROLL);
+  gyro = wpi::math::Rotation3d{wpi::units::radian_t{40.0_deg}, 0_rad, 0_rad};
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(40.0).margin(1e-6));
+  CHECK(cfg.GetGyroRotation3d().X().value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(cfg.GetGyroRotation3d().Y().value() == Catch::Approx(0.0).margin(1e-9));
+
+  // Y up: the robot turning by 40 degrees is a pitch of 40 degrees on the gyro.
+  cfg.WithGyroHeadingAxis(GyroAxis::PITCH);
+  gyro = wpi::math::Rotation3d{0_rad, wpi::units::radian_t{40.0_deg}, 0_rad};
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(40.0).margin(1e-6));
+
+  // Z up, the default: the yaw is the heading.
+  cfg.WithGyroHeadingAxis(GyroAxis::YAW);
+  gyro = wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{40.0_deg}};
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(40.0).margin(1e-6));
+}
+
+// The inversion and the offset apply to the heading of the rotated attitude.
+TEST_CASE("SwerveDriveTest.GyroInversionAndOffsetApplyToTheHeading", "[SwerveDriveTest]") {
+  SwerveDriveConfig cfg;
+  cfg.WithGyro(std::function<wpi::math::Rotation3d()>{
+         [] { return wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{30.0_deg}}; }})
+      .WithGyroInverted(true)
+      .WithGyroOffset(10.0_deg);
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(-40.0).margin(1e-6));
+}
+
+// Anti-tipping rejects values that cannot work.
+TEST_CASE("SwerveDriveTest.AntiTippingRejectsBadValues", "[SwerveDriveTest]") {
+  SwerveDriveConfig cfg;
+  CHECK_THROWS_AS(cfg.WithAntiTipping(0_mps, 10.0_deg, 1_mps), std::invalid_argument);
+  CHECK_THROWS_AS(cfg.WithAntiTipping(1_mps, 0.0_deg, 1_mps), std::invalid_argument);
+  CHECK_THROWS_AS(cfg.WithAntiTipping(1_mps, 90.0_deg, 1_mps), std::invalid_argument);
+  CHECK_THROWS_AS(cfg.WithAntiTipping(1_mps, 10.0_deg, 0_mps), std::invalid_argument);
+  CHECK_NOTHROW(cfg.WithAntiTipping(1_mps, 10.0_deg, 1_mps));
+}
+
+// Anti-tipping adds nothing while the robot is level, and pushes once it leans past the threshold.
+TEST_CASE("SwerveDriveTest.AntiTippingCorrectsOnlyPastTheThreshold", "[SwerveDriveTest]") {
+  wpi::math::Rotation3d gyro;
+  SwerveDriveConfig cfg;
+  cfg.WithGyro(std::function<wpi::math::Rotation3d()>{[&gyro] { return gyro; }})
+      .WithAntiTipping(2_mps, 10.0_deg, 1_mps);
+
+  auto level = cfg.GetAntiTippingCorrection();
+  CHECK(level.vx.value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(level.vy.value() == Catch::Approx(0.0).margin(1e-9));
+
+  // 5 degrees of pitch is inside the threshold.
+  gyro = wpi::math::Rotation3d{0_rad, wpi::units::radian_t{5.0_deg}, 0_rad};
+  auto small = cfg.GetAntiTippingCorrection();
+  CHECK(std::hypot(small.vx.value(), small.vy.value()) == Catch::Approx(0.0).margin(1e-9));
+
+  // 20 degrees is past it: the correction is along X only, and matches the controller.
+  gyro = wpi::math::Rotation3d{0_rad, wpi::units::radian_t{20.0_deg}, 0_rad};
+  auto leaning = cfg.GetAntiTippingCorrection();
+  auto expected = wpi::math::AntiTipping{
+      wpi::units::unit_t<wpi::math::AntiTipping::kp_unit>{2.0}, wpi::units::radian_t{10.0_deg},
+      1_mps}.Calculate(gyro);
+  CHECK(std::abs(leaning.vx.value()) > 0.1);
+  CHECK(leaning.vx.value() == Catch::Approx(expected.vx.value()).margin(1e-9));
+  CHECK(leaning.vy.value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(leaning.omega.value() == Catch::Approx(0.0).margin(1e-9));
+
+  // The correction is added to the commanded chassis speeds.
+  auto optimized = cfg.OptimizeRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{});
+  CHECK(optimized.vx.value() == Catch::Approx(expected.vx.value()).margin(1e-9));
+
+  // Turning it off removes the correction.
+  cfg.WithAntiTipping(std::nullopt);
+  CHECK(cfg.GetAntiTippingCorrection().vx.value() == Catch::Approx(0.0).margin(1e-9));
+}
+
+// With a maximum module speed, wheels asked to go faster are scaled down together.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleSpeedsAreDesaturated",
+                 "[SwerveDriveTest]") {
+  // Without a module limit the request passes through.
+  auto unlimited = m_drive->GetStateFromRobotRelativeChassisSpeeds(
+      wpi::math::ChassisVelocities{6.0_mps, 0_mps, 0_rad_per_s});
+  CHECK(wpi::units::math::abs(unlimited[0].velocity).value() == Catch::Approx(6.0).margin(1e-6));
+
+  // The request is inside the chassis limits, but translating and turning together asks the outer
+  // wheels for more than a module can do.
+  m_driveCfg.WithMaximumModuleSpeed(3.0_mps);
+  auto limited = m_drive->GetStateFromRobotRelativeChassisSpeeds(
+      wpi::math::ChassisVelocities{4.0_mps, 0_mps, wpi::units::radians_per_second_t{6.0}});
+  for (const auto& state : limited) {
+    CHECK(wpi::units::math::abs(state.velocity).value() <= 3.0 + 1e-6);
+  }
+}
+
+// The drive level optimization setting reaches every module, at the config and at the drive.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleStateOptimizationIsSetOnEveryModule",
+                 "[SwerveDriveTest]") {
+  CHECK_FALSE(m_driveCfg.GetModuleStateOptimization().has_value());
+  m_driveCfg.WithModuleStateOptimization(false);
+  REQUIRE(m_driveCfg.GetModuleStateOptimization().has_value());
+  CHECK_FALSE(*m_driveCfg.GetModuleStateOptimization());
+  for (auto* cfg : {&m_flCfg, &m_frCfg, &m_blCfg, &m_brCfg}) {
+    CHECK_FALSE(cfg->GetStateOptimization());
+  }
+  // Without optimization a wheel is sent the long way round instead of being reversed.
+  auto state = m_flCfg.GetOptimizedState(
+      wpi::math::SwerveModuleVelocity{1.0_mps, m_fl->GetState().angle +
+                                                   wpi::math::Rotation2d{170.0_deg}});
+  CHECK(state.velocity.value() > 0.0);
+}
+
+// The default velocity deadband holds the wheel where it is for a request too slow to steer by.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DefaultVelocityDeadbandHoldsTheWheel",
+                 "[SwerveDriveTest]") {
+  auto current = m_fl->GetState().angle;
+  auto held = m_flCfg.GetOptimizedState(
+      wpi::math::SwerveModuleVelocity{0.05_mps, current + wpi::math::Rotation2d{60.0_deg}});
+  CHECK(held.velocity.value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK((held.angle - current).Degrees().value() == Catch::Approx(0.0).margin(1e-6));
+
+  // Turned off, the same request steers the wheel.
+  m_flCfg.WithVelocityDeadband(std::nullopt);
+  auto steered = m_flCfg.GetOptimizedState(
+      wpi::math::SwerveModuleVelocity{0.05_mps, current + wpi::math::Rotation2d{60.0_deg}});
+  CHECK((steered.angle - current).Degrees().value() == Catch::Approx(60.0).margin(1e-6));
+}
+
+// The coupling ratio is stored as a gearbox, and zero turns it off.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.CouplingRatioIsStoredAndCleared",
+                 "[SwerveDriveTest]") {
+  CHECK_FALSE(m_flCfg.GetCouplingRatio().has_value());
+  m_flCfg.WithCouplingRatio(3.5);
+  REQUIRE(m_flCfg.GetCouplingRatio().has_value());
+  // The coupled wheel velocity is taken out of what the module reads.
+  double coupled = Hardware().flDriveSMC->GetConfig()
+                       .ConvertFromMechanism(Hardware().flAzimuthSMC->GetMechanismVelocity() *
+                                             m_flCfg.GetCouplingRatio()->GetOutputToInputConversionFactor() *
+                                             Hardware().flDriveSMC->GetConfig().GetMotorGearing()->GetRotorToMechanismRatio())
+                       .value();
+  CHECK(m_fl->GetState().velocity.value() ==
+        Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value() - coupled)
+            .margin(1e-6));
+  CHECK_NOTHROW(m_fl->GetPosition());
+  CHECK_NOTHROW(m_fl->SetSwerveModuleState(wpi::math::SwerveModuleVelocity{1.0_mps, {}}));
+  m_flCfg.WithCouplingRatio(0.0);
+  CHECK_FALSE(m_flCfg.GetCouplingRatio().has_value());
+}
+
+// Feedforward forces are either absent or one per module.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.FeedforwardForcesNeedOnePerModule",
+                 "[SwerveDriveTest]") {
+  wpi::math::ChassisVelocities forward{1.0_mps, 0_mps, 0_rad_per_s};
+  std::vector<wpi::units::newton_t> none;
+  std::vector<wpi::units::newton_t> two{5_N, 5_N};
+  std::vector<wpi::units::newton_t> four{5_N, 5_N, 5_N, 5_N};
+  CHECK_NOTHROW(m_drive->SetRobotRelativeChassisSpeeds(forward, none));
+  CHECK_THROWS_AS(m_drive->SetRobotRelativeChassisSpeeds(forward, two), std::invalid_argument);
+  CHECK_NOTHROW(m_drive->SetRobotRelativeChassisSpeeds(forward, four));
+  auto force = Hardware().flDriveSMC->GetSetpointFeedforwardForce();
+  REQUIRE(force.has_value());
+  CHECK(std::abs(force->value()) == Catch::Approx(5.0).margin(1e-6));
+  CHECK(m_drive->GetDesiredChassisSpeeds().vx.value() == Catch::Approx(1.0).margin(1e-9));
+}
+
+// The desired module states are the ones the modules were sent, after optimization.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DesiredModuleStatesAreTheOptimizedOnes",
+                 "[SwerveDriveTest]") {
+  // Driving backward from wheels that point forward is done by reversing them, not turning them.
+  m_drive->SetRobotRelativeChassisSpeeds(wpi::math::ChassisVelocities{-1.0_mps, 0_mps, 0_rad_per_s});
+  auto desired = m_drive->GetDesiredModuleStates();
+  for (const auto& state : desired) {
+    CHECK(state.velocity.value() == Catch::Approx(-1.0).margin(1e-6));
+    CHECK(std::abs(state.angle.Degrees().value()) == Catch::Approx(0.0).margin(1.0));
+  }
+}
+
+// Cosine compensation scales by the cosine of the azimuth error, and is 1 when it is off.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.CosineCompensationScalar",
+                 "[SwerveDriveTest]") {
+  auto current = m_fl->GetState().angle;
+  CHECK(m_flCfg.GetCosineCompensationScalar(current + wpi::math::Rotation2d{60.0_deg}) ==
+        Catch::Approx(1.0));
+  m_flCfg.WithCosineCompensation(true);
+  CHECK(m_flCfg.GetCosineCompensationScalar(current + wpi::math::Rotation2d{60.0_deg}) ==
+        Catch::Approx(0.5).margin(1e-3));
+  CHECK(m_flCfg.GetCosineCompensationScalar(current + wpi::math::Rotation2d{120.0_deg}) ==
+        Catch::Approx(0.0).margin(1e-9));
+}
+
+// The module reports how fast its azimuth is turning along with its state.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleStateCarriesTheAzimuthVelocity",
+                 "[SwerveDriveTest]") {
+  // The simulated motors are shared between tests, so compare against the controllers themselves.
+  SwerveModuleVelocityWithAzimuth state = m_fl->GetState();
+  CHECK(state.azimuthVelocity.value() ==
+        Catch::Approx(wpi::units::radians_per_second_t{
+                          Hardware().flAzimuthSMC->GetMechanismVelocity()}
+                          .value())
+            .margin(1e-6));
+  CHECK(state.velocity.value() ==
+        Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value()).margin(1e-6));
+}
+
+// The simulated attitude is the simulated heading with no tilt.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DriveGyroRotation3dFollowsTheHeading",
+                 "[SwerveDriveTest]") {
+  m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{90.0_deg}});
+  auto attitude = m_drive->GetGyroRotation3d();
+  CHECK(wpi::units::degree_t{attitude.Z()}.value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(attitude.X().value() == Catch::Approx(0.0).margin(1e-9));
+  CHECK(attitude.Y().value() == Catch::Approx(0.0).margin(1e-9));
 }
 
 // ---- SwerveInputStream telemetry and live tuning ----------------------------------
