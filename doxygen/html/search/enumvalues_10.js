@@ -1,16 +1,13 @@
 var searchData=
 [
-  ['setpointforce_0',['SetpointForce',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba53ce496d1f8045b34dc00dfd14d73871',1,'yams::telemetry']]],
-  ['setpointposition_1',['SetpointPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba6ae24e569f3d3f041dea585576b18133',1,'yams::telemetry']]],
-  ['setpointvelocity_2',['SetpointVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac412d01968c4fcd6cf5613938e78864d',1,'yams::telemetry']]],
-  ['simplemotorfeedforward_3',['SimpleMotorFeedForward',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3a285786c0dea8af07450f86969650505f',1,'yams::telemetry']]],
-  ['slot_5f0_4',['SLOT_0',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a81078b5ffe742dc7d1c26cdbc05bdf34',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f1_5',['SLOT_1',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a90d71ec57b92ac66f93b7b0a658b8606',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f2_6',['SLOT_2',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a7eccd0b49279bdde76135e56b98f6248',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f3_7',['SLOT_3',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a6cbcb9543d25d2275c1a9b74375aa33b',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['state_8',['State',['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#a187f08aa9125f5a772017cdbf2c5c345a46a2a41cc6e552044816a2d04634545d',1,'yams::telemetry::SwerveModuleTelemetryConfig']]],
-  ['statorcurrent_9',['StatorCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba3786e14c328f1ff3e0e8d914b00593f2',1,'yams::telemetry']]],
-  ['statorcurrentlimit_10',['StatorCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac741e8ea2b5294fffc2e4a6d70d69337',1,'yams::telemetry']]],
-  ['supplycurrent_11',['SupplyCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba33993099d27fb7c7678a005175fa4076',1,'yams::telemetry']]],
-  ['supplycurrentlimit_12',['SupplyCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba59e11379b07e676d83d6c6c8d4b995ff',1,'yams::telemetry']]]
+  ['temperaturelimit_0',['TemperatureLimit',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3a27e4461bfdcae2fc134c892e568a6983',1,'yams::telemetry']]],
+  ['translationd_1',['TranslationD',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a265265392ae8e9e8feccc42644183cb8',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['translationi_2',['TranslationI',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a8a11ea6fe811c5f577b4066f6bbbbe5e',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['translationp_3',['TranslationP',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1ac0dba8b6b6906dc9984e1cc626abd102',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['trapezoidalprofilemaxacceleration_4',['TrapezoidalProfileMaxAcceleration',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba0228bbdf83d9a3a529d0f83bf01f2534',1,'yams::telemetry']]],
+  ['trapezoidalprofilemaxjerk_5',['TrapezoidalProfileMaxJerk',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf700cf3fac9d95cc1f2758278e2c651b',1,'yams::telemetry']]],
+  ['trapezoidalprofilemaxvelocity_6',['TrapezoidalProfileMaxVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaba787f9e89a498fd4d5d34f876609764',1,'yams::telemetry']]],
+  ['tunableclosedloopcontrollerslot_7',['TunableClosedLoopControllerSlot',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba31748088e3ecff44b15790a9a51d09a7',1,'yams::telemetry']]],
+  ['tunablesetpointposition_8',['TunableSetpointPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba810f54345cdff825f27245110e05138a',1,'yams::telemetry']]],
+  ['tunablesetpointvelocity_9',['TunableSetpointVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac1ccc23fe01a4944f742accd0fc49628',1,'yams::telemetry']]]
 ];

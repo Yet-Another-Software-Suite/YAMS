@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['commonk_0',['commonK',['../structyams_1_1units_1_1EasyCRTConfig.html#a901899d1a1857ebe1b0a0b4566f3efcd',1,'yams::units::EasyCRTConfig']]]
+  ['doublefields_0',['doubleFields',['../structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html#a1d5b3a3529582d13301903c5f52c14ba',1,'yams::telemetry::UnsupportedTelemetryFields']]]
 ];

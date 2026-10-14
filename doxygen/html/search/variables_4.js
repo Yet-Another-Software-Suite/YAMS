@@ -1,8 +1,11 @@
 var searchData=
 [
-  ['elevatorff_0',['elevatorFF',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a8e82ae000720ec05a994368a0b5f3796',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
-  ['enc1_1',['enc1',['../structyams_1_1units_1_1EasyCRTConfig.html#aea29b3ed6a15f89677895276f04630c0',1,'yams::units::EasyCRTConfig']]],
-  ['enc1teeth_2',['enc1Teeth',['../structyams_1_1units_1_1EasyCRTConfig.html#ac51de289b93751af7699b92ea3812348',1,'yams::units::EasyCRTConfig']]],
-  ['enc2_3',['enc2',['../structyams_1_1units_1_1EasyCRTConfig.html#ae53ffaff633ffe3b71801a691cadafee',1,'yams::units::EasyCRTConfig']]],
-  ['enc2teeth_4',['enc2Teeth',['../structyams_1_1units_1_1EasyCRTConfig.html#a48a70b85cdc2e251ff1065c0e13e71ba',1,'yams::units::EasyCRTConfig']]]
+  ['ka_0',['kA',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#af7d95afa828023e64f8e5ff38e99e653',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['kd_1',['kD',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a5b4603189aedae1f8333a3e6084467f1',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['kg_2',['kG',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#add8c0f6337a45ac6a0707e36aa0384c8',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['ki_3',['kI',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#ad1d3157815ef22c075484fdd969205e9',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['kone_4',['kOne',['../classyams_1_1gearing_1_1MechanismGearing.html#ad85fc4ecf300f628a72e7e6ca8a1c02e',1,'yams::gearing::MechanismGearing']]],
+  ['kp_5',['kP',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a38d737e288450bad022d502dfb6f3ea1',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['ks_6',['kS',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a5e02f3d398223f69e27ccdcafc1b4dd3',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
+  ['kv_7',['kV',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a93258fbae1f2cbb8f1524d5807d060b0',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
 ];

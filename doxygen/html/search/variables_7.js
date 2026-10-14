@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lqr_0',['lqr',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#aaca2497330b569d8189217bb1126fd1e',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
+  ['simpleff_0',['simpleFF',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a5eec51b86a1c10422bfcb17a09e66c5c',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
 ];

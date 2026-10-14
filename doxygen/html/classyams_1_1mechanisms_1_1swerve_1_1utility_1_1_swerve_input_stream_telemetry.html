@@ -105,8 +105,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a8606c4f73e381de371aa862c16edf7a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b3cad6faed26853aafbea4497e27571" id="r_a1b3cad6faed26853aafbea4497e27571"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1b3cad6faed26853aafbea4497e27571">ApplyTuningValues</a> ()</td></tr>
 <tr class="separator:a1b3cad6faed26853aafbea4497e27571"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10d22aefeaac33aaea89e72c524647ed" id="r_a10d22aefeaac33aaea89e72c524647ed"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::reference_wrapper&lt; wpi::cmd::Command &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10d22aefeaac33aaea89e72c524647ed">GetLiveTuningCommand</a> ()</td></tr>
-<tr class="separator:a10d22aefeaac33aaea89e72c524647ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b984b79b431d3da0cff597d04b76459" id="r_a5b984b79b431d3da0cff597d04b76459"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::reference_wrapper&lt; frc2::Command &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5b984b79b431d3da0cff597d04b76459">GetLiveTuningCommand</a> ()</td></tr>
+<tr class="separator:a5b984b79b431d3da0cff597d04b76459"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">size_t</a> NumModules = 4&gt;<br />
@@ -114,7 +114,7 @@ class yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry&lt; NumModul
 <ul>
 <li>LOW: the current drive mode, under SwerveInputStream/&lt;name&gt;.</li>
 <li>MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance and robot relative), read-only.</li>
-<li>HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/&lt;name&gt;, and a "Live Tuning" command there that applies them to the stream every loop while it runs.</li>
+<li>HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/&lt;name&gt;, and a "Live Tuning" command under SmartDashboard/Mechanisms/Commands/SwerveInputStream/&lt;name&gt; that applies them to the stream every loop while it runs.</li>
 </ul>
 <p>While live tuning, values stay in sync both ways: a dashboard edit is applied to the stream, and a change made in code, e.g. a binding that changes the translation scale, is published to the dashboard. Invalid dashboard values are replaced with the stream's current value.</p>
 <p>The stream owns its telemetry and creates it when first read, so the telemetry never outlives the stream or follows it to a new address. </p>
@@ -232,7 +232,7 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Stop publishing, canceling and removing the "Live Tuning" command. </p>
+<p>Stop publishing and cancel the "Live Tuning" command. </p>
 
 </div>
 </div>
@@ -265,8 +265,8 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1
 
 </div>
 </div>
-<a id="a10d22aefeaac33aaea89e72c524647ed" name="a10d22aefeaac33aaea89e72c524647ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a10d22aefeaac33aaea89e72c524647ed">&#9670;&#160;</a></span>GetLiveTuningCommand()</h2>
+<a id="a5b984b79b431d3da0cff597d04b76459" name="a5b984b79b431d3da0cff597d04b76459"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b984b79b431d3da0cff597d04b76459">&#9670;&#160;</a></span>GetLiveTuningCommand()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -277,7 +277,7 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; std::reference_wrapper&lt; wpi::cmd::Command &gt; &gt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream_telemetry.html">yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry</a>&lt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">NumModules</a> &gt;::GetLiveTuningCommand </td>
+          <td class="memname">std::optional&lt; std::reference_wrapper&lt; frc2::Command &gt; &gt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream_telemetry.html">yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry</a>&lt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">NumModules</a> &gt;::GetLiveTuningCommand </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
@@ -345,7 +345,7 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Publish the stream's current mode and, at MEDIUM and above, its configuration. Called by <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html#a7140e255b1f174b47fe4158a36168587">SwerveInputStream::Get()</a>. </p>
+<p>Publish the stream's current mode and, at MEDIUM and above, its configuration. Called by <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html#abd8666fac96bd71f3248797fd631cad8">SwerveInputStream::Get()</a>. </p>
 
 </div>
 </div>

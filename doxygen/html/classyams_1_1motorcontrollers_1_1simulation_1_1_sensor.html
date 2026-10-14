@@ -114,7 +114,7 @@ Public Member Functions</h2></td></tr>
 <h3><a class="anchor" id="autotoc_md15"></a>
 Basic usage (construct directly)</h3>
 <div class="fragment"><div class="line"><span class="comment">// Beam-break sensor: one boolean field backed by a real DIO channel.</span></div>
-<div class="line">wpi::hardware::DigitalInput beamBreak{0};</div>
+<div class="line">frc::DigitalInput beamBreak{0};</div>
 <div class="line"> </div>
 <div class="line"><a class="code hl_class" href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html">Sensor</a> sensor{<span class="stringliteral">&quot;BeamBreak&quot;</span>, {</div>
 <div class="line">  <a class="code hl_class" href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor_data.html">SensorData</a>{<span class="stringliteral">&quot;Triggered&quot;</span>, [&amp;beamBreak] { <span class="keywordflow">return</span> !beamBreak.Get(); }, <span class="keyword">false</span>},</div>
@@ -127,8 +127,8 @@ Basic usage (construct directly)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1_sensor_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1_sensor.html">yams::motorcontrollers::simulation::Sensor</a></div><div class="ttdef"><b>Definition</b> Sensor.hpp:68</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md16"></a>
 Builder usage (SimSensorConfig)</h3>
-<div class="fragment"><div class="line">wpi::hardware::DigitalInput beamBreak{0};</div>
-<div class="line">wpi::hardware::Encoder encoder{1, 2};</div>
+<div class="fragment"><div class="line">frc::DigitalInput beamBreak{0};</div>
+<div class="line">frc::Encoder encoder{1, 2};</div>
 <div class="line"> </div>
 <div class="line">SimSensorConfig cfg{<span class="stringliteral">&quot;IntakeSensors&quot;</span>};</div>
 <div class="line">cfg.WithField(<span class="stringliteral">&quot;BeamBreak&quot;</span>,   [&amp;beamBreak] { <span class="keywordflow">return</span> !beamBreak.Get(); }, <span class="keyword">false</span>)</div>

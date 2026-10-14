@@ -1,13 +1,13 @@
 <map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/FlyWheelConfig.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/FlyWheelConfig.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="168,5,360,75"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,80,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,77,84,120,82,115,183,72"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="104,123,163,148"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,77,162,117,159,112,215,73"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="187,123,341,148"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,75,267,109,261,109,261,75"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="366,123,501,148"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="326,72,401,113,399,118,324,77"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="525,123,688,148"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="361,65,552,117,551,122,360,70"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="266,5,458,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,119,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,74,112,121,111,116,265,68"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="143,123,283,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="309,77,244,118,241,113,307,73"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="307,123,417,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="365,75,365,109,359,109,359,75"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="442,123,517,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="406,73,456,112,452,116,403,77"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="541,123,599,148"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="438,72,533,114,531,119,436,77"/>
 </map>

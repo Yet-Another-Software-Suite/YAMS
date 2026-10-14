@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['doublefields_0',['doubleFields',['../structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html#a1d5b3a3529582d13301903c5f52c14ba',1,'yams::telemetry::UnsupportedTelemetryFields']]]
+  ['elevatorff_0',['elevatorFF',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#ad3e0dbd21e24e6c34f4042b59442016d',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
 ];

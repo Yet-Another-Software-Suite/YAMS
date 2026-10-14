@@ -78,29 +78,21 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#namespaces">Namespaces</a>  </div>
   <div class="headertitle"><div class="title">EasyCRT.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>CRT-based absolute angle solver for two-encoder FRC mechanisms.  
+<p>Absolute angle solver for a gear that turns more than once, read by two absolute encoders.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;cmath&gt;</code><br />
-<code>#include &lt;functional&gt;</code><br />
-<code>#include &lt;limits&gt;</code><br />
-<code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;wpi/units/angle.hpp&gt;</code><br />
+<div class="textblock"><code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;units/angle.h&gt;</code><br />
 </div>
 <p><a href="_easy_c_r_t_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for the <a class="el" href="classyams_1_1units_1_1_easy_c_r_t.html" title="CRT-based absolute angle solver using two absolute encoders.">EasyCRT</a> solver.  <a href="structyams_1_1units_1_1_easy_c_r_t_config.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1units_1_1_easy_c_r_t.html">yams::units::EasyCRT</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CRT-based absolute angle solver using two absolute encoders.  <a href="classyams_1_1units_1_1_easy_c_r_t.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -109,83 +101,22 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespaceyams_1_1units" id="r_namespaceyams_1_1units"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html">yams::units</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a1775b640b5b8c6c0e9bcca42b00bb882" id="r_a1775b640b5b8c6c0e9bcca42b00bb882"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#a1775b640b5b8c6c0e9bcca42b00bb882">yams::units::CrtGcd</a> (int a, int b)</td></tr>
-<tr class="memdesc:a1775b640b5b8c6c0e9bcca42b00bb882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Greatest common divisor (iterative Euclidean algorithm).  <br /></td></tr>
-<tr class="separator:a1775b640b5b8c6c0e9bcca42b00bb882"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ebf401f14d8572d450eb5ed81be14db" id="r_a4ebf401f14d8572d450eb5ed81be14db"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#a4ebf401f14d8572d450eb5ed81be14db">yams::units::CrtLcm</a> (int a, int b)</td></tr>
-<tr class="memdesc:a4ebf401f14d8572d450eb5ed81be14db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Least common multiple.  <br /></td></tr>
-<tr class="separator:a4ebf401f14d8572d450eb5ed81be14db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0ad75ad333b453b7076833a791a0940" id="r_aa0ad75ad333b453b7076833a791a0940"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#aa0ad75ad333b453b7076833a791a0940">yams::units::CrtIsCoprime</a> (int a, int b)</td></tr>
-<tr class="memdesc:aa0ad75ad333b453b7076833a791a0940"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true when <code>a</code> and <code>b</code> share no common factor beyond 1.  <br /></td></tr>
-<tr class="separator:aa0ad75ad333b453b7076833a791a0940"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53f78f454fba306537de214559b8f5df" id="r_a53f78f454fba306537de214559b8f5df"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#a53f78f454fba306537de214559b8f5df">yams::units::CrtRatioFromChain</a> (std::initializer_list&lt; int &gt; teeth)</td></tr>
-<tr class="memdesc:a53f78f454fba306537de214559b8f5df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encoder rotations per mechanism rotation from a meshed gear chain.  <br /></td></tr>
-<tr class="separator:a53f78f454fba306537de214559b8f5df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a232a918e82a1a9315b4c85e74208a219" id="r_a232a918e82a1a9315b4c85e74208a219"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#a232a918e82a1a9315b4c85e74208a219">yams::units::CrtRatioFromStages</a> (std::initializer_list&lt; int &gt; pairs)</td></tr>
-<tr class="memdesc:a232a918e82a1a9315b4c85e74208a219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encoder rotations per mechanism rotation from explicit stage pairs.  <br /></td></tr>
-<tr class="separator:a232a918e82a1a9315b4c85e74208a219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae809ecacb0a120b22ed65cd0e7efbd3a" id="r_ae809ecacb0a120b22ed65cd0e7efbd3a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1units.html#ae809ecacb0a120b22ed65cd0e7efbd3a">yams::units::CrtCommonK</a> (double commonRatio, int driveTeeth)</td></tr>
-<tr class="memdesc:ae809ecacb0a120b22ed65cd0e7efbd3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the common-scale factor K used by <a class="el" href="structyams_1_1units_1_1_easy_c_r_t_config.html#a901899d1a1857ebe1b0a0b4566f3efcd">EasyCRTConfig::commonK</a>.  <br /></td></tr>
-<tr class="separator:ae809ecacb0a120b22ed65cd0e7efbd3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>CRT-based absolute angle solver for two-encoder FRC mechanisms. </p>
-<p>Provides the EasyCRT solver and its configuration, plus free inline utilities for gear-ratio arithmetic and coprimality checks. Created by team 6911.</p>
-<dl class="section user"><dt>Full example turret with 200T gear, 19T and 21T encoder pinions</dt><dd><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="_easy_c_r_t_8hpp.html">yams/units/EasyCRT.hpp</a>&quot;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;ctre/phoenix6/CANcoder.hpp&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;wpi/commands2/SubsystemBase.hpp&gt;</span></div>
+<div class="textblock"><p>Absolute angle solver for a gear that turns more than once, read by two absolute encoders. </p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="_easy_c_r_t_8hpp.html">yams/units/EasyCRT.hpp</a>&quot;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespaceyams_1_1units.html">yams::units</a>;</div>
+<div class="line"><span class="comment">// 100 tooth turret gear, 19 tooth pinion on encoder A, 21 tooth pinion on encoder B.</span></div>
+<div class="line"><a class="code hl_class" href="classyams_1_1units_1_1_easy_c_r_t.html">yams::units::EasyCRT</a> crt{100, 19, 21};</div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">class </span>Turret : <span class="keyword">public</span> wpi::cmd::SubsystemBase {</div>
-<div class="line"> <span class="keyword">public</span>:</div>
-<div class="line">  Turret() {</div>
-<div class="line">    <span class="comment">// enc1Teeth=19, enc2Teeth=21 are coprime.</span></div>
-<div class="line">    <span class="comment">// commonK = 1.0 (no intermediate gearbox) * 200T (turret gear) = 200.</span></div>
-<div class="line">    <span class="comment">// CRT period = lcm(19,21)/200 = 399/200 = 1.995 rot covers full travel.</span></div>
-<div class="line">    m_crt = std::make_unique&lt;EasyCRT&gt;(</div>
-<div class="line">        <a class="code hl_struct" href="structyams_1_1units_1_1_easy_c_r_t_config.html">EasyCRTConfig</a>{}</div>
-<div class="line">            .<a class="code hl_function" href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">WithTeeth</a>(19, 21, CrtCommonK(1.0, 200))</div>
-<div class="line">            .WithRange(0.0, 1.99)</div>
-<div class="line">            .WithTolerance(0.01));</div>
-<div class="line"> </div>
-<div class="line">    <span class="comment">// Wire suppliers after construction.</span></div>
-<div class="line">    m_crt-&gt;GetConfig().enc1 = [<span class="keyword">this</span>] {</div>
-<div class="line">      <span class="keywordflow">return</span> m_enc19T.GetAbsolutePosition().GetValue();</div>
-<div class="line">    };</div>
-<div class="line">    m_crt-&gt;GetConfig().enc2 = [<span class="keyword">this</span>] {</div>
-<div class="line">      <span class="keywordflow">return</span> m_enc21T.GetAbsolutePosition().GetValue();</div>
-<div class="line">    };</div>
-<div class="line">  }</div>
-<div class="line"> </div>
-<div class="line">  <span class="keywordtype">void</span> Periodic()<span class="keyword"> override </span>{</div>
-<div class="line">    <span class="keyword">auto</span> angle = m_crt-&gt;GetAngle();</div>
-<div class="line"> </div>
-<div class="line">    <span class="keywordflow">if</span> (angle) {</div>
-<div class="line">      <span class="comment">// Resolved: seed or correct the motor controller position.</span></div>
-<div class="line">      m_motor.SetEncoderPosition(*angle);</div>
-<div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (m_crt-&gt;GetStatus() == EasyCRT::Status::InvalidConfig) {</div>
-<div class="line">      <span class="comment">// Sensor read failed (NaN) flag for diagnostics.</span></div>
-<div class="line">    }</div>
-<div class="line"> </div>
-<div class="line">    <span class="comment">// Log for tolerance tuning.</span></div>
-<div class="line">    wpi::telemetry::Log(<span class="stringliteral">&quot;CRT/error&quot;</span>, m_crt-&gt;GetLastError());</div>
-<div class="line">  }</div>
-<div class="line"> </div>
-<div class="line"> <span class="keyword">private</span>:</div>
-<div class="line">  ctre::phoenix6::hardware::CANcoder m_enc19T{33};</div>
-<div class="line">  ctre::phoenix6::hardware::CANcoder m_enc21T{34};</div>
-<div class="line">  std::unique_ptr&lt;EasyCRT&gt; m_crt;</div>
-<div class="line">};</div>
-<div class="ttc" id="a_easy_c_r_t_8hpp_html"><div class="ttname"><a href="_easy_c_r_t_8hpp.html">EasyCRT.hpp</a></div><div class="ttdoc">CRT-based absolute angle solver for two-encoder FRC mechanisms.</div></div>
-<div class="ttc" id="anamespaceyams_1_1units_html"><div class="ttname"><a href="namespaceyams_1_1units.html">yams::units</a></div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:70</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html">yams::units::EasyCRTConfig</a></div><div class="ttdoc">Configuration for the EasyCRT solver.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:173</div></div>
-<div class="ttc" id="astructyams_1_1units_1_1_easy_c_r_t_config_html_a982524a6b868ce871afa7baf651157c1"><div class="ttname"><a href="structyams_1_1units_1_1_easy_c_r_t_config.html#a982524a6b868ce871afa7baf651157c1">yams::units::EasyCRTConfig::WithTeeth</a></div><div class="ttdeci">EasyCRTConfig &amp; WithTeeth(int t1, int t2, double k)</div><div class="ttdoc">Set encoder teeth counts and the common scale factor.</div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:199</div></div>
-</div><!-- fragment --> </dd></dl>
-</div></div><!-- contents -->
+<div class="line"><span class="comment">// Read once at startup, while the mechanism is not moving.</span></div>
+<div class="line">std::optional&lt;::units::turn_t&gt; turretAngle =</div>
+<div class="line">    crt.<a class="code hl_function" href="classyams_1_1units_1_1_easy_c_r_t.html#a463ff81d0362473038186b2786f4ea18">Solve</a>(encoderA.GetAbsolutePosition().GetValue(),</div>
+<div class="line">              encoderB.GetAbsolutePosition().GetValue());</div>
+<div class="ttc" id="a_easy_c_r_t_8hpp_html"><div class="ttname"><a href="_easy_c_r_t_8hpp.html">EasyCRT.hpp</a></div><div class="ttdoc">Absolute angle solver for a gear that turns more than once, read by two absolute encoders.</div></div>
+<div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html"><div class="ttname"><a href="classyams_1_1units_1_1_easy_c_r_t.html">yams::units::EasyCRT</a></div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:44</div></div>
+<div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html_a463ff81d0362473038186b2786f4ea18"><div class="ttname"><a href="classyams_1_1units_1_1_easy_c_r_t.html#a463ff81d0362473038186b2786f4ea18">yams::units::EasyCRT::Solve</a></div><div class="ttdeci">std::optional&lt;::units::turn_t &gt; Solve(::units::turn_t encoderA, ::units::turn_t encoderB) const</div></div>
+</div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.10.0

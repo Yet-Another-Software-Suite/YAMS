@@ -1,7 +1,7 @@
 var searchData=
 [
   ['yams_0',['yams',['../namespaceyams.html',1,'']]],
-  ['yams_20yet_20another_20mechanism_20system_1',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
+  ['yams_20—_20yet_20another_20mechanism_20system_1',['YAMS — Yet Another Mechanism System',['../index.html',1,'']]],
   ['yams_2ehpp_2',['YAMS.hpp',['../YAMS_8hpp.html',1,'']]],
   ['yams_3a_3aexceptions_3',['exceptions',['../namespaceyams_1_1exceptions.html',1,'yams']]],
   ['yams_3a_3agearing_4',['gearing',['../namespaceyams_1_1gearing.html',1,'yams']]],
@@ -19,10 +19,10 @@ var searchData=
   ['yams_3a_3atelemetry_16',['telemetry',['../namespaceyams_1_1telemetry.html',1,'yams']]],
   ['yams_3a_3aunits_17',['units',['../namespaceyams_1_1units.html',1,'yams']]],
   ['yamsexception_18',['yamsexception',['../classyams_1_1exceptions_1_1YamsException.html#af4df63206e7ec852def2800a3a2f4165',1,'yams::exceptions::YamsException::YamsException()'],['../classyams_1_1exceptions_1_1YamsException.html',1,'yams::exceptions::YamsException']]],
-  ['yard_5ft_19',['yard_t',['../namespaceyams_1_1units.html#a679b427f74b6a74ceb304463c6a7d940',1,'yams::units']]],
-  ['yardunit_20',['YardUnit',['../namespaceyams_1_1units.html#abfd1092f3f5f9f9b031f3c6045109f52',1,'yams::units']]],
-  ['year_5ft_21',['year_t',['../namespaceyams_1_1units.html#af06108eec95a645d601b41c69fe56c0b',1,'yams::units']]],
-  ['yearunit_22',['YearUnit',['../namespaceyams_1_1units.html#af0f2c7a9a912cbc67d60668e20549775',1,'yams::units']]],
-  ['yet_20another_20mechanism_20system_23',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
+  ['yard_5ft_19',['yard_t',['../namespaceyams_1_1units.html#a65cf02dba0f51ef80e3c70fd31dd2c7e',1,'yams::units']]],
+  ['yardunit_20',['YardUnit',['../namespaceyams_1_1units.html#afdc9c47f47411a22b2f127c44dfdb58e',1,'yams::units']]],
+  ['year_5ft_21',['year_t',['../namespaceyams_1_1units.html#a024efbda02411e799b84bde3f60bae7c',1,'yams::units']]],
+  ['yearunit_22',['YearUnit',['../namespaceyams_1_1units.html#a979b6c921306af91eb09a83a0db1daaf',1,'yams::units']]],
+  ['yet_20another_20mechanism_20system_23',['YAMS — Yet Another Mechanism System',['../index.html',1,'']]],
   ['yunits_2ehpp_24',['YUnits.hpp',['../YUnits_8hpp.html',1,'']]]
 ];

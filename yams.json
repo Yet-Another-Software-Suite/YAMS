@@ -1,25 +1,25 @@
 {
   "fileName": "yams.json",
   "name": "Yet Another Mechanism System",
-  "version": "2026.10.03",
+  "version": "2026.10.13",
   "frcYear": "2026",
   "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
   "mavenUrls": [
-    "https://cdn.yassrobotics.com/"
+    "https://yet-another-software-suite.github.io/YAMS/releases/"
   ],
-  "jsonUrl": "https://cdn.yassrobotics.com/yams.json",
+  "jsonUrl": "https://yet-another-software-suite.github.io/YAMS/yams.json",
   "javaDependencies": [
     {
       "groupId": "yams",
       "artifactId": "YAMS-java",
-      "version": "2026.10.03"
+      "version": "2026.10.13"
     }
   ],
   "cppDependencies": [
     {
       "groupId": "yams",
       "artifactId": "YAMS-cpp",
-      "version": "2026.10.03",
+      "version": "2026.10.13",
       "libName": "YAMS",
       "headerClassifier": "headers",
       "sharedLibrary": true,
