@@ -11,7 +11,6 @@ import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.Microsecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.RPM;
-import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
@@ -792,8 +791,7 @@ public class SparkWrapper extends SmartMotorController {
 
       // Set feedforward values
       config.getArmFeedforward(closedLoopControlSlot).ifPresent(ff -> {
-        // ArmFeedforward gains are per radian; the SPARK's are per rotation of its sensor.
-        writeSparkFeedforward(ff.getKs(), ff.getKv() * Rotations.of(1).in(Radians), ff.getKa() * Rotations.of(1).in(Radians), sparkSlot);
+        writeSparkFeedforward(ff.getKs(), ff.getKv(), ff.getKa(), sparkSlot);
         m_sparkBaseConfig.closedLoop.feedForward.kCos(ff.getKg(), sparkSlot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, sparkSlot);
       });
       config.getElevatorFeedforward(closedLoopControlSlot).ifPresent(ff -> {
@@ -1443,16 +1441,6 @@ public class SparkWrapper extends SmartMotorController {
     });
   }
 
-  /**
-   * The radians in one rotation when the active slot has an {@link ArmFeedforward}, whose kV and kA
-   * are per radian, and 1 otherwise. The motor controller's kV and kA are per rotation.
-   *
-   * @return The factor to multiply kV and kA by.
-   */
-  private double armFeedforwardRadiansPerRotation() {
-    return m_config.getArmFeedforward(m_slot).isPresent() ? Rotations.of(1).in(Radians) : 1.0;
-  }
-
   @Override
   public void setKv(double kV) {
     m_config.getSimpleFeedforward(m_slot).ifPresent(simpleMotorFeedforward -> {
@@ -1464,7 +1452,7 @@ public class SparkWrapper extends SmartMotorController {
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKv(kV);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kV(kV * armFeedforwardRadiansPerRotation() / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0), m_closedLoopSlot);
+    m_sparkBaseConfig.closedLoop.feedForward.kV(kV / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0), m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1484,7 +1472,7 @@ public class SparkWrapper extends SmartMotorController {
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKa(kA);
     });
-    m_sparkBaseConfig.closedLoop.feedForward.kA(kA * armFeedforwardRadiansPerRotation() / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0), m_closedLoopSlot);
+    m_sparkBaseConfig.closedLoop.feedForward.kA(kA / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0), m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1535,7 +1523,7 @@ public class SparkWrapper extends SmartMotorController {
       elevatorFeedforward.setKg(kG);
       m_sparkBaseConfig.closedLoop.feedForward.kG(kG, m_closedLoopSlot);
     });
-    writeSparkFeedforward(kS, kV * armFeedforwardRadiansPerRotation(), kA * armFeedforwardRadiansPerRotation(), m_closedLoopSlot);
+    writeSparkFeedforward(kS, kV, kA, m_closedLoopSlot);
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {

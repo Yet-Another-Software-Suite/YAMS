@@ -453,7 +453,13 @@ public abstract class SmartMotorController {
       });
     }
 
-    armFeedforward.ifPresent(ff -> {
+    armFeedforward.ifPresent(armFeedforwardPerRotation -> {
+      // YAMS feedforward gains are per rotation, as on the motor controllers, but WPILib's
+      // ArmFeedforward works in radians, so it gets its kV and kA per radian.
+      final double kVVoltsPerRadianPerSecond = armFeedforwardPerRotation.getKv() * Radians.of(1).in(Rotations);
+      final double kAVoltsPerRadianPerSecondSquared = armFeedforwardPerRotation.getKa() * Radians.of(1).in(Rotations);
+      final var ff = new ArmFeedforward(armFeedforwardPerRotation.getKs(), armFeedforwardPerRotation.getKg(),
+                                        kVVoltsPerRadianPerSecond, kAVoltsPerRadianPerSecondSquared, armFeedforwardPerRotation.getDt());
       var profiled = (m_expoProfile.isPresent() || m_trapezoidProfile.isPresent());
       if (profiled && !velocityTrapezoidalProfile.get()) {
         var currentVelocitySetpoint = RotationsPerSecond.of(m_trapState.isPresent() ? m_trapState.get().velocity : (m_expoState.isPresent() ? m_expoState.get().velocity : 0.0));

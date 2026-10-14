@@ -7,7 +7,6 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.Milliseconds;
-import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
@@ -891,9 +890,8 @@ public class TalonFXSWrapper extends SmartMotorController {
         if (armFeedforward.isPresent()) {
           var ff = armFeedforward.get();
           kS = ff.getKs();
-          // ArmFeedforward gains are per radian; the Talon's are per rotation.
-          kV = ff.getKv() * Rotations.of(1).in(Radians);
-          kA = ff.getKa() * Rotations.of(1).in(Radians);
+          kV = ff.getKv();
+          kA = ff.getKa();
           kG = ff.getKg();
           switch (closedLoopControlSlot) {
             case SLOT_0 -> m_talonConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -1379,16 +1377,6 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   /**
-   * The radians in one rotation when the active slot has an {@link ArmFeedforward}, whose kV and kA
-   * are per radian, and 1 otherwise. The motor controller's kV and kA are per rotation.
-   *
-   * @return The factor to multiply kV and kA by.
-   */
-  private double armFeedforwardRadiansPerRotation() {
-    return m_config.getArmFeedforward(m_slot).isPresent() ? Rotations.of(1).in(Radians) : 1.0;
-  }
-
-  /**
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
@@ -1625,9 +1613,9 @@ public class TalonFXSWrapper extends SmartMotorController {
     // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
     final double velocityGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation);
-      case SLOT_1 -> m_talonConfig.Slot1.withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation);
-      case SLOT_2 -> m_talonConfig.Slot2.withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation);
+      case SLOT_0 -> m_talonConfig.Slot0.withKV(kV / velocityGainUnitsPerRotation);
+      case SLOT_1 -> m_talonConfig.Slot1.withKV(kV / velocityGainUnitsPerRotation);
+      case SLOT_2 -> m_talonConfig.Slot2.withKV(kV / velocityGainUnitsPerRotation);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1651,9 +1639,9 @@ public class TalonFXSWrapper extends SmartMotorController {
     // Gains of a linear mechanism are per meter; the Talon's are per mechanism rotation.
     final double accelerationGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation);
-      case SLOT_1 -> m_talonConfig.Slot1.withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation);
-      case SLOT_2 -> m_talonConfig.Slot2.withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation);
+      case SLOT_0 -> m_talonConfig.Slot0.withKA(kA / accelerationGainUnitsPerRotation);
+      case SLOT_1 -> m_talonConfig.Slot1.withKA(kA / accelerationGainUnitsPerRotation);
+      case SLOT_2 -> m_talonConfig.Slot2.withKA(kA / accelerationGainUnitsPerRotation);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
@@ -1717,9 +1705,9 @@ public class TalonFXSWrapper extends SmartMotorController {
     final double velocityGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
     final double accelerationGainUnitsPerRotation = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0;
     switch (m_slot) {
-      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation).withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation).withKG(kG);
-      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation).withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation).withKG(kG);
-      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV * armFeedforwardRadiansPerRotation() / velocityGainUnitsPerRotation).withKA(kA * armFeedforwardRadiansPerRotation() / accelerationGainUnitsPerRotation).withKG(kG);
+      case SLOT_0 -> m_talonConfig.Slot0.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+      case SLOT_1 -> m_talonConfig.Slot1.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
+      case SLOT_2 -> m_talonConfig.Slot2.withKS(kS).withKV(kV / velocityGainUnitsPerRotation).withKA(kA / accelerationGainUnitsPerRotation).withKG(kG);
     }
     forceConfigApply();
     m_looseFollowers.ifPresent(smcs -> {
