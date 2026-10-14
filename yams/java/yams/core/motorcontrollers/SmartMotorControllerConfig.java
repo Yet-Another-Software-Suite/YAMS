@@ -1265,7 +1265,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}.
+   * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}, units are in
+   * Rotations: kS and kG in volts, kV in volts per rotation per second and kA in volts per rotation
+   * per second squared.
    *
    * @param slot           {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
@@ -1283,7 +1285,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Configure the {@link ArmFeedforward} for the
+   * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}, units are in
+   * Rotations: kS and kG in volts, kV in volts per rotation per second and kA in volts per rotation
+   * per second squared.
    *
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -1293,7 +1297,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Configure the {@link ArmFeedforward} for the
+   * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}, units are in
+   * Rotations: kS and kG in volts, kV in volts per rotation per second and kA in volts per rotation
+   * per second squared.
    *
    * @param slot           {@link ClosedLoopControllerSlot} for the {@link ArmFeedforward}.
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
@@ -1311,7 +1317,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Configure the {@link ArmFeedforward} for the
+   * Configure the {@link ArmFeedforward} for the {@link SmartMotorController}, units are in
+   * Rotations: kS and kG in volts, kV in volts per rotation per second and kA in volts per rotation
+   * per second squared.
    *
    * @param armFeedforward Arm feedforward for the {@link SmartMotorController}
    * @return {@link SmartMotorControllerConfig} for chaining.
