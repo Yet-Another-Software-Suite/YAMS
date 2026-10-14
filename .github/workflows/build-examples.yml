@@ -50,9 +50,8 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
-      - name: Install Toolchain
-        working-directory: vendordep
-        run: chmod a+x gradlew && ./gradlew installSystemCoreToolchain
+      # No SystemCore toolchain: a Java example builds a jar and runs its tests on the desktop, so it
+      # never cross compiles. Only the C++ example needs the toolchain.
       - name: Build ${{ matrix.example }}
         # Generates the example into examples/generated, then builds it.
         run: make build-one EXAMPLE=${{ matrix.example }}
