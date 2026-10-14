@@ -25,7 +25,12 @@ jobs:
       - name: List java examples
         id: list
         # Every examples/commands2 and examples/commands3 project, as a JSON array for the matrix.
-        run: echo "examples=$(make --no-print-directory list | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+        run: |
+          set -o pipefail
+          examples=$(make --no-print-directory list | jq -R . | jq -cs .)
+          echo "$examples"
+          test "$examples" != "[]"
+          echo "examples=$examples" >> "$GITHUB_OUTPUT"
         working-directory: examples
 
   build-example:
