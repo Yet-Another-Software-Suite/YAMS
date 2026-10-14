@@ -15,8 +15,46 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-examples:
-    name: Build Examples
+  list-examples:
+    name: List Examples
+    runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.list.outputs.examples }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: List java examples
+        id: list
+        # Every examples/commands2 and examples/commands3 project, as a JSON array for the matrix.
+        run: echo "examples=$(make --no-print-directory list | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+        working-directory: examples
+
+  build-example:
+    name: Build ${{ matrix.example }}
+    needs: list-examples
+    runs-on: ubuntu-latest
+    strategy:
+      # Each example runs its unit tests on its own runner, so one example's simulated devices cannot
+      # run another's out, and one failing example does not cancel the rest.
+      fail-fast: false
+      matrix:
+        example: ${{ fromJson(needs.list-examples.outputs.examples) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install Toolchain
+        working-directory: vendordep
+        run: chmod a+x gradlew && ./gradlew installSystemCoreToolchain
+      - name: Build ${{ matrix.example }}
+        # Generates the example into examples/generated, then builds it.
+        run: make build-one EXAMPLE=${{ matrix.example }}
+        working-directory: examples
+
+  build-cpp-example:
+    name: Build C++ example
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -28,10 +66,6 @@ jobs:
       - name: Install Toolchain
         working-directory: vendordep
         run: chmod a+x gradlew && ./gradlew installSystemCoreToolchain
-      - name: Build java examples
-        # Generates every examples/commands2 and examples/commands3 project into examples/generated, then builds each one.
-        run: make build
-        working-directory: examples
       - name: Build C++ example
         run: ./gradlew build
         working-directory: examples/cpptest

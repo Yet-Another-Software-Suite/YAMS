@@ -16,7 +16,7 @@ find-examples = $(shell find $(1) -maxdepth 1 -mindepth 1 -type d \
 EXAMPLE_PROJECTS := $(call find-examples,$(COMMANDS2_DIR))
 EXAMPLE3_PROJECTS := $(addprefix commands3-,$(call find-examples,$(COMMANDS3_DIR)))
 
-.PHONY: all examples build clean simulate $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
+.PHONY: all examples build build-one list clean simulate $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
 
 all: examples
 
@@ -28,6 +28,19 @@ build: examples
 		chmod +x "$$dir/gradlew"; \
 		(cd "$$dir" && ./gradlew build) || exit 1; \
 	done
+
+# Every example target, one per line, so CI can build each one in its own job.
+list:
+	@printf '%s
+' $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
+
+# Generate and build a single example: make build-one EXAMPLE=commands3-WCPCC_2026
+build-one:
+	@test -n "$(EXAMPLE)" || (echo "Set EXAMPLE to one of the targets from 'make list'" && exit 1)
+	@rm -rf $(GENERATED_DIR)/$(EXAMPLE)
+	@$(MAKE) --no-print-directory $(EXAMPLE)
+	@chmod +x "$(GENERATED_DIR)/$(EXAMPLE)/gradlew"
+	@cd "$(GENERATED_DIR)/$(EXAMPLE)" && ./gradlew build
 
 simulate: examples
 	@for dir in $(GENERATED_DIR)/*/; do \
