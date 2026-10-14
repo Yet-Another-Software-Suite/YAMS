@@ -15,8 +15,13 @@ find-examples = $(shell find $(1) -maxdepth 1 -mindepth 1 -type d \
 	| xargs -I{} bash -c '[ -d {}/java ] && basename {}' | sort)
 EXAMPLE_PROJECTS := $(call find-examples,$(COMMANDS2_DIR))
 EXAMPLE3_PROJECTS := $(addprefix commands3-,$(call find-examples,$(COMMANDS3_DIR)))
+# Examples with their own unit tests (a test/ folder). Their tests simulate devices, so CI builds
+# each one in its own job; the examples without tests are built together.
+TESTED_PROJECTS := $(foreach proj,$(EXAMPLE_PROJECTS),$(if $(wildcard $(COMMANDS2_DIR)/$(proj)/test),$(proj))) \
+	$(foreach proj,$(EXAMPLE3_PROJECTS),$(if $(wildcard $(COMMANDS3_DIR)/$(patsubst commands3-%,%,$(proj))/test),$(proj)))
+UNTESTED_PROJECTS := $(filter-out $(TESTED_PROJECTS),$(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS))
 
-.PHONY: all examples build clean simulate $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
+.PHONY: all examples build build-one build-untested list list-tested clean simulate $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
 
 all: examples
 
@@ -28,6 +33,29 @@ build: examples
 		chmod +x "$$dir/gradlew"; \
 		(cd "$$dir" && ./gradlew build) || exit 1; \
 	done
+
+# Every example target, one per line.
+list:
+	@printf '%s\n' $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
+
+# The example targets with their own unit tests, one per line, so CI can build each in its own job.
+list-tested:
+	@printf '%s\n' $(TESTED_PROJECTS)
+
+# Generate and build every example without its own unit tests.
+build-untested:
+	@for proj in $(UNTESTED_PROJECTS); do \
+		echo "Building $$proj..."; \
+		$(MAKE) --no-print-directory build-one EXAMPLE=$$proj || exit 1; \
+	done
+
+# Generate and build a single example: make build-one EXAMPLE=commands3-WCPCC_2026
+build-one:
+	@test -n "$(EXAMPLE)" || (echo "Set EXAMPLE to one of the targets from 'make list'" && exit 1)
+	@rm -rf $(GENERATED_DIR)/$(EXAMPLE)
+	@$(MAKE) --no-print-directory $(EXAMPLE)
+	@chmod +x "$(GENERATED_DIR)/$(EXAMPLE)/gradlew"
+	@cd "$(GENERATED_DIR)/$(EXAMPLE)" && ./gradlew build
 
 simulate: examples
 	@for dir in $(GENERATED_DIR)/*/; do \
