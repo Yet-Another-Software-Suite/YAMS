@@ -215,10 +215,24 @@ public class SwerveDrive {
    * @implNote Not compatible with AdvantageKit
    */
   public void lockPose() {
-    // Turn each wheel toward the robot center without driving it. SwerveModule#lock skips the
-    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
+    // Turn each wheel toward the robot center without driving it. SwerveModule#setAzimuthAngle skips
+    // the velocity deadband, which would otherwise hold these zero speed states where the wheels are.
     for (int i = 0; i < m_modules.length; i++) {
-      m_desiredModuleStates[i] = m_modules[i].lock(m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
+      m_desiredModuleStates[i] = m_modules[i].setAzimuthAngle(m_modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(new Rotation2d()));
+    }
+    m_desiredChassisSpeeds = new ChassisVelocities();
+  }
+
+  /**
+   * Turn every module to the given angle without driving, as for tuning the azimuth motors. The
+   * velocity deadband does not hold the wheels where they are (see
+   * {@link SwerveModule#setAzimuthAngle(Rotation2d)}).
+   *
+   * @param angle Angle to turn every module to.
+   */
+  public void setAzimuthAngles(Rotation2d angle) {
+    for (int i = 0; i < m_modules.length; i++) {
+      m_desiredModuleStates[i] = m_modules[i].setAzimuthAngle(angle);
     }
     m_desiredChassisSpeeds = new ChassisVelocities();
   }

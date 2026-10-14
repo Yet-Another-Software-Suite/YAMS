@@ -215,13 +215,9 @@ public class SwerveDriveTelemetry {
     }
 
     if (azimuthTuningOn) {
-      var angle = Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get());
-      var modules = drive.getModules();
-      var states = new SwerveModuleVelocity[modules.length];
-      for (int i = 0; i < modules.length; i++) {
-        states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), angle);
-      }
-      drive.setSwerveModuleStates(states);
+      // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
+      // wheels without driving them.
+      drive.setAzimuthAngles(Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get()));
     }
 
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {

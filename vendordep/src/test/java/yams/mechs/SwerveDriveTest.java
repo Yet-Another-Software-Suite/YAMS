@@ -595,6 +595,23 @@ public class SwerveDriveTest {
     }
   }
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("layouts")
+  void setAzimuthAnglesTurnsEveryModule(Layout layout) {
+    build(layout);
+    // A zero speed state is within the velocity deadband, which would hold the wheels where they
+    // are; setAzimuthAngles turns them anyway, as azimuth live tuning needs.
+    drive.setAzimuthAngles(Rotation2d.fromDegrees(60));
+    runFor(1);
+    for (SwerveModule module : drive.getModules()) {
+      double actual = module.getState().angle.getDegrees();
+      // Module optimization may reverse the wheel, so angles half a rotation apart are equivalent.
+      double error = Math.IEEEremainder(actual - 60, 180);
+      assertEquals(0, error, 10, module.getName() + " at " + actual + " should turn toward 60");
+      assertEquals(0, module.getState().velocity, 0.05, module.getName() + " should not drive");
+    }
+  }
+
   // ---- One layout: these do not depend on the motor controllers --------------------------------
 
   @Test

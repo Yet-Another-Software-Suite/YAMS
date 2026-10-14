@@ -180,9 +180,9 @@ public class SwerveModule {
   }
 
   /**
-   * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
-   * velocity deadband, which holds a wheel commanded too slowly to steer by where it is, does not
-   * apply (see {@link SwerveModuleConfig#getLockedState(Rotation2d, SwerveModuleVelocityWithAzimuth)}).
+   * Turn the wheel to the given angle without driving it, as for locking the drive in place or
+   * tuning the azimuth motor. The velocity deadband, which holds a wheel commanded too slowly to
+   * steer by where it is, does not apply (see {@link SwerveModuleConfig#getLockedState(Rotation2d, SwerveModuleVelocityWithAzimuth)}).
    *
    * @param angle Angle to turn the wheel to.
    * @return The zero speed {@link SwerveModuleVelocity} the module was set to.
@@ -190,7 +190,7 @@ public class SwerveModule {
    *                                                    circumference configured (e.g. via
    *                                                    {@link SwerveModuleConfig#withWheelRadius(org.wpilib.units.measure.Distance)}).
    */
-  public SwerveModuleVelocity lock(Rotation2d angle) {
+  public SwerveModuleVelocity setAzimuthAngle(Rotation2d angle) {
     final SwerveModuleVelocity state = m_config.getLockedState(angle, getState());
     m_driveMotorController.setVelocity(MetersPerSecond.of(0).plus(getCouplingVelocity()));
     m_azimuthMotorController.setPosition(state.angle.getMeasure());
