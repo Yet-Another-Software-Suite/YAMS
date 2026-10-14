@@ -31,8 +31,7 @@ build: examples
 
 # Every example target, one per line, so CI can build each one in its own job.
 list:
-	@printf '%s
-' $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
+	@printf '%s\n' $(EXAMPLE_PROJECTS) $(EXAMPLE3_PROJECTS)
 
 # Generate and build a single example: make build-one EXAMPLE=commands3-WCPCC_2026
 build-one:
