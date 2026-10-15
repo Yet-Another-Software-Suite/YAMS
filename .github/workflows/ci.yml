@@ -196,6 +196,14 @@ jobs:
               --tests "yams.core.motorcontrollers.SimulationPeriodTest"
               --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"
               --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"
+          # Every motor controller following a trapezoidal profile from each closed loop slot with the
+          # same gains in YAMS units, and the feedforward and slots of the simulated SPARK. The
+          # Talons follow in real time, as Phoenix simulates them.
+          - group: feedforward
+            test-filter: >-
+              --tests "yams.core.motorcontrollers.FeedforwardProfileTest"
+              --tests "yams.core.motorcontrollers.SparkSimulatedFeedforwardTest"
+              --tests "yams.core.motorcontrollers.SparkClosedLoopSlotTest"
           # Everything else: swerve config tests, the battery and motor simulation unit tests, and
           # the standalone math test. Gradle's --tests cannot exclude the groups above,
           # so each class is listed: add new test classes here unless they get their own group.
