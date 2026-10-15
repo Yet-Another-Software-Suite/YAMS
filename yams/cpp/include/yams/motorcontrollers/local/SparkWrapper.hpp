@@ -467,6 +467,11 @@ class SparkWrapper : public SmartMotorController {
   std::optional<wpi::units::turns_per_second_t> GetExternalEncoderSensorVelocity();
   /** Follow the trapezoidal profile with position control while simulating MAXMotion. */
   void IterateSimulatedMaxMotionPosition();
+  /**
+   * Hold an arm's plain position setpoint with the gravity feedforward the SPARK's kCos would add
+   * on the robot, since kCos is 0 in simulation.
+   */
+  void IterateSimulatedArmGravity();
   /** Whether simulation emulates MAXMotion position control (REVLib's sim does not). */
   bool SimulatingMaxMotion() const;
   /** Whether an (angular or linear) exponential profile is configured. */

@@ -159,7 +159,9 @@ public class ElevatorSimSupplier implements SimSupplier {
 
   @Override
   public Voltage getMechanismStatorVoltage() {
-    return Volts.of(motor.getVoltage(motor.getTorque(sim.getCurrentDraw()), getMechanismVelocity().in(RadiansPerSecond)));
+    // The voltage the simulated motor was given. Worked out from the mechanism's torque or speed
+    // instead, it would be off by the gear ratio, since the motor's equation is for the rotor.
+    return Volts.of(sim.getInput(0));
   }
 
   @Override

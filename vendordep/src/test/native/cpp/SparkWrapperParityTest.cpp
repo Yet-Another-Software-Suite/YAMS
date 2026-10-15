@@ -21,6 +21,7 @@
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <numbers>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -176,13 +177,15 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ArmFeedforwardCosineRatio", "[
   {
     SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
     auto& ff = spark->configAccessor.closedLoop.feedForward;
-    CheckDevice(0.5, [&] { return ff.getkCos(ClosedLoopSlot::kSlot0); }, "kCos");
+    // REVLib's simulated SPARK works kCos out from the setpoint rather than the arm's angle, so in
+    // simulation kCos is 0 and the wrapper sends the gravity as an arbitrary feedforward.
+    CheckDevice(0.0, [&] { return ff.getkCos(ClosedLoopSlot::kSlot0); }, "kCos");
     // kCos needs the mechanism angle in rotations from the motor's rotations.
     CheckDevice(1.0 / kRatio, [&] { return ff.getkCosRatio(ClosedLoopSlot::kSlot0); },
                 "kCosRatio");
 
     smc.SetKg(0.3);
-    CheckDevice(0.3, [&] { return ff.getkCos(ClosedLoopSlot::kSlot0); }, "live kCos");
+    CheckDevice(0.0, [&] { return ff.getkCos(ClosedLoopSlot::kSlot0); }, "live kCos");
     CheckDevice(1.0 / kRatio, [&] { return ff.getkCosRatio(ClosedLoopSlot::kSlot0); },
                 "live kCosRatio");
     CHECK(cfg.GetArmFeedforward(SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_0)
@@ -273,6 +276,80 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SimulatedMAXMotionFollowsProfi
     CHECK(smc.GetMechanismPosition().value() == Catch::Approx(1.0).margin(0.05));
   }
   ResetSpark(*spark);
+}
+
+/**
+ * The voltage a simulated SPARK applies while the wrapper follows a profile or holds an arm, on a
+ * mechanism heavy enough not to move. With no kP, the voltage is the feedforward's alone.
+ */
+namespace {
+double SimulatedVoltage(SparkWrapper& smc, const std::function<void()>& command, int loops) {
+  for (int i = 0; i < loops; i++) {
+    command();
+    smc.SimIterate();
+  }
+  return smc.GetVoltage().value();
+}
+}  // namespace
+
+TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SimulatedProfileAppliesKsOnce",
+                 "[SparkParity]") {
+  auto spark = MakeSparkMax();
+  auto cfg = BaseConfig();
+  cfg.WithMOI(1000_kg_sq_m)
+      .WithFeedforward(MakeSimpleFF(0.5, 0.0, 0.0))
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{2.0},
+                            wpi::units::turns_per_second_squared_t{1.0});
+  {
+    SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    // The SPARK applies kS itself in position control, so it is not sent again.
+    CHECK(SimulatedVoltage(smc, [&] { smc.SetPosition(10_tr); }, 30) ==
+          Catch::Approx(0.5).margin(0.05));
+  }
+  ResetSpark(*spark);
+}
+
+TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SimulatedProfileAppliesKa", "[SparkParity]") {
+  auto spark = MakeSparkMax();
+  auto cfg = BaseConfig();
+  cfg.WithMOI(1000_kg_sq_m)
+      .WithFeedforward(MakeSimpleFF(0.0, 0.0, 1.0))
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{2.0},
+                            wpi::units::turns_per_second_squared_t{1.0});
+  {
+    SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    // Position control leaves kA out, so kA times the profile's acceleration is sent.
+    CHECK(SimulatedVoltage(smc, [&] { smc.SetPosition(10_tr); }, 30) ==
+          Catch::Approx(1.0).margin(0.05));
+  }
+  ResetSpark(*spark);
+}
+
+TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SimulatedArmGravityFollowsTheAngle",
+                 "[SparkParity]") {
+  for (const bool profile : {false, true}) {
+    for (const double degrees : {60.0, 150.0}) {
+      auto spark = MakeSparkMax();
+      auto cfg = BaseConfig();
+      const wpi::units::turn_t angle = wpi::units::degree_t{degrees};
+      cfg.WithMOI(1000_kg_sq_m)
+          .WithStartingPosition(angle)
+          .WithFeedforward(wpi::math::ArmFeedforward{
+              0_V, 1_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{0.0},
+              wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}});
+      if (profile)
+        cfg.WithTrapezoidProfile(wpi::units::turns_per_second_t{2.0},
+                                 wpi::units::turns_per_second_squared_t{1.0});
+      {
+        SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
+        INFO(degrees << " degrees, profile " << profile);
+        // kG times the cosine of the arm's angle, not of the setpoint read as degrees.
+        CHECK(SimulatedVoltage(smc, [&] { smc.SetPosition(angle); }, 10) ==
+              Catch::Approx(std::cos(degrees * std::numbers::pi / 180.0)).margin(0.05));
+      }
+      ResetSpark(*spark);
+    }
+  }
 }
 
 TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SoftLimitsInFeedbackSensorRotations",
