@@ -330,8 +330,11 @@ void SparkWrapper::WriteSlotGains(const SmartMotorControllerConfig& config, Slot
     WriteSparkFeedforward(ff->kS, ff->kV, ff->kA, sparkSlot);
     if (ff->arm) {
       // kCos takes the angle of the mechanism, in rotations, from the feedback sensor position.
+      // REVLib's simulated SPARK works kCos out from the setpoint, read as degrees, rather than from
+      // the arm's angle (REVLib 2027.0.0-alpha-7), so in simulation kCos is 0 and the gravity is
+      // sent as an arbitrary feedforward instead.
       SparkConfig()
-          .closedLoop.feedForward.kCos(ff->kG, sparkSlot)
+          .closedLoop.feedForward.kCos(wpi::RobotBase::IsSimulation() ? 0.0 : ff->kG, sparkSlot)
           .kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, sparkSlot);
     } else if (ff->elevator) {
       SparkConfig().closedLoop.feedForward.kG(ff->kG, sparkSlot);
@@ -802,6 +805,7 @@ void SparkWrapper::SetupSimulation() {
 void SparkWrapper::SimIterate() {
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
   IterateSimulatedMaxMotionPosition();
+  IterateSimulatedArmGravity();
   // Step the physics only if the mechanism has not already stepped them this loop.
   if (!m_simSupplier->GetUpdatedSim()) {
     m_simSupplier->UpdateSim();
@@ -868,23 +872,53 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
       profile->Calculate(m_config->GetSimulationPeriod(), state, Profile::State{goal, {}});
   m_simMaxMotionState = next;
 
-  double kS = 0.0;
+  // The SPARK applies kS and an elevator's kG itself in position control, but not kV or kA, which
+  // MAXMotion would apply from its profile, nor an arm's kCos in simulation. Send the rest.
   double kV = 0.0;
+  double kA = 0.0;
+  double gravityVolts = 0.0;
   if (auto ff = GetSlotFeedforward(*m_config, m_slot)) {
-    kS = ff->kS;
     kV = ff->kV;
+    kA = ff->kA;
+    // An arm's gravity, kG times the cosine of its angle, since kCos is 0 in simulation.
+    if (ff->arm) gravityVolts = ff->kG * std::cos(wpi::units::radian_t{GetMechanismPosition()}.value());
   }
-  // kV of a linear mechanism is per meter per second.
-  double velocity = next.velocity.value();
-  if (m_config->GetLinearClosedLoopControllerUse())
-    velocity /= m_config->ConvertToMechanism(wpi::units::meters_per_second_t{1.0}).value();
-  const double sign = next.velocity.value() > 0 ? 1.0 : (next.velocity.value() < 0 ? -1.0 : 0.0);
-  const double feedforwardVolts = kS * sign + kV * velocity;
+  // kV and kA of a linear mechanism are per meter per second (squared).
+  const double rotationsPerGainUnit =
+      m_config->GetLinearClosedLoopControllerUse()
+          ? m_config->ConvertToMechanism(wpi::units::meters_per_second_t{1.0}).value()
+          : 1.0;
+  const double velocity = next.velocity.value() / rotationsPerGainUnit;
+  const double acceleration = (next.velocity - state.velocity).value() /
+                              m_config->GetSimulationPeriod().value() / rotationsPerGainUnit;
+  const double feedforwardVolts = kV * velocity + kA * acceleration + gravityVolts;
   UseVelocityGains(false);
   const double setpoint = next.position.value() * m_mechanismToFeedbackSensorRatio;
   ConfigureSpark([&] {
     return m_sparkPid->SetSetpoint(setpoint, SparkLowLevel::ControlType::kPosition,
                                    m_closedLoopSlot, feedforwardVolts,
+                                   SparkClosedLoopController::ArbFFUnits::kVoltage);
+  });
+}
+
+void SparkWrapper::IterateSimulatedArmGravity() {
+  // Only for a plain position setpoint; the simulated MAXMotion profile adds the gravity itself.
+  if (!m_config->GetArmFeedforward(m_slot) || !m_setpointPosition || SimulatingMaxMotion() ||
+      HasExponentialProfile() || m_lqr) {
+    return;
+  }
+  const auto ff = GetSlotFeedforward(*m_config, m_slot);
+  if (!ff) return;
+  const wpi::units::turn_t setpoint =
+      m_config->GetContinuousWrapping()
+          ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, GetMechanismPosition())
+          : *m_setpointPosition;
+  // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
+  const double gravityVolts = ff->kG * std::cos(wpi::units::radian_t{GetMechanismPosition()}.value());
+  UseVelocityGains(false);
+  ConfigureSpark([&] {
+    return m_sparkPid->SetSetpoint(setpoint.value() * m_mechanismToFeedbackSensorRatio,
+                                   m_positionControlType, m_closedLoopSlot, gravityVolts,
                                    SparkClosedLoopController::ArbFFUnits::kVoltage);
   });
 }
@@ -1281,8 +1315,9 @@ void SparkWrapper::SetKa(double kA) {
 void SparkWrapper::SetKg(double kG) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kG = kG; });
   if (m_config->GetArmFeedforward(m_slot)) {
+    // kCos is 0 in simulation; see ApplyConfig.
     SparkConfig()
-        .closedLoop.feedForward.kCos(kG, m_closedLoopSlot)
+        .closedLoop.feedForward.kCos(wpi::RobotBase::IsSimulation() ? 0.0 : kG, m_closedLoopSlot)
         .kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, m_closedLoopSlot);
   } else {
     SparkConfig().closedLoop.feedForward.kG(kG, m_closedLoopSlot);
@@ -1299,8 +1334,9 @@ void SparkWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
     v.kG = kG;
   });
   if (m_config->GetArmFeedforward(m_slot)) {
+    // kCos is 0 in simulation; see ApplyConfig.
     SparkConfig()
-        .closedLoop.feedForward.kCos(kG, m_closedLoopSlot)
+        .closedLoop.feedForward.kCos(wpi::RobotBase::IsSimulation() ? 0.0 : kG, m_closedLoopSlot)
         .kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, m_closedLoopSlot);
   } else if (m_config->GetElevatorFeedforward(m_slot)) {
     SparkConfig().closedLoop.feedForward.kG(kG, m_closedLoopSlot);
