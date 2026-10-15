@@ -37,8 +37,14 @@ JAVA_GROUPS = [
     {"group": "shooter", "test-filter": '--tests "yams.mechs.ShooterTest"'},
     {"group": "mechanism-limits", "test-filter": '--tests "yams.mechs.MechanismLimitTest"'},
     # Four module swerve drives on a Pigeon2: TalonFX and SPARK MAX both ways round, and mixes of
-    # SPARK MAX, SPARK Flex, TalonFXS and TalonFX, all with the same PID gains.
-    {"group": "swerve-drive", "test-filter": '--tests "yams.mechs.SwerveDriveTest"'},
+    # SPARK MAX, SPARK Flex, TalonFXS and TalonFX, all with the same PID gains. Also SwerveInputStream
+    # aiming and telemetry for Commands v2 and v3, on SPARK MAX swerve drives, which take a second.
+    {"group": "swerve-drive",
+     "test-filter": '--tests "yams.mechs.SwerveDriveTest"'
+                    ' --tests "yams.commands2.swerve.SwerveInputStreamAimTest"'
+                    ' --tests "yams.commands2.telemetry.SwerveInputStreamTelemetryTest"'
+                    ' --tests "yams.commands3.swerve.SwerveInputStreamAimTest"'
+                    ' --tests "yams.commands3.telemetry.SwerveInputStreamTelemetryTest"'},
     # Every motor controller, closed loop controller, and attached encoder crossing the continuous
     # wrapping point: many simulated Talons, which Phoenix runs in real time.
     {"group": "continuous-wrapping",
@@ -81,6 +87,10 @@ JAVA_GROUPS = [
     # Every motor controller following a trapezoidal profile from each closed loop slot.
     {"group": "closed-loop-profiles",
      "test-filter": '--tests "yams.core.motorcontrollers.FeedforwardProfileTest"'},
+    # The units of the gains each motor controller is given: per rotation for an arm, per meter for
+    # an elevator, on the motor controller and on the SystemCore.
+    {"group": "closed-loop-gain-units",
+     "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'},
     # Everything else: swerve config tests, the battery and motor simulation unit tests, and the
     # standalone math test. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.
@@ -116,6 +126,7 @@ CPP_GROUPS = [
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "swerve-drive",
                          "other"}
+JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
 
 JAVA_SOURCE = "yams/java/"
@@ -184,7 +195,7 @@ def select(path):
         # A file with no tags, such as the test runner, can affect any group.
         return set(), cpp_test_groups(path) or names(CPP_GROUPS)
     if matches(path, JAVA_SWERVE):
-        return {"swerve-drive", "other"}, set()
+        return set(JAVA_SWERVE_GROUPS), set()
     if matches(path, JAVA_MECHANISMS):
         return set(JAVA_MECHANISM_GROUPS), set()
     if matches(path, CPP_SWERVE):
