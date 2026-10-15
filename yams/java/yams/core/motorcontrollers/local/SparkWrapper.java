@@ -398,28 +398,6 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   /**
-   * Write an arm's gravity gain to a SPARK slot as kCos. REVLib's simulated SPARK works kCos out from
-   * the setpoint, read as degrees, rather than from the arm's angle (REVLib 2027.0.0-alpha-7), so in
-   * simulation kCos is 0 and {@link #simulatedArmGravityVolts()} adds the gravity instead.
-   *
-   * @param kG   Gravity gain, in volts.
-   * @param slot SPARK closed loop slot.
-   */
-  private void writeSparkArmGravity(double kG, ClosedLoopSlot slot) {
-    m_sparkBaseConfig.closedLoop.feedForward.kCos(RobotBase.isSimulation() ? 0 : kG, slot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, slot);
-  }
-
-  /**
-   * The gravity feedforward an arm needs in simulation, where the SPARK's kCos is not used: kG times
-   * the cosine of the arm's angle. Zero for anything that is not an arm.
-   *
-   * @return Gravity feedforward, in volts.
-   */
-  private double simulatedArmGravityVolts() {
-    return m_config.getArmFeedforward(m_slot).map(ff -> ff.getKg() * Math.cos(getMechanismPosition().in(Radians))).orElse(0.0);
-  }
-
-  /**
    * Hold an arm's position setpoint for one simulation period with the gravity feedforward the SPARK's
    * kCos would add on the robot. Only for a plain position setpoint; the simulated MAXMotion profile
    * adds the gravity itself.
@@ -430,7 +408,8 @@ public class SparkWrapper extends SmartMotorController {
       return;
     }
     final Angle setpoint = m_config.getContinuousWrapping().isPresent() ? m_config.getContinuousWrappingSetpoint(setpointPosition.get(), getMechanismPosition()) : setpointPosition.get();
-    final double gravityVolts = simulatedArmGravityVolts();
+    // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
+    final double gravityVolts = m_config.getArmFeedforward(m_slot).get().getKg() * Math.cos(getMechanismPosition().in(Radians));
     useVelocityGains(false);
     configureSpark(() -> m_sparkPidController.setSetpoint(setpoint.times(m_mechanismToFeedbackSensorRatio).in(Rotations), m_positionControlType, m_closedLoopSlot, gravityVolts, ArbFFUnits.kVoltage));
   }
@@ -478,7 +457,9 @@ public class SparkWrapper extends SmartMotorController {
     final double rotationsPerGainUnit = m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0;
     final double velocity = next.velocity / rotationsPerGainUnit;
     final double acceleration = (next.velocity - state.velocity) / m_config.getSimulationPeriod().in(Seconds) / rotationsPerGainUnit;
-    final double feedforwardVolts = kV * velocity + kA * acceleration + simulatedArmGravityVolts();
+    // An arm's gravity, kG times the cosine of its angle, since kCos is 0 in simulation.
+    final double gravityVolts = m_config.getArmFeedforward(m_slot).map(ff -> ff.getKg() * Math.cos(getMechanismPosition().in(Radians))).orElse(0.0);
+    final double feedforwardVolts = kV * velocity + kA * acceleration + gravityVolts;
     useVelocityGains(false);
     configureSpark(() -> m_sparkPidController.setSetpoint(next.position * m_mechanismToFeedbackSensorRatio, ControlType.kPosition, m_closedLoopSlot, feedforwardVolts, ArbFFUnits.kVoltage));
   }
@@ -834,7 +815,10 @@ public class SparkWrapper extends SmartMotorController {
       // Set feedforward values
       config.getArmFeedforward(closedLoopControlSlot).ifPresent(ff -> {
         writeSparkFeedforward(ff.getKs(), ff.getKv(), ff.getKa(), sparkSlot);
-        writeSparkArmGravity(ff.getKg(), sparkSlot);
+        // REVLib's simulated SPARK works kCos out from the setpoint, read as degrees, rather than from
+        // the arm's angle (REVLib 2027.0.0-alpha-7), so in simulation kCos is 0 and the gravity is sent
+        // as an arbitrary feedforward instead.
+        m_sparkBaseConfig.closedLoop.feedForward.kCos(RobotBase.isSimulation() ? 0 : ff.getKg(), sparkSlot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, sparkSlot);
       });
       config.getElevatorFeedforward(closedLoopControlSlot).ifPresent(ff -> {
         writeSparkFeedforward(ff.getKs(), ff.getKv(), ff.getKa(), sparkSlot);
@@ -1534,7 +1518,8 @@ public class SparkWrapper extends SmartMotorController {
     if (m_config.getArmFeedforward(m_slot).isEmpty()) {
       m_sparkBaseConfig.closedLoop.feedForward.kG(kG, m_closedLoopSlot);
     } else {
-      writeSparkArmGravity(kG, m_closedLoopSlot);
+      // kCos is 0 in simulation; see applyConfig.
+      m_sparkBaseConfig.closedLoop.feedForward.kCos(RobotBase.isSimulation() ? 0 : kG, m_closedLoopSlot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, m_closedLoopSlot);
     }
     m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
     m_looseFollowers.ifPresent(smcs -> {
@@ -1556,7 +1541,8 @@ public class SparkWrapper extends SmartMotorController {
       armFeedforward.setKv(kV);
       armFeedforward.setKa(kA);
       armFeedforward.setKg(kG);
-      writeSparkArmGravity(kG, m_closedLoopSlot);
+      // kCos is 0 in simulation; see applyConfig.
+      m_sparkBaseConfig.closedLoop.feedForward.kCos(RobotBase.isSimulation() ? 0 : kG, m_closedLoopSlot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, m_closedLoopSlot);
     });
     m_config.getElevatorFeedforward(m_slot).ifPresent(elevatorFeedforward -> {
       elevatorFeedforward.setKs(kS);
