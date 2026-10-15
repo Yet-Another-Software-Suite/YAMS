@@ -70,8 +70,8 @@ enum class DoubleTelemetryField {
   MechanismUpperLimit,                ///< Configured upper angular soft limit (degrees, tunable).
   RotorPosition,                      ///< Raw rotor position in rotations.
   RotorVelocity,                      ///< Raw rotor velocity in rotations per second.
-  ExternalEncoderPosition,            ///< External (absolute) encoder position in rotations.
-  ExternalEncoderVelocity,  ///< External (absolute) encoder velocity in rotations per second.
+  ExternalEncoderPosition,  ///< External encoder's mechanism position in rotations, only with an external encoder.
+  ExternalEncoderVelocity,  ///< External encoder's mechanism velocity in rotations per second, only with an external encoder.
   ClosedloopRampRate,       ///< Closed-loop duty-cycle ramp rate (s, tunable).
   OpenloopRampRate,         ///< Open-loop duty-cycle ramp rate (s, tunable).
 };

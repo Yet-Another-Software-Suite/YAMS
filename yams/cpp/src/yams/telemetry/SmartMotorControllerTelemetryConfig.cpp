@@ -97,9 +97,9 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
     case DoubleTelemetryField::RotorVelocity:
       return {"rotor/velocity", 0.0, field, false, "rotations_per_second"};
     case DoubleTelemetryField::ExternalEncoderPosition:
-      return {"externalencoder/position", 0.0, field, false, "rotations"};
+      return {"external/mechanism/position", 0.0, field, false, "rotations"};
     case DoubleTelemetryField::ExternalEncoderVelocity:
-      return {"externalencoder/velocity", 0.0, field, false, "rotations_per_second"};
+      return {"external/mechanism/velocity", 0.0, field, false, "rotations_per_second"};
     case DoubleTelemetryField::ClosedloopRampRate:
       return {"ramprate/dutycycle/closedloop", 0.0, field, true, "seconds"};
     case DoubleTelemetryField::OpenloopRampRate:
@@ -494,6 +494,14 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
         m_doubleFields.at(DoubleTelemetryField::TrapezoidalProfileMaxAcceleration)
             .SetDefaultValue(ma->value() * 60.0);  // turns/s² → RPM/s
     }
+  }
+
+  // External encoder: only published when one is defined.
+  if (!smc.GetExternalEncoderMechanismPosition()) {
+    m_doubleFields.at(DoubleTelemetryField::ExternalEncoderPosition).Disable();
+  }
+  if (!smc.GetExternalEncoderMechanismVelocity()) {
+    m_doubleFields.at(DoubleTelemetryField::ExternalEncoderVelocity).Disable();
   }
 
   // Exponential profile
