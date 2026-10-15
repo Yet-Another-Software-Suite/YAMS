@@ -442,9 +442,9 @@ public class SmartMotorControllerTelemetry {
     /** Rotor velocity in rotations. */
     RotorVelocity("rotor/velocity", 0, false, "rotations_per_second"),
     /** External encoder's mechanism position in rotations, published only when an external encoder is defined. */
-    ExternalEncoderPosition("external/mechanism/position", 0, false, "rotations"),
+    ExternalEncoderPosition("externalencoder/mechanism/position", 0, false, "rotations"),
     /** External encoder's mechanism velocity in rotations per second, published only when an external encoder is defined. */
-    ExternalEncoderVelocity("external/mechanism/velocity", 0, false, "rotations_per_second"),
+    ExternalEncoderVelocity("externalencoder/mechanism/velocity", 0, false, "rotations_per_second"),
     /** Closed loop dutycyle ramp rate. */
     ClosedloopRampRate("ramprate/dutycycle/closedloop", 0, true, "seconds"),
     /** Open loop dutycycle ramp rate. */

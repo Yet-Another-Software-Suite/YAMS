@@ -97,9 +97,9 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
     case DoubleTelemetryField::RotorVelocity:
       return {"rotor/velocity", 0.0, field, false, "rotations_per_second"};
     case DoubleTelemetryField::ExternalEncoderPosition:
-      return {"external/mechanism/position", 0.0, field, false, "rotations"};
+      return {"externalencoder/mechanism/position", 0.0, field, false, "rotations"};
     case DoubleTelemetryField::ExternalEncoderVelocity:
-      return {"external/mechanism/velocity", 0.0, field, false, "rotations_per_second"};
+      return {"externalencoder/mechanism/velocity", 0.0, field, false, "rotations_per_second"};
     case DoubleTelemetryField::ClosedloopRampRate:
       return {"ramprate/dutycycle/closedloop", 0.0, field, true, "seconds"};
     case DoubleTelemetryField::OpenloopRampRate:
