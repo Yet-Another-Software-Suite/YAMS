@@ -6,11 +6,15 @@ on:
       - "examples/**"
       - "yams/**"
       - "vendordep/**"
+      - ".github/workflows/ci.yml"
+      - ".github/scripts/select_test_groups.py"
   pull_request:
     paths:
       - "examples/**"
       - "yams/**"
       - "vendordep/**"
+      - ".github/workflows/ci.yml"
+      - ".github/scripts/select_test_groups.py"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -82,9 +86,40 @@ jobs:
           name: maven-linux
           path: vendordep/build/maven/
 
+  # A pull request runs the unit test groups its changes can affect, and a push to master runs them
+  # all. The groups, and which changes run which, are in .github/scripts/select_test_groups.py.
+  select-tests:
+    name: Select unit test groups
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      java: ${{ steps.select.outputs.java }}
+      cpp: ${{ steps.select.outputs.cpp }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Select unit test groups
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -o pipefail
+          if [ "$EVENT" = "pull_request" ]; then
+            # A renamed file counts under both of its names.
+            gh api --paginate "repos/${{ github.repository }}/pulls/$PR/files" \
+              --jq '.[] | .filename, (.previous_filename // empty)' \
+              | python3 .github/scripts/select_test_groups.py | tee -a "$GITHUB_OUTPUT"
+          else
+            python3 .github/scripts/select_test_groups.py --all | tee -a "$GITHUB_OUTPUT"
+          fi
+
   test-cpp:
     name: C++ unit tests - ${{ matrix.group }}
-    needs: [build-linux]
+    needs: [build-linux, select-tests]
+    if: needs.select-tests.outputs.cpp != '[]'
     runs-on: ubuntu-latest
     container: wpilib/systemcore-cross-debian:trixie
     permissions:
@@ -95,32 +130,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # The same groups as the Java unit tests, for the groups the C++ tests cover. A comma
-          # in a Catch2 filter means "or".
-          - group: arm
-            catch-filter: '[ArmTest]'
-          - group: elevator
-            catch-filter: '[ElevatorTest]'
-          - group: pivot
-            catch-filter: '[PivotTest]'
-          - group: shooter
-            catch-filter: '[ShooterTest]'
-          # The four module swerve drive, and the SwerveInputStream telemetry that runs on it.
-          - group: swerve-drive
-            catch-filter: '[SwerveDriveTest],[SwerveInputStreamTelemetryTest]'
-          # Motor controller unit tests: the parity and regression tests of each vendor's wrapper.
-          # Add new motor controller tags here and to the exclusions of the other group.
-          - group: motor-controllers
-            catch-filter: '[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[TalonApi]'
-          # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in
-          # real time, so they can time out on a busy runner: they run on their own.
-          - group: talon-parity
-            catch-filter: '[TalonParity]'
-          # Everything else: the math tests. New tags run here unless they get their own group and
-          # are excluded.
-          - group: other
-            catch-filter: '~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]~[NovaParity]~[TalonApi]~[TalonParity]'
+        # Each group with the Catch2 filter of the tags it runs; see select_test_groups.py.
+        include: ${{ fromJson(needs.select-tests.outputs.cpp) }}
     steps:
       - uses: actions/checkout@v7
       - run: chmod +x gradlew
@@ -135,7 +146,8 @@ jobs:
 
   test-java:
     name: Java unit tests - ${{ matrix.group }}
-    needs: [build-linux]
+    needs: [build-linux, select-tests]
+    if: needs.select-tests.outputs.java != '[]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -145,78 +157,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Each mechanism integration test runs in its own JVM: these create the largest number
-          # of simulated motor controller devices per process.
-          - group: arm
-            test-filter: '--tests "yams.mechs.ArmTest"'
-          - group: elevator
-            test-filter: '--tests "yams.mechs.ElevatorTest"'
-          - group: pivot
-            test-filter: '--tests "yams.mechs.PivotTest"'
-          - group: shooter
-            test-filter: '--tests "yams.mechs.ShooterTest"'
-          - group: mechanism-limits
-            test-filter: '--tests "yams.mechs.MechanismLimitTest"'
-          # Four module swerve drives on a Pigeon2: TalonFX and SPARK MAX both ways round, and mixes
-          # of SPARK MAX, SPARK Flex, TalonFXS and TalonFX, all with the same PID gains.
-          - group: swerve-drive
-            test-filter: '--tests "yams.mechs.SwerveDriveTest"'
-          # Every motor controller, closed loop controller, and attached encoder crossing the
-          # continuous wrapping point: many simulated Talons, which Phoenix runs in real time.
-          - group: continuous-wrapping
-            test-filter: '--tests "yams.core.motorcontrollers.ContinuousWrappingTest"'
-          # External encoders on each motor controller: CANcoders and CANdis on Talons, the SPARK
-          # absolute encoder and Through Bore Encoders (wired and over CAN) on SPARKs, and starting
-          # away from zero with and without an absolute encoder.
-          - group: absolute-encoders
-            test-filter: >-
-              --tests "yams.core.motorcontrollers.CANcoderTest"
-              --tests "yams.core.motorcontrollers.CANdiTest"
-              --tests "yams.core.motorcontrollers.SparkAbsoluteEncoderTest"
-              --tests "yams.core.motorcontrollers.ThroughBoreEncoderTest"
-              --tests "yams.core.motorcontrollers.StartingPositionTest"
-          # Every absolute encoder under every closed loop controller: these create many simulated
-          # Talons, which Phoenix runs in real time, so each runs in its own JVM.
-          - group: discontinuity-points
-            test-filter: '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'
-          - group: zero-offsets
-            test-filter: >-
-              --tests "yams.core.motorcontrollers.ZeroOffsetTest"
-              --tests "yams.core.motorcontrollers.ZeroOffsetDiscontinuityPointTest"
-          # Motor controller unit tests that are not about an external encoder: the configuration
-          # each vendor's device is given, feedforwards, exponential profiles, live tuning and the
-          # simulation period. Add new motor controller test classes here.
-          - group: motor-controllers
-            test-filter: >-
-              --tests "yams.core.motorcontrollers.ArmFeedforwardTest"
-              --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"
-              --tests "yams.core.motorcontrollers.ForceFeedforwardTest"
-              --tests "yams.core.motorcontrollers.LiveTuningTest"
-              --tests "yams.core.motorcontrollers.SimulationPeriodTest"
-              --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"
-              --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"
-          # Every motor controller (SPARK MAX, SPARK Flex, TalonFX, TalonFXS and Nova) given the same
-          # gains in YAMS units: the voltage of each feedback and feedforward gain, and the gains of
-          # the selected closed loop slot. The Talons run in real time, as Phoenix simulates them, and
-          # one JVM with all the closed loop gain tests' Talons falls behind, so the profile tests run
-          # on their own.
-          - group: closed-loop-gains
-            test-filter: >-
-              --tests "yams.core.motorcontrollers.FeedbackTest"
-              --tests "yams.core.motorcontrollers.FeedforwardTest"
-              --tests "yams.core.motorcontrollers.ClosedLoopSlotTest"
-          # Every motor controller following a trapezoidal profile from each closed loop slot.
-          - group: closed-loop-profiles
-            test-filter: '--tests "yams.core.motorcontrollers.FeedforwardProfileTest"'
-          # Everything else: swerve config tests, the battery and motor simulation unit tests, and
-          # the standalone math test. Gradle's --tests cannot exclude the groups above,
-          # so each class is listed: add new test classes here unless they get their own group.
-          - group: other
-            test-filter: >-
-              --tests "yams.core.mechanisms.*"
-              --tests "yams.core.motorcontrollers.simulation.*"
-              --tests "yams.ChineseRemainderTheoremTest"
+        # Each group with the --tests filters of the classes it runs; see select_test_groups.py.
+        include: ${{ fromJson(needs.select-tests.outputs.java) }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
