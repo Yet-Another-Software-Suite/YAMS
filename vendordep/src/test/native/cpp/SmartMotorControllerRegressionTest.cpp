@@ -271,6 +271,19 @@ TEST_CASE("SMCRegression.FeedforwardAppliedForVelocitySetpoint", "[SMCRegression
     smc.IterateClosedLoopController();
     CHECK(smc.lastVoltage.value() == Catch::Approx(1.0));
   }
+  SECTION("elevator kV times the velocity setpoint") {
+    // It used to work the feedforward out for a next velocity of 0, leaving out kV.
+    SmartMotorControllerConfig cfg;
+    cfg.WithMechanismCircumference(1_m)
+        .WithFeedforward(wpi::math::ElevatorFeedforward{
+            0_V, 0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{2.0},
+            wpi::units::unit_t<wpi::math::ElevatorFeedforward::ka_unit>{0.0}});
+    FakeSmartMotorController smc{&cfg};
+    smc.SetVelocity(0.5_mps);
+    smc.SetRunning(true);
+    smc.IterateClosedLoopController();
+    CHECK(smc.lastVoltage.value() == Catch::Approx(1.0));
+  }
   SECTION("arm") {
     SmartMotorControllerConfig cfg;
     cfg.WithFeedforward(MakeArmFF(1.0));

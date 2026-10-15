@@ -324,8 +324,12 @@ void SmartMotorController::IterateClosedLoopController() {
                                    wpi::units::meters_per_second_t{nextVel})
                        .value();
       } else {
-        ffOutput =
-            elevFF->Calculate(GetMeasurementVelocity(), wpi::units::meters_per_second_t{0}).value();
+        // The velocity setpoint, or none while holding a position; an elevator's controller is
+        // linear, so it is in meters per second.
+        ffOutput = elevFF
+                       ->Calculate(GetMeasurementVelocity(),
+                                   wpi::units::meters_per_second_t{nextVelocitySetpoint})
+                       .value();
       }
     }
 
