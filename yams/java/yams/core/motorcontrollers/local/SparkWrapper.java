@@ -249,6 +249,10 @@ public class SparkWrapper extends SmartMotorController {
     setupSimulation();
     try {
       applyConfig(config);
+      // Move the simulation to the starting position again, now the config gives the ratio of the
+      // feedback sensor to the mechanism. Before it, the SPARK starts at the starting position
+      // divided by the gear ratio.
+      setupSimulation();
       checkConfigSafety();
     } catch (RuntimeException e) {
       // Release what applying the config started, such as the closed loop controller's Notifier,

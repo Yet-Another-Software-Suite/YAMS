@@ -4,7 +4,6 @@
 package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
@@ -14,14 +13,11 @@ import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
-import static org.wpilib.units.Units.Seconds;
+import static yams.core.motorcontrollers.ClosedLoopCases.close;
+import static yams.core.motorcontrollers.ClosedLoopCases.create;
+import static yams.core.motorcontrollers.ClosedLoopCases.kPeriod;
+import static yams.core.motorcontrollers.ClosedLoopCases.kRatio;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.TalonFXS;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkMax;
-import com.thrifty.nova.Nova;
-import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
@@ -39,25 +34,11 @@ import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SingleJointedArmSim;
-import org.wpilib.system.Timer;
-import yams.commands2.config.SmartMotorControllerConfig;
-import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
-import yams.core.gearing.GearBox;
-import yams.core.gearing.MechanismGearing;
+import yams.core.motorcontrollers.ClosedLoopCases.Controller;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
-import yams.core.motorcontrollers.enums.ControlMode;
-import yams.core.motorcontrollers.enums.MotorMode;
-import yams.core.motorcontrollers.local.NovaWrapper;
-import yams.core.motorcontrollers.local.SparkWrapper;
-import yams.core.motorcontrollers.remote.TalonFXSWrapper;
-import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.motorcontrollers.simulation.ArmSimSupplier;
 import yams.core.motorcontrollers.simulation.ElevatorSimSupplier;
-import yams.core.telemetry.enums.TelemetryVerbosity;
-import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
-import yams.helpers.PeriodicScheduler;
-import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Tests that every {@link SmartMotorController} follows a trapezoidal profile from each closed loop
@@ -70,11 +51,6 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  * slot's gains, or converts a gain into the wrong units, falls away from the profile.
  */
 public class FeedforwardProfileTest {
-  /** 12 motor rotations per mechanism rotation. */
-  private static final MechanismGearing kGearing =
-      new MechanismGearing(GearBox.fromReductionStages(3, 4));
-
-  private static final double kRatio = 12;
   private static final double kGravity = 9.81;
 
   /** Gains of the slots that are not selected, as a multiple of the selected slot's gains. */
@@ -92,74 +68,8 @@ public class FeedforwardProfileTest {
     Preferences.removeAll();
   }
 
-  /**
-   * A motor controller to test.
-   *
-   * @param name Name of the motor controller.
-   * @param motor Motor it drives.
-   * @param slots Number of closed loop slots it has.
-   * @param realTime Whether its simulation runs in real time. Phoenix simulates a Talon's Motion
-   *     Magic on its own clock, which does not stop with WPILib's simulated time.
-   * @param create Creates the motor controller.
-   */
-  private record Controller(
-      String name,
-      DCMotor motor,
-      int slots,
-      boolean realTime,
-      BiFunction<DCMotor, SmartMotorControllerConfig, SmartMotorController> create) {
-    @Override
-    public String toString() {
-      return name;
-    }
-  }
-
-  private static final Controller[] kControllers = {
-    new Controller(
-        "SparkMax",
-        DCMotor.getNEO(1),
-        4,
-        false,
-        (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkMax(), motor, cfg)),
-    new Controller(
-        "SparkFlex",
-        DCMotor.getNeoVortex(1),
-        4,
-        false,
-        (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkFlex(), motor, cfg)),
-    new Controller(
-        "TalonFX",
-        DCMotor.getKrakenX60(1),
-        3,
-        true,
-        (motor, cfg) -> new TalonFXWrapper(DeviceCreator.createTalonFX(), motor, cfg)),
-    new Controller(
-        "TalonFXS",
-        DCMotor.getNEO(1),
-        3,
-        true,
-        (motor, cfg) -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), motor, cfg)),
-    new Controller(
-        "Nova",
-        DCMotor.getNEO(1),
-        4,
-        false,
-        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, cfg)),
-  };
-
-  /** Every motor controller with each of its closed loop slots. */
   private static Stream<Arguments> controllersAndSlots() {
-    return Stream.of(kControllers)
-        .flatMap(
-            controller ->
-                Stream.of(ClosedLoopControllerSlot.values())
-                    .limit(controller.slots())
-                    .map(slot -> Arguments.of(controller, slot)));
-  }
-
-  /** The closed loop slots a motor controller has. */
-  private static Stream<ClosedLoopControllerSlot> slots(Controller controller) {
-    return Stream.of(ClosedLoopControllerSlot.values()).limit(controller.slots());
+    return ClosedLoopCases.controllersAndSlots();
   }
 
   /** Volts per mechanism radian per second squared: J R / (G Kt). */
@@ -172,54 +82,14 @@ public class FeedforwardProfileTest {
     return kRatio / motor.Kv;
   }
 
-  private static SmartMotorControllerConfig baseConfig(String name) {
-    return new yams.commands2.config.SmartMotorControllerConfig()
-        .withSubsystem(new SmartMotorControllerTestSubsystem())
-        .withGearing(kGearing)
-        .withStatorCurrentLimit(Amps.of(80))
-        .withZeroPower(MotorMode.BRAKE)
-        .withControlMode(ControlMode.CLOSED_LOOP)
-        .withTelemetry("FeedforwardProfileTest " + name, TelemetryVerbosity.LOW);
+  private static yams.commands2.config.SmartMotorControllerConfig baseConfig(String name) {
+    return ClosedLoopCases.baseConfig("FeedforwardProfileTest " + name);
   }
 
   /** The gains of a slot: the selected slot's own, or {@link #kOtherSlotScale} times them. */
   private static double scale(ClosedLoopControllerSlot slot, ClosedLoopControllerSlot selected) {
     return slot == selected ? 1 : kOtherSlotScale;
   }
-
-  private static SmartMotorController create(Controller controller, SmartMotorControllerConfig cfg) {
-    final SmartMotorController smc = controller.create().apply(controller.motor(), cfg);
-    ((SmartMotorControllerTestSubsystem)
-            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
-        .setSMC(smc);
-    return smc;
-  }
-
-  private static void close(SmartMotorController smc) {
-    SmartMotorControllerTestSubsystem subsys =
-        (SmartMotorControllerTestSubsystem)
-            ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem();
-    SmartMotorControllerCommandRegistry.removeCommands(subsys);
-    CommandScheduler.getInstance().unregisterSubsystem(subsys);
-    subsys.close();
-    smc.close();
-    DeviceCreator.silence(smc);
-    Object motorController = smc.getMotorController();
-    if (motorController instanceof SparkMax sparkMax) {
-      sparkMax.close();
-    } else if (motorController instanceof SparkFlex sparkFlex) {
-      sparkFlex.close();
-    } else if (motorController instanceof TalonFXS talonFXS) {
-      talonFXS.close();
-    } else if (motorController instanceof TalonFX talonFX) {
-      talonFX.close();
-    } else if (motorController instanceof Nova nova) {
-      nova.close();
-    }
-  }
-
-  /** Period of the robot loop and of the simulation, in seconds. */
-  private static final double kPeriod = 0.020;
 
   /**
    * Command a profiled move with the slot selected, and check the mechanism follows the profile and
@@ -234,6 +104,7 @@ public class FeedforwardProfileTest {
    * @param controller Motor controller under test.
    * @param smc The motor controller, with its simulation set up at {@code start}.
    * @param slot Slot to select.
+   * @param hold Holds the start, for half a second before the move, while a simulated Talon starts.
    * @param command Commands the goal.
    * @param position Mechanism position, in the units of the profile.
    * @param constraints Constraints of the profile the motor controller is configured with.
@@ -244,6 +115,7 @@ public class FeedforwardProfileTest {
       Controller controller,
       SmartMotorController smc,
       ClosedLoopControllerSlot slot,
+      Runnable hold,
       Runnable command,
       DoubleSupplier position,
       TrapezoidProfile.Constraints constraints,
@@ -254,38 +126,24 @@ public class FeedforwardProfileTest {
     final TrapezoidProfile.State goalState = new TrapezoidProfile.State(goal, 0);
     final double tolerance = 4 * constraints.maxVelocity * kPeriod;
     final double settle = 1.0;
-    final double[] time = {0};
     // The largest distance from the profile, and when it was.
     final double[] worst = {0, 0};
-    try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
-      smc.setClosedLoopSlot(slot);
-      command.run();
-      final long startNanos = System.nanoTime();
-      scheduler.addPeriodic(
-          () -> {
-            smc.simIterate();
-            time[0] += kPeriod;
-            command.run();
-            final double error =
-                Math.abs(
-                    position.getAsDouble()
-                        - profile.calculate(time[0], startState, goalState).position);
-            if (error > worst[0]) {
-              worst[0] = error;
-              worst[1] = time[0];
-            }
-            if (controller.realTime()) {
-              // Keep simulated time with the wall clock, rather than wait a whole period after each
-              // step, so Phoenix's clock does not run ahead by the time each step takes.
-              final double behind = time[0] - (System.nanoTime() - startNanos) / 1e9;
-              if (behind > 0) {
-                Timer.delay(Seconds.of(behind));
-              }
-            }
-          },
-          Seconds.of(kPeriod));
-      scheduler.runFor(Seconds.of(profile.timeLeftUntil(startState, goalState) + settle));
-    }
+    smc.setClosedLoopSlot(slot);
+    ClosedLoopCases.run(controller, smc, 0.5, hold, time -> {});
+    ClosedLoopCases.run(
+        controller,
+        smc,
+        profile.timeLeftUntil(startState, goalState) + settle,
+        command,
+        time -> {
+          final double error =
+              Math.abs(
+                  position.getAsDouble() - profile.calculate(time, startState, goalState).position);
+          if (error > worst[0]) {
+            worst[0] = error;
+            worst[1] = time;
+          }
+        });
     final double end = position.getAsDouble();
     final String what = controller + " " + slot;
     System.out.println(
@@ -310,14 +168,14 @@ public class FeedforwardProfileTest {
     final double kP = 10;
     final double maxVelocity = 1;
     final double maxAcceleration = 4;
-    final SmartMotorControllerConfig cfg =
+    final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("rotary " + controller + " " + selected)
             .withMomentOfInertia(KilogramSquareMeters.of(moi))
             .withStartingPosition(Rotations.of(0))
             .withTrapezoidalProfile(
                 RotationsPerSecond.of(maxVelocity),
                 RotationsPerSecondPerSecond.of(maxAcceleration));
-    for (ClosedLoopControllerSlot slot : slots(controller).toList()) {
+    for (ClosedLoopControllerSlot slot : controller.slotStream().toList()) {
       final double scale = scale(slot, selected);
       cfg.withClosedLoopController(kP * scale, 0, 0, slot)
           .withFeedforward(new SimpleMotorFeedforward(0, kV * scale, kA * scale), slot);
@@ -329,6 +187,7 @@ public class FeedforwardProfileTest {
           controller,
           smc,
           selected,
+          () -> smc.setPosition(Rotations.of(0)),
           () -> smc.setPosition(Rotations.of(goal)),
           () -> smc.getMechanismPosition().in(Rotations),
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration),
@@ -356,14 +215,14 @@ public class FeedforwardProfileTest {
     final double maxAcceleration = 2;
     final double start = Degrees.of(-30).in(Rotations);
     final double goal = Degrees.of(90).in(Rotations);
-    final SmartMotorControllerConfig cfg =
+    final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("arm " + controller + " " + selected)
             .withMomentOfInertia(KilogramSquareMeters.of(moi))
             .withStartingPosition(Rotations.of(start))
             .withTrapezoidalProfile(
                 RotationsPerSecond.of(maxVelocity),
                 RotationsPerSecondPerSecond.of(maxAcceleration));
-    for (ClosedLoopControllerSlot slot : slots(controller).toList()) {
+    for (ClosedLoopControllerSlot slot : controller.slotStream().toList()) {
       final double scale = scale(slot, selected);
       cfg.withClosedLoopController(kP * scale, 0, 0, slot)
           .withFeedforward(new ArmFeedforward(0, kG * scale, kV * scale, kA * scale), slot);
@@ -386,6 +245,7 @@ public class FeedforwardProfileTest {
           controller,
           smc,
           selected,
+          () -> smc.setPosition(Rotations.of(start)),
           () -> smc.setPosition(Rotations.of(goal)),
           () -> smc.getMechanismPosition().in(Rotations),
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration),
@@ -412,14 +272,14 @@ public class FeedforwardProfileTest {
     final double maxAcceleration = 1;
     final double start = 0.1;
     final double goal = 0.6;
-    final SmartMotorControllerConfig cfg =
+    final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("elevator " + controller + " " + selected)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
             .withMomentOfInertia(KilogramSquareMeters.of(mass * drumRadius * drumRadius))
             .withTrapezoidalProfile(
                 MetersPerSecond.of(maxVelocity), MetersPerSecondPerSecond.of(maxAcceleration));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(start)));
-    for (ClosedLoopControllerSlot slot : slots(controller).toList()) {
+    for (ClosedLoopControllerSlot slot : controller.slotStream().toList()) {
       final double scale = scale(slot, selected);
       cfg.withClosedLoopController(kP * scale, 0, 0, slot)
           .withFeedforward(new ElevatorFeedforward(0, kG * scale, kV * scale, kA * scale), slot);
@@ -434,6 +294,7 @@ public class FeedforwardProfileTest {
           controller,
           smc,
           selected,
+          () -> smc.setPosition(Meters.of(start)),
           () -> smc.setPosition(Meters.of(goal)),
           () -> smc.getMeasurementPosition().in(Meters),
           new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration),
