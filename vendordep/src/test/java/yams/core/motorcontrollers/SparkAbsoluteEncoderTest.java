@@ -59,7 +59,7 @@ public class SparkAbsoluteEncoderTest {
   }
 
   @Test
-  void testZeroCenteredTrueWith0_5DiscontinuityPoint() {
+  void testRangeOffset0With0_5DiscontinuityPoint() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
         baseConfig()
@@ -72,7 +72,7 @@ public class SparkAbsoluteEncoderTest {
   }
 
   @Test
-  void testZeroCenteredFalseWith1_0DiscontinuityPoint() {
+  void testRangeOffset0_5With1_0DiscontinuityPoint() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
         baseConfig()
