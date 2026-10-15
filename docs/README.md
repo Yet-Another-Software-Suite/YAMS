@@ -114,4 +114,20 @@ Command raise = arm.setAngle(Degrees.of(90));
 
 <p align="center">Join our Discord community or create your first PR in just a few steps.</p>
 
-<table data-card-size="large" data-view="cards"><thead><tr><th></th><th></th><th></th><th></th><th data-hidden data-card-cover data-type="image">Cover image</th></tr></thead><tbody><tr><td><i class="fa-discord">:discord:</i></td><td><strong>Discord community</strong></td><td>Join our Discord community to post questions, get help, and share resources with over 3,000 like-minded developers.</td><td><a href="https://discord.gg/yass" class="button secondary">Join Discord</a></td><td><a href=".gitbook/assets/YASS_ANA_LOGO3.webp">YASS_ANA_LOGO3.webp</a></td></tr><tr><td><i class="fa-github">:github:</i></td><td><strong>GitHub</strong></td><td>YAMS is 100% open source and built by developers just like you. Head to our GitHub repository to learn how to submit your first PR.</td><td><a href="https://github.com/Yet-Another-Software-Suite/YAMS/pulls" class="button secondary">Submit a PR</a></td><td><a href=".gitbook/assets/YASS_LOGO.png">YASS_LOGO.png</a></td></tr></tbody></table>
+{% columns %}
+{% column %}
+**Discord community**
+
+Post questions, get help, and share resources with over 3,000 like-minded developers.
+
+<a href="https://discord.gg/yass" class="button primary" data-icon="discord">Join Discord</a>
+{% endcolumn %}
+
+{% column %}
+**GitHub**
+
+YAMS is 100% open source and built by developers just like you. Report an issue or submit your first PR.
+
+<a href="https://github.com/Yet-Another-Software-Suite/YAMS/pulls" class="button secondary" data-icon="github">Submit a PR</a>
+{% endcolumn %}
+{% endcolumns %}
