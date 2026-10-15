@@ -425,12 +425,27 @@ class SwerveDrive {
    * Lock all modules to an X-pattern to resist being pushed.
    */
   void LockPose() {
-    // Turn each wheel toward the robot center without driving it. SwerveModule::Lock skips the
-    // velocity deadband, which would otherwise hold these zero speed states where the wheels are.
+    // Turn each wheel toward the robot center without driving it. SwerveModule::SetAzimuthAngle
+    // skips the velocity deadband, which would otherwise hold these zero speed states where the
+    // wheels are.
     for (size_t i = 0; i < NumModules; ++i) {
       auto* module = m_config->GetModules()[i];
-      m_desiredModuleStates[i] = module->Lock(
+      m_desiredModuleStates[i] = module->SetAzimuthAngle(
           module->GetConfig().GetLocation()->Angle().value_or(wpi::math::Rotation2d{}));
+    }
+    m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
+  }
+
+  /**
+   * Turn every module to the given angle without driving, as for tuning the azimuth motors. The
+   * velocity deadband does not hold the wheels where they are (see
+   * SwerveModule::SetAzimuthAngle()).
+   *
+   * @param angle Angle to turn every module to.
+   */
+  void SetAzimuthAngles(wpi::math::Rotation2d angle) {
+    for (size_t i = 0; i < NumModules; ++i) {
+      m_desiredModuleStates[i] = m_config->GetModules()[i]->SetAzimuthAngle(angle);
     }
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
   }
@@ -1098,13 +1113,10 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
   }
 
   if (azimuthTuningOn) {
-    wpi::math::Rotation2d angle{wpi::units::degree_t{
-        m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}};
-    wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
-    for (size_t i = 0; i < NumModules; ++i) {
-      states[i] = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0}, angle};
-    }
-    drive->SetSwerveModuleStates(states);
+    // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
+    // wheels without driving them.
+    drive->SetAzimuthAngles(wpi::math::Rotation2d{wpi::units::degree_t{
+        m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}});
   }
 
   // Copies of the configured controllers; gain fields for missing controllers are disabled.

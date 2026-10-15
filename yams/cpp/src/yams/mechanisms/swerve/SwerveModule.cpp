@@ -98,7 +98,7 @@ wpi::math::SwerveModuleVelocity SwerveModule::SetSwerveModuleState(
   return state;
 }
 
-wpi::math::SwerveModuleVelocity SwerveModule::Lock(wpi::math::Rotation2d angle) {
+wpi::math::SwerveModuleVelocity SwerveModule::SetAzimuthAngle(wpi::math::Rotation2d angle) {
   auto state = m_config->GetLockedState(angle, GetState());
   m_driveMotorController->SetVelocity(wpi::units::meters_per_second_t{0} + GetCouplingVelocity());
   m_azimuthMotorController->SetPosition(wpi::units::degree_t{state.angle.Degrees()});

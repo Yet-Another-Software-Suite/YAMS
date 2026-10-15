@@ -343,11 +343,12 @@ public class SwerveSubsystem extends SubsystemBase
       {
         // Each module points to its own corner: getAngle() returns the vector from
         // robot center to that module, which forms an X when all four are set.
+        // setAzimuthAngle turns the wheel without driving it; a zero speed state would be
+        // held where the wheel is by the velocity deadband.
         desiredStates[i] =
-            new SwerveModuleVelocity(0, modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(Rotation2d.ZERO));
+            modules[i].setAzimuthAngle(modules[i].getConfig().getLocation().orElseThrow().getAngle().orElse(Rotation2d.ZERO));
       }
       Logger.recordOutput("Swerve/DesiredStates", desiredStates);
-      drive.setSwerveModuleStates(desiredStates);
     }).withName("Lock");
   }
 

@@ -138,13 +138,14 @@ class SwerveModule {
   config::SwerveModuleConfig& GetMutableConfig();
 
   /**
-   * Turn the wheel to the given angle without driving it, as for locking the drive in place. The
-   * velocity deadband is skipped, since it would hold the wheel where it is.
+   * Turn the wheel to the given angle without driving it, as for locking the drive in place or
+   * tuning the azimuth motor. The velocity deadband is skipped, since it would hold the wheel where
+   * it is.
    *
    * @param angle Angle to turn the wheel to.
    * @return The state the module was commanded to.
    */
-  wpi::math::SwerveModuleVelocity Lock(wpi::math::Rotation2d angle);
+  wpi::math::SwerveModuleVelocity SetAzimuthAngle(wpi::math::Rotation2d angle);
 
   /** Get the current measured module state (speed and heading). */
   SwerveModuleVelocityWithAzimuth GetState() const;

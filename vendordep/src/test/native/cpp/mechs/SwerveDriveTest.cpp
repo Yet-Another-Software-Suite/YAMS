@@ -622,6 +622,28 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   }
 }
 
+// SetAzimuthAngles turns every wheel without driving it, even with a velocity deadband, which holds
+// zero speed states in place. Azimuth live tuning relies on it.
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.SetAzimuthAnglesTurnsEveryModuleEvenWithAVelocityDeadband",
+                 "[SwerveDriveTest]") {
+  for (auto* cfg : {&m_flCfg, &m_frCfg, &m_blCfg, &m_brCfg}) {
+    cfg->WithVelocityDeadband(0.1_mps);
+  }
+  m_drive->SetAzimuthAngles(wpi::math::Rotation2d{60.0_deg});
+  SchedulerHelper::RunForDuration(1.0_s);
+
+  auto modules = m_drive->GetConfig().GetModules();
+  for (size_t i = 0; i < 4; ++i) {
+    double actual = modules[i]->GetState().angle.Degrees().value();
+    // Module optimization may reverse the wheel, so angles 180° apart are equivalent.
+    double error = std::remainder(actual - 60.0, 180.0);
+    INFO("module " << i << " is at " << actual << " degrees");
+    CHECK(error == Catch::Approx(0.0).margin(10.0));
+    CHECK(modules[i]->GetState().velocity.value() == Catch::Approx(0.0).margin(0.05));
+  }
+}
+
 // Optimization reverses the wheel when that is the shorter turn, and then keeps the orientation the
 // wheel was sent to instead of reversing it back for a target that moved a little.
 TEST_CASE_METHOD(SwerveDriveTestFixture,
