@@ -11,9 +11,12 @@ import org.wpilib.math.system.DCMotor;
  * <p>The motor controller wrappers recognize a motor by comparing its {@link DCMotor} with these
  * (see {@link SmartMotorController#isMotor(DCMotor, DCMotor)}), so use them rather than building
  * your own from the same specs.
+ *
+ * <p>This class will be deleted once WPILib has a {@link DCMotor} of the Thrifty Pulsar. Use
+ * WPILib's then.
  */
-public final class Motors {
-  private Motors() {}
+public final class YMotors {
+  private YMotors() {}
 
   /**
    * The Thrifty Pulsar 775, from Thrifty's specs: 12 V, 3.1 N-m and 189 A stalled, and 2.7 A at 7500

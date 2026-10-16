@@ -53,8 +53,8 @@ public class TalonFXSMotorArrangementTest {
         Arguments.of("NEO", DCMotor.getNEO(1), MotorArrangementValue.NEO_JST, AdvancedHallSupportValue.Disabled),
         Arguments.of("NEO 550", DCMotor.getNeo550(1), MotorArrangementValue.NEO550_JST, AdvancedHallSupportValue.Disabled),
         Arguments.of("NEO Vortex", DCMotor.getNeoVortex(1), MotorArrangementValue.VORTEX_JST, AdvancedHallSupportValue.Disabled),
-        Arguments.of("Thrifty Pulsar", Motors.getThriftyPulsar(1), MotorArrangementValue.NEO_JST, AdvancedHallSupportValue.Disabled),
-        Arguments.of("2 Thrifty Pulsars", Motors.getThriftyPulsar(2), MotorArrangementValue.NEO_JST, AdvancedHallSupportValue.Disabled));
+        Arguments.of("Thrifty Pulsar", YMotors.getThriftyPulsar(1), MotorArrangementValue.NEO_JST, AdvancedHallSupportValue.Disabled),
+        Arguments.of("2 Thrifty Pulsars", YMotors.getThriftyPulsar(2), MotorArrangementValue.NEO_JST, AdvancedHallSupportValue.Disabled));
   }
 
   private static SmartMotorControllerConfig config(String name) {
@@ -103,7 +103,7 @@ public class TalonFXSMotorArrangementTest {
   void recognizesThePulsarYamgGenerates() {
     for (int n = 1; n <= 4; n++) {
       final DCMotor yamg = new DCMotor(12.0, 3.1, 189.0, 2.7, 7500 * 2 * Math.PI / 60, n);
-      final DCMotor yams = Motors.getThriftyPulsar(n);
+      final DCMotor yams = YMotors.getThriftyPulsar(n);
       assertTrue(
           yamg.stallTorque == yams.stallTorque && yamg.stallCurrent == yams.stallCurrent && yamg.freeCurrent == yams.freeCurrent
               && yamg.freeSpeed == yams.freeSpeed && yamg.Kt == yams.Kt && yamg.Kv == yams.Kv && yamg.nominalVoltage == yams.nominalVoltage,

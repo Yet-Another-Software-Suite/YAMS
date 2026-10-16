@@ -87,9 +87,9 @@ import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
-import yams.core.motorcontrollers.Motors;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.YMotors;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
@@ -203,7 +203,7 @@ public class TalonFXSWrapper extends SmartMotorController {
    *                                                    a stator current limit of at most 40A.
    * @throws IllegalArgumentException                   if motor is not a Minion, NEO, NEO 550, NEO
    *                                                    Vortex, or Thrifty Pulsar
-   *                                                    ({@link Motors#getThriftyPulsar(int)}).
+   *                                                    ({@link YMotors#getThriftyPulsar(int)}).
    * @throws IllegalArgumentException                   if
    *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
    *                                                    rejects an unsupported option (see its
@@ -264,7 +264,7 @@ public class TalonFXSWrapper extends SmartMotorController {
           m_talonConfig.Commutation.withMotorArrangement(MotorArrangementValue.VORTEX_JST);
           found = true;
           break;
-        } else if (isMotor(motor, Motors.getThriftyPulsar(i))) {
+        } else if (isMotor(motor, YMotors.getThriftyPulsar(i))) {
           // The Pulsar is wired and commutated like a NEO
           m_talonConfig.Commutation.withMotorArrangement(MotorArrangementValue.NEO_JST);
           found = true;
