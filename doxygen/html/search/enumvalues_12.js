@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['velocitycontrol_0',['VelocityControl',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3acab54b4af19a9f13a3b5ca544256d04c',1,'yams::telemetry']]]
+  ['yaw_0',['YAW',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37',1,'yams::mechanisms::config']]]
 ];

@@ -89,16 +89,16 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa42dfe75900a11a9868b870647cf624e" id="r_aa42dfe75900a11a9868b870647cf624e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa42dfe75900a11a9868b870647cf624e">EasyCRT</a> (int sharedGearTeeth, int encoderATeeth, int encoderBTeeth)</td></tr>
 <tr class="separator:aa42dfe75900a11a9868b870647cf624e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a463ff81d0362473038186b2786f4ea18" id="r_a463ff81d0362473038186b2786f4ea18"><td class="memItemLeft" align="right" valign="top">std::optional&lt;::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a463ff81d0362473038186b2786f4ea18">Solve</a> (::units::turn_t encoderA, ::units::turn_t encoderB) const</td></tr>
-<tr class="separator:a463ff81d0362473038186b2786f4ea18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6ac51542fac09ced8d68096497350db" id="r_ac6ac51542fac09ced8d68096497350db"><td class="memItemLeft" align="right" valign="top">std::optional&lt;::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6ac51542fac09ced8d68096497350db">Solve</a> (::units::turn_t encoderA, ::units::turn_t encoderB, ::units::turn_t minAngle, ::units::turn_t maxAngle) const</td></tr>
-<tr class="separator:ac6ac51542fac09ced8d68096497350db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa84d53e37e65d914b81a0e15591f4450" id="r_aa84d53e37e65d914b81a0e15591f4450"><td class="memItemLeft" align="right" valign="top">::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa84d53e37e65d914b81a0e15591f4450">GetUniqueRange</a> () const</td></tr>
-<tr class="separator:aa84d53e37e65d914b81a0e15591f4450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab54fe0c603b769662a678b00c9ea1ca1" id="r_ab54fe0c603b769662a678b00c9ea1ca1"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab54fe0c603b769662a678b00c9ea1ca1">Solve</a> (wpi::units::turn_t encoderA, wpi::units::turn_t encoderB) const</td></tr>
+<tr class="separator:ab54fe0c603b769662a678b00c9ea1ca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a789149872603f68ac322d8f89ec71c04" id="r_a789149872603f68ac322d8f89ec71c04"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a789149872603f68ac322d8f89ec71c04">Solve</a> (wpi::units::turn_t encoderA, wpi::units::turn_t encoderB, wpi::units::turn_t minAngle, wpi::units::turn_t maxAngle) const</td></tr>
+<tr class="separator:a789149872603f68ac322d8f89ec71c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a433ff12dfbceab17b372576a3cd70336" id="r_a433ff12dfbceab17b372576a3cd70336"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a433ff12dfbceab17b372576a3cd70336">GetUniqueRange</a> () const</td></tr>
+<tr class="separator:a433ff12dfbceab17b372576a3cd70336"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Finds the absolute angle of a gear that turns more than once, from two absolute encoders on pinions with different tooth counts that both mesh with it.</p>
-<p>Each encoder only knows its angle within one of its own rotations, but the two readings together are unique over <a class="el" href="#aa84d53e37e65d914b81a0e15591f4450">GetUniqueRange()</a>, which is lcm(encoderATeeth, encoderBTeeth) / sharedGearTeeth rotations of the shared gear.</p>
+<p>Each encoder only knows its angle within one of its own rotations, but the two readings together are unique over <a class="el" href="#a433ff12dfbceab17b372576a3cd70336">GetUniqueRange()</a>, which is lcm(encoderATeeth, encoderBTeeth) / sharedGearTeeth rotations of the shared gear.</p>
 <p>Both encoders must be zeroed with the mechanism at zero, and both must read increasing angles when the mechanism moves in its positive direction. Set the offset and inversion on the encoders themselves, or adjust the readings before passing them in.</p>
 <p>This is not a textbook Chinese Remainder Theorem solve. Every angle consistent with encoder A is tried, and the one whose predicted encoder B reading is closest to the real one wins, which stays stable with backlash and sensor noise. Created by team 6911. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -144,14 +144,14 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa84d53e37e65d914b81a0e15591f4450" name="aa84d53e37e65d914b81a0e15591f4450"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa84d53e37e65d914b81a0e15591f4450">&#9670;&#160;</a></span>GetUniqueRange()</h2>
+<a id="a433ff12dfbceab17b372576a3cd70336" name="a433ff12dfbceab17b372576a3cd70336"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a433ff12dfbceab17b372576a3cd70336">&#9670;&#160;</a></span>GetUniqueRange()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">::units::turn_t yams::units::EasyCRT::GetUniqueRange </td>
+          <td class="memname">wpi::units::turn_t yams::units::EasyCRT::GetUniqueRange </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
@@ -163,25 +163,25 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a463ff81d0362473038186b2786f4ea18" name="a463ff81d0362473038186b2786f4ea18"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a463ff81d0362473038186b2786f4ea18">&#9670;&#160;</a></span>Solve() <span class="overload">[1/2]</span></h2>
+<a id="ab54fe0c603b769662a678b00c9ea1ca1" name="ab54fe0c603b769662a678b00c9ea1ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab54fe0c603b769662a678b00c9ea1ca1">&#9670;&#160;</a></span>Solve() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt;::units::turn_t &gt; yams::units::EasyCRT::Solve </td>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::units::EasyCRT::Solve </td>
           <td>(</td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderA</em>, </span></td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderA</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderB</em></span>&#160;) const</td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderB</em></span>&#160;) const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Solve for the angle of the shared gear, assuming its travel is centered on zero. The result is within half of <a class="el" href="#aa84d53e37e65d914b81a0e15591f4450">GetUniqueRange()</a> either side of zero.</p>
+<p>Solve for the angle of the shared gear, assuming its travel is centered on zero. The result is within half of <a class="el" href="#a433ff12dfbceab17b372576a3cd70336">GetUniqueRange()</a> either side of zero.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">encoderA</td><td>Encoder A reading. </td></tr>
@@ -193,31 +193,31 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac6ac51542fac09ced8d68096497350db" name="ac6ac51542fac09ced8d68096497350db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6ac51542fac09ced8d68096497350db">&#9670;&#160;</a></span>Solve() <span class="overload">[2/2]</span></h2>
+<a id="a789149872603f68ac322d8f89ec71c04" name="a789149872603f68ac322d8f89ec71c04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a789149872603f68ac322d8f89ec71c04">&#9670;&#160;</a></span>Solve() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt;::units::turn_t &gt; yams::units::EasyCRT::Solve </td>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::units::EasyCRT::Solve </td>
           <td>(</td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderA</em>, </span></td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderA</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderB</em>, </span></td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>encoderB</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>minAngle</em>, </span></td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>minAngle</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>maxAngle</em></span>&#160;) const</td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>maxAngle</em></span>&#160;) const</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -234,7 +234,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>The angle of the shared gear, or std::nullopt if the two readings do not agree on one. </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">std::invalid_argument</td><td>if the travel is longer than <a class="el" href="#aa84d53e37e65d914b81a0e15591f4450">GetUniqueRange()</a>, or maxAngle is below minAngle. </td></tr>
+    <tr><td class="paramname">std::invalid_argument</td><td>if the travel is longer than <a class="el" href="#a433ff12dfbceab17b372576a3cd70336">GetUniqueRange()</a>, or maxAngle is below minAngle. </td></tr>
   </table>
   </dd>
 </dl>

@@ -89,42 +89,41 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;frc/Timer.h&gt;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;units/time.h&gt;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="foldopen" id="foldopen00011" data-start="{" data-end="}">
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="namespaceyams_1_1math.html">   11</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceyams_1_1math.html">yams::math</a> {</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classyams_1_1math_1_1_derivative_time_filter.html">DerivativeTimeFilter</a> {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#aa10069570a57fe50682194c2bd15b0fe">   29</a></span>  <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#aa10069570a57fe50682194c2bd15b0fe">DerivativeTimeFilter</a>(<span class="keywordtype">double</span> initial, units::second_t debouncerPeriod);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#a6dbedde06f4f67322e46766e68eddffc">   36</a></span>  <span class="keyword">explicit</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#a6dbedde06f4f67322e46766e68eddffc">DerivativeTimeFilter</a>(units::second_t debouncerPeriod);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#a48a32362a04d8fde41f2cc2637035765">   47</a></span>  <span class="keywordtype">double</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#a48a32362a04d8fde41f2cc2637035765">Derivative</a>(<span class="keywordtype">double</span> current, units::second_t dt);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#a1ea6e127ef23810bf4cb5edff717a6cb">   57</a></span>  <span class="keywordtype">double</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#a1ea6e127ef23810bf4cb5edff717a6cb">Derivative</a>(<span class="keywordtype">double</span> current);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keywordtype">double</span> m_last{0.0};</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  int64_t m_lastFpgaTime_us{0};</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keywordtype">double</span> m_value{0.0};</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  frc::Timer m_debouncer;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  units::second_t m_debouncePeriod{0.02};</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>};</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;wpi/system/Timer.hpp&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;wpi/units/time.hpp&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="foldopen" id="foldopen00010" data-start="{" data-end="}">
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="namespaceyams_1_1math.html">   10</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceyams_1_1math.html">yams::math</a> {</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html">   18</a></span><span class="keyword">class </span><a class="code hl_class" href="classyams_1_1math_1_1_derivative_time_filter.html">DerivativeTimeFilter</a> {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#aa86683ad63a3dcd064c01f47205bbdd6">   28</a></span>  <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#aa86683ad63a3dcd064c01f47205bbdd6">DerivativeTimeFilter</a>(<span class="keywordtype">double</span> initial, wpi::units::second_t debouncerPeriod);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#af560715d05f0e2b56ec6374fab2956c2">   35</a></span>  <span class="keyword">explicit</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#af560715d05f0e2b56ec6374fab2956c2">DerivativeTimeFilter</a>(wpi::units::second_t debouncerPeriod);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#ad4e2a4083d820c19b2d9907e272be933">   46</a></span>  <span class="keywordtype">double</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#ad4e2a4083d820c19b2d9907e272be933">Derivative</a>(<span class="keywordtype">double</span> current, wpi::units::second_t dt);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classyams_1_1math_1_1_derivative_time_filter.html#a1ea6e127ef23810bf4cb5edff717a6cb">   56</a></span>  <span class="keywordtype">double</span> <a class="code hl_function" href="classyams_1_1math_1_1_derivative_time_filter.html#a1ea6e127ef23810bf4cb5edff717a6cb">Derivative</a>(<span class="keywordtype">double</span> current);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="keywordtype">double</span> m_last{0.0};</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  uint64_t m_lastFpgaTime_us{0};</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordtype">double</span> m_value{0.0};</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  wpi::Timer m_debouncer;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  wpi::units::second_t m_debouncePeriod{0.02};</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>};</div>
 </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}  <span class="comment">// namespace yams::math</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}  <span class="comment">// namespace yams::math</span></div>
 </div>
-<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html">yams::math::DerivativeTimeFilter</a></div><div class="ttdef"><b>Definition</b> DerivativeTimeFilter.hpp:19</div></div>
+<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html">yams::math::DerivativeTimeFilter</a></div><div class="ttdef"><b>Definition</b> DerivativeTimeFilter.hpp:18</div></div>
 <div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_a1ea6e127ef23810bf4cb5edff717a6cb"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#a1ea6e127ef23810bf4cb5edff717a6cb">yams::math::DerivativeTimeFilter::Derivative</a></div><div class="ttdeci">double Derivative(double current)</div></div>
-<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_a48a32362a04d8fde41f2cc2637035765"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#a48a32362a04d8fde41f2cc2637035765">yams::math::DerivativeTimeFilter::Derivative</a></div><div class="ttdeci">double Derivative(double current, units::second_t dt)</div></div>
-<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_a6dbedde06f4f67322e46766e68eddffc"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#a6dbedde06f4f67322e46766e68eddffc">yams::math::DerivativeTimeFilter::DerivativeTimeFilter</a></div><div class="ttdeci">DerivativeTimeFilter(units::second_t debouncerPeriod)</div></div>
-<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_aa10069570a57fe50682194c2bd15b0fe"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#aa10069570a57fe50682194c2bd15b0fe">yams::math::DerivativeTimeFilter::DerivativeTimeFilter</a></div><div class="ttdeci">DerivativeTimeFilter(double initial, units::second_t debouncerPeriod)</div></div>
-<div class="ttc" id="anamespaceyams_1_1math_html"><div class="ttname"><a href="namespaceyams_1_1math.html">yams::math</a></div><div class="ttdef"><b>Definition</b> DerivativeTimeFilter.hpp:11</div></div>
+<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_aa86683ad63a3dcd064c01f47205bbdd6"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#aa86683ad63a3dcd064c01f47205bbdd6">yams::math::DerivativeTimeFilter::DerivativeTimeFilter</a></div><div class="ttdeci">DerivativeTimeFilter(double initial, wpi::units::second_t debouncerPeriod)</div></div>
+<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_ad4e2a4083d820c19b2d9907e272be933"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#ad4e2a4083d820c19b2d9907e272be933">yams::math::DerivativeTimeFilter::Derivative</a></div><div class="ttdeci">double Derivative(double current, wpi::units::second_t dt)</div></div>
+<div class="ttc" id="aclassyams_1_1math_1_1_derivative_time_filter_html_af560715d05f0e2b56ec6374fab2956c2"><div class="ttname"><a href="classyams_1_1math_1_1_derivative_time_filter.html#af560715d05f0e2b56ec6374fab2956c2">yams::math::DerivativeTimeFilter::DerivativeTimeFilter</a></div><div class="ttdeci">DerivativeTimeFilter(wpi::units::second_t debouncerPeriod)</div></div>
+<div class="ttc" id="anamespaceyams_1_1math_html"><div class="ttname"><a href="namespaceyams_1_1math.html">yams::math</a></div><div class="ttdef"><b>Definition</b> DerivativeTimeFilter.hpp:10</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

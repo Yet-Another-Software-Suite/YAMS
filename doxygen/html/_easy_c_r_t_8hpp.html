@@ -86,7 +86,7 @@ $(function() {
 <p>Absolute angle solver for a gear that turns more than once, read by two absolute encoders.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;units/angle.h&gt;</code><br />
+<code>#include &lt;wpi/units/angle.hpp&gt;</code><br />
 </div>
 <p><a href="_easy_c_r_t_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -110,12 +110,12 @@ Namespaces</h2></td></tr>
 <div class="line"><a class="code hl_class" href="classyams_1_1units_1_1_easy_c_r_t.html">yams::units::EasyCRT</a> crt{100, 19, 21};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Read once at startup, while the mechanism is not moving.</span></div>
-<div class="line">std::optional&lt;::units::turn_t&gt; turretAngle =</div>
-<div class="line">    crt.<a class="code hl_function" href="classyams_1_1units_1_1_easy_c_r_t.html#a463ff81d0362473038186b2786f4ea18">Solve</a>(encoderA.GetAbsolutePosition().GetValue(),</div>
+<div class="line">std::optional&lt;wpi::units::turn_t&gt; turretAngle =</div>
+<div class="line">    crt.<a class="code hl_function" href="classyams_1_1units_1_1_easy_c_r_t.html#ab54fe0c603b769662a678b00c9ea1ca1">Solve</a>(encoderA.GetAbsolutePosition().GetValue(),</div>
 <div class="line">              encoderB.GetAbsolutePosition().GetValue());</div>
 <div class="ttc" id="a_easy_c_r_t_8hpp_html"><div class="ttname"><a href="_easy_c_r_t_8hpp.html">EasyCRT.hpp</a></div><div class="ttdoc">Absolute angle solver for a gear that turns more than once, read by two absolute encoders.</div></div>
 <div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html"><div class="ttname"><a href="classyams_1_1units_1_1_easy_c_r_t.html">yams::units::EasyCRT</a></div><div class="ttdef"><b>Definition</b> EasyCRT.hpp:44</div></div>
-<div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html_a463ff81d0362473038186b2786f4ea18"><div class="ttname"><a href="classyams_1_1units_1_1_easy_c_r_t.html#a463ff81d0362473038186b2786f4ea18">yams::units::EasyCRT::Solve</a></div><div class="ttdeci">std::optional&lt;::units::turn_t &gt; Solve(::units::turn_t encoderA, ::units::turn_t encoderB) const</div></div>
+<div class="ttc" id="aclassyams_1_1units_1_1_easy_c_r_t_html_ab54fe0c603b769662a678b00c9ea1ca1"><div class="ttname"><a href="classyams_1_1units_1_1_easy_c_r_t.html#ab54fe0c603b769662a678b00c9ea1ca1">yams::units::EasyCRT::Solve</a></div><div class="ttdeci">std::optional&lt; wpi::units::turn_t &gt; Solve(wpi::units::turn_t encoderA, wpi::units::turn_t encoderB) const</div></div>
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

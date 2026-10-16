@@ -91,10 +91,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a8cd0cfa2fc9b06cfc40981b383106dd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89f927d96ed21ff9bcdbb974047f3e80" id="r_a89f927d96ed21ff9bcdbb974047f3e80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89f927d96ed21ff9bcdbb974047f3e80">SetDefaultValue</a> (T value)</td></tr>
 <tr class="separator:a89f927d96ed21ff9bcdbb974047f3e80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4e0d1555a7adfdf81af0b276d54a9d3" id="r_ab4e0d1555a7adfdf81af0b276d54a9d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4e0d1555a7adfdf81af0b276d54a9d3">SetupNetworkTables</a> (std::shared_ptr&lt; nt::NetworkTable &gt; dataTable, std::shared_ptr&lt; nt::NetworkTable &gt; tuningTable)</td></tr>
-<tr class="separator:ab4e0d1555a7adfdf81af0b276d54a9d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2a44f4958ca7e48d31726a9fae86631" id="r_af2a44f4958ca7e48d31726a9fae86631"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2a44f4958ca7e48d31726a9fae86631">SetupNetworkTable</a> (std::shared_ptr&lt; nt::NetworkTable &gt; dataTable)</td></tr>
-<tr class="separator:af2a44f4958ca7e48d31726a9fae86631"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1c69434a1122b5e175d920f091127b3" id="r_af1c69434a1122b5e175d920f091127b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af1c69434a1122b5e175d920f091127b3">SetupNetworkTables</a> (std::shared_ptr&lt; wpi::nt::NetworkTable &gt; dataTable, std::shared_ptr&lt; wpi::nt::NetworkTable &gt; tuningTable)</td></tr>
+<tr class="separator:af1c69434a1122b5e175d920f091127b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd34069cbb1861ab287a492e14f4b419" id="r_acd34069cbb1861ab287a492e14f4b419"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd34069cbb1861ab287a492e14f4b419">SetupNetworkTable</a> (std::shared_ptr&lt; wpi::nt::NetworkTable &gt; dataTable)</td></tr>
+<tr class="separator:acd34069cbb1861ab287a492e14f4b419"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac762a63a45a61d2c96e7ffe20153e753" id="r_ac762a63a45a61d2c96e7ffe20153e753"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac762a63a45a61d2c96e7ffe20153e753">SetupDataLog</a> (const std::string &amp;prefix)</td></tr>
 <tr class="separator:ac762a63a45a61d2c96e7ffe20153e753"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a427d7138e56baef4e0e9cf389afb5dd7" id="r_a427d7138e56baef4e0e9cf389afb5dd7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a427d7138e56baef4e0e9cf389afb5dd7">Set</a> (const T &amp;value)</td></tr>
@@ -515,8 +515,8 @@ template&lt;typename T , typename F &gt; </div>
 
 </div>
 </div>
-<a id="af2a44f4958ca7e48d31726a9fae86631" name="af2a44f4958ca7e48d31726a9fae86631"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2a44f4958ca7e48d31726a9fae86631">&#9670;&#160;</a></span>SetupNetworkTable()</h2>
+<a id="acd34069cbb1861ab287a492e14f4b419" name="acd34069cbb1861ab287a492e14f4b419"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd34069cbb1861ab287a492e14f4b419">&#9670;&#160;</a></span>SetupNetworkTable()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -529,7 +529,7 @@ template&lt;typename T , typename F &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classyams_1_1telemetry_1_1_struct_telemetry.html">yams::telemetry::StructTelemetry</a>&lt; T, F &gt;::SetupNetworkTable </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>dataTable</em></span></td><td>)</td>
+          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>dataTable</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -549,8 +549,8 @@ template&lt;typename T , typename F &gt; </div>
 
 </div>
 </div>
-<a id="ab4e0d1555a7adfdf81af0b276d54a9d3" name="ab4e0d1555a7adfdf81af0b276d54a9d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4e0d1555a7adfdf81af0b276d54a9d3">&#9670;&#160;</a></span>SetupNetworkTables()</h2>
+<a id="af1c69434a1122b5e175d920f091127b3" name="af1c69434a1122b5e175d920f091127b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1c69434a1122b5e175d920f091127b3">&#9670;&#160;</a></span>SetupNetworkTables()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -563,12 +563,12 @@ template&lt;typename T , typename F &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classyams_1_1telemetry_1_1_struct_telemetry.html">yams::telemetry::StructTelemetry</a>&lt; T, F &gt;::SetupNetworkTables </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>dataTable</em>, </span></td>
+          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>dataTable</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::shared_ptr&lt; nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>tuningTable</em></span>&#160;)</td>
+          <td class="paramtype">std::shared_ptr&lt; wpi::nt::NetworkTable &gt;</td>          <td class="paramname"><span class="paramname"><em>tuningTable</em></span>&#160;)</td>
         </tr>
       </table>
   </td>

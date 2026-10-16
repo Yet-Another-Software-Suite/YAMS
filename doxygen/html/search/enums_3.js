@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['halvaluetype_0',['HALValueType',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8ca',1,'yams::motorcontrollers::simulation::SensorData']]]
+  ['gyroaxis_0',['GyroAxis',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66a',1,'yams::mechanisms::config']]]
 ];

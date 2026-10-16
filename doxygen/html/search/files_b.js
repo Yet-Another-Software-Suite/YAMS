@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['yams_2ehpp_0',['YAMS.hpp',['../YAMS_8hpp.html',1,'']]],
-  ['yunits_2ehpp_1',['YUnits.hpp',['../YUnits_8hpp.html',1,'']]]
+  ['talonfxswrapper_2ehpp_0',['TalonFXSWrapper.hpp',['../TalonFXSWrapper_8hpp.html',1,'']]],
+  ['talonfxwrapper_2ehpp_1',['TalonFXWrapper.hpp',['../TalonFXWrapper_8hpp.html',1,'']]]
 ];

@@ -75,7 +75,9 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">yams::mechanisms::config Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -96,7 +98,99 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html">SwerveModuleConfig</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a2330abe78bb98cf43a364422e289a66a" id="r_a2330abe78bb98cf43a364422e289a66a"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66a">GyroAxis</a> { <a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aa08cd1a31f17f0247ac89e2fbaadaa9e8">ROLL</a>
+, <a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aa79cc664d2e33a452df89eb4904e8ca1c">PITCH</a>
+, <a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37">YAW</a>
+ }</td></tr>
+<tr class="separator:a2330abe78bb98cf43a364422e289a66a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a03d3f8bf126f3fe195dfb92ef5a7b63b" id="r_a03d3f8bf126f3fe195dfb92ef5a7b63b"><td class="memItemLeft" align="right" valign="top">wpi::math::Rotation3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a03d3f8bf126f3fe195dfb92ef5a7b63b">ToRobotAttitude</a> (<a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66a">GyroAxis</a> axis, const wpi::math::Rotation3d &amp;gyroAttitude)</td></tr>
+<tr class="separator:a03d3f8bf126f3fe195dfb92ef5a7b63b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="a2330abe78bb98cf43a364422e289a66a" name="a2330abe78bb98cf43a364422e289a66a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2330abe78bb98cf43a364422e289a66a">&#9670;&#160;</a></span>GyroAxis</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66a">yams::mechanisms::config::GyroAxis</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The gyro axis that points up through the robot, for a gyro that is not mounted flat.</p>
+<p>A swerve drive needs the robot's heading, which is rotation about the axis pointing up through the robot. A gyro mounted flat reports that as its yaw. A gyro mounted on its side reports it as its roll or its pitch instead. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a2330abe78bb98cf43a364422e289a66aa08cd1a31f17f0247ac89e2fbaadaa9e8" name="a2330abe78bb98cf43a364422e289a66aa08cd1a31f17f0247ac89e2fbaadaa9e8"></a>ROLL&#160;</td><td class="fielddoc"><p>The gyro's X axis points up. The gyro's Y axis is taken to point to the robot's left. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a2330abe78bb98cf43a364422e289a66aa79cc664d2e33a452df89eb4904e8ca1c" name="a2330abe78bb98cf43a364422e289a66aa79cc664d2e33a452df89eb4904e8ca1c"></a>PITCH&#160;</td><td class="fielddoc"><p>The gyro's Y axis points up. The gyro's X axis is taken to point to the robot's front. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37" name="a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37"></a>YAW&#160;</td><td class="fielddoc"><p>The gyro's Z axis points up: the gyro is mounted flat. This is the default. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="a03d3f8bf126f3fe195dfb92ef5a7b63b" name="a03d3f8bf126f3fe195dfb92ef5a7b63b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03d3f8bf126f3fe195dfb92ef5a7b63b">&#9670;&#160;</a></span>ToRobotAttitude()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::math::Rotation3d yams::mechanisms::config::ToRobotAttitude </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66a">GyroAxis</a>&#160;</td>
+          <td class="paramname"><em>axis</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const wpi::math::Rotation3d &amp;&#160;</td>
+          <td class="paramname"><em>gyroAttitude</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Rotate a gyro's attitude into the robot's frame, so the yaw of the result is the robot's heading and its roll and pitch are the robot's tilt, whichever way the gyro is mounted.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">axis</td><td>The gyro axis that points up through the robot. </td></tr>
+    <tr><td class="paramname">gyroAttitude</td><td>The attitude the gyro reports. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The robot's attitude. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

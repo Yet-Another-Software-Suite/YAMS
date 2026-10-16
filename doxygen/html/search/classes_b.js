@@ -31,5 +31,6 @@ var searchData=
   ['swervemodule_28',['SwerveModule',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveModule.html',1,'yams::mechanisms::swerve']]],
   ['swervemoduleconfig_29',['SwerveModuleConfig',['../classyams_1_1mechanisms_1_1config_1_1SwerveModuleConfig.html',1,'yams::mechanisms::config']]],
   ['swervemoduletelemetry_30',['SwerveModuleTelemetry',['../classyams_1_1telemetry_1_1SwerveModuleTelemetry.html',1,'yams::telemetry']]],
-  ['swervemoduletelemetryconfig_31',['SwerveModuleTelemetryConfig',['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html',1,'yams::telemetry']]]
+  ['swervemoduletelemetryconfig_31',['SwerveModuleTelemetryConfig',['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html',1,'yams::telemetry']]],
+  ['swervemodulevelocitywithazimuth_32',['SwerveModuleVelocityWithAzimuth',['../structyams_1_1mechanisms_1_1swerve_1_1SwerveModuleVelocityWithAzimuth.html',1,'yams::mechanisms::swerve']]]
 ];

@@ -1,0 +1,56 @@
+{
+    "fileName": "yams_commands2.json",
+    "name": "Yet Another Mechanism System (Commands v2)",
+    "version": "2026.10.15",
+    "wpilibYear": "2027_alpha7",
+    "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
+    "mavenUrls": [
+        "https://cdn.yassrobotics.com/"
+    ],
+    "jsonUrl": "https://cdn.yassrobotics.com/yams_commands2.json",
+    "javaDependencies": [
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-core",
+            "version": "2026.10.15"
+        },
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-commands2",
+            "version": "2026.10.15"
+        }
+    ],
+    "cppDependencies": [
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-cpp",
+            "version": "2026.10.15",
+            "libName": "YAMS",
+            "headerClassifier": "headers",
+            "sharedLibrary": true,
+            "skipInvalidPlatforms": true,
+            "binaryPlatforms": [
+                "windowsx86-64",
+                "linuxarm64",
+                "linuxx86-64",
+                "linuxsystemcore",
+                "osxuniversal"
+            ]
+        }
+    ],
+    "jniDependencies": [],
+    "requires": [
+        {
+            "uuid": "111e20f7-815e-48f8-9dd6-e675ce75b266",
+            "errorMessage": "Commands V2 is required! Install it from the WPILib vendor libraries.",
+            "offlineFileName": "CommandsV2.json"
+        }
+    ],
+    "conflictsWith": [
+        {
+            "uuid": "9eadd383-6bdc-4107-957a-b50cd3146f17",
+            "errorMessage": "Yet Another Mechanism System (Commands v2) cannot be used with Yet Another Mechanism System (Commands v3). Remove one of them.",
+            "offlineFileName": "yams_commands3.json"
+        }
+    ]
+}

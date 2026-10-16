@@ -1,7 +1,7 @@
 {
     "fileName": "yams_commands3.json",
     "name": "Yet Another Mechanism System (Commands v3)",
-    "version": "2026.10.09",
+    "version": "2026.10.15",
     "wpilibYear": "2027_alpha7",
     "uuid": "9eadd383-6bdc-4107-957a-b50cd3146f17",
     "mavenUrls": [
@@ -12,12 +12,12 @@
         {
             "groupId": "yams",
             "artifactId": "YAMS-core",
-            "version": "2026.10.09"
+            "version": "2026.10.15"
         },
         {
             "groupId": "yams",
             "artifactId": "YAMS-commands3",
-            "version": "2026.10.09"
+            "version": "2026.10.15"
         }
     ],
     "cppDependencies": [],
@@ -26,8 +26,7 @@
         {
             "uuid": "4decdc05-a056-46cf-9561-39449bbb0130",
             "errorMessage": "Commands v3 is required! Install it from the WPILib vendor libraries.",
-            "offlineFileName": "CommandsV3.json",
-            "onlineUrl": ""
+            "offlineFileName": "CommandsV3.json"
         }
     ],
     "conflictsWith": [

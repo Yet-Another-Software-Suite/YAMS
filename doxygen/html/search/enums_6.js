@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['structarraytelemetryfield_0',['StructArrayTelemetryField',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ae98cb7badf234d5f70f02f0ca32acdbc',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
-  ['structtelemetryfield_1',['structtelemetryfield',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0',1,'yams::telemetry::SwerveDriveTelemetryConfig::StructTelemetryField'],['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#a187f08aa9125f5a772017cdbf2c5c345',1,'yams::telemetry::SwerveModuleTelemetryConfig::StructTelemetryField']]]
+  ['motorarrangement_0',['MotorArrangement',['../classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a5824bb1070aa6c7842b38f019ecb014f',1,'yams::motorcontrollers::remote::TalonFXSWrapper']]],
+  ['motormode_1',['MotorMode',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#aefe3e39d1d0073649bc288c817d3de5b',1,'yams::motorcontrollers::SmartMotorControllerConfig']]]
 ];

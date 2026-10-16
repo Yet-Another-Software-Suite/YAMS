@@ -85,12 +85,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa10069570a57fe50682194c2bd15b0fe" id="r_aa10069570a57fe50682194c2bd15b0fe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#aa10069570a57fe50682194c2bd15b0fe">DerivativeTimeFilter</a> (double initial, units::second_t debouncerPeriod)</td></tr>
-<tr class="separator:aa10069570a57fe50682194c2bd15b0fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6dbedde06f4f67322e46766e68eddffc" id="r_a6dbedde06f4f67322e46766e68eddffc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#a6dbedde06f4f67322e46766e68eddffc">DerivativeTimeFilter</a> (units::second_t debouncerPeriod)</td></tr>
-<tr class="separator:a6dbedde06f4f67322e46766e68eddffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48a32362a04d8fde41f2cc2637035765" id="r_a48a32362a04d8fde41f2cc2637035765"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#a48a32362a04d8fde41f2cc2637035765">Derivative</a> (double current, units::second_t dt)</td></tr>
-<tr class="separator:a48a32362a04d8fde41f2cc2637035765"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa86683ad63a3dcd064c01f47205bbdd6" id="r_aa86683ad63a3dcd064c01f47205bbdd6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#aa86683ad63a3dcd064c01f47205bbdd6">DerivativeTimeFilter</a> (double initial, wpi::units::second_t debouncerPeriod)</td></tr>
+<tr class="separator:aa86683ad63a3dcd064c01f47205bbdd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af560715d05f0e2b56ec6374fab2956c2" id="r_af560715d05f0e2b56ec6374fab2956c2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#af560715d05f0e2b56ec6374fab2956c2">DerivativeTimeFilter</a> (wpi::units::second_t debouncerPeriod)</td></tr>
+<tr class="separator:af560715d05f0e2b56ec6374fab2956c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4e2a4083d820c19b2d9907e272be933" id="r_ad4e2a4083d820c19b2d9907e272be933"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#ad4e2a4083d820c19b2d9907e272be933">Derivative</a> (double current, wpi::units::second_t dt)</td></tr>
+<tr class="separator:ad4e2a4083d820c19b2d9907e272be933"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ea6e127ef23810bf4cb5edff717a6cb" id="r_a1ea6e127ef23810bf4cb5edff717a6cb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1math_1_1DerivativeTimeFilter.html#a1ea6e127ef23810bf4cb5edff717a6cb">Derivative</a> (double current)</td></tr>
 <tr class="separator:a1ea6e127ef23810bf4cb5edff717a6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -98,8 +98,8 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Computes the time-derivative of a scalar value, debounced to avoid updating too frequently.</p>
 <p>The derivative is computed over the elapsed FPGA time between calls and is gated by a configurable debounce period so high-frequency callers still receive stable readings. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa10069570a57fe50682194c2bd15b0fe" name="aa10069570a57fe50682194c2bd15b0fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa10069570a57fe50682194c2bd15b0fe">&#9670;&#160;</a></span>DerivativeTimeFilter() <span class="overload">[1/2]</span></h2>
+<a id="aa86683ad63a3dcd064c01f47205bbdd6" name="aa86683ad63a3dcd064c01f47205bbdd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa86683ad63a3dcd064c01f47205bbdd6">&#9670;&#160;</a></span>DerivativeTimeFilter() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -113,7 +113,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">units::second_t&#160;</td>
+          <td class="paramtype">wpi::units::second_t&#160;</td>
           <td class="paramname"><em>debouncerPeriod</em>&#160;</td>
         </tr>
         <tr>
@@ -135,8 +135,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a6dbedde06f4f67322e46766e68eddffc" name="a6dbedde06f4f67322e46766e68eddffc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6dbedde06f4f67322e46766e68eddffc">&#9670;&#160;</a></span>DerivativeTimeFilter() <span class="overload">[2/2]</span></h2>
+<a id="af560715d05f0e2b56ec6374fab2956c2" name="af560715d05f0e2b56ec6374fab2956c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af560715d05f0e2b56ec6374fab2956c2">&#9670;&#160;</a></span>DerivativeTimeFilter() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -147,7 +147,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">yams::math::DerivativeTimeFilter::DerivativeTimeFilter </td>
           <td>(</td>
-          <td class="paramtype">units::second_t&#160;</td>
+          <td class="paramtype">wpi::units::second_t&#160;</td>
           <td class="paramname"><em>debouncerPeriod</em></td><td>)</td>
           <td></td>
         </tr>
@@ -196,8 +196,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a48a32362a04d8fde41f2cc2637035765" name="a48a32362a04d8fde41f2cc2637035765"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48a32362a04d8fde41f2cc2637035765">&#9670;&#160;</a></span>Derivative() <span class="overload">[2/2]</span></h2>
+<a id="ad4e2a4083d820c19b2d9907e272be933" name="ad4e2a4083d820c19b2d9907e272be933"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4e2a4083d820c19b2d9907e272be933">&#9670;&#160;</a></span>Derivative() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -211,7 +211,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">units::second_t&#160;</td>
+          <td class="paramtype">wpi::units::second_t&#160;</td>
           <td class="paramname"><em>dt</em>&#160;</td>
         </tr>
         <tr>

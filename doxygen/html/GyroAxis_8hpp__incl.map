@@ -1,0 +1,11 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/GyroAxis.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/mechanisms/config/GyroAxis.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="278,5,470,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,123,84,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="279,71,98,122,96,117,277,66"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="108,123,363,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="325,77,266,117,263,112,322,73"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="387,123,641,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="426,73,487,113,484,117,423,77"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="665,123,814,148"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="471,63,682,117,681,122,470,68"/>
+</map>
