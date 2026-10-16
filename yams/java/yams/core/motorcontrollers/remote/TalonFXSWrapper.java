@@ -87,6 +87,7 @@ import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
+import yams.core.motorcontrollers.Motors;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
@@ -200,8 +201,9 @@ public class TalonFXSWrapper extends SmartMotorController {
    *                                                    rejects the config.
    * @throws SmartMotorControllerConfigurationException if the motor is a single NEO 550 without
    *                                                    a stator current limit of at most 40A.
-   * @throws IllegalArgumentException                   if motor is not a Minion, NEO, NEO 550, or
-   *                                                    NEO Vortex.
+   * @throws IllegalArgumentException                   if motor is not a Minion, NEO, NEO 550, NEO
+   *                                                    Vortex, or Thrifty Pulsar
+   *                                                    ({@link Motors#getThriftyPulsar(int)}).
    * @throws IllegalArgumentException                   if
    *                                                    {@link #applyConfig(SmartMotorControllerConfig)}
    *                                                    rejects an unsupported option (see its
@@ -259,6 +261,11 @@ public class TalonFXSWrapper extends SmartMotorController {
           found = true;
           break;
         } else if (isMotor(motor, DCMotor.getNeoVortex(i))) {
+          m_talonConfig.Commutation.withMotorArrangement(MotorArrangementValue.VORTEX_JST);
+          found = true;
+          break;
+        } else if (isMotor(motor, Motors.getThriftyPulsar(i))) {
+          // The Pulsar is wired and commutated like a NEO
           m_talonConfig.Commutation.withMotorArrangement(MotorArrangementValue.NEO_JST);
           found = true;
           break;
