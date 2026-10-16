@@ -5,6 +5,9 @@ robot project means updating WPILib and the vendor libraries, installing a new Y
 changing imports for the package split, and fixing a handful of renamed APIs. Each step is
 covered below, with a [checklist](#checklist) at the end.
 
+Already on YAMS 2027 v2026.10.09? See
+[Updating from v2026.10.09 to v2026.10.15](#updating-from-v20261009-to-v20261015).
+
 ## WPILib 2027
 
 - WPILib Java packages are now `org.wpilib.*` (`org.wpilib.units.Units`,
@@ -251,6 +254,68 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
    Triggers.
 7. If you set up motor controller telemetry yourself, call `setupLiveTuning()` after
    `setupTelemetry(...)` to get the "Live Tuning" command.
+
+## Updating from v2026.10.09 to v2026.10.15
+
+If you already moved to YAMS 2027 with v2026.10.09, these are the changes that can affect your
+code or your tuning. The vendordep URLs are the same; update the version in your vendordep (or
+reinstall it from `cdn.yassrobotics.com`).
+
+### Changes that can need code or gain changes
+
+- **EasyCRT takes tooth counts and two readings.** `EasyCRTConfig` is removed; see
+  [EasyCRT](#easycrt) above. `EasyCRTConfigGuide.md` is now `EasyCRTGuide.md`.
+- **An `ArmFeedforward`'s kV and kA are per rotation everywhere.** YAMS documents its feedforward
+  gains per rotation, and the Talon and SPARK wrappers already sent them to the motor controller
+  that way. Only the closed loop on the SystemCore (such as the Thrifty Nova's) read them per
+  radian. It now reads them per rotation too, so the same kV and kA give 2π times less voltage
+  there. If you tuned an arm's kV or kA on the SystemCore with v2026.10.09, multiply them by 2π
+  (`Rotations.of(1).in(Radians)`) to keep the same behaviour.
+- **The temperature cutoff is only accepted where it is checked.** `withTemperatureCutoff(...)` is
+  enforced by the closed loop on the SystemCore. A SPARK now rejects it with a trapezoidal profile,
+  which runs on the SPARK, and accepts it with an exponential profile or LQR. A TalonFX or TalonFXS
+  accepts it with an LQR controller, where it was rejected before.
+- **`SwerveModule.lock(Rotation2d)` is now `setAzimuthAngle(Rotation2d)`.** It turns the wheel
+  without driving it. `SwerveDrive.setAzimuthAngles(Rotation2d)` turns every module to one angle,
+  which azimuth live tuning now uses, so it turns the modules again.
+- **The external encoder telemetry is only published when there is an external encoder.**
+  `externalencoder/position` and `externalencoder/velocity` keep their names, and hold the
+  mechanism position and velocity.
+
+### Fixes
+
+- **Simulated SPARKs follow their profile and feedforward.** REVLib's simulation does not run
+  MAXMotion, and works out kCos from the setpoint instead of the position, so in simulation a
+  SPARK with a trapezoidal profile runs the profile on the SystemCore and sends kV, kA and an
+  arm's gravity as an arbitrary feedforward. On the robot it still uses MAXMotion. See
+  [wpilibsuite/SystemcoreTesting#425](https://github.com/wpilibsuite/SystemcoreTesting/issues/425).
+- **Simulated SPARKs start where they should and report their real voltage.** A simulated SPARK
+  started at its starting position divided by the gear ratio, and reported a voltage that was off
+  by the gear ratio.
+- **Every motor controller reacts the same to the same gains.** The SPARK MAX, SPARK Flex,
+  TalonFX, TalonFXS and Thrifty Nova are now tested to give the same voltage for the same kP, kI,
+  kD, kS, kV, kA and kG in YAMS units, from every closed loop slot. This also fixed an elevator
+  feedforward under velocity control on the SystemCore (the Nova), which left out kV.
+- A mechanism iterating its simulation no longer replaces the shared `BatterySim` voltage.
+- `ExponentialProfilePIDController.createConstraints(...)` is fixed.
+- `DifferentialMechanism.set(...)` mixes its two outputs correctly.
+- C++ swerve fixes that Java already had, and C++ swerve azimuth live tuning.
+- The vendordep JSONs now require the matching WPILib command library (`command2` or `command3`).
+
+### New
+
+- **`SwerveDrive.driveToPose(pose, translationTolerance, rotationTolerance)`** in Commands v2, as
+  Commands v3 already had: it ends once the robot is within the tolerances. `isNear(pose,
+  translationTolerance, rotationTolerance)` and `stop()` are on the shared `SwerveDrive` for both.
+- **`SwerveInputStream` aim options**, carried over from YAGSL 2026: `withAimLookahead(Time)`,
+  `withAimFeedforward(SimpleMotorFeedforward)`, `withAimHeadingOffset(Rotation2d)`,
+  `isAimLocked(Angle)` and the `aimLock(Angle)` Trigger, `getTargetVector(Pose2d)` and
+  `calculateAngularVelocity(Angle)`. Aiming without them behaves as before.
+- **`SmartMechanism.getMeasurementSetpoint()`**: the setpoint as a distance, for linear
+  mechanisms.
+- **The C++ swerve drive matches the Java one**: the 3D gyro and gyro heading axis, anti-tipping,
+  module speed desaturation, the coupling ratio, feedforward forces and the default velocity
+  deadband.
 
 ## Why this split
 
