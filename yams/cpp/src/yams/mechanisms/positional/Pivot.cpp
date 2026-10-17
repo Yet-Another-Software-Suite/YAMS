@@ -131,14 +131,20 @@ void Pivot::SimIterate() {
     m_smc->SimIterate();
     ss->StarveUpdateSim();
 
+    // The DCMotorSim has no hard stops, so a pivot that reaches one is put back on it and stopped,
+    // as a real hard stop stops it. A hard stop stops the pivot where it really is, which the
+    // encoder can lag.
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
+    const wpi::units::turn_t simulatedPosition = ss->GetMechanismPosition();
     if (m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
-        GetAngle() < *m_pivotConfig->GetMinAngle()) {
+        simulatedPosition < *m_pivotConfig->GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMinAngle());
+      m_dcMotorSim->SetAngularVelocity(wpi::units::radians_per_second_t{0});
     }
     if (m_pivotConfig->GetMaxAngle() && simVelRadPerSec > 0.0 &&
-        GetAngle() > *m_pivotConfig->GetMaxAngle()) {
+        simulatedPosition > *m_pivotConfig->GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMaxAngle());
+      m_dcMotorSim->SetAngularVelocity(wpi::units::radians_per_second_t{0});
     }
     VisualizationUpdate();
   }

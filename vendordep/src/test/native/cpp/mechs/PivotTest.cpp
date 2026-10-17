@@ -6,11 +6,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <thread>
+#include <vector>
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/math/system/DCMotor.hpp>
@@ -210,6 +212,57 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.PivotPositionPID", "[PivotTest]") 
       wpi::cmd::CommandScheduler::GetInstance().Schedule(highPid);
 
       PositionPIDTestBody(bundle.smc, IsCTRE(bundle));
+      CloseBundle(bundle);
+      delete pivot;
+    }
+  }
+}
+
+// A pivot driven into its hard stops stays on them. Its DCMotorSim has no hard stops, so the pivot
+// is put back on the stop it passes, and stopped there, or it flies past again on the next loop.
+TEST_CASE_METHOD(PivotTestFixture, "PivotTest.HardStops", "[PivotTest]") {
+  constexpr double kLowerHardStopDegrees = -30.0;
+  constexpr double kUpperHardStopDegrees = 60.0;
+  for (auto& param : AllMotorParams()) {
+    if (param.profile != ProfileType::None) continue;
+    DYNAMIC_SECTION(param.name) {
+      auto cfg = MakePivotSMCConfig(param.profile, param.hardware, nullptr, param.name);
+      auto bundle = MakeBundle(param, cfg);
+      bundle.smc->SetupSimulation();
+      bundle.subsystem->m_testRunning = true;
+      auto* pivotCfg = new PivotConfig;
+      pivotCfg->WithMinAngle(wpi::units::degree_t{kLowerHardStopDegrees})
+          .WithMaxAngle(wpi::units::degree_t{kUpperHardStopDegrees});
+      auto* pivot = new positional::Pivot(pivotCfg, bundle.smc);
+      bundle.subsystem->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };
+      bundle.subsystem->m_mechUpdateTelemetry = [pivot] { pivot->UpdateTelemetry(); };
+      const bool isCTRE = IsCTRE(bundle);
+      // Phoenix runs its simulated Talons in real time.
+      auto pace = [isCTRE] {
+        if (isCTRE) std::this_thread::sleep_for(std::chrono::milliseconds(20));
+      };
+
+      // The commands outlive their runs: the scheduler holds on to them.
+      std::vector<wpi::cmd::CommandPtr> commands;
+      for (double dutyCycle : {0.5, -0.5}) {
+        const double stop = dutyCycle > 0 ? kUpperHardStopDegrees : kLowerHardStopDegrees;
+        commands.push_back(bundle.subsystem->SetDutyCycle(dutyCycle));
+        wpi::cmd::CommandScheduler::GetInstance().Schedule(commands.back());
+        // Long enough to reach the stop from the other one.
+        SchedulerHelper::RunForDuration(2.0_s, pace);
+        // Pushed against the stop, the pivot must stay on it, loop after loop.
+        double furthestPast = 0.0;
+        SchedulerHelper::RunForDuration(0.5_s, [&] {
+          pace();
+          const double simulated =
+              wpi::units::degree_t{bundle.smc->GetSimSupplier()->GetMechanismPosition()}.value();
+          furthestPast = std::max(furthestPast, dutyCycle > 0 ? simulated - stop : stop - simulated);
+        });
+        INFO(param.name << " pivot went " << furthestPast << " deg past its hard stop at " << stop
+                        << " deg");
+        CHECK(furthestPast < 1.0);
+      }
+      SchedulerHelper::CancelAll();
       CloseBundle(bundle);
       delete pivot;
     }
