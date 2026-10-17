@@ -517,12 +517,14 @@ public class TalonFXSWrapper extends SmartMotorController {
 
   @Override
   public void setEncoderPosition(Angle angle) {
-    m_talonfxs.setPosition(angle);
-    m_cancoder.ifPresent(caNcoder -> caNcoder.setPosition(angle.in(Rotations)));
+    // Move the simulated mechanism first, so the TalonFXS keeps the new position. The TalonFXS sets its
+    // position from the rotor it has, so a rotor moved afterwards would move the position again.
     m_simSupplier.ifPresent(mSim -> {
       m_talonfxs.getSimState().setRawRotorPosition(angle.times(m_config.getGearing().getMechanismToRotorRatio()));
       mSim.setMechanismPosition(angle);
     });
+    m_talonfxs.setPosition(angle);
+    m_cancoder.ifPresent(caNcoder -> caNcoder.setPosition(angle.in(Rotations)));
     // TODO: Implement absolute encoder position with external encoders, other than cancoders.
     //    m_dcmotorSim.ifPresent(dcMotorSim -> dcMotorSim.setAngle(angle.in(Radians)));
     // Might want to set absolute encoder position in the future
