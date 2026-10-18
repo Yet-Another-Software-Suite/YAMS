@@ -214,27 +214,49 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorFollowsItsHeight",
   delete elevator;
 }
 
-TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.CascadeElevatorStagesEachMoveAShareOfItsHeight", "[MechanismPose]") {
-  auto cfg = BaseConfig("PoseCascade");
+TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[MechanismPose]") {
+  // An elevator mounted 0.1 m up, with its carriage at 0.9 m.
+  auto cfg = BaseConfig("PoseStages");
   cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
-  auto bundle = Spark("PoseCascade", cfg);
+  auto bundle = Spark("PoseStages", cfg);
   bundle.smc->SetupSimulation();
   MechanismPositionConfig position;
   position.WithRelativePosition(Meters(0, 0, 0.1));
   auto* elevatorCfg = new ElevatorConfig;
   elevatorCfg->WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg).WithMechanismPositionConfig(position);
   auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
-  // Three moving stages, the carriage last: a third, two thirds and all of the carriage's 0.9 m.
-  auto stages = elevator->GetPose3d(3);
-  REQUIRE(stages.size() == 3);
-  CheckNear(Meters(0, 0, 0.4), stages[0].Translation(), "first stage");
-  CheckNear(Meters(0, 0, 0.7), stages[1].Translation(), "second stage");
-  CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
-  CHECK(stages[2] == elevator->GetPose3d());
-  auto single = elevator->GetPose3d(1);
-  REQUIRE(single.size() == 1);
-  CHECK(single[0] == elevator->GetPose3d());
-  CHECK_THROWS_AS(elevator->GetPose3d(0), std::invalid_argument);
+
+  SECTION("cascade stages each move their share of its height") {
+    auto stages = elevator->GetCascadePose3d(3, {0.4_m, 0.4_m, 0.4_m});
+    REQUIRE(stages.size() == 3);
+    CheckNear(Meters(0, 0, 0.4), stages[0].Translation(), "first stage");
+    CheckNear(Meters(0, 0, 0.7), stages[1].Translation(), "second stage");
+    CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
+    CHECK(stages[2] == elevator->GetPose3d());
+    auto uneven = elevator->GetCascadePose3d(3, {0.6_m, 0.3_m, 0.3_m});
+    CheckNear(Meters(0, 0, 0.55), uneven[0].Translation(), "first stage of uneven travel");
+    CheckNear(Meters(0, 0, 0.775), uneven[1].Translation(), "second stage of uneven travel");
+    CheckNear(Meters(0, 0, 1.0), uneven[2].Translation(), "carriage of uneven travel");
+  }
+
+  SECTION("a continuous carriage moves first") {
+    auto stages = elevator->GetContinuousPose3d(3, {0.5_m, 0.5_m, 0.5_m});
+    REQUIRE(stages.size() == 3);
+    CheckNear(Meters(0, 0, 0.1), stages[0].Translation(), "first stage");
+    CheckNear(Meters(0, 0, 0.5), stages[1].Translation(), "second stage");
+    CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
+    CHECK(stages[2] == elevator->GetPose3d());
+    auto single = elevator->GetContinuousPose3d(1, {2_m});
+    REQUIRE(single.size() == 1);
+    CHECK(single[0] == elevator->GetPose3d());
+  }
+
+  SECTION("needs a positive height for each stage") {
+    CHECK_THROWS_AS(elevator->GetCascadePose3d(0, {}), std::invalid_argument);
+    CHECK_THROWS_AS(elevator->GetCascadePose3d(3, {0.5_m, 0.5_m}), std::invalid_argument);
+    CHECK_THROWS_AS(elevator->GetContinuousPose3d(2, {0.5_m, 0_m}), std::invalid_argument);
+  }
+
   CloseBundle(bundle);
   delete elevator;
 }

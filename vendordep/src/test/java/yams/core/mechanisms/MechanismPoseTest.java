@@ -187,20 +187,51 @@ public class MechanismPoseTest {
     assertNear(new Translation3d(0, 0, 0.8), elevator.getPose3d().getTranslation(), "carriage");
   }
 
+  /** An elevator mounted 0.1 m up, with its carriage at 0.9 m. */
+  private Elevator elevatorAtNinetyCentimeters(String name) {
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config(name).withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
+    return new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
+                                            .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
+  }
+
   @Test
-  void aCascadeElevatorsStagesEachMoveAShareOfItsHeight() {
-    SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseCascade").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
-    Elevator elevator = new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
-                                                         .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
-    // Three moving stages, the carriage last: a third, two thirds and all of the carriage's 0.9 m.
-    List<Pose3d> stages = elevator.getPose3d(3);
+  void aCascadeElevatorsStagesEachMoveTheirShareOfItsHeight() {
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseCascade");
+    // Equal travel: a third, two thirds and all of the carriage's 0.9 m.
+    List<Pose3d> stages = elevator.getCascadePose3d(3, List.of(Meters.of(0.4), Meters.of(0.4), Meters.of(0.4)));
     assertEquals(3, stages.size());
     assertNear(new Translation3d(0, 0, 0.4), stages.get(0).getTranslation(), "first stage");
     assertNear(new Translation3d(0, 0, 0.7), stages.get(1).getTranslation(), "second stage");
     assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
     assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
-    assertEquals(List.of(elevator.getPose3d()), elevator.getPose3d(1), "a single stage is the carriage");
-    assertThrows(IllegalArgumentException.class, () -> elevator.getPose3d(0));
+    // The first stage travels half of the 1.2 m total, so it moves half of the carriage's height,
+    // 0.45 m, and the others a quarter each.
+    List<Pose3d> uneven = elevator.getCascadePose3d(3, List.of(Meters.of(0.6), Meters.of(0.3), Meters.of(0.3)));
+    assertNear(new Translation3d(0, 0, 0.55), uneven.get(0).getTranslation(), "first stage of uneven travel");
+    assertNear(new Translation3d(0, 0, 0.775), uneven.get(1).getTranslation(), "second stage of uneven travel");
+    assertNear(new Translation3d(0, 0, 1.0), uneven.get(2).getTranslation(), "carriage of uneven travel");
+  }
+
+  @Test
+  void aContinuousElevatorsCarriageMovesFirst() {
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuous");
+    // Each stage travels 0.5 m. The carriage takes the first 0.5 m of its 0.9 m, the second stage the
+    // other 0.4 m, and the first stage has not moved.
+    List<Pose3d> stages = elevator.getContinuousPose3d(3, List.of(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
+    assertEquals(3, stages.size());
+    assertNear(new Translation3d(0, 0, 0.1), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 0.5), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+    assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
+    assertEquals(List.of(elevator.getPose3d()), elevator.getContinuousPose3d(1, List.of(Meters.of(2))), "a single stage is the carriage");
+  }
+
+  @Test
+  void elevatorStagesNeedAPositiveHeightForEachStage() {
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseStageChecks");
+    assertThrows(IllegalArgumentException.class, () -> elevator.getCascadePose3d(0, List.of()));
+    assertThrows(IllegalArgumentException.class, () -> elevator.getCascadePose3d(3, List.of(Meters.of(0.5), Meters.of(0.5))));
+    assertThrows(IllegalArgumentException.class, () -> elevator.getContinuousPose3d(2, List.of(Meters.of(0.5), Meters.of(0))));
   }
 
   @Test
