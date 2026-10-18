@@ -188,18 +188,25 @@ public class Elevator extends SmartPositionalMechanism {
    * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
   public List<Pose3d> getCascadePose3d() {
-    double[] travel = stageTravel();
-    int stages = travel.length;
+    List<Distance> stageHeights = m_config.getStageHeights();
+    if (stageHeights.size() < 2) {
+      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
+      throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
+    }
     double total = 0;
-    for (double stageTravel : travel) {
-      total += stageTravel;
+    for (Distance stageHeight : stageHeights) {
+      total += stageHeight.in(Meters);
     }
     double height = getHeight().in(Meters);
-    double[] extension = new double[stages];
-    for (int stage = 0; stage < stages; stage++) {
-      extension[stage] = height * travel[stage] / total;
+    List<Pose3d> poses = new ArrayList<>(stageHeights.size());
+    double stageHeight = 0;
+    for (Distance travel : stageHeights) {
+      // Each stage moves its share of the carriage's height, on top of the stage below it.
+      stageHeight += height * travel.in(Meters) / total;
+      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(Meters.of(stageHeight), m_config.getAngle()));
     }
-    return stagePoses(extension);
+    return poses;
   }
 
   /**
@@ -215,43 +222,29 @@ public class Elevator extends SmartPositionalMechanism {
    * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
   public List<Pose3d> getContinuousPose3d() {
-    double[] travel = stageTravel();
-    int stages = travel.length;
-    double remaining = getHeight().in(Meters);
+    List<Distance> stageHeights = m_config.getStageHeights();
+    if (stageHeights.size() < 2) {
+      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
+      throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
+    }
+    int stages = stageHeights.size();
     double[] extension = new double[stages];
+    double remaining = getHeight().in(Meters);
     // From the carriage down, each stage takes as much of the height as it can travel. The stage
     // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
     // is always at the elevator's height.
     for (int stage = stages - 1; stage > 0; stage--) {
-      extension[stage] = stage == stages - 1 ? Math.min(remaining, travel[stage]) : Math.min(Math.max(remaining, 0), travel[stage]);
+      double travel = stageHeights.get(stage).in(Meters);
+      extension[stage] = stage == stages - 1 ? Math.min(remaining, travel) : Math.min(Math.max(remaining, 0), travel);
       remaining -= extension[stage];
     }
     extension[0] += remaining;
-    return stagePoses(extension);
-  }
-
-  /** Each moving stage's travel in meters, from the config. */
-  private double[] stageTravel() {
-    List<Distance> heights = m_config.getStageHeights();
-    if (heights.size() < 2) {
-      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
-      throw new ElevatorConfigurationException(heights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
-                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
-    }
-    double[] travel = new double[heights.size()];
-    for (int stage = 0; stage < travel.length; stage++) {
-      travel[stage] = heights.get(stage).in(Meters);
-    }
-    return travel;
-  }
-
-  /** The pose of each stage, from how far each is extended relative to the stage below it. */
-  private List<Pose3d> stagePoses(double[] extension) {
-    List<Pose3d> poses = new ArrayList<>(extension.length);
-    double height = 0;
+    List<Pose3d> poses = new ArrayList<>(stages);
+    double stageHeight = 0;
     for (double stageExtension : extension) {
-      height += stageExtension;
-      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(Meters.of(height), m_config.getAngle()));
+      stageHeight += stageExtension;
+      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(Meters.of(stageHeight), m_config.getAngle()));
     }
     return poses;
   }

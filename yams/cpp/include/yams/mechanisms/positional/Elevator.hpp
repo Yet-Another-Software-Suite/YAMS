@@ -247,11 +247,6 @@ class Elevator : public SmartPositionalMechanism {
 
 
  private:
-  /** Each moving stage's travel in meters, from the config. */
-  std::vector<double> StageTravel() const;
-
-  /** The pose of each stage, from how far each is extended relative to the stage below it. */
-  std::vector<wpi::math::Pose3d> StagePoses(const std::vector<double>& extension) const;
   config::ElevatorConfig* m_elevatorConfig{nullptr};
   std::string m_name{"Elevator"};
   std::optional<wpi::sim::ElevatorSim> m_elevatorSim;

@@ -241,58 +241,61 @@ wpi::math::Pose3d Elevator::GetPose3d() const {
   return m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(GetHeight(), m_elevatorConfig->GetAngle());
 }
 
-std::vector<double> Elevator::StageTravel() const {
-  const auto& heights = m_elevatorConfig->GetStageHeights();
-  if (heights.size() < 2) {
+std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
+  const auto& stageHeights = m_elevatorConfig->GetStageHeights();
+  if (stageHeights.size() < 2) {
     // An elevator with only a carriage has no stages to cascade or move in turn: use GetPose3d().
     throw exceptions::ElevatorConfigurationException(
-        heights.empty() ? "Elevator stages are not configured!"
-                        : "Elevator has only 1 moving stage, its carriage!",
+        stageHeights.empty() ? "Elevator stages are not configured!"
+                             : "Elevator has only 1 moving stage, its carriage!",
         "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
         "WithStages(int, std::vector<wpi::units::meter_t>) with 2 or more stages");
   }
-  std::vector<double> travel;
-  travel.reserve(heights.size());
-  for (const auto& height : heights) travel.push_back(height.value());
-  return travel;
-}
-
-std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
-  const std::vector<double> travel = StageTravel();
   double total = 0;
-  for (double stageTravel : travel) total += stageTravel;
+  for (const auto& stageHeight : stageHeights) total += stageHeight.value();
   const double height = GetHeight().value();
-  std::vector<double> extension;
-  extension.reserve(travel.size());
-  for (double stageTravel : travel) extension.push_back(height * stageTravel / total);
-  return StagePoses(extension);
+  std::vector<wpi::math::Pose3d> poses;
+  poses.reserve(stageHeights.size());
+  double stageHeight = 0;
+  for (const auto& travel : stageHeights) {
+    // Each stage moves its share of the carriage's height, on top of the stage below it.
+    stageHeight += height * travel.value() / total;
+    poses.push_back(m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(
+        wpi::units::meter_t{stageHeight}, m_elevatorConfig->GetAngle()));
+  }
+  return poses;
 }
 
 std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d() const {
-  const std::vector<double> travel = StageTravel();
-  const int stages = static_cast<int>(travel.size());
-  double remaining = GetHeight().value();
+  const auto& stageHeights = m_elevatorConfig->GetStageHeights();
+  if (stageHeights.size() < 2) {
+    // An elevator with only a carriage has no stages to cascade or move in turn: use GetPose3d().
+    throw exceptions::ElevatorConfigurationException(
+        stageHeights.empty() ? "Elevator stages are not configured!"
+                             : "Elevator has only 1 moving stage, its carriage!",
+        "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
+        "WithStages(int, std::vector<wpi::units::meter_t>) with 2 or more stages");
+  }
+  const int stages = static_cast<int>(stageHeights.size());
   std::vector<double> extension(stages, 0.0);
+  double remaining = GetHeight().value();
   // From the carriage down, each stage takes as much of the height as it can travel. The stage
   // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
   // is always at the elevator's height.
   for (int stage = stages - 1; stage > 0; stage--) {
-    extension[stage] = stage == stages - 1 ? std::min(remaining, travel[stage])
-                                           : std::min(std::max(remaining, 0.0), travel[stage]);
+    const double travel = stageHeights[stage].value();
+    extension[stage] = stage == stages - 1 ? std::min(remaining, travel)
+                                           : std::min(std::max(remaining, 0.0), travel);
     remaining -= extension[stage];
   }
   extension[0] += remaining;
-  return StagePoses(extension);
-}
-
-std::vector<wpi::math::Pose3d> Elevator::StagePoses(const std::vector<double>& extension) const {
   std::vector<wpi::math::Pose3d> poses;
-  poses.reserve(extension.size());
-  double height = 0;
+  poses.reserve(stages);
+  double stageHeight = 0;
   for (double stageExtension : extension) {
-    height += stageExtension;
+    stageHeight += stageExtension;
     poses.push_back(m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(
-        wpi::units::meter_t{height}, m_elevatorConfig->GetAngle()));
+        wpi::units::meter_t{stageHeight}, m_elevatorConfig->GetAngle()));
   }
   return poses;
 }
