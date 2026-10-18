@@ -4,7 +4,7 @@
 package yams.core.mechanisms;
 
 import java.util.Optional;
-import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.telemetry.Telemetry;
 import org.wpilib.units.measure.Angle;
@@ -203,11 +203,14 @@ public abstract class SmartMechanism {
   public abstract void visualizationUpdate();
 
   /**
-   * Get the {@link Translation3d} of the mechanism using {@link Mechanism2d} coordinates.
+   * Get the mechanism's pose relative to the robot, worked out from its motor's position and where it
+   * is mounted, as set in its {@code MechanismPositionConfig}. Publish it, such as with
+   * {@code Telemetry.log("Mechanisms/Arm/pose", arm.getPose3d())}, as a component of an AdvantageScope
+   * robot model, whose part is modeled at the mechanism's zero position about its mount.
    *
-   * @return {@link Translation3d} of the mechanism.
+   * @return {@link Pose3d} of the mechanism, relative to the robot.
    */
-  public abstract Translation3d getRelativeMechanismPosition();
+  public abstract Pose3d getPose3d();
 
   /**
    * Get the name of the mechanism.

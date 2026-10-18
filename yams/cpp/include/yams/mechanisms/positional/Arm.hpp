@@ -8,7 +8,7 @@
 #include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/units/angle.hpp>
@@ -198,11 +198,13 @@ class Arm : public SmartPositionalMechanism {
   const config::ArmConfig& GetConfig() const;
 
   /**
-   * Get the 3-D position of the arm tip relative to the robot origin.
+   * Get the arm's pose, for publishing to AdvantageScope as a component of a robot model: where
+   * it is mounted, as set in its MechanismPositionConfig, turned to the arm's angle about the axis
+   * normal to its movement plane.
    *
-   * @return Translation3d representing the mechanism endpoint.
+   * @return The pose of the arm, relative to the robot.
    */
-  wpi::math::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Pose3d GetPose3d() const override;
 
   /**
    * Directly command the arm to an angle setpoint (non-command, for use in periodic).

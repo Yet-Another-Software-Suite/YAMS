@@ -10,8 +10,6 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation3d.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -236,12 +234,8 @@ wpi::cmd::Trigger Elevator::IsNear(wpi::units::meter_t height, wpi::units::meter
 
 const config::ElevatorConfig& Elevator::GetConfig() const { return *m_elevatorConfig; }
 
-wpi::math::Translation3d Elevator::GetRelativeMechanismPosition() const {
-  if (m_mechanismLigament) {
-    return wpi::math::Translation3d{0_m, 0_m,
-                                    wpi::units::meter_t{m_mechanismLigament->GetLength()}};
-  }
-  return wpi::math::Translation3d{};
+wpi::math::Pose3d Elevator::GetPose3d() const {
+  return m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(GetHeight(), m_elevatorConfig->GetAngle());
 }
 
 void Elevator::SetHeight(wpi::units::meter_t height) { SetMeasurementPositionSetpoint(height); }

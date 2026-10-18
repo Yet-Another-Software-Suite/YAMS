@@ -8,8 +8,6 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation3d.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -225,13 +223,8 @@ wpi::cmd::Trigger Arm::IsNear(wpi::units::degree_t angle, wpi::units::degree_t w
 
 const config::ArmConfig& Arm::GetConfig() const { return *m_armConfig; }
 
-wpi::math::Translation3d Arm::GetRelativeMechanismPosition() const {
-  if (m_mechanismLigament) {
-    return wpi::math::Translation3d{
-        wpi::units::meter_t{m_mechanismLigament->GetLength()},
-        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
-  }
-  return wpi::math::Translation3d{};
+wpi::math::Pose3d Arm::GetPose3d() const {
+  return m_armConfig->GetMechanismPositionConfig().GetRotatedPose(GetAngle());
 }
 
 void Arm::SetAngle(wpi::units::degree_t angle) { SetMechanismPositionSetpoint(angle); }

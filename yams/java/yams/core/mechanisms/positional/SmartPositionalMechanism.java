@@ -65,9 +65,8 @@ import yams.core.motorcontrollers.SmartMotorController;
  * abstract methods inherited from {@link yams.core.mechanisms.SmartMechanism}:
  * </p>
  * <ul>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()} returns the
- * current 3-D position of the mechanism end-point in {@link org.wpilib.smartdashboard.Mechanism2d}
- * coordinates</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getPose3d()} returns the mechanism's pose relative
+ * to the robot, for an AdvantageScope robot model</li>
  * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()} updates
  * {@code m_mechanismLigament} (and any setpoint ligament) to reflect the current state</li>
  * <li>{@link yams.core.mechanisms.SmartMechanism#getName()} returns a human-readable mechanism

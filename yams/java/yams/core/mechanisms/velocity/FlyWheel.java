@@ -10,8 +10,7 @@ import static org.wpilib.units.Units.RPM;
 
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
-import org.wpilib.math.geometry.Rotation3d;
-import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
 import org.wpilib.simulation.DCMotorSim;
@@ -199,19 +198,15 @@ public class FlyWheel extends SmartVelocityMechanism {
   }
 
   /**
-   * Get the relative position of the mechanism, taking into account the relative position defined
-   * in the
-   * {@link MechanismPositionConfig}.
+   * Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model: where its
+   * axle is mounted, as set in its {@link MechanismPositionConfig}, turned by the wheel's position about
+   * the axis normal to its movement plane.
    *
-   * @return The relative position of the mechanism as a {@link Translation3d}.
+   * @return The flywheel's {@link Pose3d}, relative to the robot.
    */
   @Override
-  public Translation3d getRelativeMechanismPosition() {
-    Translation3d mechanismTranslation = new Translation3d(mechanismLigament.getLength(), new Rotation3d(0, 0, mechanismLigament.getAngle()));
-    if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent()) {
-      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(mechanismTranslation);
-    }
-    return mechanismTranslation;
+  public Pose3d getPose3d() {
+    return m_config.getMechanismPositionConfig().getRotatedPose(m_smc.getMechanismPosition());
   }
 
   @Override

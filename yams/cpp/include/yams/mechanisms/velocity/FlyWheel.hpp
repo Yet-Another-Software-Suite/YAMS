@@ -8,7 +8,7 @@
 #include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
@@ -285,11 +285,13 @@ class FlyWheel : public SmartVelocityMechanism {
   // ---- Misc ------------------------------------------------------------------
 
   /**
-   * Get the 3-D position of the flywheel relative to the robot origin.
+   * Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model:
+   * where its axle is mounted, as set in its MechanismPositionConfig, turned by the wheel's position
+   * about the axis normal to its movement plane.
    *
-   * @return Translation3d representing the mechanism endpoint.
+   * @return The pose of the flywheel, relative to the robot.
    */
-  wpi::math::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Pose3d GetPose3d() const override;
 
   /**
    * Get the configuration used to construct this flywheel.
