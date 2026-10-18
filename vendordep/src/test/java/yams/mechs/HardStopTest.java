@@ -10,6 +10,7 @@ import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.Seconds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -21,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -184,6 +186,45 @@ public class HardStopTest {
       // The pivot is at 0°, and the Talon says so: it did not count the move to 0° twice.
       assertEquals(0, simulatedDegrees(smc), 1, name + " simulated pivot after setting the encoder to 0° at " + moved + "°");
       assertEquals(0, smc.getMechanismPosition().in(Degrees), 1, name + " encoder after setting it to 0° at " + moved + "°");
+    } finally {
+      close(smc);
+    }
+  }
+
+  @Test
+  void pivotSimulationStartsAtItsStartingPosition() {
+    // Without setupSimulation(), which seeds the motor controller's own simulation: the pivot's
+    // simulation must start where the motor controller does, or its hard stops are off by as much.
+    SmartMotorController smc = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
+        (SmartMotorControllerConfig) config("SparkMax(start)[" + (++offset) + "]").withStartingPosition(Degrees.of(45)));
+    try {
+      subsystem(smc).setSMC(smc);
+      new Pivot(new PivotConfig().withHardLimits(Degrees.of(LOWER_HARD_STOP_DEGREES), Degrees.of(UPPER_HARD_STOP_DEGREES)), smc);
+      assertEquals(45, simulatedDegrees(smc), 1e-6, "simulated pivot at its starting position");
+    } finally {
+      close(smc);
+    }
+  }
+
+  @Test
+  void continuousPivotTurnsPastWhereItWraps() throws InterruptedException {
+    // A pivot that wraps continuously, such as a turret on a slip ring, has no hard stops: its hard
+    // limits are the range it wraps over, and it turns on past them.
+    SmartMotorController smc = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(1),
+        (SmartMotorControllerConfig) config("SparkMax(wrap)[" + (++offset) + "]")
+            .withContinuousWrapping(Rotations.of(0), Rotations.of(1))
+            .withStartingPosition(Rotations.of(0.9)));
+    try {
+      SmartMotorControllerTestSubsystem subsys = subsystem(smc);
+      subsys.setSMC(smc);
+      Pivot pivot = new Pivot(new PivotConfig().withHardLimits(Rotations.of(0), Rotations.of(1)), smc);
+      subsys.mechSimPeriodic = pivot::simIterate;
+      subsys.mechUpdateTelemetry = pivot::updateTelemetry;
+      subsys.testRunning = true;
+      TestWithScheduler.schedule(subsys.setDutyCycle(0.5));
+      TestWithScheduler.cycle(Seconds.of(1));
+      double rotations = smc.getSimSupplier().orElseThrow().getMechanismPosition().in(Rotations);
+      assertTrue(rotations > 1.05, "continuous pivot stopped at " + rotations + " rotations, where it wraps");
     } finally {
       close(smc);
     }

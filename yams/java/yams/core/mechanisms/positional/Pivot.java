@@ -94,6 +94,9 @@ public class Pivot extends SmartPositionalMechanism {
       m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor, smc.getConfig().getMOI(), smc.getConfig().getGearing().getMechanismToRotorRatio()), dcMotor));
 
       m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), smc));
+      // Start the simulated pivot where the motor controller starts, as the arm's and elevator's
+      // simulations do. Otherwise it starts at 0, away from its encoder.
+      m_smc.getSimSupplier().get().setMechanismPosition(smc.getConfig().getStartingPosition().get());
       Distance pivotLength = Inches.of(36);
       m_mechanismWindow = new Mechanism2d(pivotLength.in(Meters) * 2, pivotLength.in(Meters) * 2);
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", pivotLength.in(Meters), pivotLength.in(Meters));
@@ -206,13 +209,15 @@ public class Pivot extends SmartPositionalMechanism {
       m_smc.getSimSupplier().get().starveUpdateSim();
       // The DCMotorSim has no hard stops, so a pivot that reaches one is put back on it and stopped,
       // as a real hard stop stops it. A hard stop stops the pivot where it really is, which the
-      // encoder can lag.
+      // encoder can lag. A pivot that wraps continuously, such as a turret on a slip ring, has no
+      // hard stops: its hard limits are the range it wraps over.
       Angle simulatedPosition = m_smc.getSimSupplier().get().getMechanismPosition();
-      if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 && simulatedPosition.lt(m_config.getLowerHardLimit().get())) {
+      boolean hasHardStops = m_smc.getConfig().getContinuousWrapping().isEmpty();
+      if (hasHardStops && m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 && simulatedPosition.lt(m_config.getLowerHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
         m_dcmotorSim.get().setAngularVelocity(0);
       }
-      if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 && simulatedPosition.gt(m_config.getUpperHardLimit().get())) {
+      if (hasHardStops && m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 && simulatedPosition.gt(m_config.getUpperHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
         m_dcmotorSim.get().setAngularVelocity(0);
       }
