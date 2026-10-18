@@ -205,11 +205,17 @@ public class Pivot extends SmartPositionalMechanism {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
       m_smc.getSimSupplier().get().starveUpdateSim();
-      if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 && m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get())) {
+      // The DCMotorSim has no hard stops, so a pivot that reaches one is put back on it and stopped,
+      // as a real hard stop stops it. A hard stop stops the pivot where it really is, which the
+      // encoder can lag.
+      Angle simulatedPosition = m_smc.getSimSupplier().get().getMechanismPosition();
+      if (m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 && simulatedPosition.lt(m_config.getLowerHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
+        m_dcmotorSim.get().setAngularVelocity(0);
       }
-      if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 && m_smc.getMechanismPosition().gt(m_config.getUpperHardLimit().get())) {
+      if (m_config.getUpperHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() > 0 && simulatedPosition.gt(m_config.getUpperHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getUpperHardLimit().get());
+        m_dcmotorSim.get().setAngularVelocity(0);
       }
       visualizationUpdate();
     }

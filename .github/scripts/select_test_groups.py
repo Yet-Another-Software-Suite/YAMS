@@ -40,6 +40,9 @@ JAVA_GROUPS = [
     # (a Nova, a SPARK with an exponential profile and a SPARK with an LQR) following and stopping
     # with their leader. A TalonFX leads one, which Phoenix runs in real time.
     {"group": "loose-followers", "test-filter": '--tests "yams.mechs.LooselyCoupledFollowerTest"'},
+    # A pivot driven into its hard stops, and a Talon set to a position, on every motor controller:
+    # simulated Talons, which Phoenix runs in real time.
+    {"group": "hard-stops", "test-filter": '--tests "yams.mechs.HardStopTest"'},
     # Four module swerve drives on a Pigeon2: TalonFX and SPARK MAX both ways round, and mixes of
     # SPARK MAX, SPARK Flex, TalonFXS and TalonFX, all with the same PID gains. Also SwerveInputStream
     # aiming and telemetry for Commands v2 and v3, on SPARK MAX swerve drives, which take a second.
@@ -128,8 +131,8 @@ CPP_GROUPS = [
                      "~[NovaParity]~[TalonApi]~[TalonParity]"},
 ]
 
-JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "loose-followers",
-                         "swerve-drive", "other"}
+JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
+                         "loose-followers", "swerve-drive", "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
 
