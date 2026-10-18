@@ -317,6 +317,22 @@ reinstall it from `cdn.yassrobotics.com`).
   module speed desaturation, the coupling ratio, feedforward forces and the default velocity
   deadband.
 
+## Updating from v2026.10.15
+
+### Changes that can need code changes
+
+- **`getRelativeMechanismPosition()` is replaced by `getPose3d()`** (`GetPose3d()` in C++) on every
+  mechanism. It returns the mechanism's `Pose3d` relative to the robot, worked out from its motor's
+  position, so it works on the real robot as well as in simulation: an arm's or pivot's axis turned to
+  its angle, an elevator's carriage at its height, or a flywheel's axle turned by its position. Publish
+  it as a component of an AdvantageScope robot model. `DoubleJointedArm.getUpperPose3d()` gives the
+  upper arm's.
+- **`MechanismPositionConfig` places the mechanism in 3D.** `withRelativePosition(Transform3d)` also
+  sets how the mechanism is turned where it is mounted, and `withParent(Supplier<Pose3d>)` mounts it
+  on another mechanism, such as an arm on `elevator::getPose3d`. In C++, `MechanismPositionConfig` is
+  now this class (it was an unused, undefined named-setpoint class), and `ArmConfig`, `ElevatorConfig`,
+  `PivotConfig` and `FlyWheelConfig` take one with `WithMechanismPositionConfig(...)`.
+
 ## Why this split
 
 Separating state/physics (`yams.core`) from command-framework bindings (`yams.commands2`,

@@ -8,8 +8,6 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation3d.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -225,13 +223,8 @@ wpi::cmd::Trigger Pivot::IsNear(wpi::units::degree_t angle, wpi::units::degree_t
 
 const config::PivotConfig& Pivot::GetConfig() const { return *m_pivotConfig; }
 
-wpi::math::Translation3d Pivot::GetRelativeMechanismPosition() const {
-  if (m_mechanismLigament) {
-    return wpi::math::Translation3d{
-        wpi::units::meter_t{m_mechanismLigament->GetLength()},
-        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{GetAngle()}}};
-  }
-  return wpi::math::Translation3d{};
+wpi::math::Pose3d Pivot::GetPose3d() const {
+  return m_pivotConfig->GetMechanismPositionConfig().GetRotatedPose(GetAngle());
 }
 
 void Pivot::SetAngle(wpi::units::degree_t angle) { SetMechanismPositionSetpoint(angle); }

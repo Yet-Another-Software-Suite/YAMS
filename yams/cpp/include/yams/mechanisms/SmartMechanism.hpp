@@ -9,6 +9,7 @@
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/commands2/SubsystemBase.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
@@ -44,6 +45,14 @@ class SmartMechanism {
 
   /** Get the human-readable name of this mechanism. */
   virtual std::string GetName() const = 0;
+
+  /**
+   * Get the mechanism's pose relative to the robot, worked out from its motor's position and where
+   * it is mounted, as set in its MechanismPositionConfig. Publish it as a component of an
+   * AdvantageScope robot model, whose part is modeled at the mechanism's zero position about its
+   * mount.
+   */
+  virtual wpi::math::Pose3d GetPose3d() const = 0;
 
   // ---- Open-loop command factories ------------------------------------------
 

@@ -3,9 +3,16 @@
 
 package yams.core.mechanisms.config;
 
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Radians;
+
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation3d;
+import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.core.mechanisms.positional.SmartPositionalMechanism;
 
@@ -31,6 +38,10 @@ import yams.core.mechanisms.positional.SmartPositionalMechanism;
  * plane of the robot coordinate system. This determines which Translation3d axes are
  * mapped to the 2D canvas X and Y axes.</li>
  * </ul>
+ *
+ * <p>It also places the mechanism in 3D, for each mechanism's {@code getPose3d()}: where it is mounted
+ * on the robot, and how it is turned there, optionally on another mechanism, such as an arm on an
+ * elevator's carriage.
  *
  * <h2>Example</h2>
  * <pre>{@code
@@ -64,6 +75,14 @@ public class MechanismPositionConfig {
    * The plane that the mechanism is on, used for position calculations.
    */
   protected Plane plane = Plane.XZ;
+  /**
+   * How the mechanism is turned where it is mounted.
+   */
+  protected Rotation3d mountRotation = Rotation3d.ZERO;
+  /**
+   * The pose the mechanism is mounted on, such as another mechanism's, or the robot's origin if empty.
+   */
+  protected Optional<Supplier<Pose3d>> parent = Optional.empty();
 
   /** Create a {@link MechanismPositionConfig} with no relative position or robot size limits. */
   public MechanismPositionConfig() {}
@@ -77,6 +96,32 @@ public class MechanismPositionConfig {
    */
   public MechanismPositionConfig withRelativePosition(Translation3d robotToMechanism) {
     this.robotToMechanism = Optional.ofNullable(robotToMechanism);
+    return this;
+  }
+
+  /**
+   * Set where the mechanism is mounted, relative to the robot, or to its parent, and how it is turned
+   * there. The mechanism's pose is worked out from here: an arm's or pivot's axis, an elevator's
+   * carriage at zero height, or a flywheel's axle.
+   *
+   * @param robotToMechanism {@link Transform3d} from the robot, or from its parent, to the mechanism.
+   * @return The {@link MechanismPositionConfig}, for easy chaining.
+   */
+  public MechanismPositionConfig withRelativePosition(Transform3d robotToMechanism) {
+    this.robotToMechanism = Optional.of(robotToMechanism.getTranslation());
+    this.mountRotation = robotToMechanism.getRotation();
+    return this;
+  }
+
+  /**
+   * Mount the mechanism on another, such as an arm on an elevator's carriage, so it moves with it. The
+   * mechanism's relative position is then from the parent's pose, rather than from the robot.
+   *
+   * @param parentPose The pose the mechanism is mounted on, such as {@code elevator::getPose3d}.
+   * @return The {@link MechanismPositionConfig}, for easy chaining.
+   */
+  public MechanismPositionConfig withParent(Supplier<Pose3d> parentPose) {
+    this.parent = Optional.ofNullable(parentPose);
     return this;
   }
 
@@ -177,6 +222,67 @@ public class MechanismPositionConfig {
    */
   public Plane getMovementPlane() {
     return plane;
+  }
+
+  /**
+   * Where the mechanism is mounted: its parent's pose, or the robot's origin, moved and turned by its
+   * relative position.
+   *
+   * @return The {@link Pose3d} the mechanism is mounted at.
+   */
+  public Pose3d getMountPose() {
+    Pose3d base = parent.map(Supplier::get).orElse(Pose3d.ZERO);
+    return base.transformBy(new Transform3d(robotToMechanism.orElse(Translation3d.ZERO), mountRotation));
+  }
+
+  /**
+   * The pose of a part that turns about the axis normal to the movement plane, such as an arm or a
+   * pivot, at an angle. At 0 it points along +X in the XZ and XY planes, and along +Y in the YZ plane,
+   * and a positive angle turns it toward +Z in the XZ and YZ planes, and toward +Y in the XY plane.
+   *
+   * @param angle The angle it is turned to.
+   * @return Its {@link Pose3d}: where it is mounted, turned by the angle.
+   */
+  public Pose3d getRotatedPose(Angle angle) {
+    return getMountPose().transformBy(new Transform3d(Translation3d.ZERO, rotationInPlane(angle)));
+  }
+
+  /**
+   * The pose of a part that slides along the movement plane, such as an elevator's carriage.
+   *
+   * @param distance How far it has slid from where it is mounted.
+   * @param angle    The direction it slides in, in the movement plane: 0 along +X (+Y in the YZ plane),
+   *                 90 degrees along +Z (+Y in the XY plane).
+   * @return Its {@link Pose3d}: where it is mounted, moved by the distance, and not turned.
+   */
+  public Pose3d getTranslatedPose(Distance distance, Angle angle) {
+    double meters = distance.in(Meters);
+    double cos = Math.cos(angle.in(Radians)) * meters;
+    double sin = Math.sin(angle.in(Radians)) * meters;
+    Translation3d slide = switch (plane) {
+      case XZ -> new Translation3d(cos, 0, sin);
+      case YZ -> new Translation3d(0, cos, sin);
+      case XY -> new Translation3d(cos, sin, 0);
+    };
+    return getMountPose().transformBy(new Transform3d(slide, Rotation3d.ZERO));
+  }
+
+  /**
+   * The rotation of a part turned by an angle about the axis normal to the movement plane.
+   *
+   * @param angle The angle.
+   * @return The {@link Rotation3d}.
+   */
+  public Rotation3d rotationInPlane(Angle angle) {
+    double radians = angle.in(Radians);
+    return switch (plane) {
+      // +X turns toward +Z: a negative pitch about +Y.
+      case XZ -> new Rotation3d(0, -radians, 0);
+      // +Y turns toward +Z: a positive roll about +X.
+      case YZ -> new Rotation3d(radians, 0, 0);
+      // +X turns toward +Y: a positive yaw about +Z.
+      case XY -> new Rotation3d(0, 0, radians);
+    };
   }
 
   /**

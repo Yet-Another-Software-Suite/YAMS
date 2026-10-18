@@ -11,6 +11,8 @@
 #include <wpi/util/Color.hpp>
 #include <wpi/util/Color8Bit.hpp>
 
+#include "yams/mechanisms/config/MechanismPositionConfig.hpp"
+
 namespace yams::mechanisms::config {
 
 /**
@@ -58,6 +60,18 @@ class PivotConfig {
    */
   PivotConfig& WithSimColor(const wpi::util::Color8Bit& color);
 
+  /**
+   * Set where the mechanism is on the robot, for GetPose3d(): where it is mounted, how it is turned
+   * there, the plane it moves in, and the mechanism it is mounted on, if any.
+   *
+   * @param mechanismPositionConfig The mechanism's position.
+   * @return *this for chaining.
+   */
+  PivotConfig& WithMechanismPositionConfig(const MechanismPositionConfig& mechanismPositionConfig) {
+    m_mechanismPositionConfig = mechanismPositionConfig;
+    return *this;
+  }
+
   // ---- Getters ---------------------------------------------------------------
 
   /** Get the telemetry name. */
@@ -72,11 +86,15 @@ class PivotConfig {
   /** Get the Mechanism2d simulation colour. */
   wpi::util::Color8Bit GetSimColor() const;
 
+  /** Get where the mechanism is on the robot. */
+  const MechanismPositionConfig& GetMechanismPositionConfig() const { return m_mechanismPositionConfig; }
+
  private:
   std::string m_telemetryName;
   std::optional<wpi::units::degree_t> m_minAngle;
   std::optional<wpi::units::degree_t> m_maxAngle;
   wpi::util::Color8Bit m_simColor{wpi::util::Color::GREEN};
+  MechanismPositionConfig m_mechanismPositionConfig;
 };
 
 }  // namespace yams::mechanisms::config

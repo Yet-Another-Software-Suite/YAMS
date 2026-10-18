@@ -11,8 +11,10 @@ import static org.wpilib.units.Units.Radians;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
+import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.Models;
@@ -26,6 +28,7 @@ import org.wpilib.util.Color;
 import org.wpilib.util.Color8Bit;
 import yams.core.exceptions.DifferentialMechanismConfigurationException;
 import yams.core.mechanisms.config.DifferentialMechanismConfig;
+import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.simulation.DCMotorSimSupplier;
@@ -260,15 +263,19 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
   }
 
   /**
-   * Get the relative position of the mechanism, taking into account the relative position defined
-   * in the
-   * {@link MechanismPositionConfig}.
+   * Get the mechanism's pose, for publishing to AdvantageScope as a component of a robot model: where it
+   * is mounted, as set in its {@link MechanismPositionConfig}, tilted about the axis normal to its
+   * movement plane, then twisted about its own length.
    *
-   * @return The relative position of the mechanism as a {@link Translation3d}.
+   * @return The mechanism's {@link Pose3d}, relative to the robot.
    */
   @Override
-  public Translation3d getRelativeMechanismPosition() {
-    return new Translation3d(m_armLength.in(Meters), new Rotation3d(Degrees.of(0), getTiltPosition(), Degrees.of(0)));
+  public Pose3d getPose3d() {
+    MechanismPositionConfig mount = m_config.getMechanismPositionConfig();
+    double twist = getTwistPosition().in(Radians);
+    // The mechanism points along +Y in the YZ plane, and along +X in the others.
+    Rotation3d twistRotation = mount.getMovementPlane() == Plane.YZ ? new Rotation3d(0, twist, 0) : new Rotation3d(twist, 0, 0);
+    return mount.getRotatedPose(getTiltPosition()).transformBy(new Transform3d(Translation3d.ZERO, twistRotation));
   }
 
   @Override

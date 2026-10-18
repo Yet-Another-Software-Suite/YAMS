@@ -11,7 +11,7 @@ import static org.wpilib.units.Units.Rotations;
 
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
-import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.simulation.SingleJointedArmSim;
@@ -23,7 +23,6 @@ import org.wpilib.util.Color8Bit;
 import yams.core.exceptions.ArmConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
-import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
@@ -155,19 +154,15 @@ public class Arm extends SmartPositionalMechanism {
   }
 
   /**
-   * Get the relative position of the mechanism, taking into account the relative position defined
-   * in the {@link MechanismPositionConfig}.
+   * Get the arm's pose, for publishing to AdvantageScope as a component of a robot model: where it is
+   * mounted, as set in its {@link MechanismPositionConfig}, turned to the arm's angle about the axis
+   * normal to its movement plane.
    *
-   * @return The relative position of the mechanism as a {@link Translation3d}.
+   * @return The arm's {@link Pose3d}, relative to the robot.
    */
   @Override
-  public Translation3d getRelativeMechanismPosition() {
-    Plane movementPlane = m_config.getMechanismPositionConfig().getMovementPlane();
-    Translation3d mechanismTranslation = new Translation3d(m_mechanismLigament.getLength(), new Rotation3d(Plane.YZ == movementPlane ? m_mechanismLigament.getAngle() : 0, Plane.XZ == movementPlane ? m_mechanismLigament.getAngle() : 0, 0));
-    if (m_config.getMechanismPositionConfig().getRelativePosition().isPresent()) {
-      return m_config.getMechanismPositionConfig().getRelativePosition().get().plus(mechanismTranslation);
-    }
-    return mechanismTranslation;
+  public Pose3d getPose3d() {
+    return m_config.getMechanismPositionConfig().getRotatedPose(getAngle());
   }
 
   @Override

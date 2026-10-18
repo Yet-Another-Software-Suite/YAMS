@@ -8,7 +8,7 @@
 #include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/units/angle.hpp>
@@ -199,11 +199,13 @@ class Pivot : public SmartPositionalMechanism {
   const config::PivotConfig& GetConfig() const;
 
   /**
-   * Get the 3-D position of the pivot tip relative to the robot origin.
+   * Get the pivot's pose, for publishing to AdvantageScope as a component of a robot model:
+   * where it is mounted, as set in its MechanismPositionConfig, turned to the pivot's angle about the
+   * axis normal to its movement plane. A turret turns in the XY plane.
    *
-   * @return Translation3d representing the mechanism endpoint.
+   * @return The pose of the pivot, relative to the robot.
    */
-  wpi::math::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Pose3d GetPose3d() const override;
 
   /**
    * Directly command the pivot to an angle setpoint (non-command, for use in periodic).

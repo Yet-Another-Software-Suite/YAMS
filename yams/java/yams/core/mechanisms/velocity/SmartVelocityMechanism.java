@@ -24,7 +24,7 @@ import yams.core.motorcontrollers.SmartMotorController;
  * <p>Every concrete subclass must implement these abstract methods inherited from
  * {@link yams.core.mechanisms.SmartMechanism}:
  * <ul>
- * <li>{@link yams.core.mechanisms.SmartMechanism#getRelativeMechanismPosition()}</li>
+ * <li>{@link yams.core.mechanisms.SmartMechanism#getPose3d()}</li>
  * <li>{@link yams.core.mechanisms.SmartMechanism#visualizationUpdate()}</li>
  * <li>{@link yams.core.mechanisms.SmartMechanism#getName()}</li>
  * <li>{@link yams.core.mechanisms.SmartMechanism#simIterate()}</li>

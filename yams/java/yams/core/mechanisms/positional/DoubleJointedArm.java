@@ -9,6 +9,9 @@ import static org.wpilib.units.Units.Radians;
 
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.simulation.SingleJointedArmSim;
@@ -20,6 +23,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.DoubleJointedArmConfigurationException;
 import yams.core.mechanisms.config.ArmConfig;
+import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
@@ -345,18 +349,31 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
   }
 
   /**
-   * Get the relative position of the mechanism, taking into account the relative position defined
-   * in the
-   * {@link MechanismPositionConfig}.
+   * Get the lower arm's pose, for publishing to AdvantageScope as a component of a robot model: where
+   * it is mounted, as set in the lower arm's {@link MechanismPositionConfig}, turned to its angle.
    *
-   * @return The relative position of the mechanism as a {@link Translation3d}.
+   * @return The lower arm's {@link Pose3d}, relative to the robot.
+   * @see #getUpperPose3d()
    */
   @Override
-  public Translation3d getRelativeMechanismPosition() {
-    var pos = getPosition();
-    var x = pos.getX();
-    var z = pos.getY();
-    return new Translation3d(x, 0, z);
+  public Pose3d getPose3d() {
+    return m_lowerArmConfig.getMechanismPositionConfig().getRotatedPose(getLowerAngle());
+  }
+
+  /**
+   * Get the upper arm's pose, for publishing to AdvantageScope as a component of a robot model: at the
+   * end of the lower arm, turned to the upper arm's angle. Both angles are from the lower arm's mount,
+   * as {@link #getPosition()} takes them.
+   *
+   * @return The upper arm's {@link Pose3d}, relative to the robot.
+   */
+  public Pose3d getUpperPose3d() {
+    MechanismPositionConfig mount = m_lowerArmConfig.getMechanismPositionConfig();
+    Pose3d elbow = getPose3d().transformBy(new Transform3d(new Translation3d(m_lowerArmLength.in(Meters), 0, 0), Rotation3d.ZERO));
+    if (mount.getMovementPlane() == Plane.YZ) {
+      elbow = getPose3d().transformBy(new Transform3d(new Translation3d(0, m_lowerArmLength.in(Meters), 0), Rotation3d.ZERO));
+    }
+    return new Pose3d(elbow.getTranslation(), mount.getRotatedPose(getUpperAngle()).getRotation());
   }
 
   @Override

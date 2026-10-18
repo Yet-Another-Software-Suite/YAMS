@@ -8,7 +8,7 @@
 #include <string>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
+#include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/simulation/ElevatorSim.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/units/length.hpp>
@@ -201,11 +201,13 @@ class Elevator : public SmartPositionalMechanism {
   const config::ElevatorConfig& GetConfig() const;
 
   /**
-   * Get the 3-D position of the elevator carriage relative to the robot origin.
+   * Get the carriage's pose, for publishing to AdvantageScope as a component of a robot model:
+   * where the elevator is mounted, as set in its MechanismPositionConfig, moved up the elevator by
+   * its height, at the elevator's angle in its movement plane.
    *
-   * @return Translation3d representing the current carriage position.
+   * @return The pose of the carriage, relative to the robot.
    */
-  wpi::math::Translation3d GetRelativeMechanismPosition() const;
+  wpi::math::Pose3d GetPose3d() const override;
 
   /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).

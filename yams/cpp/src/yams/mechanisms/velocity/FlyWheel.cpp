@@ -11,8 +11,6 @@
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/driverstation/DriverStation.hpp>
 #include <wpi/framework/RobotBase.hpp>
-#include <wpi/math/geometry/Rotation3d.hpp>
-#include <wpi/math/geometry/Translation3d.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -249,13 +247,8 @@ void FlyWheel::SetMeasurementVelocitySetpoint(wpi::units::meters_per_second_t ve
       (velocity.value() / radius.value()) * (180.0 / std::numbers::pi)});
 }
 
-wpi::math::Translation3d FlyWheel::GetRelativeMechanismPosition() const {
-  if (m_mechanismLigament) {
-    return wpi::math::Translation3d{
-        wpi::units::meter_t{m_mechanismLigament->GetLength()},
-        wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{m_mechanismLigament->GetAngle()}}};
-  }
-  return wpi::math::Translation3d{};
+wpi::math::Pose3d FlyWheel::GetPose3d() const {
+  return m_flyWheelConfig->GetMechanismPositionConfig().GetRotatedPose(m_smc->GetMechanismPosition());
 }
 
 const config::FlyWheelConfig& FlyWheel::GetConfig() const { return *m_flyWheelConfig; }
