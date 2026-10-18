@@ -60,6 +60,8 @@ public class Elevator extends SmartPositionalMechanism {
    *                                                    mass is not configured.
    * @throws ElevatorConfigurationException             if running in simulation and the minimum or
    *                                                    maximum height is not configured.
+   * @throws ElevatorConfigurationException             if the stage heights do not add up to the
+   *                                                    maximum height.
    * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
    *                                                    position is not set on the
    *                                                    {@link SmartMotorControllerConfig}.
@@ -77,6 +79,17 @@ public class Elevator extends SmartPositionalMechanism {
     if (config.getTelemetryName().isPresent()) {
       // TODO: Add telemetry units to config.
       m_telemetry.setupTelemetry(getName(), m_smc);
+    }
+
+    // The stages travel the elevator's whole height together, so their heights must add up to it.
+    // Without hard limits, the maximum height is the stage heights' total.
+    if (config.getStageHeightTotal().isPresent() && config.getMaximumHeight().isPresent()) {
+      Distance total = config.getStageHeightTotal().get();
+      Distance maximum = config.getMaximumHeight().get();
+      if (Math.abs(total.in(Meters) - maximum.in(Meters)) > 1e-6) {
+        throw new ElevatorConfigurationException("Elevator stage heights add up to " + total.in(Meters) + " m, not the maximum height of " + maximum.in(Meters) + " m",
+                                                 "Cannot create elevator", "withStages(int, List<Distance>) with heights that add up to the maximum height");
+      }
     }
 
     if (RobotBase.isSimulation()) {
@@ -194,10 +207,7 @@ public class Elevator extends SmartPositionalMechanism {
       throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
                                                "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
     }
-    double total = 0;
-    for (Distance stageHeight : stageHeights) {
-      total += stageHeight.in(Meters);
-    }
+    double total = m_config.getStageHeightTotal().orElseThrow().in(Meters);
     double height = getHeight().in(Meters);
     List<Pose3d> poses = new ArrayList<>(stageHeights.size());
     double stageHeight = 0;

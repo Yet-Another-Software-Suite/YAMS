@@ -41,6 +41,19 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     m_name = m_elevatorConfig->GetTelemetryName();
   }
 
+  // The stages travel the elevator's whole height together, so their heights must add up to it.
+  if (auto total = m_elevatorConfig->GetStageHeightTotal()) {
+    if (auto maxH = m_elevatorConfig->GetMaxHeight();
+        maxH && std::abs(total->value() - maxH->value()) > 1e-6) {
+      throw exceptions::ElevatorConfigurationException(
+          "Elevator stage heights add up to " + std::to_string(total->value()) +
+              " m, not the maximum height of " + std::to_string(maxH->value()) + " m!",
+          "Cannot create elevator",
+          "WithStages(int, std::vector<wpi::units::meter_t>) with heights that add up to the "
+          "maximum height");
+    }
+  }
+
   // Apply soft limits to the motor controller when configured.
   if (auto minH = m_elevatorConfig->GetMinHeight()) {
     m_smc->SetMeasurementLowerLimit(*minH);
@@ -251,8 +264,7 @@ std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
         "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
         "WithStages(int, std::vector<wpi::units::meter_t>) with 2 or more stages");
   }
-  double total = 0;
-  for (const auto& stageHeight : stageHeights) total += stageHeight.value();
+  const double total = m_elevatorConfig->GetStageHeightTotal()->value();
   const double height = GetHeight().value();
   std::vector<wpi::math::Pose3d> poses;
   poses.reserve(stageHeights.size());

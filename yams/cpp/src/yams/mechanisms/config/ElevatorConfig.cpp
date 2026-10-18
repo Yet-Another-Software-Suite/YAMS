@@ -65,15 +65,25 @@ ElevatorConfig& ElevatorConfig::WithStages(int stages, std::vector<wpi::units::m
     }
   }
   m_stages = stages;
+  wpi::units::meter_t total{0};
+  for (const auto& stageHeight : stageHeights) total += stageHeight;
+  m_stageHeightTotal = total;
   m_stageHeights = std::move(stageHeights);
   return *this;
 }
 
 std::string ElevatorConfig::GetTelemetryName() const { return m_telemetryName; }
 
-std::optional<wpi::units::meter_t> ElevatorConfig::GetMinHeight() const { return m_minHeight; }
+std::optional<wpi::units::meter_t> ElevatorConfig::GetMinHeight() const {
+  // Without a minimum height, an elevator whose stages are set starts at 0, at the bottom.
+  if (!m_minHeight && m_stageHeightTotal) return wpi::units::meter_t{0};
+  return m_minHeight;
+}
 
-std::optional<wpi::units::meter_t> ElevatorConfig::GetMaxHeight() const { return m_maxHeight; }
+std::optional<wpi::units::meter_t> ElevatorConfig::GetMaxHeight() const {
+  // Without a maximum height, the stages carry the carriage to their total.
+  return m_maxHeight ? m_maxHeight : m_stageHeightTotal;
+}
 
 std::optional<wpi::units::kilogram_t> ElevatorConfig::GetCarriageMass() const {
   return m_carriageMass;
@@ -89,6 +99,10 @@ std::optional<int> ElevatorConfig::GetStages() const { return m_stages; }
 
 const std::vector<wpi::units::meter_t>& ElevatorConfig::GetStageHeights() const {
   return m_stageHeights;
+}
+
+std::optional<wpi::units::meter_t> ElevatorConfig::GetStageHeightTotal() const {
+  return m_stageHeightTotal;
 }
 
 }  // namespace yams::mechanisms::config

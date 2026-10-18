@@ -5,6 +5,7 @@ package yams.core.mechanisms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Kilograms;
@@ -13,6 +14,7 @@ import static org.wpilib.units.Units.Meters;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Distance;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.Arm;
 import yams.commands2.mechanisms.DoubleJointedArm;
@@ -188,10 +191,17 @@ public class MechanismPoseTest {
     assertNear(new Translation3d(0, 0, 0.8), elevator.getPose3d().getTranslation(), "carriage");
   }
 
-  /** An elevator mounted 0.1 m up, with its carriage at 0.9 m, and the stages set. */
+  /**
+   * An elevator mounted 0.1 m up, with its carriage at 0.9 m, and the stages set. Its maximum height is
+   * the stage heights' total, or 2 m without stages.
+   */
   private Elevator elevatorAtNinetyCentimeters(String name, ElevatorConfig config) {
+    return elevatorAtNinetyCentimeters(name, config, config.getStageHeightTotal().orElse(Meters.of(2)));
+  }
+
+  private Elevator elevatorAtNinetyCentimeters(String name, ElevatorConfig config, Distance maximumHeight) {
     SmartMotorController motor = spark((SmartMotorControllerConfig) config(name).withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
-    return new Elevator(config.withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
+    return new Elevator(config.withHardLimits(Meters.of(0), maximumHeight).withCarriageWeight(Kilograms.of(5))
                               .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
   }
 
@@ -248,6 +258,29 @@ public class MechanismPoseTest {
     Elevator elevator = elevatorAtNinetyCentimeters("PoseNoStages", new ElevatorConfig());
     assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
     assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
+  }
+
+  @Test
+  void anElevatorsHeightIsItsStagesWithoutHardLimits() {
+    // No hard limits: the stages give the elevator's height, from 0 to their 1.5 m total.
+    ElevatorConfig config = new ElevatorConfig().withStages(3, List.of(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
+    assertEquals(Optional.of(Meters.of(1.5)), config.getMaximumHeight().map(height -> Meters.of(height.in(Meters))), "maximum height");
+    assertEquals(0, config.getMinimumHeight().orElseThrow().in(Meters), 1e-9, "minimum height");
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseStagesOnly").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
+    Elevator elevator = new Elevator(config.withCarriageWeight(Kilograms.of(5)), motor);
+    List<Pose3d> stages = elevator.getContinuousPose3d();
+    assertNear(new Translation3d(0, 0, 0.9), stages.get(2).getTranslation(), "carriage");
+  }
+
+  @Test
+  void elevatorStageHeightsAddUpToItsMaximumHeight() {
+    ElevatorConfig stages = new ElevatorConfig().withStages(3, List.of(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5)));
+    assertEquals(1.7, stages.getStageHeightTotal().orElseThrow().in(Meters), 1e-9, "stage height total");
+    assertEquals(Optional.empty(), new ElevatorConfig().getStageHeightTotal(), "no stages, no total");
+    // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top.
+    ElevatorConfigurationException exception = assertThrows(ElevatorConfigurationException.class,
+        () -> elevatorAtNinetyCentimeters("PoseShortStages", new ElevatorConfig().withStages(2, List.of(Meters.of(0.5), Meters.of(0.5))), Meters.of(2)));
+    assertTrue(exception.getMessage().contains("stage heights add up to 1.0 m, not the maximum height of 2.0 m"), exception.getMessage());
   }
 
   @Test

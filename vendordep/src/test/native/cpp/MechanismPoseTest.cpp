@@ -7,6 +7,7 @@
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <cmath>
 #include <numbers>
@@ -245,7 +246,11 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
   bundle.smc->SetupSimulation();
   MechanismPositionConfig position;
   position.WithRelativePosition(Meters(0, 0, 0.1));
-  elevatorCfg->WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg).WithMechanismPositionConfig(position);
+  // The maximum height is the stage heights' total, or 2 m without stages.
+  elevatorCfg->WithMinimumHeight(0_m)
+      .WithMaximumHeight(elevatorCfg->GetStageHeightTotal().value_or(2_m))
+      .WithCarriageMass(5_kg)
+      .WithMechanismPositionConfig(position);
   auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
 
   if (name == "PoseCascade") {
@@ -280,6 +285,45 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
     CHECK_THROWS(elevator->GetContinuousPose3d());
   }
 
+  CloseBundle(bundle);
+  delete elevator;
+}
+
+TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStageHeightsAddUpToItsMaximumHeight",
+                 "[MechanismPose]") {
+  ElevatorConfig stages;
+  stages.WithStages(3, {0.6_m, 0.6_m, 0.5_m});
+  CHECK(stages.GetStageHeightTotal()->value() == Catch::Approx(1.7).margin(1e-9));
+  CHECK_FALSE(ElevatorConfig{}.GetStageHeightTotal().has_value());
+
+  // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top.
+  auto cfg = BaseConfig("PoseShortStages");
+  cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
+  auto bundle = Spark("PoseShortStages", cfg);
+  bundle.smc->SetupSimulation();
+  auto* elevatorCfg = new ElevatorConfig;
+  elevatorCfg->WithStages(2, {0.5_m, 0.5_m}).WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg);
+  CHECK_THROWS_WITH(positional::Elevator(elevatorCfg, bundle.smc),
+                    Catch::Matchers::ContainsSubstring("stage heights add up to 1.000000 m, not the maximum height of 2.000000 m"));
+  CloseBundle(bundle);
+  delete elevatorCfg;
+}
+
+TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorHeightIsItsStagesWithoutLimits",
+                 "[MechanismPose]") {
+  // No minimum or maximum height: the stages give the elevator's height, from 0 to their 1.5 m total.
+  auto* elevatorCfg = new ElevatorConfig;
+  elevatorCfg->WithStages(3, {0.5_m, 0.5_m, 0.5_m}).WithCarriageMass(5_kg);
+  CHECK(elevatorCfg->GetMaxHeight()->value() == Catch::Approx(1.5).margin(1e-9));
+  CHECK(elevatorCfg->GetMinHeight()->value() == Catch::Approx(0.0).margin(1e-9));
+  auto cfg = BaseConfig("PoseStagesOnly");
+  cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
+  auto bundle = Spark("PoseStagesOnly", cfg);
+  bundle.smc->SetupSimulation();
+  auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
+  auto stages = elevator->GetContinuousPose3d();
+  REQUIRE(stages.size() == 3);
+  CheckNear(Meters(0, 0, 0.9), stages[2].Translation(), "carriage");
   CloseBundle(bundle);
   delete elevator;
 }
