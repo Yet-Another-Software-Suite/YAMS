@@ -572,10 +572,13 @@ class SmartMotorController {
 
   // ---- Closed-loop controller thread --------------------------------------
 
-  /** Start the background closed-loop controller thread. */
+  /** Start the background closed-loop controller thread, and the loosely coupled followers'. */
   void StartClosedLoopController();
 
-  /** Stop the background closed-loop controller thread. */
+  /**
+   * Stop the background closed-loop controller thread, and the loosely coupled followers'. The
+   * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at.
+   */
   void StopClosedLoopController();
 
   /** Run one iteration of the closed-loop controller on the calling thread. */

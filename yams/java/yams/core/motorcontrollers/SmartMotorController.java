@@ -264,16 +264,29 @@ public abstract class SmartMotorController {
     return Optional.of(new ExponentialProfile.State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
   }
 
-  /** Stop the closed loop controller. */
+  /**
+   * Stop the closed loop controller, and the loosely coupled followers' closed loop controllers. The
+   * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at
+   * instead.
+   */
   public void stopClosedLoopController() {
     if (m_closedLoopControllerThread != null) {
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerRunning = false;
     }
+    // A follower's closed loop running on the SystemCore would otherwise keep driving it to the last
+    // setpoint, and set its output again after it is stopped.
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.stopClosedLoopController();
+        follower.setDutyCycle(0);
+      }
+    });
   }
 
   /**
-   * Start the closed loop controller with the period.
+   * Start the closed loop controller with the period, and the loosely coupled followers' closed loop
+   * controllers.
    *
    * @throws SmartMotorControllerConfigurationException if the control mode is closed loop, a linear
    *                                                    closed loop controller is in use, and the
@@ -293,6 +306,11 @@ public abstract class SmartMotorController {
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
       m_closedLoopControllerRunning = true;
     }
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.startClosedLoopController();
+      }
+    });
   }
 
   /**
