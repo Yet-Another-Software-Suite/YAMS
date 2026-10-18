@@ -36,6 +36,10 @@ JAVA_GROUPS = [
     {"group": "pivot", "test-filter": '--tests "yams.mechs.PivotTest"'},
     {"group": "shooter", "test-filter": '--tests "yams.mechs.ShooterTest"'},
     {"group": "mechanism-limits", "test-filter": '--tests "yams.mechs.MechanismLimitTest"'},
+    # Loosely coupled followers whose closed loop runs on the motor controller or on the SystemCore
+    # (a Nova, a SPARK with an exponential profile and a SPARK with an LQR) following and stopping
+    # with their leader. A TalonFX leads one, which Phoenix runs in real time.
+    {"group": "loose-followers", "test-filter": '--tests "yams.mechs.LooselyCoupledFollowerTest"'},
     # A pivot driven into its hard stops, and a Talon set to a position, on every motor controller:
     # simulated Talons, which Phoenix runs in real time.
     {"group": "hard-stops", "test-filter": '--tests "yams.mechs.HardStopTest"'},
@@ -128,7 +132,7 @@ CPP_GROUPS = [
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "swerve-drive", "other"}
+                         "loose-followers", "swerve-drive", "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
 

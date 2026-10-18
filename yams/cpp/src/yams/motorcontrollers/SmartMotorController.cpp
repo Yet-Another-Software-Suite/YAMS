@@ -60,6 +60,13 @@ void SmartMotorController::StopClosedLoopController() {
     m_closedLoopControllerThread->Stop();
     m_closedLoopControllerRunning = false;
   }
+  // Stop the loosely coupled followers too: they are not sent the duty cycle or voltage the leader
+  // is driven at instead, and a follower's closed loop running on the SystemCore would otherwise keep
+  // driving it to the last setpoint, and set its output again after it is stopped.
+  for (auto* f : m_looseFollowers) {
+    f->StopClosedLoopController();
+    f->SetDutyCycle(0.0);
+  }
 }
 
 void SmartMotorController::StartClosedLoopController() {
@@ -81,6 +88,7 @@ void SmartMotorController::StartClosedLoopController() {
     m_closedLoopControllerThread->StartPeriodic(period);
     m_closedLoopControllerRunning = true;
   }
+  for (auto* f : m_looseFollowers) f->StartClosedLoopController();
 }
 
 void SmartMotorController::IterateClosedLoopController() {

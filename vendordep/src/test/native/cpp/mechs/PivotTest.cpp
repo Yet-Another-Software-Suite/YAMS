@@ -269,4 +269,96 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.HardStops", "[PivotTest]") {
   }
 }
 
+// A loosely coupled follower follows its leader, whether its closed loop runs on the motor
+// controller or on the SystemCore, as a Nova's always does and a SPARK's with an exponential profile
+// does. When the leader's closed loop is stopped, such as to drive it at a duty cycle, the follower
+// is stopped too, rather than its closed loop driving it on to the last setpoint. Each motor drives
+// its own simulated pivot.
+TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotTest]") {
+  constexpr double kSetpointDegrees = 45.0;
+  struct Pair {
+    std::string name;
+    MotorTestParam leader;
+    MotorTestParam follower;
+  };
+  const std::vector<Pair> pairs = {
+      // The follower's closed loop runs on the motor controller.
+      {"SparkMax following a SparkFlex",
+       {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlex"},
+       {HardwareType::SparkMax, ProfileType::None, "LooseFollowerSparkMax"}},
+      // The follower's closed loop runs on the SystemCore.
+      {"Nova following a SparkMax",
+       {HardwareType::SparkMax, ProfileType::None, "LooseLeaderSparkMax"},
+       {HardwareType::Nova, ProfileType::None, "LooseFollowerNova"}},
+      {"SparkMax with an exponential profile following a SparkFlex",
+       {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlexExpo"},
+       {HardwareType::SparkMax, ProfileType::Exponential, "LooseFollowerSparkMaxExpo"}},
+  };
+  for (const auto& pair : pairs) {
+    DYNAMIC_SECTION(pair.name) {
+      auto followerCfg = MakePivotSMCConfig(pair.follower.profile, pair.follower.hardware, nullptr,
+                                            pair.follower.name);
+      auto follower = MakeBundle(pair.follower, followerCfg);
+      auto leaderCfg = MakePivotSMCConfig(pair.leader.profile, pair.leader.hardware, nullptr,
+                                          pair.leader.name);
+      leaderCfg.WithLooselyCoupledFollowers({follower.smc});
+      auto leader = MakeBundle(pair.leader, leaderCfg);
+      // The command registry needs the leader's and the follower's subsystems named apart.
+      leader.subsystem->SetName(pair.leader.name);
+      follower.subsystem->SetName(pair.follower.name);
+      auto* leaderPivot = CreatePivot(leader.smc, leader.subsystem.get());
+      auto* followerPivot = CreatePivot(follower.smc, follower.subsystem.get());
+      leader.smc->SetupSimulation();
+      follower.smc->SetupSimulation();
+      leader.subsystem->m_testRunning = true;
+      follower.subsystem->m_testRunning = true;
+      auto followerDegrees = [&] {
+        return wpi::units::degree_t{follower.smc->GetSimSupplier()->GetMechanismPosition()}.value();
+      };
+
+      // The commands outlive their runs: the scheduler holds on to them.
+      std::vector<wpi::cmd::CommandPtr> commands;
+      auto schedule = [&](wpi::cmd::CommandPtr command) {
+        commands.push_back(std::move(command));
+        wpi::cmd::CommandScheduler::GetInstance().Schedule(commands.back());
+      };
+
+      // 1. The follower goes to the leader's setpoint.
+      schedule(leader.subsystem->SetPositionSetpoint(wpi::units::degree_t{kSetpointDegrees}));
+      SchedulerHelper::RunForDuration(5.0_s);
+      CHECK(std::abs(followerDegrees() - kSetpointDegrees) < 3.0);
+
+      // 2. Back to 0 deg, and the leader is stopped halfway, as a duty cycle command does.
+      schedule(leader.subsystem->SetPositionSetpoint(0.0_deg));
+      for (int loop = 0; loop < 250 && followerDegrees() > kSetpointDegrees / 2; loop++) {
+        SchedulerHelper::RunForDuration(20_ms);
+      }
+      const double stoppedAt = followerDegrees();
+      REQUIRE(stoppedAt > 5.0);
+      schedule(leader.subsystem->SetDutyCycle(0.0));
+      // The follower is stopped as well, loop after loop, rather than its closed loop driving it on to
+      // 0 deg. Its position cannot show this, as a fast follower coasts most of the way there.
+      SchedulerHelper::RunForDuration(40_ms);
+      double largestDutyCycle = 0.0;
+      SchedulerHelper::RunForDuration(1.0_s, [&] {
+        largestDutyCycle = std::max(largestDutyCycle, std::abs(follower.smc->GetDutyCycle()));
+      });
+      INFO(pair.name << ": follower driven at a duty cycle of up to " << largestDutyCycle
+                     << " after its leader stopped, at " << stoppedAt << " deg");
+      CHECK(largestDutyCycle < 0.01);
+
+      // 3. The leader's closed loop is started again, and the follower follows again.
+      schedule(leader.subsystem->SetPositionSetpoint(wpi::units::degree_t{kSetpointDegrees}));
+      SchedulerHelper::RunForDuration(5.0_s);
+      CHECK(std::abs(followerDegrees() - kSetpointDegrees) < 3.0);
+
+      SchedulerHelper::CancelAll();
+      CloseBundle(leader);
+      CloseBundle(follower);
+      delete leaderPivot;
+      delete followerPivot;
+    }
+  }
+}
+
 }  // namespace yams::test
