@@ -215,50 +215,80 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorFollowsItsHeight",
 }
 
 TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[MechanismPose]") {
+  auto* elevatorCfg = new ElevatorConfig;
+  std::string name = "PoseStages";
+
+  SECTION("cascade stages each move their share of its height") {
+    elevatorCfg->WithStages(3, {0.4_m, 0.4_m, 0.4_m});
+    name = "PoseCascade";
+  }
+  SECTION("uneven cascade stages move in proportion to their travel") {
+    elevatorCfg->WithStages(3, {0.6_m, 0.3_m, 0.3_m});
+    name = "PoseUnevenCascade";
+  }
+  SECTION("a continuous carriage moves first") {
+    elevatorCfg->WithStages(3, {0.5_m, 0.5_m, 0.5_m});
+    name = "PoseContinuous";
+  }
+  SECTION("an elevator with only a carriage has no stage poses") {
+    elevatorCfg->WithStages(1, {2_m});
+    name = "PoseSingleStage";
+  }
+  SECTION("no stages") {
+    name = "PoseNoStages";
+  }
+
   // An elevator mounted 0.1 m up, with its carriage at 0.9 m.
-  auto cfg = BaseConfig("PoseStages");
+  auto cfg = BaseConfig(name);
   cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
-  auto bundle = Spark("PoseStages", cfg);
+  auto bundle = Spark(name, cfg);
   bundle.smc->SetupSimulation();
   MechanismPositionConfig position;
   position.WithRelativePosition(Meters(0, 0, 0.1));
-  auto* elevatorCfg = new ElevatorConfig;
   elevatorCfg->WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg).WithMechanismPositionConfig(position);
   auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
 
-  SECTION("cascade stages each move their share of its height") {
-    auto stages = elevator->GetCascadePose3d(3, {0.4_m, 0.4_m, 0.4_m});
+  if (name == "PoseCascade") {
+    // Equal travel: a third, two thirds and all of the carriage's 0.9 m.
+    auto stages = elevator->GetCascadePose3d();
     REQUIRE(stages.size() == 3);
     CheckNear(Meters(0, 0, 0.4), stages[0].Translation(), "first stage");
     CheckNear(Meters(0, 0, 0.7), stages[1].Translation(), "second stage");
     CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
     CHECK(stages[2] == elevator->GetPose3d());
-    auto uneven = elevator->GetCascadePose3d(3, {0.6_m, 0.3_m, 0.3_m});
-    CheckNear(Meters(0, 0, 0.55), uneven[0].Translation(), "first stage of uneven travel");
-    CheckNear(Meters(0, 0, 0.775), uneven[1].Translation(), "second stage of uneven travel");
-    CheckNear(Meters(0, 0, 1.0), uneven[2].Translation(), "carriage of uneven travel");
-  }
-
-  SECTION("a continuous carriage moves first") {
-    auto stages = elevator->GetContinuousPose3d(3, {0.5_m, 0.5_m, 0.5_m});
+  } else if (name == "PoseUnevenCascade") {
+    // The first stage travels half of the 1.2 m total, so it moves half of the carriage's height.
+    auto stages = elevator->GetCascadePose3d();
+    CheckNear(Meters(0, 0, 0.55), stages[0].Translation(), "first stage");
+    CheckNear(Meters(0, 0, 0.775), stages[1].Translation(), "second stage");
+    CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
+  } else if (name == "PoseContinuous") {
+    // The carriage takes the first 0.5 m of its 0.9 m, the second stage the other 0.4 m.
+    auto stages = elevator->GetContinuousPose3d();
     REQUIRE(stages.size() == 3);
     CheckNear(Meters(0, 0, 0.1), stages[0].Translation(), "first stage");
     CheckNear(Meters(0, 0, 0.5), stages[1].Translation(), "second stage");
     CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
     CHECK(stages[2] == elevator->GetPose3d());
-    auto single = elevator->GetContinuousPose3d(1, {2_m});
-    REQUIRE(single.size() == 1);
-    CHECK(single[0] == elevator->GetPose3d());
-  }
-
-  SECTION("needs a positive height for each stage") {
-    CHECK_THROWS_AS(elevator->GetCascadePose3d(0, {}), std::invalid_argument);
-    CHECK_THROWS_AS(elevator->GetCascadePose3d(3, {0.5_m, 0.5_m}), std::invalid_argument);
-    CHECK_THROWS_AS(elevator->GetContinuousPose3d(2, {0.5_m, 0_m}), std::invalid_argument);
+  } else if (name == "PoseSingleStage") {
+    // 1 moving stage, the carriage, is a valid elevator, but has no stages to cascade or move in turn.
+    CHECK_THROWS(elevator->GetCascadePose3d());
+    CHECK_THROWS(elevator->GetContinuousPose3d());
+    CheckNear(Meters(0, 0, 1.0), elevator->GetPose3d().Translation(), "carriage");
+  } else {
+    CHECK_THROWS(elevator->GetCascadePose3d());
+    CHECK_THROWS(elevator->GetContinuousPose3d());
   }
 
   CloseBundle(bundle);
   delete elevator;
+}
+
+TEST_CASE("MechanismPose.ElevatorStagesNeedAPositiveHeightForEachStage", "[MechanismPose]") {
+  ElevatorConfig config;
+  CHECK_THROWS_AS(config.WithStages(0, {}), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithStages(3, {0.5_m, 0.5_m}), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithStages(2, {0.5_m, 0_m}), std::invalid_argument);
 }
 
 TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.FlyWheelFollowsItsPosition", "[MechanismPose]") {

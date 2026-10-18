@@ -4,7 +4,9 @@
 package yams.core.mechanisms.config;
 
 import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.wpilib.units.measure.Angle;
@@ -74,10 +76,14 @@ public class ElevatorConfig {
    */
   private Optional<Distance>           drumCircumference       = Optional.empty();
   /**
-   * Elevator stages, applied to the motor controller config gearing by dividing it by the number of
-   * stages given.
+   * The number of stages that move, counting the carriage as the last.
    */
   private OptionalInt                  stages                  = OptionalInt.empty();
+  /**
+   * How far each moving stage travels relative to the stage below it, from the stage nearest the fixed
+   * stage to the carriage.
+   */
+  private List<Distance>               stageHeights            = List.of();
   /**
    * Disable gravity on the elevator simulation.
    */
@@ -99,6 +105,7 @@ public class ElevatorConfig {
     this.isElevatorHorizontal = cfg.isElevatorHorizontal;
     this.drumCircumference = cfg.drumCircumference;
     this.stages = cfg.stages;
+    this.stageHeights = cfg.stageHeights;
     this.simColor = cfg.simColor;
     this.angle = cfg.angle;
     this.carriageWeight = cfg.carriageWeight;
@@ -201,6 +208,53 @@ public class ElevatorConfig {
    */
   public Angle getAngle() {
     return angle;
+  }
+
+  /**
+   * Set the elevator's moving stages, for the pose of each stage from
+   * {@code Elevator.getCascadePose3d()} or {@code Elevator.getContinuousPose3d()}.
+   *
+   * @param stages       The number of stages that move, counting the carriage as the last.
+   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
+   *                     stage nearest the fixed stage to the carriage.
+   * @return {@link ElevatorConfig} for chaining.
+   * @throws IllegalArgumentException if {@code stages} is less than 1, there is not one height for each
+   *                                  stage, or a height is not positive.
+   */
+  public ElevatorConfig withStages(int stages, List<Distance> stageHeights) {
+    if (stages < 1) {
+      throw new IllegalArgumentException("An elevator has at least 1 moving stage, its carriage, but was given " + stages + ".");
+    }
+    if (stageHeights == null || stageHeights.size() != stages) {
+      throw new IllegalArgumentException("Give one height for each of the " + stages + " moving stages, but " + (stageHeights == null ? "none were" : stageHeights.size() + " were") + " given.");
+    }
+    for (int stage = 0; stage < stages; stage++) {
+      if (!(stageHeights.get(stage).in(Meters) > 0)) {
+        throw new IllegalArgumentException("Stage " + (stage + 1) + "'s height must be positive, but is " + stageHeights.get(stage) + ".");
+      }
+    }
+    this.stages = OptionalInt.of(stages);
+    this.stageHeights = List.copyOf(stageHeights);
+    return this;
+  }
+
+  /**
+   * Get the number of stages that move, counting the carriage as the last.
+   *
+   * @return The number of moving stages, or empty if {@link #withStages(int, List)} was not called.
+   */
+  public OptionalInt getStages() {
+    return stages;
+  }
+
+  /**
+   * Get how far each moving stage travels relative to the stage below it.
+   *
+   * @return Each moving stage's height, from the stage nearest the fixed stage to the carriage, or an
+   *         empty list if {@link #withStages(int, List)} was not called.
+   */
+  public List<Distance> getStageHeights() {
+    return stageHeights;
   }
 
   /**

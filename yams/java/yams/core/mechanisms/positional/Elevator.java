@@ -181,16 +181,15 @@ public class Elevator extends SmartPositionalMechanism {
    * carriage's height: a stage that travels a third of the elevator's total travel moves a third of the
    * carriage's height relative to the stage below it.
    *
-   * @param stages       The number of stages that move, counting the carriage as the last.
-   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
-   *                     stage nearest the fixed stage to the carriage.
-   * @return Each moving stage's {@link Pose3d}, relative to the robot, in the same order. The last is
-   *         the carriage, {@link #getPose3d()}.
-   * @throws IllegalArgumentException if {@code stages} is less than 1, there is not one height for each
-   *                                  stage, or a height is not positive.
+   * <p>The stages are set with {@link ElevatorConfig#withStages(int, List)}.
+   *
+   * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
+   *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  public List<Pose3d> getCascadePose3d(int stages, List<Distance> stageHeights) {
-    double[] travel = stageTravel(stages, stageHeights);
+  public List<Pose3d> getCascadePose3d() {
+    double[] travel = stageTravel();
+    int stages = travel.length;
     double total = 0;
     for (double stageTravel : travel) {
       total += stageTravel;
@@ -209,16 +208,15 @@ public class Elevator extends SmartPositionalMechanism {
    * the whole of its travel first, then the stage below it, and so on out to the stage nearest the fixed
    * stage.
    *
-   * @param stages  The number of stages that move, counting the carriage as the last.
-   * @param heights How far each moving stage travels relative to the stage below it, from the stage
-   *                nearest the fixed stage to the carriage.
-   * @return Each moving stage's {@link Pose3d}, relative to the robot, in the same order. The last is
-   *         the carriage, {@link #getPose3d()}.
-   * @throws IllegalArgumentException if {@code stages} is less than 1, there is not one height for each
-   *                                  stage, or a height is not positive.
+   * <p>The stages are set with {@link ElevatorConfig#withStages(int, List)}.
+   *
+   * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
+   *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  public List<Pose3d> getContinuousPose3d(int stages, List<Distance> heights) {
-    double[] travel = stageTravel(stages, heights);
+  public List<Pose3d> getContinuousPose3d() {
+    double[] travel = stageTravel();
+    int stages = travel.length;
     double remaining = getHeight().in(Meters);
     double[] extension = new double[stages];
     // From the carriage down, each stage takes as much of the height as it can travel. The stage
@@ -232,20 +230,17 @@ public class Elevator extends SmartPositionalMechanism {
     return stagePoses(extension);
   }
 
-  /** Check each stage has a positive travel, and get them in meters. */
-  private static double[] stageTravel(int stages, List<Distance> heights) {
-    if (stages < 1) {
-      throw new IllegalArgumentException("An elevator has at least 1 moving stage, its carriage, but was given " + stages + ".");
+  /** Each moving stage's travel in meters, from the config. */
+  private double[] stageTravel() {
+    List<Distance> heights = m_config.getStageHeights();
+    if (heights.size() < 2) {
+      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
+      throw new ElevatorConfigurationException(heights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
     }
-    if (heights == null || heights.size() != stages) {
-      throw new IllegalArgumentException("Give one height for each of the " + stages + " moving stages, but " + (heights == null ? "none were" : heights.size() + " were") + " given.");
-    }
-    double[] travel = new double[stages];
-    for (int stage = 0; stage < stages; stage++) {
+    double[] travel = new double[heights.size()];
+    for (int stage = 0; stage < travel.length; stage++) {
       travel[stage] = heights.get(stage).in(Meters);
-      if (!(travel[stage] > 0)) {
-        throw new IllegalArgumentException("Stage " + (stage + 1) + "'s height must be positive, but is " + heights.get(stage) + ".");
-      }
     }
     return travel;
   }

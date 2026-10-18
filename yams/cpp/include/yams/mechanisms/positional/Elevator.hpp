@@ -216,16 +216,13 @@ class Elevator : public SmartPositionalMechanism {
    * the carriage's height: a stage that travels a third of the elevator's total travel moves a third
    * of the carriage's height relative to the stage below it.
    *
-   * @param stages The number of stages that move, counting the carriage as the last.
-   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
-   *        stage nearest the fixed stage to the carriage.
-   * @return Each moving stage's pose, relative to the robot, in the same order. The last is the
-   *         carriage, GetPose3d().
-   * @throws std::invalid_argument if stages is less than 1, there is not one height for each stage,
-   *         or a height is not positive.
+   * The stages are set with ElevatorConfig::WithStages().
+   *
+   * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
+   *         to the carriage. The last is the carriage, GetPose3d().
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  std::vector<wpi::math::Pose3d> GetCascadePose3d(
-      int stages, const std::vector<wpi::units::meter_t>& stageHeights) const;
+  std::vector<wpi::math::Pose3d> GetCascadePose3d() const;
 
   /**
    * Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
@@ -233,16 +230,13 @@ class Elevator : public SmartPositionalMechanism {
    * rises the whole of its travel first, then the stage below it, and so on out to the stage nearest
    * the fixed stage.
    *
-   * @param stages The number of stages that move, counting the carriage as the last.
-   * @param heights How far each moving stage travels relative to the stage below it, from the stage
-   *        nearest the fixed stage to the carriage.
-   * @return Each moving stage's pose, relative to the robot, in the same order. The last is the
-   *         carriage, GetPose3d().
-   * @throws std::invalid_argument if stages is less than 1, there is not one height for each stage,
-   *         or a height is not positive.
+   * The stages are set with ElevatorConfig::WithStages().
+   *
+   * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
+   *         to the carriage. The last is the carriage, GetPose3d().
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  std::vector<wpi::math::Pose3d> GetContinuousPose3d(
-      int stages, const std::vector<wpi::units::meter_t>& heights) const;
+  std::vector<wpi::math::Pose3d> GetContinuousPose3d() const;
 
   /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).
@@ -253,6 +247,9 @@ class Elevator : public SmartPositionalMechanism {
 
 
  private:
+  /** Each moving stage's travel in meters, from the config. */
+  std::vector<double> StageTravel() const;
+
   /** The pose of each stage, from how far each is extended relative to the stage below it. */
   std::vector<wpi::math::Pose3d> StagePoses(const std::vector<double>& extension) const;
   config::ElevatorConfig* m_elevatorConfig{nullptr};
