@@ -84,6 +84,9 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
 
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, *m_smc));
+    // Start the simulated pivot where the motor controller starts, as the arm's and elevator's
+    // simulations do. Otherwise it starts at 0, away from its encoder.
+    m_smc->GetSimSupplier()->SetMechanismPosition(*m_smc->GetConfig().GetStartingPosition());
 
     // Build Mechanism2d fixed 36-inch ligament length like Java.
     constexpr double kPivotLen = 36.0 * 0.0254;  // 36 inches in metres
@@ -131,15 +134,17 @@ void Pivot::SimIterate() {
 
     // The DCMotorSim has no hard stops, so a pivot that reaches one is put back on it and stopped,
     // as a real hard stop stops it. A hard stop stops the pivot where it really is, which the
-    // encoder can lag.
+    // encoder can lag. A pivot that wraps continuously, such as a turret on a slip ring, has no
+    // hard stops: its hard limits are the range it wraps over.
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
     const wpi::units::turn_t simulatedPosition = ss->GetMechanismPosition();
-    if (m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
+    const bool hasHardStops = !m_smc->GetConfig().GetContinuousWrapping().has_value();
+    if (hasHardStops && m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
         simulatedPosition < *m_pivotConfig->GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMinAngle());
       m_dcMotorSim->SetAngularVelocity(wpi::units::radians_per_second_t{0});
     }
-    if (m_pivotConfig->GetMaxAngle() && simVelRadPerSec > 0.0 &&
+    if (hasHardStops && m_pivotConfig->GetMaxAngle() && simVelRadPerSec > 0.0 &&
         simulatedPosition > *m_pivotConfig->GetMaxAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMaxAngle());
       m_dcMotorSim->SetAngularVelocity(wpi::units::radians_per_second_t{0});

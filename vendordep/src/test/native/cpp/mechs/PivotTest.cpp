@@ -4,6 +4,7 @@
 // Mirrors Java PivotTest duty-cycle and position-PID tests for a rotary
 // pivot mechanism across all (HardwareType × ProfileType) combinations.
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
@@ -359,6 +360,52 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       delete followerPivot;
     }
   }
+}
+
+// The pivot's simulation starts where the motor controller does, without SetupSimulation(), which
+// seeds the motor controller's own simulation. Otherwise its hard stops are off by as much.
+TEST_CASE_METHOD(PivotTestFixture, "PivotTest.SimStartsAtStartingPosition", "[PivotTest]") {
+  MotorTestParam param{HardwareType::SparkMax, ProfileType::None, "PivotSimStart"};
+  auto cfg = MakeBaseConfig(ProfileType::None, 1.0,
+                            gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})},
+                            nullptr, param.name);
+  cfg.WithMOI(12_in, 1_lb).WithStartingPosition(45_deg);
+  auto bundle = MakeBundle(param, cfg);
+  auto* pivotCfg = new PivotConfig;
+  pivotCfg->WithMinAngle(-30_deg).WithMaxAngle(60_deg);
+  auto* pivot = new positional::Pivot(pivotCfg, bundle.smc);
+  CHECK(wpi::units::degree_t{bundle.smc->GetSimSupplier()->GetMechanismPosition()}.value() ==
+        Catch::Approx(45.0).margin(1e-6));
+  CloseBundle(bundle);
+  delete pivot;
+}
+
+// A pivot that wraps continuously, such as a turret on a slip ring, has no hard stops: its hard
+// limits are the range it wraps over, and it turns on past them.
+TEST_CASE_METHOD(PivotTestFixture, "PivotTest.ContinuousTurnsPastWhereItWraps", "[PivotTest]") {
+  MotorTestParam param{HardwareType::SparkMax, ProfileType::None, "PivotSimWrap"};
+  auto cfg = MakeBaseConfig(ProfileType::None, 1.0,
+                            gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})},
+                            nullptr, param.name);
+  cfg.WithMOI(12_in, 1_lb)
+      .WithContinuousWrapping(wpi::units::turn_t{0}, wpi::units::turn_t{1})
+      .WithStartingPosition(wpi::units::turn_t{0.9});
+  auto bundle = MakeBundle(param, cfg);
+  bundle.subsystem->m_testRunning = true;
+  auto* pivotCfg = new PivotConfig;
+  pivotCfg->WithMinAngle(wpi::units::turn_t{0}).WithMaxAngle(wpi::units::turn_t{1});
+  auto* pivot = new positional::Pivot(pivotCfg, bundle.smc);
+  bundle.subsystem->m_mechSimPeriodic = [pivot] { pivot->SimIterate(); };
+  bundle.subsystem->m_mechUpdateTelemetry = [pivot] { pivot->UpdateTelemetry(); };
+  auto command = bundle.subsystem->SetDutyCycle(0.5);
+  wpi::cmd::CommandScheduler::GetInstance().Schedule(command);
+  SchedulerHelper::RunForDuration(1.0_s);
+  const double rotations = wpi::units::turn_t{bundle.smc->GetSimSupplier()->GetMechanismPosition()}.value();
+  INFO("continuous pivot stopped at " << rotations << " rotations, where it wraps");
+  CHECK(rotations > 1.05);
+  SchedulerHelper::CancelAll();
+  CloseBundle(bundle);
+  delete pivot;
 }
 
 }  // namespace yams::test
