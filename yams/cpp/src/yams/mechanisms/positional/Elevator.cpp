@@ -7,7 +7,9 @@
 #include <cmath>
 #include <memory>
 #include <numbers>
+#include <stdexcept>
 #include <string>
+#include <vector>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
@@ -236,6 +238,21 @@ const config::ElevatorConfig& Elevator::GetConfig() const { return *m_elevatorCo
 
 wpi::math::Pose3d Elevator::GetPose3d() const {
   return m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(GetHeight(), m_elevatorConfig->GetAngle());
+}
+
+std::vector<wpi::math::Pose3d> Elevator::GetPose3d(int cascadingStages) const {
+  if (cascadingStages < 1) {
+    throw std::invalid_argument("An elevator has at least 1 moving stage, its carriage, but was given " +
+                                std::to_string(cascadingStages) + ".");
+  }
+  const wpi::units::meter_t height = GetHeight();
+  std::vector<wpi::math::Pose3d> poses;
+  poses.reserve(cascadingStages);
+  for (int stage = 1; stage <= cascadingStages; stage++) {
+    poses.push_back(m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(
+        height * stage / cascadingStages, m_elevatorConfig->GetAngle()));
+  }
+  return poses;
 }
 
 void Elevator::SetHeight(wpi::units::meter_t height) { SetMeasurementPositionSetpoint(height); }

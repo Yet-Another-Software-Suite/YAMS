@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <numbers>
+#include <stdexcept>
 #include <string>
 #include <wpi/math/geometry/Pose3d.hpp>
 #include <wpi/math/geometry/Rotation3d.hpp>
@@ -209,6 +210,31 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorFollowsItsHeight",
   elevatorCfg->WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg).WithMechanismPositionConfig(position);
   auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
   CheckNear(Meters(0, 0, 0.8), elevator->GetPose3d().Translation(), "carriage");
+  CloseBundle(bundle);
+  delete elevator;
+}
+
+TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.CascadeElevatorStagesEachMoveAShareOfItsHeight", "[MechanismPose]") {
+  auto cfg = BaseConfig("PoseCascade");
+  cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
+  auto bundle = Spark("PoseCascade", cfg);
+  bundle.smc->SetupSimulation();
+  MechanismPositionConfig position;
+  position.WithRelativePosition(Meters(0, 0, 0.1));
+  auto* elevatorCfg = new ElevatorConfig;
+  elevatorCfg->WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg).WithMechanismPositionConfig(position);
+  auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
+  // Three moving stages, the carriage last: a third, two thirds and all of the carriage's 0.9 m.
+  auto stages = elevator->GetPose3d(3);
+  REQUIRE(stages.size() == 3);
+  CheckNear(Meters(0, 0, 0.4), stages[0].Translation(), "first stage");
+  CheckNear(Meters(0, 0, 0.7), stages[1].Translation(), "second stage");
+  CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
+  CHECK(stages[2] == elevator->GetPose3d());
+  auto single = elevator->GetPose3d(1);
+  REQUIRE(single.size() == 1);
+  CHECK(single[0] == elevator->GetPose3d());
+  CHECK_THROWS_AS(elevator->GetPose3d(0), std::invalid_argument);
   CloseBundle(bundle);
   delete elevator;
 }

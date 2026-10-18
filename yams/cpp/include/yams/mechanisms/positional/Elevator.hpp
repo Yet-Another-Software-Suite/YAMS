@@ -6,6 +6,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <vector>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
 #include <wpi/math/geometry/Pose3d.hpp>
@@ -208,6 +209,19 @@ class Elevator : public SmartPositionalMechanism {
    * @return The pose of the carriage, relative to the robot.
    */
   wpi::math::Pose3d GetPose3d() const override;
+
+  /**
+   * Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+   * components of a robot model. A cascade elevator's stages all move at once, each by an equal
+   * share of the carriage's height: with 3 moving stages, the first moves a third of the carriage's
+   * height, the second two thirds, and the carriage all of it.
+   *
+   * @param cascadingStages The number of stages that move, counting the carriage as the last.
+   * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
+   *         to the carriage, which is GetPose3d().
+   * @throws std::invalid_argument if cascadingStages is less than 1.
+   */
+  std::vector<wpi::math::Pose3d> GetPose3d(int cascadingStages) const;
 
   /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).

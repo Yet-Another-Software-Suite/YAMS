@@ -4,6 +4,7 @@
 package yams.core.mechanisms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Kilograms;
@@ -184,6 +185,22 @@ public class MechanismPoseTest {
     Elevator elevator = new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
                                                          .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
     assertNear(new Translation3d(0, 0, 0.8), elevator.getPose3d().getTranslation(), "carriage");
+  }
+
+  @Test
+  void aCascadeElevatorsStagesEachMoveAShareOfItsHeight() {
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseCascade").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
+    Elevator elevator = new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
+                                                         .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
+    // Three moving stages, the carriage last: a third, two thirds and all of the carriage's 0.9 m.
+    List<Pose3d> stages = elevator.getPose3d(3);
+    assertEquals(3, stages.size());
+    assertNear(new Translation3d(0, 0, 0.4), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 0.7), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+    assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
+    assertEquals(List.of(elevator.getPose3d()), elevator.getPose3d(1), "a single stage is the carriage");
+    assertThrows(IllegalArgumentException.class, () -> elevator.getPose3d(0));
   }
 
   @Test

@@ -8,6 +8,8 @@ import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Pose3d;
@@ -171,6 +173,30 @@ public class Elevator extends SmartPositionalMechanism {
   @Override
   public Pose3d getPose3d() {
     return m_config.getMechanismPositionConfig().getTranslatedPose(getHeight(), m_config.getAngle());
+  }
+
+  /**
+   * Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+   * components of a robot model. A cascade elevator's stages all move at once, each by an equal share of
+   * the carriage's height: with 3 moving stages, the first moves a third of the carriage's height, the
+   * second two thirds, and the carriage all of it.
+   *
+   * @param cascadingStages The number of stages that move, counting the carriage as the last.
+   * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
+   *         stage to the carriage, which is {@link #getPose3d()}. Each is where the elevator is mounted,
+   *         as set in its {@link MechanismPositionConfig}, moved up the elevator by that stage's height.
+   * @throws IllegalArgumentException if {@code cascadingStages} is less than 1.
+   */
+  public List<Pose3d> getPose3d(int cascadingStages) {
+    if (cascadingStages < 1) {
+      throw new IllegalArgumentException("An elevator has at least 1 moving stage, its carriage, but was given " + cascadingStages + ".");
+    }
+    Distance height = getHeight();
+    List<Pose3d> poses = new ArrayList<>(cascadingStages);
+    for (int stage = 1; stage <= cascadingStages; stage++) {
+      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(height.times((double) stage / cascadingStages), m_config.getAngle()));
+    }
+    return poses;
   }
 
   @Override
