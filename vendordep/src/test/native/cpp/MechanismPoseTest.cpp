@@ -183,6 +183,21 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.PivotFollowsItsAngle", "[M
   delete pivot;
 }
 
+TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.PivotTurnsInTheXyPlaneByDefault", "[MechanismPose]") {
+  // As in Java, a pivot with no MechanismPositionConfig of its own turns like a turret.
+  auto cfg = BaseConfig("PoseDefaultPivot");
+  cfg.WithStartingPosition(90_deg);
+  auto bundle = Spark("PoseDefaultPivot", cfg);
+  bundle.smc->SetupSimulation();
+  auto* pivotCfg = new PivotConfig;
+  pivotCfg->WithMinAngle(-180_deg).WithMaxAngle(180_deg);
+  CHECK(pivotCfg->GetMechanismPositionConfig().GetMovementPlane() == Plane::XY);
+  auto* pivot = new positional::Pivot(pivotCfg, bundle.smc);
+  CheckNear(Meters(0, 1, 0), PointAlong(pivot->GetPose3d(), kAlongX), "turret turned 90 degrees");
+  CloseBundle(bundle);
+  delete pivot;
+}
+
 TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorFollowsItsHeight", "[MechanismPose]") {
   auto cfg = BaseConfig("PoseElevator");
   cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.7_m);
