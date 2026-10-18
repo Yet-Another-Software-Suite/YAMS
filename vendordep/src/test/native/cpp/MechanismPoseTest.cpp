@@ -21,6 +21,7 @@
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
 
+#include "helpers/FakeSmartMotorController.h"
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
 #include "helpers/SchedulerHelper.h"
@@ -289,24 +290,23 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
   delete elevator;
 }
 
-TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStageHeightsAddUpToItsMaximumHeight",
-                 "[MechanismPose]") {
+TEST_CASE("MechanismPose.ElevatorStageHeightsAddUpToItsMaximumHeight", "[MechanismPose]") {
   ElevatorConfig stages;
   stages.WithStages(3, {0.6_m, 0.6_m, 0.5_m});
   CHECK(stages.GetStageHeightTotal()->value() == Catch::Approx(1.7).margin(1e-9));
   CHECK_FALSE(ElevatorConfig{}.GetStageHeightTotal().has_value());
 
-  // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top.
+  // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top. The elevator
+  // throws before it uses its motor controller, so a fake one, with no simulated device, will do.
+  TestSubsystem subsystem;
+  subsystem.SetName("PoseShortStages");
   auto cfg = BaseConfig("PoseShortStages");
-  cfg.WithMechanismCircumference(0.1_m).WithStartingPosition(0.9_m);
-  auto bundle = Spark("PoseShortStages", cfg);
-  bundle.smc->SetupSimulation();
-  auto* elevatorCfg = new ElevatorConfig;
-  elevatorCfg->WithStages(2, {0.5_m, 0.5_m}).WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg);
-  CHECK_THROWS_WITH(positional::Elevator(elevatorCfg, bundle.smc),
+  cfg.WithSubsystem(&subsystem);
+  FakeSmartMotorController motor{&cfg};
+  ElevatorConfig elevatorCfg;
+  elevatorCfg.WithStages(2, {0.5_m, 0.5_m}).WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg);
+  CHECK_THROWS_WITH(positional::Elevator(&elevatorCfg, &motor),
                     Catch::Matchers::ContainsSubstring("stage heights add up to 1.000000 m, not the maximum height of 2.000000 m"));
-  CloseBundle(bundle);
-  delete elevatorCfg;
 }
 
 TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorHeightIsItsStagesWithoutLimits",
