@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <wpi/math/filter/LinearFilter.hpp>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
 #include <wpi/units/angle.hpp>
@@ -18,6 +19,7 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SimSupplier.hpp"
+#include "yams/motorcontrollers/simulation/GamePieces.hpp"
 
 namespace yams::motorcontrollers {
 class SmartMotorController;
@@ -43,6 +45,19 @@ class ArmSimSupplier : public SimSupplier {
    * @param smc SmartMotorController driving the simulation (must outlive this supplier).
    */
   ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim, SmartMotorController& smc);
+
+  /**
+   * Create a ArmSimSupplier that can simulate game pieces.
+   *
+   * @param sim WPILib simulation to advance each loop (must outlive this supplier).
+   * @param smc SmartMotorController driving the simulation (must outlive this supplier).
+   * @param moi The arm's moment of inertia, as the simulation was given it.
+   * @param length The arm's length, as the simulation was given it.
+   * @param simulateGravity Whether the simulation simulates gravity, as it was given it.
+   */
+  ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim, SmartMotorController& smc,
+                 wpi::units::kilogram_square_meter_t moi, wpi::units::meter_t length,
+                 bool simulateGravity);
 
   void UpdateSim() override;
   bool GetUpdatedSim() override;
@@ -71,6 +86,10 @@ class ArmSimSupplier : public SimSupplier {
   wpi::units::ampere_t GetStatorCurrent() override;
   wpi::units::ampere_t GetSupplyCurrent() override;
 
+  void AddGamePiece(wpi::units::kilogram_t mass) override;
+  void AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) override;
+  void RemoveGamePiece() override;
+
  private:
   wpi::sim::SingleJointedArmSim& m_sim;
   std::function<double()> m_dutyCycleSupplier;
@@ -82,6 +101,15 @@ class ArmSimSupplier : public SimSupplier {
   bool m_simUpdated{false};
   wpi::units::volt_t m_lastInputVoltage{0};
   math::DerivativeTimeFilter m_rotorAccelFilter;
+  wpi::math::DCMotor m_motor;
+  /** The game pieces the arm carries. */
+  GamePieces m_gamePieces;
+  /** The arm's moment of inertia without game pieces, in kilogram square meters, if known. */
+  std::optional<double> m_armMoi;
+  /** The arm's length, in meters, if known. */
+  std::optional<double> m_armLength;
+  /** Whether the simulation simulates gravity. */
+  bool m_simulateGravity{true};
 };
 
 }  // namespace yams::motorcontrollers::simulation

@@ -19,7 +19,14 @@ ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim, SmartMotorC
       // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
       m_supplyCurrentFilter(wpi::math::LinearFilter<double>::SinglePoleIIR(0.1, m_period)),
       m_rotorAccelFilter(m_period),
-      m_circumference(smc.GetConfig().ConvertFromMechanism(wpi::units::turn_t{1.0})) {}
+      m_circumference(smc.GetConfig().ConvertFromMechanism(wpi::units::turn_t{1.0})),
+      m_motor(smc.GetDCMotor()) {}
+
+ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim, SmartMotorController& smc,
+                                         wpi::units::kilogram_t carriageMass)
+    : ElevatorSimSupplier(sim, smc) {
+  m_carriageMass = carriageMass.value();
+}
 
 void ElevatorSimSupplier::UpdateSim() {
   if (!IsInputFed()) {
@@ -30,7 +37,17 @@ void ElevatorSimSupplier::UpdateSim() {
   }
   if (!m_simUpdated) {
     StarveInput();
+    // Carrying game pieces, the simulation is given the voltage that moves the mechanism without them
+    // as they move it, for this step, and then the motor's voltage again.
+    const double volts = m_sim.GetInput(0);
+    const double backEmf =
+        wpi::units::radians_per_second_t{GetRotorVelocity()}.value() / m_motor.Kv.value();
+    const double simulatedVolts = m_gamePieces.IsEmpty() ? volts : GamePieces::InertiaVoltage(
+        volts, backEmf, *m_carriageMass, *m_carriageMass + m_gamePieces.Mass());
+    m_sim.SetInput(0, simulatedVolts);
     m_sim.Update(m_period);
+    // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+    if (m_sim.GetInput(0) == simulatedVolts) m_sim.SetInput(0, volts);
     FeedUpdateSim();
   }
 }
@@ -108,5 +125,22 @@ wpi::units::ampere_t ElevatorSimSupplier::GetSupplyCurrent() {
   return wpi::units::ampere_t{
       m_supplyCurrentFilter.Calculate(dutyCycle * m_sim.GetCurrentDraw().value())};
 }
+
+void ElevatorSimSupplier::AddGamePiece(wpi::units::kilogram_t mass) {
+  // The game piece is on the carriage.
+  AddGamePiece(mass, wpi::units::meter_t{0});
+}
+
+void ElevatorSimSupplier::AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) {
+  // The elevator lifts the game piece wherever it is on the carriage, so the distance does not matter.
+  if (!m_carriageMass) {
+    throw std::logic_error(
+        "This ElevatorSimSupplier cannot simulate a game piece, as it was not given the carriage's "
+        "mass.");
+  }
+  m_gamePieces.Add(mass, distance);
+}
+
+void ElevatorSimSupplier::RemoveGamePiece() { m_gamePieces.RemoveLast(); }
 
 }  // namespace yams::motorcontrollers::simulation

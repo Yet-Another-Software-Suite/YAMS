@@ -91,7 +91,7 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
                      std::array<double, 2>{0, 0.002 / 4096.0});
 
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
-        *m_armSim, *m_smc));
+        *m_armSim, *m_smc, m_smc->GetConfig().GetMOI(), m_armConfig->GetArmLength().value(), true));
 
     // Build Mechanism2d window.
     double armLengthM = m_armConfig->GetArmLength().value().value();

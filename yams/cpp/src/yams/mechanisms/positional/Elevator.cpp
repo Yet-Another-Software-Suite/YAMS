@@ -98,7 +98,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
         std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
     m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
-        *m_elevatorSim, *m_smc));
+        *m_elevatorSim, *m_smc, m_elevatorConfig->GetCarriageMass().value()));
 
     // Build Mechanism2d window.
     double maxH = m_elevatorConfig->GetMaxHeight().value().value();

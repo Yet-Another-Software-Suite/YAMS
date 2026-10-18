@@ -7,6 +7,8 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.Voltage;
 
 /**
@@ -171,4 +173,42 @@ public interface SimSupplier {
    * @return Rotor acceleration.
    */
   AngularAcceleration getRotorAcceleration();
+
+  /**
+   * Simulate the mechanism carrying a game piece, such as when it is picked up. The simulated mechanism
+   * is then heavier, and an arm is pulled down further, so it needs the gains it needs with a game piece
+   * on the real robot. Each call adds another game piece.
+   *
+   * <p>An arm carries the game piece at its end. An elevator carries it on its carriage. A pivot or a
+   * flywheel needs the game piece's distance from its axis: use {@link #addGamePiece(Mass, Distance)}.
+   *
+   * @param mass The game piece's mass.
+   * @throws UnsupportedOperationException if this simulation cannot carry a game piece without its
+   *                                       distance from the axis, or cannot carry one at all.
+   */
+  default void addGamePiece(Mass mass) {
+    throw new UnsupportedOperationException(getClass().getSimpleName() + " cannot simulate a game piece.");
+  }
+
+  /**
+   * Simulate the mechanism carrying a game piece at a distance from the axis it turns about, such as
+   * when it is picked up. The simulated mechanism is then heavier, and an arm is pulled down further, so
+   * it needs the gains it needs with a game piece on the real robot. Each call adds another game piece.
+   *
+   * <p>The distance is from the arm's, pivot's or flywheel's axis to the game piece's center of mass. An
+   * elevator lifts the game piece wherever it is on the carriage, so the distance does not matter.
+   *
+   * @param mass     The game piece's mass.
+   * @param distance The distance from the axis to the game piece's center of mass.
+   * @throws UnsupportedOperationException if this simulation cannot carry a game piece.
+   */
+  default void addGamePiece(Mass mass, Distance distance) {
+    throw new UnsupportedOperationException(getClass().getSimpleName() + " cannot simulate a game piece.");
+  }
+
+  /**
+   * Stop simulating the game piece added last, such as when it is scored. Does nothing when the
+   * mechanism carries no game piece.
+   */
+  default void removeGamePiece() {}
 }

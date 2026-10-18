@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <wpi/math/filter/LinearFilter.hpp>
 #include <wpi/simulation/DCMotorSim.hpp>
 #include <wpi/units/angle.hpp>
@@ -18,6 +19,7 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SimSupplier.hpp"
+#include "yams/motorcontrollers/simulation/GamePieces.hpp"
 
 namespace yams::motorcontrollers {
 class SmartMotorController;
@@ -72,6 +74,10 @@ class DCMotorSimSupplier : public SimSupplier {
   wpi::units::ampere_t GetStatorCurrent() override;
   wpi::units::ampere_t GetSupplyCurrent() override;
 
+  void AddGamePiece(wpi::units::kilogram_t mass) override;
+  void AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) override;
+  void RemoveGamePiece() override;
+
  private:
   wpi::sim::DCMotorSim& m_sim;
   std::function<double()> m_dutyCycleSupplier;
@@ -82,6 +88,9 @@ class DCMotorSimSupplier : public SimSupplier {
   bool m_inputFed{false};
   bool m_simUpdated{false};
   wpi::units::volt_t m_lastInputVoltage{0};
+  wpi::math::DCMotor m_motor;
+  /** The game pieces the mechanism carries. */
+  GamePieces m_gamePieces;
 };
 
 }  // namespace yams::motorcontrollers::simulation

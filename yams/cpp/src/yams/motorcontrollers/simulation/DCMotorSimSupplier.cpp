@@ -17,7 +17,8 @@ DCMotorSimSupplier::DCMotorSimSupplier(wpi::sim::DCMotorSim& sim, SmartMotorCont
       m_period(smc.GetConfig().GetSimulationPeriod()),
       m_batteryKey(&smc),
       // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
-      m_supplyCurrentFilter(wpi::math::LinearFilter<double>::SinglePoleIIR(0.1, m_period)) {}
+      m_supplyCurrentFilter(wpi::math::LinearFilter<double>::SinglePoleIIR(0.1, m_period)),
+      m_motor(smc.GetDCMotor()) {}
 
 void DCMotorSimSupplier::UpdateSim() {
   if (!IsInputFed()) {
@@ -28,7 +29,17 @@ void DCMotorSimSupplier::UpdateSim() {
   }
   if (!m_simUpdated) {
     StarveInput();
+    // Carrying game pieces, the simulation is given the voltage that moves the mechanism without them
+    // as they move it, for this step, and then the motor's voltage again.
+    const double volts = m_sim.GetInput(0);
+    const double backEmf =
+        wpi::units::radians_per_second_t{GetRotorVelocity()}.value() / m_motor.Kv.value();
+    const double simulatedVolts = m_gamePieces.IsEmpty() ? volts : GamePieces::InertiaVoltage(
+        volts, backEmf, m_sim.GetJ().value(), m_sim.GetJ().value() + m_gamePieces.Moi());
+    m_sim.SetInput(0, simulatedVolts);
     m_sim.Update(m_period);
+    // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+    if (m_sim.GetInput(0) == simulatedVolts) m_sim.SetInput(0, volts);
     FeedUpdateSim();
   }
 }
@@ -104,5 +115,19 @@ wpi::units::ampere_t DCMotorSimSupplier::GetSupplyCurrent() {
   return wpi::units::ampere_t{
       m_supplyCurrentFilter.Calculate(dutyCycle * m_sim.GetCurrentDraw().value())};
 }
+
+void DCMotorSimSupplier::AddGamePiece(wpi::units::kilogram_t mass) {
+  throw std::logic_error(
+      "A game piece on a pivot or flywheel needs its distance from the axis: use "
+      "AddGamePiece(kilogram_t, meter_t).");
+}
+
+void DCMotorSimSupplier::AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) {
+  // The game piece adds its mass times its distance from the axis, squared, to the moment of inertia.
+  // A pivot or flywheel is not pulled by gravity, so the game piece's weight does not turn it.
+  m_gamePieces.Add(mass, distance);
+}
+
+void DCMotorSimSupplier::RemoveGamePiece() { m_gamePieces.RemoveLast(); }
 
 }  // namespace yams::motorcontrollers::simulation

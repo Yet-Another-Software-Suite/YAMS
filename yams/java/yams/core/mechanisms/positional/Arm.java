@@ -5,6 +5,7 @@ package yams.core.mechanisms.positional;
 
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Inch;
+import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
@@ -99,7 +100,7 @@ public class Arm extends SmartPositionalMechanism {
       }
       m_sim = Optional.of(new SingleJointedArmSim(smc.getDCMotor(), smccfg.getGearing().getMechanismToRotorRatio(), smccfg.getMOI(), config.getLength().get().in(Meters), config.getLowerHardLimit().get().in(Radians), config.getUpperHardLimit().get()
           .in(Radians), true, smccfg.getStartingPosition().orElse(Rotations.zero()).in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
-      m_smc.setSimSupplier(new ArmSimSupplier(m_sim.get(), m_smc));
+      m_smc.setSimSupplier(new ArmSimSupplier(m_sim.get(), m_smc, KilogramSquareMeters.of(smccfg.getMOI()), config.getLength().get(), true));
 
       m_mechanismWindow = new Mechanism2d(config.getMechanismPositionConfig().getWindowXDimension(config.getLength().get()).in(Meters), config.getMechanismPositionConfig().getWindowYDimension(config.getLength().get()).in(Meters));
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", config.getMechanismPositionConfig().getMechanismX(config.getLength().get()).in(Meters) + config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d())

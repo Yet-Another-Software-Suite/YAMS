@@ -21,6 +21,8 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 import yams.core.gearing.MechanismGearing;
@@ -71,6 +73,8 @@ public class DCMotorSimSupplier implements SimSupplier {
   private final Time             simPeriod;
   private final DCMotor          motor;
   private final UUID             uuid;
+  /** The game pieces the mechanism carries. */
+  private final GamePieces       gamePieces = new GamePieces();
 
   /**
    * Construct the DCMotorSim supplier
@@ -98,7 +102,18 @@ public class DCMotorSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
+      // Carrying game pieces, the simulation is given the voltage that moves the mechanism without them
+      // as they move it, for this step, and then the motor's voltage again.
+      final double volts = sim.getInput(0);
+      final double simulatedVolts = gamePieces.isEmpty() ? volts : GamePieces.inertiaVoltage(
+          volts, getRotorVelocity().in(RadiansPerSecond) / motor.Kv, sim.getJ(),
+          sim.getJ() + gamePieces.moi());
+      sim.setInput(simulatedVolts);
       sim.update(simPeriod.in(Seconds));
+      // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+      if (sim.getInput(0) == simulatedVolts) {
+        sim.setInput(volts);
+      }
       try {
         // Thread.sleep(1);
       } catch (Exception e) {
@@ -208,5 +223,32 @@ public class DCMotorSimSupplier implements SimSupplier {
   @Override
   public AngularAcceleration getRotorAcceleration() {
     return RadiansPerSecondPerSecond.of(sim.getAngularAcceleration());
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @throws UnsupportedOperationException always: a pivot or flywheel needs the game piece's distance
+   *                                       from its axis, given to {@link #addGamePiece(Mass, Distance)}.
+   */
+  @Override
+  public void addGamePiece(Mass mass) {
+    throw new UnsupportedOperationException("A game piece on a pivot or flywheel needs its distance from the axis: use addGamePiece(Mass, Distance).");
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The game piece adds its mass times its distance from the axis, squared, to the moment of inertia.
+   * A pivot or flywheel is not pulled by gravity, so the game piece's weight does not turn it.
+   */
+  @Override
+  public void addGamePiece(Mass mass, Distance distance) {
+    gamePieces.add(mass, distance);
+  }
+
+  @Override
+  public void removeGamePiece() {
+    gamePieces.removeLast();
   }
 }

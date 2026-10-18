@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/current.hpp>
 #include <wpi/units/length.hpp>
+#include <wpi/units/mass.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
 
@@ -172,6 +175,43 @@ class SimSupplier {
    * @return Supply current in amperes.
    */
   virtual wpi::units::ampere_t GetSupplyCurrent() = 0;
+
+  /**
+   * Simulate the mechanism carrying a game piece, such as when it is picked up. The simulated
+   * mechanism is then heavier, and an arm is pulled down further, so it needs the gains it needs with
+   * a game piece on the real robot. Each call adds another game piece.
+   *
+   * An arm carries the game piece at its end. An elevator carries it on its carriage. A pivot or a
+   * flywheel needs the game piece's distance from its axis: use AddGamePiece(kilogram_t, meter_t).
+   *
+   * @param mass The game piece's mass.
+   * @throws std::logic_error if this simulation cannot carry a game piece without its distance from
+   *         the axis, or cannot carry one at all.
+   */
+  virtual void AddGamePiece(wpi::units::kilogram_t mass) {
+    throw std::logic_error("This simulation cannot simulate a game piece.");
+  }
+
+  /**
+   * Simulate the mechanism carrying a game piece at a distance from the axis it turns about, such as
+   * when it is picked up. Each call adds another game piece.
+   *
+   * The distance is from the arm's, pivot's or flywheel's axis to the game piece's center of mass. An
+   * elevator lifts the game piece wherever it is on the carriage, so the distance does not matter.
+   *
+   * @param mass The game piece's mass.
+   * @param distance The distance from the axis to the game piece's center of mass.
+   * @throws std::logic_error if this simulation cannot carry a game piece.
+   */
+  virtual void AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) {
+    throw std::logic_error("This simulation cannot simulate a game piece.");
+  }
+
+  /**
+   * Stop simulating the game piece added last, such as when it is scored. Does nothing when the
+   * mechanism carries no game piece.
+   */
+  virtual void RemoveGamePiece() {}
 };
 
 }  // namespace yams::motorcontrollers

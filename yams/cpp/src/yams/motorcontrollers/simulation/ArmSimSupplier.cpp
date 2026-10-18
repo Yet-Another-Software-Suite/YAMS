@@ -18,7 +18,17 @@ ArmSimSupplier::ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim, SmartMotorCon
       m_batteryKey(&smc),
       // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
       m_supplyCurrentFilter(wpi::math::LinearFilter<double>::SinglePoleIIR(0.1, m_period)),
-      m_rotorAccelFilter(m_period) {}
+      m_rotorAccelFilter(m_period),
+      m_motor(smc.GetDCMotor()) {}
+
+ArmSimSupplier::ArmSimSupplier(wpi::sim::SingleJointedArmSim& sim, SmartMotorController& smc,
+                               wpi::units::kilogram_square_meter_t moi, wpi::units::meter_t length,
+                               bool simulateGravity)
+    : ArmSimSupplier(sim, smc) {
+  m_armMoi = moi.value();
+  m_armLength = length.value();
+  m_simulateGravity = simulateGravity;
+}
 
 void ArmSimSupplier::UpdateSim() {
   if (!IsInputFed()) {
@@ -29,7 +39,18 @@ void ArmSimSupplier::UpdateSim() {
   }
   if (!m_simUpdated) {
     StarveInput();
+    // Carrying game pieces, the simulation is given the voltage that moves the mechanism without them
+    // as they move it, for this step, and then the motor's voltage again.
+    const double volts = m_sim.GetInput(0);
+    const double backEmf =
+        wpi::units::radians_per_second_t{GetRotorVelocity()}.value() / m_motor.Kv.value();
+    const double simulatedVolts = m_gamePieces.IsEmpty() ? volts : m_gamePieces.ArmVoltage(
+        volts, backEmf, m_sim.GetAngle().value(), *m_armMoi, *m_armLength, m_simulateGravity, m_motor,
+        m_gearing.GetMechanismToRotorRatio());
+    m_sim.SetInput(0, simulatedVolts);
     m_sim.Update(m_period);
+    // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+    if (m_sim.GetInput(0) == simulatedVolts) m_sim.SetInput(0, volts);
     FeedUpdateSim();
   }
 }
@@ -106,5 +127,26 @@ wpi::units::ampere_t ArmSimSupplier::GetSupplyCurrent() {
   return wpi::units::ampere_t{
       m_supplyCurrentFilter.Calculate(dutyCycle * m_sim.GetCurrentDraw().value())};
 }
+
+void ArmSimSupplier::AddGamePiece(wpi::units::kilogram_t mass) {
+  // The game piece is at the end of the arm.
+  if (!m_armLength) {
+    throw std::logic_error(
+        "This ArmSimSupplier cannot simulate a game piece, as it was not given the arm's moment of "
+        "inertia and length.");
+  }
+  AddGamePiece(mass, wpi::units::meter_t{*m_armLength});
+}
+
+void ArmSimSupplier::AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) {
+  if (!m_armMoi || !m_armLength) {
+    throw std::logic_error(
+        "This ArmSimSupplier cannot simulate a game piece, as it was not given the arm's moment of "
+        "inertia and length.");
+  }
+  m_gamePieces.Add(mass, distance);
+}
+
+void ArmSimSupplier::RemoveGamePiece() { m_gamePieces.RemoveLast(); }
 
 }  // namespace yams::motorcontrollers::simulation

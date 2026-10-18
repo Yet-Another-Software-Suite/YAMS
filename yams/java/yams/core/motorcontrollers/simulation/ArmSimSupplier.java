@@ -4,6 +4,8 @@
 package yams.core.motorcontrollers.simulation;
 
 import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.KilogramSquareMeters;
+import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Microsecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Radians;
@@ -12,6 +14,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.wpilib.math.filter.LinearFilter;
@@ -22,6 +25,9 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.MomentOfInertia;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 import yams.core.gearing.MechanismGearing;
@@ -75,14 +81,47 @@ public class ArmSimSupplier implements SimSupplier {
   private final Time                 simPeriod;
   private final DCMotor              motor;
   private final UUID                 uuid;
+  /** The game pieces the arm carries. */
+  private final GamePieces           gamePieces = new GamePieces();
+  /** The arm's moment of inertia without game pieces, in kilogram square meters, if known. */
+  private final Optional<Double>     armMoi;
+  /** The arm's length, in meters, if known. */
+  private final Optional<Double>     armLength;
+  /** Whether the simulation simulates gravity. */
+  private final boolean              simulateGravity;
 
   /**
-   * Construct the ArmSim supplier
+   * Construct the ArmSim supplier. It cannot simulate game pieces, as it does not know the arm's moment
+   * of inertia and length: use
+   * {@link #ArmSimSupplier(SingleJointedArmSim, SmartMotorController, MomentOfInertia, Distance, boolean)}.
    *
    * @param simulation           Simulatoin instance
    * @param smartMotorController SMC for the ArmSim..
    */
   public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController) {
+    this(simulation, smartMotorController, Optional.empty(), Optional.empty(), true);
+  }
+
+  /**
+   * Construct the ArmSim supplier, which can simulate game pieces.
+   *
+   * @param simulation           Simulation instance.
+   * @param smartMotorController SMC for the ArmSim.
+   * @param moi                  The arm's moment of inertia, as the simulation was given it.
+   * @param length               The arm's length, as the simulation was given it.
+   * @param simulateGravity      Whether the simulation simulates gravity, as it was given it.
+   */
+  public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController, MomentOfInertia moi,
+                        Distance length, boolean simulateGravity) {
+    this(simulation, smartMotorController, Optional.of(moi.in(KilogramSquareMeters)), Optional.of(length.in(Meters)),
+         simulateGravity);
+  }
+
+  private ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController,
+                         Optional<Double> moi, Optional<Double> length, boolean simulateGravity) {
+    armMoi = moi;
+    armLength = length;
+    this.simulateGravity = simulateGravity;
     var config = smartMotorController.getConfig();
     sim = simulation;
     motorDutyCycleSupplier = smartMotorController::getDutyCycle;
@@ -103,7 +142,18 @@ public class ArmSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
+      // Carrying game pieces, the simulation is given the voltage that moves the arm without them as
+      // they move it, for this step, and then the motor's voltage again.
+      final double volts = sim.getInput(0);
+      final double simulatedVolts = gamePieces.isEmpty() ? volts : gamePieces.armVoltage(
+          volts, getRotorVelocity().in(RadiansPerSecond) / motor.Kv, sim.getAngle(), armMoi.orElseThrow(),
+          armLength.orElseThrow(), simulateGravity, motor, mechGearing.getMechanismToRotorRatio());
+      sim.setInput(simulatedVolts);
       sim.update(simPeriod.in(Seconds));
+      // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+      if (sim.getInput(0) == simulatedVolts) {
+        sim.setInput(volts);
+      }
       try {
         // Thread.sleep(1);
       } catch (Exception e) {
@@ -208,6 +258,33 @@ public class ArmSimSupplier implements SimSupplier {
     // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
     double dutyCycle = motorDutyCycleSupplier.get();
     return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The game piece is at the end of the arm.
+   */
+  @Override
+  public void addGamePiece(Mass mass) {
+    addGamePiece(mass, Meters.of(armLength.orElseThrow(this::cannotCarry)));
+  }
+
+  @Override
+  public void addGamePiece(Mass mass, Distance distance) {
+    if (armMoi.isEmpty() || armLength.isEmpty()) {
+      throw cannotCarry();
+    }
+    gamePieces.add(mass, distance);
+  }
+
+  @Override
+  public void removeGamePiece() {
+    gamePieces.removeLast();
+  }
+
+  private UnsupportedOperationException cannotCarry() {
+    return new UnsupportedOperationException("This ArmSimSupplier cannot simulate a game piece, as it was not given the arm's moment of inertia and length.");
   }
 
   @Override

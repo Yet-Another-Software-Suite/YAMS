@@ -4,6 +4,7 @@
 package yams.core.motorcontrollers.simulation;
 
 import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Microsecond;
@@ -13,6 +14,7 @@ import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.wpilib.math.filter.LinearFilter;
@@ -23,6 +25,8 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
@@ -81,14 +85,36 @@ public class ElevatorSimSupplier implements SimSupplier {
   private final Time                       simPeriod;
   private boolean                          inputFed   = false;
   private boolean                          simUpdated = false;
+  /** The game pieces the carriage carries. */
+  private final GamePieces                 gamePieces = new GamePieces();
+  /** The carriage's mass without game pieces, in kilograms, if known. */
+  private final Optional<Double>           carriageMass;
 
   /**
-   * Construct the ElevatorSim supplier
+   * Construct the ElevatorSim supplier. It cannot simulate game pieces, as it does not know the
+   * carriage's mass: use {@link #ElevatorSimSupplier(ElevatorSim, SmartMotorController, Mass)}.
    *
    * @param simulation           Simulation instance
    * @param smartMotorController SMC for the ElevatorSim.
    */
   public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController) {
+    this(simulation, smartMotorController, Optional.empty());
+  }
+
+  /**
+   * Construct the ElevatorSim supplier, which can simulate game pieces.
+   *
+   * @param simulation           Simulation instance.
+   * @param smartMotorController SMC for the ElevatorSim.
+   * @param carriageMass         The carriage's mass, as the simulation was given it.
+   */
+  public ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController, Mass carriageMass) {
+    this(simulation, smartMotorController, Optional.of(carriageMass.in(Kilograms)));
+  }
+
+  private ElevatorSimSupplier(ElevatorSim simulation, SmartMotorController smartMotorController,
+                              Optional<Double> carriageMass) {
+    this.carriageMass = carriageMass;
     sim = simulation;
     config = smartMotorController.getConfig();
     mechGearing = config.getGearing();
@@ -111,7 +137,18 @@ public class ElevatorSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
+      // Carrying game pieces, the simulation is given the voltage that moves the carriage without them as
+      // they move it, for this step, and then the motor's voltage again.
+      final double volts = sim.getInput(0);
+      final double simulatedVolts = gamePieces.isEmpty() ? volts : GamePieces.inertiaVoltage(
+          volts, getRotorVelocity().in(RadiansPerSecond) / motor.Kv, carriageMass.orElseThrow(),
+          carriageMass.orElseThrow() + gamePieces.mass());
+      sim.setInput(simulatedVolts);
       sim.update(simPeriod.in(Seconds));
+      // Unless a closed loop on another thread gave the motor a new voltage meanwhile.
+      if (sim.getInput(0) == simulatedVolts) {
+        sim.setInput(volts);
+      }
       feedUpdateSim();
     }
   }
@@ -256,6 +293,35 @@ public class ElevatorSimSupplier implements SimSupplier {
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
    *                                                    configured.
    */
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The game piece is on the carriage.
+   */
+  @Override
+  public void addGamePiece(Mass mass) {
+    addGamePiece(mass, Meters.zero());
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The elevator lifts the game piece wherever it is on the carriage, so the distance does not
+   * matter.
+   */
+  @Override
+  public void addGamePiece(Mass mass, Distance distance) {
+    if (carriageMass.isEmpty()) {
+      throw new UnsupportedOperationException("This ElevatorSimSupplier cannot simulate a game piece, as it was not given the carriage's mass.");
+    }
+    gamePieces.add(mass, distance);
+  }
+
+  @Override
+  public void removeGamePiece() {
+    gamePieces.removeLast();
+  }
+
   @Override
   public AngularAcceleration getRotorAcceleration() {
     return RotationsPerSecond.per(Microsecond).of(mpsps.derivative(getRotorVelocity().in(RotationsPerSecond)));

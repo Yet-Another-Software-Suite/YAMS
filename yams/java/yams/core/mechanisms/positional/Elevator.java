@@ -100,7 +100,7 @@ public class Elevator extends SmartPositionalMechanism {
 
       m_sim = Optional.of(new ElevatorSim(smc.getDCMotor(), smcConfig.getGearing().getMechanismToRotorRatio(), config.getCarriageMass().get().in(Kilograms), smcCfg.getMechanismCircumference().orElseThrow().div(2).div(Math.PI).in(Meters), config
           .getMinimumHeight().get().in(Meters), config.getMaximumHeight().get().in(Meters), simulateGravity, smcConfig.convertFromMechanism(smcConfig.getStartingPosition().orElseThrow()).in(Meters), 0.01 / 4096, 0.01 / 4096));
-      m_smc.setSimSupplier(new ElevatorSimSupplier(m_sim.get(), m_smc));
+      m_smc.setSimSupplier(new ElevatorSimSupplier(m_sim.get(), m_smc, config.getCarriageMass().get()));
       m_mechanismWindow = new Mechanism2d(config.getMaximumHeight().get().in(Meters) * 2, config.getMaximumHeight().get().in(Meters) * 2);
 
       m_mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", config.getMaximumHeight().get().in(Meters) - config.getMechanismPositionConfig().getRelativePosition().orElse(new Translation3d()).getX(), config.getMechanismPositionConfig()

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <wpi/math/filter/LinearFilter.hpp>
 #include <wpi/simulation/ElevatorSim.hpp>
 #include <wpi/units/angle.hpp>
@@ -18,6 +19,7 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SimSupplier.hpp"
+#include "yams/motorcontrollers/simulation/GamePieces.hpp"
 
 namespace yams::motorcontrollers {
 class SmartMotorController;
@@ -46,6 +48,16 @@ class ElevatorSimSupplier : public SimSupplier {
    */
   ElevatorSimSupplier(wpi::sim::ElevatorSim& sim, SmartMotorController& smc);
 
+  /**
+   * Create a ElevatorSimSupplier that can simulate game pieces.
+   *
+   * @param sim WPILib simulation to advance each loop (must outlive this supplier).
+   * @param smc SmartMotorController driving the simulation (must outlive this supplier).
+   * @param carriageMass The carriage's mass, as the simulation was given it.
+   */
+  ElevatorSimSupplier(wpi::sim::ElevatorSim& sim, SmartMotorController& smc,
+                      wpi::units::kilogram_t carriageMass);
+
   void UpdateSim() override;
   bool GetUpdatedSim() override;
   void FeedUpdateSim() override;
@@ -73,6 +85,10 @@ class ElevatorSimSupplier : public SimSupplier {
   wpi::units::ampere_t GetStatorCurrent() override;
   wpi::units::ampere_t GetSupplyCurrent() override;
 
+  void AddGamePiece(wpi::units::kilogram_t mass) override;
+  void AddGamePiece(wpi::units::kilogram_t mass, wpi::units::meter_t distance) override;
+  void RemoveGamePiece() override;
+
  private:
   wpi::sim::ElevatorSim& m_sim;
   std::function<double()> m_dutyCycleSupplier;
@@ -85,6 +101,11 @@ class ElevatorSimSupplier : public SimSupplier {
   wpi::units::volt_t m_lastInputVoltage{0};
   math::DerivativeTimeFilter m_rotorAccelFilter;
   wpi::units::meter_t m_circumference;
+  wpi::math::DCMotor m_motor;
+  /** The game pieces the carriage carries. */
+  GamePieces m_gamePieces;
+  /** The carriage's mass without game pieces, in kilograms, if known. */
+  std::optional<double> m_carriageMass;
 };
 
 }  // namespace yams::motorcontrollers::simulation
