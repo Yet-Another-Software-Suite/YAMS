@@ -172,6 +172,13 @@ public class MechanismPoseTest {
   }
 
   @Test
+  void aPivotTurnsInTheXyPlaneByDefault() {
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseDefaultPivot").withStartingPosition(Degrees.of(90)));
+    Pivot pivot = new Pivot(new PivotConfig().withHardLimits(Degrees.of(-180), Degrees.of(180)), motor);
+    assertNear(new Translation3d(0, 1, 0), pointAlong(pivot.getPose3d(), ALONG_X), "turret turned 90 degrees");
+  }
+
+  @Test
   void anElevatorsPoseFollowsItsHeight() {
     SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseElevator").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.7)));
     Elevator elevator = new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))

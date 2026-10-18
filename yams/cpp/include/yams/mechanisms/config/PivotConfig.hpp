@@ -94,7 +94,10 @@ class PivotConfig {
   std::optional<wpi::units::degree_t> m_minAngle;
   std::optional<wpi::units::degree_t> m_maxAngle;
   wpi::util::Color8Bit m_simColor{wpi::util::Color::GREEN};
-  MechanismPositionConfig m_mechanismPositionConfig;
+  // A pivot, such as a turret, turns in the XY plane unless given a MechanismPositionConfig, as in
+  // Java.
+  MechanismPositionConfig m_mechanismPositionConfig{
+      MechanismPositionConfig{}.WithMovementPlane(MechanismPositionConfig::Plane::XY)};
 };
 
 }  // namespace yams::mechanisms::config
