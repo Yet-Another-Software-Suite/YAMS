@@ -146,7 +146,11 @@ class SparkWrapper : public SmartMotorController {
   void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
   wpi::units::volt_t GetVoltage() override;
-  /** Read from the SPARK's encoder settings when the config is applied. */
+  /**
+   * Read from the SPARK's encoder settings when the config is applied. The SPARK's closed loop uses
+   * the velocity as soon as it is filtered. A closed loop run on the SystemCore reads it from its
+   * status frame instead, which on average is half the frame's period older.
+   */
   std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
@@ -431,6 +435,8 @@ class SparkWrapper : public SmartMotorController {
   /** How far behind the measured velocity is, from the encoder's filtering, read when the config
    *  is applied. */
   std::optional<wpi::units::second_t> m_velocityMeasurementDelay;
+  /** How often the SPARK sends the measured velocity over CAN, read when the config is applied. */
+  wpi::units::second_t m_velocitySignalPeriod{0.02};
   /** Shown when the SPARK does not take the feedforward gains. */
   std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
 

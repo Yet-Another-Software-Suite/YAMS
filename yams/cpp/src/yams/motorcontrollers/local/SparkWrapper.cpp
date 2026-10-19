@@ -671,16 +671,22 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // out for its REV presets: a backward difference over the measurement period is half the period
   // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
   // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
-  // back from the SPARK. An absolute or detached encoder's delay is not known.
+  // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
+  // waits for too. An absolute or detached encoder's delay is not known.
+  auto& signals = m_maxConfig ? static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.signals
+                              : static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.signals;
+  m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetPrimaryEncoderVelocityPeriodMs())};
   auto delayOf = [](int periodMs, int depth) {
     return wpi::units::second_t{(periodMs / 2.0 + (depth - 1) / 2.0) / 1000.0};
   };
   auto enc = config.GetUseExternalFeedback() ? config.GetExternalEncoder() : std::nullopt;
   if (enc && std::any_cast<SparkMaxAlternateEncoder*>(&*enc)) {
     auto& accessor = static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.alternateEncoder;
+    m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetExternalOrAltEncoderVelocityPeriodMs())};
     m_velocityMeasurementDelay = delayOf(accessor.GetMeasurementPeriod(), accessor.GetAverageDepth());
   } else if (enc && std::any_cast<SparkFlexExternalEncoder*>(&*enc)) {
     auto& accessor = static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.externalEncoder;
+    m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetExternalOrAltEncoderVelocityPeriodMs())};
     m_velocityMeasurementDelay = delayOf(accessor.GetMeasurementPeriod(), accessor.GetAverageDepth());
   } else if (enc) {
     m_velocityMeasurementDelay = std::nullopt;
@@ -697,7 +703,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 
 std::optional<wpi::units::second_t> SparkWrapper::GetVelocityMeasurementDelay() const {
   if (wpi::RobotBase::IsSimulation()) return SmartMotorController::GetVelocityMeasurementDelay();
-  return m_velocityMeasurementDelay;
+  if (!m_closedLoopControllerThread || !m_velocityMeasurementDelay) return m_velocityMeasurementDelay;
+  return *m_velocityMeasurementDelay + m_velocitySignalPeriod / 2.0;
 }
 
 void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,

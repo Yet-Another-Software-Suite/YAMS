@@ -198,6 +198,8 @@ public class SparkWrapper extends SmartMotorController {
   private Alert m_externalEncoderGearingDiscontinuityAlert;
   /** How far behind the measured velocity is, from the encoder's filtering, read when the config is applied. */
   private Optional<Time> m_velocityMeasurementDelay = Optional.empty();
+  /** How often the SPARK sends the measured velocity over CAN, read when the config is applied. */
+  private Time m_velocitySignalPeriod = Milliseconds.of(20);
   /** Alert shown when the SPARK does not take a feedback gain. */
   private Alert m_feedbackNotAppliedAlert;
   /** Alert shown when the SPARK does not take a feedforward gain. */
@@ -1145,13 +1147,18 @@ public class SparkWrapper extends SmartMotorController {
     // out for its REV presets: a backward difference over the measurement period is half the period
     // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
     // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
-    // back from the SPARK. An absolute or detached encoder's delay is not known.
+    // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
+    // waits for too. An absolute or detached encoder's delay is not known.
+    var signals = m_spark instanceof SparkMax max ? max.configAccessor.signals : ((SparkFlex) m_spark).configAccessor.signals;
+    m_velocitySignalPeriod = Milliseconds.of(signals.getPrimaryEncoderVelocityPeriodMs());
     Object velocityEncoder = config.getUseExternalFeedback() ? config.getExternalEncoder().orElse(null) : null;
     if (velocityEncoder instanceof SparkMaxAlternateEncoder && m_spark instanceof SparkMax max) {
       var encoder = max.configAccessor.alternateEncoder;
+      m_velocitySignalPeriod = Milliseconds.of(signals.getExternalOrAltEncoderVelocityPeriodMs());
       m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getMeasurementPeriod() / 2.0 + (encoder.getAverageDepth() - 1) / 2.0));
     } else if (velocityEncoder instanceof SparkFlexExternalEncoder && m_spark instanceof SparkFlex flex) {
       var encoder = flex.configAccessor.externalEncoder;
+      m_velocitySignalPeriod = Milliseconds.of(signals.getExternalOrAltEncoderVelocityPeriodMs());
       m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getMeasurementPeriod() / 2.0 + (encoder.getAverageDepth() - 1) / 2.0));
     } else if (velocityEncoder != null) {
       m_velocityMeasurementDelay = Optional.empty();
@@ -1167,11 +1174,19 @@ public class SparkWrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
-   * <p>Read from the SPARK's encoder settings when the config is applied.
+   * <p>Read from the SPARK's encoder settings when the config is applied. The SPARK's closed loop uses
+   * the velocity as soon as it is filtered. A closed loop run on the SystemCore reads it from its status
+   * frame instead, which on average is half the frame's period older.
    */
   @Override
   public Optional<Time> getVelocityMeasurementDelay() {
-    return RobotBase.isSimulation() ? super.getVelocityMeasurementDelay() : m_velocityMeasurementDelay;
+    if (RobotBase.isSimulation()) {
+      return super.getVelocityMeasurementDelay();
+    }
+    if (m_closedLoopControllerThread == null) {
+      return m_velocityMeasurementDelay;
+    }
+    return m_velocityMeasurementDelay.map(delay -> delay.plus(m_velocitySignalPeriod.div(2)));
   }
 
   @Override
