@@ -110,6 +110,9 @@ class SwerveDriveTelemetry {
   /** Whether the azimuth motors are driven at a tuning voltage, without their closed-loop
    *  controllers. */
   bool m_azimuthVoltageControl = false;
+  /** The tuning modes on in the last loop, to send the setpoints again when they change, or -1
+   *  for none yet. */
+  int m_lastModes = -1;
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;

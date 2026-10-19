@@ -31,6 +31,8 @@ public class SwerveDriveTelemetry {
   private boolean                                                                            m_driveVoltageControl;
   /** Whether the azimuth motors are driven at a tuning voltage, without their closed loop controllers. */
   private boolean                                                                            m_azimuthVoltageControl;
+  /** The tuning modes on in the last loop, to send the setpoints again when they change, or -1 for none yet. */
+  private int                                                                                m_lastModes = -1;
 
   /**
    * Create SwerveDrive telemetry for logging in NetworkTables and DataLog.
@@ -201,62 +203,56 @@ public class SwerveDriveTelemetry {
       }
     }
 
-    // Set every gain that changed, and drive the modules in the tuning mode that is on.
+    // Whether a tuning mode turned on or off since the last loop.
+    int modes = (autoAlignOn ? 1 : 0) | (driveTuningOn ? 2 : 0) | (driveInPlaceOn ? 4 : 0) | (m_driveVoltageControl ? 8 : 0)
+                | (azimuthTuningOn ? 16 : 0) | (m_azimuthVoltageControl ? 32 : 0);
+    boolean modesChanged = modes != m_lastModes;
+    m_lastModes = modes;
+
+    // Set every gain and setpoint that changed, and drive the modules in the tuning mode that is on.
     for (DoubleTelemetryField field : DoubleTelemetryField.values()) {
       var dt = m_doubleTelemetry.get(field);
-      if (!dt.enabled) {
+      // Skip a value that hasn't changed, unless a tuning mode changed, which needs its setpoint sent
+      // again. Auto-align drives to its target pose every loop.
+      if (!dt.enabled || (!dt.tunable() && !modesChanged && field != DoubleTelemetryField.AutoAlignPoseRotation)) {
         continue;
       }
-      // Whether a gain changed since the last loop, so it is only set when it does.
-      boolean changed = dt.tunable();
       switch (field) {
         case TranslationP:
-          if (changed) {
-            translationPID.ifPresent(pid -> {
-              pid.setP(dt.get());
-              drive.setTranslationPID(pid);
-            });
-          }
+          translationPID.ifPresent(pid -> {
+            pid.setP(dt.get());
+            drive.setTranslationPID(pid);
+          });
           break;
         case TranslationI:
-          if (changed) {
-            translationPID.ifPresent(pid -> {
-              pid.setI(dt.get());
-              drive.setTranslationPID(pid);
-            });
-          }
+          translationPID.ifPresent(pid -> {
+            pid.setI(dt.get());
+            drive.setTranslationPID(pid);
+          });
           break;
         case TranslationD:
-          if (changed) {
-            translationPID.ifPresent(pid -> {
-              pid.setD(dt.get());
-              drive.setTranslationPID(pid);
-            });
-          }
+          translationPID.ifPresent(pid -> {
+            pid.setD(dt.get());
+            drive.setTranslationPID(pid);
+          });
           break;
         case RotationP:
-          if (changed) {
-            rotationPID.ifPresent(pid -> {
-              pid.setP(dt.get());
-              drive.setRotationPID(pid);
-            });
-          }
+          rotationPID.ifPresent(pid -> {
+            pid.setP(dt.get());
+            drive.setRotationPID(pid);
+          });
           break;
         case RotationI:
-          if (changed) {
-            rotationPID.ifPresent(pid -> {
-              pid.setI(dt.get());
-              drive.setRotationPID(pid);
-            });
-          }
+          rotationPID.ifPresent(pid -> {
+            pid.setI(dt.get());
+            drive.setRotationPID(pid);
+          });
           break;
         case RotationD:
-          if (changed) {
-            rotationPID.ifPresent(pid -> {
-              pid.setD(dt.get());
-              drive.setRotationPID(pid);
-            });
-          }
+          rotationPID.ifPresent(pid -> {
+            pid.setD(dt.get());
+            drive.setRotationPID(pid);
+          });
           break;
         case AutoAlignPoseX:
         case AutoAlignPoseY:
@@ -273,50 +269,38 @@ public class SwerveDriveTelemetry {
         // Every module's drive or azimuth gain.
         case ModulesDriveP:
         case ModulesAzimuthP:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveP ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKp(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveP ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKp(dt.get());
           }
           break;
         case ModulesDriveI:
         case ModulesAzimuthI:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveI ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKi(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveI ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKi(dt.get());
           }
           break;
         case ModulesDriveD:
         case ModulesAzimuthD:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveD ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKd(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveD ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKd(dt.get());
           }
           break;
         case ModulesDriveKs:
         case ModulesAzimuthKs:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveKs ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKs(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveKs ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKs(dt.get());
           }
           break;
         case ModulesDriveKv:
         case ModulesAzimuthKv:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveKv ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKv(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveKv ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKv(dt.get());
           }
           break;
         case ModulesDriveKa:
         case ModulesAzimuthKa:
-          if (changed) {
-            for (SwerveModule module : modules) {
-              (field == DoubleTelemetryField.ModulesDriveKa ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKa(dt.get());
-            }
+          for (SwerveModule module : modules) {
+            (field == DoubleTelemetryField.ModulesDriveKa ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKa(dt.get());
           }
           break;
         case ModulesDriveVelocity:
@@ -390,6 +374,8 @@ public class SwerveDriveTelemetry {
   public void stopTuning(SwerveDrive drive) {
     setVoltageControl(drive, false, false);
     setVoltageControl(drive, true, false);
+    // Send everything again when tuning starts again.
+    m_lastModes = -1;
   }
 
   /**

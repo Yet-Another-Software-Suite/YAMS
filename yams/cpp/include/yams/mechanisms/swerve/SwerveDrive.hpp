@@ -1126,7 +1126,14 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
            wpi::math::Rotation2d{wpi::units::degree_t{90}};
   };
 
-  // Set every gain that changed, and drive the modules in the tuning mode that is on.
+  // Whether a tuning mode turned on or off since the last loop.
+  const int modes = (autoAlignOn ? 1 : 0) | (driveTuningOn ? 2 : 0) | (driveInPlaceOn ? 4 : 0) |
+                    (m_driveVoltageControl ? 8 : 0) | (azimuthTuningOn ? 16 : 0) |
+                    (m_azimuthVoltageControl ? 32 : 0);
+  const bool modesChanged = modes != m_lastModes;
+  m_lastModes = modes;
+
+  // Set every gain and setpoint that changed, and drive the modules in the tuning mode that is on.
   for (auto field : {DoubleTelemetryField::TranslationP,
                      DoubleTelemetryField::TranslationI,
                      DoubleTelemetryField::TranslationD,
@@ -1153,42 +1160,45 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
                      DoubleTelemetryField::ModulesAzimuthAngle,
                      DoubleTelemetryField::ModulesAzimuthVoltage}) {
     auto& dt = doubleFields.at(field);
-    if (!dt.IsEnabled()) continue;
-    // Whether a gain changed since the last loop, so it is only set when it does.
-    const bool changed = dt.IsTunable();
+    // Skip a value that hasn't changed, unless a tuning mode changed, which needs its setpoint sent
+    // again. Auto-align drives to its target pose every loop.
+    if (!dt.IsEnabled() ||
+        (!dt.IsTunable() && !modesChanged && field != DoubleTelemetryField::AutoAlignPoseRotation)) {
+      continue;
+    }
     switch (field) {
       case DoubleTelemetryField::TranslationP:
-        if (changed && translationPID) {
+        if (translationPID) {
           translationPID->SetP(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::TranslationI:
-        if (changed && translationPID) {
+        if (translationPID) {
           translationPID->SetI(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::TranslationD:
-        if (changed && translationPID) {
+        if (translationPID) {
           translationPID->SetD(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::RotationP:
-        if (changed && rotationPID) {
+        if (rotationPID) {
           rotationPID->SetP(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
         break;
       case DoubleTelemetryField::RotationI:
-        if (changed && rotationPID) {
+        if (rotationPID) {
           rotationPID->SetI(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
         break;
       case DoubleTelemetryField::RotationD:
-        if (changed && rotationPID) {
+        if (rotationPID) {
           rotationPID->SetD(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
@@ -1209,62 +1219,50 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
       // Every module's drive or azimuth gain.
       case DoubleTelemetryField::ModulesDriveP:
       case DoubleTelemetryField::ModulesAzimuthP:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveP ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKp(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveP ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKp(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveI:
       case DoubleTelemetryField::ModulesAzimuthI:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveI ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKi(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveI ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKi(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveD:
       case DoubleTelemetryField::ModulesAzimuthD:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveD ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKd(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveD ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKd(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveKs:
       case DoubleTelemetryField::ModulesAzimuthKs:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveKs ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKs(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveKs ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKs(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveKv:
       case DoubleTelemetryField::ModulesAzimuthKv:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveKv ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKv(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveKv ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKv(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveKa:
       case DoubleTelemetryField::ModulesAzimuthKa:
-        if (changed) {
-          for (auto* module : modules) {
-            (field == DoubleTelemetryField::ModulesDriveKa ? module->GetDriveMotorController()
-                                                       : module->GetAzimuthMotorController())
-                ->SetKa(dt.Get());
-          }
+        for (auto* module : modules) {
+          (field == DoubleTelemetryField::ModulesDriveKa ? module->GetDriveMotorController()
+                                                     : module->GetAzimuthMotorController())
+              ->SetKa(dt.Get());
         }
         break;
       case DoubleTelemetryField::ModulesDriveVelocity:
@@ -1320,6 +1318,8 @@ template <std::size_t NumModules>
 void SwerveDriveTelemetry::StopTuning(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
   SetVoltageControl(drive, false, false);
   SetVoltageControl(drive, true, false);
+  // Send everything again when tuning starts again.
+  m_lastModes = -1;
 }
 
 template <std::size_t NumModules>
