@@ -1402,3 +1402,67 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
 }
 
 }  // namespace yams::test
+
+// Voltage tuning drives the wheels, then turns them, without their closed loops, and the tuning
+// command ending holds the wheels still with their closed loops again.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWithoutTheClosedLoop",
+                 "[SwerveDriveTest]") {
+  // Release the fixture's drive so its modules can be reused by a drive with live tuning.
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+  m_driveCfg.WithTelemetry("SwerveVoltageTuning", SwerveDriveConfig::TelemetryVerbosity::HIGH);
+  m_drive.emplace(&m_driveCfg);
+  Hardware().sub->m_drive = &m_drive.value();
+  auto tuning =
+      wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(m_drive->GetName());
+  auto tuneFor = [this](int loops) {
+    for (int i = 0; i < loops; ++i) {
+      m_drive->ApplyTuningValues();
+      SchedulerHelper::RunForDuration(0.02_s);
+    }
+  };
+  std::vector<SwerveModule*> modules{&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()};
+
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/drive/voltage/setpoint").SetDouble(4);
+  tuning->GetEntry("modules/drive/voltage/enabled").SetBoolean(true);
+  tuneFor(30);
+  for (auto* module : modules) {
+    INFO(module->GetName());
+    CHECK(module->GetDriveMotorController()->GetVoltage().value() == Catch::Approx(4).margin(0.25));
+    CHECK(module->GetState().velocity.value() > 0.5);
+  }
+  tuning->GetEntry("modules/drive/voltage/enabled").SetBoolean(false);
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(false);
+
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/azimuth/voltage/setpoint").SetDouble(1);
+  tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(true);
+  tuneFor(20);
+  for (auto* module : modules) {
+    INFO(module->GetName());
+    CHECK(module->GetAzimuthMotorController()->GetVoltage().value() ==
+          Catch::Approx(1).margin(0.25));
+  }
+
+  m_drive->StopTuning();
+  tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(false);
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(false);
+  SchedulerHelper::RunForDuration(0.5_s);
+  std::vector<double> stopped;
+  for (auto* module : modules) stopped.push_back(module->GetState().angle.Degrees().value());
+  SchedulerHelper::RunForDuration(0.5_s);
+  for (size_t i = 0; i < modules.size(); ++i) {
+    INFO(modules[i]->GetName());
+    CHECK(modules[i]->GetState().angle.Degrees().value() == Catch::Approx(stopped[i]).margin(2));
+  }
+}
+
+// A TalonFX's closed loop runs on the motor controller, at 1 kHz.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ClosedLoopPeriodIsOnTheMotorController",
+                 "[SwerveDriveTest]") {
+  CHECK(m_fl->GetDriveMotorController()->GetClosedLoopControllerPeriod().value() ==
+        Catch::Approx(0.001));
+  CHECK(m_fl->GetAzimuthMotorController()->GetClosedLoopControllerPeriod().value() ==
+        Catch::Approx(0.001));
+}

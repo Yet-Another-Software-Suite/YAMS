@@ -70,11 +70,49 @@ class SwerveDriveTelemetry {
   template <std::size_t NumModules>
   void ApplyTuningValues(mechanisms::swerve::SwerveDrive<NumModules>* drive);
 
+  /**
+   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still
+   * where it is with its closed-loop controller.
+   *
+   * @param drive Drive being tuned.
+   */
+  template <std::size_t NumModules>
+  void StopTuning(mechanisms::swerve::SwerveDrive<NumModules>* drive);
+
   /** Release all NT4 pub/sub handles. */
   void Close();
 
  private:
+  /**
+   * Set a gain from the tuning table: a drive to pose controller's, or every module's.
+   *
+   * @param drive Drive being tuned.
+   * @param field The gain's field.
+   * @param value The gain.
+   */
+  template <std::size_t NumModules>
+  void ApplyGain(mechanisms::swerve::SwerveDrive<NumModules>* drive, DoubleTelemetryField field,
+                 double value);
+
+  /**
+   * Switch the drive or azimuth motors between a tuning voltage and their closed-loop controllers.
+   * A closed-loop controller run on the SystemCore would replace the voltage on its next loop, so
+   * it is stopped while the voltage is applied.
+   *
+   * @param drive Drive being tuned.
+   * @param azimuth True for the azimuth motors, false for the drive motors.
+   * @param on True to apply a voltage, false to go back to the closed-loop controller.
+   */
+  template <std::size_t NumModules>
+  void SetVoltageControl(mechanisms::swerve::SwerveDrive<NumModules>* drive, bool azimuth, bool on);
+
   SwerveDriveTelemetryConfig m_config;
+  /** Whether the drive motors are driven at a tuning voltage, without their closed-loop
+   *  controllers. */
+  bool m_driveVoltageControl = false;
+  /** Whether the azimuth motors are driven at a tuning voltage, without their closed-loop
+   *  controllers. */
+  bool m_azimuthVoltageControl = false;
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;

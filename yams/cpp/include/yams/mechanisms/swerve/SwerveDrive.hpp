@@ -592,6 +592,21 @@ class SwerveDrive {
   }
 
   /**
+   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still
+   * where it is with its closed-loop controller.
+   */
+  /**
+   * Apply the live tuning values from NetworkTables, as the tuning command does each loop.
+   */
+  void ApplyTuningValues() {
+    if (m_swerveTelemetry) m_swerveTelemetry->ApplyTuningValues(this);
+  }
+
+  void StopTuning() {
+    if (m_swerveTelemetry) m_swerveTelemetry->StopTuning(this);
+  }
+
+  /**
    * Get the simulated pose of the robot, assuming the commanded module states are met perfectly.
    * Useful for feeding a simulated vision system with ground-truth poses under perfect-world
    * conditions.
@@ -793,14 +808,17 @@ class SwerveDrive {
 
     // Drive to pose tuning needs both controllers, so only offer it when they are configured.
     if (m_config->GetTranslationPID() && m_config->GetRotationPID()) {
-      m_driveToPoseTuningCommand.emplace(wpi::cmd::StartRun(
+      auto tuningCommand = wpi::cmd::StartRun(
           [this] {
             std::puts(
                 "================= Starting SwerveDrive.driveToPoseTuning() =================\n");
             ResetTranslationPID();
             ResetRotationPID();
           },
-          [this] { m_swerveTelemetry->ApplyTuningValues(this); }));
+          [this] { m_swerveTelemetry->ApplyTuningValues(this); });
+      // Stop any tuning voltage when the command ends.
+      m_driveToPoseTuningCommand.emplace(
+          std::move(tuningCommand).FinallyDo([this] { StopTuning(); }));
       telemetry::EnsureMechanismsTunableBackend();
       wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning/driveToPose",
                              *m_driveToPoseTuningCommand->get());
@@ -1041,69 +1059,133 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
 
 template <std::size_t NumModules>
 void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
-  bool nt4Enabled = m_config.GetNT4Enabled();
-
+  const bool nt4Enabled = m_config.GetNT4Enabled();
+  auto& modules = drive->GetConfig().GetModules();
   auto& boolFields = m_config.GetBoolFields();
-  auto& autoAlignBt = boolFields.at(BooleanTelemetryField::AutoAlignEnabled);
-  auto& driveTuningBt = boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled);
-  auto& azimuthTuningBt = boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled);
-  auto& driveInPlaceBt = boolFields.at(BooleanTelemetryField::ModulesDriveInPlace);
 
-  bool autoAlignOn = autoAlignBt.IsEnabled() && nt4Enabled && autoAlignBt.Get();
-  bool driveTuningOn = driveTuningBt.IsEnabled() && nt4Enabled && driveTuningBt.Get();
-  bool azimuthTuningOn = azimuthTuningBt.IsEnabled() && nt4Enabled && azimuthTuningBt.Get();
-  bool driveInPlaceOn = driveInPlaceBt.IsEnabled() && nt4Enabled && driveInPlaceBt.Get();
+  // Read which tuning modes are on. Auto-align fields are disabled when either drive to pose
+  // controller is missing.
+  bool autoAlignOn = false;
+  bool driveTuningOn = false;
+  bool driveInPlaceOn = false;
+  bool driveVoltageOn = false;
+  bool azimuthTuningOn = false;
+  bool azimuthVoltageOn = false;
+  for (auto& [field, bt] : boolFields) {
+    if (!bt.IsEnabled() || !nt4Enabled) continue;
+    switch (field) {
+      case BooleanTelemetryField::AutoAlignEnabled:
+        autoAlignOn = bt.Get();
+        break;
+      case BooleanTelemetryField::ModulesDriveTuningEnabled:
+        driveTuningOn = bt.Get();
+        break;
+      case BooleanTelemetryField::ModulesDriveInPlace:
+        driveInPlaceOn = bt.Get();
+        break;
+      case BooleanTelemetryField::ModulesDriveVoltageEnabled:
+        driveVoltageOn = bt.Get();
+        break;
+      case BooleanTelemetryField::ModulesAzimuthTuningEnabled:
+        azimuthTuningOn = bt.Get();
+        break;
+      case BooleanTelemetryField::ModulesAzimuthVoltageEnabled:
+        azimuthVoltageOn = bt.Get();
+        break;
+    }
+  }
 
   // Only one tuning mode may drive the chassis at a time; enforce priority order
   // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
   // NetworkTables so the dashboard reflects what's actually happening.
   if (autoAlignOn) {
     if (driveTuningOn) {
-      driveTuningBt.ForceSet(false);
+      boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled).ForceSet(false);
       driveTuningOn = false;
     }
     if (azimuthTuningOn) {
-      azimuthTuningBt.ForceSet(false);
+      boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled).ForceSet(false);
       azimuthTuningOn = false;
     }
   } else if (driveTuningOn && azimuthTuningOn) {
-    azimuthTuningBt.ForceSet(false);
+    boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled).ForceSet(false);
     azimuthTuningOn = false;
   }
 
+  // Read the setpoints, and set every gain that changed.
+  double autoAlignX = 0;
+  double autoAlignY = 0;
+  double autoAlignRotation = 0;
+  double driveVelocity = 0;
+  double driveVoltage = 0;
+  double azimuthAngle = 0;
+  double azimuthVoltage = 0;
+  for (auto& [field, dt] : m_config.GetDoubleFields()) {
+    if (!dt.IsEnabled() || !nt4Enabled) continue;
+    switch (field) {
+      case DoubleTelemetryField::AutoAlignPoseX:
+        autoAlignX = dt.Get();
+        break;
+      case DoubleTelemetryField::AutoAlignPoseY:
+        autoAlignY = dt.Get();
+        break;
+      case DoubleTelemetryField::AutoAlignPoseRotation:
+        autoAlignRotation = dt.Get();
+        break;
+      case DoubleTelemetryField::ModulesDriveVelocity:
+        driveVelocity = dt.Get();
+        break;
+      case DoubleTelemetryField::ModulesDriveVoltage:
+        driveVoltage = dt.Get();
+        break;
+      case DoubleTelemetryField::ModulesAzimuthAngle:
+        azimuthAngle = dt.Get();
+        break;
+      case DoubleTelemetryField::ModulesAzimuthVoltage:
+        azimuthVoltage = dt.Get();
+        break;
+      default:
+        if (dt.IsTunable()) ApplyGain(drive, field, dt.Get());
+        break;
+    }
+  }
+
+  // A voltage is only applied while its tuning mode is on.
+  const bool driveVoltageControl = driveTuningOn && driveVoltageOn;
+  const bool azimuthVoltageControl = azimuthTuningOn && azimuthVoltageOn;
+  SetVoltageControl(drive, false, driveVoltageControl);
+  SetVoltageControl(drive, true, azimuthVoltageControl);
+
   if (autoAlignOn) {
-    auto& doubleFields = m_config.GetDoubleFields();
-    double x = doubleFields.at(DoubleTelemetryField::AutoAlignPoseX).Get();
-    double y = doubleFields.at(DoubleTelemetryField::AutoAlignPoseY).Get();
-    double rot = doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Get();
-    wpi::math::Pose2d targetPose{wpi::units::meter_t{x}, wpi::units::meter_t{y},
-                                 wpi::math::Rotation2d{wpi::units::degree_t{rot}}};
+    wpi::math::Pose2d targetPose{wpi::units::meter_t{autoAlignX}, wpi::units::meter_t{autoAlignY},
+                                 wpi::math::Rotation2d{wpi::units::degree_t{autoAlignRotation}}};
     drive->SetRobotRelativeChassisSpeeds(drive->DriveToPoseSetpoint(targetPose));
   }
 
-  if (driveTuningBt.IsEnabled() && nt4Enabled) {
-    auto& modules = drive->GetConfig().GetModules();
+  if (boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled).IsEnabled() && nt4Enabled) {
+    wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
     if (driveTuningOn) {
-      wpi::units::meters_per_second_t velocity{
-          m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesDriveVelocity).Get()};
-      wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
       for (size_t i = 0; i < NumModules; ++i) {
+        wpi::math::Rotation2d angle{};
         if (driveInPlaceOn) {
           // Point each module tangent to its position around the robot center so a positive
           // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
           auto moduleLocation = *modules[i]->GetConfig().GetLocation();
-          auto tangentAngle = moduleLocation.Angle().value_or(wpi::math::Rotation2d{}) +
-                              wpi::math::Rotation2d{wpi::units::degree_t{90}};
-          states[i] = wpi::math::SwerveModuleVelocity{velocity, tangentAngle};
+          angle = moduleLocation.Angle().value_or(wpi::math::Rotation2d{}) +
+                  wpi::math::Rotation2d{wpi::units::degree_t{90}};
+        }
+        if (driveVoltageControl) {
+          modules[i]->SetDriveVoltage(wpi::units::volt_t{driveVoltage}, angle);
         } else {
-          states[i] = wpi::math::SwerveModuleVelocity{velocity, wpi::math::Rotation2d{}};
+          states[i] =
+              wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{driveVelocity}, angle};
         }
       }
-      drive->SetSwerveModuleStates(states);
-    } else if (!autoAlignOn) {
+      if (!driveVoltageControl) drive->SetSwerveModuleStates(states);
+    } else if (!autoAlignOn && !azimuthTuningOn) {
       // Drive tuning is off (and auto-align isn't driving the chassis instead); make sure the
       // modules don't keep spinning at whatever velocity was last commanded while it was on.
-      wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
+      // Azimuth tuning holds the wheels still itself.
       for (size_t i = 0; i < NumModules; ++i) {
         states[i] = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{0},
                                                     modules[i]->GetState().angle};
@@ -1113,118 +1195,90 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
   }
 
   if (azimuthTuningOn) {
-    // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
-    // wheels without driving them.
-    drive->SetAzimuthAngles(wpi::math::Rotation2d{wpi::units::degree_t{
-        m_config.GetDoubleFields().at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}});
+    if (azimuthVoltageControl) {
+      for (auto* module : modules) module->SetAzimuthVoltage(wpi::units::volt_t{azimuthVoltage});
+    } else {
+      // Zero speed states would be held where the wheels are by the velocity deadband, so turn
+      // the wheels without driving them.
+      drive->SetAzimuthAngles(wpi::math::Rotation2d{wpi::units::degree_t{azimuthAngle}});
+    }
   }
+}
 
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::ApplyGain(mechanisms::swerve::SwerveDrive<NumModules>* drive,
+                                     DoubleTelemetryField field, double value) {
   // Copies of the configured controllers; gain fields for missing controllers are disabled.
   std::optional<wpi::math::PIDController> translationPID;
   if (auto pid = drive->GetConfig().GetTranslationPID()) translationPID = pid->get();
   std::optional<wpi::math::PIDController> rotationPID;
   if (auto pid = drive->GetConfig().GetRotationPID()) rotationPID = pid->get();
-  for (auto& [field, dt] : m_config.GetDoubleFields()) {
-    if (!dt.IsTunable()) continue;
-    switch (field) {
-      case DoubleTelemetryField::TranslationP:
-        if (translationPID) {
-          translationPID->SetP(dt.Get());
-          drive->SetTranslationPID(*translationPID);
-        }
-        break;
-      case DoubleTelemetryField::TranslationI:
-        if (translationPID) {
-          translationPID->SetI(dt.Get());
-          drive->SetTranslationPID(*translationPID);
-        }
-        break;
-      case DoubleTelemetryField::TranslationD:
-        if (translationPID) {
-          translationPID->SetD(dt.Get());
-          drive->SetTranslationPID(*translationPID);
-        }
-        break;
-      case DoubleTelemetryField::RotationP:
-        if (rotationPID) {
-          rotationPID->SetP(dt.Get());
-          drive->SetRotationPID(*rotationPID);
-        }
-        break;
-      case DoubleTelemetryField::RotationI:
-        if (rotationPID) {
-          rotationPID->SetI(dt.Get());
-          drive->SetRotationPID(*rotationPID);
-        }
-        break;
-      case DoubleTelemetryField::RotationD:
-        if (rotationPID) {
-          rotationPID->SetD(dt.Get());
-          drive->SetRotationPID(*rotationPID);
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveP:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKp(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveI:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKi(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveD:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKd(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthP:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKp(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthI:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKi(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthD:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKd(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveKs:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKs(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveKv:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKv(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesDriveKa:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetDriveMotorController()->SetKa(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthKs:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKs(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthKv:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKv(dt.Get());
-        }
-        break;
-      case DoubleTelemetryField::ModulesAzimuthKa:
-        for (auto* module : drive->GetConfig().GetModules()) {
-          module->GetAzimuthMotorController()->SetKa(dt.Get());
-        }
-        break;
-      default:
-        break;
+  switch (field) {
+    case DoubleTelemetryField::TranslationP:
+      if (translationPID) {
+        translationPID->SetP(value);
+        drive->SetTranslationPID(*translationPID);
+      }
+      break;
+    case DoubleTelemetryField::TranslationI:
+      if (translationPID) {
+        translationPID->SetI(value);
+        drive->SetTranslationPID(*translationPID);
+      }
+      break;
+    case DoubleTelemetryField::TranslationD:
+      if (translationPID) {
+        translationPID->SetD(value);
+        drive->SetTranslationPID(*translationPID);
+      }
+      break;
+    case DoubleTelemetryField::RotationP:
+      if (rotationPID) {
+        rotationPID->SetP(value);
+        drive->SetRotationPID(*rotationPID);
+      }
+      break;
+    case DoubleTelemetryField::RotationI:
+      if (rotationPID) {
+        rotationPID->SetI(value);
+        drive->SetRotationPID(*rotationPID);
+      }
+      break;
+    case DoubleTelemetryField::RotationD:
+      if (rotationPID) {
+        rotationPID->SetD(value);
+        drive->SetRotationPID(*rotationPID);
+      }
+      break;
+    default:
+      // The module gains.
+      for (auto* module : drive->GetConfig().GetModules()) module->ApplyTuningValue(field, value);
+      break;
+  }
+}
+
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::StopTuning(mechanisms::swerve::SwerveDrive<NumModules>* drive) {
+  SetVoltageControl(drive, false, false);
+  SetVoltageControl(drive, true, false);
+}
+
+template <std::size_t NumModules>
+void SwerveDriveTelemetry::SetVoltageControl(mechanisms::swerve::SwerveDrive<NumModules>* drive,
+                                             bool azimuth, bool on) {
+  bool& control = azimuth ? m_azimuthVoltageControl : m_driveVoltageControl;
+  if (on == control) return;
+  control = on;
+  for (auto* module : drive->GetConfig().GetModules()) {
+    auto* smc = azimuth ? module->GetAzimuthMotorController() : module->GetDriveMotorController();
+    if (on) {
+      smc->StopClosedLoopController();
+    } else {
+      smc->SetVoltage(wpi::units::volt_t{0});
+      smc->StartClosedLoopController();
+      // Restarted, the closed-loop controller would go back to the setpoint from before the
+      // voltage.
+      module->SetAzimuthAngle(module->GetState().angle);
     }
   }
 }

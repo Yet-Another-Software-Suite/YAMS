@@ -60,6 +60,8 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"closedloop/setpoint/velocity", 0.0, field, false, "velocity"};
     case DoubleTelemetryField::SetpointForce:
       return {"closedloop/setpoint/force", 0.0, field, false, "newtons"};
+    case DoubleTelemetryField::ClosedLoopPeriod:
+      return {"closedloop/period", 0.02, field, false, "seconds"};
     case DoubleTelemetryField::OutputVoltage:
       return {"motor/outputVoltage", 0.0, field, false, "volts"};
     case DoubleTelemetryField::StatorCurrent:
@@ -159,6 +161,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::TunableSetpointVelocity,
            DoubleTelemetryField::SetpointVelocity,
            DoubleTelemetryField::SetpointForce,
+           DoubleTelemetryField::ClosedLoopPeriod,
            DoubleTelemetryField::OutputVoltage,
            DoubleTelemetryField::StatorCurrent,
            DoubleTelemetryField::StatorCurrentLimit,
@@ -253,6 +256,7 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::kI).Enable();
     m_doubleFields.at(DoubleTelemetryField::kD).Enable();
     m_doubleFields.at(DoubleTelemetryField::SetpointForce).Enable();
+    m_doubleFields.at(DoubleTelemetryField::ClosedLoopPeriod).Enable();
   }
   if (verbosity == V::HIGH || verbosity == V::MEDIUM) {
     m_doubleFields.at(DoubleTelemetryField::OutputVoltage).Enable();
@@ -344,6 +348,10 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCu
 SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithCustom(
     const std::vector<BooleanTelemetryField>& fields, bool enabled) {
   for (auto f : fields) WithCustom(f, enabled);
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithClosedLoopPeriod() {
+  m_doubleFields.at(DoubleTelemetryField::ClosedLoopPeriod).Enable();
   return *this;
 }
 SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithOutputVoltage() {

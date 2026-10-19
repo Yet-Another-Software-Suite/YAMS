@@ -572,6 +572,16 @@ class SmartMotorController {
 
   // ---- Closed-loop controller thread --------------------------------------
 
+  /**
+   * Get the period the closed-loop controller runs at. A closed-loop controller run on the
+   * SystemCore, such as an LQR or an exponential profile, runs at
+   * SmartMotorControllerConfig::WithClosedLoopControlPeriod(), 20 ms by default. One run on the motor
+   * controller runs at 1 kHz.
+   *
+   * @return The closed-loop controller's period.
+   */
+  wpi::units::second_t GetClosedLoopControllerPeriod() const;
+
   /** Start the background closed-loop controller thread, and the loosely coupled followers'. */
   void StartClosedLoopController();
 

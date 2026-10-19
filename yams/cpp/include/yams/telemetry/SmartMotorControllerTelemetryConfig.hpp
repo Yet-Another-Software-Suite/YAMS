@@ -164,6 +164,8 @@ class SmartMotorControllerTelemetryConfig {
   SmartMotorControllerTelemetryConfig& WithCustom(const std::vector<BooleanTelemetryField>& fields,
                                                   bool enabled);
 
+  /** Enables logging the period the closed-loop controller runs at. */
+  SmartMotorControllerTelemetryConfig& WithClosedLoopPeriod();
   /** Enable output voltage logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithOutputVoltage();
   /** Enable stator current logging. @return *this for chaining. */

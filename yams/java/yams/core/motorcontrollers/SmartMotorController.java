@@ -265,6 +265,20 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Get the period the closed loop controller runs at. A closed loop controller run on the SystemCore,
+   * such as an LQR or an exponential profile, runs at {@link SmartMotorControllerConfig#withClosedLoopControlPeriod(Time)},
+   * 20 ms by default. One run on the motor controller runs at 1 kHz.
+   *
+   * @return The closed loop controller's period.
+   */
+  public Time getClosedLoopControllerPeriod() {
+    if (m_closedLoopControllerThread != null) {
+      return m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    }
+    return Milliseconds.of(1);
+  }
+
+  /**
    * Stop the closed loop controller, and the loosely coupled followers' closed loop controllers. The
    * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at
    * instead.

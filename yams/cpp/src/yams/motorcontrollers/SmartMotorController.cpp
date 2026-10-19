@@ -69,6 +69,13 @@ void SmartMotorController::StopClosedLoopController() {
   }
 }
 
+wpi::units::second_t SmartMotorController::GetClosedLoopControllerPeriod() const {
+  if (m_closedLoopControllerThread) {
+    return m_config->GetClosedLoopControlPeriod().value_or(20_ms);
+  }
+  return 1_ms;
+}
+
 void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
       m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {

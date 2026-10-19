@@ -62,7 +62,7 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
     this.subsystem = config.getSubsystem();
     // Drive to pose tuning needs both controllers, so only offer it when they are configured.
     if (config.getTranslationPID().isPresent() && config.getRotationPID().isPresent()) {
-      Tunables.publish("Mechanisms/" + getName() + "/tuning", Commands.startRun(this::startDriveToPoseTuning, this::applyTuningValues));
+      Tunables.publish("Mechanisms/" + getName() + "/tuning", Commands.startRun(this::startDriveToPoseTuning, this::applyTuningValues).finallyDo(this::stopTuning));
     }
   }
 

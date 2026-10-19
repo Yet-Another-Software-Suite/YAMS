@@ -19,6 +19,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -51,6 +52,8 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.util.MathUtil;
+import org.wpilib.networktables.NetworkTable;
+import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.preferences.Preferences;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
@@ -328,6 +331,11 @@ public class SwerveDriveTest {
 
   /** A drive config for the layout's modules and Pigeon2, with no translation or rotation controller. */
   private SwerveDriveConfig baseConfig() {
+    return baseConfig(TelemetryVerbosity.LOW);
+  }
+
+  /** A drive config for the layout's modules and Pigeon2, with telemetry at a verbosity. */
+  private SwerveDriveConfig baseConfig(TelemetryVerbosity verbosity) {
     driveCount++;
     return new SwerveDriveConfig(subsystem, modules)
         // Phoenix's simulated Pigeon2 does not fill in its quaternion, which getRotation3d() reads,
@@ -340,18 +348,42 @@ public class SwerveDriveTest {
                     pigeon.getYaw().getValue()))
         .withStartingPose(new Pose2d())
         .withMaximumChassisSpeed(MetersPerSecond.of(4.5), DegreesPerSecond.of(540))
-        .withTelemetry("SwerveDriveTest" + driveCount, TelemetryVerbosity.LOW);
+        .withTelemetry("SwerveDriveTest" + driveCount, verbosity);
   }
 
   /** Build a drive, with translation and rotation controllers, on the layout's hardware. */
   private void build(Layout layout) {
+    build(layout, TelemetryVerbosity.LOW);
+  }
+
+  /**
+   * Build a drive with live tuning, with translation and rotation controllers, on the layout's
+   * hardware.
+   *
+   * @return The drive's tuning table.
+   */
+  private NetworkTable buildForTuning(Layout layout) {
+    build(layout, TelemetryVerbosity.HIGH);
+    return NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(drive.getName());
+  }
+
+  /** Apply the drive's tuning values every loop, as the tuning command does. */
+  private void tuneFor(double seconds) {
+    for (int i = 0; i < Math.round(seconds / 0.02); i++) {
+      drive.applyTuningValues();
+      runFor(0.02);
+    }
+  }
+
+  /** Build a drive, with translation and rotation controllers, on the layout's hardware. */
+  private void build(Layout layout, TelemetryVerbosity verbosity) {
     final Hardware hardware = HARDWARE.computeIfAbsent(layout.name(), name -> new Hardware(layout));
     subsystem = hardware.subsystem;
     pigeon = hardware.pigeon;
     modules = hardware.modules;
     drive =
         new SwerveDrive(
-            baseConfig()
+            baseConfig(verbosity)
                 .withTranslationController(new PIDController(2, 0, 0))
                 .withRotationController(new PIDController(4, 0, 0)));
     subsystem.drive = drive;
@@ -613,6 +645,70 @@ public class SwerveDriveTest {
   }
 
   // ---- One layout: these do not depend on the motor controllers --------------------------------
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("layouts")
+  void driveVoltageTuningDrivesTheWheelsWithoutTheirClosedLoop(Layout layout) {
+    NetworkTable tuning = buildForTuning(layout);
+    tuning.getEntry("modules/drive/enabled").setBoolean(true);
+    tuning.getEntry("modules/drive/voltage/setpoint").setDouble(4);
+    tuning.getEntry("modules/drive/voltage/enabled").setBoolean(true);
+    tuneFor(0.6);
+    // A closed loop run on the SystemCore, as on a Nova, is stopped so it does not replace the
+    // voltage.
+    for (SwerveModule module : modules) {
+      assertEquals(4, module.getDriveMotorController().getVoltage().in(Volts), 0.25, module.getName() + " drive voltage");
+      assertTrue(module.getState().velocity > 0.5, module.getName() + " drives forward at 4 V");
+      assertEquals(0, module.getState().angle.getDegrees(), 5, module.getName() + " points forward");
+    }
+
+    // Back to the velocity setpoint, 0, with the closed loop.
+    tuning.getEntry("modules/drive/voltage/enabled").setBoolean(false);
+    tuneFor(1.0);
+    for (SwerveModule module : modules) {
+      assertEquals(0, module.getState().velocity, 0.1, module.getName() + " stops with its closed loop");
+    }
+    tuning.getEntry("modules/drive/enabled").setBoolean(false);
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("layouts")
+  void azimuthVoltageTuningTurnsTheWheelsWithoutTheirClosedLoop(Layout layout) {
+    NetworkTable tuning = buildForTuning(layout);
+    tuning.getEntry("modules/azimuth/enabled").setBoolean(true);
+    tuning.getEntry("modules/azimuth/voltage/setpoint").setDouble(1);
+    tuning.getEntry("modules/azimuth/voltage/enabled").setBoolean(true);
+    tuneFor(0.4);
+    for (SwerveModule module : modules) {
+      assertEquals(1, module.getAzimuthMotorController().getVoltage().in(Volts), 0.25, module.getName() + " azimuth voltage");
+      assertTrue(Math.abs(module.getState().azimuthVelocity.in(DegreesPerSecond)) > 10, module.getName() + " turns at 1 V");
+    }
+
+    // The tuning command ending stops the voltage and holds the wheels where they are.
+    drive.stopTuning();
+    tuning.getEntry("modules/azimuth/voltage/enabled").setBoolean(false);
+    tuning.getEntry("modules/azimuth/enabled").setBoolean(false);
+    runFor(0.5);
+    double[] stopped = new double[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      stopped[i] = modules[i].getState().angle.getDegrees();
+    }
+    runFor(0.5);
+    for (int i = 0; i < modules.length; i++) {
+      assertEquals(stopped[i], modules[i].getState().angle.getDegrees(), 2, modules[i].getName() + " is held where it stopped");
+    }
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("layouts")
+  void closedLoopPeriodIsWhereTheClosedLoopRuns(Layout layout) {
+    build(layout);
+    for (int i = 0; i < modules.length; i++) {
+      // A Nova's closed loop runs on the SystemCore, every other one on the motor controller.
+      double expected = layout.drives()[i] == NOVA ? 0.02 : 0.001;
+      assertEquals(expected, modules[i].getDriveMotorController().getClosedLoopControllerPeriod().in(Seconds), 1e-9, modules[i].getName() + " drive period");
+    }
+  }
 
   @Test
   void configuredPIDControllersArePresent() {

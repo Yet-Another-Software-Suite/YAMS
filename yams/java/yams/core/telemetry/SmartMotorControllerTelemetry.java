@@ -151,6 +151,7 @@ public class SmartMotorControllerTelemetry {
           smc.getMechanismSetpointVelocity().ifPresent(mechSetpoint -> dt.set(cfg.getLinearClosedLoopControllerUse() ? cfg.convertFromMechanism(mechSetpoint).in(MetersPerSecond) : mechSetpoint.in(RotationsPerSecond)));
         }
         case SetpointForce -> dt.set(smc.getSetpointFeedforwardForce().orElse(Newtons.zero()).in(Newtons));
+        case ClosedLoopPeriod -> dt.set(smc.getClosedLoopControllerPeriod().in(Seconds));
         case OutputVoltage -> dt.set(smc.getVoltage().in(Volts));
         case StatorCurrent -> dt.set(smc.getStatorCurrent().in(Amps));
         case SupplyCurrent -> smc.getSupplyCurrent().ifPresent(current -> dt.set(current.in(Amps)));
@@ -405,6 +406,11 @@ public class SmartMotorControllerTelemetry {
     SetpointVelocity("closedloop/setpoint/velocity", 0, false, "velocity"),
     /** Setpoint feedforward force, e.g. from a PathPlanner set-point generator. */
     SetpointForce("closedloop/setpoint/force", 0, false, "newtons"),
+    /**
+     * Period the closed loop controller runs at: 1 ms on the motor controller, or the closed loop
+     * control period on the SystemCore.
+     */
+    ClosedLoopPeriod("closedloop/period", 0.02, false, "seconds"),
     /** Voltage supplied to the motor. */
     OutputVoltage("motor/outputVoltage", 0, false, "volts"),
     /** Stator current. */

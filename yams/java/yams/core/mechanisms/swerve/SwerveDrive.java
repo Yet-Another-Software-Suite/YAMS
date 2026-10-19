@@ -178,6 +178,14 @@ public class SwerveDrive {
   }
 
   /**
+   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
+   * it is with its closed loop controller.
+   */
+  public void stopTuning() {
+    m_swerveTelemetry.stopTuning(this);
+  }
+
+  /**
    * Get the robot's attitude from the gyro (see {@link SwerveDriveConfig#getGyroRotation3d()}): its
    * yaw is the robot's heading. In simulation, the simulated heading with no tilt.
    *
