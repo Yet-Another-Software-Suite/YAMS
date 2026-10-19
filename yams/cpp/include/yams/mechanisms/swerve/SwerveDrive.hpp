@@ -1206,19 +1206,66 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
           drive->SetRobotRelativeChassisSpeeds(drive->DriveToPoseSetpoint(targetPose));
         }
         break;
+      // Every module's drive or azimuth gain.
       case DoubleTelemetryField::ModulesDriveP:
-      case DoubleTelemetryField::ModulesDriveI:
-      case DoubleTelemetryField::ModulesDriveD:
-      case DoubleTelemetryField::ModulesDriveKs:
-      case DoubleTelemetryField::ModulesDriveKv:
-      case DoubleTelemetryField::ModulesDriveKa:
       case DoubleTelemetryField::ModulesAzimuthP:
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveP ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKp(dt.Get());
+          }
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveI:
       case DoubleTelemetryField::ModulesAzimuthI:
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveI ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKi(dt.Get());
+          }
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveD:
       case DoubleTelemetryField::ModulesAzimuthD:
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveD ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKd(dt.Get());
+          }
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKs:
       case DoubleTelemetryField::ModulesAzimuthKs:
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveKs ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKs(dt.Get());
+          }
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKv:
       case DoubleTelemetryField::ModulesAzimuthKv:
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveKv ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKv(dt.Get());
+          }
+        }
+        break;
+      case DoubleTelemetryField::ModulesDriveKa:
       case DoubleTelemetryField::ModulesAzimuthKa:
-        for (auto* module : modules) module->ApplyTuningValue(field, dt.Get(), changed);
+        if (changed) {
+          for (auto* module : modules) {
+            (field == DoubleTelemetryField::ModulesDriveKa ? module->GetDriveMotorController()
+                                                       : module->GetAzimuthMotorController())
+                ->SetKa(dt.Get());
+          }
+        }
         break;
       case DoubleTelemetryField::ModulesDriveVelocity:
         if (driveTuningOn && !m_driveVoltageControl) {
@@ -1238,8 +1285,11 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
         break;
       case DoubleTelemetryField::ModulesDriveVoltage:
         if (m_driveVoltageControl) {
+          // The wheels are not optimized, so they always drive the same way.
           for (auto* module : modules) {
-            module->SetDriveVoltage(wpi::units::volt_t{dt.Get()}, driveTuningAngle(module));
+            module->GetDriveMotorController()->SetVoltage(wpi::units::volt_t{dt.Get()});
+            module->GetAzimuthMotorController()->SetPosition(
+                wpi::units::degree_t{driveTuningAngle(module).Degrees()});
           }
         }
         break;
@@ -1252,7 +1302,12 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
         break;
       case DoubleTelemetryField::ModulesAzimuthVoltage:
         if (m_azimuthVoltageControl) {
-          for (auto* module : modules) module->SetAzimuthVoltage(wpi::units::volt_t{dt.Get()});
+          // Hold the drive motors still while the azimuth motors turn.
+          for (auto* module : modules) {
+            module->GetDriveMotorController()->SetVelocity(wpi::units::meters_per_second_t{0} +
+                                                           module->GetCouplingVelocity());
+            module->GetAzimuthMotorController()->SetVoltage(wpi::units::volt_t{dt.Get()});
+          }
         }
         break;
       default:

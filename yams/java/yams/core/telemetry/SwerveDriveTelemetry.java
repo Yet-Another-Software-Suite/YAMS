@@ -270,20 +270,53 @@ public class SwerveDriveTelemetry {
             drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
           }
           break;
+        // Every module's drive or azimuth gain.
         case ModulesDriveP:
-        case ModulesDriveI:
-        case ModulesDriveD:
-        case ModulesDriveKs:
-        case ModulesDriveKv:
-        case ModulesDriveKa:
         case ModulesAzimuthP:
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveP ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKp(dt.get());
+            }
+          }
+          break;
+        case ModulesDriveI:
         case ModulesAzimuthI:
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveI ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKi(dt.get());
+            }
+          }
+          break;
+        case ModulesDriveD:
         case ModulesAzimuthD:
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveD ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKd(dt.get());
+            }
+          }
+          break;
+        case ModulesDriveKs:
         case ModulesAzimuthKs:
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveKs ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKs(dt.get());
+            }
+          }
+          break;
+        case ModulesDriveKv:
         case ModulesAzimuthKv:
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveKv ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKv(dt.get());
+            }
+          }
+          break;
+        case ModulesDriveKa:
         case ModulesAzimuthKa:
-          for (SwerveModule module : modules) {
-            module.applyTuningValue(field, dt.get(), changed);
+          if (changed) {
+            for (SwerveModule module : modules) {
+              (field == DoubleTelemetryField.ModulesDriveKa ? module.getDriveMotorController() : module.getAzimuthMotorController()).setKa(dt.get());
+            }
           }
           break;
         case ModulesDriveVelocity:
@@ -302,8 +335,10 @@ public class SwerveDriveTelemetry {
           break;
         case ModulesDriveVoltage:
           if (m_driveVoltageControl) {
+            // The wheels are not optimized, so they always drive the same way.
             for (SwerveModule module : modules) {
-              module.setDriveVoltage(Volts.of(dt.get()), driveTuningAngle(module, driveInPlaceOn));
+              module.getDriveMotorController().setVoltage(Volts.of(dt.get()));
+              module.getAzimuthMotorController().setPosition(driveTuningAngle(module, driveInPlaceOn).getMeasure());
             }
           }
           break;
@@ -316,8 +351,10 @@ public class SwerveDriveTelemetry {
           break;
         case ModulesAzimuthVoltage:
           if (m_azimuthVoltageControl) {
+            // Hold the drive motors still while the azimuth motors turn.
             for (SwerveModule module : modules) {
-              module.setAzimuthVoltage(Volts.of(dt.get()));
+              module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
+              module.getAzimuthMotorController().setVoltage(Volts.of(dt.get()));
             }
           }
           break;

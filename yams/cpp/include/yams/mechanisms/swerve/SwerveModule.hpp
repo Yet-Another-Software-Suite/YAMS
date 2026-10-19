@@ -10,13 +10,11 @@
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/force.hpp>
-#include <wpi/units/voltage.hpp>
 
 #include "yams/mechanisms/config/SwerveModuleConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModuleVelocityWithAzimuth.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
 #include "yams/telemetry/MechanismTelemetry.hpp"
-#include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
 #include "yams/telemetry/SwerveModuleTelemetry.hpp"
 
 namespace yams::mechanisms::swerve {
@@ -149,36 +147,6 @@ class SwerveModule {
    */
   wpi::math::SwerveModuleVelocity SetAzimuthAngle(wpi::math::Rotation2d angle);
 
-  /**
-   * Drive the wheel at a voltage, without the drive motor's closed-loop controller, with the wheel
-   * turned to an angle, as for characterizing the drive motor. The angle is not optimized, so the
-   * wheel is always driven the same way. Stop the drive motor's closed-loop controller first, or
-   * one run on the SystemCore replaces the voltage on its next loop.
-   *
-   * @param voltage Voltage to drive the wheel at.
-   * @param angle Angle to turn the wheel to.
-   */
-  void SetDriveVoltage(wpi::units::volt_t voltage, wpi::math::Rotation2d angle);
-
-  /**
-   * Turn the wheel at a voltage, without the azimuth motor's closed-loop controller, and without
-   * driving it, as for characterizing the azimuth motor. Stop the azimuth motor's closed-loop
-   * controller first, or one run on the SystemCore replaces the voltage on its next loop.
-   *
-   * @param voltage Voltage to turn the wheel at.
-   */
-  void SetAzimuthVoltage(wpi::units::volt_t voltage);
-
-  /**
-   * Apply a live tuning gain from the SwerveDrive's telemetry to this module's drive or azimuth
-   * motor controller, when it changed. Fields that are not a module gain are ignored.
-   *
-   * @param field The tuning field.
-   * @param value Its value.
-   * @param changed Whether the value changed since it was last applied.
-   */
-  void ApplyTuningValue(telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField field,
-                        double value, bool changed);
 
   /** Get the current measured module state (speed and heading). */
   SwerveModuleVelocityWithAzimuth GetState() const;
@@ -213,10 +181,10 @@ class SwerveModule {
   wpi::units::meter_t GetCouplingDistance(wpi::units::turn_t azimuthAngle) const;
   /** The drive motor's rotor to mechanism ratio, or 1 when no gearing is configured. */
   double GetDriveRotorToMechanismRatio() const;
+ public:
   /** Wheel velocity the drive encoder reads because the azimuth is turning. */
   wpi::units::meters_per_second_t GetCouplingVelocity() const;
 
- public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).
   motorcontrollers::SmartMotorController* m_driveMotorController;
   motorcontrollers::SmartMotorController* m_azimuthMotorController;

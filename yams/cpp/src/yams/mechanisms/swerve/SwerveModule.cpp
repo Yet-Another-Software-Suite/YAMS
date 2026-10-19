@@ -105,62 +105,6 @@ wpi::math::SwerveModuleVelocity SwerveModule::SetAzimuthAngle(wpi::math::Rotatio
   return state;
 }
 
-void SwerveModule::SetDriveVoltage(wpi::units::volt_t voltage, wpi::math::Rotation2d angle) {
-  m_driveMotorController->SetVoltage(voltage);
-  m_azimuthMotorController->SetPosition(wpi::units::degree_t{angle.Degrees()});
-}
-
-void SwerveModule::SetAzimuthVoltage(wpi::units::volt_t voltage) {
-  m_driveMotorController->SetVelocity(wpi::units::meters_per_second_t{0} + GetCouplingVelocity());
-  m_azimuthMotorController->SetVoltage(voltage);
-}
-
-void SwerveModule::ApplyTuningValue(
-    telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField field, double value, bool changed) {
-  if (!changed) return;
-  using Field = telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField;
-  switch (field) {
-    case Field::ModulesDriveP:
-      m_driveMotorController->SetKp(value);
-      break;
-    case Field::ModulesDriveI:
-      m_driveMotorController->SetKi(value);
-      break;
-    case Field::ModulesDriveD:
-      m_driveMotorController->SetKd(value);
-      break;
-    case Field::ModulesDriveKs:
-      m_driveMotorController->SetKs(value);
-      break;
-    case Field::ModulesDriveKv:
-      m_driveMotorController->SetKv(value);
-      break;
-    case Field::ModulesDriveKa:
-      m_driveMotorController->SetKa(value);
-      break;
-    case Field::ModulesAzimuthP:
-      m_azimuthMotorController->SetKp(value);
-      break;
-    case Field::ModulesAzimuthI:
-      m_azimuthMotorController->SetKi(value);
-      break;
-    case Field::ModulesAzimuthD:
-      m_azimuthMotorController->SetKd(value);
-      break;
-    case Field::ModulesAzimuthKs:
-      m_azimuthMotorController->SetKs(value);
-      break;
-    case Field::ModulesAzimuthKv:
-      m_azimuthMotorController->SetKv(value);
-      break;
-    case Field::ModulesAzimuthKa:
-      m_azimuthMotorController->SetKa(value);
-      break;
-    default:
-      break;
-  }
-}
-
 SwerveModuleVelocityWithAzimuth SwerveModule::GetState() const {
   return SwerveModuleVelocityWithAzimuth{
       m_driveMotorController->GetMeasurementVelocity() - GetCouplingVelocity(),

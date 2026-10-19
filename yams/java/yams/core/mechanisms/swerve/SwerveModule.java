@@ -18,13 +18,11 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
 import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.units.measure.Voltage;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.telemetry.MechanismTelemetry;
-import yams.core.telemetry.SwerveDriveTelemetry;
 import yams.core.telemetry.SwerveModuleTelemetry;
 import yams.core.telemetry.SwerveModuleTelemetryConfig;
 import yams.core.telemetry.enums.TelemetryVerbosity;
@@ -200,66 +198,6 @@ public class SwerveModule {
   }
 
   /**
-   * Drive the wheel at a voltage, without the drive motor's closed loop controller, with the wheel
-   * turned to an angle, as for characterizing the drive motor. The angle is not optimized, so the
-   * wheel is always driven the same way. Stop the drive motor's closed loop controller first, or one
-   * run on the SystemCore replaces the voltage on its next loop.
-   *
-   * @param voltage Voltage to drive the wheel at.
-   * @param angle   Angle to turn the wheel to.
-   */
-  public void setDriveVoltage(Voltage voltage, Rotation2d angle) {
-    m_driveMotorController.setVoltage(voltage);
-    m_azimuthMotorController.setPosition(angle.getMeasure());
-  }
-
-  /**
-   * Turn the wheel at a voltage, without the azimuth motor's closed loop controller, and without
-   * driving it, as for characterizing the azimuth motor. Stop the azimuth motor's closed loop
-   * controller first, or one run on the SystemCore replaces the voltage on its next loop.
-   *
-   * @param voltage Voltage to turn the wheel at.
-   * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
-   *                                                    circumference configured (e.g. via
-   *                                                    {@link SwerveModuleConfig#withWheelRadius(org.wpilib.units.measure.Distance)}).
-   */
-  public void setAzimuthVoltage(Voltage voltage) {
-    m_driveMotorController.setVelocity(MetersPerSecond.of(0).plus(getCouplingVelocity()));
-    m_azimuthMotorController.setVoltage(voltage);
-  }
-
-  /**
-   * Apply a live tuning gain from the {@link yams.core.mechanisms.swerve.SwerveDrive}'s telemetry to
-   * this module's drive or azimuth motor controller, when it changed. Fields that are not a module gain
-   * are ignored.
-   *
-   * @param field   The tuning field.
-   * @param value   Its value.
-   * @param changed Whether the value changed since it was last applied.
-   */
-  public void applyTuningValue(SwerveDriveTelemetry.DoubleTelemetryField field, double value, boolean changed) {
-    if (!changed) {
-      return;
-    }
-    switch (field) {
-      case ModulesDriveP -> m_driveMotorController.setKp(value);
-      case ModulesDriveI -> m_driveMotorController.setKi(value);
-      case ModulesDriveD -> m_driveMotorController.setKd(value);
-      case ModulesDriveKs -> m_driveMotorController.setKs(value);
-      case ModulesDriveKv -> m_driveMotorController.setKv(value);
-      case ModulesDriveKa -> m_driveMotorController.setKa(value);
-      case ModulesAzimuthP -> m_azimuthMotorController.setKp(value);
-      case ModulesAzimuthI -> m_azimuthMotorController.setKi(value);
-      case ModulesAzimuthD -> m_azimuthMotorController.setKd(value);
-      case ModulesAzimuthKs -> m_azimuthMotorController.setKs(value);
-      case ModulesAzimuthKv -> m_azimuthMotorController.setKv(value);
-      case ModulesAzimuthKa -> m_azimuthMotorController.setKa(value);
-      default -> {
-      }
-    }
-  }
-
-  /**
    * Set the {@link SwerveModuleVelocity} of the module.
    *
    * @param state State to set.
@@ -367,7 +305,7 @@ public class SwerveModule {
    * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
    *                                                    circumference configured.
    */
-  private LinearVelocity getCouplingVelocity() {
+  public LinearVelocity getCouplingVelocity() {
     return m_config.getCouplingRatio().map(couplingRatio -> {
       final AngularVelocity coupledWheelVelocity = m_azimuthMotorController.getMechanismVelocity().times(couplingRatio.getOutputToInputConversionFactor()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
       return m_driveMotorController.getConfig().convertFromMechanism(coupledWheelVelocity);
