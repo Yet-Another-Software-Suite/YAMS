@@ -1132,54 +1132,18 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
   if (modes != m_lastModes) {
     const std::set<TuningMode> lastModes = m_lastModes.value_or(std::set<TuningMode>{});
     m_lastModes = modes;
-    // A closed loop run on the SystemCore would replace a tuning voltage on its next loop, so stop
-    // it when the voltage turns on, and start it again when the voltage turns off.
+    // Back to the closed loops when a voltage turns off.
     for (auto* module : modules) {
-      if (modes.contains(TuningMode::DriveVoltage) && !lastModes.contains(TuningMode::DriveVoltage)) {
-        module->GetDriveMotorController()->StopClosedLoopController();
-      } else if (!modes.contains(TuningMode::DriveVoltage) &&
-                 lastModes.contains(TuningMode::DriveVoltage)) {
+      if (lastModes.contains(TuningMode::DriveVoltage) && !modes.contains(TuningMode::DriveVoltage)) {
         module->GetDriveMotorController()->StartClosedLoopController();
       }
-      if (modes.contains(TuningMode::AzimuthVoltage) &&
-          !lastModes.contains(TuningMode::AzimuthVoltage)) {
-        module->GetAzimuthMotorController()->StopClosedLoopController();
-      } else if (!modes.contains(TuningMode::AzimuthVoltage) &&
-                 lastModes.contains(TuningMode::AzimuthVoltage)) {
+      if (lastModes.contains(TuningMode::AzimuthVoltage) &&
+          !modes.contains(TuningMode::AzimuthVoltage)) {
         module->GetAzimuthMotorController()->StartClosedLoopController();
       }
     }
     wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> states{wpi::util::empty_array};
-    if (modes.contains(TuningMode::DriveVoltage)) {
-      // The wheels are not optimized, so they always drive the same way.
-      for (auto* module : modules) {
-        module->GetDriveMotorController()->SetVoltage(
-            wpi::units::volt_t{doubleFields.at(DoubleTelemetryField::ModulesDriveVoltage).Get()});
-        module->GetAzimuthMotorController()->SetPosition(
-            wpi::units::degree_t{driveTuningAngle(module).Degrees()});
-      }
-    } else if (modes.contains(TuningMode::Drive)) {
-      for (size_t i = 0; i < NumModules; ++i) {
-        states[i] = wpi::math::SwerveModuleVelocity{
-            wpi::units::meters_per_second_t{
-                doubleFields.at(DoubleTelemetryField::ModulesDriveVelocity).Get()},
-            driveTuningAngle(modules[i])};
-      }
-      drive->SetSwerveModuleStates(states);
-    } else if (modes.contains(TuningMode::AzimuthVoltage)) {
-      // Hold the drive motors still while the azimuth motors turn.
-      for (auto* module : modules) {
-        module->GetDriveMotorController()->SetVelocity(wpi::units::meters_per_second_t{0} +
-                                                       module->GetCouplingVelocity());
-        module->GetAzimuthMotorController()->SetVoltage(
-            wpi::units::volt_t{doubleFields.at(DoubleTelemetryField::ModulesAzimuthVoltage).Get()});
-      }
-    } else if (modes.contains(TuningMode::Azimuth)) {
-      // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
-      // wheels without driving them.
-      drive->SetAzimuthAngles(wpi::math::Rotation2d{
-          wpi::units::degree_t{doubleFields.at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}});
-    } else if (modes.empty()) {
+    if (modes.empty()) {
       // No tuning mode is driving the chassis; make sure the modules don't keep spinning at
       // whatever velocity was last commanded while drive tuning was on.
       for (size_t i = 0; i < NumModules; ++i) {
@@ -1187,6 +1151,61 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
                                                     modules[i]->GetState().angle};
       }
       drive->SetSwerveModuleStates(states);
+    }
+    for (auto mode : modes) {
+      switch (mode) {
+        case TuningMode::AutoAlign:
+          // Driven every loop, above.
+          [[fallthrough]];
+        case TuningMode::DriveInPlace:
+          // Sent with drive tuning's setpoint.
+          break;
+        case TuningMode::Drive:
+          if (!modes.contains(TuningMode::DriveVoltage)) {
+            for (size_t i = 0; i < NumModules; ++i) {
+              states[i] = wpi::math::SwerveModuleVelocity{
+                  wpi::units::meters_per_second_t{
+                      doubleFields.at(DoubleTelemetryField::ModulesDriveVelocity).Get()},
+                  driveTuningAngle(modules[i])};
+            }
+            drive->SetSwerveModuleStates(states);
+          }
+          break;
+        case TuningMode::DriveVoltage:
+          for (auto* module : modules) {
+            // A closed loop run on the SystemCore would replace the voltage on its next loop.
+            if (!lastModes.contains(TuningMode::DriveVoltage)) {
+              module->GetDriveMotorController()->StopClosedLoopController();
+            }
+            // The wheels are not optimized, so they always drive the same way.
+            module->GetDriveMotorController()->SetVoltage(
+                wpi::units::volt_t{doubleFields.at(DoubleTelemetryField::ModulesDriveVoltage).Get()});
+            module->GetAzimuthMotorController()->SetPosition(
+                wpi::units::degree_t{driveTuningAngle(module).Degrees()});
+          }
+          break;
+        case TuningMode::Azimuth:
+          if (!modes.contains(TuningMode::AzimuthVoltage)) {
+            // Zero speed states would be held where the wheels are by the velocity deadband, so turn
+            // the wheels without driving them.
+            drive->SetAzimuthAngles(wpi::math::Rotation2d{wpi::units::degree_t{
+                doubleFields.at(DoubleTelemetryField::ModulesAzimuthAngle).Get()}});
+          }
+          break;
+        case TuningMode::AzimuthVoltage:
+          for (auto* module : modules) {
+            // A closed loop run on the SystemCore would replace the voltage on its next loop.
+            if (!lastModes.contains(TuningMode::AzimuthVoltage)) {
+              module->GetAzimuthMotorController()->StopClosedLoopController();
+            }
+            // Hold the drive motors still while the azimuth motors turn.
+            module->GetDriveMotorController()->SetVelocity(wpi::units::meters_per_second_t{0} +
+                                                           module->GetCouplingVelocity());
+            module->GetAzimuthMotorController()->SetVoltage(wpi::units::volt_t{
+                doubleFields.at(DoubleTelemetryField::ModulesAzimuthVoltage).Get()});
+          }
+          break;
+      }
     }
   }
 
