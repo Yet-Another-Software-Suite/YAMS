@@ -116,7 +116,8 @@ void SwerveModule::SetAzimuthVoltage(wpi::units::volt_t voltage) {
 }
 
 void SwerveModule::ApplyTuningValue(
-    telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField field, double value) {
+    telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField field, double value, bool changed) {
+  if (!changed) return;
   using Field = telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField;
   switch (field) {
     case Field::ModulesDriveP:

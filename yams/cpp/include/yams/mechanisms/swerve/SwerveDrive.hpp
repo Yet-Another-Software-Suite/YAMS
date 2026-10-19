@@ -1154,39 +1154,41 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
                      DoubleTelemetryField::ModulesAzimuthVoltage}) {
     auto& dt = doubleFields.at(field);
     if (!dt.IsEnabled()) continue;
+    // Whether a gain changed since the last loop, so it is only set when it does.
+    const bool changed = dt.IsTunable();
     switch (field) {
       case DoubleTelemetryField::TranslationP:
-        if (dt.IsTunable() && translationPID) {
+        if (changed && translationPID) {
           translationPID->SetP(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::TranslationI:
-        if (dt.IsTunable() && translationPID) {
+        if (changed && translationPID) {
           translationPID->SetI(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::TranslationD:
-        if (dt.IsTunable() && translationPID) {
+        if (changed && translationPID) {
           translationPID->SetD(dt.Get());
           drive->SetTranslationPID(*translationPID);
         }
         break;
       case DoubleTelemetryField::RotationP:
-        if (dt.IsTunable() && rotationPID) {
+        if (changed && rotationPID) {
           rotationPID->SetP(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
         break;
       case DoubleTelemetryField::RotationI:
-        if (dt.IsTunable() && rotationPID) {
+        if (changed && rotationPID) {
           rotationPID->SetI(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
         break;
       case DoubleTelemetryField::RotationD:
-        if (dt.IsTunable() && rotationPID) {
+        if (changed && rotationPID) {
           rotationPID->SetD(dt.Get());
           drive->SetRotationPID(*rotationPID);
         }
@@ -1216,9 +1218,7 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
       case DoubleTelemetryField::ModulesAzimuthKs:
       case DoubleTelemetryField::ModulesAzimuthKv:
       case DoubleTelemetryField::ModulesAzimuthKa:
-        if (dt.IsTunable()) {
-          for (auto* module : modules) module->ApplyTuningValue(field, dt.Get());
-        }
+        for (auto* module : modules) module->ApplyTuningValue(field, dt.Get(), changed);
         break;
       case DoubleTelemetryField::ModulesDriveVelocity:
         if (driveTuningOn && !m_driveVoltageControl) {

@@ -230,12 +230,17 @@ public class SwerveModule {
 
   /**
    * Apply a live tuning gain from the {@link yams.core.mechanisms.swerve.SwerveDrive}'s telemetry to
-   * this module's drive or azimuth motor controller. Fields that are not a module gain are ignored.
+   * this module's drive or azimuth motor controller, when it changed. Fields that are not a module gain
+   * are ignored.
    *
-   * @param field The tuning field.
-   * @param value Its value.
+   * @param field   The tuning field.
+   * @param value   Its value.
+   * @param changed Whether the value changed since it was last applied.
    */
-  public void applyTuningValue(SwerveDriveTelemetry.DoubleTelemetryField field, double value) {
+  public void applyTuningValue(SwerveDriveTelemetry.DoubleTelemetryField field, double value, boolean changed) {
+    if (!changed) {
+      return;
+    }
     switch (field) {
       case ModulesDriveP -> m_driveMotorController.setKp(value);
       case ModulesDriveI -> m_driveMotorController.setKi(value);

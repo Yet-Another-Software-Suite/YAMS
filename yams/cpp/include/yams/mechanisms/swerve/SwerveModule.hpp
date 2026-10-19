@@ -171,13 +171,14 @@ class SwerveModule {
 
   /**
    * Apply a live tuning gain from the SwerveDrive's telemetry to this module's drive or azimuth
-   * motor controller. Fields that are not a module gain are ignored.
+   * motor controller, when it changed. Fields that are not a module gain are ignored.
    *
    * @param field The tuning field.
    * @param value Its value.
+   * @param changed Whether the value changed since it was last applied.
    */
   void ApplyTuningValue(telemetry::SwerveDriveTelemetryConfig::DoubleTelemetryField field,
-                        double value);
+                        double value, bool changed);
 
   /** Get the current measured module state (speed and heading). */
   SwerveModuleVelocityWithAzimuth GetState() const;

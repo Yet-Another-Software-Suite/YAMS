@@ -207,9 +207,11 @@ public class SwerveDriveTelemetry {
       if (!dt.enabled) {
         continue;
       }
+      // Whether a gain changed since the last loop, so it is only set when it does.
+      boolean changed = dt.tunable();
       switch (field) {
         case TranslationP:
-          if (dt.tunable()) {
+          if (changed) {
             translationPID.ifPresent(pid -> {
               pid.setP(dt.get());
               drive.setTranslationPID(pid);
@@ -217,7 +219,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case TranslationI:
-          if (dt.tunable()) {
+          if (changed) {
             translationPID.ifPresent(pid -> {
               pid.setI(dt.get());
               drive.setTranslationPID(pid);
@@ -225,7 +227,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case TranslationD:
-          if (dt.tunable()) {
+          if (changed) {
             translationPID.ifPresent(pid -> {
               pid.setD(dt.get());
               drive.setTranslationPID(pid);
@@ -233,7 +235,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case RotationP:
-          if (dt.tunable()) {
+          if (changed) {
             rotationPID.ifPresent(pid -> {
               pid.setP(dt.get());
               drive.setRotationPID(pid);
@@ -241,7 +243,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case RotationI:
-          if (dt.tunable()) {
+          if (changed) {
             rotationPID.ifPresent(pid -> {
               pid.setI(dt.get());
               drive.setRotationPID(pid);
@@ -249,7 +251,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case RotationD:
-          if (dt.tunable()) {
+          if (changed) {
             rotationPID.ifPresent(pid -> {
               pid.setD(dt.get());
               drive.setRotationPID(pid);
@@ -280,10 +282,8 @@ public class SwerveDriveTelemetry {
         case ModulesAzimuthKs:
         case ModulesAzimuthKv:
         case ModulesAzimuthKa:
-          if (dt.tunable()) {
-            for (SwerveModule module : modules) {
-              module.applyTuningValue(field, dt.get());
-            }
+          for (SwerveModule module : modules) {
+            module.applyTuningValue(field, dt.get(), changed);
           }
           break;
         case ModulesDriveVelocity:
