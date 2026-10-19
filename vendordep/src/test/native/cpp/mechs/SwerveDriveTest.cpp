@@ -1401,8 +1401,6 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   CHECK_FALSE(ahead.IsAimLocked(1.0_deg));
 }
 
-}  // namespace yams::test
-
 // Voltage tuning drives the wheels, then turns them, without their closed loops, and the tuning
 // command ending holds the wheels still with their closed loops again.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWithoutTheClosedLoop",
@@ -1466,3 +1464,5 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ClosedLoopPeriodIsOnTh
   CHECK(m_fl->GetAzimuthMotorController()->GetClosedLoopControllerPeriod().value() ==
         Catch::Approx(0.001));
 }
+
+}  // namespace yams::test
