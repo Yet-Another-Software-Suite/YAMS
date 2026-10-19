@@ -19,6 +19,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <wpi/system/Timer.hpp>
 #include <wpi/driverstation/RobotState.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/system/Models.hpp>
@@ -1255,12 +1256,13 @@ void SparkWrapper::ApplyFeedback(double kP, double kI, double kD) {
   // The SPARK's gains are in its own units; write the whole slot.
   WriteSparkPID(kP, kI, kD, m_closedLoopSlot);
   // Wait for the SPARK to acknowledge the gains, retrying silently for up to 15 ms if it doesn't.
-  const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15);
+  wpi::Timer timer;
+  timer.Start();
   rev::REVLibError status;
   do {
     status = m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
                                 PersistModeForState());
-  } while (status != rev::REVLibError::kOk && std::chrono::steady_clock::now() < deadline);
+  } while (status != rev::REVLibError::kOk && !timer.HasElapsed(15_ms));
   const bool applied = status == rev::REVLibError::kOk;
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +

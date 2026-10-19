@@ -288,11 +288,12 @@ public class SparkWrapper extends SmartMotorController {
    * @return The last status the SPARK returned, {@link REVLibError#kOk} once it took the gains.
    */
   private REVLibError configureFeedback() {
-    long deadline = System.nanoTime() + 15_000_000;
+    Timer timer = new Timer();
+    timer.start();
     REVLibError status;
     do {
       status = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
-    } while (status != REVLibError.kOk && System.nanoTime() < deadline);
+    } while (status != REVLibError.kOk && !timer.hasElapsed(Milliseconds.of(15)));
     return status;
   }
 

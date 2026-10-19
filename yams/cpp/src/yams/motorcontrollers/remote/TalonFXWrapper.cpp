@@ -14,6 +14,8 @@
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <wpi/units/math.hpp>
+#include <wpi/system/Timer.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/units/angular_jerk.hpp>
@@ -1107,14 +1109,14 @@ void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
   WriteSlotPID(m_slot, kP, kI, kD);
   // The Talon acknowledges the gains with a status code. Retry silently for up to 15 ms if it
   // doesn't take them, waiting at most the time left each time.
-  const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15);
+  wpi::Timer timer;
+  timer.Start();
   ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   do {
-    const wpi::units::second_t timeout{std::max(
-        0.001, std::chrono::duration<double>(deadline - std::chrono::steady_clock::now()).count())};
+    const wpi::units::second_t timeout = wpi::units::math::max(1_ms, 15_ms - timer.Get());
     WithSlotConfigs(m_talonConfig, m_slot,
                     [&](auto& s) { status = m_talon->GetConfigurator().Apply(s, timeout); });
-  } while (!status.IsOK() && std::chrono::steady_clock::now() < deadline);
+  } while (!status.IsOK() && !timer.HasElapsed(15_ms));
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
                                      ") were not applied: " + status.GetName());

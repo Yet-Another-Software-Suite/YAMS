@@ -1506,18 +1506,19 @@ public class TalonFXWrapper extends SmartMotorController {
    *                                                    which the TalonFX does not support.
    */
   private StatusCode applyFeedback() {
-    long deadline = System.nanoTime() + 15_000_000;
+    Timer timer = new Timer();
+    timer.start();
     StatusCode status;
     do {
       // Wait at most the time left for the Talon to acknowledge them.
-      double timeout = Math.max(0.001, (deadline - System.nanoTime()) / 1e9);
+      double timeout = Math.max(0.001, 0.015 - timer.get());
       status = switch (m_slot) {
         case SLOT_0 -> m_configurator.apply(m_talonConfig.Slot0, timeout);
         case SLOT_1 -> m_configurator.apply(m_talonConfig.Slot1, timeout);
         case SLOT_2 -> m_configurator.apply(m_talonConfig.Slot2, timeout);
         case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
       };
-    } while (!status.isOK() && System.nanoTime() < deadline);
+    } while (!status.isOK() && !timer.hasElapsed(Milliseconds.of(15)));
     return status;
   }
 
