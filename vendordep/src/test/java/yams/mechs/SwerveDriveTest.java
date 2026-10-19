@@ -736,6 +736,20 @@ public class SwerveDriveTest {
     }
   }
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("layouts")
+  void velocityMeasurementDelayIsSimulatedForTalons(Layout layout) {
+    build(layout);
+    for (int i = 0; i < modules.length; i++) {
+      // A Talon runs these closed loops itself, and Phoenix 6 simulates its filtering in its own
+      // thread; every other simulated sensor is updated once a simulation period.
+      double expected = layout.drives()[i] == TFX || layout.drives()[i] == TFXS ? 0.001 : 0.02;
+      assertEquals(expected, modules[i].getDriveMotorController().getVelocityMeasurementDelay().orElseThrow().in(Seconds), 1e-9, modules[i].getName() + " drive delay");
+      expected = layout.azimuths()[i] == TFX || layout.azimuths()[i] == TFXS ? 0.001 : 0.02;
+      assertEquals(expected, modules[i].getAzimuthMotorController().getVelocityMeasurementDelay().orElseThrow().in(Seconds), 1e-9, modules[i].getName() + " azimuth delay");
+    }
+  }
+
   @Test
   void configuredPIDControllersArePresent() {
     build(kTalonFXDriveSparkMaxAzimuth);

@@ -857,8 +857,10 @@ void TalonFXWrapper::SetVoltage(wpi::units::volt_t voltage) {
 }
 
 std::optional<wpi::units::second_t> TalonFXWrapper::GetVelocityMeasurementDelay() const {
-  if (wpi::RobotBase::IsSimulation()) return SmartMotorController::GetVelocityMeasurementDelay();
-  return wpi::units::second_t{0.001};
+  if (!m_closedLoopControllerThread) return wpi::units::second_t{0.001};
+  const wpi::units::hertz_t updateFrequency = m_talon->GetVelocity(false).GetAppliedUpdateFrequency();
+  if (updateFrequency <= 0_Hz) return std::nullopt;
+  return wpi::units::second_t{0.001} + 0.5 / updateFrequency;
 }
 
 wpi::units::volt_t TalonFXWrapper::GetVoltage() {

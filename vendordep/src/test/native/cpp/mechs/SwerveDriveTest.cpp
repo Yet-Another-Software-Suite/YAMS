@@ -1492,4 +1492,17 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ClosedLoopPeriodIsOnTh
         Catch::Approx(0.001));
 }
 
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.VelocityMeasurementDelayIsSimulatedForTalons",
+                 "[SwerveDriveTest]") {
+  // The Talons run these closed loops themselves, and Phoenix 6 simulates their filtering in its
+  // own thread, so the delay is not the simulation period.
+  REQUIRE(m_fl->GetDriveMotorController()->GetVelocityMeasurementDelay().has_value());
+  CHECK(m_fl->GetDriveMotorController()->GetVelocityMeasurementDelay()->value() ==
+        Catch::Approx(0.001));
+  REQUIRE(m_fl->GetAzimuthMotorController()->GetVelocityMeasurementDelay().has_value());
+  CHECK(m_fl->GetAzimuthMotorController()->GetVelocityMeasurementDelay()->value() ==
+        Catch::Approx(0.001));
+}
+
 }  // namespace yams::test

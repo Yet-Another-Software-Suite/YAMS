@@ -188,7 +188,10 @@ class TalonFXSWrapper : public SmartMotorController {
   wpi::units::volt_t GetVoltage() override;
   /**
    * Phoenix 6 filters velocity with a Kalman filter tuned for the least latency, about 1 ms, as
-   * WPILib's SysId takes it for its CTRE Phoenix 6 preset.
+   * WPILib's SysId takes it for its CTRE Phoenix 6 preset. A closed loop run on the SystemCore reads
+   * the velocity from its status signal instead, which on average is half the signal's update period
+   * older. Phoenix 6 simulates the Talon in its own thread with the same filtering, so the delay is
+   * the same in simulation.
    */
   std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const override;
 
