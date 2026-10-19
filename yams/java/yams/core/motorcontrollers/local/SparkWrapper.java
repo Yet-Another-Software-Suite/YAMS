@@ -189,6 +189,8 @@ public class SparkWrapper extends SmartMotorController {
    * point.
    */
   private Alert m_externalEncoderGearingDiscontinuityAlert;
+  /** Alert shown when the SPARK does not take a feedback gain. */
+  private Alert m_feedbackNotAppliedAlert;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -245,6 +247,7 @@ public class SparkWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_externalEncoderGearingDiscontinuityAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ExternalEncoderGearingDiscontinuity"),
         getName() + (" external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; " + "the discontinuity point will NOT be moved by the gearing, wrapping will occur " + "non-uniformly"), Level.HIGH);
+    m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();
     setupSimulation();
     try {
@@ -1386,7 +1389,11 @@ public class SparkWrapper extends SmartMotorController {
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
 
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
+    REVLibError[] status = {REVLibError.kOk};
+    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status[0]);
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKp(kP);
@@ -1404,7 +1411,11 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
+    REVLibError[] status = {REVLibError.kOk};
+    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status[0]);
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKi(kI);
@@ -1422,7 +1433,11 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
+    REVLibError[] status = {REVLibError.kOk};
+    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status[0]);
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKd(kD);

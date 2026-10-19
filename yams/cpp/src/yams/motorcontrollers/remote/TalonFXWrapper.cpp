@@ -174,6 +174,9 @@ TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMo
   m_rioControllerAlert.emplace("YAMS", AlertId("ClosedLoop"),
                                GetName() + " closed loop controller is running on the SystemCore.",
                                wpi::util::Alert::Level::MEDIUM);
+  m_feedbackNotAppliedAlert.emplace("YAMS", AlertId("FeedbackNotApplied"),
+                                    GetName() + " feedback gains were not applied.",
+                                    wpi::util::Alert::Level::HIGH);
   m_startingPositionExternalEncoderAlert.emplace(
       "YAMS", AlertId("StartingPosition"),
       GetName() + " starting position is not applied because an external encoder is used!",
@@ -1101,7 +1104,13 @@ void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
     m_pid->SetD(kD);
   }
   WriteSlotPID(m_slot, kP, kI, kD);
-  WithSlotConfigs(m_talonConfig, m_slot, [this](auto& s) { ApplyGroup(s); });
+  // The Talon acknowledges the gains with a status code, so ones it doesn't take are reported.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
+  WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) { status = ApplyGroup(s); });
+  m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
+                                     ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
+                                     ") were not applied: " + status.GetName());
+  m_feedbackNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetFeedback(kP, kI, kD);
 }
 

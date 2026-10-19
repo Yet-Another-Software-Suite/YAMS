@@ -412,6 +412,8 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_startingPositionExternalEncoderAlert;
   /** Shown when a zero offset is set without an external encoder. */
   std::optional<wpi::util::Alert> m_zeroOffsetNoExternalEncoderAlert;
+  /** Shown when the Talon does not take the feedback gains. */
+  std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
   /** Shown when a discontinuity point is set without an external encoder. */
   std::optional<wpi::util::Alert> m_discontinuityPointNoExternalEncoderAlert;
 

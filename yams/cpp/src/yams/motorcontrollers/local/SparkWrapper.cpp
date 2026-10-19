@@ -204,6 +204,9 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
   m_config = cfg;
   m_config->WithSimMotor(motor);
 
+  m_feedbackNotAppliedAlert.emplace("YAMS", AlertId("FeedbackNotApplied"),
+                                    GetName() + " feedback gains were not applied.",
+                                    wpi::util::Alert::Level::HIGH);
   m_externalEncoderGearingDiscontinuityAlert.emplace(
       "YAMS", AlertId("ExternalEncoderGearingDiscontinuity"),
       GetName() +
@@ -1251,7 +1254,17 @@ void SparkWrapper::ApplyFeedback(double kP, double kI, double kD) {
   }
   // The SPARK's gains are in its own units; write the whole slot.
   WriteSparkPID(kP, kI, kD, m_closedLoopSlot);
-  ConfigureAsync();
+  // Wait for the SPARK to acknowledge the gains, so ones it doesn't take are reported.
+  rev::REVLibError status = rev::REVLibError::kOk;
+  const bool applied = ConfigureSpark([&] {
+    return status = m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
+                                       PersistModeForState());
+  });
+  m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
+                                     ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
+                                     ") were not applied: REVLibError " +
+                                     std::to_string(static_cast<int>(status)));
+  m_feedbackNotAppliedAlert->Set(!applied);
 }
 
 void SparkWrapper::SetKp(double kP) {

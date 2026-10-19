@@ -178,6 +178,8 @@ public class TalonFXWrapper extends SmartMotorController {
   private Alert m_startingPositionExternalEncoderAlert;
   /** Alert shown when a zero offset is set without an external encoder present. */
   private Alert m_zeroOffsetNoExternalEncoderAlert;
+  /** Alert shown when the Talon does not take a feedback gain. */
+  private Alert m_feedbackNotAppliedAlert;
   /** Alert shown when a discontinuity point is set without an external encoder present. */
   private Alert m_discontinuityPointNoExternalEncoderAlert;
   /**
@@ -211,6 +213,7 @@ public class TalonFXWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
     m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
+    m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Alert.Level.HIGH);
     m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);
     m_configurator = m_talonfx.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
@@ -1513,7 +1516,10 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kP = kP / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // The Talon acknowledges the gain with a status code, so one it doesn't take is reported.
+    StatusCode status = forceConfigApply();
+    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status.getName());
+    m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKp(kP);
@@ -1540,7 +1546,10 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kI = kI / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // The Talon acknowledges the gain with a status code, so one it doesn't take is reported.
+    StatusCode status = forceConfigApply();
+    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status.getName());
+    m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKi(kI);
@@ -1567,7 +1576,10 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kD = kD / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // The Talon acknowledges the gain with a status code, so one it doesn't take is reported.
+    StatusCode status = forceConfigApply();
+    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status.getName());
+    m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKd(kD);

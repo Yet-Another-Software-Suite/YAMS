@@ -424,6 +424,8 @@ class SparkWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_rioControllerAlert;
   /** Shown when external encoder gearing is set alongside a discontinuity point. */
   std::optional<wpi::util::Alert> m_externalEncoderGearingDiscontinuityAlert;
+  /** Shown when the SPARK does not take the feedback gains. */
+  std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
 
   void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,
             SmartMotorControllerConfig* config);
