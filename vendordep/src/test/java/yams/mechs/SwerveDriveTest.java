@@ -668,6 +668,14 @@ public class SwerveDriveTest {
     for (SwerveModule module : modules) {
       assertEquals(0, module.getState().velocity, 0.1, module.getName() + " stops with its closed loop");
     }
+    // And follows a velocity setpoint again.
+    tuning.getEntry("modules/drive/velocity").setDouble(1);
+    tuneFor(1.0);
+    for (SwerveModule module : modules) {
+      assertEquals(1, module.getState().velocity, 0.15, module.getName() + " follows the velocity setpoint after the voltage");
+    }
+    tuning.getEntry("modules/drive/velocity").setDouble(0);
+    tuneFor(0.5);
     tuning.getEntry("modules/drive/enabled").setBoolean(false);
   }
 

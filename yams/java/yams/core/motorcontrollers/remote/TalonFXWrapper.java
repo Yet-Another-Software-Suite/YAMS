@@ -3,6 +3,8 @@
 
 package yams.core.motorcontrollers.remote;
 
+import java.util.function.DoubleFunction;
+import com.ctre.phoenix6.configs.SlotConfigs;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
@@ -1488,37 +1490,38 @@ public class TalonFXWrapper extends SmartMotorController {
    * @return {@link StatusCode} from the device.
    */
   public StatusCode forceConfigApply() {
-    StatusCode status = m_configurator.apply(m_talonConfig);
-
-    for (int i = 0; i < 10 && !status.isOK(); i++) {
-      Timer.delay(Milliseconds.of(10).in(Seconds));
-      status = m_configurator.apply(m_talonConfig);
-    }
-    return status;
+    // A whole config takes the Talon longer to take than a part of it.
+    return forceConfigApply(timeout -> m_configurator.apply(m_talonConfig, timeout), Milliseconds.of(100));
   }
 
   /**
-   * Apply the active slot's feedback gains, which the Talon acknowledges with a status code, retrying
-   * silently for up to 15 ms if it doesn't take them.
+   * Apply part of the Talon's config, such as only a slot's gains, which uses less of the CAN bus than
+   * applying all of it, retrying silently for up to 15 ms. The part must also be in the Talon's config,
+   * so it is kept when the whole config is applied.
    *
-   * @return The last status the Talon returned, OK once it took the gains.
-   * @throws SmartMotorControllerConfigurationException if the active closed loop slot is SLOT_3,
-   *                                                    which the TalonFX does not support.
+   * @param slot The slot's configs to apply.
+   * @return The last status the Talon returned, OK once it took them.
    */
-  private StatusCode applyFeedback() {
+  public StatusCode forceConfigApply(SlotConfigs slot) {
+    return forceConfigApply(timeout -> m_configurator.apply(slot, timeout), Milliseconds.of(15));
+  }
+
+  /**
+   * Apply a config, which the Talon acknowledges with a status code, retrying silently until it takes
+   * it or the time is up.
+   *
+   * @param apply    Applies the config, waiting at most the given seconds for the Talon to take it.
+   * @param retryFor How long to keep retrying.
+   * @return The last status the Talon returned, OK once it took the config.
+   */
+  private StatusCode forceConfigApply(DoubleFunction<StatusCode> apply, Time retryFor) {
     Timer timer = new Timer();
     timer.start();
     StatusCode status;
     do {
-      // Wait at most the time left for the Talon to acknowledge them.
-      double timeout = Math.max(0.001, 0.015 - timer.get());
-      status = switch (m_slot) {
-        case SLOT_0 -> m_configurator.apply(m_talonConfig.Slot0, timeout);
-        case SLOT_1 -> m_configurator.apply(m_talonConfig.Slot1, timeout);
-        case SLOT_2 -> m_configurator.apply(m_talonConfig.Slot2, timeout);
-        case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
-      };
-    } while (!status.isOK() && !timer.hasElapsed(Milliseconds.of(15)));
+      // Wait at most the time left for the Talon to take it.
+      status = apply.apply(Math.max(0.001, retryFor.in(Seconds) - timer.get()));
+    } while (!status.isOK() && !timer.hasElapsed(retryFor));
     return status;
   }
 
@@ -1541,7 +1544,13 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kP = kP / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    StatusCode status = applyFeedback();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
     m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status.getName());
     m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
@@ -1570,7 +1579,13 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kI = kI / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    StatusCode status = applyFeedback();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
     m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status.getName());
     m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
@@ -1599,7 +1614,13 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.kD = kD / gainUnitsPerRotation;
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    StatusCode status = applyFeedback();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
     m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status.getName());
     m_feedbackNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {

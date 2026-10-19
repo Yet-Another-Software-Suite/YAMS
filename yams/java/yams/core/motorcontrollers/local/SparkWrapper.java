@@ -130,6 +130,8 @@ public class SparkWrapper extends SmartMotorController {
   private final DCMotor m_motor;
   /** Spark base configuration. */
   private final SparkBaseConfig m_sparkBaseConfig;
+  /** Only the closed loop part of the config, sent on its own when a gain changes. */
+  private final SparkBaseConfig m_closedLoopConfig;
   /** Spark relative encoder. */
   private final RelativeEncoder m_sparkRelativeEncoder;
   /** Spark relative encoder sim object. */
@@ -226,6 +228,7 @@ public class SparkWrapper extends SmartMotorController {
       } else {
         m_sparkBaseConfig = new SparkMaxConfig();
       }
+      m_closedLoopConfig = new SparkMaxConfig();
     } else if (controller instanceof SparkFlex) {
       if (config.getVendorConfig().isPresent()) {
         var genCfg = config.getVendorConfig().get();
@@ -236,6 +239,7 @@ public class SparkWrapper extends SmartMotorController {
       } else {
         m_sparkBaseConfig = new SparkFlexConfig();
       }
+      m_closedLoopConfig = new SparkFlexConfig();
     } else {
       throw new IllegalArgumentException("[ERROR] Unsupported controller type: " + controller.getClass().getSimpleName());
     }
@@ -266,35 +270,44 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   /**
-   * Run the configuration until it succeeds or times out.
+   * Run the configuration until it succeeds, retrying silently for up to 15 ms.
    *
    * @param config Lambda supplier returning the error state.
    * @return Successful configuration
    */
   private boolean configureSpark(Supplier<REVLibError> config) {
-    for (int i = 0; i < 8; i++) {
+    return configureSpark(config, Milliseconds.of(15));
+  }
+
+  /**
+   * Run the configuration until it succeeds, retrying silently for a while.
+   *
+   * @param config   Lambda supplier returning the error state.
+   * @param retryFor How long to keep retrying.
+   * @return Successful configuration
+   */
+  private boolean configureSpark(Supplier<REVLibError> config, Time retryFor) {
+    Timer timer = new Timer();
+    timer.start();
+    do {
       if (config.get() == REVLibError.kOk) {
         return true;
       }
       Timer.delay(Milliseconds.of(1));
-    }
+    } while (!timer.hasElapsed(retryFor));
     return false;
   }
 
   /**
-   * Apply the feedback gains, waiting for the SPARK to acknowledge them, and retrying silently for up
-   * to 15 ms if it doesn't.
+   * Send part of the SPARK's config, such as only its closed loop gains, which uses less of the CAN
+   * bus than sending all of it. The part must also be in the SPARK's config, so it is kept when the
+   * whole config is sent.
    *
-   * @return The last status the SPARK returned, {@link REVLibError#kOk} once it took the gains.
+   * @param config The part of the config to send.
+   * @return Whether the SPARK acknowledged it.
    */
-  private REVLibError configureFeedback() {
-    Timer timer = new Timer();
-    timer.start();
-    REVLibError status;
-    do {
-      status = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
-    } while (status != REVLibError.kOk && !timer.hasElapsed(Milliseconds.of(15)));
-    return status;
+  private boolean configureSpark(SparkBaseConfig config) {
+    return configureSpark(() -> m_spark.configure(config, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
   }
 
   @Override
@@ -545,13 +558,13 @@ public class SparkWrapper extends SmartMotorController {
     for (var closedLoopControlSlot : ClosedLoopControllerSlot.values()) {
       m_config.getPID(closedLoopControlSlot).ifPresent(pidController -> writeSparkPID(pidController.getP(), pidController.getI(), pidController.getD(), getSparkClosedLoopSlot(closedLoopControlSlot)));
     }
-    configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters));
+    configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters), Milliseconds.of(100));
   }
 
   @Override
   public void setZeroPower(MotorMode mode) {
     m_sparkBaseConfig.idleMode(mode == MotorMode.BRAKE ? IdleMode.kBrake : IdleMode.kCoast);
-    configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+    configureSpark(() -> m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters), Milliseconds.of(100));
   }
 
   /**
@@ -1101,7 +1114,7 @@ public class SparkWrapper extends SmartMotorController {
     var resetMode = m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters : ResetMode.kNoResetSafeParameters;
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
-    return configureSpark(() -> m_spark.configure(m_sparkBaseConfig, resetMode, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+    return configureSpark(() -> m_spark.configure(m_sparkBaseConfig, resetMode, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters), Milliseconds.of(100));
   }
 
   @Override
@@ -1405,9 +1418,10 @@ public class SparkWrapper extends SmartMotorController {
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
 
-    REVLibError status = configureFeedback();
-    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status);
-    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
+    // Send only the closed loop config, which holds the gains.
+    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied.");
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKp(kP);
@@ -1425,9 +1439,10 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    REVLibError status = configureFeedback();
-    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status);
-    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
+    // Send only the closed loop config, which holds the gains.
+    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied.");
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKi(kI);
@@ -1445,9 +1460,10 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    REVLibError status = configureFeedback();
-    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status);
-    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
+    // Send only the closed loop config, which holds the gains.
+    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied.");
+    m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKd(kD);

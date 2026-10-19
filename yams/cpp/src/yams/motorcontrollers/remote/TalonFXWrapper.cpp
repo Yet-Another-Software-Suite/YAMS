@@ -230,12 +230,16 @@ void TalonFXWrapper::EnsureRequest(const std::function<ctre::phoenix::StatusCode
 }
 
 template <typename Group>
-ctre::phoenix::StatusCode TalonFXWrapper::ApplyGroup(const Group& group) {
-  auto status = m_talon->GetConfigurator().Apply(group);
-  for (int i = 0; i < 10 && !status.IsOK(); i++) {
-    Sleep10ms();
-    status = m_talon->GetConfigurator().Apply(group);
-  }
+ctre::phoenix::StatusCode TalonFXWrapper::ApplyGroup(const Group& group,
+                                                     wpi::units::second_t retryFor) {
+  // Retry silently until the Talon takes it or the time is up, waiting at most the time left each
+  // time.
+  wpi::Timer timer;
+  timer.Start();
+  ctre::phoenix::StatusCode status;
+  do {
+    status = m_talon->GetConfigurator().Apply(group, wpi::units::math::max(1_ms, retryFor - timer.Get()));
+  } while (!status.IsOK() && !timer.HasElapsed(retryFor));
   return status;
 }
 
@@ -1107,16 +1111,9 @@ void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
     m_pid->SetD(kD);
   }
   WriteSlotPID(m_slot, kP, kI, kD);
-  // The Talon acknowledges the gains with a status code. Retry silently for up to 15 ms if it
-  // doesn't take them, waiting at most the time left each time.
-  wpi::Timer timer;
-  timer.Start();
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
   ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
-  do {
-    const wpi::units::second_t timeout = wpi::units::math::max(1_ms, 15_ms - timer.Get());
-    WithSlotConfigs(m_talonConfig, m_slot,
-                    [&](auto& s) { status = m_talon->GetConfigurator().Apply(s, timeout); });
-  } while (!status.IsOK() && !timer.HasElapsed(15_ms));
+  WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) { status = ApplyGroup(s, 15_ms); });
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
                                      ") were not applied: " + status.GetName());

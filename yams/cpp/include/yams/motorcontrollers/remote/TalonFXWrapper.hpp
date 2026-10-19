@@ -423,7 +423,8 @@ class TalonFXWrapper : public SmartMotorController {
   void EnsureRequest(const std::function<ctre::phoenix::StatusCode()>& request);
   /** Apply one configuration group, retrying every 10 ms up to 10 times. */
   template <typename Group>
-  ctre::phoenix::StatusCode ApplyGroup(const Group& group);
+  ctre::phoenix::StatusCode ApplyGroup(const Group& group,
+                                       wpi::units::second_t retryFor = wpi::units::second_t{0.1});
   /** Set FOC on the position and velocity requests. */
   void SetFOC(bool foc);
   /** Mechanism rotations per linear gain unit (1 when the closed loop is not linear). */

@@ -243,12 +243,23 @@ SparkBaseConfig& SparkWrapper::SparkConfig() {
   return *m_flexConfig;
 }
 
-bool SparkWrapper::ConfigureSpark(const std::function<rev::REVLibError()>& call) {
-  for (int i = 0; i < 8; i++) {
+bool SparkWrapper::ConfigureSpark(const std::function<rev::REVLibError()>& call,
+                                  wpi::units::second_t retryFor) {
+  // Retry silently until it succeeds or the time is up.
+  wpi::Timer timer;
+  timer.Start();
+  do {
     if (call() == rev::REVLibError::kOk) return true;
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  }
+  } while (!timer.HasElapsed(retryFor));
   return false;
+}
+
+bool SparkWrapper::ConfigureSpark(rev::spark::SparkBaseConfig& config) {
+  return ConfigureSpark([&] {
+    return m_spark->Configure(config, rev::ResetMode::kNoResetSafeParameters,
+                              PersistModeForState());
+  });
 }
 
 rev::PersistMode SparkWrapper::PersistModeForState() const {
@@ -422,7 +433,7 @@ void SparkWrapper::UseVelocityGains(bool velocity) {
   ConfigureSpark([this] {
     return m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
                               rev::PersistMode::kNoPersistParameters);
-  });
+  }, wpi::units::second_t{0.1});
 }
 
 bool SparkWrapper::HasExponentialProfile() const {
@@ -1231,7 +1242,7 @@ void SparkWrapper::SetZeroPower(MotorMode mode) {
   ConfigureSpark([this] {
     return m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
                               PersistModeForState());
-  });
+  }, wpi::units::second_t{0.1});
 }
 
 void SparkWrapper::SetMotorInverted(bool inverted) {
@@ -1255,19 +1266,20 @@ void SparkWrapper::ApplyFeedback(double kP, double kI, double kD) {
   }
   // The SPARK's gains are in its own units; write the whole slot.
   WriteSparkPID(kP, kI, kD, m_closedLoopSlot);
-  // Wait for the SPARK to acknowledge the gains, retrying silently for up to 15 ms if it doesn't.
-  wpi::Timer timer;
-  timer.Start();
-  rev::REVLibError status;
-  do {
-    status = m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
-                                PersistModeForState());
-  } while (status != rev::REVLibError::kOk && !timer.HasElapsed(15_ms));
-  const bool applied = status == rev::REVLibError::kOk;
+  // Send only the closed loop config, which holds the gains.
+  bool applied;
+  if (m_maxConfig) {
+    rev::spark::SparkMaxConfig closedLoop;
+    closedLoop.Apply(SparkConfig().closedLoop);
+    applied = ConfigureSpark(closedLoop);
+  } else {
+    rev::spark::SparkFlexConfig closedLoop;
+    closedLoop.Apply(SparkConfig().closedLoop);
+    applied = ConfigureSpark(closedLoop);
+  }
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
-                                     ") were not applied: REVLibError " +
-                                     std::to_string(static_cast<int>(status)));
+                                     ") were not applied.");
   m_feedbackNotAppliedAlert->Set(!applied);
 }
 

@@ -431,8 +431,19 @@ class SparkWrapper : public SmartMotorController {
             SmartMotorControllerConfig* config);
   /** @return The SparkMaxConfig or SparkFlexConfig this wrapper owns. */
   rev::spark::SparkBaseConfig& SparkConfig();
-  /** Run a SPARK call until it returns kOk, up to 8 times. */
-  bool ConfigureSpark(const std::function<rev::REVLibError()>& call);
+  /** Run a SPARK call until it returns kOk, retrying silently for up to retryFor. */
+  bool ConfigureSpark(const std::function<rev::REVLibError()>& call,
+                      wpi::units::second_t retryFor = wpi::units::second_t{0.015});
+
+  /**
+   * Send part of the SPARK's config, such as only its closed loop gains, which uses less of the CAN
+   * bus than sending all of it. The part must also be in the SPARK's config, so it is kept when the
+   * whole config is sent.
+   *
+   * @param config The part of the config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::SparkBaseConfig& config);
   /** Persist parameters only while the robot is disabled. */
   rev::PersistMode PersistModeForState() const;
   /** Send the SPARK config without blocking or resetting (live setters). */
