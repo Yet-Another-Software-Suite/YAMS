@@ -226,17 +226,23 @@ class Elevator : public SmartPositionalMechanism {
 
   /**
    * Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
-   * components of a robot model. A continuous elevator's stages move one at a time: the carriage
-   * rises the whole of its travel first, then the stage below it, and so on out to the stage nearest
-   * the fixed stage.
+   * components of a robot model. A continuous elevator's stages move one at a time. Which moves first
+   * depends on how it is rigged: watch it move to see which it is.
+   *
+   * - Carriage first: the carriage rises the whole of its travel first, then the stage below it, and
+   *   so on out to the stage nearest the fixed stage. Going down, the stage nearest the fixed stage
+   *   lowers first.
+   * - Carriage last: the stage nearest the fixed stage rises the whole of its travel first, then the
+   *   next, and so on out to the carriage. Going down, the carriage lowers first.
    *
    * The stages are set with ElevatorConfig::WithStages().
    *
+   * @param carriageFirst True if the carriage moves first, false if it moves last.
    * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
    *         to the carriage. The last is the carriage, GetPose3d().
    * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  std::vector<wpi::math::Pose3d> GetContinuousPose3d() const;
+  std::vector<wpi::math::Pose3d> GetContinuousPose3d(bool carriageFirst) const;
 
   /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).
