@@ -49,7 +49,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
           "Elevator stage heights add up to " + std::to_string(total->value()) +
               " m, not the maximum height of " + std::to_string(maxH->value()) + " m!",
           "Cannot create elevator",
-          "WithStages(int, std::vector<wpi::units::meter_t>) with heights that add up to the "
+          "WithStages(...) with heights that add up to the "
           "maximum height");
     }
   }
@@ -262,7 +262,7 @@ std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
         stageHeights.empty() ? "Elevator stages are not configured!"
                              : "Elevator has only 1 moving stage, its carriage!",
         "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
-        "WithStages(int, std::vector<wpi::units::meter_t>) with 2 or more stages");
+        "WithStages(...) with 2 or more stages");
   }
   const double total = m_elevatorConfig->GetStageHeightTotal()->value();
   const double height = GetHeight().value();
@@ -286,7 +286,7 @@ std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d() const {
         stageHeights.empty() ? "Elevator stages are not configured!"
                              : "Elevator has only 1 moving stage, its carriage!",
         "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
-        "WithStages(int, std::vector<wpi::units::meter_t>) with 2 or more stages");
+        "WithStages(...) with 2 or more stages");
   }
   const int stages = static_cast<int>(stageHeights.size());
   std::vector<double> extension(stages, 0.0);

@@ -88,7 +88,7 @@ public class Elevator extends SmartPositionalMechanism {
       Distance maximum = config.getMaximumHeight().get();
       if (Math.abs(total.in(Meters) - maximum.in(Meters)) > 1e-6) {
         throw new ElevatorConfigurationException("Elevator stage heights add up to " + total.in(Meters) + " m, not the maximum height of " + maximum.in(Meters) + " m",
-                                                 "Cannot create elevator", "withStages(int, List<Distance>) with heights that add up to the maximum height");
+                                                 "Cannot create elevator", "withStages(Distance...) with heights that add up to the maximum height");
       }
     }
 
@@ -194,7 +194,7 @@ public class Elevator extends SmartPositionalMechanism {
    * carriage's height: a stage that travels a third of the elevator's total travel moves a third of the
    * carriage's height relative to the stage below it.
    *
-   * <p>The stages are set with {@link ElevatorConfig#withStages(int, List)}.
+   * <p>The stages are set with {@link ElevatorConfig#withStages(Distance...)}.
    *
    * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
    *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
@@ -205,7 +205,7 @@ public class Elevator extends SmartPositionalMechanism {
     if (stageHeights.size() < 2) {
       // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
       throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
-                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(Distance...) with 2 or more stages");
     }
     double total = m_config.getStageHeightTotal().orElseThrow().in(Meters);
     double height = getHeight().in(Meters);
@@ -225,7 +225,7 @@ public class Elevator extends SmartPositionalMechanism {
    * the whole of its travel first, then the stage below it, and so on out to the stage nearest the fixed
    * stage.
    *
-   * <p>The stages are set with {@link ElevatorConfig#withStages(int, List)}.
+   * <p>The stages are set with {@link ElevatorConfig#withStages(Distance...)}.
    *
    * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
    *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
@@ -236,7 +236,7 @@ public class Elevator extends SmartPositionalMechanism {
     if (stageHeights.size() < 2) {
       // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
       throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
-                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(int, List<Distance>) with 2 or more stages");
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(Distance...) with 2 or more stages");
     }
     int stages = stageHeights.size();
     double[] extension = new double[stages];

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <optional>
 #include <string>
 #include <vector>
@@ -92,14 +93,27 @@ class ElevatorConfig {
    * not. Without a minimum and maximum height, the elevator's height is from 0 to the stage heights'
    * total.
    *
-   * @param stages The number of stages that move, counting the carriage as the last.
+   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
+   *        stage nearest the fixed stage to the carriage, which is the last. One for each stage that
+   *        moves, such as WithStages(0.6_m, 0.6_m, 0.5_m).
+   * @return *this for chaining.
+   * @throws std::invalid_argument if no height is given, or a height is not positive.
+   */
+  template <typename... Heights>
+    requires(std::convertible_to<Heights, wpi::units::meter_t> && ...)
+  ElevatorConfig& WithStages(Heights... stageHeights) {
+    return WithStages(std::vector<wpi::units::meter_t>{wpi::units::meter_t{stageHeights}...});
+  }
+
+  /**
+   * Set the elevator's moving stages from a list of stage heights. See WithStages(Heights...).
+   *
    * @param stageHeights How far each moving stage travels relative to the stage below it, from the
    *        stage nearest the fixed stage to the carriage.
    * @return *this for chaining.
-   * @throws std::invalid_argument if stages is less than 1, there is not one height for each stage,
-   *         or a height is not positive.
+   * @throws std::invalid_argument if no height is given, or a height is not positive.
    */
-  ElevatorConfig& WithStages(int stages, std::vector<wpi::units::meter_t> stageHeights);
+  ElevatorConfig& WithStages(std::vector<wpi::units::meter_t> stageHeights);
 
   /**
    * Set where the mechanism is on the robot, for GetPose3d(): where it is mounted, how it is turned

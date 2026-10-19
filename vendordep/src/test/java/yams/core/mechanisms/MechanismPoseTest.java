@@ -15,6 +15,7 @@ import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -207,7 +208,7 @@ public class MechanismPoseTest {
 
   @Test
   void aCascadeElevatorsStagesEachMoveTheirShareOfItsHeight() {
-    Elevator elevator = elevatorAtNinetyCentimeters("PoseCascade", new ElevatorConfig().withStages(3, List.of(Meters.of(0.4), Meters.of(0.4), Meters.of(0.4))));
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseCascade", new ElevatorConfig().withStages(Meters.of(0.4), Meters.of(0.4), Meters.of(0.4)));
     // Equal travel: a third, two thirds and all of the carriage's 0.9 m.
     List<Pose3d> stages = elevator.getCascadePose3d();
     assertEquals(3, stages.size());
@@ -221,7 +222,7 @@ public class MechanismPoseTest {
   void aCascadeElevatorsStagesMoveInProportionToTheirTravel() {
     // The first stage travels half of the 1.2 m total, so it moves half of the carriage's height,
     // 0.45 m, and the others a quarter each.
-    Elevator elevator = elevatorAtNinetyCentimeters("PoseUnevenCascade", new ElevatorConfig().withStages(3, List.of(Meters.of(0.6), Meters.of(0.3), Meters.of(0.3))));
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseUnevenCascade", new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.3), Meters.of(0.3)));
     List<Pose3d> stages = elevator.getCascadePose3d();
     assertNear(new Translation3d(0, 0, 0.55), stages.get(0).getTranslation(), "first stage");
     assertNear(new Translation3d(0, 0, 0.775), stages.get(1).getTranslation(), "second stage");
@@ -232,7 +233,7 @@ public class MechanismPoseTest {
   void aContinuousElevatorsCarriageMovesFirst() {
     // Each stage travels 0.5 m. The carriage takes the first 0.5 m of its 0.9 m, the second stage the
     // other 0.4 m, and the first stage has not moved.
-    Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuous", new ElevatorConfig().withStages(3, List.of(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5))));
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuous", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
     List<Pose3d> stages = elevator.getContinuousPose3d();
     assertEquals(3, stages.size());
     assertNear(new Translation3d(0, 0, 0.1), stages.get(0).getTranslation(), "first stage");
@@ -244,7 +245,7 @@ public class MechanismPoseTest {
   @Test
   void anElevatorWithOnlyACarriageHasNoStagePoses() {
     // 1 moving stage, the carriage, is a valid elevator, but has no stages to cascade or move in turn.
-    Elevator elevator = elevatorAtNinetyCentimeters("PoseSingleStage", new ElevatorConfig().withStages(1, List.of(Meters.of(2))));
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseSingleStage", new ElevatorConfig().withStages(Meters.of(2)));
     assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
     assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
     assertNear(new Translation3d(0, 0, 1.0), elevator.getPose3d().getTranslation(), "carriage");
@@ -252,9 +253,9 @@ public class MechanismPoseTest {
 
   @Test
   void elevatorStagesNeedAPositiveHeightForEachStage() {
-    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages(0, List.of()));
-    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages(3, List.of(Meters.of(0.5), Meters.of(0.5))));
-    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages(2, List.of(Meters.of(0.5), Meters.of(0))));
+    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages());
+    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0)));
+    assertEquals(OptionalInt.of(3), new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5)).getStages(), "a stage for each height");
     Elevator elevator = elevatorAtNinetyCentimeters("PoseNoStages", new ElevatorConfig());
     assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
     assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
@@ -263,7 +264,7 @@ public class MechanismPoseTest {
   @Test
   void anElevatorsHeightIsItsStagesWithoutHardLimits() {
     // No hard limits: the stages give the elevator's height, from 0 to their 1.5 m total.
-    ElevatorConfig config = new ElevatorConfig().withStages(3, List.of(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
+    ElevatorConfig config = new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5));
     assertEquals(Optional.of(Meters.of(1.5)), config.getMaximumHeight().map(height -> Meters.of(height.in(Meters))), "maximum height");
     assertEquals(0, config.getMinimumHeight().orElseThrow().in(Meters), 1e-9, "minimum height");
     SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseStagesOnly").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
@@ -274,12 +275,12 @@ public class MechanismPoseTest {
 
   @Test
   void elevatorStageHeightsAddUpToItsMaximumHeight() {
-    ElevatorConfig stages = new ElevatorConfig().withStages(3, List.of(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5)));
+    ElevatorConfig stages = new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5));
     assertEquals(1.7, stages.getStageHeightTotal().orElseThrow().in(Meters), 1e-9, "stage height total");
     assertEquals(Optional.empty(), new ElevatorConfig().getStageHeightTotal(), "no stages, no total");
     // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top.
     ElevatorConfigurationException exception = assertThrows(ElevatorConfigurationException.class,
-        () -> elevatorAtNinetyCentimeters("PoseShortStages", new ElevatorConfig().withStages(2, List.of(Meters.of(0.5), Meters.of(0.5))), Meters.of(2)));
+        () -> elevatorAtNinetyCentimeters("PoseShortStages", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5)), Meters.of(2)));
     assertTrue(exception.getMessage().contains("stage heights add up to 1.0 m, not the maximum height of 2.0 m"), exception.getMessage());
   }
 

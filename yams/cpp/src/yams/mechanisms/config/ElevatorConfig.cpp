@@ -49,22 +49,17 @@ ElevatorConfig& ElevatorConfig::WithAngle(wpi::units::degree_t angle) {
   return *this;
 }
 
-ElevatorConfig& ElevatorConfig::WithStages(int stages, std::vector<wpi::units::meter_t> stageHeights) {
-  if (stages < 1) {
-    throw std::invalid_argument("An elevator has at least 1 moving stage, its carriage, but was given " +
-                                std::to_string(stages) + ".");
+ElevatorConfig& ElevatorConfig::WithStages(std::vector<wpi::units::meter_t> stageHeights) {
+  if (stageHeights.empty()) {
+    throw std::invalid_argument(
+        "An elevator has at least 1 moving stage, its carriage, but no stage heights were given.");
   }
-  if (stageHeights.size() != static_cast<size_t>(stages)) {
-    throw std::invalid_argument("Give one height for each of the " + std::to_string(stages) +
-                                " moving stages, but " + std::to_string(stageHeights.size()) +
-                                " were given.");
-  }
-  for (int stage = 0; stage < stages; stage++) {
+  for (size_t stage = 0; stage < stageHeights.size(); stage++) {
     if (!(stageHeights[stage].value() > 0)) {
       throw std::invalid_argument("Stage " + std::to_string(stage + 1) + "'s height must be positive.");
     }
   }
-  m_stages = stages;
+  m_stages = static_cast<int>(stageHeights.size());
   wpi::units::meter_t total{0};
   for (const auto& stageHeight : stageHeights) total += stageHeight;
   m_stageHeightTotal = total;

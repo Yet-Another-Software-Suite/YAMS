@@ -221,19 +221,19 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
   std::string name = "PoseStages";
 
   SECTION("cascade stages each move their share of its height") {
-    elevatorCfg->WithStages(3, {0.4_m, 0.4_m, 0.4_m});
+    elevatorCfg->WithStages(0.4_m, 0.4_m, 0.4_m);
     name = "PoseCascade";
   }
   SECTION("uneven cascade stages move in proportion to their travel") {
-    elevatorCfg->WithStages(3, {0.6_m, 0.3_m, 0.3_m});
+    elevatorCfg->WithStages(0.6_m, 0.3_m, 0.3_m);
     name = "PoseUnevenCascade";
   }
   SECTION("a continuous carriage moves first") {
-    elevatorCfg->WithStages(3, {0.5_m, 0.5_m, 0.5_m});
+    elevatorCfg->WithStages(0.5_m, 0.5_m, 0.5_m);
     name = "PoseContinuous";
   }
   SECTION("an elevator with only a carriage has no stage poses") {
-    elevatorCfg->WithStages(1, {2_m});
+    elevatorCfg->WithStages(2_m);
     name = "PoseSingleStage";
   }
   SECTION("no stages") {
@@ -292,7 +292,7 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
 
 TEST_CASE("MechanismPose.ElevatorStageHeightsAddUpToItsMaximumHeight", "[MechanismPose]") {
   ElevatorConfig stages;
-  stages.WithStages(3, {0.6_m, 0.6_m, 0.5_m});
+  stages.WithStages(0.6_m, 0.6_m, 0.5_m);
   CHECK(stages.GetStageHeightTotal()->value() == Catch::Approx(1.7).margin(1e-9));
   CHECK_FALSE(ElevatorConfig{}.GetStageHeightTotal().has_value());
 
@@ -304,7 +304,7 @@ TEST_CASE("MechanismPose.ElevatorStageHeightsAddUpToItsMaximumHeight", "[Mechani
   cfg.WithSubsystem(&subsystem);
   FakeSmartMotorController motor{&cfg};
   ElevatorConfig elevatorCfg;
-  elevatorCfg.WithStages(2, {0.5_m, 0.5_m}).WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg);
+  elevatorCfg.WithStages(0.5_m, 0.5_m).WithMinimumHeight(0_m).WithMaximumHeight(2_m).WithCarriageMass(5_kg);
   CHECK_THROWS_WITH(positional::Elevator(&elevatorCfg, &motor),
                     Catch::Matchers::ContainsSubstring("stage heights add up to 1.000000 m, not the maximum height of 2.000000 m"));
 }
@@ -313,7 +313,7 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorHeightIsItsStagesW
                  "[MechanismPose]") {
   // No minimum or maximum height: the stages give the elevator's height, from 0 to their 1.5 m total.
   auto* elevatorCfg = new ElevatorConfig;
-  elevatorCfg->WithStages(3, {0.5_m, 0.5_m, 0.5_m}).WithCarriageMass(5_kg);
+  elevatorCfg->WithStages(0.5_m, 0.5_m, 0.5_m).WithCarriageMass(5_kg);
   CHECK(elevatorCfg->GetMaxHeight()->value() == Catch::Approx(1.5).margin(1e-9));
   CHECK(elevatorCfg->GetMinHeight()->value() == Catch::Approx(0.0).margin(1e-9));
   auto cfg = BaseConfig("PoseStagesOnly");
@@ -330,9 +330,9 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorHeightIsItsStagesW
 
 TEST_CASE("MechanismPose.ElevatorStagesNeedAPositiveHeightForEachStage", "[MechanismPose]") {
   ElevatorConfig config;
-  CHECK_THROWS_AS(config.WithStages(0, {}), std::invalid_argument);
-  CHECK_THROWS_AS(config.WithStages(3, {0.5_m, 0.5_m}), std::invalid_argument);
-  CHECK_THROWS_AS(config.WithStages(2, {0.5_m, 0_m}), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithStages(), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithStages(0.5_m, 0_m), std::invalid_argument);
+  CHECK(ElevatorConfig{}.WithStages(0.6_m, 0.6_m, 0.5_m).GetStages() == 3);
 }
 
 TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.FlyWheelFollowsItsPosition", "[MechanismPose]") {
