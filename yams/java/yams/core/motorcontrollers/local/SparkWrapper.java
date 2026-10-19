@@ -43,6 +43,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkMaxAlternateEncoder;
 import com.revrobotics.spark.SparkSim;
 import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
+import com.revrobotics.spark.config.ClosedLoopConfig;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -130,8 +132,10 @@ public class SparkWrapper extends SmartMotorController {
   private final DCMotor m_motor;
   /** Spark base configuration. */
   private final SparkBaseConfig m_sparkBaseConfig;
-  /** Only the closed loop part of the config, sent on its own when a gain changes. */
+  /** Only the closed loop part of the config, sent on its own when a feedback gain changes. */
   private final SparkBaseConfig m_closedLoopConfig;
+  /** Only the feedforward part of the config, sent on its own when a feedforward gain changes. */
+  private final SparkBaseConfig m_feedforwardConfig;
   /** Spark relative encoder. */
   private final RelativeEncoder m_sparkRelativeEncoder;
   /** Spark relative encoder sim object. */
@@ -193,6 +197,8 @@ public class SparkWrapper extends SmartMotorController {
   private Alert m_externalEncoderGearingDiscontinuityAlert;
   /** Alert shown when the SPARK does not take a feedback gain. */
   private Alert m_feedbackNotAppliedAlert;
+  /** Alert shown when the SPARK does not take a feedforward gain. */
+  private Alert m_feedforwardNotAppliedAlert;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -229,6 +235,7 @@ public class SparkWrapper extends SmartMotorController {
         m_sparkBaseConfig = new SparkMaxConfig();
       }
       m_closedLoopConfig = new SparkMaxConfig();
+      m_feedforwardConfig = new SparkMaxConfig();
     } else if (controller instanceof SparkFlex) {
       if (config.getVendorConfig().isPresent()) {
         var genCfg = config.getVendorConfig().get();
@@ -240,6 +247,7 @@ public class SparkWrapper extends SmartMotorController {
         m_sparkBaseConfig = new SparkFlexConfig();
       }
       m_closedLoopConfig = new SparkFlexConfig();
+      m_feedforwardConfig = new SparkFlexConfig();
     } else {
       throw new IllegalArgumentException("[ERROR] Unsupported controller type: " + controller.getClass().getSimpleName());
     }
@@ -252,6 +260,7 @@ public class SparkWrapper extends SmartMotorController {
     m_externalEncoderGearingDiscontinuityAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ExternalEncoderGearingDiscontinuity"),
         getName() + (" external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; " + "the discontinuity point will NOT be moved by the gearing, wrapping will occur " + "non-uniformly"), Level.HIGH);
     m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Level.HIGH);
+    m_feedforwardNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedforwardNotApplied"), getName() + " feedforward gain was not applied.", Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();
     setupSimulation();
     try {
@@ -299,15 +308,28 @@ public class SparkWrapper extends SmartMotorController {
   }
 
   /**
-   * Send part of the SPARK's config, such as only its closed loop gains, which uses less of the CAN
-   * bus than sending all of it. The part must also be in the SPARK's config, so it is kept when the
-   * whole config is sent.
+   * Send only the closed loop part of the SPARK's config, such as its feedback gains, which uses less
+   * of the CAN bus than sending all of it. It must also be in the SPARK's config, so it is kept when
+   * the whole config is sent.
    *
-   * @param config The part of the config to send.
+   * @param closedLoop The closed loop config to send.
    * @return Whether the SPARK acknowledged it.
    */
-  private boolean configureSpark(SparkBaseConfig config) {
-    return configureSpark(() -> m_spark.configure(config, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+  private boolean configureSpark(ClosedLoopConfig closedLoop) {
+    m_closedLoopConfig.apply(closedLoop);
+    return configureSpark(() -> m_spark.configure(m_closedLoopConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
+  }
+
+  /**
+   * Send only the feedforward part of the SPARK's config, which uses less of the CAN bus than sending
+   * all of it. It must also be in the SPARK's config, so it is kept when the whole config is sent.
+   *
+   * @param feedForward The feedforward config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  private boolean configureSpark(FeedForwardConfig feedForward) {
+    m_feedforwardConfig.closedLoop.apply(feedForward);
+    return configureSpark(() -> m_spark.configure(m_feedforwardConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
   }
 
   @Override
@@ -1419,7 +1441,7 @@ public class SparkWrapper extends SmartMotorController {
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
 
     // Send only the closed loop config, which holds the gains.
-    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop);
     m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied.");
     m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
@@ -1440,7 +1462,7 @@ public class SparkWrapper extends SmartMotorController {
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
     // Send only the closed loop config, which holds the gains.
-    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop);
     m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied.");
     m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
@@ -1461,7 +1483,7 @@ public class SparkWrapper extends SmartMotorController {
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
     // Send only the closed loop config, which holds the gains.
-    boolean applied = configureSpark(m_closedLoopConfig.apply(m_sparkBaseConfig.closedLoop));
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop);
     m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied.");
     m_feedbackNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
@@ -1504,7 +1526,10 @@ public class SparkWrapper extends SmartMotorController {
       elevatorFeedforward.setKs(kS);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kS(kS, m_closedLoopSlot);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Send only the feedforward config, which holds the gains.
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop.feedForward);
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kS of " + kS + " was not applied.");
+    m_feedforwardNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKs(kS);
@@ -1524,7 +1549,10 @@ public class SparkWrapper extends SmartMotorController {
       elevatorFeedforward.setKv(kV);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kV(kV / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecond.of(1)).in(RotationsPerSecond) : 1.0), m_closedLoopSlot);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Send only the feedforward config, which holds the gains.
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop.feedForward);
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kV of " + kV + " was not applied.");
+    m_feedforwardNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKv(kV);
@@ -1544,7 +1572,10 @@ public class SparkWrapper extends SmartMotorController {
       elevatorFeedforward.setKa(kA);
     });
     m_sparkBaseConfig.closedLoop.feedForward.kA(kA / RotationsPerSecond.of(m_mechanismToFeedbackSensorRatio).in(RPM) / (m_config.getLinearClosedLoopControllerUse() ? m_config.convertToMechanism(MetersPerSecondPerSecond.of(1)).in(RotationsPerSecondPerSecond) : 1.0), m_closedLoopSlot);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Send only the feedforward config, which holds the gains.
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop.feedForward);
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kA of " + kA + " was not applied.");
+    m_feedforwardNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKa(kA);
@@ -1566,7 +1597,10 @@ public class SparkWrapper extends SmartMotorController {
       // kCos is 0 in simulation; see applyConfig.
       m_sparkBaseConfig.closedLoop.feedForward.kCos(RobotBase.isSimulation() ? 0 : kG, m_closedLoopSlot).kCosRatio(1.0 / m_mechanismToFeedbackSensorRatio, m_closedLoopSlot);
     }
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Send only the feedforward config, which holds the gains.
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop.feedForward);
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kG of " + kG + " was not applied.");
+    m_feedforwardNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKg(kG);
@@ -1597,7 +1631,10 @@ public class SparkWrapper extends SmartMotorController {
       m_sparkBaseConfig.closedLoop.feedForward.kG(kG, m_closedLoopSlot);
     });
     writeSparkFeedforward(kS, kV, kA, m_closedLoopSlot);
-    m_spark.configureAsync(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    // Send only the feedforward config, which holds the gains.
+    boolean applied = configureSpark(m_sparkBaseConfig.closedLoop.feedForward);
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "feedforward gains" + " was not applied.");
+    m_feedforwardNotAppliedAlert.set(!applied);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setFeedforward(kS, kV, kA, kG);

@@ -426,6 +426,8 @@ class SparkWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_externalEncoderGearingDiscontinuityAlert;
   /** Shown when the SPARK does not take the feedback gains. */
   std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
+  /** Shown when the SPARK does not take the feedforward gains. */
+  std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
 
   void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,
             SmartMotorControllerConfig* config);
@@ -444,6 +446,24 @@ class SparkWrapper : public SmartMotorController {
    * @return Whether the SPARK acknowledged it.
    */
   bool ConfigureSpark(rev::spark::SparkBaseConfig& config);
+
+  /**
+   * Send only the closed loop part of the SPARK's config, such as its feedback gains. It must also
+   * be in the SPARK's config, so it is kept when the whole config is sent.
+   *
+   * @param closedLoop The closed loop config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::ClosedLoopConfig& closedLoop);
+
+  /**
+   * Send only the feedforward part of the SPARK's config. It must also be in the SPARK's config, so
+   * it is kept when the whole config is sent.
+   *
+   * @param feedForward The feedforward config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::FeedForwardConfig& feedForward);
   /** Persist parameters only while the robot is disabled. */
   rev::PersistMode PersistModeForState() const;
   /** Send the SPARK config without blocking or resetting (live setters). */

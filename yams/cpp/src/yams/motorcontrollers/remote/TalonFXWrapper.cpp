@@ -180,6 +180,9 @@ TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMo
   m_feedbackNotAppliedAlert.emplace("YAMS", AlertId("FeedbackNotApplied"),
                                     GetName() + " feedback gains were not applied.",
                                     wpi::util::Alert::Level::HIGH);
+  m_feedforwardNotAppliedAlert.emplace("YAMS", AlertId("FeedforwardNotApplied"),
+                                       GetName() + " feedforward gains were not applied.",
+                                       wpi::util::Alert::Level::HIGH);
   m_startingPositionExternalEncoderAlert.emplace(
       "YAMS", AlertId("StartingPosition"),
       GetName() + " starting position is not applied because an external encoder is used!",
@@ -1123,30 +1126,45 @@ void TalonFXWrapper::SetFeedback(double kP, double kI, double kD) {
 
 void TalonFXWrapper::SetKs(double kS) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kS = kS; });
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) {
     s.kS = kS;
-    ApplyGroup(s);
+    status = ApplyGroup(s, 15_ms);
   });
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kS of " + std::to_string(kS) + " was not applied: " +
+                                        status.GetName());
+  m_feedforwardNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetKs(kS);
 }
 
 void TalonFXWrapper::SetKv(double kV) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kV = kV; });
   const double talonKv = KvPerRotation(*m_config, m_slot, kV) / VelocityGainUnitsPerRotation();
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) {
     s.kV = talonKv;
-    ApplyGroup(s);
+    status = ApplyGroup(s, 15_ms);
   });
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kV of " + std::to_string(kV) + " was not applied: " +
+                                        status.GetName());
+  m_feedforwardNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetKv(kV);
 }
 
 void TalonFXWrapper::SetKa(double kA) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kA = kA; });
   const double talonKa = KaPerRotation(*m_config, m_slot, kA) / AccelerationGainUnitsPerRotation();
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) {
     s.kA = talonKa;
-    ApplyGroup(s);
+    status = ApplyGroup(s, 15_ms);
   });
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kA of " + std::to_string(kA) + " was not applied: " +
+                                        status.GetName());
+  m_feedforwardNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetKa(kA);
 }
 
@@ -1154,14 +1172,19 @@ void TalonFXWrapper::SetKg(double kG) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kG = kG; });
   const bool arm = m_config->GetArmFeedforward(m_slot).has_value();
   const bool elevator = m_config->GetElevatorFeedforward(m_slot).has_value();
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) {
     s.kG = kG;
     if (arm)
       s.GravityType = signals::GravityTypeValue::Arm_Cosine;
     else if (elevator)
       s.GravityType = signals::GravityTypeValue::Elevator_Static;
-    ApplyGroup(s);
+    status = ApplyGroup(s, 15_ms);
   });
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kG of " + std::to_string(kG) + " was not applied: " +
+                                        status.GetName());
+  m_feedforwardNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetKg(kG);
 }
 
@@ -1176,6 +1199,8 @@ void TalonFXWrapper::SetFeedforward(double kS, double kV, double kA, double kG) 
   const bool elevator = m_config->GetElevatorFeedforward(m_slot).has_value();
   const double talonKv = KvPerRotation(*m_config, m_slot, kV) / VelocityGainUnitsPerRotation();
   const double talonKa = KaPerRotation(*m_config, m_slot, kA) / AccelerationGainUnitsPerRotation();
+  // Apply only the slot, which holds the gains, retrying silently for up to 15 ms.
+  ctre::phoenix::StatusCode status = ctre::phoenix::StatusCode::OK;
   WithSlotConfigs(m_talonConfig, m_slot, [&](auto& s) {
     s.kS = kS;
     s.kV = talonKv;
@@ -1185,8 +1210,11 @@ void TalonFXWrapper::SetFeedforward(double kS, double kV, double kA, double kG) 
       s.GravityType = signals::GravityTypeValue::Arm_Cosine;
     else if (elevator)
       s.GravityType = signals::GravityTypeValue::Elevator_Static;
-    ApplyGroup(s);
+    status = ApplyGroup(s, 15_ms);
   });
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + std::string{"feedforward gains"} + " was not applied: " +
+                                        status.GetName());
+  m_feedforwardNotAppliedAlert->Set(!status.IsOK());
   for (auto* f : m_looseFollowers) f->SetFeedforward(kS, kV, kA, kG);
 }
 

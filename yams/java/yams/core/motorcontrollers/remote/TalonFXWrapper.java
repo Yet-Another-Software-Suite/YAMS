@@ -182,6 +182,8 @@ public class TalonFXWrapper extends SmartMotorController {
   private Alert m_zeroOffsetNoExternalEncoderAlert;
   /** Alert shown when the Talon does not take a feedback gain. */
   private Alert m_feedbackNotAppliedAlert;
+  /** Alert shown when the Talon does not take a feedforward gain. */
+  private Alert m_feedforwardNotAppliedAlert;
   /** Alert shown when a discontinuity point is set without an external encoder present. */
   private Alert m_discontinuityPointNoExternalEncoderAlert;
   /**
@@ -216,6 +218,7 @@ public class TalonFXWrapper extends SmartMotorController {
     m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
     m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
     m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Alert.Level.HIGH);
+    m_feedforwardNotAppliedAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "FeedforwardNotApplied"), getName() + " feedforward gain was not applied.", Alert.Level.HIGH);
     m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);
     m_configurator = m_talonfx.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
@@ -1687,7 +1690,15 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.withKS(kS);
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kS of " + kS + " was not applied: " + status.getName());
+    m_feedforwardNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKs(kS);
@@ -1720,7 +1731,15 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.withKV(kV / velocityGainUnitsPerRotation);
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kV of " + kV + " was not applied: " + status.getName());
+    m_feedforwardNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKv(kV);
@@ -1753,7 +1772,15 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.withKA(kA / accelerationGainUnitsPerRotation);
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kA of " + kA + " was not applied: " + status.getName());
+    m_feedforwardNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKa(kA);
@@ -1781,7 +1808,15 @@ public class TalonFXWrapper extends SmartMotorController {
       case SLOT_2 -> m_talonConfig.Slot2.withKG(kG);
       case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
     }
-    forceConfigApply();
+    // Apply only the slot, which holds the gains.
+    StatusCode status = forceConfigApply(switch (m_slot) {
+      case SLOT_0 -> SlotConfigs.from(m_talonConfig.Slot0);
+      case SLOT_1 -> SlotConfigs.from(m_talonConfig.Slot1);
+      case SLOT_2 -> SlotConfigs.from(m_talonConfig.Slot2);
+      case SLOT_3 -> throw new SmartMotorControllerConfigurationException("Slot 3 is not available on TalonFX", "Cannot use Slot 3 on TalonFX", "");
+    });
+    m_feedforwardNotAppliedAlert.setText(getName() + " " + "kG of " + kG + " was not applied: " + status.getName());
+    m_feedforwardNotAppliedAlert.set(!status.isOK());
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKg(kG);

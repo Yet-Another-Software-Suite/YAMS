@@ -208,6 +208,9 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
   m_feedbackNotAppliedAlert.emplace("YAMS", AlertId("FeedbackNotApplied"),
                                     GetName() + " feedback gains were not applied.",
                                     wpi::util::Alert::Level::HIGH);
+  m_feedforwardNotAppliedAlert.emplace("YAMS", AlertId("FeedforwardNotApplied"),
+                                       GetName() + " feedforward gains were not applied.",
+                                       wpi::util::Alert::Level::HIGH);
   m_externalEncoderGearingDiscontinuityAlert.emplace(
       "YAMS", AlertId("ExternalEncoderGearingDiscontinuity"),
       GetName() +
@@ -260,6 +263,28 @@ bool SparkWrapper::ConfigureSpark(rev::spark::SparkBaseConfig& config) {
     return m_spark->Configure(config, rev::ResetMode::kNoResetSafeParameters,
                               PersistModeForState());
   });
+}
+
+bool SparkWrapper::ConfigureSpark(rev::spark::ClosedLoopConfig& closedLoop) {
+  if (m_maxConfig) {
+    rev::spark::SparkMaxConfig part;
+    part.Apply(closedLoop);
+    return ConfigureSpark(part);
+  }
+  rev::spark::SparkFlexConfig part;
+  part.Apply(closedLoop);
+  return ConfigureSpark(part);
+}
+
+bool SparkWrapper::ConfigureSpark(rev::spark::FeedForwardConfig& feedForward) {
+  if (m_maxConfig) {
+    rev::spark::SparkMaxConfig part;
+    part.closedLoop.Apply(feedForward);
+    return ConfigureSpark(part);
+  }
+  rev::spark::SparkFlexConfig part;
+  part.closedLoop.Apply(feedForward);
+  return ConfigureSpark(part);
 }
 
 rev::PersistMode SparkWrapper::PersistModeForState() const {
@@ -1267,16 +1292,7 @@ void SparkWrapper::ApplyFeedback(double kP, double kI, double kD) {
   // The SPARK's gains are in its own units; write the whole slot.
   WriteSparkPID(kP, kI, kD, m_closedLoopSlot);
   // Send only the closed loop config, which holds the gains.
-  bool applied;
-  if (m_maxConfig) {
-    rev::spark::SparkMaxConfig closedLoop;
-    closedLoop.Apply(SparkConfig().closedLoop);
-    applied = ConfigureSpark(closedLoop);
-  } else {
-    rev::spark::SparkFlexConfig closedLoop;
-    closedLoop.Apply(SparkConfig().closedLoop);
-    applied = ConfigureSpark(closedLoop);
-  }
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop);
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
                                      ") were not applied.");
@@ -1309,7 +1325,10 @@ void SparkWrapper::SetFeedback(double kP, double kI, double kD) {
 void SparkWrapper::SetKs(double kS) {
   UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kS = kS; });
   SparkConfig().closedLoop.feedForward.kS(kS, m_closedLoopSlot);
-  ConfigureAsync();
+  // Send only the feedforward config, which holds the gains.
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop.feedForward);
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kS of " + std::to_string(kS) + " was not applied.");
+  m_feedforwardNotAppliedAlert->Set(!applied);
   for (auto* f : m_looseFollowers) f->SetKs(kS);
 }
 
@@ -1323,7 +1342,10 @@ void SparkWrapper::SetKv(double kV) {
                                               (m_mechanismToFeedbackSensorRatio * 60.0) /
                                               velocityPerGainUnit,
                                           m_closedLoopSlot);
-  ConfigureAsync();
+  // Send only the feedforward config, which holds the gains.
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop.feedForward);
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kV of " + std::to_string(kV) + " was not applied.");
+  m_feedforwardNotAppliedAlert->Set(!applied);
   for (auto* f : m_looseFollowers) f->SetKv(kV);
 }
 
@@ -1337,7 +1359,10 @@ void SparkWrapper::SetKa(double kA) {
                                               (m_mechanismToFeedbackSensorRatio * 60.0) /
                                               accelerationPerGainUnit,
                                           m_closedLoopSlot);
-  ConfigureAsync();
+  // Send only the feedforward config, which holds the gains.
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop.feedForward);
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kA of " + std::to_string(kA) + " was not applied.");
+  m_feedforwardNotAppliedAlert->Set(!applied);
   for (auto* f : m_looseFollowers) f->SetKa(kA);
 }
 
@@ -1351,7 +1376,10 @@ void SparkWrapper::SetKg(double kG) {
   } else {
     SparkConfig().closedLoop.feedForward.kG(kG, m_closedLoopSlot);
   }
-  ConfigureAsync();
+  // Send only the feedforward config, which holds the gains.
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop.feedForward);
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + "kG of " + std::to_string(kG) + " was not applied.");
+  m_feedforwardNotAppliedAlert->Set(!applied);
   for (auto* f : m_looseFollowers) f->SetKg(kG);
 }
 
@@ -1372,7 +1400,10 @@ void SparkWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
   }
   WriteSparkFeedforward(kS, KvPerRotation(*m_config, m_slot, kV),
                         KaPerRotation(*m_config, m_slot, kA), m_closedLoopSlot);
-  ConfigureAsync();
+  // Send only the feedforward config, which holds the gains.
+  const bool applied = ConfigureSpark(SparkConfig().closedLoop.feedForward);
+  m_feedforwardNotAppliedAlert->SetText(GetName() + " " + std::string{"feedforward gains"} + " was not applied.");
+  m_feedforwardNotAppliedAlert->Set(!applied);
   for (auto* f : m_looseFollowers) f->SetFeedforward(kS, kV, kA, kG);
 }
 
