@@ -205,7 +205,17 @@ public class SwerveDriveTelemetry {
     if (!modes.contains(TuningMode.AZIMUTH)) {
       modes.remove(TuningMode.AZIMUTH_VOLTAGE);
     }
-    boolean inPlace = modes.contains(TuningMode.DRIVE_IN_PLACE);
+    // The angle each module points while drive tuning: forward, or, to spin in place, tangent to its
+    // position around the robot center so a positive velocity spins the robot counter-clockwise
+    // (WPILib's positive rotation direction).
+    var driveAngles = new Rotation2d[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      driveAngles[i] = Rotation2d.ZERO;
+      if (modes.contains(TuningMode.DRIVE_IN_PLACE)) {
+        var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
+        driveAngles[i] = moduleLocation.getAngle().orElse(new Rotation2d()).plus(Rotation2d.fromDegrees(90));
+      }
+    }
 
     // Auto-align drives to its target pose every loop.
     if (modes.contains(TuningMode.AUTO_ALIGN)) {
@@ -247,20 +257,20 @@ public class SwerveDriveTelemetry {
           case DRIVE:
             if (!modes.contains(TuningMode.DRIVE_VOLTAGE)) {
               for (int i = 0; i < modules.length; i++) {
-                states[i] = new SwerveModuleVelocity(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get(), driveTuningAngle(modules[i], inPlace));
+                states[i] = new SwerveModuleVelocity(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get(), driveAngles[i]);
               }
               drive.setSwerveModuleStates(states);
             }
             break;
           case DRIVE_VOLTAGE:
-            for (SwerveModule module : modules) {
+            for (int i = 0; i < modules.length; i++) {
               // A closed loop run on the SystemCore would replace the voltage on its next loop.
               if (!lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
-                module.getDriveMotorController().stopClosedLoopController();
+                modules[i].getDriveMotorController().stopClosedLoopController();
               }
               // The wheels are not optimized, so they always drive the same way.
-              module.getDriveMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVoltage).get()));
-              module.getAzimuthMotorController().setPosition(driveTuningAngle(module, inPlace).getMeasure());
+              modules[i].getDriveMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVoltage).get()));
+              modules[i].getAzimuthMotorController().setPosition(driveAngles[i].getMeasure());
             }
             break;
           case AZIMUTH:
@@ -373,17 +383,17 @@ public class SwerveDriveTelemetry {
           if (modes.contains(TuningMode.DRIVE) && !modes.contains(TuningMode.DRIVE_VOLTAGE)) {
             var states = new SwerveModuleVelocity[modules.length];
             for (int i = 0; i < modules.length; i++) {
-              states[i] = new SwerveModuleVelocity(dt.get(), driveTuningAngle(modules[i], inPlace));
+              states[i] = new SwerveModuleVelocity(dt.get(), driveAngles[i]);
             }
             drive.setSwerveModuleStates(states);
           }
           break;
         case ModulesDriveVoltage:
           if (modes.contains(TuningMode.DRIVE_VOLTAGE)) {
-            for (SwerveModule module : modules) {
+            for (int i = 0; i < modules.length; i++) {
               // The wheels are not optimized, so they always drive the same way.
-              module.getDriveMotorController().setVoltage(Volts.of(dt.get()));
-              module.getAzimuthMotorController().setPosition(driveTuningAngle(module, inPlace).getMeasure());
+              modules[i].getDriveMotorController().setVoltage(Volts.of(dt.get()));
+              modules[i].getAzimuthMotorController().setPosition(driveAngles[i].getMeasure());
             }
           }
           break;
@@ -407,23 +417,6 @@ public class SwerveDriveTelemetry {
           break;
       }
     }
-  }
-
-  /**
-   * The angle a module points while drive tuning: forward, or, to spin in place, tangent to its
-   * position around the robot center so a positive velocity spins the robot counter-clockwise
-   * (WPILib's positive rotation direction).
-   *
-   * @param module  The module.
-   * @param inPlace True to spin in place.
-   * @return The angle.
-   */
-  private static Rotation2d driveTuningAngle(SwerveModule module, boolean inPlace) {
-    if (!inPlace) {
-      return Rotation2d.ZERO;
-    }
-    var moduleLocation = module.getConfig().getLocation().orElseThrow();
-    return moduleLocation.getAngle().orElse(new Rotation2d()).plus(Rotation2d.fromDegrees(90));
   }
 
   /**

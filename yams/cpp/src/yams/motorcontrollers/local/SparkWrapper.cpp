@@ -1254,12 +1254,14 @@ void SparkWrapper::ApplyFeedback(double kP, double kI, double kD) {
   }
   // The SPARK's gains are in its own units; write the whole slot.
   WriteSparkPID(kP, kI, kD, m_closedLoopSlot);
-  // Wait for the SPARK to acknowledge the gains, so ones it doesn't take are reported.
-  rev::REVLibError status = rev::REVLibError::kOk;
-  const bool applied = ConfigureSpark([&] {
-    return status = m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
-                                       PersistModeForState());
-  });
+  // Wait for the SPARK to acknowledge the gains, retrying silently for up to 15 ms if it doesn't.
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(15);
+  rev::REVLibError status;
+  do {
+    status = m_spark->Configure(SparkConfig(), rev::ResetMode::kNoResetSafeParameters,
+                                PersistModeForState());
+  } while (status != rev::REVLibError::kOk && std::chrono::steady_clock::now() < deadline);
+  const bool applied = status == rev::REVLibError::kOk;
   m_feedbackNotAppliedAlert->SetText(GetName() + " feedback gains (kP " + std::to_string(kP) +
                                      ", kI " + std::to_string(kI) + ", kD " + std::to_string(kD) +
                                      ") were not applied: REVLibError " +

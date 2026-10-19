@@ -1106,16 +1106,18 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
     modes.erase(TuningMode::DriveVoltage);
   }
   if (!modes.contains(TuningMode::Azimuth)) modes.erase(TuningMode::AzimuthVoltage);
-  // The angle a module points while drive tuning: forward, or, to spin in place, tangent to its
+  // The angle each module points while drive tuning: forward, or, to spin in place, tangent to its
   // position around the robot center so a positive velocity spins the robot counter-clockwise
   // (WPILib's positive rotation direction).
-  const bool driveInPlace = modes.contains(TuningMode::DriveInPlace);
-  auto driveTuningAngle = [driveInPlace](mechanisms::swerve::SwerveModule* module) {
-    if (!driveInPlace) return wpi::math::Rotation2d{};
-    auto moduleLocation = *module->GetConfig().GetLocation();
-    return moduleLocation.Angle().value_or(wpi::math::Rotation2d{}) +
-           wpi::math::Rotation2d{wpi::units::degree_t{90}};
-  };
+  wpi::util::array<wpi::math::Rotation2d, NumModules> driveAngles{wpi::util::empty_array};
+  for (size_t i = 0; i < NumModules; ++i) {
+    driveAngles[i] = wpi::math::Rotation2d{};
+    if (modes.contains(TuningMode::DriveInPlace)) {
+      auto moduleLocation = *modules[i]->GetConfig().GetLocation();
+      driveAngles[i] = moduleLocation.Angle().value_or(wpi::math::Rotation2d{}) +
+                       wpi::math::Rotation2d{wpi::units::degree_t{90}};
+    }
+  }
 
   // Auto-align drives to its target pose every loop.
   if (modes.contains(TuningMode::AutoAlign)) {
@@ -1166,22 +1168,22 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
               states[i] = wpi::math::SwerveModuleVelocity{
                   wpi::units::meters_per_second_t{
                       doubleFields.at(DoubleTelemetryField::ModulesDriveVelocity).Get()},
-                  driveTuningAngle(modules[i])};
+                  driveAngles[i]};
             }
             drive->SetSwerveModuleStates(states);
           }
           break;
         case TuningMode::DriveVoltage:
-          for (auto* module : modules) {
+          for (size_t i = 0; i < NumModules; ++i) {
             // A closed loop run on the SystemCore would replace the voltage on its next loop.
             if (!lastModes.contains(TuningMode::DriveVoltage)) {
-              module->GetDriveMotorController()->StopClosedLoopController();
+              modules[i]->GetDriveMotorController()->StopClosedLoopController();
             }
             // The wheels are not optimized, so they always drive the same way.
-            module->GetDriveMotorController()->SetVoltage(
+            modules[i]->GetDriveMotorController()->SetVoltage(
                 wpi::units::volt_t{doubleFields.at(DoubleTelemetryField::ModulesDriveVoltage).Get()});
-            module->GetAzimuthMotorController()->SetPosition(
-                wpi::units::degree_t{driveTuningAngle(module).Degrees()});
+            modules[i]->GetAzimuthMotorController()->SetPosition(
+                wpi::units::degree_t{driveAngles[i].Degrees()});
           }
           break;
         case TuningMode::Azimuth:
@@ -1321,18 +1323,18 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
               wpi::util::empty_array};
           for (size_t i = 0; i < NumModules; ++i) {
             states[i] = wpi::math::SwerveModuleVelocity{wpi::units::meters_per_second_t{dt.Get()},
-                                                        driveTuningAngle(modules[i])};
+                                                        driveAngles[i]};
           }
           drive->SetSwerveModuleStates(states);
         }
         break;
       case DoubleTelemetryField::ModulesDriveVoltage:
         if (modes.contains(TuningMode::DriveVoltage)) {
-          for (auto* module : modules) {
+          for (size_t i = 0; i < NumModules; ++i) {
             // The wheels are not optimized, so they always drive the same way.
-            module->GetDriveMotorController()->SetVoltage(wpi::units::volt_t{dt.Get()});
-            module->GetAzimuthMotorController()->SetPosition(
-                wpi::units::degree_t{driveTuningAngle(module).Degrees()});
+            modules[i]->GetDriveMotorController()->SetVoltage(wpi::units::volt_t{dt.Get()});
+            modules[i]->GetAzimuthMotorController()->SetPosition(
+                wpi::units::degree_t{driveAngles[i].Degrees()});
           }
         }
         break;

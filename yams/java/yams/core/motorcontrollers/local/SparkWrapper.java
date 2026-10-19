@@ -281,6 +281,21 @@ public class SparkWrapper extends SmartMotorController {
     return false;
   }
 
+  /**
+   * Apply the feedback gains, waiting for the SPARK to acknowledge them, and retrying silently for up
+   * to 15 ms if it doesn't.
+   *
+   * @return The last status the SPARK returned, {@link REVLibError#kOk} once it took the gains.
+   */
+  private REVLibError configureFeedback() {
+    long deadline = System.nanoTime() + 15_000_000;
+    REVLibError status;
+    do {
+      status = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters);
+    } while (status != REVLibError.kOk && System.nanoTime() < deadline);
+    return status;
+  }
+
   @Override
   public void setupSimulation() {
     if (RobotBase.isSimulation()) {
@@ -1389,11 +1404,9 @@ public class SparkWrapper extends SmartMotorController {
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
 
-    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
-    REVLibError[] status = {REVLibError.kOk};
-    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
-    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status[0]);
-    m_feedbackNotAppliedAlert.set(!applied);
+    REVLibError status = configureFeedback();
+    m_feedbackNotAppliedAlert.setText(getName() + " kP of " + kP + " was not applied: " + status);
+    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKp(kP);
@@ -1411,11 +1424,9 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
-    REVLibError[] status = {REVLibError.kOk};
-    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
-    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status[0]);
-    m_feedbackNotAppliedAlert.set(!applied);
+    REVLibError status = configureFeedback();
+    m_feedbackNotAppliedAlert.setText(getName() + " kI of " + kI + " was not applied: " + status);
+    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKi(kI);
@@ -1433,11 +1444,9 @@ public class SparkWrapper extends SmartMotorController {
     });
     // The SPARK's gains are in its own units; write the whole slot from the config's YAMS gains.
     m_config.getPID(m_slot).ifPresent(pid -> writeSparkPID(pid.getP(), pid.getI(), pid.getD(), m_closedLoopSlot));
-    // Wait for the SPARK to acknowledge the gain, so one it doesn't take is reported.
-    REVLibError[] status = {REVLibError.kOk};
-    boolean applied = configureSpark(() -> status[0] = m_spark.configure(m_sparkBaseConfig, ResetMode.kNoResetSafeParameters, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters));
-    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status[0]);
-    m_feedbackNotAppliedAlert.set(!applied);
+    REVLibError status = configureFeedback();
+    m_feedbackNotAppliedAlert.setText(getName() + " kD of " + kD + " was not applied: " + status);
+    m_feedbackNotAppliedAlert.set(status != REVLibError.kOk);
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
         f.setKd(kD);
