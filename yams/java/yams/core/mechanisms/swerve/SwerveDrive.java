@@ -77,7 +77,8 @@ public class SwerveDrive {
   /**
    * Pose, chassis speeds, gyro, and auto-align tuning telemetry.
    */
-  private SwerveDriveTelemetry m_swerveTelemetry;
+  /** Telemetry and live tuning of the drive. */
+  protected SwerveDriveTelemetry m_swerveTelemetry;
   /**
    * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
    */
@@ -175,14 +176,6 @@ public class SwerveDrive {
    */
   public void applyTuningValues() {
     m_swerveTelemetry.applyTuningValues(this);
-  }
-
-  /**
-   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
-   * it is with its closed loop controller.
-   */
-  public void stopTuning() {
-    m_swerveTelemetry.stopTuning(this);
   }
 
   /**

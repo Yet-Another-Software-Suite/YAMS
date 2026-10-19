@@ -73,7 +73,7 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
           applyTuningValues();
           coroutine.yield();
         }
-      }).whenCanceled(this::stopTuning).named(getName() + " Tuning")));
+      }).whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named(getName() + " Tuning")));
     }
   }
 

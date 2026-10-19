@@ -592,21 +592,6 @@ class SwerveDrive {
   }
 
   /**
-   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still
-   * where it is with its closed-loop controller.
-   */
-  /**
-   * Apply the live tuning values from NetworkTables, as the tuning command does each loop.
-   */
-  void ApplyTuningValues() {
-    if (m_swerveTelemetry) m_swerveTelemetry->ApplyTuningValues(this);
-  }
-
-  void StopTuning() {
-    if (m_swerveTelemetry) m_swerveTelemetry->StopTuning(this);
-  }
-
-  /**
    * Get the simulated pose of the robot, assuming the commanded module states are met perfectly.
    * Useful for feeding a simulated vision system with ground-truth poses under perfect-world
    * conditions.
@@ -818,7 +803,7 @@ class SwerveDrive {
           [this] { m_swerveTelemetry->ApplyTuningValues(this); });
       // Stop any tuning voltage when the command ends.
       m_driveToPoseTuningCommand.emplace(
-          std::move(tuningCommand).FinallyDo([this] { StopTuning(); }));
+          std::move(tuningCommand).FinallyDo([this] { m_swerveTelemetry->StopTuning(this); }));
       telemetry::EnsureMechanismsTunableBackend();
       wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning/driveToPose",
                              *m_driveToPoseTuningCommand->get());

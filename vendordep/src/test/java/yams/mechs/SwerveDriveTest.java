@@ -684,11 +684,10 @@ public class SwerveDriveTest {
       assertTrue(Math.abs(module.getState().azimuthVelocity.in(DegreesPerSecond)) > 10, module.getName() + " turns at 1 V");
     }
 
-    // The tuning command ending stops the voltage and holds the wheels where they are.
-    drive.stopTuning();
+    // Turning the voltage off stops it and holds the wheels where they are.
     tuning.getEntry("modules/azimuth/voltage/enabled").setBoolean(false);
     tuning.getEntry("modules/azimuth/enabled").setBoolean(false);
-    runFor(0.5);
+    tuneFor(0.5);
     double[] stopped = new double[modules.length];
     for (int i = 0; i < modules.length; i++) {
       stopped[i] = modules[i].getState().angle.getDegrees();

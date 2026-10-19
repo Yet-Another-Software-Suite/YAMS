@@ -1402,7 +1402,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
 }
 
 // Voltage tuning drives the wheels, then turns them, without their closed loops, and the tuning
-// command ending holds the wheels still with their closed loops again.
+// turning the voltage off holds the wheels still with their closed loops again.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWithoutTheClosedLoop",
                  "[SwerveDriveTest]") {
   // Release the fixture's drive so its modules can be reused by a drive with live tuning.
@@ -1443,10 +1443,10 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWitho
           Catch::Approx(1).margin(0.25));
   }
 
-  m_drive->StopTuning();
+  // Turning the voltage off stops it and holds the wheels where they are.
   tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(false);
   tuning->GetEntry("modules/azimuth/enabled").SetBoolean(false);
-  SchedulerHelper::RunForDuration(0.5_s);
+  tuneFor(25);
   std::vector<double> stopped;
   for (auto* module : modules) stopped.push_back(module->GetState().angle.Degrees().value());
   SchedulerHelper::RunForDuration(0.5_s);
