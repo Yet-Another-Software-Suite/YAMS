@@ -582,6 +582,16 @@ class SmartMotorController {
    */
   wpi::units::second_t GetClosedLoopControllerPeriod() const;
 
+  /**
+   * Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+   * it, as WPILib's SysId works it out for its presets. Feedback gains worked out for the closed loop
+   * depend on it. In simulation, the simulation period, since the simulated sensor is updated once a
+   * period.
+   *
+   * @return The delay, or nullopt if it is not known for this motor controller.
+   */
+  virtual std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const;
+
   /** Start the background closed-loop controller thread, and the loosely coupled followers'. */
   void StartClosedLoopController();
 

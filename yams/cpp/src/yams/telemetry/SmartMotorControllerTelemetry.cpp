@@ -134,6 +134,9 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
       case DoubleTelemetryField::ClosedLoopPeriod:
         dt.Set(smc.GetClosedLoopControllerPeriod().value());
         break;
+      case DoubleTelemetryField::VelocityMeasurementDelay:
+        if (auto delay = smc.GetVelocityMeasurementDelay()) dt.Set(delay->value());
+        break;
       case DoubleTelemetryField::OutputVoltage:
         dt.Set(smc.GetVoltage().value());
         break;

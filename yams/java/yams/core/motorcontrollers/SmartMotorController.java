@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
@@ -262,6 +263,18 @@ public abstract class SmartMotorController {
       return Optional.of(new ExponentialProfile.State(getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
     }
     return Optional.of(new ExponentialProfile.State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
+  }
+
+  /**
+   * Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+   * it, as WPILib's SysId works it out for its presets. Feedback gains worked out for the closed loop
+   * depend on it. In simulation, the simulation period, since the simulated sensor is updated once a
+   * period.
+   *
+   * @return The delay, or empty if it is not known for this motor controller.
+   */
+  public Optional<Time> getVelocityMeasurementDelay() {
+    return RobotBase.isSimulation() ? Optional.of(m_config.getSimulationPeriod()) : Optional.empty();
   }
 
   /**

@@ -53,6 +53,7 @@ enum class DoubleTelemetryField {
   SetpointVelocity,                   ///< Read-only velocity setpoint RPS or m/s.
   SetpointForce,                      ///< Feedforward force applied on the velocity setpoint (N).
   ClosedLoopPeriod,                   ///< Period the closed-loop controller runs at (s).
+  VelocityMeasurementDelay,           ///< How far behind the measured velocity is, when known (s).
   OutputVoltage,                      ///< Voltage currently applied to the motor (V).
   StatorCurrent,                      ///< Stator (output) current draw (A).
   StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).

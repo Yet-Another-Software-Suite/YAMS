@@ -1971,6 +1971,17 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   /**
+   * {@inheritDoc}
+   *
+   * <p>Phoenix 6 filters velocity with a Kalman filter tuned for the least latency, about 1 ms, as
+   * WPILib's SysId takes it for its CTRE Phoenix 6 preset.
+   */
+  @Override
+  public Optional<Time> getVelocityMeasurementDelay() {
+    return RobotBase.isSimulation() ? super.getVelocityMeasurementDelay() : Optional.of(Milliseconds.of(1));
+  }
+
+  /**
    * Ensure setting is applied, retries every 10ms.
    *
    * @return {@link StatusCode} from CTRE

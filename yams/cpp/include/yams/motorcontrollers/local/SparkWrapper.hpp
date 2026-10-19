@@ -146,6 +146,8 @@ class SparkWrapper : public SmartMotorController {
   void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
   wpi::units::volt_t GetVoltage() override;
+  /** Read from the SPARK's encoder settings when the config is applied. */
+  std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
   /** @copydoc SmartMotorController::SetPosition(wpi::units::turn_t) */
@@ -426,6 +428,9 @@ class SparkWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_externalEncoderGearingDiscontinuityAlert;
   /** Shown when the SPARK does not take the feedback gains. */
   std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
+  /** How far behind the measured velocity is, from the encoder's filtering, read when the config
+   *  is applied. */
+  std::optional<wpi::units::second_t> m_velocityMeasurementDelay;
   /** Shown when the SPARK does not take the feedforward gains. */
   std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
 

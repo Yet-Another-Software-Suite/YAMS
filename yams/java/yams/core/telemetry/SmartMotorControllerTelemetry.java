@@ -152,6 +152,7 @@ public class SmartMotorControllerTelemetry {
         }
         case SetpointForce -> dt.set(smc.getSetpointFeedforwardForce().orElse(Newtons.zero()).in(Newtons));
         case ClosedLoopPeriod -> dt.set(smc.getClosedLoopControllerPeriod().in(Seconds));
+        case VelocityMeasurementDelay -> smc.getVelocityMeasurementDelay().ifPresent(delay -> dt.set(delay.in(Seconds)));
         case OutputVoltage -> dt.set(smc.getVoltage().in(Volts));
         case StatorCurrent -> dt.set(smc.getStatorCurrent().in(Amps));
         case SupplyCurrent -> smc.getSupplyCurrent().ifPresent(current -> dt.set(current.in(Amps)));
@@ -411,6 +412,11 @@ public class SmartMotorControllerTelemetry {
      * control period on the SystemCore.
      */
     ClosedLoopPeriod("closedloop/period", 0.02, false, "seconds"),
+    /**
+     * How far behind the mechanism the measured velocity is, from how the motor controller filters it,
+     * when it is known.
+     */
+    VelocityMeasurementDelay("closedloop/measurementDelay", 0, false, "seconds"),
     /** Voltage supplied to the motor. */
     OutputVoltage("motor/outputVoltage", 0, false, "volts"),
     /** Stator current. */

@@ -19,6 +19,7 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -195,6 +196,8 @@ public class SparkWrapper extends SmartMotorController {
    * point.
    */
   private Alert m_externalEncoderGearingDiscontinuityAlert;
+  /** How far behind the measured velocity is, from the encoder's filtering, read when the config is applied. */
+  private Optional<Time> m_velocityMeasurementDelay = Optional.empty();
   /** Alert shown when the SPARK does not take a feedback gain. */
   private Alert m_feedbackNotAppliedAlert;
   /** Alert shown when the SPARK does not take a feedforward gain. */
@@ -1136,7 +1139,39 @@ public class SparkWrapper extends SmartMotorController {
     var resetMode = m_config.getResetPreviousConfig() ? ResetMode.kResetSafeParameters : ResetMode.kNoResetSafeParameters;
     config.validateBasicOptions();
     config.validateExternalEncoderOptions();
-    return configureSpark(() -> m_spark.configure(m_sparkBaseConfig, resetMode, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters), Milliseconds.of(100));
+    boolean configured = configureSpark(() -> m_spark.configure(m_sparkBaseConfig, resetMode, DriverStationBackend.isEnabled() ? PersistMode.kNoPersistParameters : PersistMode.kPersistParameters), Milliseconds.of(100));
+
+    // How far behind the measured velocity is, from the encoder's filtering, as WPILib's SysId works it
+    // out for its REV presets: a backward difference over the measurement period is half the period
+    // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
+    // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
+    // back from the SPARK. An absolute or detached encoder's delay is not known.
+    Object velocityEncoder = config.getUseExternalFeedback() ? config.getExternalEncoder().orElse(null) : null;
+    if (velocityEncoder instanceof SparkMaxAlternateEncoder && m_spark instanceof SparkMax max) {
+      var encoder = max.configAccessor.alternateEncoder;
+      m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getMeasurementPeriod() / 2.0 + (encoder.getAverageDepth() - 1) / 2.0));
+    } else if (velocityEncoder instanceof SparkFlexExternalEncoder && m_spark instanceof SparkFlex flex) {
+      var encoder = flex.configAccessor.externalEncoder;
+      m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getMeasurementPeriod() / 2.0 + (encoder.getAverageDepth() - 1) / 2.0));
+    } else if (velocityEncoder != null) {
+      m_velocityMeasurementDelay = Optional.empty();
+    } else if (m_spark instanceof SparkMax && m_spark.getMotorType() == MotorType.kBrushless) {
+      m_velocityMeasurementDelay = Optional.of(Milliseconds.of(112));
+    } else {
+      var encoder = m_spark instanceof SparkMax max ? max.configAccessor.encoder : ((SparkFlex) m_spark).configAccessor.encoder;
+      m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getQuadratureMeasurementPeriod() / 2.0 + (encoder.getQuadratureAverageDepth() - 1) / 2.0));
+    }
+    return configured;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Read from the SPARK's encoder settings when the config is applied.
+   */
+  @Override
+  public Optional<Time> getVelocityMeasurementDelay() {
+    return RobotBase.isSimulation() ? super.getVelocityMeasurementDelay() : m_velocityMeasurementDelay;
   }
 
   @Override
