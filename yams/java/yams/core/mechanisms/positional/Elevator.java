@@ -221,17 +221,24 @@ public class Elevator extends SmartPositionalMechanism {
 
   /**
    * Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
-   * components of a robot model. A continuous elevator's stages move one at a time: the carriage rises
-   * the whole of its travel first, then the stage below it, and so on out to the stage nearest the fixed
-   * stage.
+   * components of a robot model. A continuous elevator's stages move one at a time. Which moves first
+   * depends on how it is rigged: watch it move to see which it is.
+   * <ul>
+   *   <li>Carriage first: the carriage rises the whole of its travel first, then the stage below it, and
+   *   so on out to the stage nearest the fixed stage. Going down, the stage nearest the fixed stage
+   *   lowers first.</li>
+   *   <li>Carriage last: the stage nearest the fixed stage rises the whole of its travel first, then the
+   *   next, and so on out to the carriage. Going down, the carriage lowers first.</li>
+   * </ul>
    *
    * <p>The stages are set with {@link ElevatorConfig#withStages(Distance...)}.
    *
+   * @param carriageFirst True if the carriage moves first, false if it moves last.
    * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
    *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
    * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
    */
-  public List<Pose3d> getContinuousPose3d() {
+  public List<Pose3d> getContinuousPose3d(boolean carriageFirst) {
     List<Distance> stageHeights = m_config.getStageHeights();
     if (stageHeights.size() < 2) {
       // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
@@ -239,17 +246,24 @@ public class Elevator extends SmartPositionalMechanism {
                                                "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(Distance...) with 2 or more stages");
     }
     int stages = stageHeights.size();
+    int carriage = stages - 1;
     double[] extension = new double[stages];
     double remaining = getHeight().in(Meters);
-    // From the carriage down, each stage takes as much of the height as it can travel. The stage
-    // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
-    // is always at the elevator's height.
-    for (int stage = stages - 1; stage > 0; stage--) {
+    // In the order the stages move, each takes as much of the height as it can travel. The last to
+    // move takes the rest, and the carriage any height below zero, so the carriage is always at the
+    // elevator's height.
+    for (int order = 0; order < stages; order++) {
+      int stage = carriageFirst ? carriage - order : order;
       double travel = stageHeights.get(stage).in(Meters);
-      extension[stage] = stage == stages - 1 ? Math.min(remaining, travel) : Math.min(Math.max(remaining, 0), travel);
+      if (order == stages - 1) {
+        extension[stage] = remaining;
+      } else if (stage == carriage) {
+        extension[stage] = Math.min(remaining, travel);
+      } else {
+        extension[stage] = Math.min(Math.max(remaining, 0), travel);
+      }
       remaining -= extension[stage];
     }
-    extension[0] += remaining;
     List<Pose3d> poses = new ArrayList<>(stages);
     double stageHeight = 0;
     for (double stageExtension : extension) {

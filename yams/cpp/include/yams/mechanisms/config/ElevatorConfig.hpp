@@ -87,7 +87,7 @@ class ElevatorConfig {
 
   /**
    * Set the elevator's moving stages, for the pose of each stage from Elevator::GetCascadePose3d()
-   * or Elevator::GetContinuousPose3d().
+   * or Elevator::GetContinuousPose3d(bool).
    *
    * The stage heights must add up to the elevator's maximum height: the Elevator throws if they do
    * not. Without a minimum and maximum height, the elevator's height is from 0 to the stage heights'

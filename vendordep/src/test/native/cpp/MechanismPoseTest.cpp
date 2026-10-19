@@ -232,6 +232,10 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
     elevatorCfg->WithStages(0.5_m, 0.5_m, 0.5_m);
     name = "PoseContinuous";
   }
+  SECTION("a continuous carriage moves last") {
+    elevatorCfg->WithStages(0.5_m, 0.5_m, 0.5_m);
+    name = "PoseContinuousLast";
+  }
   SECTION("an elevator with only a carriage has no stage poses") {
     elevatorCfg->WithStages(2_m);
     name = "PoseSingleStage";
@@ -270,20 +274,30 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorStages", "[Mechani
     CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
   } else if (name == "PoseContinuous") {
     // The carriage takes the first 0.5 m of its 0.9 m, the second stage the other 0.4 m.
-    auto stages = elevator->GetContinuousPose3d();
+    auto stages = elevator->GetContinuousPose3d(true);
     REQUIRE(stages.size() == 3);
     CheckNear(Meters(0, 0, 0.1), stages[0].Translation(), "first stage");
     CheckNear(Meters(0, 0, 0.5), stages[1].Translation(), "second stage");
     CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
     CHECK(stages[2] == elevator->GetPose3d());
+  } else if (name == "PoseContinuousLast") {
+    // The first stage takes the first 0.5 m of its 0.9 m, the second stage the other 0.4 m.
+    auto stages = elevator->GetContinuousPose3d(false);
+    REQUIRE(stages.size() == 3);
+    CheckNear(Meters(0, 0, 0.6), stages[0].Translation(), "first stage");
+    CheckNear(Meters(0, 0, 1.0), stages[1].Translation(), "second stage");
+    CheckNear(Meters(0, 0, 1.0), stages[2].Translation(), "carriage");
+    CHECK(stages[2] == elevator->GetPose3d());
   } else if (name == "PoseSingleStage") {
     // 1 moving stage, the carriage, is a valid elevator, but has no stages to cascade or move in turn.
     CHECK_THROWS(elevator->GetCascadePose3d());
-    CHECK_THROWS(elevator->GetContinuousPose3d());
+    CHECK_THROWS(elevator->GetContinuousPose3d(true));
+    CHECK_THROWS(elevator->GetContinuousPose3d(false));
     CheckNear(Meters(0, 0, 1.0), elevator->GetPose3d().Translation(), "carriage");
   } else {
     CHECK_THROWS(elevator->GetCascadePose3d());
-    CHECK_THROWS(elevator->GetContinuousPose3d());
+    CHECK_THROWS(elevator->GetContinuousPose3d(true));
+    CHECK_THROWS(elevator->GetContinuousPose3d(false));
   }
 
   CloseBundle(bundle);
@@ -321,7 +335,7 @@ TEST_CASE_METHOD(MechanismPoseFixture, "MechanismPose.ElevatorHeightIsItsStagesW
   auto bundle = Spark("PoseStagesOnly", cfg);
   bundle.smc->SetupSimulation();
   auto* elevator = new positional::Elevator(elevatorCfg, bundle.smc);
-  auto stages = elevator->GetContinuousPose3d();
+  auto stages = elevator->GetContinuousPose3d(true);
   REQUIRE(stages.size() == 3);
   CheckNear(Meters(0, 0, 0.9), stages[2].Translation(), "carriage");
   CloseBundle(bundle);

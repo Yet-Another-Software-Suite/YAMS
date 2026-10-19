@@ -234,10 +234,23 @@ public class MechanismPoseTest {
     // Each stage travels 0.5 m. The carriage takes the first 0.5 m of its 0.9 m, the second stage the
     // other 0.4 m, and the first stage has not moved.
     Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuous", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
-    List<Pose3d> stages = elevator.getContinuousPose3d();
+    List<Pose3d> stages = elevator.getContinuousPose3d(true);
     assertEquals(3, stages.size());
     assertNear(new Translation3d(0, 0, 0.1), stages.get(0).getTranslation(), "first stage");
     assertNear(new Translation3d(0, 0, 0.5), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+    assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
+  }
+
+  @Test
+  void aContinuousElevatorsCarriageMovesLast() {
+    // Each stage travels 0.5 m. The first stage takes the first 0.5 m of the carriage's 0.9 m, the
+    // second stage the other 0.4 m, and the carriage has not moved on the second stage.
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuousLast", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
+    List<Pose3d> stages = elevator.getContinuousPose3d(false);
+    assertEquals(3, stages.size());
+    assertNear(new Translation3d(0, 0, 0.6), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(1).getTranslation(), "second stage");
     assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
     assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
   }
@@ -247,7 +260,8 @@ public class MechanismPoseTest {
     // 1 moving stage, the carriage, is a valid elevator, but has no stages to cascade or move in turn.
     Elevator elevator = elevatorAtNinetyCentimeters("PoseSingleStage", new ElevatorConfig().withStages(Meters.of(2)));
     assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
-    assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
+    assertThrows(ElevatorConfigurationException.class, () -> elevator.getContinuousPose3d(true));
+    assertThrows(ElevatorConfigurationException.class, () -> elevator.getContinuousPose3d(false));
     assertNear(new Translation3d(0, 0, 1.0), elevator.getPose3d().getTranslation(), "carriage");
   }
 
@@ -258,7 +272,8 @@ public class MechanismPoseTest {
     assertEquals(OptionalInt.of(3), new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5)).getStages(), "a stage for each height");
     Elevator elevator = elevatorAtNinetyCentimeters("PoseNoStages", new ElevatorConfig());
     assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
-    assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
+    assertThrows(ElevatorConfigurationException.class, () -> elevator.getContinuousPose3d(true));
+    assertThrows(ElevatorConfigurationException.class, () -> elevator.getContinuousPose3d(false));
   }
 
   @Test
@@ -269,7 +284,7 @@ public class MechanismPoseTest {
     assertEquals(0, config.getMinimumHeight().orElseThrow().in(Meters), 1e-9, "minimum height");
     SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseStagesOnly").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
     Elevator elevator = new Elevator(config.withCarriageWeight(Kilograms.of(5)), motor);
-    List<Pose3d> stages = elevator.getContinuousPose3d();
+    List<Pose3d> stages = elevator.getContinuousPose3d(true);
     assertNear(new Translation3d(0, 0, 0.9), stages.get(2).getTranslation(), "carriage");
   }
 
