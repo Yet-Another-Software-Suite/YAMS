@@ -84,17 +84,6 @@ class SwerveDriveTelemetry {
 
  private:
   /**
-   * Set a gain from the tuning table: a drive to pose controller's, or every module's.
-   *
-   * @param drive Drive being tuned.
-   * @param field The gain's field.
-   * @param value The gain.
-   */
-  template <std::size_t NumModules>
-  void ApplyGain(mechanisms::swerve::SwerveDrive<NumModules>* drive, DoubleTelemetryField field,
-                 double value);
-
-  /**
    * Switch the drive or azimuth motors between a tuning voltage and their closed-loop controllers.
    * A closed-loop controller run on the SystemCore would replace the voltage on its next loop, so
    * it is stopped while the voltage is applied.
@@ -105,6 +94,14 @@ class SwerveDriveTelemetry {
    */
   template <std::size_t NumModules>
   void SetVoltageControl(mechanisms::swerve::SwerveDrive<NumModules>* drive, bool azimuth, bool on);
+
+  /**
+   * Hold every wheel still where it is, with its closed-loop controllers.
+   *
+   * @param drive Drive being tuned.
+   */
+  template <std::size_t NumModules>
+  void HoldWheels(mechanisms::swerve::SwerveDrive<NumModules>* drive);
 
   SwerveDriveTelemetryConfig m_config;
   /** Whether the drive motors are driven at a tuning voltage, without their closed-loop

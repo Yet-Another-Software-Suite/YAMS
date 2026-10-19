@@ -699,6 +699,25 @@ public class SwerveDriveTest {
     }
   }
 
+  @Test
+  void onlyTheHighestTuningModeStaysOn() {
+    NetworkTable tuning = buildForTuning(kTalonFXDriveSparkMaxAzimuth);
+    // Drive tuning outranks azimuth tuning, so azimuth tuning is turned back off.
+    tuning.getEntry("modules/drive/enabled").setBoolean(true);
+    tuning.getEntry("modules/azimuth/enabled").setBoolean(true);
+    tuneFor(0.04);
+    assertTrue(tuning.getEntry("modules/drive/enabled").getBoolean(false), "drive tuning stays on");
+    assertFalse(tuning.getEntry("modules/azimuth/enabled").getBoolean(true), "azimuth tuning is turned off");
+    // Auto-align outranks both.
+    tuning.getEntry("modules/azimuth/enabled").setBoolean(true);
+    tuning.getEntry("autoalign/enabled").setBoolean(true);
+    tuneFor(0.04);
+    assertTrue(tuning.getEntry("autoalign/enabled").getBoolean(false), "auto-align stays on");
+    assertFalse(tuning.getEntry("modules/drive/enabled").getBoolean(true), "drive tuning is turned off");
+    assertFalse(tuning.getEntry("modules/azimuth/enabled").getBoolean(true), "azimuth tuning is turned off");
+    tuning.getEntry("autoalign/enabled").setBoolean(false);
+  }
+
   @ParameterizedTest(name = "{0}")
   @MethodSource("layouts")
   void closedLoopPeriodIsWhereTheClosedLoopRuns(Layout layout) {

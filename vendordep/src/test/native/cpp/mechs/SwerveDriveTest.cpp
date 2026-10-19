@@ -1456,6 +1456,33 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWitho
   }
 }
 
+// Only the highest tuning mode stays on: auto-align, then drive tuning, then azimuth tuning.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.OnlyTheHighestTuningModeStaysOn",
+                 "[SwerveDriveTest]") {
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+  m_driveCfg.WithTelemetry("SwerveTuningPriority", SwerveDriveConfig::TelemetryVerbosity::HIGH);
+  m_drive.emplace(&m_driveCfg);
+  Hardware().sub->m_drive = &m_drive.value();
+  auto tuning = wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(
+      m_drive->GetName());
+
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  m_drive->ApplyTuningValues();
+  CHECK(tuning->GetEntry("modules/drive/enabled").GetBoolean(false));
+  CHECK_FALSE(tuning->GetEntry("modules/azimuth/enabled").GetBoolean(true));
+
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  tuning->GetEntry("autoalign/enabled").SetBoolean(true);
+  m_drive->ApplyTuningValues();
+  CHECK(tuning->GetEntry("autoalign/enabled").GetBoolean(false));
+  CHECK_FALSE(tuning->GetEntry("modules/drive/enabled").GetBoolean(true));
+  CHECK_FALSE(tuning->GetEntry("modules/azimuth/enabled").GetBoolean(true));
+  tuning->GetEntry("autoalign/enabled").SetBoolean(false);
+  m_drive->ApplyTuningValues();
+}
+
 // A TalonFX's closed loop runs on the motor controller, at 1 kHz.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ClosedLoopPeriodIsOnTheMotorController",
                  "[SwerveDriveTest]") {
