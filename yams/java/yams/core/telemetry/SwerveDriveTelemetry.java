@@ -205,17 +205,70 @@ public class SwerveDriveTelemetry {
     if (!modes.contains(TuningMode.AZIMUTH)) {
       modes.remove(TuningMode.AZIMUTH_VOLTAGE);
     }
-    // Setpoints are sent again when the tuning modes change.
-    var lastModes = m_lastModes == null ? EnumSet.noneOf(TuningMode.class) : m_lastModes;
-    boolean modesChanged = !modes.equals(m_lastModes);
-    m_lastModes = modes;
+    boolean inPlace = modes.contains(TuningMode.DRIVE_IN_PLACE);
 
-    // Set every gain and setpoint that changed, and drive the modules in the tuning mode that is on.
+    // Auto-align drives to its target pose every loop.
+    if (modes.contains(TuningMode.AUTO_ALIGN)) {
+      var targetPose = new Pose2d(m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX).get(),
+                                  m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY).get(),
+                                  Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation).get()));
+      drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
+    }
+
+    // When the tuning modes change, switch the motors over, and send the setpoints of the modes now on.
+    if (!modes.equals(m_lastModes)) {
+      var lastModes = m_lastModes == null ? EnumSet.noneOf(TuningMode.class) : m_lastModes;
+      m_lastModes = modes;
+      // A closed loop run on the SystemCore would replace a tuning voltage on its next loop, so stop it
+      // when the voltage turns on, and start it again when the voltage turns off.
+      for (SwerveModule module : modules) {
+        if (modes.contains(TuningMode.DRIVE_VOLTAGE) && !lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
+          module.getDriveMotorController().stopClosedLoopController();
+        } else if (!modes.contains(TuningMode.DRIVE_VOLTAGE) && lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
+          module.getDriveMotorController().startClosedLoopController();
+        }
+        if (modes.contains(TuningMode.AZIMUTH_VOLTAGE) && !lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+          module.getAzimuthMotorController().stopClosedLoopController();
+        } else if (!modes.contains(TuningMode.AZIMUTH_VOLTAGE) && lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+          module.getAzimuthMotorController().startClosedLoopController();
+        }
+      }
+      var states = new SwerveModuleVelocity[modules.length];
+      if (modes.contains(TuningMode.DRIVE_VOLTAGE)) {
+        // The wheels are not optimized, so they always drive the same way.
+        for (SwerveModule module : modules) {
+          module.getDriveMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVoltage).get()));
+          module.getAzimuthMotorController().setPosition(driveTuningAngle(module, inPlace).getMeasure());
+        }
+      } else if (modes.contains(TuningMode.DRIVE)) {
+        for (int i = 0; i < modules.length; i++) {
+          states[i] = new SwerveModuleVelocity(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get(), driveTuningAngle(modules[i], inPlace));
+        }
+        drive.setSwerveModuleStates(states);
+      } else if (modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+        // Hold the drive motors still while the azimuth motors turn.
+        for (SwerveModule module : modules) {
+          module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
+          module.getAzimuthMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthVoltage).get()));
+        }
+      } else if (modes.contains(TuningMode.AZIMUTH)) {
+        // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
+        // wheels without driving them.
+        drive.setAzimuthAngles(Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get()));
+      } else if (modes.isEmpty()) {
+        // No tuning mode is driving the chassis; make sure the modules don't keep spinning at whatever
+        // velocity was last commanded while drive tuning was on.
+        for (int i = 0; i < modules.length; i++) {
+          states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), modules[i].getState().angle);
+        }
+        drive.setSwerveModuleStates(states);
+      }
+    }
+
+    // Set every gain and setpoint that changed.
     for (DoubleTelemetryField field : DoubleTelemetryField.values()) {
       var dt = m_doubleTelemetry.get(field);
-      // Skip a value that hasn't changed, unless a tuning mode changed, which needs its setpoint sent
-      // again. Auto-align drives to its target pose every loop.
-      if (!dt.enabled || (!dt.tunable() && !modesChanged && field != DoubleTelemetryField.AutoAlignPoseRotation)) {
+      if (!dt.enabled || !dt.tunable()) {
         continue;
       }
       switch (field) {
@@ -257,15 +310,8 @@ public class SwerveDriveTelemetry {
           break;
         case AutoAlignPoseX:
         case AutoAlignPoseY:
-          // Read with the rotation.
-          break;
         case AutoAlignPoseRotation:
-          if (modes.contains(TuningMode.AUTO_ALIGN)) {
-            var targetPose = new Pose2d(m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX).get(),
-                                        m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY).get(),
-                                        Rotation2d.fromDegrees(dt.get()));
-            drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
-          }
+          // Auto-align reads its target pose every loop, above.
           break;
         case ModulesDriveP:
           for (SwerveModule module : modules) module.getDriveMotorController().setKp(dt.get());
@@ -307,15 +353,7 @@ public class SwerveDriveTelemetry {
           if (modes.contains(TuningMode.DRIVE) && !modes.contains(TuningMode.DRIVE_VOLTAGE)) {
             var states = new SwerveModuleVelocity[modules.length];
             for (int i = 0; i < modules.length; i++) {
-              states[i] = new SwerveModuleVelocity(dt.get(), driveTuningAngle(modules[i], modes.contains(TuningMode.DRIVE_IN_PLACE)));
-            }
-            drive.setSwerveModuleStates(states);
-          } else if (modes.isEmpty()) {
-            // No tuning mode is driving the chassis; make sure the modules don't keep spinning at
-            // whatever velocity was last commanded while drive tuning was on.
-            var states = new SwerveModuleVelocity[modules.length];
-            for (int i = 0; i < modules.length; i++) {
-              states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), modules[i].getState().angle);
+              states[i] = new SwerveModuleVelocity(dt.get(), driveTuningAngle(modules[i], inPlace));
             }
             drive.setSwerveModuleStates(states);
           }
@@ -323,18 +361,9 @@ public class SwerveDriveTelemetry {
         case ModulesDriveVoltage:
           if (modes.contains(TuningMode.DRIVE_VOLTAGE)) {
             for (SwerveModule module : modules) {
-              // A closed loop run on the SystemCore would replace the voltage on its next loop.
-              if (!lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
-                module.getDriveMotorController().stopClosedLoopController();
-              }
               // The wheels are not optimized, so they always drive the same way.
               module.getDriveMotorController().setVoltage(Volts.of(dt.get()));
-              module.getAzimuthMotorController().setPosition(driveTuningAngle(module, modes.contains(TuningMode.DRIVE_IN_PLACE)).getMeasure());
-            }
-          } else if (lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
-            // Back to the closed loops. The modes changed, so the setpoints are sent again this loop.
-            for (SwerveModule module : modules) {
-              module.getDriveMotorController().startClosedLoopController();
+              module.getAzimuthMotorController().setPosition(driveTuningAngle(module, inPlace).getMeasure());
             }
           }
           break;
@@ -348,18 +377,9 @@ public class SwerveDriveTelemetry {
         case ModulesAzimuthVoltage:
           if (modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
             for (SwerveModule module : modules) {
-              // A closed loop run on the SystemCore would replace the voltage on its next loop.
-              if (!lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
-                module.getAzimuthMotorController().stopClosedLoopController();
-              }
               // Hold the drive motors still while the azimuth motors turn.
               module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
               module.getAzimuthMotorController().setVoltage(Volts.of(dt.get()));
-            }
-          } else if (lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
-            // Back to the closed loops. The modes changed, so the setpoints are sent again this loop.
-            for (SwerveModule module : modules) {
-              module.getAzimuthMotorController().startClosedLoopController();
             }
           }
           break;
