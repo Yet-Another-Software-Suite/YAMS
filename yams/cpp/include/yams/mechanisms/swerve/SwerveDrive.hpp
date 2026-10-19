@@ -812,7 +812,7 @@ class SwerveDrive {
       m_driveToPoseTuningCommand.emplace(
           std::move(tuningCommand).FinallyDo([this] { m_swerveTelemetry->StopTuning(this); }));
       telemetry::EnsureMechanismsTunableBackend();
-      wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning/driveToPose",
+      wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning",
                              *m_driveToPoseTuningCommand->get());
     }
   }
