@@ -6,6 +6,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <vector>
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/button/Trigger.hpp>
 #include <wpi/math/geometry/Pose3d.hpp>
@@ -210,11 +211,40 @@ class Elevator : public SmartPositionalMechanism {
   wpi::math::Pose3d GetPose3d() const override;
 
   /**
+   * Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+   * components of a robot model. A cascade elevator's stages all move at once, each by its share of
+   * the carriage's height: a stage that travels a third of the elevator's total travel moves a third
+   * of the carriage's height relative to the stage below it.
+   *
+   * The stages are set with ElevatorConfig::WithStages().
+   *
+   * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
+   *         to the carriage. The last is the carriage, GetPose3d().
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
+   */
+  std::vector<wpi::math::Pose3d> GetCascadePose3d() const;
+
+  /**
+   * Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
+   * components of a robot model. A continuous elevator's stages move one at a time: the carriage
+   * rises the whole of its travel first, then the stage below it, and so on out to the stage nearest
+   * the fixed stage.
+   *
+   * The stages are set with ElevatorConfig::WithStages().
+   *
+   * @return Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage
+   *         to the carriage. The last is the carriage, GetPose3d().
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
+   */
+  std::vector<wpi::math::Pose3d> GetContinuousPose3d() const;
+
+  /**
    * Directly command the elevator to a height setpoint (non-command, for use in periodic).
    *
    * @param height Desired carriage height.
    */
   void SetHeight(wpi::units::meter_t height);
+
 
  private:
   config::ElevatorConfig* m_elevatorConfig{nullptr};

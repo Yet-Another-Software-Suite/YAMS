@@ -4,7 +4,9 @@
 package yams.core.mechanisms.config;
 
 import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.wpilib.units.measure.Angle;
@@ -74,10 +76,18 @@ public class ElevatorConfig {
    */
   private Optional<Distance>           drumCircumference       = Optional.empty();
   /**
-   * Elevator stages, applied to the motor controller config gearing by dividing it by the number of
-   * stages given.
+   * The number of stages that move, counting the carriage as the last.
    */
   private OptionalInt                  stages                  = OptionalInt.empty();
+  /**
+   * How far each moving stage travels relative to the stage below it, from the stage nearest the fixed
+   * stage to the carriage.
+   */
+  private List<Distance>               stageHeights            = List.of();
+  /**
+   * How far the stages travel together: the sum of the stage heights.
+   */
+  private Optional<Distance>           stageHeightTotal        = Optional.empty();
   /**
    * Disable gravity on the elevator simulation.
    */
@@ -99,6 +109,8 @@ public class ElevatorConfig {
     this.isElevatorHorizontal = cfg.isElevatorHorizontal;
     this.drumCircumference = cfg.drumCircumference;
     this.stages = cfg.stages;
+    this.stageHeights = cfg.stageHeights;
+    this.stageHeightTotal = cfg.stageHeightTotal;
     this.simColor = cfg.simColor;
     this.angle = cfg.angle;
     this.carriageWeight = cfg.carriageWeight;
@@ -204,22 +216,89 @@ public class ElevatorConfig {
   }
 
   /**
-   * Get the Upper hard limit of the {@link Elevator}.
+   * Set the elevator's moving stages, for the pose of each stage from
+   * {@code Elevator.getCascadePose3d()} or {@code Elevator.getContinuousPose3d()}.
+   *
+   * <p>The stage heights must add up to the elevator's maximum height, from
+   * {@link #withHardLimits(Distance, Distance)}: the {@code Elevator} throws if they do not. Without hard
+   * limits, the elevator's height is from 0 to the stage heights' total.
+   *
+   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
+   *                     stage nearest the fixed stage to the carriage, which is the last. One for each
+   *                     stage that moves.
+   * @return {@link ElevatorConfig} for chaining.
+   * @throws IllegalArgumentException if no height is given, or a height is not positive.
+   */
+  public ElevatorConfig withStages(Distance... stageHeights) {
+    if (stageHeights == null || stageHeights.length == 0) {
+      throw new IllegalArgumentException("An elevator has at least 1 moving stage, its carriage, but no stage heights were given.");
+    }
+    for (int stage = 0; stage < stageHeights.length; stage++) {
+      if (!(stageHeights[stage].in(Meters) > 0)) {
+        throw new IllegalArgumentException("Stage " + (stage + 1) + "'s height must be positive, but is " + stageHeights[stage] + ".");
+      }
+    }
+    this.stages = OptionalInt.of(stageHeights.length);
+    this.stageHeights = List.of(stageHeights);
+    Distance total = Meters.zero();
+    for (Distance stageHeight : stageHeights) {
+      total = total.plus(stageHeight);
+    }
+    this.stageHeightTotal = Optional.of(total);
+    return this;
+  }
+
+  /**
+   * Get the number of stages that move, counting the carriage as the last.
+   *
+   * @return The number of moving stages, or empty if {@link #withStages(Distance...)} was not called.
+   */
+  public OptionalInt getStages() {
+    return stages;
+  }
+
+  /**
+   * Get how far each moving stage travels relative to the stage below it.
+   *
+   * @return Each moving stage's height, from the stage nearest the fixed stage to the carriage, or an
+   *         empty list if {@link #withStages(Distance...)} was not called.
+   */
+  public List<Distance> getStageHeights() {
+    return stageHeights;
+  }
+
+  /**
+   * Get how far the stages travel together, the sum of the stage heights.
+   *
+   * @return The total of the stage heights, or empty if {@link #withStages(Distance...)} was not called.
+   */
+  public Optional<Distance> getStageHeightTotal() {
+    return stageHeightTotal;
+  }
+
+  /**
+   * Get the Upper hard limit of the {@link Elevator}: the maximum height from
+   * {@link #withHardLimits(Distance, Distance)}, or the stage heights' total without hard limits, as the
+   * stages carry the carriage to the top.
    *
    * @return {@link Distance} hard limit.
    */
   public Optional<Distance> getMaximumHeight() {
-    return upperHardLimit;
+    return upperHardLimit.or(() -> stageHeightTotal);
   }
 
+
   /**
-   * Get the lower hard limit of the {@link Elevator}
+   * Get the lower hard limit of the {@link Elevator}: the minimum height from
+   * {@link #withHardLimits(Distance, Distance)}, or 0 without hard limits when the stages are set, as the
+   * stages start at the bottom.
    *
    * @return {@link Distance} hard limit.
    */
   public Optional<Distance> getMinimumHeight() {
-    return lowerHardLimit;
+    return lowerHardLimit.or(() -> stageHeightTotal.map(total -> Meters.zero()));
   }
+
 
   /**
    * Get the telemetry verbosity of the {@link Elevator}

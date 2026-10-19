@@ -4,6 +4,8 @@
 package yams.core.mechanisms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Kilograms;
@@ -12,6 +14,8 @@ import static org.wpilib.units.Units.Meters;
 import com.revrobotics.spark.SparkMax;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +26,7 @@ import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation3d;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
+import org.wpilib.units.measure.Distance;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.Arm;
 import yams.commands2.mechanisms.DoubleJointedArm;
@@ -29,6 +34,7 @@ import yams.commands2.mechanisms.Elevator;
 import yams.commands2.mechanisms.FlyWheel;
 import yams.commands2.mechanisms.Pivot;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.exceptions.ElevatorConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
@@ -184,6 +190,98 @@ public class MechanismPoseTest {
     Elevator elevator = new Elevator(new ElevatorConfig().withHardLimits(Meters.of(0), Meters.of(2)).withCarriageWeight(Kilograms.of(5))
                                                          .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
     assertNear(new Translation3d(0, 0, 0.8), elevator.getPose3d().getTranslation(), "carriage");
+  }
+
+  /**
+   * An elevator mounted 0.1 m up, with its carriage at 0.9 m, and the stages set. Its maximum height is
+   * the stage heights' total, or 2 m without stages.
+   */
+  private Elevator elevatorAtNinetyCentimeters(String name, ElevatorConfig config) {
+    return elevatorAtNinetyCentimeters(name, config, config.getStageHeightTotal().orElse(Meters.of(2)));
+  }
+
+  private Elevator elevatorAtNinetyCentimeters(String name, ElevatorConfig config, Distance maximumHeight) {
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config(name).withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
+    return new Elevator(config.withHardLimits(Meters.of(0), maximumHeight).withCarriageWeight(Kilograms.of(5))
+                              .withMechanismPositionConfig(new MechanismPositionConfig().withRelativePosition(new Translation3d(0, 0, 0.1))), motor);
+  }
+
+  @Test
+  void aCascadeElevatorsStagesEachMoveTheirShareOfItsHeight() {
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseCascade", new ElevatorConfig().withStages(Meters.of(0.4), Meters.of(0.4), Meters.of(0.4)));
+    // Equal travel: a third, two thirds and all of the carriage's 0.9 m.
+    List<Pose3d> stages = elevator.getCascadePose3d();
+    assertEquals(3, stages.size());
+    assertNear(new Translation3d(0, 0, 0.4), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 0.7), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+    assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
+  }
+
+  @Test
+  void aCascadeElevatorsStagesMoveInProportionToTheirTravel() {
+    // The first stage travels half of the 1.2 m total, so it moves half of the carriage's height,
+    // 0.45 m, and the others a quarter each.
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseUnevenCascade", new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.3), Meters.of(0.3)));
+    List<Pose3d> stages = elevator.getCascadePose3d();
+    assertNear(new Translation3d(0, 0, 0.55), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 0.775), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+  }
+
+  @Test
+  void aContinuousElevatorsCarriageMovesFirst() {
+    // Each stage travels 0.5 m. The carriage takes the first 0.5 m of its 0.9 m, the second stage the
+    // other 0.4 m, and the first stage has not moved.
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseContinuous", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5)));
+    List<Pose3d> stages = elevator.getContinuousPose3d();
+    assertEquals(3, stages.size());
+    assertNear(new Translation3d(0, 0, 0.1), stages.get(0).getTranslation(), "first stage");
+    assertNear(new Translation3d(0, 0, 0.5), stages.get(1).getTranslation(), "second stage");
+    assertNear(new Translation3d(0, 0, 1.0), stages.get(2).getTranslation(), "carriage");
+    assertEquals(elevator.getPose3d(), stages.get(2), "the last stage is the carriage");
+  }
+
+  @Test
+  void anElevatorWithOnlyACarriageHasNoStagePoses() {
+    // 1 moving stage, the carriage, is a valid elevator, but has no stages to cascade or move in turn.
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseSingleStage", new ElevatorConfig().withStages(Meters.of(2)));
+    assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
+    assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
+    assertNear(new Translation3d(0, 0, 1.0), elevator.getPose3d().getTranslation(), "carriage");
+  }
+
+  @Test
+  void elevatorStagesNeedAPositiveHeightForEachStage() {
+    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages());
+    assertThrows(IllegalArgumentException.class, () -> new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0)));
+    assertEquals(OptionalInt.of(3), new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5)).getStages(), "a stage for each height");
+    Elevator elevator = elevatorAtNinetyCentimeters("PoseNoStages", new ElevatorConfig());
+    assertThrows(ElevatorConfigurationException.class, elevator::getCascadePose3d);
+    assertThrows(ElevatorConfigurationException.class, elevator::getContinuousPose3d);
+  }
+
+  @Test
+  void anElevatorsHeightIsItsStagesWithoutHardLimits() {
+    // No hard limits: the stages give the elevator's height, from 0 to their 1.5 m total.
+    ElevatorConfig config = new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5), Meters.of(0.5));
+    assertEquals(Optional.of(Meters.of(1.5)), config.getMaximumHeight().map(height -> Meters.of(height.in(Meters))), "maximum height");
+    assertEquals(0, config.getMinimumHeight().orElseThrow().in(Meters), 1e-9, "minimum height");
+    SmartMotorController motor = spark((SmartMotorControllerConfig) config("PoseStagesOnly").withMechanismCircumference(Meters.of(0.1)).withStartingPosition(Meters.of(0.9)));
+    Elevator elevator = new Elevator(config.withCarriageWeight(Kilograms.of(5)), motor);
+    List<Pose3d> stages = elevator.getContinuousPose3d();
+    assertNear(new Translation3d(0, 0, 0.9), stages.get(2).getTranslation(), "carriage");
+  }
+
+  @Test
+  void elevatorStageHeightsAddUpToItsMaximumHeight() {
+    ElevatorConfig stages = new ElevatorConfig().withStages(Meters.of(0.6), Meters.of(0.6), Meters.of(0.5));
+    assertEquals(1.7, stages.getStageHeightTotal().orElseThrow().in(Meters), 1e-9, "stage height total");
+    assertEquals(Optional.empty(), new ElevatorConfig().getStageHeightTotal(), "no stages, no total");
+    // Stages that add up to 1 m on a 2 m elevator cannot carry the carriage to the top.
+    ElevatorConfigurationException exception = assertThrows(ElevatorConfigurationException.class,
+        () -> elevatorAtNinetyCentimeters("PoseShortStages", new ElevatorConfig().withStages(Meters.of(0.5), Meters.of(0.5)), Meters.of(2)));
+    assertTrue(exception.getMessage().contains("stage heights add up to 1.0 m, not the maximum height of 2.0 m"), exception.getMessage());
   }
 
   @Test

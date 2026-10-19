@@ -3,11 +3,14 @@
 
 #include "yams/mechanisms/positional/Elevator.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <memory>
 #include <numbers>
+#include <stdexcept>
 #include <string>
+#include <vector>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
@@ -36,6 +39,19 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
 
   if (!m_elevatorConfig->GetTelemetryName().empty()) {
     m_name = m_elevatorConfig->GetTelemetryName();
+  }
+
+  // The stages travel the elevator's whole height together, so their heights must add up to it.
+  if (auto total = m_elevatorConfig->GetStageHeightTotal()) {
+    if (auto maxH = m_elevatorConfig->GetMaxHeight();
+        maxH && std::abs(total->value() - maxH->value()) > 1e-6) {
+      throw exceptions::ElevatorConfigurationException(
+          "Elevator stage heights add up to " + std::to_string(total->value()) +
+              " m, not the maximum height of " + std::to_string(maxH->value()) + " m!",
+          "Cannot create elevator",
+          "WithStages(...) with heights that add up to the "
+          "maximum height");
+    }
   }
 
   // Apply soft limits to the motor controller when configured.
@@ -236,6 +252,64 @@ const config::ElevatorConfig& Elevator::GetConfig() const { return *m_elevatorCo
 
 wpi::math::Pose3d Elevator::GetPose3d() const {
   return m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(GetHeight(), m_elevatorConfig->GetAngle());
+}
+
+std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
+  const auto& stageHeights = m_elevatorConfig->GetStageHeights();
+  if (stageHeights.size() < 2) {
+    // An elevator with only a carriage has no stages to cascade or move in turn: use GetPose3d().
+    throw exceptions::ElevatorConfigurationException(
+        stageHeights.empty() ? "Elevator stages are not configured!"
+                             : "Elevator has only 1 moving stage, its carriage!",
+        "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
+        "WithStages(...) with 2 or more stages");
+  }
+  const double total = m_elevatorConfig->GetStageHeightTotal()->value();
+  const double height = GetHeight().value();
+  std::vector<wpi::math::Pose3d> poses;
+  poses.reserve(stageHeights.size());
+  double stageHeight = 0;
+  for (const auto& travel : stageHeights) {
+    // Each stage moves its share of the carriage's height, on top of the stage below it.
+    stageHeight += height * travel.value() / total;
+    poses.push_back(m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(
+        wpi::units::meter_t{stageHeight}, m_elevatorConfig->GetAngle()));
+  }
+  return poses;
+}
+
+std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d() const {
+  const auto& stageHeights = m_elevatorConfig->GetStageHeights();
+  if (stageHeights.size() < 2) {
+    // An elevator with only a carriage has no stages to cascade or move in turn: use GetPose3d().
+    throw exceptions::ElevatorConfigurationException(
+        stageHeights.empty() ? "Elevator stages are not configured!"
+                             : "Elevator has only 1 moving stage, its carriage!",
+        "Cannot get the pose of each stage. Use GetPose3d() for the carriage",
+        "WithStages(...) with 2 or more stages");
+  }
+  const int stages = static_cast<int>(stageHeights.size());
+  std::vector<double> extension(stages, 0.0);
+  double remaining = GetHeight().value();
+  // From the carriage down, each stage takes as much of the height as it can travel. The stage
+  // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
+  // is always at the elevator's height.
+  for (int stage = stages - 1; stage > 0; stage--) {
+    const double travel = stageHeights[stage].value();
+    extension[stage] = stage == stages - 1 ? std::min(remaining, travel)
+                                           : std::min(std::max(remaining, 0.0), travel);
+    remaining -= extension[stage];
+  }
+  extension[0] += remaining;
+  std::vector<wpi::math::Pose3d> poses;
+  poses.reserve(stages);
+  double stageHeight = 0;
+  for (double stageExtension : extension) {
+    stageHeight += stageExtension;
+    poses.push_back(m_elevatorConfig->GetMechanismPositionConfig().GetTranslatedPose(
+        wpi::units::meter_t{stageHeight}, m_elevatorConfig->GetAngle()));
+  }
+  return poses;
 }
 
 void Elevator::SetHeight(wpi::units::meter_t height) { SetMeasurementPositionSetpoint(height); }

@@ -8,6 +8,8 @@ import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Kilograms;
 import static org.wpilib.units.Units.Meters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Pose3d;
@@ -58,6 +60,8 @@ public class Elevator extends SmartPositionalMechanism {
    *                                                    mass is not configured.
    * @throws ElevatorConfigurationException             if running in simulation and the minimum or
    *                                                    maximum height is not configured.
+   * @throws ElevatorConfigurationException             if the stage heights do not add up to the
+   *                                                    maximum height.
    * @throws SmartMotorControllerConfigurationException if running in simulation and the starting
    *                                                    position is not set on the
    *                                                    {@link SmartMotorControllerConfig}.
@@ -75,6 +79,17 @@ public class Elevator extends SmartPositionalMechanism {
     if (config.getTelemetryName().isPresent()) {
       // TODO: Add telemetry units to config.
       m_telemetry.setupTelemetry(getName(), m_smc);
+    }
+
+    // The stages travel the elevator's whole height together, so their heights must add up to it.
+    // Without hard limits, the maximum height is the stage heights' total.
+    if (config.getStageHeightTotal().isPresent() && config.getMaximumHeight().isPresent()) {
+      Distance total = config.getStageHeightTotal().get();
+      Distance maximum = config.getMaximumHeight().get();
+      if (Math.abs(total.in(Meters) - maximum.in(Meters)) > 1e-6) {
+        throw new ElevatorConfigurationException("Elevator stage heights add up to " + total.in(Meters) + " m, not the maximum height of " + maximum.in(Meters) + " m",
+                                                 "Cannot create elevator", "withStages(Distance...) with heights that add up to the maximum height");
+      }
     }
 
     if (RobotBase.isSimulation()) {
@@ -171,6 +186,77 @@ public class Elevator extends SmartPositionalMechanism {
   @Override
   public Pose3d getPose3d() {
     return m_config.getMechanismPositionConfig().getTranslatedPose(getHeight(), m_config.getAngle());
+  }
+
+  /**
+   * Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+   * components of a robot model. A cascade elevator's stages all move at once, each by its share of the
+   * carriage's height: a stage that travels a third of the elevator's total travel moves a third of the
+   * carriage's height relative to the stage below it.
+   *
+   * <p>The stages are set with {@link ElevatorConfig#withStages(Distance...)}.
+   *
+   * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
+   *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
+   */
+  public List<Pose3d> getCascadePose3d() {
+    List<Distance> stageHeights = m_config.getStageHeights();
+    if (stageHeights.size() < 2) {
+      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
+      throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(Distance...) with 2 or more stages");
+    }
+    double total = m_config.getStageHeightTotal().orElseThrow().in(Meters);
+    double height = getHeight().in(Meters);
+    List<Pose3d> poses = new ArrayList<>(stageHeights.size());
+    double stageHeight = 0;
+    for (Distance travel : stageHeights) {
+      // Each stage moves its share of the carriage's height, on top of the stage below it.
+      stageHeight += height * travel.in(Meters) / total;
+      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(Meters.of(stageHeight), m_config.getAngle()));
+    }
+    return poses;
+  }
+
+  /**
+   * Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
+   * components of a robot model. A continuous elevator's stages move one at a time: the carriage rises
+   * the whole of its travel first, then the stage below it, and so on out to the stage nearest the fixed
+   * stage.
+   *
+   * <p>The stages are set with {@link ElevatorConfig#withStages(Distance...)}.
+   *
+   * @return Each moving stage's {@link Pose3d}, relative to the robot, from the stage nearest the fixed
+   *         stage to the carriage. The last is the carriage, {@link #getPose3d()}.
+   * @throws ElevatorConfigurationException if the stages are not set, or there are fewer than 2.
+   */
+  public List<Pose3d> getContinuousPose3d() {
+    List<Distance> stageHeights = m_config.getStageHeights();
+    if (stageHeights.size() < 2) {
+      // An elevator with only a carriage has no stages to cascade or move in turn: use getPose3d().
+      throw new ElevatorConfigurationException(stageHeights.isEmpty() ? "Elevator stages are not configured" : "Elevator has only 1 moving stage, its carriage",
+                                               "Cannot get the pose of each stage. Use getPose3d() for the carriage.", "withStages(Distance...) with 2 or more stages");
+    }
+    int stages = stageHeights.size();
+    double[] extension = new double[stages];
+    double remaining = getHeight().in(Meters);
+    // From the carriage down, each stage takes as much of the height as it can travel. The stage
+    // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
+    // is always at the elevator's height.
+    for (int stage = stages - 1; stage > 0; stage--) {
+      double travel = stageHeights.get(stage).in(Meters);
+      extension[stage] = stage == stages - 1 ? Math.min(remaining, travel) : Math.min(Math.max(remaining, 0), travel);
+      remaining -= extension[stage];
+    }
+    extension[0] += remaining;
+    List<Pose3d> poses = new ArrayList<>(stages);
+    double stageHeight = 0;
+    for (double stageExtension : extension) {
+      stageHeight += stageExtension;
+      poses.add(m_config.getMechanismPositionConfig().getTranslatedPose(Meters.of(stageHeight), m_config.getAngle()));
+    }
+    return poses;
   }
 
   @Override

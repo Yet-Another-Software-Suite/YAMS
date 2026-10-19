@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include <concepts>
 #include <optional>
 #include <string>
+#include <vector>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
@@ -84,6 +86,36 @@ class ElevatorConfig {
   ElevatorConfig& WithAngle(wpi::units::degree_t angle);
 
   /**
+   * Set the elevator's moving stages, for the pose of each stage from Elevator::GetCascadePose3d()
+   * or Elevator::GetContinuousPose3d().
+   *
+   * The stage heights must add up to the elevator's maximum height: the Elevator throws if they do
+   * not. Without a minimum and maximum height, the elevator's height is from 0 to the stage heights'
+   * total.
+   *
+   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
+   *        stage nearest the fixed stage to the carriage, which is the last. One for each stage that
+   *        moves, such as WithStages(0.6_m, 0.6_m, 0.5_m).
+   * @return *this for chaining.
+   * @throws std::invalid_argument if no height is given, or a height is not positive.
+   */
+  template <typename... Heights>
+    requires(std::convertible_to<Heights, wpi::units::meter_t> && ...)
+  ElevatorConfig& WithStages(Heights... stageHeights) {
+    return WithStages(std::vector<wpi::units::meter_t>{wpi::units::meter_t{stageHeights}...});
+  }
+
+  /**
+   * Set the elevator's moving stages from a list of stage heights. See WithStages(Heights...).
+   *
+   * @param stageHeights How far each moving stage travels relative to the stage below it, from the
+   *        stage nearest the fixed stage to the carriage.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if no height is given, or a height is not positive.
+   */
+  ElevatorConfig& WithStages(std::vector<wpi::units::meter_t> stageHeights);
+
+  /**
    * Set where the mechanism is on the robot, for GetPose3d(): where it is mounted, how it is turned
    * there, the plane it moves in, and the mechanism it is mounted on, if any.
    *
@@ -100,10 +132,10 @@ class ElevatorConfig {
   /** Get the telemetry name. */
   std::string GetTelemetryName() const;
 
-  /** Get the optional minimum height. */
+  /** Get the minimum height, or 0 without one when the stages are set. */
   std::optional<wpi::units::meter_t> GetMinHeight() const;
 
-  /** Get the optional maximum height. */
+  /** Get the maximum height, or the stage heights' total without one. */
   std::optional<wpi::units::meter_t> GetMaxHeight() const;
 
   /** Get the optional carriage mass. */
@@ -118,6 +150,18 @@ class ElevatorConfig {
   /** Get the Mechanism2d ligament angle (default: 90°). */
   wpi::units::degree_t GetAngle() const;
 
+  /** Get the number of stages that move, counting the carriage as the last, if set. */
+  std::optional<int> GetStages() const;
+
+  /**
+   * Get how far each moving stage travels relative to the stage below it, from the stage nearest the
+   * fixed stage to the carriage. Empty if WithStages() was not called.
+   */
+  const std::vector<wpi::units::meter_t>& GetStageHeights() const;
+
+  /** Get how far the stages travel together, the sum of the stage heights, if set. */
+  std::optional<wpi::units::meter_t> GetStageHeightTotal() const;
+
   /** Get where the mechanism is on the robot. */
   const MechanismPositionConfig& GetMechanismPositionConfig() const { return m_mechanismPositionConfig; }
 
@@ -130,6 +174,9 @@ class ElevatorConfig {
   bool m_isHorizontal{false};
   wpi::util::Color8Bit m_simColor{wpi::util::Color::ORANGE};
   wpi::units::degree_t m_angle{90.0};
+  std::optional<int> m_stages;
+  std::vector<wpi::units::meter_t> m_stageHeights;
+  std::optional<wpi::units::meter_t> m_stageHeightTotal;
   MechanismPositionConfig m_mechanismPositionConfig;
 };
 
