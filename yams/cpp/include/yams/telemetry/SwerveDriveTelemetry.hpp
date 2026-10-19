@@ -85,33 +85,23 @@ class SwerveDriveTelemetry {
   void Close();
 
  private:
-  /**
-   * Switch the drive or azimuth motors between a tuning voltage and their closed-loop controllers.
-   * A closed-loop controller run on the SystemCore would replace the voltage on its next loop, so
-   * it is stopped while the voltage is applied.
-   *
-   * @param drive Drive being tuned.
-   * @param azimuth True for the azimuth motors, false for the drive motors.
-   * @param on True to apply a voltage, false to go back to the closed-loop controller.
-   */
-  template <std::size_t NumModules>
-  void SetVoltageControl(mechanisms::swerve::SwerveDrive<NumModules>* drive, bool azimuth, bool on);
-
-  /**
-   * Hold every wheel still where it is, with its closed-loop controllers.
-   *
-   * @param drive Drive being tuned.
-   */
-  template <std::size_t NumModules>
-  void HoldWheels(mechanisms::swerve::SwerveDrive<NumModules>* drive);
+  /** The live tuning modes that can be on. */
+  enum class TuningMode {
+    /** Driving to the auto-align target pose. */
+    AutoAlign,
+    /** Driving every module at the velocity setpoint. */
+    Drive,
+    /** Pointing the modules around the robot center while drive tuning. */
+    DriveInPlace,
+    /** Driving every drive motor at the voltage setpoint while drive tuning. */
+    DriveVoltage,
+    /** Turning every module to the angle setpoint. */
+    Azimuth,
+    /** Turning every azimuth motor at the voltage setpoint while azimuth tuning. */
+    AzimuthVoltage,
+  };
 
   SwerveDriveTelemetryConfig m_config;
-  /** Whether the drive motors are driven at a tuning voltage, without their closed-loop
-   *  controllers. */
-  bool m_driveVoltageControl = false;
-  /** Whether the azimuth motors are driven at a tuning voltage, without their closed-loop
-   *  controllers. */
-  bool m_azimuthVoltageControl = false;
   /** The tuning modes on in the last loop, to send the setpoints again when they change, or none
    *  yet. */
   std::optional<std::set<TuningMode>> m_lastModes;

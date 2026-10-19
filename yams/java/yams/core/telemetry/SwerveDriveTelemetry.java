@@ -28,10 +28,6 @@ public class SwerveDriveTelemetry {
   private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>                m_boolTelemetry;
   private NetworkTable                                                                       m_dataNt;
   private NetworkTable                                                                       m_tuningNt;
-  /** Whether the drive motors are driven at a tuning voltage, without their closed loop controllers. */
-  private boolean                                                                            m_driveVoltageControl;
-  /** Whether the azimuth motors are driven at a tuning voltage, without their closed loop controllers. */
-  private boolean                                                                            m_azimuthVoltageControl;
   /** The tuning modes on in the last loop, to send the setpoints again when they change, or null for none yet. */
   private EnumSet<TuningMode>                                                                m_lastModes;
 
@@ -209,9 +205,8 @@ public class SwerveDriveTelemetry {
     if (!modes.contains(TuningMode.AZIMUTH)) {
       modes.remove(TuningMode.AZIMUTH_VOLTAGE);
     }
-    setVoltageControl(drive, false, modes.contains(TuningMode.DRIVE_VOLTAGE));
-    setVoltageControl(drive, true, modes.contains(TuningMode.AZIMUTH_VOLTAGE));
     // Setpoints are sent again when the tuning modes change.
+    var lastModes = m_lastModes == null ? EnumSet.noneOf(TuningMode.class) : m_lastModes;
     boolean modesChanged = !modes.equals(m_lastModes);
     m_lastModes = modes;
 
@@ -318,15 +313,28 @@ public class SwerveDriveTelemetry {
           } else if (modes.isEmpty()) {
             // No tuning mode is driving the chassis; make sure the modules don't keep spinning at
             // whatever velocity was last commanded while drive tuning was on.
-            holdWheels(drive);
+            var states = new SwerveModuleVelocity[modules.length];
+            for (int i = 0; i < modules.length; i++) {
+              states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), modules[i].getState().angle);
+            }
+            drive.setSwerveModuleStates(states);
           }
           break;
         case ModulesDriveVoltage:
           if (modes.contains(TuningMode.DRIVE_VOLTAGE)) {
-            // The wheels are not optimized, so they always drive the same way.
             for (SwerveModule module : modules) {
+              // A closed loop run on the SystemCore would replace the voltage on its next loop.
+              if (!lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
+                module.getDriveMotorController().stopClosedLoopController();
+              }
+              // The wheels are not optimized, so they always drive the same way.
               module.getDriveMotorController().setVoltage(Volts.of(dt.get()));
               module.getAzimuthMotorController().setPosition(driveTuningAngle(module, modes.contains(TuningMode.DRIVE_IN_PLACE)).getMeasure());
+            }
+          } else if (lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
+            // Back to the closed loops. The modes changed, so the setpoints are sent again this loop.
+            for (SwerveModule module : modules) {
+              module.getDriveMotorController().startClosedLoopController();
             }
           }
           break;
@@ -339,10 +347,19 @@ public class SwerveDriveTelemetry {
           break;
         case ModulesAzimuthVoltage:
           if (modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
-            // Hold the drive motors still while the azimuth motors turn.
             for (SwerveModule module : modules) {
+              // A closed loop run on the SystemCore would replace the voltage on its next loop.
+              if (!lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+                module.getAzimuthMotorController().stopClosedLoopController();
+              }
+              // Hold the drive motors still while the azimuth motors turn.
               module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
               module.getAzimuthMotorController().setVoltage(Volts.of(dt.get()));
+            }
+          } else if (lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+            // Back to the closed loops. The modes changed, so the setpoints are sent again this loop.
+            for (SwerveModule module : modules) {
+              module.getAzimuthMotorController().startClosedLoopController();
             }
           }
           break;
@@ -376,58 +393,16 @@ public class SwerveDriveTelemetry {
    * @param drive {@link SwerveDrive} being tuned.
    */
   public void stopTuning(SwerveDrive drive) {
-    setVoltageControl(drive, false, false);
-    setVoltageControl(drive, true, false);
-    // Send everything again when tuning starts again.
-    m_lastModes = null;
-  }
-
-  /**
-   * Switch the drive or azimuth motors between a tuning voltage and their closed loop controllers. A
-   * closed loop controller run on the SystemCore would replace the voltage on its next loop, so it is
-   * stopped while the voltage is applied.
-   *
-   * @param drive   {@link SwerveDrive} being tuned.
-   * @param azimuth True for the azimuth motors, false for the drive motors.
-   * @param on      True to apply a voltage, false to go back to the closed loop controller.
-   */
-  private void setVoltageControl(SwerveDrive drive, boolean azimuth, boolean on) {
-    if (on == (azimuth ? m_azimuthVoltageControl : m_driveVoltageControl)) {
-      return;
-    }
-    if (azimuth) {
-      m_azimuthVoltageControl = on;
-    } else {
-      m_driveVoltageControl = on;
-    }
-    for (SwerveModule module : drive.getModules()) {
-      var smc = azimuth ? module.getAzimuthMotorController() : module.getDriveMotorController();
-      if (on) {
-        smc.stopClosedLoopController();
-      } else {
-        smc.setVoltage(Volts.zero());
-        smc.startClosedLoopController();
+    // Turn every tuning mode off and apply it, so a voltage stops and the wheels are held where they
+    // are.
+    for (BooleanTelemetry<BooleanTelemetryField> bt : m_boolTelemetry.values()) {
+      if (bt.enabled) {
+        bt.forceSet(false);
       }
     }
-    if (!on) {
-      // Restarted, the closed loop controllers would go back to the setpoints from before the
-      // voltage, so hold every wheel where it is instead.
-      holdWheels(drive);
-    }
-  }
-
-  /**
-   * Hold every wheel still where it is, with its closed loop controllers.
-   *
-   * @param drive {@link SwerveDrive} being tuned.
-   */
-  private static void holdWheels(SwerveDrive drive) {
-    var modules = drive.getModules();
-    var states = new SwerveModuleVelocity[modules.length];
-    for (int i = 0; i < modules.length; i++) {
-      states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), modules[i].getState().angle);
-    }
-    drive.setSwerveModuleStates(states);
+    applyTuningValues(drive);
+    // Send everything again when tuning starts again.
+    m_lastModes = null;
   }
 
   /** Close and unpublish telemetry. */
