@@ -217,7 +217,7 @@ public class ElevatorConfig {
 
   /**
    * Set the elevator's moving stages, for the pose of each stage from
-   * {@code Elevator.getCascadePose3d()} or {@code Elevator.getContinuousPose3d()}.
+   * {@code Elevator.getCascadePose3d()} or {@code Elevator.getContinuousPose3d(boolean)}.
    *
    * <p>The stage heights must add up to the elevator's maximum height, from
    * {@link #withHardLimits(Distance, Distance)}: the {@code Elevator} throws if they do not. Without hard

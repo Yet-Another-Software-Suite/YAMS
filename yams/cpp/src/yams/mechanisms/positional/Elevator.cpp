@@ -278,7 +278,7 @@ std::vector<wpi::math::Pose3d> Elevator::GetCascadePose3d() const {
   return poses;
 }
 
-std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d() const {
+std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d(bool carriageFirst) const {
   const auto& stageHeights = m_elevatorConfig->GetStageHeights();
   if (stageHeights.size() < 2) {
     // An elevator with only a carriage has no stages to cascade or move in turn: use GetPose3d().
@@ -289,18 +289,24 @@ std::vector<wpi::math::Pose3d> Elevator::GetContinuousPose3d() const {
         "WithStages(...) with 2 or more stages");
   }
   const int stages = static_cast<int>(stageHeights.size());
+  const int carriage = stages - 1;
   std::vector<double> extension(stages, 0.0);
   double remaining = GetHeight().value();
-  // From the carriage down, each stage takes as much of the height as it can travel. The stage
-  // nearest the fixed stage takes the rest, and the carriage any height below zero, so the carriage
-  // is always at the elevator's height.
-  for (int stage = stages - 1; stage > 0; stage--) {
+  // In the order the stages move, each takes as much of the height as it can travel. The last to
+  // move takes the rest, and the carriage any height below zero, so the carriage is always at the
+  // elevator's height.
+  for (int order = 0; order < stages; order++) {
+    const int stage = carriageFirst ? carriage - order : order;
     const double travel = stageHeights[stage].value();
-    extension[stage] = stage == stages - 1 ? std::min(remaining, travel)
-                                           : std::min(std::max(remaining, 0.0), travel);
+    if (order == stages - 1) {
+      extension[stage] = remaining;
+    } else if (stage == carriage) {
+      extension[stage] = std::min(remaining, travel);
+    } else {
+      extension[stage] = std::min(std::max(remaining, 0.0), travel);
+    }
     remaining -= extension[stage];
   }
-  extension[0] += remaining;
   std::vector<wpi::math::Pose3d> poses;
   poses.reserve(stages);
   double stageHeight = 0;
