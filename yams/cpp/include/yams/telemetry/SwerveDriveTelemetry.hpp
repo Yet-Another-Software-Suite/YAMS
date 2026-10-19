@@ -5,6 +5,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <set>
 #include <wpi/nt/NetworkTable.hpp>
 
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
@@ -110,9 +112,9 @@ class SwerveDriveTelemetry {
   /** Whether the azimuth motors are driven at a tuning voltage, without their closed-loop
    *  controllers. */
   bool m_azimuthVoltageControl = false;
-  /** The tuning modes on in the last loop, to send the setpoints again when they change, or -1
-   *  for none yet. */
-  int m_lastModes = -1;
+  /** The tuning modes on in the last loop, to send the setpoints again when they change, or none
+   *  yet. */
+  std::optional<std::set<TuningMode>> m_lastModes;
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;

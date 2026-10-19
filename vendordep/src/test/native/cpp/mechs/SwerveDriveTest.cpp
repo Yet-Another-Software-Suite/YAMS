@@ -1401,7 +1401,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   CHECK_FALSE(ahead.IsAimLocked(1.0_deg));
 }
 
-// Voltage tuning drives the wheels, then turns them, without their closed loops, and the tuning
+// Voltage tuning drives the wheels, then turns them, without their closed loops, and
 // turning the voltage off holds the wheels still with their closed loops again.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWithoutTheClosedLoop",
                  "[SwerveDriveTest]") {
