@@ -966,6 +966,24 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops, it is turned
+   * off in the Tuning table, and the closed loop controller holds the setpoint again.
+   */
+  public void stopLiveTuning() {
+    telemetry.stopTuning(this);
+  }
+
+  /**
+   * Get the loosely coupled followers, which are sent the leader's setpoints and run their own
+   * closed loop controllers.
+   *
+   * @return The loosely coupled followers, or empty if there are none.
+   */
+  public Optional<SmartMotorController[]> getLooselyCoupledFollowers() {
+    return m_looseFollowers;
+  }
+
+  /**
    * Register a hook to run when {@link #close()} is called, so command-layer helpers (e.g. live
    * tuning) can clean up resources they registered elsewhere without core depending on any command
    * framework types.

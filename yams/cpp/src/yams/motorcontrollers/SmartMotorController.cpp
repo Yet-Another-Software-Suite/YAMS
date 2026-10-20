@@ -482,8 +482,8 @@ void SmartMotorController::SetupLiveTuning() {
       m_telemetryTable && !m_liveTuningRegistered && m_config->HasSubsystem()) {
     // Live Tuning command (one per subsystem, shared across all SMCs)
     auto* subsystem = m_config->GetSubsystem();
-    SmartMotorControllerCommandRegistry::AddCommand("Live Tuning", subsystem,
-                                                    [this] { ApplyTuningValues(); });
+    SmartMotorControllerCommandRegistry::AddCommand(
+        "Live Tuning", subsystem, [this] { ApplyTuningValues(); }, [this] { StopLiveTuning(); });
     // The registered callback captures this; drop the registration when this SMC is closed.
     AddCloseHook([subsystem] { SmartMotorControllerCommandRegistry::RemoveCommands(subsystem); });
     m_liveTuningRegistered = true;
@@ -502,6 +502,8 @@ void SmartMotorController::UpdateTelemetry() {
 bool SmartMotorController::TuningEnabled() const { return m_telemetry.TuningEnabled(); }
 
 void SmartMotorController::ApplyTuningValues() { m_telemetry.ApplyTuningValues(*this); }
+
+void SmartMotorController::StopLiveTuning() { m_telemetry.StopTuning(*this); }
 
 void SmartMotorController::AddCloseHook(std::function<void()> hook) {
   m_closeHooks.push_back(std::move(hook));

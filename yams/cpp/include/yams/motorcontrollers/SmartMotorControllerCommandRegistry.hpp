@@ -37,6 +37,27 @@ class SmartMotorControllerCommandRegistry {
                          std::function<void()> callback);
 
   /**
+   * Register a callback for a command on a subsystem, with a callback run when the command ends.
+   *
+   * @param cmdName   Display name for the command (e.g. "Live Tuning").
+   * @param subsystem Subsystem that owns the command (used for requirement and naming).
+   * @param callback  Runnable invoked each loop while the command is running.
+   * @param onEnd     Runnable invoked when the command ends.
+   */
+  static void AddCommand(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem,
+                         std::function<void()> callback, std::function<void()> onEnd);
+
+  /**
+   * Get a registered command, such as the "Live Tuning" command, to schedule it from code.
+   *
+   * @param cmdName   Command name.
+   * @param subsystem Subsystem the command was registered for.
+   * @return The command, or nullptr if none is registered under cmdName.
+   */
+  static wpi::cmd::Command* GetCommand(const std::string& cmdName,
+                                       wpi::cmd::SubsystemBase* subsystem);
+
+  /**
    * Check whether a command with the given name already exists for a subsystem.
    *
    * @param cmdName   Command name.
@@ -69,6 +90,7 @@ class SmartMotorControllerCommandRegistry {
  private:
   static std::unordered_map<std::string, wpi::cmd::CommandPtr> s_commands;
   static std::unordered_map<std::string, std::vector<std::function<void()>>> s_callbacks;
+  static std::unordered_map<std::string, std::vector<std::function<void()>>> s_endCallbacks;
   static std::unordered_map<std::string, wpi::cmd::SubsystemBase*> s_owners;
 
   static std::string MakeKey(const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem);

@@ -14,6 +14,7 @@
 #include <wpi/nt/DoubleTopic.hpp>
 #include <wpi/nt/NetworkTable.hpp>
 #include <wpi/system/DataLogManager.hpp>
+#include <wpi/units/voltage.hpp>
 #include <wpi/util/json.hpp>
 
 // DoubleTelemetry<F>::TransformUnit() calls SmartMotorControllerConfig methods directly in its
@@ -54,6 +55,8 @@ enum class DoubleTelemetryField {
   SetpointForce,                      ///< Feedforward force applied on the velocity setpoint (N).
   ClosedLoopPeriod,                   ///< Period the closed-loop controller runs at (s).
   VelocityMeasurementDelay,           ///< How far behind the measured velocity is, when known (s).
+  TunableVoltage,  ///< Voltage applied to the motor and its loosely coupled followers, without the
+                   ///< closed-loop controller, while TunableVoltageEnabled is on (V, tunable).
   OutputVoltage,                      ///< Voltage currently applied to the motor (V).
   StatorCurrent,                      ///< Stator (output) current draw (A).
   StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).
@@ -90,6 +93,8 @@ enum class BooleanTelemetryField {
   MotionProfile,           ///< true when a motion profile (trapezoidal or exponential) is active.
   MotorInversion,          ///< true when the motor output direction is inverted (tunable).
   EncoderInversion,        ///< true when the encoder count direction is inverted (tunable).
+  TunableVoltageEnabled,   ///< Drive the motor and its loosely coupled followers at TunableVoltage
+                           ///< instead of the closed-loop controller while on (tunable).
 };
 
 // ---- UnsupportedTelemetryFields ---------------------------------------------
@@ -557,6 +562,15 @@ class SmartMotorControllerTelemetry {
    */
   void ApplyTuningValues(motorcontrollers::SmartMotorController& smc);
 
+  /**
+   * Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops and the
+   * closed-loop controller holds the setpoint again. The voltage is turned off in the Tuning table
+   * too, so it is not applied again as soon as live tuning starts again.
+   *
+   * @param smc SmartMotorController being tuned.
+   */
+  void StopTuning(motorcontrollers::SmartMotorController& smc);
+
   /** True if any live-setpoint tuning fields are enabled. */
   bool TuningEnabled() const;
 
@@ -571,6 +585,38 @@ class SmartMotorControllerTelemetry {
       nullptr};
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>* m_boolFields{
       nullptr};
+  /** Whether the fields were published to NetworkTables, so the tunable ones can be read. */
+  bool m_nt4Enabled{false};
+  /**
+   * Whether the tuning voltage is driving the motor and its loosely coupled followers instead of
+   * the closed-loop controller.
+   */
+  bool m_voltageTuningActive{false};
+
+  /** Whether the tuning voltage can be turned on from the Tuning table. */
+  bool VoltageTuningAvailable() const;
+
+  /** Whether the tuning voltage is turned on in the Tuning table. */
+  bool VoltageTuningRequested() const;
+
+  /**
+   * Stop the closed-loop controller so the tuning voltage can drive the motor. The loosely coupled
+   * followers' closed-loop controllers are stopped too.
+   */
+  void StartVoltageTuning(motorcontrollers::SmartMotorController& smc);
+
+  /**
+   * Stop the tuning voltage, start the closed-loop controller again, and send it the setpoint it
+   * held before the voltage was turned on. The loosely coupled followers are started again too.
+   */
+  void StopVoltageTuning(motorcontrollers::SmartMotorController& smc);
+
+  /**
+   * Apply a voltage to the motor and each of its loosely coupled followers. The followers are not
+   * sent the leader's voltage otherwise.
+   */
+  static void ApplyVoltage(motorcontrollers::SmartMotorController& smc,
+                           wpi::units::volt_t voltage);
 };
 
 }  // namespace yams::telemetry

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.wpilib.networktables.NetworkTable;
+import org.wpilib.units.measure.Voltage;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
@@ -74,6 +75,11 @@ public class SmartMotorControllerTelemetry {
   private NetworkTable tuningNetworkTable;
   /** Telemetry config */
   private SmartMotorControllerTelemetryConfig config;
+  /**
+   * Whether the tuning voltage is driving the motor and its loosely coupled followers instead of the
+   * closed loop controller.
+   */
+  private boolean voltageTuningActive = false;
 
   /** Create motor controller telemetry, publish it with {@link #setupTelemetry}. */
   public SmartMotorControllerTelemetry() {}
@@ -196,6 +202,17 @@ public class SmartMotorControllerTelemetry {
     if (cfg.getMotorControllerMode() != ControlMode.CLOSED_LOOP) {
       throw new SmartMotorControllerConfigurationException("Live tuning does not work in OPEN_LOOP", "Cannot apply setpoints for Live Tuning.", ".withControlMode(ControlMode.CLOSED_LOOP) instead of " + ".withControlMode(ControlMode.OPEN_LOOP)");
     }
+    // Switch between the tuning voltage and the closed loop controller when the voltage is turned on
+    // or off.
+    boolean voltageRequested = voltageTuningRequested();
+    if (voltageRequested && !voltageTuningActive) {
+      startVoltageTuning(smartMotorController);
+    } else if (!voltageRequested && voltageTuningActive) {
+      stopVoltageTuning(smartMotorController);
+    }
+    if (voltageTuningActive) {
+      applyVoltage(smartMotorController, Volts.of(doubleFields.get(DoubleTelemetryField.TunableVoltage).get()));
+    }
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
       BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       if (bt.tunable()) {
@@ -207,6 +224,11 @@ public class SmartMotorControllerTelemetry {
     }
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
       DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
+      // A setpoint changed while the tuning voltage is on is left unread, so it is applied once the
+      // closed loop controller takes over again.
+      if (voltageTuningActive && (dt.getField() == DoubleTelemetryField.TunableSetpointPosition || dt.getField() == DoubleTelemetryField.TunableSetpointVelocity)) {
+        continue;
+      }
       if (dt.tunable()) {
         switch (dt.getField()) {
           case TunableClosedLoopControllerSlot -> {
@@ -285,6 +307,89 @@ public class SmartMotorControllerTelemetry {
     }
   }
 
+  /**
+   * Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops and the closed
+   * loop controller holds the setpoint again. The voltage is turned off in the Tuning table too, so
+   * it is not applied again as soon as live tuning starts again.
+   *
+   * @param smartMotorController {@link SmartMotorController} being tuned.
+   */
+  public void stopTuning(SmartMotorController smartMotorController) {
+    if (voltageTuningActive) {
+      stopVoltageTuning(smartMotorController);
+    }
+    if (boolFields != null && voltageTuningAvailable()) {
+      boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).forceSet(false);
+    }
+  }
+
+  /**
+   * Whether the tuning voltage can be turned on from the Tuning table.
+   *
+   * @return True if {@link BooleanTelemetryField#TunableVoltageEnabled} and
+   *         {@link DoubleTelemetryField#TunableVoltage} are enabled and published to NetworkTables.
+   */
+  private boolean voltageTuningAvailable() {
+    return config != null && config.getNT4Enabled() && boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).enabled && doubleFields.get(DoubleTelemetryField.TunableVoltage).enabled;
+  }
+
+  /**
+   * Whether the tuning voltage is turned on in the Tuning table.
+   *
+   * @return True if the tuning voltage should drive the motor.
+   */
+  private boolean voltageTuningRequested() {
+    return voltageTuningAvailable() && boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).get();
+  }
+
+  /**
+   * Stop the closed loop controller so the tuning voltage can drive the motor. The loosely coupled
+   * followers' closed loop controllers are stopped too.
+   *
+   * @param smc {@link SmartMotorController} being tuned.
+   */
+  private void startVoltageTuning(SmartMotorController smc) {
+    // A closed loop controller run on the SystemCore would replace the voltage on its next loop.
+    smc.stopClosedLoopController();
+    voltageTuningActive = true;
+  }
+
+  /**
+   * Stop the tuning voltage, start the closed loop controller again, and send it the setpoint it held
+   * before the voltage was turned on. The loosely coupled followers are started again too.
+   *
+   * @param smc {@link SmartMotorController} being tuned.
+   */
+  private void stopVoltageTuning(SmartMotorController smc) {
+    applyVoltage(smc, Volts.zero());
+    voltageTuningActive = false;
+    smc.startClosedLoopController();
+    // The voltage replaced the setpoint on a closed loop controller run on the motor controller, so it
+    // must be sent again. This sends it to the loosely coupled followers too.
+    var position = smc.getMechanismPositionSetpoint();
+    if (position.isPresent()) {
+      smc.setPosition(position.get());
+    } else {
+      smc.getMechanismSetpointVelocity().ifPresent(smc::setVelocity);
+    }
+  }
+
+  /**
+   * Apply a voltage to the motor and each of its loosely coupled followers. The followers are not sent
+   * the leader's voltage otherwise.
+   *
+   * @param smc     {@link SmartMotorController} being tuned.
+   * @param voltage Voltage to apply.
+   */
+  private void applyVoltage(SmartMotorController smc, Voltage voltage) {
+    smc.setVoltage(voltage);
+    smc.getLooselyCoupledFollowers().ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.setVoltage(voltage);
+      }
+    });
+  }
+
   /** Close and unpublish telemetry. */
   public void close() {
     if (doubleFields != null) {
@@ -330,7 +435,12 @@ public class SmartMotorControllerTelemetry {
     /** Motor inversion. */
     MotorInversion("motor/inverted", false, true),
     /** Encoder inversion. */
-    EncoderInversion("encoder/inverted", false, true);
+    EncoderInversion("encoder/inverted", false, true),
+    /**
+     * Drive the motor and its loosely coupled followers at {@link DoubleTelemetryField#TunableVoltage}
+     * instead of the closed loop controller while on.
+     */
+    TunableVoltageEnabled("voltage/enabled", false, true);
 
     /** Default value of the boolean telemetry field. */
     private final boolean currentValue;
@@ -417,6 +527,11 @@ public class SmartMotorControllerTelemetry {
      * when it is known.
      */
     VelocityMeasurementDelay("closedloop/measurementDelay", 0, false, "seconds"),
+    /**
+     * Tunable voltage applied to the motor and its loosely coupled followers, without the closed loop
+     * controller, while {@link BooleanTelemetryField#TunableVoltageEnabled} is on.
+     */
+    TunableVoltage("voltage/setpoint", 0, true, "volts"),
     /** Voltage supplied to the motor. */
     OutputVoltage("motor/outputVoltage", 0, false, "volts"),
     /** Stator current. */

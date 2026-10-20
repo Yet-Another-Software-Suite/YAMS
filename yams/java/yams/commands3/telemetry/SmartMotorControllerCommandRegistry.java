@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.tunable.Tunables;
@@ -28,6 +29,11 @@ public class SmartMotorControllerCommandRegistry {
    * command.
    */
   private static Map<String, List<Runnable>> commandCallbacks = new HashMap<>();
+  /**
+   * HashMap with the Mechanism name as the key and a list of runnables run when the shared command
+   * ends.
+   */
+  private static Map<String, List<Runnable>> commandEndCallbacks = new HashMap<>();
   /**
    * HashMap tracking which mechanism instance owns each command key.
    * Used to detect when two different mechanism instances share the same name.
@@ -52,7 +58,7 @@ public class SmartMotorControllerCommandRegistry {
         }
         coroutine.yield();
       }
-    }).named(cmdName);
+    }).whenCanceled(() -> runEndCallbacks(key)).named(cmdName);
     commands.put(key, cmd);
     NetworkTablesBackends.ensureTuningTunableBackend();
     Tunables.publish("Tuning/" + key, new CommandTunable(cmd));
@@ -68,6 +74,20 @@ public class SmartMotorControllerCommandRegistry {
    *                               already registered a command under {@code cmdName}.
    */
   public static void addCommand(String cmdName, Mechanism mechanism, Runnable callback) {
+    addCommand(cmdName, mechanism, callback, () -> {});
+  }
+
+  /**
+   * Add a command to the registry, with a {@link Runnable} run when the shared command ends.
+   *
+   * @param cmdName   Command name to publish to NetworkTables.
+   * @param mechanism Mechanism to create the command for.
+   * @param callback  Runnable to be added to the shared command.
+   * @param onEnd     Runnable run when the shared command ends.
+   * @throws IllegalStateException if a different {@link Mechanism} instance with the same name has
+   *                               already registered a command under {@code cmdName}.
+   */
+  public static void addCommand(String cmdName, Mechanism mechanism, Runnable callback, Runnable onEnd) {
     var key = mechanism.getName() + "/" + cmdName;
     var owner = commandOwners.get(key);
     if (owner != null && owner != mechanism) {
@@ -76,10 +96,33 @@ public class SmartMotorControllerCommandRegistry {
     }
     commandOwners.put(key, mechanism);
     commandCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);
+    commandEndCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(onEnd);
     // Create Command and publish it to NT
     if (!commandExists(cmdName, mechanism)) {
       addCommandToNT(cmdName, mechanism);
     }
+  }
+
+  /**
+   * Run the callbacks registered to run when the shared command ends.
+   *
+   * @param key Command key, the Mechanism name and the command name.
+   */
+  private static void runEndCallbacks(String key) {
+    for (var onEnd : commandEndCallbacks.getOrDefault(key, List.of())) {
+      onEnd.run();
+    }
+  }
+
+  /**
+   * Get a registered command, such as the "Live Tuning" command, to schedule it from code.
+   *
+   * @param cmdName   Command name.
+   * @param mechanism Mechanism the command was registered for.
+   * @return The command, or empty if none is registered under {@code cmdName}.
+   */
+  public static Optional<Command> getCommand(String cmdName, Mechanism mechanism) {
+    return Optional.ofNullable(commands.get(mechanism.getName() + "/" + cmdName));
   }
 
   /**
@@ -106,6 +149,7 @@ public class SmartMotorControllerCommandRegistry {
     commandOwners.entrySet().removeIf(e -> {
       if (e.getValue() == mechanism) {
         commandCallbacks.remove(e.getKey());
+        commandEndCallbacks.remove(e.getKey());
         commands.remove(e.getKey());
         Tunables.remove("Tuning/" + e.getKey());
         return true;

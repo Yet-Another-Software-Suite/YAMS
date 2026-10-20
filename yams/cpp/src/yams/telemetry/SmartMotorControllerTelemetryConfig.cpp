@@ -64,6 +64,8 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"closedloop/period", 0.02, field, false, "seconds"};
     case DoubleTelemetryField::VelocityMeasurementDelay:
       return {"closedloop/measurementDelay", 0.0, field, false, "seconds"};
+    case DoubleTelemetryField::TunableVoltage:
+      return {"voltage/setpoint", 0.0, field, true, "volts"};
     case DoubleTelemetryField::OutputVoltage:
       return {"motor/outputVoltage", 0.0, field, false, "volts"};
     case DoubleTelemetryField::StatorCurrent:
@@ -135,6 +137,8 @@ static BooleanTelemetry<BooleanTelemetryField> MakeBool(BooleanTelemetryField fi
       return {"motor/inverted", false, field, true};
     case BooleanTelemetryField::EncoderInversion:
       return {"encoder/inverted", false, field, true};
+    case BooleanTelemetryField::TunableVoltageEnabled:
+      return {"voltage/enabled", false, field, true};
     default:
       return {"unknown", false, field, false};
   }
@@ -165,6 +169,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::SetpointForce,
            DoubleTelemetryField::ClosedLoopPeriod,
            DoubleTelemetryField::VelocityMeasurementDelay,
+           DoubleTelemetryField::TunableVoltage,
            DoubleTelemetryField::OutputVoltage,
            DoubleTelemetryField::StatorCurrent,
            DoubleTelemetryField::StatorCurrentLimit,
@@ -201,6 +206,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            BooleanTelemetryField::MotionProfile,
            BooleanTelemetryField::MotorInversion,
            BooleanTelemetryField::EncoderInversion,
+           BooleanTelemetryField::TunableVoltageEnabled,
        }) {
     m_boolFields.emplace(f, MakeBool(f));
   }
@@ -239,6 +245,8 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_boolFields.at(BooleanTelemetryField::MotionProfile).Enable();
     m_boolFields.at(BooleanTelemetryField::MotorInversion).Enable();
     m_boolFields.at(BooleanTelemetryField::EncoderInversion).Enable();
+    m_boolFields.at(BooleanTelemetryField::TunableVoltageEnabled).Enable();
+    m_doubleFields.at(DoubleTelemetryField::TunableVoltage).Enable();
     m_doubleFields.at(DoubleTelemetryField::TunableSetpointPosition).Enable();
     m_doubleFields.at(DoubleTelemetryField::TunableSetpointVelocity).Enable();
     m_doubleFields.at(DoubleTelemetryField::TunableClosedLoopControllerSlot).Enable();

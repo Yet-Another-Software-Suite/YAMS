@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
@@ -30,6 +31,11 @@ public class SmartMotorControllerCommandRegistry {
    */
   private static Map<String, List<Runnable>> commandCallbacks = new HashMap<>();
   /**
+   * HashMap with the Subsystem name as the key and a list of runnables run when the shared command
+   * ends.
+   */
+  private static Map<String, List<Runnable>> commandEndCallbacks = new HashMap<>();
+  /**
    * HashMap tracking which subsystem instance owns each command key.
    * Used to detect when two different subsystem instances share the same name.
    */
@@ -50,7 +56,7 @@ public class SmartMotorControllerCommandRegistry {
       for (var callback : commandCallbacks.get(key)) {
         callback.run();
       }
-    }, subsystem).withName(cmdName);
+    }, subsystem).finallyDo(() -> runEndCallbacks(key)).withName(cmdName);
     commands.put(key, cmd);
     NetworkTablesBackends.ensureTuningTunableBackend();
     Tunables.publish("Tuning/" + key, cmd);
@@ -66,6 +72,20 @@ public class SmartMotorControllerCommandRegistry {
    *                               already registered a command under {@code cmdName}.
    */
   public static void addCommand(String cmdName, Subsystem subsystem, Runnable callback) {
+    addCommand(cmdName, subsystem, callback, () -> {});
+  }
+
+  /**
+   * Add a command to the registry, with a {@link Runnable} run when the shared command ends.
+   *
+   * @param cmdName   Command name to publish to NetworkTables.
+   * @param subsystem Subsystem to create the command for.
+   * @param callback  Runnable to be added to the shared command.
+   * @param onEnd     Runnable run when the shared command ends.
+   * @throws IllegalStateException if a different {@link Subsystem} instance with the same name has
+   *                               already registered a command under {@code cmdName}.
+   */
+  public static void addCommand(String cmdName, Subsystem subsystem, Runnable callback, Runnable onEnd) {
     var key = subsystem.getName() + "/" + cmdName;
     var owner = commandOwners.get(key);
     if (owner != null && owner != subsystem) {
@@ -74,10 +94,33 @@ public class SmartMotorControllerCommandRegistry {
     }
     commandOwners.put(key, subsystem);
     commandCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);
+    commandEndCallbacks.computeIfAbsent(key, k -> new ArrayList<>()).add(onEnd);
     // Create Command and publish it to NT
     if (!commandExists(cmdName, subsystem)) {
       addCommandToNT(cmdName, subsystem);
     }
+  }
+
+  /**
+   * Run the callbacks registered to run when the shared command ends.
+   *
+   * @param key Command key, the Subsystem name and the command name.
+   */
+  private static void runEndCallbacks(String key) {
+    for (var onEnd : commandEndCallbacks.getOrDefault(key, List.of())) {
+      onEnd.run();
+    }
+  }
+
+  /**
+   * Get a registered command, such as the "Live Tuning" command, to schedule it from code.
+   *
+   * @param cmdName   Command name.
+   * @param subsystem Subsystem the command was registered for.
+   * @return The command, or empty if none is registered under {@code cmdName}.
+   */
+  public static Optional<Command> getCommand(String cmdName, Subsystem subsystem) {
+    return Optional.ofNullable(commands.get(subsystem.getName() + "/" + cmdName));
   }
 
   /**
@@ -104,6 +147,7 @@ public class SmartMotorControllerCommandRegistry {
     commandOwners.entrySet().removeIf(e -> {
       if (e.getValue() == subsystem) {
         commandCallbacks.remove(e.getKey());
+        commandEndCallbacks.remove(e.getKey());
         commands.remove(e.getKey());
         Tunables.remove("Tuning/" + e.getKey());
         return true;

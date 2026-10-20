@@ -19,6 +19,8 @@ std::unordered_map<std::string, wpi::cmd::CommandPtr>
     SmartMotorControllerCommandRegistry::s_commands;
 std::unordered_map<std::string, std::vector<std::function<void()>>>
     SmartMotorControllerCommandRegistry::s_callbacks;
+std::unordered_map<std::string, std::vector<std::function<void()>>>
+    SmartMotorControllerCommandRegistry::s_endCallbacks;
 std::unordered_map<std::string, wpi::cmd::SubsystemBase*>
     SmartMotorControllerCommandRegistry::s_owners;
 
@@ -35,6 +37,9 @@ void SmartMotorControllerCommandRegistry::PublishToNT(const std::string& cmdName
                                          for (auto& cb : s_callbacks[capturedKey]) cb();
                                        },
                                        {subsystem})
+                                       .FinallyDo([capturedKey = key](bool) {
+                                         for (auto& onEnd : s_endCallbacks[capturedKey]) onEnd();
+                                       })
                                        .WithName(cmdName));
   yams::telemetry::EnsureTuningTunableBackend();
   wpi::tunables::Publish("Tuning/" + key, *s_commands.at(key).get());
@@ -43,6 +48,13 @@ void SmartMotorControllerCommandRegistry::PublishToNT(const std::string& cmdName
 void SmartMotorControllerCommandRegistry::AddCommand(const std::string& cmdName,
                                                      wpi::cmd::SubsystemBase* subsystem,
                                                      std::function<void()> callback) {
+  AddCommand(cmdName, subsystem, std::move(callback), [] {});
+}
+
+void SmartMotorControllerCommandRegistry::AddCommand(const std::string& cmdName,
+                                                     wpi::cmd::SubsystemBase* subsystem,
+                                                     std::function<void()> callback,
+                                                     std::function<void()> onEnd) {
   auto key = MakeKey(cmdName, subsystem);
   auto ownerIt = s_owners.find(key);
   if (ownerIt != s_owners.end() && ownerIt->second != subsystem) {
@@ -54,9 +66,16 @@ void SmartMotorControllerCommandRegistry::AddCommand(const std::string& cmdName,
   }
   s_owners[key] = subsystem;
   s_callbacks[key].push_back(std::move(callback));
+  s_endCallbacks[key].push_back(std::move(onEnd));
   if (!CommandExists(cmdName, subsystem)) {
     PublishToNT(cmdName, subsystem);
   }
+}
+
+wpi::cmd::Command* SmartMotorControllerCommandRegistry::GetCommand(
+    const std::string& cmdName, wpi::cmd::SubsystemBase* subsystem) {
+  auto it = s_commands.find(MakeKey(cmdName, subsystem));
+  return it == s_commands.end() ? nullptr : it->second.get();
 }
 
 bool SmartMotorControllerCommandRegistry::CommandExists(const std::string& cmdName,
@@ -70,6 +89,7 @@ void SmartMotorControllerCommandRegistry::RemoveCommands(wpi::cmd::SubsystemBase
       wpi::tunables::Remove("Tuning/" + it->first);
       s_commands.erase(it->first);
       s_callbacks.erase(it->first);
+      s_endCallbacks.erase(it->first);
       it = s_owners.erase(it);
     } else {
       ++it;
@@ -81,6 +101,7 @@ void SmartMotorControllerCommandRegistry::Clear() {
   for (const auto& [key, cmd] : s_commands) wpi::tunables::Remove("Tuning/" + key);
   s_commands.clear();
   s_callbacks.clear();
+  s_endCallbacks.clear();
   s_owners.clear();
 }
 

@@ -46,6 +46,7 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
   m_tuningTable = tuningTable;
   m_doubleFields = &doubleFields;
   m_boolFields = &boolFields;
+  m_nt4Enabled = nt4Enabled;
 
   SmartMotorControllerConfig& cfg = smc.GetConfig();
 
@@ -201,6 +202,19 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         ".withControlMode(ControlMode.CLOSED_LOOP)");
   }
 
+  // Switch between the tuning voltage and the closed-loop controller when the voltage is turned on
+  // or off.
+  bool voltageRequested = VoltageTuningRequested();
+  if (voltageRequested && !m_voltageTuningActive) {
+    StartVoltageTuning(smc);
+  } else if (!voltageRequested && m_voltageTuningActive) {
+    StopVoltageTuning(smc);
+  }
+  if (m_voltageTuningActive) {
+    ApplyVoltage(smc,
+                 wpi::units::volt_t{m_doubleFields->at(DoubleTelemetryField::TunableVoltage).Get()});
+  }
+
   // Boolean tuning
   for (auto& [field, bt] : *m_boolFields) {
     if (!bt.IsTunable()) continue;
@@ -220,6 +234,12 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
 
   // Double tuning
   for (auto& [field, dt] : *m_doubleFields) {
+    // A setpoint changed while the tuning voltage is on is left unread, so it is applied once the
+    // closed-loop controller takes over again.
+    if (m_voltageTuningActive && (field == DoubleTelemetryField::TunableSetpointPosition ||
+                                  field == DoubleTelemetryField::TunableSetpointVelocity)) {
+      continue;
+    }
     if (!dt.IsTunable()) continue;
     switch (dt.GetField()) {
       case DoubleTelemetryField::TunableClosedLoopControllerSlot: {
@@ -319,6 +339,53 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
       default:
         break;
     }
+  }
+}
+
+void SmartMotorControllerTelemetry::StopTuning(SmartMotorController& smc) {
+  if (m_voltageTuningActive) {
+    StopVoltageTuning(smc);
+  }
+  if (VoltageTuningAvailable()) {
+    m_boolFields->at(BooleanTelemetryField::TunableVoltageEnabled).ForceSet(false);
+  }
+}
+
+bool SmartMotorControllerTelemetry::VoltageTuningAvailable() const {
+  return m_nt4Enabled && m_doubleFields && m_boolFields &&
+         m_boolFields->at(BooleanTelemetryField::TunableVoltageEnabled).IsEnabled() &&
+         m_doubleFields->at(DoubleTelemetryField::TunableVoltage).IsEnabled();
+}
+
+bool SmartMotorControllerTelemetry::VoltageTuningRequested() const {
+  return VoltageTuningAvailable() &&
+         m_boolFields->at(BooleanTelemetryField::TunableVoltageEnabled).Get();
+}
+
+void SmartMotorControllerTelemetry::StartVoltageTuning(SmartMotorController& smc) {
+  // A closed-loop controller run on the SystemCore would replace the voltage on its next loop.
+  smc.StopClosedLoopController();
+  m_voltageTuningActive = true;
+}
+
+void SmartMotorControllerTelemetry::StopVoltageTuning(SmartMotorController& smc) {
+  ApplyVoltage(smc, wpi::units::volt_t{0.0});
+  m_voltageTuningActive = false;
+  smc.StartClosedLoopController();
+  // The voltage replaced the setpoint on a closed-loop controller run on the motor controller, so
+  // it must be sent again. This sends it to the loosely coupled followers too.
+  if (auto position = smc.GetMechanismPositionSetpoint()) {
+    smc.SetPosition(*position);
+  } else if (auto velocity = smc.GetMechanismSetpointVelocity()) {
+    smc.SetVelocity(*velocity);
+  }
+}
+
+void SmartMotorControllerTelemetry::ApplyVoltage(SmartMotorController& smc,
+                                                 wpi::units::volt_t voltage) {
+  smc.SetVoltage(voltage);
+  for (auto* follower : smc.GetLooselyCoupledFollowers()) {
+    follower->SetVoltage(voltage);
   }
 }
 

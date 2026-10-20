@@ -649,6 +649,22 @@ class SmartMotorController {
   void ApplyTuningValues();
 
   /**
+   * Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops, it is turned
+   * off in the Tuning table, and the closed-loop controller holds the setpoint again.
+   */
+  void StopLiveTuning();
+
+  /**
+   * Get the loosely coupled followers, which are sent the leader's setpoints and run their own
+   * closed-loop controllers.
+   *
+   * @return The loosely coupled followers, empty if there are none.
+   */
+  const std::vector<SmartMotorController*>& GetLooselyCoupledFollowers() const {
+    return m_looseFollowers;
+  }
+
+  /**
    * Register a hook to run when Close() is called, so helpers (e.g. live tuning) can clean up
    * resources they registered elsewhere.
    *
