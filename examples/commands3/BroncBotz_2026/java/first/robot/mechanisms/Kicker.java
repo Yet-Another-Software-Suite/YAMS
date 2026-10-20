@@ -87,7 +87,7 @@ public class Kicker implements Mechanism {
         kicker.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         kicker.simIterate();
     }

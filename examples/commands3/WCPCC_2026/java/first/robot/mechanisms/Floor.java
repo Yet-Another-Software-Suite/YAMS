@@ -102,7 +102,7 @@ public class Floor implements Mechanism {
         floor.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         floor.simIterate();
     }

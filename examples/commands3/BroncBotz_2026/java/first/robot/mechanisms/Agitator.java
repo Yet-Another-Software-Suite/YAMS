@@ -78,7 +78,7 @@ public class Agitator implements Mechanism {
         agitator.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         agitator.simIterate();
     }

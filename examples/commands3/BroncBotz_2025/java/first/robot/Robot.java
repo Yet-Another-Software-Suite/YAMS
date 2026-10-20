@@ -22,6 +22,8 @@ import first.robot.mechanisms.Elevator;
 import first.robot.mechanisms.Swerve;
 import first.robot.util.Launchpad;
 import first.robot.util.ReefTargeting;
+import java.util.ArrayList;
+import java.util.List;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.Trigger;
@@ -30,6 +32,7 @@ import org.wpilib.framework.OpModeRobot;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.hal.AllianceStationID;
 import org.wpilib.simulation.DriverStationSim;
+import org.wpilib.system.Notifier;
 import org.wpilib.telemetry.Telemetry;
 import org.wpilib.util.Color;
 
@@ -60,6 +63,8 @@ public class Robot extends OpModeRobot {
     public final SuperstructureCommands superstructure = new SuperstructureCommands(elevator, coralArm, algaeArm);
 
     private final Scheduler scheduler = Scheduler.getDefault();
+    /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
+    private final List<Notifier> simulationNotifiers = new ArrayList<>();
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -142,26 +147,39 @@ public class Robot extends OpModeRobot {
         Telemetry.log("Scheduler", scheduler, Scheduler.proto);
     }
 
-    @Override
-    public void simulationPeriodic() {
-        swerve.simulationPeriodic();
-        elevator.simulationPeriodic();
-        coralArm.simulationPeriodic();
-        coralWrist.simulationPeriodic();
-        coralRoller.simulationPeriodic();
-        algaeArm.simulationPeriodic();
-        algaeIntake.simulationPeriodic();
-    }
-
     /**
-     * Simulation starts with an unknown alliance, so the reef poses would not be mirrored. Default to
-     * Blue 1; another alliance can still be picked in the simulated driver station.
+     * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
+     * {@code simulationPeriodic()} on the main robot loop.
+     *
+     * <p>Simulation starts with an unknown alliance, so the reef poses would not be mirrored. Default
+     * to Blue 1; another alliance can still be picked in the simulated driver station.
      */
     @Override
     public void simulationInit() {
+        startSimulation("Swerve", swerve::simulationPeriodic);
+        startSimulation("Elevator", elevator::simulationPeriodic);
+        startSimulation("Coral Arm", coralArm::simulationPeriodic);
+        startSimulation("Coral Wrist", coralWrist::simulationPeriodic);
+        startSimulation("Coral Roller", coralRoller::simulationPeriodic);
+        startSimulation("Algae Arm", algaeArm::simulationPeriodic);
+        startSimulation("Algae Intake", algaeIntake::simulationPeriodic);
+
         if (DriverStationSim.getAllianceStationId() == AllianceStationID.UNKNOWN) {
             DriverStationSim.setAllianceStationId(AllianceStationID.BLUE_1);
             DriverStationSim.notifyNewData();
         }
+    }
+
+    /**
+     * Run a mechanism's simulation in its own Notifier, every robot loop period.
+     *
+     * @param name               Name of the mechanism, used to name the Notifier's thread.
+     * @param simulationPeriodic The mechanism's simulation update.
+     */
+    private void startSimulation(String name, Runnable simulationPeriodic) {
+        final Notifier notifier = new Notifier(simulationPeriodic);
+        notifier.setName(name + " Simulation");
+        notifier.startPeriodic(getPeriod());
+        simulationNotifiers.add(notifier);
     }
 }

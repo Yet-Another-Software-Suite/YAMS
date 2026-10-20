@@ -112,7 +112,7 @@ public class Feeder implements Mechanism {
         feeder.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         feeder.simIterate();
     }

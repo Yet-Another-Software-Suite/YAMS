@@ -198,7 +198,7 @@ public class IntakeArm implements Mechanism {
         followerController.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         arm.simIterate();
         followerController.simIterate();

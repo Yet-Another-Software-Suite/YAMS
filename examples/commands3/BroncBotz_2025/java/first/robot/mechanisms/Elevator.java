@@ -143,7 +143,7 @@ public class Elevator implements Mechanism {
         elevator.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         elevator.simIterate();
     }

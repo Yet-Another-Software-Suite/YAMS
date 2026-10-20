@@ -143,7 +143,7 @@ public class Turret implements Mechanism {
         turret.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         turret.simIterate();
     }

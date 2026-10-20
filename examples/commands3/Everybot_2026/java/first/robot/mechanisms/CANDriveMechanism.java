@@ -141,7 +141,7 @@ public class CANDriveMechanism implements Mechanism {
     right.updateTelemetry();
   }
 
-  /** Steps the YAMS simulation. Called from {@code Robot.simulationPeriodic()}. */
+  /** Steps the YAMS simulation. Run in its own Notifier, started in {@code Robot.simulationInit()}. */
   public void simIterate() {
     left.simIterate();
     right.simIterate();

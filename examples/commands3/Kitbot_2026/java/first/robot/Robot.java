@@ -9,9 +9,12 @@ import first.robot.commands.FuelCommands;
 import first.robot.mechanisms.CANDriveMechanism;
 import first.robot.mechanisms.FeederMechanism;
 import first.robot.mechanisms.IntakeLauncherMechanism;
+import java.util.ArrayList;
+import java.util.List;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.framework.OpModeRobot;
+import org.wpilib.system.Notifier;
 
 /**
  * The robot. Holds the mechanisms, the fuel commands and the controllers. Teleop bindings live in
@@ -21,6 +24,9 @@ import org.wpilib.framework.OpModeRobot;
  * you must also update the Main.java file in the project.
  */
 public class Robot extends OpModeRobot {
+  /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
+  private final List<Notifier> simulationNotifiers = new ArrayList<>();
+
   // The robot's mechanisms
   public final CANDriveMechanism drive = new CANDriveMechanism();
   public final FeederMechanism feeder = new FeederMechanism();
@@ -66,11 +72,27 @@ public class Robot extends OpModeRobot {
     intakeLauncher.periodic();
   }
 
-  /** This function is called periodically whilst in simulation. */
+  /**
+   * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
+   * {@code simulationPeriodic()} on the main robot loop.
+   */
   @Override
-  public void simulationPeriodic() {
-    drive.simulationPeriodic();
-    feeder.simulationPeriodic();
-    intakeLauncher.simulationPeriodic();
+  public void simulationInit() {
+    startSimulation("Drive", drive::simulationPeriodic);
+    startSimulation("Feeder", feeder::simulationPeriodic);
+    startSimulation("Intake Launcher", intakeLauncher::simulationPeriodic);
+  }
+
+  /**
+   * Run a mechanism's simulation in its own Notifier, every robot loop period.
+   *
+   * @param name               Name of the mechanism, used to name the Notifier's thread.
+   * @param simulationPeriodic The mechanism's simulation update.
+   */
+  private void startSimulation(String name, Runnable simulationPeriodic) {
+    final Notifier notifier = new Notifier(simulationPeriodic);
+    notifier.setName(name + " Simulation");
+    notifier.startPeriodic(getPeriod());
+    simulationNotifiers.add(notifier);
   }
 }

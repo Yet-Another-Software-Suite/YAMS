@@ -10,7 +10,9 @@
 #include <cmath>
 #include <numbers>
 #include <string>
+#include <thread>
 #include <utility>
+#include <vector>
 #include <wpi/math/controller/SimpleMotorFeedforward.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/math/system/Models.hpp>
@@ -168,6 +170,33 @@ TEST_CASE("SMCParity.BatterySimReset", "[SMCParity]") {
   REQUIRE(BatterySim::HasCurrent(&a));
   BatterySim::Reset();
   CHECK_FALSE(BatterySim::HasCurrent(&a));
+}
+
+TEST_CASE("SMCParity.BatterySimIsThreadSafe", "[SMCParity]") {
+  // Each mechanism may run its simulation in its own Notifier, so several threads register,
+  // update and remove their current draws at once.
+  BatterySim::Reset();
+  constexpr int kThreads = 8;
+  constexpr int kIterations = 20000;
+  std::vector<std::thread> threads;
+  for (int t = 0; t < kThreads; t++) {
+    threads.emplace_back([] {
+      for (int i = 0; i < kIterations; i++) {
+        int id = 0;
+        BatterySim::CalculateVoltage(&id, 1_A);
+        BatterySim::CalculateVoltage(&id, 2_A);
+        BatterySim::RemoveCurrent(&id);
+      }
+    });
+  }
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  // Every thread removed the currents it added, so nothing is left loading the battery.
+  int probe = 0;
+  CHECK(BatterySim::CalculateVoltage(&probe, 0_A).value() == Catch::Approx(12.0));
+  BatterySim::Reset();
 }
 
 // ---- Item 19: arm supplier acceleration ----------------------------------------------------

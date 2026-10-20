@@ -50,7 +50,7 @@ A port of BroncBotz 3481's 2025 Reefscape robot code (the `comp` branch) to WPIL
 
 ### Mechanisms
 
-Every motor is a NEO on a SPARK MAX wrapped in a YAMS `SparkWrapper`. Each is a Commands v3 `Mechanism` with HIGH verbosity YAMS telemetry, updated from `Robot.robotPeriodic()` and simulated from `Robot.simulationPeriodic()`. The original's SysId routines, SmartDashboard numbers and `Mechanism2d` side view were removed. YAMS telemetry covers the same values.
+Every motor is a NEO on a SPARK MAX wrapped in a YAMS `SparkWrapper`. Each is a Commands v3 `Mechanism` with HIGH verbosity YAMS telemetry, updated from `Robot.robotPeriodic()` and simulated in its own `Notifier`, started in `Robot.simulationInit()`. The original's SysId routines, SmartDashboard numbers and `Mechanism2d` side view were removed. YAMS telemetry covers the same values.
 
 - **Swerve**
   - Built from the YAGSL files: modules at ±12 in, drive 6.12:1 on 4 in wheels, angle 12.8:1, drives inverted, 40 A drive and 20 A angle current limits, 0.25 s ramps, and the same absolute encoder offsets.

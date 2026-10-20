@@ -12,7 +12,7 @@ This is the Commands v3 version of [`examples/commands2/Everybot_2026`](../../co
 
 - `Robot` extends `OpModeRobot` instead of `TimedRobot`, and `RobotContainer` is gone. `Robot` holds the mechanisms and controllers, sets the stop default commands and runs `Scheduler.getDefault().run()`.
 - The subsystems became `org.wpilib.command3.Mechanism` classes in `mechanisms/` (`CANDriveMechanism`, `IntakeLauncherMechanism`, `IndexerMechanism`, `ClimberMechanism`). They are still split one YAMS mechanism per class so live tuning works.
-- Mechanisms have no `periodic()` in v3, so `Robot.robotPeriodic()` calls each mechanism's `updateTelemetry()` and `Robot.simulationPeriodic()` calls each `simIterate()`.
+- Mechanisms have no `periodic()` in v3, so `Robot.robotPeriodic()` calls each mechanism's `updateTelemetry()` and `Robot.simulationInit()` runs each `simIterate()` in its own `Notifier`.
 - The 10 command classes became coroutine command factories and plain mechanism methods:
   - `ClimbUp`/`ClimbDown` are `climber.climbUp()`/`climbDown()`, which set the climber power in a `while (true)` loop.
   - `Drive` is `drive.arcadeDrive(controller)`, which reads the joysticks and sends them every loop in a `while (true)` loop. `AutoDrive` is `drive.arcadeDrive(xSpeed, zRotation)`, which sends fixed speeds every loop until it is interrupted.

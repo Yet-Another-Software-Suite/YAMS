@@ -19,6 +19,9 @@ import org.wpilib.units.measure.Voltage;
 /**
  * Battery Simulation that takes the entirety of the robot into account by storing all currently
  * used currents on the robot.
+ *
+ * <p>Thread safe: every method synchronizes on this class, so mechanisms can run their simulation
+ * in their own {@link org.wpilib.system.Notifier}s while sharing the one battery.
  */
 public class BatterySim {
   /** Hashmap holding all currents used by the robot. */
@@ -123,7 +126,7 @@ public class BatterySim {
    *                     voltage. Call this before
    *                     {@link #enableDischarge(double, Voltage, Resistance)} so discharge simulation uses the new curve from the start.
    */
-  public static void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
+  public static synchronized void replaceSOCInterpolation(InterpolatingDoubleTreeMap socToVoltage) {
     BatterySim.SOC_TO_VOLTAGE = socToVoltage;
   }
 
@@ -139,7 +142,7 @@ public class BatterySim {
    *                                  at that current. Call this before {@link #enableDischarge(double, Voltage, Resistance)} so
    *                                  discharge simulation uses the new curve from the start.
    */
-  public static void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
+  public static synchronized void replaceCapacityDerating(InterpolatingDoubleTreeMap currentToCapacityFraction) {
     BatterySim.CURRENT_TO_CAPACITY_FRACTION = currentToCapacityFraction;
   }
 
@@ -153,7 +156,7 @@ public class BatterySim {
    * @param nomVoltage              Nominal (fully charged) open circuit voltage of the battery.
    * @param nomResistance           Nominal internal resistance of the battery.
    */
-  public static void enableDischarge(double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
+  public static synchronized void enableDischarge(double batteryCapacityAmpHours, Voltage nomVoltage, Resistance nomResistance) {
     dischargeEnabled = true;
     BatterySim.batteryCapacityAmpHours = batteryCapacityAmpHours;
     BatterySim.batteryResistance = nomResistance;
@@ -164,12 +167,12 @@ public class BatterySim {
    * Disable battery discharge simulation, reverting to a constant {@link #batteryVoltage} and
    * {@link #batteryResistance}.
    */
-  public static void disableDischarge() {
+  public static synchronized void disableDischarge() {
     dischargeEnabled = false;
   }
 
   /** Reset the simulated battery back to a full charge. */
-  public static void resetDischarge() {
+  public static synchronized void resetDischarge() {
     ampHoursUsed = 0.0;
     lastTimestampSeconds = Double.NaN;
   }
@@ -181,7 +184,7 @@ public class BatterySim {
    *
    * @param id {@link UUID} of the simulation to remove.
    */
-  public static void removeCurrent(UUID id) {
+  public static synchronized void removeCurrent(UUID id) {
     currents.remove(id);
   }
 
@@ -189,7 +192,7 @@ public class BatterySim {
    * Clear every tracked per-consumer current draw and reset discharge simulation to a fresh,
    * fully-charged, disabled state.
    */
-  public static void reset() {
+  public static synchronized void reset() {
     currents.clear();
     dischargeEnabled = false;
     ampHoursUsed = 0.0;
@@ -201,7 +204,7 @@ public class BatterySim {
    *
    * @return State of charge of the battery.
    */
-  public static double getStateOfCharge() {
+  public static synchronized double getStateOfCharge() {
     return Math.clamp(1.0 - (ampHoursUsed / batteryCapacityAmpHours), 0.0, 1.0);
   }
 
@@ -234,7 +237,7 @@ public class BatterySim {
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
    */
-  public static double calculateVoltage(UUID id, double current) {
+  public static synchronized double calculateVoltage(UUID id, double current) {
     currents.put(id, current);
     double[] currentDraws = currents.values().stream().mapToDouble(Double::doubleValue).toArray();
 
@@ -263,7 +266,7 @@ public class BatterySim {
    * @param current {@link org.wpilib.units.Units#Amps Amps} used by the robot.
    * @return Voltage of the robot.
    */
-  public static double calculateVoltage(UUID id, Current current) {
+  public static synchronized double calculateVoltage(UUID id, Current current) {
     return calculateVoltage(id, current.in(Amps));
   }
 }

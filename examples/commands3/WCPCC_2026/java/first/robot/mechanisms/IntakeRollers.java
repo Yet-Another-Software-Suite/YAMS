@@ -102,7 +102,7 @@ public class IntakeRollers implements Mechanism {
         rollers.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         rollers.simIterate();
     }

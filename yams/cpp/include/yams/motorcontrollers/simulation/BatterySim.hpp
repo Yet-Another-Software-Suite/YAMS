@@ -4,6 +4,7 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 #include <unordered_map>
 #include <wpi/units/current.hpp>
 #include <wpi/units/impedance.hpp>
@@ -19,6 +20,11 @@ namespace yams::motorcontrollers::simulation {
  * stable, unique identity (e.g. the address of its SimSupplier instance) and its own current
  * draw. The result accounts for the combined current draw of every registered mechanism, and
  * should be fed into wpi::sim::RoboRioSim::SetVInVoltage().
+ *
+ * Thread safe: every method locks one shared mutex, so mechanisms can run their simulation in
+ * their own wpi::Notifier while sharing the one battery. BatteryVoltage and BatteryResistance are
+ * read under that lock, so set them before the simulation threads start, or through
+ * EnableDischarge().
  */
 class BatterySim {
  public:
@@ -131,9 +137,13 @@ class BatterySim {
 
  private:
   static void UpdateDischarge(double totalCurrentAmps);
+  /** GetStateOfCharge() for callers already holding m_mutex. */
+  static double StateOfCharge();
   static double InterpolateOpenCircuitVoltage(double stateOfCharge);
   static double Interpolate(const std::map<double, double>& table, double key);
 
+  /** Guards every member below, and BatteryVoltage and BatteryResistance. */
+  static std::mutex m_mutex;
   static std::unordered_map<const void*, double> m_currents;
   static bool m_dischargeEnabled;
   static double m_batteryCapacityAmpHours;

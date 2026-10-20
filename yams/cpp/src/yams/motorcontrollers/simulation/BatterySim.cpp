@@ -16,6 +16,7 @@ namespace yams::motorcontrollers::simulation {
 wpi::units::volt_t BatterySim::BatteryVoltage = wpi::units::volt_t{12.0};
 wpi::units::ohm_t BatterySim::BatteryResistance = wpi::units::ohm_t{0.020};
 
+std::mutex BatterySim::m_mutex{};
 std::unordered_map<const void*, double> BatterySim::m_currents{};
 bool BatterySim::m_dischargeEnabled = false;
 double BatterySim::m_batteryCapacityAmpHours = 18.0;
@@ -31,6 +32,7 @@ std::map<double, double> BatterySim::m_socToVoltage{
 };
 
 void BatterySim::ReplaceSOCInterpolation(const std::map<double, double>& socToVoltage) {
+  std::lock_guard lock{m_mutex};
   m_socToVoltage = socToVoltage;
 }
 
@@ -46,6 +48,7 @@ std::map<double, double> BatterySim::m_currentToCapacityFraction{
 
 void BatterySim::ReplaceCapacityDerating(
     const std::map<double, double>& currentToCapacityFraction) {
+  std::lock_guard lock{m_mutex};
   m_currentToCapacityFraction = currentToCapacityFraction;
 }
 
@@ -73,31 +76,48 @@ double BatterySim::InterpolateOpenCircuitVoltage(double stateOfCharge) {
 
 void BatterySim::EnableDischarge(double batteryCapacityAmpHours, wpi::units::volt_t nominalVoltage,
                                  wpi::units::ohm_t nominalResistance) {
+  std::lock_guard lock{m_mutex};
   m_dischargeEnabled = true;
   m_batteryCapacityAmpHours = batteryCapacityAmpHours;
   BatteryVoltage = nominalVoltage;
   BatteryResistance = nominalResistance;
 }
 
-void BatterySim::DisableDischarge() { m_dischargeEnabled = false; }
+void BatterySim::DisableDischarge() {
+  std::lock_guard lock{m_mutex};
+  m_dischargeEnabled = false;
+}
 
 void BatterySim::ResetDischarge() {
+  std::lock_guard lock{m_mutex};
   m_ampHoursUsed = 0.0;
   m_lastTimestampSeconds = std::numeric_limits<double>::quiet_NaN();
 }
 
-void BatterySim::RemoveCurrent(const void* id) { m_currents.erase(id); }
+void BatterySim::RemoveCurrent(const void* id) {
+  std::lock_guard lock{m_mutex};
+  m_currents.erase(id);
+}
 
 void BatterySim::Reset() {
+  std::lock_guard lock{m_mutex};
   m_currents.clear();
   m_dischargeEnabled = false;
   m_ampHoursUsed = 0.0;
   m_lastTimestampSeconds = std::numeric_limits<double>::quiet_NaN();
 }
 
-bool BatterySim::HasCurrent(const void* id) { return m_currents.count(id) > 0; }
+bool BatterySim::HasCurrent(const void* id) {
+  std::lock_guard lock{m_mutex};
+  return m_currents.count(id) > 0;
+}
 
 double BatterySim::GetStateOfCharge() {
+  std::lock_guard lock{m_mutex};
+  return StateOfCharge();
+}
+
+double BatterySim::StateOfCharge() {
   return std::clamp(1.0 - (m_ampHoursUsed / m_batteryCapacityAmpHours), 0.0, 1.0);
 }
 
@@ -115,6 +135,7 @@ void BatterySim::UpdateDischarge(double totalCurrentAmps) {
 }
 
 wpi::units::volt_t BatterySim::CalculateVoltage(const void* id, wpi::units::ampere_t current) {
+  std::lock_guard lock{m_mutex};
   m_currents[id] = current.value();
 
   std::vector<wpi::units::ampere_t> currentDraws;
@@ -130,7 +151,7 @@ wpi::units::volt_t BatterySim::CalculateVoltage(const void* id, wpi::units::ampe
   if (m_dischargeEnabled) {
     UpdateDischarge(totalCurrentAmps);
 
-    double stateOfCharge = GetStateOfCharge();
+    double stateOfCharge = StateOfCharge();
     openCircuitVoltage = InterpolateOpenCircuitVoltage(stateOfCharge);
     // Internal resistance rises as the battery depletes, exaggerating voltage sag under load.
     internalResistance *= 1.0 + (2.0 * (1.0 - stateOfCharge));
