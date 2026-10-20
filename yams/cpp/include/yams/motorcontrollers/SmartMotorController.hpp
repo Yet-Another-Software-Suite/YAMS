@@ -619,6 +619,13 @@ class SmartMotorController {
   void SetupTelemetry();
 
   /**
+   * Set up live tuning for this motor controller when its telemetry verbosity is HIGH, so the
+   * values under the Tuning table are applied while the "Live Tuning" command runs. Only sets it
+   * up once, however many times it is called.
+   */
+  void SetupLiveTuning();
+
+  /**
    * Publish the current sensor readings and setpoints to NetworkTables.
    *
    * Does nothing unless a telemetry verbosity is configured; sets telemetry up on first use.

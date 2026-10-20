@@ -473,6 +473,10 @@ void SmartMotorController::SetupTelemetry(std::shared_ptr<wpi::nt::NetworkTable>
 void SmartMotorController::SetupTelemetry() {
   auto inst = wpi::nt::NetworkTableInstance::GetDefault();
   SetupTelemetry(inst.GetTable("Mechanisms"), inst.GetTable("Tuning"));
+  SetupLiveTuning();
+}
+
+void SmartMotorController::SetupLiveTuning() {
   if (m_config->GetVerbosity().value_or(SmartMotorControllerConfig::TelemetryVerbosity::LOW) ==
           SmartMotorControllerConfig::TelemetryVerbosity::HIGH &&
       m_telemetryTable && !m_liveTuningRegistered && m_config->HasSubsystem()) {

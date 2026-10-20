@@ -31,6 +31,7 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
+#include "yams/telemetry/MechanismTelemetry.hpp"
 
 namespace yams::test {
 
@@ -139,6 +140,57 @@ TEST_CASE("SMCRegression.CloseRemovesLiveTuningCommand", "[SMCRegression]") {
   }
   SmartMotorControllerCommandRegistry::RemoveCommands(&sub);
   wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(&sub);
+}
+
+TEST_CASE("SMCRegression.MechanismTelemetryRegistersLiveTuning", "[SMCRegression]") {
+  // A mechanism with a telemetry name sets up its motor's telemetry itself, so it must register
+  // Live Tuning too, for a single motor mechanism and for each motor of a multi motor one.
+  SECTION("single motor mechanism") {
+    TestSubsystem sub;
+    sub.SetName(UniqueName("SMCRegressionMechLiveTuning"));
+    SmartMotorControllerConfig cfg;
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithSubsystem(&sub)
+        .WithTelemetry(UniqueName("MechLiveTuningMotor"), Verbosity::HIGH);
+    FakeSmartMotorController smc{&cfg};
+    telemetry::MechanismTelemetry mechTelemetry;
+    mechTelemetry.SetupTelemetry(UniqueName("MechLiveTuning"), smc);
+    CHECK(SmartMotorControllerCommandRegistry::CommandExists("Live Tuning", &sub));
+    smc.Close();
+    SmartMotorControllerCommandRegistry::RemoveCommands(&sub);
+    wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(&sub);
+  }
+  SECTION("multi motor mechanism") {
+    TestSubsystem sub;
+    sub.SetName(UniqueName("SMCRegressionMultiMechLiveTuning"));
+    SmartMotorControllerConfig cfg;
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithSubsystem(&sub)
+        .WithTelemetry(UniqueName("MultiMechLiveTuningMotor"), Verbosity::HIGH);
+    FakeSmartMotorController smc{&cfg};
+    telemetry::MechanismTelemetry mechTelemetry;
+    mechTelemetry.SetupTelemetry(UniqueName("MultiMechLiveTuning"));
+    mechTelemetry.AddMotorController("lower", smc);
+    CHECK(SmartMotorControllerCommandRegistry::CommandExists("Live Tuning", &sub));
+    smc.Close();
+    SmartMotorControllerCommandRegistry::RemoveCommands(&sub);
+    wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(&sub);
+  }
+  SECTION("low verbosity does not register it") {
+    TestSubsystem sub;
+    sub.SetName(UniqueName("SMCRegressionLowMechLiveTuning"));
+    SmartMotorControllerConfig cfg;
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithSubsystem(&sub)
+        .WithTelemetry(UniqueName("LowMechLiveTuningMotor"), Verbosity::LOW);
+    FakeSmartMotorController smc{&cfg};
+    telemetry::MechanismTelemetry mechTelemetry;
+    mechTelemetry.SetupTelemetry(UniqueName("LowMechLiveTuning"), smc);
+    CHECK_FALSE(SmartMotorControllerCommandRegistry::CommandExists("Live Tuning", &sub));
+    smc.Close();
+    SmartMotorControllerCommandRegistry::RemoveCommands(&sub);
+    wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(&sub);
+  }
 }
 
 TEST_CASE("SMCRegression.RemoveCommandsUnpublishesTunable", "[SMCRegression]") {

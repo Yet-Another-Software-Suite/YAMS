@@ -25,6 +25,7 @@ void MechanismTelemetry::SetupTelemetry(const std::string& mechanismName,
   m_tuningNetworkTable = inst.GetTable("Tuning")->GetSubTable(mechanismName);
   m_networkTable = inst.GetTable("Mechanisms")->GetSubTable(mechanismName);
   motorController.SetupTelemetry(m_networkTable, m_tuningNetworkTable);
+  motorController.SetupLiveTuning();
   SetupLoopTime();
 }
 
@@ -45,6 +46,7 @@ void MechanismTelemetry::AddMotorController(
     const std::string& subTableName, motorcontrollers::SmartMotorController& motorController) {
   motorController.SetupTelemetry(m_networkTable->GetSubTable(subTableName),
                                  m_tuningNetworkTable->GetSubTable(subTableName));
+  motorController.SetupLiveTuning();
 }
 
 std::function<void(double)> MechanismTelemetry::PublishDouble(const std::string& key,
