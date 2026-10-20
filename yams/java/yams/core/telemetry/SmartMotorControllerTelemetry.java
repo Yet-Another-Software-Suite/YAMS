@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.wpilib.networktables.NetworkTable;
-import org.wpilib.units.measure.Voltage;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
@@ -75,11 +74,6 @@ public class SmartMotorControllerTelemetry {
   private NetworkTable tuningNetworkTable;
   /** Telemetry config */
   private SmartMotorControllerTelemetryConfig config;
-  /**
-   * Whether the tuning voltage is driving the motor and its loosely coupled followers instead of the
-   * closed loop controller.
-   */
-  private boolean voltageTuningActive = false;
 
   /** Create motor controller telemetry, publish it with {@link #setupTelemetry}. */
   public SmartMotorControllerTelemetry() {}
@@ -202,17 +196,7 @@ public class SmartMotorControllerTelemetry {
     if (cfg.getMotorControllerMode() != ControlMode.CLOSED_LOOP) {
       throw new SmartMotorControllerConfigurationException("Live tuning does not work in OPEN_LOOP", "Cannot apply setpoints for Live Tuning.", ".withControlMode(ControlMode.CLOSED_LOOP) instead of " + ".withControlMode(ControlMode.OPEN_LOOP)");
     }
-    // Switch between the tuning voltage and the closed loop controller when the voltage is turned on
-    // or off.
-    boolean voltageRequested = voltageTuningRequested();
-    if (voltageRequested && !voltageTuningActive) {
-      startVoltageTuning(smartMotorController);
-    } else if (!voltageRequested && voltageTuningActive) {
-      stopVoltageTuning(smartMotorController);
-    }
-    if (voltageTuningActive) {
-      applyVoltage(smartMotorController, Volts.of(doubleFields.get(DoubleTelemetryField.TunableVoltage).get()));
-    }
+
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
       BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       if (bt.tunable()) {
@@ -222,85 +206,109 @@ public class SmartMotorControllerTelemetry {
         }
       }
     }
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
-      DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
-      // A setpoint changed while the tuning voltage is on is left unread, so it is applied once the
-      // closed loop controller takes over again.
-      if (voltageTuningActive && (dt.getField() == DoubleTelemetryField.TunableSetpointPosition || dt.getField() == DoubleTelemetryField.TunableSetpointVelocity)) {
-        continue;
+
+    BooleanTelemetry<BooleanTelemetryField> voltageEnabled = boolFields.get(BooleanTelemetryField.TunableVoltageEnabled);
+    // True when voltage/enabled was turned on or off since the last loop.
+    boolean voltageToggled = voltageEnabled.tunable();
+    if (voltageEnabled.enabled && config.getNT4Enabled() && voltageEnabled.get()) {
+      // Only the voltage is applied while it is on. Everything else, setpoints included, waits for the
+      // closed loop controller.
+      if (voltageToggled) {
+        // A closed loop controller run on the SystemCore would replace the voltage on its next loop.
+        // This stops the loosely coupled followers' closed loop controllers too.
+        smartMotorController.stopClosedLoopController();
       }
-      if (dt.tunable()) {
-        switch (dt.getField()) {
-          case TunableClosedLoopControllerSlot -> {
-            if (dt.get() >= 0 && dt.get() < ClosedLoopControllerSlot.values().length) {
-              var slot = ClosedLoopControllerSlot.values()[(int) dt.get()];
-              if (!smartMotorController.getClosedLoopControllerSlot().equals(slot)) {
-                smartMotorController.setClosedLoopSlot(slot);
+      DoubleTelemetry<DoubleTelemetryField> voltage = doubleFields.get(DoubleTelemetryField.TunableVoltage);
+      if (voltage.tunable() || voltageToggled) {
+        // The loosely coupled followers are not sent the leader's voltage, so send it to each of them.
+        smartMotorController.setVoltage(Volts.of(voltage.get()));
+        smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
+          for (var follower : followers) {
+            follower.setVoltage(Volts.of(voltage.get()));
+          }
+        });
+      }
+
+    } else {
+      if (voltageToggled) {
+        handBackToClosedLoop(smartMotorController);
+      }
+
+      for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
+        DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
+        if (dt.tunable()) {
+          switch (dt.getField()) {
+            case TunableClosedLoopControllerSlot -> {
+              if (dt.get() >= 0 && dt.get() < ClosedLoopControllerSlot.values().length) {
+                var slot = ClosedLoopControllerSlot.values()[(int) dt.get()];
+                if (!smartMotorController.getClosedLoopControllerSlot().equals(slot)) {
+                  smartMotorController.setClosedLoopSlot(slot);
+                }
               }
             }
-          }
-          case TunableSetpointPosition -> {
-            if (cfg.getLinearClosedLoopControllerUse()) {
-              smartMotorController.setPosition(Meters.of(dt.get()));
-            } else {
-              smartMotorController.setPosition(Degrees.of(dt.get()));
+            case TunableSetpointPosition -> {
+              if (cfg.getLinearClosedLoopControllerUse()) {
+                smartMotorController.setPosition(Meters.of(dt.get()));
+              } else {
+                smartMotorController.setPosition(Degrees.of(dt.get()));
+              }
+              break;
             }
-            break;
-          }
-          case TunableSetpointVelocity -> {
-            if (dt.get() == 0) {
-              continue;
+            case TunableSetpointVelocity -> {
+              if (dt.get() == 0) {
+                continue;
+              }
+              if (cfg.getLinearClosedLoopControllerUse()) {
+                smartMotorController.setVelocity(MetersPerSecond.of(dt.get()));
+              } else {
+                smartMotorController.setVelocity(dt.get() == 0 ? null : RPM.of(dt.get()));
+              }
+              break;
             }
-            if (cfg.getLinearClosedLoopControllerUse()) {
-              smartMotorController.setVelocity(MetersPerSecond.of(dt.get()));
-            } else {
-              smartMotorController.setVelocity(dt.get() == 0 ? null : RPM.of(dt.get()));
-            }
-            break;
-          }
-          case kP -> smartMotorController.setKp(dt.get());
-          case kI -> smartMotorController.setKi(dt.get());
-          case kD -> smartMotorController.setKd(dt.get());
-          case kS -> smartMotorController.setKs(dt.get());
-          case kV -> smartMotorController.setKv(dt.get());
-          case kA -> smartMotorController.setKa(dt.get());
-          case kG -> smartMotorController.setKg(dt.get());
-          case ClosedloopRampRate -> smartMotorController.setClosedLoopRampRate(Seconds.of(dt.get()));
-          case OpenloopRampRate -> smartMotorController.setOpenLoopRampRate(Seconds.of(dt.get()));
-          case SupplyCurrentLimit -> smartMotorController.setSupplyCurrentLimit(Amps.of(dt.get()));
-          case StatorCurrentLimit -> smartMotorController.setStatorCurrentLimit(Amps.of(dt.get()));
-          case MeasurementUpperLimit -> smartMotorController.setMeasurementUpperLimit(Meters.of(dt.get()));
-          case MeasurementLowerLimit -> smartMotorController.setMeasurementLowerLimit(Meters.of(dt.get()));
-          case MechanismUpperLimit -> smartMotorController.setMechanismUpperLimit(Degrees.of(dt.get()));
-          case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Degrees.of(dt.get()));
-          case TrapezoidalProfileMaxAcceleration -> {
-            if (cfg.getLinearClosedLoopControllerUse()) {
-              smartMotorController.setMotionProfileMaxAcceleration(MetersPerSecondPerSecond.of(dt.get()));
+            case kP -> smartMotorController.setKp(dt.get());
+            case kI -> smartMotorController.setKi(dt.get());
+            case kD -> smartMotorController.setKd(dt.get());
+            case kS -> smartMotorController.setKs(dt.get());
+            case kV -> smartMotorController.setKv(dt.get());
+            case kA -> smartMotorController.setKa(dt.get());
+            case kG -> smartMotorController.setKg(dt.get());
+            case ClosedloopRampRate -> smartMotorController.setClosedLoopRampRate(Seconds.of(dt.get()));
+            case OpenloopRampRate -> smartMotorController.setOpenLoopRampRate(Seconds.of(dt.get()));
+            case SupplyCurrentLimit -> smartMotorController.setSupplyCurrentLimit(Amps.of(dt.get()));
+            case StatorCurrentLimit -> smartMotorController.setStatorCurrentLimit(Amps.of(dt.get()));
+            case MeasurementUpperLimit -> smartMotorController.setMeasurementUpperLimit(Meters.of(dt.get()));
+            case MeasurementLowerLimit -> smartMotorController.setMeasurementLowerLimit(Meters.of(dt.get()));
+            case MechanismUpperLimit -> smartMotorController.setMechanismUpperLimit(Degrees.of(dt.get()));
+            case MechanismLowerLimit -> smartMotorController.setMechanismLowerLimit(Degrees.of(dt.get()));
+            case TrapezoidalProfileMaxAcceleration -> {
+              if (cfg.getLinearClosedLoopControllerUse()) {
+                smartMotorController.setMotionProfileMaxAcceleration(MetersPerSecondPerSecond.of(dt.get()));
 
-            } else {
-              smartMotorController.setMotionProfileMaxAcceleration(RPM.per(Second).of(dt.get()));
+              } else {
+                smartMotorController.setMotionProfileMaxAcceleration(RPM.per(Second).of(dt.get()));
+              }
+              break;
             }
-            break;
-          }
-          case TrapezoidalProfileMaxVelocity -> {
-            if (cfg.getLinearClosedLoopControllerUse()) {
-              smartMotorController.setMotionProfileMaxVelocity(MetersPerSecond.of(dt.get()));
-            } else {
-              smartMotorController.setMotionProfileMaxVelocity(RPM.of(dt.get()));
+            case TrapezoidalProfileMaxVelocity -> {
+              if (cfg.getLinearClosedLoopControllerUse()) {
+                smartMotorController.setMotionProfileMaxVelocity(MetersPerSecond.of(dt.get()));
+              } else {
+                smartMotorController.setMotionProfileMaxVelocity(RPM.of(dt.get()));
+              }
+              break;
             }
-            break;
-          }
-          case TrapezoidalProfileMaxJerk -> {
-            smartMotorController.setMotionProfileMaxJerk(RPM.per(Second).per(Second).of(dt.get()));
-          }
-          case ExponentialProfileKA -> {
-            smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.of(dt.get()), Optional.empty());
-          }
-          case ExponentialProfileKV -> {
-            smartMotorController.setExponentialProfile(OptionalDouble.of(dt.get()), OptionalDouble.empty(), Optional.empty());
-          }
-          case ExponentialProfileMaxInput -> {
-            smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.empty(), Optional.of(Volts.of(dt.get())));
+            case TrapezoidalProfileMaxJerk -> {
+              smartMotorController.setMotionProfileMaxJerk(RPM.per(Second).per(Second).of(dt.get()));
+            }
+            case ExponentialProfileKA -> {
+              smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.of(dt.get()), Optional.empty());
+            }
+            case ExponentialProfileKV -> {
+              smartMotorController.setExponentialProfile(OptionalDouble.of(dt.get()), OptionalDouble.empty(), Optional.empty());
+            }
+            case ExponentialProfileMaxInput -> {
+              smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.empty(), Optional.of(Volts.of(dt.get())));
+            }
           }
         }
       }
@@ -315,54 +323,30 @@ public class SmartMotorControllerTelemetry {
    * @param smartMotorController {@link SmartMotorController} being tuned.
    */
   public void stopTuning(SmartMotorController smartMotorController) {
-    if (voltageTuningActive) {
-      stopVoltageTuning(smartMotorController);
+    if (boolFields == null) {
+      return;
     }
-    if (boolFields != null && voltageTuningAvailable()) {
-      boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).forceSet(false);
+    BooleanTelemetry<BooleanTelemetryField> voltageEnabled = boolFields.get(BooleanTelemetryField.TunableVoltageEnabled);
+    if (voltageEnabled.enabled && config.getNT4Enabled() && voltageEnabled.get()) {
+      voltageEnabled.forceSet(false);
+      handBackToClosedLoop(smartMotorController);
     }
-  }
-
-  /**
-   * Whether the tuning voltage can be turned on from the Tuning table.
-   *
-   * @return True if {@link BooleanTelemetryField#TunableVoltageEnabled} and
-   *         {@link DoubleTelemetryField#TunableVoltage} are enabled and published to NetworkTables.
-   */
-  private boolean voltageTuningAvailable() {
-    return config != null && config.getNT4Enabled() && boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).enabled && doubleFields.get(DoubleTelemetryField.TunableVoltage).enabled;
-  }
-
-  /**
-   * Whether the tuning voltage is turned on in the Tuning table.
-   *
-   * @return True if the tuning voltage should drive the motor.
-   */
-  private boolean voltageTuningRequested() {
-    return voltageTuningAvailable() && boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).get();
-  }
-
-  /**
-   * Stop the closed loop controller so the tuning voltage can drive the motor. The loosely coupled
-   * followers' closed loop controllers are stopped too.
-   *
-   * @param smc {@link SmartMotorController} being tuned.
-   */
-  private void startVoltageTuning(SmartMotorController smc) {
-    // A closed loop controller run on the SystemCore would replace the voltage on its next loop.
-    smc.stopClosedLoopController();
-    voltageTuningActive = true;
   }
 
   /**
    * Stop the tuning voltage, start the closed loop controller again, and send it the setpoint it held
-   * before the voltage was turned on. The loosely coupled followers are started again too.
+   * before the voltage was turned on. The loosely coupled followers are stopped and started again
+   * too.
    *
    * @param smc {@link SmartMotorController} being tuned.
    */
-  private void stopVoltageTuning(SmartMotorController smc) {
-    applyVoltage(smc, Volts.zero());
-    voltageTuningActive = false;
+  private static void handBackToClosedLoop(SmartMotorController smc) {
+    smc.setVoltage(Volts.zero());
+    smc.getLooselyCoupledFollowers().ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.setVoltage(Volts.zero());
+      }
+    });
     smc.startClosedLoopController();
     // The voltage replaced the setpoint on a closed loop controller run on the motor controller, so it
     // must be sent again. This sends it to the loosely coupled followers too.
@@ -372,22 +356,6 @@ public class SmartMotorControllerTelemetry {
     } else {
       smc.getMechanismSetpointVelocity().ifPresent(smc::setVelocity);
     }
-  }
-
-  /**
-   * Apply a voltage to the motor and each of its loosely coupled followers. The followers are not sent
-   * the leader's voltage otherwise.
-   *
-   * @param smc     {@link SmartMotorController} being tuned.
-   * @param voltage Voltage to apply.
-   */
-  private void applyVoltage(SmartMotorController smc, Voltage voltage) {
-    smc.setVoltage(voltage);
-    smc.getLooselyCoupledFollowers().ifPresent(followers -> {
-      for (var follower : followers) {
-        follower.setVoltage(voltage);
-      }
-    });
   }
 
   /** Close and unpublish telemetry. */

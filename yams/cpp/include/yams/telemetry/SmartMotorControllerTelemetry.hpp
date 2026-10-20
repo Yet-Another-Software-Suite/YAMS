@@ -14,7 +14,6 @@
 #include <wpi/nt/DoubleTopic.hpp>
 #include <wpi/nt/NetworkTable.hpp>
 #include <wpi/system/DataLogManager.hpp>
-#include <wpi/units/voltage.hpp>
 #include <wpi/util/json.hpp>
 
 // DoubleTelemetry<F>::TransformUnit() calls SmartMotorControllerConfig methods directly in its
@@ -585,38 +584,6 @@ class SmartMotorControllerTelemetry {
       nullptr};
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>* m_boolFields{
       nullptr};
-  /** Whether the fields were published to NetworkTables, so the tunable ones can be read. */
-  bool m_nt4Enabled{false};
-  /**
-   * Whether the tuning voltage is driving the motor and its loosely coupled followers instead of
-   * the closed-loop controller.
-   */
-  bool m_voltageTuningActive{false};
-
-  /** Whether the tuning voltage can be turned on from the Tuning table. */
-  bool VoltageTuningAvailable() const;
-
-  /** Whether the tuning voltage is turned on in the Tuning table. */
-  bool VoltageTuningRequested() const;
-
-  /**
-   * Stop the closed-loop controller so the tuning voltage can drive the motor. The loosely coupled
-   * followers' closed-loop controllers are stopped too.
-   */
-  void StartVoltageTuning(motorcontrollers::SmartMotorController& smc);
-
-  /**
-   * Stop the tuning voltage, start the closed-loop controller again, and send it the setpoint it
-   * held before the voltage was turned on. The loosely coupled followers are started again too.
-   */
-  void StopVoltageTuning(motorcontrollers::SmartMotorController& smc);
-
-  /**
-   * Apply a voltage to the motor and each of its loosely coupled followers. The followers are not
-   * sent the leader's voltage otherwise.
-   */
-  static void ApplyVoltage(motorcontrollers::SmartMotorController& smc,
-                           wpi::units::volt_t voltage);
 };
 
 }  // namespace yams::telemetry
