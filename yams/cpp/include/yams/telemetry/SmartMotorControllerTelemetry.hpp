@@ -227,6 +227,21 @@ class DoubleTelemetry {
   }
 
   /**
+   * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+   * guard in Set(double). The next IsTunable() reports the change, as if it was made on the
+   * dashboard.
+   *
+   * @param value Value to force.
+   */
+  void ForceSet(double value) {
+    if (m_subPublisher) {
+      m_subPublisher->Set(value);
+    } else if (m_publisher) {
+      m_publisher->Set(value);
+    }
+  }
+
+  /**
    * Publish a value; returns false if the field is disabled or a tunable subscriber disagrees.
    *
    * @param value Value to publish.

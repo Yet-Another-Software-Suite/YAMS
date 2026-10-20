@@ -234,12 +234,12 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
           }
         } else {
           smc.StopClosedLoopController();
-          // voltage/setpoint is only applied when it changes, so send it now.
-          wpi::units::volt_t voltage{m_doubleFields->at(DoubleTelemetryField::TunableVoltage).Get()};
+          // Start at 0 V, with voltage/setpoint set back to 0 on the dashboard too.
+          m_doubleFields->at(DoubleTelemetryField::TunableVoltage).ForceSet(0);
           for (auto* follower : smc.GetLooselyCoupledFollowers()) {
-            follower->SetVoltage(voltage);
+            follower->SetVoltage(wpi::units::volt_t{0.0});
           }
-          smc.SetVoltage(voltage);
+          smc.SetVoltage(wpi::units::volt_t{0.0});
         }
         break;
       default:

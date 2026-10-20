@@ -216,10 +216,18 @@ TEST_CASE("SMCRegression.LiveTuningVoltage", "[SMCRegression]") {
   auto tuning = wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(name);
 
   SECTION("the voltage drives the motor and its follower instead of the closed loop") {
+    // Turning the voltage on starts at 0 V, with voltage/setpoint set back to 0 even if it was not.
     tuning->GetEntry("voltage/setpoint").SetDouble(3.0);
     tuning->GetEntry("voltage/enabled").SetBoolean(true);
     smc.ApplyTuningValues();
     CHECK_FALSE(smc.IsRunning());
+    CHECK(tuning->GetEntry("voltage/setpoint").GetDouble(-1.0) == Catch::Approx(0.0));
+    CHECK(smc.lastVoltage.value() == Catch::Approx(0.0));
+    CHECK(follower.lastVoltage.value() == Catch::Approx(0.0));
+
+    // The voltage typed then drives the motor and its follower.
+    tuning->GetEntry("voltage/setpoint").SetDouble(3.0);
+    smc.ApplyTuningValues();
     CHECK(smc.lastVoltage.value() == Catch::Approx(3.0));
     CHECK(follower.lastVoltage.value() == Catch::Approx(3.0));
 

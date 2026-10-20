@@ -229,14 +229,14 @@ public class SmartMotorControllerTelemetry {
               }
             } else {
               smartMotorController.stopClosedLoopController();
-              // voltage/setpoint is only applied when it changes, so send it now.
-              var voltage = Volts.of(doubleFields.get(DoubleTelemetryField.TunableVoltage).get());
+              // Start at 0 V, with voltage/setpoint set back to 0 on the dashboard too.
+              doubleFields.get(DoubleTelemetryField.TunableVoltage).forceSet(0);
               smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
                 for (var follower : followers) {
-                  follower.setVoltage(voltage);
+                  follower.setVoltage(Volts.zero());
                 }
               });
-              smartMotorController.setVoltage(voltage);
+              smartMotorController.setVoltage(Volts.zero());
             }
           }
         }

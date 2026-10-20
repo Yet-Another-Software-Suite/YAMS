@@ -56,8 +56,8 @@ import yams.helpers.TestWithScheduler;
  * closed loop runs on the motor controller or on the SystemCore.
  *
  * <ol>
- *   <li>Turning the voltage on stops the closed loop controller and drives the leader and its loosely
- *       coupled follower at the voltage.
+ *   <li>Turning the voltage on stops the closed loop controller and starts at 0 V, with voltage/setpoint
+ *       set back to 0. A voltage typed then drives the leader and its loosely coupled follower.
  *   <li>Turning it off starts the closed loop controller again, which takes both back to the setpoint.
  *   <li>Ending the Live Tuning command with the voltage on stops the voltage, turns it off in the
  *       Tuning table, and the closed loop controller holds the setpoint again.
@@ -178,9 +178,16 @@ public class VoltageLiveTuningTest {
       TestWithScheduler.schedule(liveTuning);
       TestWithScheduler.cycle(Seconds.of(0.1));
 
-      // 1. The voltage drives both pivots forward, instead of the closed loop holding them at 0°.
+      // 1. Turning the voltage on starts at 0 V, with voltage/setpoint set back to 0 even if it was not.
       tuning.getEntry("voltage/setpoint").setDouble(TUNING_VOLTS);
       tuning.getEntry("voltage/enabled").setBoolean(true);
+      TestWithScheduler.cycle(Seconds.of(0.5));
+      assertEquals(0, tuning.getEntry("voltage/setpoint").getDouble(Double.NaN), name + ": voltage/setpoint set back to 0");
+      assertEquals(0, simulatedDegrees(leader), HELD_DEGREES, name + ": leader not driven before a voltage is typed");
+      assertEquals(0, simulatedDegrees(follower), HELD_DEGREES, name + ": follower not driven before a voltage is typed");
+
+      // The voltage typed then drives both pivots forward, instead of the closed loop holding them at 0°.
+      tuning.getEntry("voltage/setpoint").setDouble(TUNING_VOLTS);
       TestWithScheduler.cycle(Seconds.of(0.5));
       assertTrue(simulatedDegrees(leader) > MOVED_DEGREES, name + ": leader driven by the voltage, at " + simulatedDegrees(leader) + "°");
       assertTrue(simulatedDegrees(follower) > MOVED_DEGREES, name + ": follower driven by the voltage, at " + simulatedDegrees(follower) + "°");
@@ -193,6 +200,8 @@ public class VoltageLiveTuningTest {
 
       // 3. Ending Live Tuning with the voltage on stops it, and turns it off in the Tuning table.
       tuning.getEntry("voltage/enabled").setBoolean(true);
+      TestWithScheduler.cycle(Seconds.of(0.1));
+      tuning.getEntry("voltage/setpoint").setDouble(TUNING_VOLTS);
       TestWithScheduler.cycle(Seconds.of(0.5));
       assertTrue(simulatedDegrees(leader) > MOVED_DEGREES, name + ": leader driven by the voltage again, at " + simulatedDegrees(leader) + "°");
       liveTuning.cancel();
