@@ -73,16 +73,22 @@ JAVA_GROUPS = [
      "test-filter": '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
                     ' --tests "yams.core.motorcontrollers.ZeroOffsetDiscontinuityPointTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
-    # vendor's device is given, feedforwards, exponential profiles, live tuning and the simulation
-    # period. Add new motor controller test classes here.
+    # vendor's device is given, feedforwards, exponential profiles and the simulation period. Add new
+    # motor controller test classes here.
     {"group": "motor-controllers",
      "test-filter": '--tests "yams.core.motorcontrollers.ArmFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"'
                     ' --tests "yams.core.motorcontrollers.ForceFeedforwardTest"'
-                    ' --tests "yams.core.motorcontrollers.LiveTuningTest"'
                     ' --tests "yams.core.motorcontrollers.SimulationPeriodTest"'
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'},
+    # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
+    # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
+    # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
+    {"group": "live-tuning",
+     "test-filter": '--tests "yams.core.motorcontrollers.LiveTuningTest"'
+                    ' --tests "yams.core.telemetry.MechanismLiveTuningTest"'
+                    ' --tests "yams.mechs.VoltageLiveTuningTest"'},
     # Every motor controller (SPARK MAX, SPARK Flex, TalonFX, TalonFXS and Nova) given the same gains
     # in YAMS units: the voltage of each feedback and feedforward gain, and the gains of the selected
     # closed loop slot. The Talons run in real time, as Phoenix simulates them, and one JVM with all
@@ -132,7 +138,7 @@ CPP_GROUPS = [
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "loose-followers", "swerve-drive", "other"}
+                         "loose-followers", "live-tuning", "swerve-drive", "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
 
