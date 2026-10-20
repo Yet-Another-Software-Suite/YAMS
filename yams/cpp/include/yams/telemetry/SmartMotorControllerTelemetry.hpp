@@ -442,12 +442,12 @@ class BooleanTelemetry {
   /**
    * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
    * guard in Set(bool). Used to enforce mutual exclusion between tunable modes that share the
-   * same underlying drive/mechanism.
+   * same underlying drive/mechanism. The next IsTunable() reports the change, as if it was made on
+   * the dashboard.
    *
    * @param value Value to force.
    */
   void ForceSet(bool value) {
-    m_cachedValue = value;
     if (m_pubSub) {
       m_pubSub->Set(value);
     } else if (m_publisher) {

@@ -200,7 +200,7 @@ public class SmartMotorControllerTelemetry {
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
       BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       boolean tunable = bt.tunable();
-      if (!bt.enabled)
+      if (!bt.enabled || !config.getNT4Enabled())
         continue;
       switch (bt.getField()) {
         case TunableVoltageEnabled -> closedloop = !bt.get();
@@ -212,9 +212,31 @@ public class SmartMotorControllerTelemetry {
           case EncoderInversion -> smartMotorController.setEncoderInverted(bt.get());
           case TunableVoltageEnabled -> {
             if (closedloop) {
+              smartMotorController.setVoltage(Volts.zero());
+              smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
+                for (var follower : followers) {
+                  follower.setVoltage(Volts.zero());
+                }
+              });
               smartMotorController.startClosedLoopController();
+              // The voltage replaced the setpoint on a closed loop controller run on the motor controller, so it
+              // must be sent again. This sends it to the loosely coupled followers too.
+              var position = smartMotorController.getMechanismPositionSetpoint();
+              if (position.isPresent()) {
+                smartMotorController.setPosition(position.get());
+              } else {
+                smartMotorController.getMechanismSetpointVelocity().ifPresent(smartMotorController::setVelocity);
+              }
             } else {
               smartMotorController.stopClosedLoopController();
+              // voltage/setpoint is only applied when it changes, so send it now.
+              var voltage = Volts.of(doubleFields.get(DoubleTelemetryField.TunableVoltage).get());
+              smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
+                for (var follower : followers) {
+                  follower.setVoltage(voltage);
+                }
+              });
+              smartMotorController.setVoltage(voltage);
             }
           }
         }
@@ -228,6 +250,9 @@ public class SmartMotorControllerTelemetry {
       if (dt.tunable()) {
         switch (dt.getField()) {
           case TunableVoltage -> {
+            if (closedloop) {
+              continue;
+            }
             smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
               for (SmartMotorController follower : followers) {
                 follower.setVoltage(Volts.of(dt.get()));
@@ -325,35 +350,16 @@ public class SmartMotorControllerTelemetry {
     if (boolFields == null) {
       return;
     }
-    BooleanTelemetry<BooleanTelemetryField> voltageEnabled = boolFields.get(BooleanTelemetryField.TunableVoltageEnabled);
-    if (voltageEnabled.enabled && config.getNT4Enabled() && voltageEnabled.get()) {
-      voltageEnabled.forceSet(false);
-      handBackToClosedLoop(smartMotorController);
-    }
-  }
-
-  /**
-   * Stop the tuning voltage, start the closed loop controller again, and send it the setpoint it held
-   * before the voltage was turned on. The loosely coupled followers are stopped and started again
-   * too.
-   *
-   * @param smc {@link SmartMotorController} being tuned.
-   */
-  private static void handBackToClosedLoop(SmartMotorController smc) {
-    smc.setVoltage(Volts.zero());
-    smc.getLooselyCoupledFollowers().ifPresent(followers -> {
-      for (var follower : followers) {
-        follower.setVoltage(Volts.zero());
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
+      BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
+      switch (bt.getField()) {
+        case TunableVoltageEnabled -> {
+          if (bt.enabled && config.getNT4Enabled() && bt.get()) {
+            bt.forceSet(false);
+            applyTuningValues(smartMotorController);
+          }
+        }
       }
-    });
-    smc.startClosedLoopController();
-    // The voltage replaced the setpoint on a closed loop controller run on the motor controller, so it
-    // must be sent again. This sends it to the loosely coupled followers too.
-    var position = smc.getMechanismPositionSetpoint();
-    if (position.isPresent()) {
-      smc.setPosition(position.get());
-    } else {
-      smc.getMechanismSetpointVelocity().ifPresent(smc::setVelocity);
     }
   }
 

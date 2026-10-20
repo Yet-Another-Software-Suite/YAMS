@@ -223,7 +223,7 @@ TEST_CASE("SMCRegression.LiveTuningVoltage", "[SMCRegression]") {
     CHECK(smc.lastVoltage.value() == Catch::Approx(3.0));
     CHECK(follower.lastVoltage.value() == Catch::Approx(3.0));
 
-    // A setpoint entered while the voltage is on waits for the closed loop.
+    // A setpoint entered while the voltage is on is not applied.
     tuning->GetEntry("closedloop/setpoint/position").SetDouble(90.0);
     smc.ApplyTuningValues();
     CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.1));
@@ -234,7 +234,8 @@ TEST_CASE("SMCRegression.LiveTuningVoltage", "[SMCRegression]") {
       CHECK(smc.IsRunning());
       CHECK(smc.lastVoltage.value() == Catch::Approx(0.0));
       CHECK(follower.lastVoltage.value() == Catch::Approx(0.0));
-      CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.25));
+      // The setpoint held before the voltage was turned on is sent again.
+      CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.1));
     }
     SECTION("ending the Live Tuning command stops the voltage and turns it off") {
       auto* liveTuning = SmartMotorControllerCommandRegistry::GetCommand("Live Tuning", &sub);
