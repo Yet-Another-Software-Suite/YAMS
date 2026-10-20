@@ -1226,7 +1226,7 @@ public class SparkWrapper extends SmartMotorController {
 
   @Override
   public Voltage getVoltage() {
-    return m_simSupplier.isPresent() ? m_simSupplier.get().getMechanismStatorVoltage() : Volts.of(m_spark.getAppliedOutput().get() * m_spark.getBusVoltage().get());
+    return Volts.of(m_spark.getAppliedOutput().get() * m_spark.getBusVoltage().get());
   }
 
   @Override

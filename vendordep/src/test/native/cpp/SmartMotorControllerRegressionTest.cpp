@@ -231,6 +231,13 @@ TEST_CASE("SMCRegression.LiveTuningVoltage", "[SMCRegression]") {
     CHECK(smc.lastVoltage.value() == Catch::Approx(3.0));
     CHECK(follower.lastVoltage.value() == Catch::Approx(3.0));
 
+    // The voltage is sent every loop, even when it did not change.
+    smc.SetVoltage(0_V);
+    follower.SetVoltage(0_V);
+    smc.ApplyTuningValues();
+    CHECK(smc.lastVoltage.value() == Catch::Approx(3.0));
+    CHECK(follower.lastVoltage.value() == Catch::Approx(3.0));
+
     // A setpoint entered while the voltage is on is not applied.
     tuning->GetEntry("closedloop/setpoint/position").SetDouble(90.0);
     smc.ApplyTuningValues();

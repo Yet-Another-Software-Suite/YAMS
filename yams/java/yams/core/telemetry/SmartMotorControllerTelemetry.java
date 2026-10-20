@@ -247,19 +247,22 @@ public class SmartMotorControllerTelemetry {
       if (!dt.enabled)
         continue;
 
+      // Fields that must be set regularly.
+      switch (dt.getField()) {
+        case TunableVoltage -> {
+          if (closedloop)
+            continue;
+
+          smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
+            for (SmartMotorController follower : followers) {
+              follower.setVoltage(Volts.of(dt.get()));
+            }
+          });
+          smartMotorController.setVoltage(Volts.of(dt.get()));
+        }
+      }
       if (dt.tunable()) {
         switch (dt.getField()) {
-          case TunableVoltage -> {
-            if (closedloop) {
-              continue;
-            }
-            smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> {
-              for (SmartMotorController follower : followers) {
-                follower.setVoltage(Volts.of(dt.get()));
-              }
-            });
-            smartMotorController.setVoltage(Volts.of(dt.get()));
-          }
           case TunableClosedLoopControllerSlot -> {
             if (dt.get() >= 0 && dt.get() < ClosedLoopControllerSlot.values().length) {
               var slot = ClosedLoopControllerSlot.values()[(int) dt.get()];

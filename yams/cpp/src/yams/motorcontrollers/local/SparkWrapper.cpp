@@ -1083,7 +1083,6 @@ void SparkWrapper::SetVoltage(wpi::units::volt_t voltage) {
 }
 
 wpi::units::volt_t SparkWrapper::GetVoltage() {
-  if (m_simSupplier) return m_simSupplier->GetMechanismStatorVoltage();
   return wpi::units::volt_t{m_spark->GetAppliedOutput().Get() * m_spark->GetBusVoltage().Get()};
 }
 

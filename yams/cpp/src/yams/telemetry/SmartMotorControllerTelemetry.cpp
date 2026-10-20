@@ -252,15 +252,21 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
   // Double tuning
   for (auto& [field, dt] : *m_doubleFields) {
     if (!dt.IsEnabled()) continue;
-    if (!dt.IsTunable()) continue;
+
+    // Fields that must be set regularly.
     switch (dt.GetField()) {
       case DoubleTelemetryField::TunableVoltage:
-        if (closedLoop) break;
+        if (closedLoop) continue;
         for (auto* follower : smc.GetLooselyCoupledFollowers()) {
           follower->SetVoltage(wpi::units::volt_t{dt.Get()});
         }
         smc.SetVoltage(wpi::units::volt_t{dt.Get()});
         break;
+      default:
+        break;
+    }
+    if (!dt.IsTunable()) continue;
+    switch (dt.GetField()) {
       case DoubleTelemetryField::TunableClosedLoopControllerSlot: {
         int idx = static_cast<int>(dt.Get());
         if (idx >= 0 && idx <= 3) {

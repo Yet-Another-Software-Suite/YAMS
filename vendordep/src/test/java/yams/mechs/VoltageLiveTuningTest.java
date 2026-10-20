@@ -19,6 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -209,6 +210,54 @@ public class VoltageLiveTuningTest {
       assertFalse(tuning.getEntry("voltage/enabled").getBoolean(true), name + ": voltage still on in the Tuning table");
       assertEquals(0, simulatedDegrees(leader), HELD_DEGREES, name + ": leader held at the setpoint after Live Tuning ended");
       assertEquals(0, simulatedDegrees(follower), HELD_DEGREES, name + ": follower held at the setpoint after Live Tuning ended");
+    } finally {
+      close(leader);
+      close(follower);
+    }
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("leadersAndFollowers")
+  void voltageSetpointIsHeldWithoutChanging(
+      String name,
+      Function<SmartMotorControllerConfig, SmartMotorController> createLeader,
+      Function<SmartMotorControllerConfig, SmartMotorControllerConfig> leaderConfig,
+      Function<SmartMotorControllerConfig, SmartMotorController> createFollower)
+      throws InterruptedException {
+    String leaderName = "HeldVoltageLeader(" + name + ")[" + offset + "]";
+    SmartMotorController follower = createFollower.apply(config("HeldVoltageFollower(" + name + ")[" + offset + "]"));
+    SmartMotorController leader = createLeader.apply(
+        (SmartMotorControllerConfig) leaderConfig.apply(config(leaderName)).withLooselyCoupledFollowers(follower));
+    try {
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      pivot(follower);
+
+      TestWithScheduler.schedule(leaderSubsys.setPositionSetpoint(Degrees.of(0)));
+      TestWithScheduler.cycle(Seconds.of(0.5));
+      Command liveTuning = SmartMotorControllerCommandRegistry.getCommand("Live Tuning", leaderSubsys).orElseThrow();
+      NetworkTable tuning = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(leaderName);
+      TestWithScheduler.schedule(liveTuning);
+      TestWithScheduler.cycle(Seconds.of(0.1));
+      tuning.getEntry("voltage/enabled").setBoolean(true);
+      TestWithScheduler.cycle(Seconds.of(0.1));
+
+      // Type 1 V once, then leave it alone. The leader and follower must keep outputting 1 V.
+      tuning.getEntry("voltage/setpoint").setDouble(1);
+      // A TalonFX in simulation reports its output voltage a loop or two late.
+      TestWithScheduler.cycle(Seconds.of(0.2));
+      double[] leaderVolts = new double[20];
+      double[] followerVolts = new double[20];
+      for (int i = 0; i < 20; i++) {
+        TestWithScheduler.cycle(Seconds.of(0.1));
+        leaderVolts[i] = leader.getVoltage().in(Volts);
+        followerVolts[i] = follower.getVoltage().in(Volts);
+      }
+      String samples = " (leader " + Arrays.toString(leaderVolts) + ", follower " + Arrays.toString(followerVolts) + ")";
+      for (int i = 0; i < 20; i++) {
+        double elapsed = (i + 1) * 0.1;
+        assertEquals(1, leaderVolts[i], 0.1, name + ": leader output after " + elapsed + "s" + samples);
+        assertEquals(1, followerVolts[i], 0.1, name + ": follower output after " + elapsed + "s" + samples);
+      }
     } finally {
       close(leader);
       close(follower);
