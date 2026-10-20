@@ -1,0 +1,39 @@
+{
+    "fileName": "yams_commands3.json",
+    "name": "Yet Another Mechanism System (Commands v3)",
+    "version": "2026.10.19",
+    "wpilibYear": "2027_alpha7",
+    "uuid": "9eadd383-6bdc-4107-957a-b50cd3146f17",
+    "mavenUrls": [
+        "https://cdn.yassrobotics.com/"
+    ],
+    "jsonUrl": "https://cdn.yassrobotics.com/yams_commands3.json",
+    "javaDependencies": [
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-core",
+            "version": "2026.10.19"
+        },
+        {
+            "groupId": "yams",
+            "artifactId": "YAMS-commands3",
+            "version": "2026.10.19"
+        }
+    ],
+    "cppDependencies": [],
+    "jniDependencies": [],
+    "requires": [
+        {
+            "uuid": "4decdc05-a056-46cf-9561-39449bbb0130",
+            "errorMessage": "Commands v3 is required! Install it from the WPILib vendor libraries.",
+            "offlineFileName": "CommandsV3.json"
+        }
+    ],
+    "conflictsWith": [
+        {
+            "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
+            "errorMessage": "Yet Another Mechanism System (Commands v3) cannot be used with Yet Another Mechanism System (Commands v2). Remove one of them.",
+            "offlineFileName": "yams_commands2.json"
+        }
+    ]
+}

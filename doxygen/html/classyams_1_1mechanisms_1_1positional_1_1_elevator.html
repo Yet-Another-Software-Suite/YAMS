@@ -131,8 +131,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab94cee1befd23cae3f828ec3772f1247"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7caedcbcf84d0207f8994475880763c0" id="r_a7caedcbcf84d0207f8994475880763c0"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">config::ElevatorConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7caedcbcf84d0207f8994475880763c0">GetConfig</a> () const</td></tr>
 <tr class="separator:a7caedcbcf84d0207f8994475880763c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86968f7c7d84a8672e9c99027dfe7975" id="r_a86968f7c7d84a8672e9c99027dfe7975"><td class="memItemLeft" align="right" valign="top">wpi::math::Translation3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86968f7c7d84a8672e9c99027dfe7975">GetRelativeMechanismPosition</a> () const</td></tr>
-<tr class="separator:a86968f7c7d84a8672e9c99027dfe7975"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f968e1324bb9d0c804b91be952835b3" id="r_a1f968e1324bb9d0c804b91be952835b3"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f968e1324bb9d0c804b91be952835b3">GetPose3d</a> () const override</td></tr>
+<tr class="separator:a1f968e1324bb9d0c804b91be952835b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa7eae3ef7bb632e46cdbb886511de88" id="r_afa7eae3ef7bb632e46cdbb886511de88"><td class="memItemLeft" align="right" valign="top">std::vector&lt; wpi::math::Pose3d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa7eae3ef7bb632e46cdbb886511de88">GetCascadePose3d</a> () const</td></tr>
+<tr class="separator:afa7eae3ef7bb632e46cdbb886511de88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd73da3946bdf52aef4f93f60349527c" id="r_afd73da3946bdf52aef4f93f60349527c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; wpi::math::Pose3d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd73da3946bdf52aef4f93f60349527c">GetContinuousPose3d</a> (bool carriageFirst) const</td></tr>
+<tr class="separator:afd73da3946bdf52aef4f93f60349527c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89117a7b341fd02fe283faad75eda6a6" id="r_a89117a7b341fd02fe283faad75eda6a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89117a7b341fd02fe283faad75eda6a6">SetHeight</a> (wpi::units::meter_t height)</td></tr>
 <tr class="separator:a89117a7b341fd02fe283faad75eda6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism.html">yams::mechanisms::positional::SmartPositionalMechanism</a></td></tr>
@@ -241,7 +245,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line"><span class="comment">// In commands or bindings:</span></div>
 <div class="line">m_elevator-&gt;RunTo(1.2_m);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1_mechanism_gearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1_mechanism_gearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
-<div class="ttc" id="aclassyams_1_1mechanisms_1_1_smart_mechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1_smart_mechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:144</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1_smart_mechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1_smart_mechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:153</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_elevator_config_html_a80bb4b4e55c9ccaedfcadb146e62ba7c"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html#a80bb4b4e55c9ccaedfcadb146e62ba7c">yams::mechanisms::config::ElevatorConfig::WithMinimumHeight</a></div><div class="ttdeci">ElevatorConfig &amp; WithMinimumHeight(wpi::units::meter_t height)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_elevator_config_html_ac9224996164b81a88d2510928dbbb817"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html#ac9224996164b81a88d2510928dbbb817">yams::mechanisms::config::ElevatorConfig::WithMaximumHeight</a></div><div class="ttdeci">ElevatorConfig &amp; WithMaximumHeight(wpi::units::meter_t height)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_elevator_config_html_ad0073fa517e4e6b09a6b34829d7c87d1"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html#ad0073fa517e4e6b09a6b34829d7c87d1">yams::mechanisms::config::ElevatorConfig::WithTelemetryName</a></div><div class="ttdeci">ElevatorConfig &amp; WithTelemetryName(const std::string &amp;name)</div></div>
@@ -322,6 +326,32 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
+<a id="afa7eae3ef7bb632e46cdbb886511de88" name="afa7eae3ef7bb632e46cdbb886511de88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa7eae3ef7bb632e46cdbb886511de88">&#9670;&#160;</a></span>GetCascadePose3d()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; wpi::math::Pose3d &gt; yams::mechanisms::positional::Elevator::GetCascadePose3d </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as components of a robot model. A cascade elevator's stages all move at once, each by its share of the carriage's height: a stage that travels a third of the elevator's total travel moves a third of the carriage's height relative to the stage below it.</p>
+<p>The stages are set with ElevatorConfig::WithStages().</p>
+<dl class="section return"><dt>Returns</dt><dd>Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage to the carriage. The last is the carriage, <a class="el" href="#a1f968e1324bb9d0c804b91be952835b3">GetPose3d()</a>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">ElevatorConfigurationException</td><td>if the stages are not set, or there are fewer than 2. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a7caedcbcf84d0207f8994475880763c0" name="a7caedcbcf84d0207f8994475880763c0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7caedcbcf84d0207f8994475880763c0">&#9670;&#160;</a></span>GetConfig()</h2>
 
@@ -338,6 +368,42 @@ Example usage (inside a subsystem constructor)</h3>
 </div><div class="memdoc">
 <p>Get the configuration used to construct this elevator.</p>
 <dl class="section return"><dt>Returns</dt><dd>Const reference to the ElevatorConfig. </dd></dl>
+
+</div>
+</div>
+<a id="afd73da3946bdf52aef4f93f60349527c" name="afd73da3946bdf52aef4f93f60349527c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd73da3946bdf52aef4f93f60349527c">&#9670;&#160;</a></span>GetContinuousPose3d()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; wpi::math::Pose3d &gt; yams::mechanisms::positional::Elevator::GetContinuousPose3d </td>
+          <td>(</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>carriageFirst</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as components of a robot model. A continuous elevator's stages move one at a time. Which moves first depends on how it is rigged: watch it move to see which it is.</p>
+<ul>
+<li>Carriage first: the carriage rises the whole of its travel first, then the stage below it, and so on out to the stage nearest the fixed stage. Going down, the stage nearest the fixed stage lowers first.</li>
+<li>Carriage last: the stage nearest the fixed stage rises the whole of its travel first, then the next, and so on out to the carriage. Going down, the carriage lowers first.</li>
+</ul>
+<p>The stages are set with ElevatorConfig::WithStages().</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">carriageFirst</td><td>True if the carriage moves first, false if it moves last. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Each moving stage's pose, relative to the robot, from the stage nearest the fixed stage to the carriage. The last is the carriage, <a class="el" href="#a1f968e1324bb9d0c804b91be952835b3">GetPose3d()</a>. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">ElevatorConfigurationException</td><td>if the stages are not set, or there are fewer than 2. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -388,22 +454,32 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
-<a id="a86968f7c7d84a8672e9c99027dfe7975" name="a86968f7c7d84a8672e9c99027dfe7975"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a86968f7c7d84a8672e9c99027dfe7975">&#9670;&#160;</a></span>GetRelativeMechanismPosition()</h2>
+<a id="a1f968e1324bb9d0c804b91be952835b3" name="a1f968e1324bb9d0c804b91be952835b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f968e1324bb9d0c804b91be952835b3">&#9670;&#160;</a></span>GetPose3d()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::math::Translation3d yams::mechanisms::positional::Elevator::GetRelativeMechanismPosition </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::positional::Elevator::GetPose3d </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the 3-D position of the elevator carriage relative to the robot origin.</p>
-<dl class="section return"><dt>Returns</dt><dd>Translation3d representing the current carriage position. </dd></dl>
+<p>Get the carriage's pose, for publishing to AdvantageScope as a component of a robot model: where the elevator is mounted, as set in its MechanismPositionConfig, moved up the elevator by its height, at the elevator's angle in its movement plane.</p>
+<dl class="section return"><dt>Returns</dt><dd>The pose of the carriage, relative to the robot. </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1mechanisms_1_1_smart_mechanism.html#aaf7cff5cd9269098247104b56ecdafd4">yams::mechanisms::SmartMechanism</a>.</p>
 
 </div>
 </div>

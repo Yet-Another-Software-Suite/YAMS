@@ -265,6 +265,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a51121e909c52fac8f5a2dd8ad01e58b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0a9bf0420c2532ee250f507966e07db" id="r_ab0a9bf0420c2532ee250f507966e07db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#ab0a9bf0420c2532ee250f507966e07db">SetMechanismCircumference</a> (wpi::units::meter_t circumference)</td></tr>
 <tr class="separator:ab0a9bf0420c2532ee250f507966e07db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc4154462c515f8ceb8d2c9ca8293e3c" id="r_adc4154462c515f8ceb8d2c9ca8293e3c"><td class="memItemLeft" align="right" valign="top">wpi::units::second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#adc4154462c515f8ceb8d2c9ca8293e3c">GetClosedLoopControllerPeriod</a> () const</td></tr>
+<tr class="separator:adc4154462c515f8ceb8d2c9ca8293e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9171eb87fdcd0f217a8b30059891f706" id="r_a9171eb87fdcd0f217a8b30059891f706"><td class="memItemLeft" align="right" valign="top">virtual std::optional&lt; wpi::units::second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a9171eb87fdcd0f217a8b30059891f706">GetVelocityMeasurementDelay</a> () const</td></tr>
+<tr class="separator:a9171eb87fdcd0f217a8b30059891f706"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac0e6aa284a745bc0f126af1fd63b2c9" id="r_aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#aac0e6aa284a745bc0f126af1fd63b2c9">StartClosedLoopController</a> ()</td></tr>
 <tr class="separator:aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ee466e963009350506cadc018c3dfc4" id="r_a2ee466e963009350506cadc018c3dfc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a2ee466e963009350506cadc018c3dfc4">StopClosedLoopController</a> ()</td></tr>
@@ -741,6 +745,25 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Forward a velocity setpoint to all loosely coupled followers. Call at the end of SetVelocity(turns_per_second_t) in each concrete wrapper. </p>
+
+</div>
+</div>
+<a id="adc4154462c515f8ceb8d2c9ca8293e3c" name="adc4154462c515f8ceb8d2c9ca8293e3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc4154462c515f8ceb8d2c9ca8293e3c">&#9670;&#160;</a></span>GetClosedLoopControllerPeriod()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::units::second_t yams::motorcontrollers::SmartMotorController::GetClosedLoopControllerPeriod </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the period the closed-loop controller runs at. A closed-loop controller run on the SystemCore, such as an LQR or an exponential profile, runs at <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a2a6816c38776de0d54bcd31a54c8069c">SmartMotorControllerConfig::WithClosedLoopControlPeriod()</a>, 20 ms by default. One run on the motor controller runs at 1 kHz.</p>
+<dl class="section return"><dt>Returns</dt><dd>The closed-loop controller's period. </dd></dl>
 
 </div>
 </div>
@@ -1503,6 +1526,35 @@ Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Struct with optional lists of unsupported boolean and double fields. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html#a97fce7fb5a33d97bfd8e14d034bed5b4">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#aa48d1c6d917605c08fff26760257f5c9">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#ac00bcb7cfe5c91d4852c8aa540d67a49">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+
+</div>
+</div>
+<a id="a9171eb87fdcd0f217a8b30059891f706" name="a9171eb87fdcd0f217a8b30059891f706"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9171eb87fdcd0f217a8b30059891f706">&#9670;&#160;</a></span>GetVelocityMeasurementDelay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::optional&lt; wpi::units::second_t &gt; yams::motorcontrollers::SmartMotorController::GetVelocityMeasurementDelay </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get how far behind the mechanism the measured velocity is, from how the motor controller filters it, as WPILib's SysId works it out for its presets. Feedback gains worked out for the closed loop depend on it. In simulation, the simulation period, since the simulated sensor is updated once a period.</p>
+<dl class="section return"><dt>Returns</dt><dd>The delay, or nullopt if it is not known for this motor controller. </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html#a419afe99d7ddc4be61636fc3fcfbbde1">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#abcf7c6853b8c2fed6b80a8a9a47760cf">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#aa936d8a920699dcd6a1e455896c0f68f">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -3386,7 +3438,7 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start the background closed-loop controller thread. </p>
+<p>Start the background closed-loop controller thread, and the loosely coupled followers'. </p>
 
 </div>
 </div>
@@ -3404,7 +3456,7 @@ Protected Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Stop the background closed-loop controller thread. </p>
+<p>Stop the background closed-loop controller thread, and the loosely coupled followers'. The followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at. </p>
 
 </div>
 </div>

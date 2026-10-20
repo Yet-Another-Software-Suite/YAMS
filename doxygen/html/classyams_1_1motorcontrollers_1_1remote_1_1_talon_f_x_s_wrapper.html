@@ -156,6 +156,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a17a3a1493e8668991588a381a3cf371e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27e48a0606fdb395bc6ae4236b6a2030" id="r_a27e48a0606fdb395bc6ae4236b6a2030"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a27e48a0606fdb395bc6ae4236b6a2030">GetVoltage</a> () override</td></tr>
 <tr class="separator:a27e48a0606fdb395bc6ae4236b6a2030"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcf7c6853b8c2fed6b80a8a9a47760cf" id="r_abcf7c6853b8c2fed6b80a8a9a47760cf"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abcf7c6853b8c2fed6b80a8a9a47760cf">GetVelocityMeasurementDelay</a> () const override</td></tr>
+<tr class="separator:abcf7c6853b8c2fed6b80a8a9a47760cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a984c93dde7b8108667e9a2f17b085393" id="r_a984c93dde7b8108667e9a2f17b085393"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a984c93dde7b8108667e9a2f17b085393">SetPosition</a> (wpi::units::turn_t angle) override</td></tr>
 <tr class="separator:a984c93dde7b8108667e9a2f17b085393"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0361b9a61ccb6613bb12a0ce70f2ae93" id="r_a0361b9a61ccb6613bb12a0ce70f2ae93"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0361b9a61ccb6613bb12a0ce70f2ae93">SetPosition</a> (wpi::units::meter_t distance) override</td></tr>
@@ -291,6 +293,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2026dd192b4f903f41aed09bb4332da3 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a82c193dc7dd1b4119d3c6425b6002906"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a82c193dc7dd1b4119d3c6425b6002906">SetVelocity</a> (wpi::units::meters_per_second_t velocity, wpi::units::newton_t feedforwardForce)</td></tr>
 <tr class="separator:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc4154462c515f8ceb8d2c9ca8293e3c inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_adc4154462c515f8ceb8d2c9ca8293e3c"><td class="memItemLeft" align="right" valign="top">wpi::units::second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#adc4154462c515f8ceb8d2c9ca8293e3c">GetClosedLoopControllerPeriod</a> () const</td></tr>
+<tr class="separator:adc4154462c515f8ceb8d2c9ca8293e3c inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aac0e6aa284a745bc0f126af1fd63b2c9">StartClosedLoopController</a> ()</td></tr>
 <tr class="separator:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ee466e963009350506cadc018c3dfc4 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a2ee466e963009350506cadc018c3dfc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a2ee466e963009350506cadc018c3dfc4">StopClosedLoopController</a> ()</td></tr>
@@ -1316,6 +1320,34 @@ Example usage (inside a subsystem constructor)</h3>
 <dl class="section return"><dt>Returns</dt><dd>Struct with optional lists of unsupported boolean and double fields.   </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a63843ecff006713fb980137e85536204">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="abcf7c6853b8c2fed6b80a8a9a47760cf" name="abcf7c6853b8c2fed6b80a8a9a47760cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcf7c6853b8c2fed6b80a8a9a47760cf">&#9670;&#160;</a></span>GetVelocityMeasurementDelay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::second_t &gt; yams::motorcontrollers::remote::TalonFXSWrapper::GetVelocityMeasurementDelay </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Phoenix 6 filters velocity with a Kalman filter tuned for the least latency, about 1 ms, as WPILib's SysId takes it for its CTRE Phoenix 6 preset. A closed loop run on the SystemCore reads the velocity from its status signal instead, which on average is half the signal's update period older. Phoenix 6 simulates the Talon in its own thread with the same filtering, so the delay is the same in simulation. </p>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a9171eb87fdcd0f217a8b30059891f706">yams::motorcontrollers::SmartMotorController</a>.</p>
 
 </div>
 </div>

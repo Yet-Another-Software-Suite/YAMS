@@ -67,6 +67,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#setupTelemetry(yams.core.mechanisms.swerve.SwerveDrive)" tabindex="0">setupTelemetry(SwerveDrive)</a></li>
 <li><a href="#publish(yams.core.mechanisms.swerve.SwerveDrive)" tabindex="0">publish(SwerveDrive)</a></li>
 <li><a href="#applyTuningValues(yams.core.mechanisms.swerve.SwerveDrive)" tabindex="0">applyTuningValues(SwerveDrive)</a></li>
+<li><a href="#stopTuning(yams.core.mechanisms.swerve.SwerveDrive)" tabindex="0">stopTuning(SwerveDrive)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 </ol>
 </li>
@@ -168,6 +169,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup telemetry for the drive.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopTuning(yams.core.mechanisms.swerve.SwerveDrive)" class="member-name-link">stopTuning</a><wbr>(<a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
+it is with its closed loop controller.</div>
+</div>
 </div>
 </div>
 </div>
@@ -247,6 +254,20 @@ loadScripts(document, 'script');</script>
                               <a href="../mechanisms/config/SwerveDriveConfig.html#withGyroAngularVelocityScaleFactor(double)"><code>SwerveDriveConfig.withGyroAngularVelocityScaleFactor(double)</code></a>
                               but no gyro supplier was set with
                               <a href="../mechanisms/config/SwerveDriveConfig.html#withGyro(java.util.function.Supplier)"><code>SwerveDriveConfig.withGyro(java.util.function.Supplier)</code></a>.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stopTuning(yams.core.mechanisms.swerve.SwerveDrive)">
+<h3>stopTuning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stopTuning</span><wbr><span class="parameters">(<a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a>&nbsp;drive)</span></div>
+<div class="block">Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
+it is with its closed loop controller.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>drive</code> - <a href="../mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> being tuned.</dd>
 </dl>
 </div>
 </section>

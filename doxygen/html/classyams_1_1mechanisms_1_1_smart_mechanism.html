@@ -114,6 +114,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0759cf6d5b0bf764df83ae2be5f0c355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca3adfd26b306043dfbf0b9a626b4e26" id="r_aca3adfd26b306043dfbf0b9a626b4e26"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca3adfd26b306043dfbf0b9a626b4e26">GetName</a> () const =0</td></tr>
 <tr class="separator:aca3adfd26b306043dfbf0b9a626b4e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf7cff5cd9269098247104b56ecdafd4" id="r_aaf7cff5cd9269098247104b56ecdafd4"><td class="memItemLeft" align="right" valign="top">virtual wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf7cff5cd9269098247104b56ecdafd4">GetPose3d</a> () const =0</td></tr>
+<tr class="separator:aaf7cff5cd9269098247104b56ecdafd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82bace42409275bcbb506abd97fc94c6" id="r_a82bace42409275bcbb506abd97fc94c6"><td class="memItemLeft" align="right" valign="top">wpi::cmd::CommandPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82bace42409275bcbb506abd97fc94c6">Set</a> (double dutycycle)</td></tr>
 <tr class="separator:a82bace42409275bcbb506abd97fc94c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29dcb9f01b64a050c309617ae1eba460" id="r_a29dcb9f01b64a050c309617ae1eba460"><td class="memItemLeft" align="right" valign="top">wpi::cmd::CommandPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29dcb9f01b64a050c309617ae1eba460">Set</a> (std::function&lt; double()&gt; dutycycle)</td></tr>
@@ -307,6 +309,34 @@ Protected Attributes</h2></td></tr>
 <p>Get the human-readable name of this mechanism. </p>
 
 <p>Implemented in <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_arm.html#a26572427dc8356d15ed35d8c13c6352b">yams::mechanisms::positional::Arm</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_elevator.html#ab9dfceefb660f072824a57c09dc5180c">yams::mechanisms::positional::Elevator</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_pivot.html#a158f2319cea15b5e55983cf7734ff9c3">yams::mechanisms::positional::Pivot</a>, and <a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1_fly_wheel.html#a3909a1915e10d0107bfe9cf022fb1a57">yams::mechanisms::velocity::FlyWheel</a>.</p>
+
+</div>
+</div>
+<a id="aaf7cff5cd9269098247104b56ecdafd4" name="aaf7cff5cd9269098247104b56ecdafd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf7cff5cd9269098247104b56ecdafd4">&#9670;&#160;</a></span>GetPose3d()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual wpi::math::Pose3d yams::mechanisms::SmartMechanism::GetPose3d </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the mechanism's pose relative to the robot, worked out from its motor's position and where it is mounted, as set in its MechanismPositionConfig. Publish it as a component of an AdvantageScope robot model, whose part is modeled at the mechanism's zero position about its mount. </p>
+
+<p>Implemented in <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_arm.html#aff15accc8b55dcb0ab0b198521cd9e78">yams::mechanisms::positional::Arm</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_elevator.html#a1f968e1324bb9d0c804b91be952835b3">yams::mechanisms::positional::Elevator</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_pivot.html#a42d77f48ade429b039cad4f0a517f45b">yams::mechanisms::positional::Pivot</a>, and <a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1_fly_wheel.html#a942265a95cdc54d8ef58e2e6c134a9bb">yams::mechanisms::velocity::FlyWheel</a>.</p>
 
 </div>
 </div>

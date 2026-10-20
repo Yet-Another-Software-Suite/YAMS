@@ -468,6 +468,11 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 <dd>
 <div class="block">Use the PID controller.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ClosedLoopPeriod" class="member-name-link">ClosedLoopPeriod</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Period the closed loop controller runs at: 1 ms on the motor controller, or the closed loop
+control period on the SystemCore.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ClosedloopRampRate" class="member-name-link">ClosedloopRampRate</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Closed loop dutycyle ramp rate.</div>
@@ -1299,6 +1304,11 @@ such as the Live Tuning command.</div>
 <dd>
 <div class="block">Ensure setting is applied, retries every 10ms.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#forceConfigApply(com.ctre.phoenix6.configs.SlotConfigs)" class="member-name-link">forceConfigApply(SlotConfigs)</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>
+<div class="block">Apply part of the Talon's config, such as only a slot's gains, which uses less of the CAN bus than
+applying all of it, retrying silently for up to 15 ms.</div>
+</dd>
 <dt><a href="yams/core/telemetry/BooleanTelemetry.html#forceSet(boolean)" class="member-name-link">forceSet(boolean)</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/BooleanTelemetry.html" title="class in yams.core.telemetry">BooleanTelemetry</a></dt>
 <dd>
 <div class="block">Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
@@ -1495,6 +1505,11 @@ configuration is supported.</div>
 <dd>
 <div class="block">Get the <code>Mass</code> of the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a> carriage.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/positional/Elevator.html#getCascadePose3d()" class="member-name-link">getCascadePose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional">Elevator</a></dt>
+<dd>
+<div class="block">Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+components of a robot model.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getCenterOfRotation()" class="member-name-link">getCenterOfRotation()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the center of rotation.</div>
@@ -1506,6 +1521,10 @@ configuration is supported.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getClosedLoopControllerMaximumVoltage()" class="member-name-link">getClosedLoopControllerMaximumVoltage()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the closed loop maximum voltage.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getClosedLoopControllerPeriod()" class="member-name-link">getClosedLoopControllerPeriod()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get the period the closed loop controller runs at.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getClosedLoopControllerSlot()" class="member-name-link">getClosedLoopControllerSlot()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -1555,6 +1574,11 @@ configuration is supported.</div>
 <dd>
 <div class="block">Get the constraints.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/positional/Elevator.html#getContinuousPose3d(boolean)" class="member-name-link">getContinuousPose3d(boolean)</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional">Elevator</a></dt>
+<dd>
+<div class="block">Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
+components of a robot model.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrapping()" class="member-name-link">getContinuousWrapping()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the continuous wrapping point for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
@@ -1576,6 +1600,10 @@ current azimuth angle.</div>
 <dt><a href="yams/core/mechanisms/config/SwerveModuleConfig.html#getCouplingRatio()" class="member-name-link">getCouplingRatio()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the steer to drive coupling ratio.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/swerve/SwerveModule.html#getCouplingVelocity()" class="member-name-link">getCouplingVelocity()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve">SwerveModule</a></dt>
+<dd>
+<div class="block">Wheel speed the drive gearing produces from the azimuth turning at its current rate.</div>
 </dd>
 <dt><a href="yams/core/math/ExponentialProfilePIDController.html#getCurrentAngle()" class="member-name-link">getCurrentAngle()</a> - Method in class yams.core.math.<a href="yams/core/math/ExponentialProfilePIDController.html" title="class in yams.core.math">ExponentialProfilePIDController</a></dt>
 <dd>
@@ -1970,7 +1998,9 @@ drive in place.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#getMaximumHeight()" class="member-name-link">getMaximumHeight()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
-<div class="block">Get the Upper hard limit of the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>.</div>
+<div class="block">Get the Upper hard limit of the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the maximum height from
+<a href="yams/core/mechanisms/config/ElevatorConfig.html#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>ElevatorConfig.withHardLimits(Distance, Distance)</code></a>, or the stage heights' total without hard limits, as the
+stages carry the carriage to the top.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getMaximumModuleLinearVelocity()" class="member-name-link">getMaximumModuleLinearVelocity()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -2256,7 +2286,9 @@ the given distance.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#getMinimumHeight()" class="member-name-link">getMinimumHeight()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
 <dd>
-<div class="block">Get the lower hard limit of the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
+<div class="block">Get the lower hard limit of the <a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the minimum height from
+<a href="yams/core/mechanisms/config/ElevatorConfig.html#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>ElevatorConfig.withHardLimits(Distance, Distance)</code></a>, or 0 without hard limits when the stages are set, as the
+stages start at the bottom.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#getModule(java.lang.String)" class="member-name-link">getModule(String)</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -2346,6 +2378,11 @@ the given distance.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getMotorInverted()" class="member-name-link">getMotorInverted()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the motor inversion state</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#getMountPose()" class="member-name-link">getMountPose()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">Where the mechanism is mounted: its parent's pose, or the robot's origin, moved and turned by its
+relative position.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#getMovementPlane()" class="member-name-link">getMovementPlane()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
@@ -2460,6 +2497,46 @@ the wheel with the azimuth motor controller.</div>
 <dd>
 <div class="block">Gets the measured pose (position and rotation) of the robot, as reported by odometry.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/positional/Arm.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Arm.html" title="class in yams.core.mechanisms.positional">Arm</a></dt>
+<dd>
+<div class="block">Get the arm's pose, for publishing to AdvantageScope as a component of a robot model: where it is
+mounted, as set in its <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned to the arm's angle about the axis
+normal to its movement plane.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/positional/DifferentialMechanism.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DifferentialMechanism.html" title="class in yams.core.mechanisms.positional">DifferentialMechanism</a></dt>
+<dd>
+<div class="block">Get the mechanism's pose, for publishing to AdvantageScope as a component of a robot model: where it
+is mounted, as set in its <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, tilted about the axis normal to its
+movement plane, then twisted about its own length.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/positional/DoubleJointedArm.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DoubleJointedArm.html" title="class in yams.core.mechanisms.positional">DoubleJointedArm</a></dt>
+<dd>
+<div class="block">Get the lower arm's pose, for publishing to AdvantageScope as a component of a robot model: where
+it is mounted, as set in the lower arm's <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned to its angle.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/positional/Elevator.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional">Elevator</a></dt>
+<dd>
+<div class="block">Get the carriage's pose, for publishing to AdvantageScope as a component of a robot model: where the
+elevator is mounted, as set in its <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, moved up the elevator by its
+height, at the elevator's angle in its movement plane.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/positional/Pivot.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Pivot.html" title="class in yams.core.mechanisms.positional">Pivot</a></dt>
+<dd>
+<div class="block">Get the pivot's pose, for publishing to AdvantageScope as a component of a robot model: where it is
+mounted, as set in its <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned to the pivot's angle about the axis
+normal to its movement plane.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/SmartMechanism.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
+<dd>
+<div class="block">Get the mechanism's pose relative to the robot, worked out from its motor's position and where it
+is mounted, as set in its <code>MechanismPositionConfig</code>.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/velocity/FlyWheel.html#getPose3d()" class="member-name-link">getPose3d()</a> - Method in class yams.core.mechanisms.velocity.<a href="yams/core/mechanisms/velocity/FlyWheel.html" title="class in yams.core.mechanisms.velocity">FlyWheel</a></dt>
+<dd>
+<div class="block">Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model: where its
+axle is mounted, as set in its <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned by the wheel's position about
+the axis normal to its movement plane.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/positional/DoubleJointedArm.html#getPosition()" class="member-name-link">getPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DoubleJointedArm.html" title="class in yams.core.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
 <div class="block">Get the <code>Translation2d</code> of the double jointed arm.</div>
@@ -2483,45 +2560,6 @@ the wheel with the azimuth motor controller.</div>
 <dt><a href="yams/core/math/LQRConfig.html#getRegulator(org.wpilib.math.system.LinearSystem)" class="member-name-link">getRegulator(LinearSystem)</a> - Method in class yams.core.math.<a href="yams/core/math/LQRConfig.html" title="class in yams.core.math">LQRConfig</a></dt>
 <dd>
 <div class="block">Get the <code>LinearQuadraticRegulator</code>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/positional/Arm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Arm.html" title="class in yams.core.mechanisms.positional">Arm</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the <a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/positional/DifferentialMechanism.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DifferentialMechanism.html" title="class in yams.core.mechanisms.positional">DifferentialMechanism</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/positional/DoubleJointedArm.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DoubleJointedArm.html" title="class in yams.core.mechanisms.positional">DoubleJointedArm</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/positional/Elevator.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional">Elevator</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/positional/Pivot.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Pivot.html" title="class in yams.core.mechanisms.positional">Pivot</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/SmartMechanism.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
-<dd>
-<div class="block">Get the <code>Translation3d</code> of the mechanism using <code>Mechanism2d</code> coordinates.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/velocity/FlyWheel.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.mechanisms.velocity.<a href="yams/core/mechanisms/velocity/FlyWheel.html" title="class in yams.core.mechanisms.velocity">FlyWheel</a></dt>
-<dd>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -2576,6 +2614,11 @@ configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yam
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#getRobotRelativeSpeed()" class="member-name-link">getRobotRelativeSpeed()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
 <div class="block">Get the robot relative speed of the drive.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#getRotatedPose(org.wpilib.units.measure.Angle)" class="member-name-link">getRotatedPose(Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">The pose of a part that turns about the axis normal to the movement plane, such as an arm or a
+pivot, at an angle.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getRotationPID()" class="member-name-link">getRotationPID()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -2712,6 +2755,18 @@ steps the simulated physics forward.</div>
 <dt><a href="yams/core/mechanisms/config/FlyWheelConfig.html#getSpeedometerMaxVelocity()" class="member-name-link">getSpeedometerMaxVelocity()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/FlyWheelConfig.html" title="class in yams.core.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Get the maximum velocity of the speedometer simulation.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#getStageHeights()" class="member-name-link">getStageHeights()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
+<dd>
+<div class="block">Get how far each moving stage travels relative to the stage below it.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#getStageHeightTotal()" class="member-name-link">getStageHeightTotal()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
+<dd>
+<div class="block">Get how far the stages travel together, the sum of the stage heights.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#getStages()" class="member-name-link">getStages()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
+<dd>
+<div class="block">Get the number of stages that move, counting the carriage as the last.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getStartingPosition()" class="member-name-link">getStartingPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -2944,6 +2999,11 @@ speed.</div>
 <dd>
 <div class="block">Get the temperature cut off for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/YMotors.html#getThriftyPulsar(int)" class="member-name-link">getThriftyPulsar(int)</a> - Static method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/YMotors.html" title="class in yams.core.motorcontrollers">YMotors</a></dt>
+<dd>
+<div class="block">The Thrifty Pulsar 775, from Thrifty's specs: 12 V, 3.1 N-m and 189 A stalled, and 2.7 A at 7500
+RPM free.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html#getTiltAngle(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">getTiltAngle(Angle, Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.core.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Get the tilt angle of the <a href="yams/core/mechanisms/positional/DifferentialMechanism.html" title="class in yams.core.mechanisms.positional"><code>DifferentialMechanism</code></a>.</div>
@@ -2959,6 +3019,10 @@ speed.</div>
 <dt><a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html#getTiltStartingAngle()" class="member-name-link">getTiltStartingAngle()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.core.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Get the starting angle of the <a href="yams/core/mechanisms/positional/DifferentialMechanism.html" title="class in yams.core.mechanisms.positional"><code>DifferentialMechanism</code></a> tilt.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#getTranslatedPose(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)" class="member-name-link">getTranslatedPose(Distance, Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">The pose of a part that slides along the movement plane, such as an elevator's carriage.</div>
 </dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getTranslationAxisScale()" class="member-name-link">getTranslationAxisScale()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
 <dd>
@@ -3068,6 +3132,11 @@ speed.</div>
 <dd>
 <div class="block">Get the upper (elbow) <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/positional/DoubleJointedArm.html#getUpperPose3d()" class="member-name-link">getUpperPose3d()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DoubleJointedArm.html" title="class in yams.core.mechanisms.positional">DoubleJointedArm</a></dt>
+<dd>
+<div class="block">Get the upper arm's pose, for publishing to AdvantageScope as a component of a robot model: at the
+end of the lower arm, turned to the upper arm's angle.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getUseExternalFeedback()" class="member-name-link">getUseExternalFeedback()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Use the external feedback sensor.</div>
@@ -3079,6 +3148,26 @@ speed.</div>
 <dt><a href="yams/core/mechanisms/positional/Elevator.html#getVelocity()" class="member-name-link">getVelocity()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Elevator.html" title="class in yams.core.mechanisms.positional">Elevator</a></dt>
 <dd>
 <div class="block">Get the linear velocity of the Elevator.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
+<dd>
+<div class="block">Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+it, as WPILib's SysId works it out for its presets.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
+<dd>
+<div class="block">Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+it, as WPILib's SysId works it out for its presets.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
+<dd>
+<div class="block">Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+it, as WPILib's SysId works it out for its presets.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
+<dd>
+<div class="block">Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+it, as WPILib's SysId works it out for its presets.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getVelocityTrapezoidalProfileInUse()" class="member-name-link">getVelocityTrapezoidalProfileInUse()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -3618,6 +3707,10 @@ wrapping point.</div>
 <dd>
 <div class="block">Motor for the subsystem.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#m_swerveTelemetry" class="member-name-link">m_swerveTelemetry</a> - Variable in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Telemetry and live tuning of the drive.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#m_systemCoreClosedLoopAlert" class="member-name-link">m_systemCoreClosedLoopAlert</a> - Variable in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Alert shown when the closed loop controller is running on the SystemCore.</div>
@@ -3848,6 +3941,17 @@ relative to a robot in a 3D coordinate system.</div>
 <dd>
 <div class="block">Enables or disables live tuning of every module's azimuth motor PID gains and angle setpoint.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthVoltage" class="member-name-link">ModulesAzimuthVoltage</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Tunable voltage applied to every module's azimuth motor, without its closed loop controller,
+while <a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesAzimuthVoltageEnabled"><code>SwerveDriveTelemetry.BooleanTelemetryField.ModulesAzimuthVoltageEnabled</code></a> is on.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesAzimuthVoltageEnabled" class="member-name-link">ModulesAzimuthVoltageEnabled</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">While azimuth tuning is on, turn every module's azimuth motor at
+<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesAzimuthVoltage</code></a> instead of the angle setpoint, without its
+closed loop controller, as for characterizing it.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveD" class="member-name-link">ModulesDriveD</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Derivative gain for tuning every module's drive motor closed-loop controller.</div>
@@ -3886,6 +3990,17 @@ setpoint.</div>
 <dd>
 <div class="block">Tunable velocity setpoint applied to every module's drive motor, in meters per second.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveVoltage" class="member-name-link">ModulesDriveVoltage</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Tunable voltage applied to every module's drive motor, without its closed loop controller, while
+<a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesDriveVoltageEnabled"><code>SwerveDriveTelemetry.BooleanTelemetryField.ModulesDriveVoltageEnabled</code></a> is on.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesDriveVoltageEnabled" class="member-name-link">ModulesDriveVoltageEnabled</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></dt>
+<dd>
+<div class="block">While drive tuning is on, drive every module's drive motor at
+<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesDriveVoltage</code></a> instead of the velocity setpoint, without its
+closed loop controller, as for characterizing it.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html#MotionProfile" class="member-name-link">MotionProfile</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a></dt>
 <dd>
 <div class="block">Motion profile currently getting used.</div>
@@ -3923,6 +4038,10 @@ to use it.</div>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#MotorTemperature" class="member-name-link">MotorTemperature</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Motor temperature</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#mountRotation" class="member-name-link">mountRotation</a> - Variable in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">How the mechanism is turned where it is mounted.</div>
 </dd>
 <dt><a href="yams/core/units/YUnits.html#MPH" class="member-name-link">MPH</a> - Static variable in class yams.core.units.<a href="yams/core/units/YUnits.html" title="class in yams.core.units">YUnits</a></dt>
 <dd>
@@ -4040,6 +4159,10 @@ configured with <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#with
 <dl class="index">
 <dt><a href="index.html#package-summary-heading" class="search-tag-link">Package Summary</a> - Section in Overview</dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#parent" class="member-name-link">parent</a> - Variable in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">The pose the mechanism is mounted on, such as another mechanism's, or the robot's origin if empty.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#parentTable" class="member-name-link">parentTable</a> - Variable in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Parent table for telemetry.</div>
@@ -4258,6 +4381,10 @@ velocity.</div>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#RotationI" class="member-name-link">RotationI</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Rotational integral gain for auto-aligning the robot.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#rotationInPlane(org.wpilib.units.measure.Angle)" class="member-name-link">rotationInPlane(Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">The rotation of a part turned by an angle about the axis normal to the movement plane.</div>
 </dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#RotationP" class="member-name-link">RotationP</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
 <dd>
@@ -6030,7 +6157,8 @@ conflicting, incomplete, or incompatible settings.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#startClosedLoopController()" class="member-name-link">startClosedLoopController()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
-<div class="block">Start the closed loop controller with the period.</div>
+<div class="block">Start the closed loop controller with the period, and the loosely coupled followers' closed loop
+controllers.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#startDriveToPoseTuning()" class="member-name-link">startDriveToPoseTuning()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -6079,7 +6207,12 @@ this <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#stopClosedLoopController()" class="member-name-link">stopClosedLoopController()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
-<div class="block">Stop the closed loop controller.</div>
+<div class="block">Stop the closed loop controller, and the loosely coupled followers' closed loop controllers.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.html#stopTuning(yams.core.mechanisms.swerve.SwerveDrive)" class="member-name-link">stopTuning(SwerveDrive)</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.html" title="class in yams.core.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
+it is with its closed loop controller.</div>
 </dd>
 <dt><a href="yams/core/telemetry/StructArrayTelemetry.html" class="type-name-link" title="class in yams.core.telemetry">StructArrayTelemetry&lt;T,<wbr>F&gt;</a> - Class in <a href="yams/core/telemetry/package-summary.html">yams.core.telemetry</a></dt>
 <dd>
@@ -6765,6 +6898,11 @@ the order they are declared.</div>
 <dd>
 <div class="block">Velocity control currently getting used.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#VelocityMeasurementDelay" class="member-name-link">VelocityMeasurementDelay</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">How far behind the mechanism the measured velocity is, from how the motor controller filters it,
+when it is known.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/positional/Arm.html#visualizationUpdate()" class="member-name-link">visualizationUpdate()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Arm.html" title="class in yams.core.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Updates the mechanism ligament with the current angle of the arm.</div>
@@ -6973,6 +7111,10 @@ configured), outputs are in Volts.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopControlPeriod(org.wpilib.units.measure.Time)" class="member-name-link">withClosedLoopControlPeriod(Time)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Modify the period of the PID controller for the motor controller.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html#withClosedLoopPeriod()" class="member-name-link">withClosedLoopPeriod()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.core.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables logging the period the closed loop controller runs at.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">withClosedLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -7587,6 +7729,10 @@ each state: turn the wheel at most 90 degrees and reverse the drive instead.</di
 <dd>
 <div class="block">Enables the output voltage logging if available.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#withParent(java.util.function.Supplier)" class="member-name-link">withParent(Supplier)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">Mount the mechanism on another, such as an arm on an elevator's carriage, so it moves with it.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withPose()" class="member-name-link">withPose()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
 <div class="block">Enables the pose logging.</div>
@@ -7598,6 +7744,11 @@ each state: turn the wheel at most 90 degrees and reverse the drive instead.</di
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withProfile(org.wpilib.math.trajectory.TrapezoidProfile.Constraints)" class="member-name-link">withProfile(TrapezoidProfile.Constraints)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the trapezoidal motion profile for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#withRelativePosition(org.wpilib.math.geometry.Transform3d)" class="member-name-link">withRelativePosition(Transform3d)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
+<dd>
+<div class="block">Set where the mechanism is mounted, relative to the robot, or to its parent, and how it is turned
+there.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#withRelativePosition(org.wpilib.math.geometry.Translation3d)" class="member-name-link">withRelativePosition(Translation3d)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>
@@ -7831,6 +7982,11 @@ steps the simulated physics forward.</div>
 <dd>
 <div class="block">Enables the use of the speedometer simulation for the shooter.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/config/ElevatorConfig.html#withStages(org.wpilib.units.measure.Distance...)" class="member-name-link">withStages(Distance...)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></dt>
+<dd>
+<div class="block">Set the elevator's moving stages, for the pose of each stage from
+<code>Elevator.getCascadePose3d()</code> or <code>Elevator.getContinuousPose3d(boolean)</code>.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withStartingPose(org.wpilib.math.geometry.Pose2d)" class="member-name-link">withStartingPose(Pose2d)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Set the starting pose of the robot.</div>
@@ -8024,6 +8180,10 @@ velocity, rotational or linear).</div>
 <div class="block">Set the velocity deadband: a requested wheel speed at or below it is too slow to steer by, so the
 module stops and holds its angle instead of turning toward controller noise.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html#withVelocityMeasurementDelay()" class="member-name-link">withVelocityMeasurementDelay()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetryConfig.html" title="class in yams.core.telemetry">SmartMotorControllerTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables logging how far behind the mechanism the measured velocity is, when it is known.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withVelocityTrapezoidalProfile(boolean)" class="member-name-link">withVelocityTrapezoidalProfile(boolean)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the trapezoidal profile to be read explicitly as a velocity profile.</div>
@@ -8196,6 +8356,10 @@ mode and zero power mode.</div>
 </dd>
 <dt><a href="index.html#yet-another-mechanism-system-yams--heading" class="search-tag-link">Yet Another Mechanism System (YAMS)</a> - Section in Overview</dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/YMotors.html" class="type-name-link" title="class in yams.core.motorcontrollers">YMotors</a> - Class in <a href="yams/core/motorcontrollers/package-summary.html">yams.core.motorcontrollers</a></dt>
+<dd>
+<div class="block"><code>DCMotor</code> models of motors WPILib does not have a model of.</div>
+</dd>
 <dt><a href="yams/core/units/YUnits.html" class="type-name-link" title="class in yams.core.units">YUnits</a> - Class in <a href="yams/core/units/package-summary.html">yams.core.units</a></dt>
 <dd>
 <div class="block">YUnits that are fun and useful!</div>

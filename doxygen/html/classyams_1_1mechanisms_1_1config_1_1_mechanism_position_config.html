@@ -77,6 +77,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yams::mechanisms::config::MechanismPositionConfig Class Reference</div></div>
@@ -85,31 +86,83 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="_mechanism_position_config_8hpp_source.html">MechanismPositionConfig.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:aaa509aecf464a1c40f07fc365d424325" id="r_aaa509aecf464a1c40f07fc365d424325"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa509aecf464a1c40f07fc365d424325">Plane</a> { <a class="el" href="#aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469">XZ</a>
+, <a class="el" href="#aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512">YZ</a>
+, <a class="el" href="#aaa509aecf464a1c40f07fc365d424325a74c53bcd3dcb2bb79993b2fec37d362a">XY</a>
+ }</td></tr>
+<tr class="separator:aaa509aecf464a1c40f07fc365d424325"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7ac2c8698d184d79fb0e8987643e9c0f" id="r_a7ac2c8698d184d79fb0e8987643e9c0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ac2c8698d184d79fb0e8987643e9c0f">MechanismPositionConfig</a> (const std::string &amp;name)</td></tr>
-<tr class="separator:a7ac2c8698d184d79fb0e8987643e9c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af93f07ea3add1fe48e02bf0fd4fda900" id="r_af93f07ea3add1fe48e02bf0fd4fda900"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af93f07ea3add1fe48e02bf0fd4fda900">MechanismPositionConfig</a> (const std::string &amp;name, wpi::units::degree_t angle)</td></tr>
-<tr class="separator:af93f07ea3add1fe48e02bf0fd4fda900"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab381b5cb1ccf78260294eddfe69c438e" id="r_ab381b5cb1ccf78260294eddfe69c438e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab381b5cb1ccf78260294eddfe69c438e">MechanismPositionConfig</a> (const std::string &amp;name, wpi::units::meter_t distance)</td></tr>
-<tr class="separator:ab381b5cb1ccf78260294eddfe69c438e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6156c5f26627983b9921fe8ede67be3" id="r_ac6156c5f26627983b9921fe8ede67be3"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6156c5f26627983b9921fe8ede67be3">GetName</a> () const</td></tr>
-<tr class="separator:ac6156c5f26627983b9921fe8ede67be3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ba0cba470a6e4ce89b7075d797604fe" id="r_a5ba0cba470a6e4ce89b7075d797604fe"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::degree_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ba0cba470a6e4ce89b7075d797604fe">GetAngle</a> () const</td></tr>
-<tr class="separator:a5ba0cba470a6e4ce89b7075d797604fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9371d7a01a06de15230f7c17d2e6c422" id="r_a9371d7a01a06de15230f7c17d2e6c422"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::meter_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9371d7a01a06de15230f7c17d2e6c422">GetDistance</a> () const</td></tr>
-<tr class="separator:a9371d7a01a06de15230f7c17d2e6c422"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c3540e57fba51099c1ad75ef85207ed" id="r_a2c3540e57fba51099c1ad75ef85207ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c3540e57fba51099c1ad75ef85207ed">IsAngular</a> () const</td></tr>
-<tr class="separator:a2c3540e57fba51099c1ad75ef85207ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0655688f52164a0fc765875aab1f6cd" id="r_aa0655688f52164a0fc765875aab1f6cd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0655688f52164a0fc765875aab1f6cd">IsLinear</a> () const</td></tr>
-<tr class="separator:aa0655688f52164a0fc765875aab1f6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf7d1508aa8f982ca17c7b931247ce5c" id="r_abf7d1508aa8f982ca17c7b931247ce5c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf7d1508aa8f982ca17c7b931247ce5c">MechanismPositionConfig</a> ()=default</td></tr>
+<tr class="separator:abf7d1508aa8f982ca17c7b931247ce5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6855995e4e4a302d83b445ef96f75e19" id="r_a6855995e4e4a302d83b445ef96f75e19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6855995e4e4a302d83b445ef96f75e19">WithRelativePosition</a> (const wpi::math::Translation3d &amp;robotToMechanism)</td></tr>
+<tr class="separator:a6855995e4e4a302d83b445ef96f75e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6cfe31c6afc496caf10a6a8232abc6f" id="r_ab6cfe31c6afc496caf10a6a8232abc6f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab6cfe31c6afc496caf10a6a8232abc6f">WithRelativePosition</a> (const wpi::math::Transform3d &amp;robotToMechanism)</td></tr>
+<tr class="separator:ab6cfe31c6afc496caf10a6a8232abc6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d0a952225b8574984b7ebe7c86f33cd" id="r_a7d0a952225b8574984b7ebe7c86f33cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d0a952225b8574984b7ebe7c86f33cd">WithMovementPlane</a> (<a class="el" href="#aaa509aecf464a1c40f07fc365d424325">Plane</a> plane)</td></tr>
+<tr class="separator:a7d0a952225b8574984b7ebe7c86f33cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af487dcb7b63ccf018aab6e6f774c873a" id="r_af487dcb7b63ccf018aab6e6f774c873a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af487dcb7b63ccf018aab6e6f774c873a">WithParent</a> (std::function&lt; wpi::math::Pose3d()&gt; parentPose)</td></tr>
+<tr class="separator:af487dcb7b63ccf018aab6e6f774c873a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a199a63567e334c4059e8b842c6e17012" id="r_a199a63567e334c4059e8b842c6e17012"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::math::Translation3d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a199a63567e334c4059e8b842c6e17012">GetRelativePosition</a> () const</td></tr>
+<tr class="separator:a199a63567e334c4059e8b842c6e17012"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9bead97a135e0757f07e0548f4368b9" id="r_af9bead97a135e0757f07e0548f4368b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#aaa509aecf464a1c40f07fc365d424325">Plane</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9bead97a135e0757f07e0548f4368b9">GetMovementPlane</a> () const</td></tr>
+<tr class="separator:af9bead97a135e0757f07e0548f4368b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b78d6a58300efec52dc10000548f4de" id="r_a2b78d6a58300efec52dc10000548f4de"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b78d6a58300efec52dc10000548f4de">GetMountPose</a> () const</td></tr>
+<tr class="separator:a2b78d6a58300efec52dc10000548f4de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae61e73320541eafe2f6bcef2d7955684" id="r_ae61e73320541eafe2f6bcef2d7955684"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae61e73320541eafe2f6bcef2d7955684">GetRotatedPose</a> (wpi::units::radian_t angle) const</td></tr>
+<tr class="separator:ae61e73320541eafe2f6bcef2d7955684"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a421ce8e2ea8551906e1575f8290b0950" id="r_a421ce8e2ea8551906e1575f8290b0950"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a421ce8e2ea8551906e1575f8290b0950">GetTranslatedPose</a> (wpi::units::meter_t distance, wpi::units::radian_t angle) const</td></tr>
+<tr class="separator:a421ce8e2ea8551906e1575f8290b0950"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f1e2a407bca93727c5b5e86d70d485d" id="r_a9f1e2a407bca93727c5b5e86d70d485d"><td class="memItemLeft" align="right" valign="top">wpi::math::Rotation3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f1e2a407bca93727c5b5e86d70d485d">RotationInPlane</a> (wpi::units::radian_t angle) const</td></tr>
+<tr class="separator:a9f1e2a407bca93727c5b5e86d70d485d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A named position setpoint for a SmartPositionalMechanism.</p>
-<p>Holds either an angular or a linear target value (not both) together with a human-readable label used for telemetry and logging. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a7ac2c8698d184d79fb0e8987643e9c0f" name="a7ac2c8698d184d79fb0e8987643e9c0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ac2c8698d184d79fb0e8987643e9c0f">&#9670;&#160;</a></span>MechanismPositionConfig() <span class="overload">[1/3]</span></h2>
+<div class="textblock"><p>Where a mechanism is on the robot, for each mechanism's GetPose3d(): where it is mounted, how it is turned there, the plane it moves in, and optionally the mechanism it is mounted on, such as an arm on an elevator's carriage.</p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> position;</div>
+<div class="line">position.<a class="code hl_function" href="#a6855995e4e4a302d83b445ef96f75e19">WithRelativePosition</a>(wpi::math::Translation3d{0.2_m, wpi::units::meter_t{0}, 0.3_m})  <span class="comment">// 20 cm forward, 30 cm up</span></div>
+<div class="line">    .<a class="code hl_function" href="#a7d0a952225b8574984b7ebe7c86f33cd">WithMovementPlane</a>(<a class="code hl_enumvalue" href="#aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469">MechanismPositionConfig::Plane::XZ</a>);</div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_mechanism_position_config_html"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">yams::mechanisms::config::MechanismPositionConfig</a></div><div class="ttdef"><b>Definition</b> MechanismPositionConfig.hpp:31</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_mechanism_position_config_html_a6855995e4e4a302d83b445ef96f75e19"><div class="ttname"><a href="#a6855995e4e4a302d83b445ef96f75e19">yams::mechanisms::config::MechanismPositionConfig::WithRelativePosition</a></div><div class="ttdeci">MechanismPositionConfig &amp; WithRelativePosition(const wpi::math::Translation3d &amp;robotToMechanism)</div><div class="ttdef"><b>Definition</b> MechanismPositionConfig.hpp:51</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_mechanism_position_config_html_a7d0a952225b8574984b7ebe7c86f33cd"><div class="ttname"><a href="#a7d0a952225b8574984b7ebe7c86f33cd">yams::mechanisms::config::MechanismPositionConfig::WithMovementPlane</a></div><div class="ttdeci">MechanismPositionConfig &amp; WithMovementPlane(Plane plane)</div><div class="ttdef"><b>Definition</b> MechanismPositionConfig.hpp:76</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_mechanism_position_config_html_aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469"><div class="ttname"><a href="#aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469">yams::mechanisms::config::MechanismPositionConfig::Plane::XZ</a></div><div class="ttdeci">@ XZ</div></div>
+</div><!-- fragment --> </div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="aaa509aecf464a1c40f07fc365d424325" name="aaa509aecf464a1c40f07fc365d424325"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa509aecf464a1c40f07fc365d424325">&#9670;&#160;</a></span>Plane</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#aaa509aecf464a1c40f07fc365d424325">yams::mechanisms::config::MechanismPositionConfig::Plane</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The planes that the mechanism could move in. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469" name="aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469"></a>XZ&#160;</td><td class="fielddoc"><p>X-Z plane: forward and up. The default. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512" name="aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512"></a>YZ&#160;</td><td class="fielddoc"><p>Y-Z plane: left and up. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aaa509aecf464a1c40f07fc365d424325a74c53bcd3dcb2bb79993b2fec37d362a" name="aaa509aecf464a1c40f07fc365d424325a74c53bcd3dcb2bb79993b2fec37d362a"></a>XY&#160;</td><td class="fielddoc"><p>X-Y plane: forward and left, such as a turret. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="abf7d1508aa8f982ca17c7b931247ce5c" name="abf7d1508aa8f982ca17c7b931247ce5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf7d1508aa8f982ca17c7b931247ce5c">&#9670;&#160;</a></span>MechanismPositionConfig()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -120,177 +173,331 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">yams::mechanisms::config::MechanismPositionConfig::MechanismPositionConfig </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Create a named position config with no setpoint (name-only label).</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">name</td><td>Human-readable name for this position. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="af93f07ea3add1fe48e02bf0fd4fda900" name="af93f07ea3add1fe48e02bf0fd4fda900"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af93f07ea3add1fe48e02bf0fd4fda900">&#9670;&#160;</a></span>MechanismPositionConfig() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">yams::mechanisms::config::MechanismPositionConfig::MechanismPositionConfig </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">wpi::units::degree_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Create a named angular position config.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">name</td><td>Human-readable name for this position. </td></tr>
-    <tr><td class="paramname">angle</td><td>Target angle setpoint. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ab381b5cb1ccf78260294eddfe69c438e" name="ab381b5cb1ccf78260294eddfe69c438e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab381b5cb1ccf78260294eddfe69c438e">&#9670;&#160;</a></span>MechanismPositionConfig() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">yams::mechanisms::config::MechanismPositionConfig::MechanismPositionConfig </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>distance</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Create a named linear position config.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">name</td><td>Human-readable name for this position. </td></tr>
-    <tr><td class="paramname">distance</td><td>Target distance setpoint. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a5ba0cba470a6e4ce89b7075d797604fe" name="a5ba0cba470a6e4ce89b7075d797604fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ba0cba470a6e4ce89b7075d797604fe">&#9670;&#160;</a></span>GetAngle()</h2>
+<a id="a2b78d6a58300efec52dc10000548f4de" name="a2b78d6a58300efec52dc10000548f4de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b78d6a58300efec52dc10000548f4de">&#9670;&#160;</a></span>GetMountPose()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; wpi::units::degree_t &gt; yams::mechanisms::config::MechanismPositionConfig::GetAngle </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::config::MechanismPositionConfig::GetMountPose </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the optional angular setpoint.</p>
-<dl class="section return"><dt>Returns</dt><dd>Angle if this is an angular position config, otherwise empty. </dd></dl>
+<p>Where the mechanism is mounted: its parent's pose, or the robot's origin, moved and turned by its relative position. </p>
 
 </div>
 </div>
-<a id="a9371d7a01a06de15230f7c17d2e6c422" name="a9371d7a01a06de15230f7c17d2e6c422"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9371d7a01a06de15230f7c17d2e6c422">&#9670;&#160;</a></span>GetDistance()</h2>
+<a id="af9bead97a135e0757f07e0548f4368b9" name="af9bead97a135e0757f07e0548f4368b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9bead97a135e0757f07e0548f4368b9">&#9670;&#160;</a></span>GetMovementPlane()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; wpi::units::meter_t &gt; yams::mechanisms::config::MechanismPositionConfig::GetDistance </td>
+          <td class="memname"><a class="el" href="#aaa509aecf464a1c40f07fc365d424325">Plane</a> yams::mechanisms::config::MechanismPositionConfig::GetMovementPlane </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the optional linear setpoint.</p>
-<dl class="section return"><dt>Returns</dt><dd>Distance if this is a linear position config, otherwise empty. </dd></dl>
+<p>Get the plane that the mechanism moves in. </p>
 
 </div>
 </div>
-<a id="ac6156c5f26627983b9921fe8ede67be3" name="ac6156c5f26627983b9921fe8ede67be3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6156c5f26627983b9921fe8ede67be3">&#9670;&#160;</a></span>GetName()</h2>
+<a id="a199a63567e334c4059e8b842c6e17012" name="a199a63567e334c4059e8b842c6e17012"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a199a63567e334c4059e8b842c6e17012">&#9670;&#160;</a></span>GetRelativePosition()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const std::string &amp; yams::mechanisms::config::MechanismPositionConfig::GetName </td>
+          <td class="memname">std::optional&lt; wpi::math::Translation3d &gt; yams::mechanisms::config::MechanismPositionConfig::GetRelativePosition </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the human-readable name of this position.</p>
-<dl class="section return"><dt>Returns</dt><dd>Name string. </dd></dl>
+<p>Get the translation from the robot, or from the parent, to the mechanism, if set. </p>
 
 </div>
 </div>
-<a id="a2c3540e57fba51099c1ad75ef85207ed" name="a2c3540e57fba51099c1ad75ef85207ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2c3540e57fba51099c1ad75ef85207ed">&#9670;&#160;</a></span>IsAngular()</h2>
+<a id="ae61e73320541eafe2f6bcef2d7955684" name="ae61e73320541eafe2f6bcef2d7955684"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae61e73320541eafe2f6bcef2d7955684">&#9670;&#160;</a></span>GetRotatedPose()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool yams::mechanisms::config::MechanismPositionConfig::IsAngular </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::config::MechanismPositionConfig::GetRotatedPose </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td class="paramtype">wpi::units::radian_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Return true if this config holds an angular setpoint.</p>
-<dl class="section return"><dt>Returns</dt><dd>true when an angle was provided at construction. </dd></dl>
+<p>The pose of a part that turns about the axis normal to the movement plane, such as an arm or a pivot, at an angle. At 0 it points along +X in the XZ and XY planes, and along +Y in the YZ plane, and a positive angle turns it toward +Z in the XZ and YZ planes, and toward +Y in the XY plane.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">angle</td><td>The angle it is turned to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Its pose: where it is mounted, turned by the angle. </dd></dl>
 
 </div>
 </div>
-<a id="aa0655688f52164a0fc765875aab1f6cd" name="aa0655688f52164a0fc765875aab1f6cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0655688f52164a0fc765875aab1f6cd">&#9670;&#160;</a></span>IsLinear()</h2>
+<a id="a421ce8e2ea8551906e1575f8290b0950" name="a421ce8e2ea8551906e1575f8290b0950"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a421ce8e2ea8551906e1575f8290b0950">&#9670;&#160;</a></span>GetTranslatedPose()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool yams::mechanisms::config::MechanismPositionConfig::IsLinear </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::config::MechanismPositionConfig::GetTranslatedPose </td>
           <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>distance</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::radian_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The pose of a part that slides along the movement plane, such as an elevator's carriage.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">distance</td><td>How far it has slid from where it is mounted. </td></tr>
+    <tr><td class="paramname">angle</td><td>The direction it slides in, in the movement plane: 0 along +X (+Y in the YZ plane), 90 degrees along +Z (+Y in the XY plane). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Its pose: where it is mounted, moved by the distance, and not turned. </dd></dl>
+
+</div>
+</div>
+<a id="a9f1e2a407bca93727c5b5e86d70d485d" name="a9f1e2a407bca93727c5b5e86d70d485d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f1e2a407bca93727c5b5e86d70d485d">&#9670;&#160;</a></span>RotationInPlane()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::math::Rotation3d yams::mechanisms::config::MechanismPositionConfig::RotationInPlane </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::radian_t</td>          <td class="paramname"><span class="paramname"><em>angle</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Return true if this config holds a linear setpoint.</p>
-<dl class="section return"><dt>Returns</dt><dd>true when a distance was provided at construction. </dd></dl>
+<p>The rotation of a part turned by an angle about the axis normal to the movement plane.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">angle</td><td>The angle. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The rotation. </dd></dl>
+
+</div>
+</div>
+<a id="a7d0a952225b8574984b7ebe7c86f33cd" name="a7d0a952225b8574984b7ebe7c86f33cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d0a952225b8574984b7ebe7c86f33cd">&#9670;&#160;</a></span>WithMovementPlane()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::MechanismPositionConfig::WithMovementPlane </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aaa509aecf464a1c40f07fc365d424325">Plane</a></td>          <td class="paramname"><span class="paramname"><em>plane</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set the plane that the mechanism moves in.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plane</td><td>The plane. Default is the X-Z plane. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="af487dcb7b63ccf018aab6e6f774c873a" name="af487dcb7b63ccf018aab6e6f774c873a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af487dcb7b63ccf018aab6e6f774c873a">&#9670;&#160;</a></span>WithParent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::MechanismPositionConfig::WithParent </td>
+          <td>(</td>
+          <td class="paramtype">std::function&lt; wpi::math::Pose3d()&gt;</td>          <td class="paramname"><span class="paramname"><em>parentPose</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Mount the mechanism on another, such as an arm on an elevator's carriage, so it moves with it. The mechanism's relative position is then from the parent's pose, rather than from the robot.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parentPose</td><td>The pose the mechanism is mounted on, such as the elevator's GetPose3d(). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="ab6cfe31c6afc496caf10a6a8232abc6f" name="ab6cfe31c6afc496caf10a6a8232abc6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6cfe31c6afc496caf10a6a8232abc6f">&#9670;&#160;</a></span>WithRelativePosition() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::MechanismPositionConfig::WithRelativePosition </td>
+          <td>(</td>
+          <td class="paramtype">const wpi::math::Transform3d &amp;</td>          <td class="paramname"><span class="paramname"><em>robotToMechanism</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set where the mechanism is mounted, relative to the robot, or to its parent, and how it is turned there. The mechanism's pose is worked out from here: an arm's or pivot's axis, an elevator's carriage at zero height, or a flywheel's axle.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">robotToMechanism</td><td>Transform from the robot, or from its parent, to the mechanism. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a6855995e4e4a302d83b445ef96f75e19" name="a6855995e4e4a302d83b445ef96f75e19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6855995e4e4a302d83b445ef96f75e19">&#9670;&#160;</a></span>WithRelativePosition() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::MechanismPositionConfig::WithRelativePosition </td>
+          <td>(</td>
+          <td class="paramtype">const wpi::math::Translation3d &amp;</td>          <td class="paramname"><span class="paramname"><em>robotToMechanism</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set where the mechanism is mounted, relative to the robot, or to its parent.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">robotToMechanism</td><td>Translation from the robot, or from its parent, to the mechanism. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
 
 </div>
 </div>

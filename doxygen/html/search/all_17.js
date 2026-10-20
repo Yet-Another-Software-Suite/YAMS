@@ -1,4 +1,30 @@
 var searchData=
 [
-  ['zerogyro_0',['ZeroGyro',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a09b5f2b0bc0cb9ecdc8a671151257889',1,'yams::mechanisms::swerve::SwerveDrive']]]
+  ['yams_0',['yams',['../namespaceyams.html',1,'']]],
+  ['yams_20yet_20another_20mechanism_20system_1',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
+  ['yams_2ehpp_2',['YAMS.hpp',['../YAMS_8hpp.html',1,'']]],
+  ['yams_3a_3aexceptions_3',['exceptions',['../namespaceyams_1_1exceptions.html',1,'yams']]],
+  ['yams_3a_3agearing_4',['gearing',['../namespaceyams_1_1gearing.html',1,'yams']]],
+  ['yams_3a_3amath_5',['math',['../namespaceyams_1_1math.html',1,'yams']]],
+  ['yams_3a_3amechanisms_6',['mechanisms',['../namespaceyams_1_1mechanisms.html',1,'yams']]],
+  ['yams_3a_3amechanisms_3a_3aconfig_7',['config',['../namespaceyams_1_1mechanisms_1_1config.html',1,'yams::mechanisms']]],
+  ['yams_3a_3amechanisms_3a_3apositional_8',['positional',['../namespaceyams_1_1mechanisms_1_1positional.html',1,'yams::mechanisms']]],
+  ['yams_3a_3amechanisms_3a_3aswerve_9',['swerve',['../namespaceyams_1_1mechanisms_1_1swerve.html',1,'yams::mechanisms']]],
+  ['yams_3a_3amechanisms_3a_3aswerve_3a_3autility_10',['utility',['../namespaceyams_1_1mechanisms_1_1swerve_1_1utility.html',1,'yams::mechanisms::swerve']]],
+  ['yams_3a_3amechanisms_3a_3avelocity_11',['velocity',['../namespaceyams_1_1mechanisms_1_1velocity.html',1,'yams::mechanisms']]],
+  ['yams_3a_3amotorcontrollers_12',['motorcontrollers',['../namespaceyams_1_1motorcontrollers.html',1,'yams']]],
+  ['yams_3a_3amotorcontrollers_3a_3alocal_13',['local',['../namespaceyams_1_1motorcontrollers_1_1local.html',1,'yams::motorcontrollers']]],
+  ['yams_3a_3amotorcontrollers_3a_3aremote_14',['remote',['../namespaceyams_1_1motorcontrollers_1_1remote.html',1,'yams::motorcontrollers']]],
+  ['yams_3a_3amotorcontrollers_3a_3asimulation_15',['simulation',['../namespaceyams_1_1motorcontrollers_1_1simulation.html',1,'yams::motorcontrollers']]],
+  ['yams_3a_3atelemetry_16',['telemetry',['../namespaceyams_1_1telemetry.html',1,'yams']]],
+  ['yams_3a_3aunits_17',['units',['../namespaceyams_1_1units.html',1,'yams']]],
+  ['yamsexception_18',['yamsexception',['../classyams_1_1exceptions_1_1YamsException.html#af4df63206e7ec852def2800a3a2f4165',1,'yams::exceptions::YamsException::YamsException()'],['../classyams_1_1exceptions_1_1YamsException.html',1,'yams::exceptions::YamsException']]],
+  ['yard_5ft_19',['yard_t',['../namespaceyams_1_1units.html#a679b427f74b6a74ceb304463c6a7d940',1,'yams::units']]],
+  ['yardunit_20',['YardUnit',['../namespaceyams_1_1units.html#abfd1092f3f5f9f9b031f3c6045109f52',1,'yams::units']]],
+  ['yaw_21',['YAW',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37',1,'yams::mechanisms::config']]],
+  ['year_5ft_22',['year_t',['../namespaceyams_1_1units.html#af06108eec95a645d601b41c69fe56c0b',1,'yams::units']]],
+  ['yearunit_23',['YearUnit',['../namespaceyams_1_1units.html#af0f2c7a9a912cbc67d60668e20549775',1,'yams::units']]],
+  ['yet_20another_20mechanism_20system_24',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
+  ['yunits_2ehpp_25',['YUnits.hpp',['../YUnits_8hpp.html',1,'']]],
+  ['yz_26',['YZ',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512',1,'yams::mechanisms::config::MechanismPositionConfig']]]
 ];

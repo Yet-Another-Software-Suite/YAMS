@@ -78,7 +78,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#updateTelemetry()" tabindex="0">updateTelemetry()</a></li>
 <li><a href="#simIterate()" tabindex="0">simIterate()</a></li>
 <li><a href="#visualizationUpdate()" tabindex="0">visualizationUpdate()</a></li>
-<li><a href="#getRelativeMechanismPosition()" tabindex="0">getRelativeMechanismPosition()</a></li>
+<li><a href="#getPose3d()" tabindex="0">getPose3d()</a></li>
+<li><a href="#getUpperPose3d()" tabindex="0">getUpperPose3d()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#getLowerAngle()" tabindex="0">getLowerAngle()</a></li>
 <li><a href="#getUpperAngle()" tabindex="0">getUpperAngle()</a></li>
@@ -215,17 +216,16 @@ this class and has control examples in its Javadoc.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the mechanism.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation2d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPosition()" class="member-name-link">getPosition</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPose3d()" class="member-name-link">getPose3d</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the <code>Translation2d</code> of the double jointed arm.</div>
+<div class="block">Get the lower arm's pose, for publishing to AdvantageScope as a component of a robot model: where
+it is mounted, as set in the lower arm's <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned to its angle.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation3d</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation2d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPosition()" class="member-name-link">getPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the <code>Translation2d</code> of the double jointed arm.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Angle</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getUpperAngle()" class="member-name-link">getUpperAngle</a>()</code></div>
@@ -242,35 +242,41 @@ in the
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the upper (elbow) <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getUpperPose3d()" class="member-name-link">getUpperPose3d</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the upper arm's pose, for publishing to AdvantageScope as a component of a robot model: at the
+end of the lower arm, turned to the upper arm's angle.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAtMax()" class="member-name-link">isAtMax</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Not supported for <a href="DoubleJointedArm.html" title="class in yams.core.mechanisms.positional"><code>DoubleJointedArm</code></a>.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAtMax()" class="member-name-link">isAtMax</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAtMin()" class="member-name-link">isAtMin</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Not supported for <a href="DoubleJointedArm.html" title="class in yams.core.mechanisms.positional"><code>DoubleJointedArm</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isAtMin()" class="member-name-link">isAtMin</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Not supported for <a href="DoubleJointedArm.html" title="class in yams.core.mechanisms.positional"><code>DoubleJointedArm</code></a>.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNear(org.wpilib.math.geometry.Translation2d,org.wpilib.units.measure.Distance)" class="member-name-link">isNear</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;target,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNear(org.wpilib.math.geometry.Translation2d,org.wpilib.units.measure.Distance)" class="member-name-link">isNear</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;target,
  org.wpilib.units.measure.Distance&nbsp;tolerance)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Is near the target within tolerance</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Iterate sim</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the mechanism's telemetry.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizationUpdate()" class="member-name-link">visualizationUpdate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#visualizationUpdate()" class="member-name-link">visualizationUpdate</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Updates the mechanism ligament with the current angle of the arm.</div>
 </div>
 </div>
@@ -480,18 +486,38 @@ in the
 </section>
 </li>
 <li>
-<section class="detail" id="getRelativeMechanismPosition()">
-<h3>getRelativeMechanismPosition</h3>
+<section class="detail" id="getPose3d()">
+<h3>getPose3d</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Translation3d</span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getPose3d</span>()</div>
+<div class="block">Get the lower arm's pose, for publishing to AdvantageScope as a component of a robot model: where
+it is mounted, as set in the lower arm's <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned to its angle.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../SmartMechanism.html#getRelativeMechanismPosition()">getRelativeMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
+<dd><code><a href="../SmartMechanism.html#getPose3d()">getPose3d</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
 <dt>Returns:</dt>
-<dd>The relative position of the mechanism as a <code>Translation3d</code>.</dd>
+<dd>The lower arm's <code>Pose3d</code>, relative to the robot.</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="#getUpperPose3d()"><code>getUpperPose3d()</code></a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getUpperPose3d()">
+<h3>getUpperPose3d</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getUpperPose3d</span>()</div>
+<div class="block">Get the upper arm's pose, for publishing to AdvantageScope as a component of a robot model: at the
+end of the lower arm, turned to the upper arm's angle. Both angles are from the lower arm's mount,
+as <a href="#getPosition()"><code>getPosition()</code></a> takes them.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The upper arm's <code>Pose3d</code>, relative to the robot.</dd>
 </dl>
 </div>
 </section>

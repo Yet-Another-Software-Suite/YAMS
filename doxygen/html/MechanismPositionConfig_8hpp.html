@@ -80,8 +80,14 @@ $(function() {
   <div class="headertitle"><div class="title">MechanismPositionConfig.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;string&gt;</code><br />
+<div class="textblock"><code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;utility&gt;</code><br />
+<code>#include &lt;wpi/math/geometry/Pose3d.hpp&gt;</code><br />
+<code>#include &lt;wpi/math/geometry/Rotation3d.hpp&gt;</code><br />
+<code>#include &lt;wpi/math/geometry/Transform3d.hpp&gt;</code><br />
+<code>#include &lt;wpi/math/geometry/Translation3d.hpp&gt;</code><br />
 <code>#include &lt;wpi/units/angle.hpp&gt;</code><br />
 <code>#include &lt;wpi/units/length.hpp&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -89,15 +95,27 @@ Include dependency graph for MechanismPositionConfig.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="MechanismPositionConfig_8hpp__incl.png" border="0" usemap="#a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hpp" alt=""/></div>
 <map name="a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hpp" id="a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hpp">
-<area shape="rect" title=" " alt="" coords="86,5,309,75"/>
-<area shape="rect" title=" " alt="" coords="5,123,80,148"/>
-<area shape="poly" title=" " alt="" coords="143,77,75,118,72,113,140,73"/>
-<area shape="rect" title=" " alt="" coords="104,123,163,148"/>
-<area shape="poly" title=" " alt="" coords="176,76,151,113,147,110,172,73"/>
-<area shape="rect" title=" " alt="" coords="187,123,336,148"/>
-<area shape="poly" title=" " alt="" coords="223,73,248,110,243,113,218,76"/>
-<area shape="rect" title=" " alt="" coords="360,123,515,148"/>
-<area shape="poly" title=" " alt="" coords="285,72,396,115,394,120,283,77"/>
+<area shape="rect" title=" " alt="" coords="523,5,745,75"/>
+<area shape="rect" title=" " alt="" coords="5,123,68,148"/>
+<area shape="poly" title=" " alt="" coords="523,57,321,84,82,125,81,120,320,78,522,51"/>
+<area shape="rect" title=" " alt="" coords="92,123,179,148"/>
+<area shape="poly" title=" " alt="" coords="523,64,192,125,191,120,522,59"/>
+<area shape="rect" title=" " alt="" coords="203,123,278,148"/>
+<area shape="poly" title=" " alt="" coords="523,70,292,125,291,119,522,65"/>
+<area shape="rect" title=" " alt="" coords="303,123,363,148"/>
+<area shape="poly" title=" " alt="" coords="526,77,377,123,375,118,524,72"/>
+<area shape="rect" title=" " alt="" coords="387,123,617,148"/>
+<area shape="poly" title=" " alt="" coords="588,77,531,117,528,112,585,73"/>
+<area shape="rect" title=" " alt="" coords="641,123,894,148"/>
+<area shape="poly" title=" " alt="" coords="684,73,741,112,738,117,681,77"/>
+<area shape="rect" title=" " alt="" coords="919,123,1181,148"/>
+<area shape="poly" title=" " alt="" coords="746,64,986,117,985,122,745,69"/>
+<area shape="rect" title=" " alt="" coords="1206,123,1475,148"/>
+<area shape="poly" title=" " alt="" coords="746,53,1241,118,1240,124,745,59"/>
+<area shape="rect" title=" " alt="" coords="1499,123,1649,148"/>
+<area shape="poly" title=" " alt="" coords="746,48,1073,78,1486,120,1486,125,1073,83,745,53"/>
+<area shape="rect" title=" " alt="" coords="1673,123,1827,148"/>
+<area shape="poly" title=" " alt="" coords="746,46,1144,74,1659,120,1659,125,1144,80,745,51"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -105,9 +123,33 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="MechanismPositionConfig_8hpp__dep__incl.png" border="0" usemap="#a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hppdep" alt=""/></div>
 <map name="a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hppdep" id="a_2home_2runner_2work_2YAMS_2YAMS_2yams_2cpp_2include_2yams_2mechanisms_2config_2MechanismPositionConfig_8hppdep">
-<area shape="rect" title=" " alt="" coords="5,5,228,75"/>
-<area shape="rect" href="YAMS_8hpp.html" title=" " alt="" coords="24,123,209,177"/>
-<area shape="poly" title=" " alt="" coords="119,88,119,122,114,122,114,88"/>
+<area shape="rect" title=" " alt="" coords="283,5,505,75"/>
+<area shape="rect" href="YAMS_8hpp.html" title=" " alt="" coords="375,357,560,412"/>
+<area shape="poly" title=" " alt="" coords="270,61,149,88,100,105,68,125,31,169,18,192,11,215,8,238,11,261,21,284,37,308,59,324,91,339,179,359,280,372,375,378,374,384,279,377,178,365,89,344,56,329,33,311,16,287,6,262,3,238,5,213,13,190,26,166,64,121,98,100,148,83,269,56"/>
+<area shape="rect" href="ArmConfig_8hpp.html" title=" " alt="" coords="78,123,270,192"/>
+<area shape="poly" title=" " alt="" coords="319,83,240,125,237,120,316,79"/>
+<area shape="rect" href="ElevatorConfig_8hpp.html" title=" " alt="" coords="298,123,490,192"/>
+<area shape="poly" title=" " alt="" coords="397,89,397,122,391,122,391,89"/>
+<area shape="rect" href="FlyWheelConfig_8hpp.html" title=" " alt="" coords="518,123,710,192"/>
+<area shape="poly" title=" " alt="" coords="472,79,551,120,548,125,469,83"/>
+<area shape="rect" href="PivotConfig_8hpp.html" title=" " alt="" coords="798,123,990,192"/>
+<area shape="poly" title=" " alt="" coords="519,67,799,131,797,137,518,73"/>
+<area shape="poly" title=" " alt="" coords="90,202,70,220,55,241,46,260,42,276,45,291,55,308,75,324,105,337,188,358,284,371,375,377,374,383,283,376,187,363,104,342,72,328,51,311,40,293,37,276,41,258,50,239,66,217,86,198"/>
+<area shape="rect" href="Arm_8hpp.html" title=" " alt="" coords="65,240,283,309"/>
+<area shape="poly" title=" " alt="" coords="177,206,177,240,171,240,171,206"/>
+<area shape="poly" title=" " alt="" coords="279,311,397,355,395,360,277,316"/>
+<area shape="poly" title=" " alt="" coords="364,205,351,230,342,256,341,283,348,308,371,335,400,355,397,360,367,339,344,311,335,284,337,255,346,228,359,203"/>
+<area shape="rect" href="Elevator_8hpp.html" title=" " alt="" coords="359,240,576,309"/>
+<area shape="poly" title=" " alt="" coords="425,203,448,238,444,241,421,205"/>
+<area shape="poly" title=" " alt="" coords="470,323,470,357,465,357,465,323"/>
+<area shape="poly" title=" " alt="" coords="618,206,611,258,603,286,590,311,563,339,532,360,529,355,560,335,585,308,598,284,606,257,613,205"/>
+<area shape="rect" href="FlyWheel_8hpp.html" title=" " alt="" coords="651,240,857,309"/>
+<area shape="poly" title=" " alt="" coords="667,199,715,238,711,242,664,203"/>
+<area shape="poly" title=" " alt="" coords="653,317,538,360,536,355,651,312"/>
+<area shape="poly" title=" " alt="" coords="902,206,901,233,897,261,887,288,871,311,849,327,818,340,739,360,647,373,561,381,560,376,647,368,738,354,817,334,846,322,867,307,882,285,892,259,896,232,896,206"/>
+<area shape="rect" href="Pivot_8hpp.html" title=" " alt="" coords="932,240,1149,309"/>
+<area shape="poly" title=" " alt="" coords="949,198,999,238,996,242,946,203"/>
+<area shape="poly" title=" " alt="" coords="919,311,913,312,726,347,561,373,560,368,725,342,912,307,918,305"/>
 </map>
 </div>
 </div>

@@ -68,6 +68,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#maxRobotLength" tabindex="0">maxRobotLength</a></li>
 <li><a href="#maxRobotHeight" tabindex="0">maxRobotHeight</a></li>
 <li><a href="#plane" tabindex="0">plane</a></li>
+<li><a href="#mountRotation" tabindex="0">mountRotation</a></li>
+<li><a href="#parent" tabindex="0">parent</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
@@ -78,6 +80,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#withRelativePosition(org.wpilib.math.geometry.Translation3d)" tabindex="0">withRelativePosition(Translation3d)</a></li>
+<li><a href="#withRelativePosition(org.wpilib.math.geometry.Transform3d)" tabindex="0">withRelativePosition(Transform3d)</a></li>
+<li><a href="#withParent(java.util.function.Supplier)" tabindex="0">withParent(Supplier)</a></li>
 <li><a href="#withMaxRobotLength(org.wpilib.units.measure.Distance)" tabindex="0">withMaxRobotLength(Distance)</a></li>
 <li><a href="#withMaxRobotHeight(org.wpilib.units.measure.Distance)" tabindex="0">withMaxRobotHeight(Distance)</a></li>
 <li><a href="#withMovementPlane(yams.core.mechanisms.config.MechanismPositionConfig.Plane)" tabindex="0">withMovementPlane(MechanismPositionConfig.Plane)</a></li>
@@ -87,6 +91,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#getWindowYDimension(org.wpilib.units.measure.Distance)" tabindex="0">getWindowYDimension(Distance)</a></li>
 <li><a href="#getRelativePosition()" tabindex="0">getRelativePosition()</a></li>
 <li><a href="#getMovementPlane()" tabindex="0">getMovementPlane()</a></li>
+<li><a href="#getMountPose()" tabindex="0">getMountPose()</a></li>
+<li><a href="#getRotatedPose(org.wpilib.units.measure.Angle)" tabindex="0">getRotatedPose(Angle)</a></li>
+<li><a href="#getTranslatedPose(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)" tabindex="0">getTranslatedPose(Distance, Angle)</a></li>
+<li><a href="#rotationInPlane(org.wpilib.units.measure.Angle)" tabindex="0">rotationInPlane(Angle)</a></li>
 </ol>
 </li>
 </ol>
@@ -125,6 +133,10 @@ reported length.</li>
 plane of the robot coordinate system. This determines which Translation3d axes are
 mapped to the 2D canvas X and Y axes.</li>
 </ul>
+
+<p>It also places the mechanism in 3D, for each mechanism's <code>getPose3d()</code>: where it is mounted
+on the robot, and how it is turned there, optionally on another mechanism, such as an arm on an
+elevator's carriage.
 
 <h2 id="example-heading">Example</h2>
 <pre><code>import static org.wpilib.units.Units.Meters;
@@ -177,6 +189,16 @@ MechanismPositionConfig posConfig = new MechanismPositionConfig()
 <div class="col-last odd-row-color">
 <div class="block">The length of the robot in meters.</div>
 </div>
+<div class="col-first even-row-color"><code>protected org.wpilib.math.geometry.Rotation3d</code></div>
+<div class="col-second even-row-color"><code><a href="#mountRotation" class="member-name-link">mountRotation</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">How the mechanism is turned where it is mounted.</div>
+</div>
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose3d&gt;&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#parent" class="member-name-link">parent</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">The pose the mechanism is mounted on, such as another mechanism's, or the robot's origin if empty.</div>
+</div>
 <div class="col-first even-row-color"><code>protected <a href="MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a></code></div>
 <div class="col-second even-row-color"><code><a href="#plane" class="member-name-link">plane</a></code></div>
 <div class="col-last even-row-color">
@@ -228,27 +250,50 @@ Mechanism2d.</div>
 <div class="block">Gets the distance in the y-direction appropriate for visualizing on a Mechanism2d, defaults to
 the given distance.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMovementPlane()" class="member-name-link">getMovementPlane</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMountPose()" class="member-name-link">getMountPose</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Where the mechanism is mounted: its parent's pose, or the robot's origin, moved and turned by its
+relative position.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMovementPlane()" class="member-name-link">getMovementPlane</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the plane that the mechanism is on.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.geometry.Translation3d&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativePosition()" class="member-name-link">getRelativePosition</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.geometry.Translation3d&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativePosition()" class="member-name-link">getRelativePosition</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the relative position of the mechanism to the robot.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Distance</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowXDimension(org.wpilib.units.measure.Distance)" class="member-name-link">getWindowXDimension</a><wbr>(org.wpilib.units.measure.Distance&nbsp;length)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotatedPose(org.wpilib.units.measure.Angle)" class="member-name-link">getRotatedPose</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">The pose of a part that turns about the axis normal to the movement plane, such as an arm or a
+pivot, at an angle.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTranslatedPose(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)" class="member-name-link">getTranslatedPose</a><wbr>(org.wpilib.units.measure.Distance&nbsp;distance,
+ org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">The pose of a part that slides along the movement plane, such as an elevator's carriage.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Distance</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowXDimension(org.wpilib.units.measure.Distance)" class="member-name-link">getWindowXDimension</a><wbr>(org.wpilib.units.measure.Distance&nbsp;length)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the x dimension of the window in the Mechanism2d for visualization, either the max
 robot length if set, or twice the given length.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Distance</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowYDimension(org.wpilib.units.measure.Distance)" class="member-name-link">getWindowYDimension</a><wbr>(org.wpilib.units.measure.Distance&nbsp;length)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Distance</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWindowYDimension(org.wpilib.units.measure.Distance)" class="member-name-link">getWindowYDimension</a><wbr>(org.wpilib.units.measure.Distance&nbsp;length)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max
 robot height if set, or twice the given length.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Rotation3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#rotationInPlane(org.wpilib.units.measure.Angle)" class="member-name-link">rotationInPlane</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">The rotation of a part turned by an angle about the axis normal to the movement plane.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaxRobotHeight(org.wpilib.units.measure.Distance)" class="member-name-link">withMaxRobotHeight</a><wbr>(org.wpilib.units.measure.Distance&nbsp;robotHeight)</code></div>
@@ -264,6 +309,17 @@ robot height if set, or twice the given length.</div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMovementPlane(yams.core.mechanisms.config.MechanismPositionConfig.Plane)" class="member-name-link">withMovementPlane</a><wbr>(<a href="MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config">MechanismPositionConfig.Plane</a>&nbsp;plane)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the plane that the mechanism is on, used for position calculations.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withParent(java.util.function.Supplier)" class="member-name-link">withParent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose3d&gt;&nbsp;parentPose)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Mount the mechanism on another, such as an arm on an elevator's carriage, so it moves with it.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRelativePosition(org.wpilib.math.geometry.Transform3d)" class="member-name-link">withRelativePosition</a><wbr>(org.wpilib.math.geometry.Transform3d&nbsp;robotToMechanism)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set where the mechanism is mounted, relative to the robot, or to its parent, and how it is turned
+there.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRelativePosition(org.wpilib.math.geometry.Translation3d)" class="member-name-link">withRelativePosition</a><wbr>(org.wpilib.math.geometry.Translation3d&nbsp;robotToMechanism)</code></div>
@@ -323,6 +379,24 @@ robot height if set, or twice the given length.</div>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="mountRotation">
+<h3>mountRotation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Rotation3d</span>&nbsp;<span class="element-name">mountRotation</span></div>
+<div class="block">How the mechanism is turned where it is mounted.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="parent">
+<h3>parent</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose3d&gt;&gt;</span>&nbsp;<span class="element-name">parent</span></div>
+<div class="block">The pose the mechanism is mounted on, such as another mechanism's, or the robot's origin if empty.</div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -360,6 +434,39 @@ robot height if set, or twice the given length.</div>
                         robot.</dd>
 <dt>Returns:</dt>
 <dd>The <a href="../positional/SmartPositionalMechanism.html" title="class in yams.core.mechanisms.positional"><code>SmartPositionalMechanism</code></a>, for easy chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withRelativePosition(org.wpilib.math.geometry.Transform3d)">
+<h3>withRelativePosition</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></span>&nbsp;<span class="element-name">withRelativePosition</span><wbr><span class="parameters">(org.wpilib.math.geometry.Transform3d&nbsp;robotToMechanism)</span></div>
+<div class="block">Set where the mechanism is mounted, relative to the robot, or to its parent, and how it is turned
+there. The mechanism's pose is worked out from here: an arm's or pivot's axis, an elevator's
+carriage at zero height, or a flywheel's axle.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>robotToMechanism</code> - <code>Transform3d</code> from the robot, or from its parent, to the mechanism.</dd>
+<dt>Returns:</dt>
+<dd>The <a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, for easy chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withParent(java.util.function.Supplier)">
+<h3>withParent</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></span>&nbsp;<span class="element-name">withParent</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Pose3d&gt;&nbsp;parentPose)</span></div>
+<div class="block">Mount the mechanism on another, such as an arm on an elevator's carriage, so it moves with it. The
+mechanism's relative position is then from the parent's pose, rather than from the robot.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>parentPose</code> - The pose the mechanism is mounted on, such as <code>elevator::getPose3d</code>.</dd>
+<dt>Returns:</dt>
+<dd>The <a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, for easy chaining.</dd>
 </dl>
 </div>
 </section>
@@ -496,6 +603,70 @@ robot height if set, or twice the given length.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The <a href="MechanismPositionConfig.Plane.html" title="enum class in yams.core.mechanisms.config"><code>MechanismPositionConfig.Plane</code></a> that the mechanism is on.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMountPose()">
+<h3>getMountPose</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getMountPose</span>()</div>
+<div class="block">Where the mechanism is mounted: its parent's pose, or the robot's origin, moved and turned by its
+relative position.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The <code>Pose3d</code> the mechanism is mounted at.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRotatedPose(org.wpilib.units.measure.Angle)">
+<h3>getRotatedPose</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getRotatedPose</span><wbr><span class="parameters">(org.wpilib.units.measure.Angle&nbsp;angle)</span></div>
+<div class="block">The pose of a part that turns about the axis normal to the movement plane, such as an arm or a
+pivot, at an angle. At 0 it points along +X in the XZ and XY planes, and along +Y in the YZ plane,
+and a positive angle turns it toward +Z in the XZ and YZ planes, and toward +Y in the XY plane.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>angle</code> - The angle it is turned to.</dd>
+<dt>Returns:</dt>
+<dd>Its <code>Pose3d</code>: where it is mounted, turned by the angle.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getTranslatedPose(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)">
+<h3>getTranslatedPose</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getTranslatedPose</span><wbr><span class="parameters">(org.wpilib.units.measure.Distance&nbsp;distance,
+ org.wpilib.units.measure.Angle&nbsp;angle)</span></div>
+<div class="block">The pose of a part that slides along the movement plane, such as an elevator's carriage.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>distance</code> - How far it has slid from where it is mounted.</dd>
+<dd><code>angle</code> - The direction it slides in, in the movement plane: 0 along +X (+Y in the YZ plane),
+                90 degrees along +Z (+Y in the XY plane).</dd>
+<dt>Returns:</dt>
+<dd>Its <code>Pose3d</code>: where it is mounted, moved by the distance, and not turned.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="rotationInPlane(org.wpilib.units.measure.Angle)">
+<h3>rotationInPlane</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Rotation3d</span>&nbsp;<span class="element-name">rotationInPlane</span><wbr><span class="parameters">(org.wpilib.units.measure.Angle&nbsp;angle)</span></div>
+<div class="block">The rotation of a part turned by an angle about the axis normal to the movement plane.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>angle</code> - The angle.</dd>
+<dt>Returns:</dt>
+<dd>The <code>Rotation3d</code>.</dd>
 </dl>
 </div>
 </section>

@@ -163,8 +163,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a49f9944010965fca43d09241d34476b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58e2e7344c06bf77413634a893eede41" id="r_a58e2e7344c06bf77413634a893eede41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a58e2e7344c06bf77413634a893eede41">SetMeasurementVelocitySetpoint</a> (wpi::units::meters_per_second_t velocity)</td></tr>
 <tr class="separator:a58e2e7344c06bf77413634a893eede41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a058706ae895c88562598f2529f60ccb8" id="r_a058706ae895c88562598f2529f60ccb8"><td class="memItemLeft" align="right" valign="top">wpi::math::Translation3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a058706ae895c88562598f2529f60ccb8">GetRelativeMechanismPosition</a> () const</td></tr>
-<tr class="separator:a058706ae895c88562598f2529f60ccb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a942265a95cdc54d8ef58e2e6c134a9bb" id="r_a942265a95cdc54d8ef58e2e6c134a9bb"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a942265a95cdc54d8ef58e2e6c134a9bb">GetPose3d</a> () const override</td></tr>
+<tr class="separator:a942265a95cdc54d8ef58e2e6c134a9bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b05c1987f15da498fa87c81e99a3e51" id="r_a7b05c1987f15da498fa87c81e99a3e51"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1FlyWheelConfig.html">config::FlyWheelConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a7b05c1987f15da498fa87c81e99a3e51">GetConfig</a> () const</td></tr>
 <tr class="separator:a7b05c1987f15da498fa87c81e99a3e51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html">yams::mechanisms::velocity::SmartVelocityMechanism</a></td></tr>
@@ -407,22 +407,32 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
-<a id="a058706ae895c88562598f2529f60ccb8" name="a058706ae895c88562598f2529f60ccb8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a058706ae895c88562598f2529f60ccb8">&#9670;&#160;</a></span>GetRelativeMechanismPosition()</h2>
+<a id="a942265a95cdc54d8ef58e2e6c134a9bb" name="a942265a95cdc54d8ef58e2e6c134a9bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a942265a95cdc54d8ef58e2e6c134a9bb">&#9670;&#160;</a></span>GetPose3d()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::math::Translation3d yams::mechanisms::velocity::FlyWheel::GetRelativeMechanismPosition </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::velocity::FlyWheel::GetPose3d </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the 3-D position of the flywheel relative to the robot origin.</p>
-<dl class="section return"><dt>Returns</dt><dd>Translation3d representing the mechanism endpoint. </dd></dl>
+<p>Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model: where its axle is mounted, as set in its MechanismPositionConfig, turned by the wheel's position about the axis normal to its movement plane.</p>
+<dl class="section return"><dt>Returns</dt><dd>The pose of the flywheel, relative to the robot. </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1mechanisms_1_1SmartMechanism.html#aaf7cff5cd9269098247104b56ecdafd4">yams::mechanisms::SmartMechanism</a>.</p>
 
 </div>
 </div>

@@ -103,6 +103,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a895b6d9884fabe5b7d297a2874152b29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89bb9fe7585cfdfff8b3527e779062e7" id="r_a89bb9fe7585cfdfff8b3527e779062e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89bb9fe7585cfdfff8b3527e779062e7">WithAngle</a> (wpi::units::degree_t angle)</td></tr>
 <tr class="separator:a89bb9fe7585cfdfff8b3527e779062e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60934ff3902b590427f91fc61c73178b" id="r_a60934ff3902b590427f91fc61c73178b"><td class="memTemplParams" colspan="2">template&lt;typename... Heights&gt; <br />
+requires (std::convertible_to&lt;Heights, wpi::units::meter_t&gt; &amp;&amp; ...)</td></tr>
+<tr class="memitem:a60934ff3902b590427f91fc61c73178b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a60934ff3902b590427f91fc61c73178b">WithStages</a> (Heights... stageHeights)</td></tr>
+<tr class="separator:a60934ff3902b590427f91fc61c73178b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79e8b409a4b4525e26a1198806aaa019" id="r_a79e8b409a4b4525e26a1198806aaa019"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a79e8b409a4b4525e26a1198806aaa019">WithStages</a> (std::vector&lt; wpi::units::meter_t &gt; stageHeights)</td></tr>
+<tr class="separator:a79e8b409a4b4525e26a1198806aaa019"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a612c1dc7449a3124749d3fd2c911c676" id="r_a612c1dc7449a3124749d3fd2c911c676"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a612c1dc7449a3124749d3fd2c911c676">WithMechanismPositionConfig</a> (const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;mechanismPositionConfig)</td></tr>
+<tr class="separator:a612c1dc7449a3124749d3fd2c911c676"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dc8c0f626aa5e7b15d07ff6f3709701" id="r_a0dc8c0f626aa5e7b15d07ff6f3709701"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0dc8c0f626aa5e7b15d07ff6f3709701">GetTelemetryName</a> () const</td></tr>
 <tr class="separator:a0dc8c0f626aa5e7b15d07ff6f3709701"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d0ea7281f6b21894c2a1a13bba2080a" id="r_a2d0ea7281f6b21894c2a1a13bba2080a"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::meter_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d0ea7281f6b21894c2a1a13bba2080a">GetMinHeight</a> () const</td></tr>
@@ -117,6 +125,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a09147b420bcea7c8ff76e79fb311f706"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af62b29d68d3b9f691c5bc1d2deeeca9b" id="r_af62b29d68d3b9f691c5bc1d2deeeca9b"><td class="memItemLeft" align="right" valign="top">wpi::units::degree_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af62b29d68d3b9f691c5bc1d2deeeca9b">GetAngle</a> () const</td></tr>
 <tr class="separator:af62b29d68d3b9f691c5bc1d2deeeca9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09cfc2dc56d066cc3e9fa1569fb8374d" id="r_a09cfc2dc56d066cc3e9fa1569fb8374d"><td class="memItemLeft" align="right" valign="top">std::optional&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09cfc2dc56d066cc3e9fa1569fb8374d">GetStages</a> () const</td></tr>
+<tr class="separator:a09cfc2dc56d066cc3e9fa1569fb8374d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0c9e8a0634bf075c5ee9d207a0e8fe7" id="r_aa0c9e8a0634bf075c5ee9d207a0e8fe7"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; wpi::units::meter_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0c9e8a0634bf075c5ee9d207a0e8fe7">GetStageHeights</a> () const</td></tr>
+<tr class="separator:aa0c9e8a0634bf075c5ee9d207a0e8fe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad18ed64b85ec6d931fae88f30e28ec7a" id="r_ad18ed64b85ec6d931fae88f30e28ec7a"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::meter_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad18ed64b85ec6d931fae88f30e28ec7a">GetStageHeightTotal</a> () const</td></tr>
+<tr class="separator:ad18ed64b85ec6d931fae88f30e28ec7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace9071018153f67c15142a87835ea490" id="r_ace9071018153f67c15142a87835ea490"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace9071018153f67c15142a87835ea490">GetMechanismPositionConfig</a> () const</td></tr>
+<tr class="separator:ace9071018153f67c15142a87835ea490"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration class for an Elevator mechanism.</p>
@@ -198,7 +214,33 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the optional maximum height. </p>
+<p>Get the maximum height, or the stage heights' total without one. </p>
+
+</div>
+</div>
+<a id="ace9071018153f67c15142a87835ea490" name="ace9071018153f67c15142a87835ea490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace9071018153f67c15142a87835ea490">&#9670;&#160;</a></span>GetMechanismPositionConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::ElevatorConfig::GetMechanismPositionConfig </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get where the mechanism is on the robot. </p>
 
 </div>
 </div>
@@ -216,7 +258,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get the optional minimum height. </p>
+<p>Get the minimum height, or 0 without one when the stages are set. </p>
 
 </div>
 </div>
@@ -235,6 +277,60 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the Mechanism2d simulation colour. </p>
+
+</div>
+</div>
+<a id="aa0c9e8a0634bf075c5ee9d207a0e8fe7" name="aa0c9e8a0634bf075c5ee9d207a0e8fe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0c9e8a0634bf075c5ee9d207a0e8fe7">&#9670;&#160;</a></span>GetStageHeights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; wpi::units::meter_t &gt; &amp; yams::mechanisms::config::ElevatorConfig::GetStageHeights </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get how far each moving stage travels relative to the stage below it, from the stage nearest the fixed stage to the carriage. Empty if <a class="el" href="#a60934ff3902b590427f91fc61c73178b">WithStages()</a> was not called. </p>
+
+</div>
+</div>
+<a id="ad18ed64b85ec6d931fae88f30e28ec7a" name="ad18ed64b85ec6d931fae88f30e28ec7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad18ed64b85ec6d931fae88f30e28ec7a">&#9670;&#160;</a></span>GetStageHeightTotal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::meter_t &gt; yams::mechanisms::config::ElevatorConfig::GetStageHeightTotal </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get how far the stages travel together, the sum of the stage heights, if set. </p>
+
+</div>
+</div>
+<a id="a09cfc2dc56d066cc3e9fa1569fb8374d" name="a09cfc2dc56d066cc3e9fa1569fb8374d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09cfc2dc56d066cc3e9fa1569fb8374d">&#9670;&#160;</a></span>GetStages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; int &gt; yams::mechanisms::config::ElevatorConfig::GetStages </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the number of stages that move, counting the carriage as the last, if set. </p>
 
 </div>
 </div>
@@ -374,6 +470,39 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a612c1dc7449a3124749d3fd2c911c676" name="a612c1dc7449a3124749d3fd2c911c676"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a612c1dc7449a3124749d3fd2c911c676">&#9670;&#160;</a></span>WithMechanismPositionConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp; yams::mechanisms::config::ElevatorConfig::WithMechanismPositionConfig </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mechanismPositionConfig</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set where the mechanism is on the robot, for GetPose3d(): where it is mounted, how it is turned there, the plane it moves in, and the mechanism it is mounted on, if any.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mechanismPositionConfig</td><td>The mechanism's position. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
 <a id="a80bb4b4e55c9ccaedfcadb146e62ba7c" name="a80bb4b4e55c9ccaedfcadb146e62ba7c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a80bb4b4e55c9ccaedfcadb146e62ba7c">&#9670;&#160;</a></span>WithMinimumHeight()</h2>
 
@@ -421,6 +550,80 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a60934ff3902b590427f91fc61c73178b" name="a60934ff3902b590427f91fc61c73178b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60934ff3902b590427f91fc61c73178b">&#9670;&#160;</a></span>WithStages() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename... Heights&gt; <br />
+requires (std::convertible_to&lt;Heights, wpi::units::meter_t&gt; &amp;&amp; ...)</div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp; yams::mechanisms::config::ElevatorConfig::WithStages </td>
+          <td>(</td>
+          <td class="paramtype">Heights...</td>          <td class="paramname"><span class="paramname"><em>stageHeights</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set the elevator's moving stages, for the pose of each stage from Elevator::GetCascadePose3d() or Elevator::GetContinuousPose3d(bool).</p>
+<p>The stage heights must add up to the elevator's maximum height: the Elevator throws if they do not. Without a minimum and maximum height, the elevator's height is from 0 to the stage heights' total.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stageHeights</td><td>How far each moving stage travels relative to the stage below it, from the stage nearest the fixed stage to the carriage, which is the last. One for each stage that moves, such as WithStages(0.6_m, 0.6_m, 0.5_m). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if no height is given, or a height is not positive. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a79e8b409a4b4525e26a1198806aaa019" name="a79e8b409a4b4525e26a1198806aaa019"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79e8b409a4b4525e26a1198806aaa019">&#9670;&#160;</a></span>WithStages() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_elevator_config.html">ElevatorConfig</a> &amp; yams::mechanisms::config::ElevatorConfig::WithStages </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; wpi::units::meter_t &gt;</td>          <td class="paramname"><span class="paramname"><em>stageHeights</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the elevator's moving stages from a list of stage heights. See <a class="el" href="#a60934ff3902b590427f91fc61c73178b">WithStages(Heights...)</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stageHeights</td><td>How far each moving stage travels relative to the stage below it, from the stage nearest the fixed stage to the carriage. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if no height is given, or a height is not positive. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

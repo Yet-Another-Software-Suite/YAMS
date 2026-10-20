@@ -76,6 +76,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" tabindex="0">withHardLimits(Distance, Distance)</a></li>
 <li><a href="#withHorizontalElevator()" tabindex="0">withHorizontalElevator()</a></li>
 <li><a href="#getAngle()" tabindex="0">getAngle()</a></li>
+<li><a href="#withStages(org.wpilib.units.measure.Distance...)" tabindex="0">withStages(Distance...)</a></li>
+<li><a href="#getStages()" tabindex="0">getStages()</a></li>
+<li><a href="#getStageHeights()" tabindex="0">getStageHeights()</a></li>
+<li><a href="#getStageHeightTotal()" tabindex="0">getStageHeightTotal()</a></li>
 <li><a href="#getMaximumHeight()" tabindex="0">getMaximumHeight()</a></li>
 <li><a href="#getMinimumHeight()" tabindex="0">getMinimumHeight()</a></li>
 <li><a href="#getTelemetryVerbosity()" tabindex="0">getTelemetryVerbosity()</a></li>
@@ -169,7 +173,9 @@ Elevator elevator = new Elevator(config, motor);
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumHeight()" class="member-name-link">getMaximumHeight</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the Upper hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>.</div>
+<div class="block">Get the Upper hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the maximum height from
+<a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>withHardLimits(Distance, Distance)</code></a>, or the stage heights' total without hard limits, as the
+stages carry the carriage to the top.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionConfig()" class="member-name-link">getMechanismPositionConfig</a>()</code></div>
@@ -179,53 +185,76 @@ Elevator elevator = new Elevator(config, motor);
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMinimumHeight()" class="member-name-link">getMinimumHeight</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the lower hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
+<div class="block">Get the lower hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the minimum height from
+<a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>withHardLimits(Distance, Distance)</code></a>, or 0 without hard limits when the stages are set, as the
+stages start at the bottom.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.util.Color8Bit</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimColor()" class="member-name-link">getSimColor</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get sim color</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStageHeights()" class="member-name-link">getStageHeights</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get how far each moving stage travels relative to the stage below it.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStageHeightTotal()" class="member-name-link">getStageHeightTotal</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get how far the stages travel together, the sum of the stage heights.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalInt.html" title="class or interface in java.util" class="external-link">OptionalInt</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStages()" class="member-name-link">getStages</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the number of stages that move, counting the carriage as the last.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Network Tables name for the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the telemetry verbosity of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAngle(org.wpilib.units.measure.Angle)" class="member-name-link">withAngle</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAngle(org.wpilib.units.measure.Angle)" class="member-name-link">withAngle</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>s angle for simulation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCarriageWeight(org.wpilib.units.measure.Mass)" class="member-name-link">withCarriageWeight</a><wbr>(org.wpilib.units.measure.Mass&nbsp;mass)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCarriageWeight(org.wpilib.units.measure.Mass)" class="member-name-link">withCarriageWeight</a><wbr>(org.wpilib.units.measure.Mass&nbsp;mass)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>s <code>Mass</code> for simulation.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" class="member-name-link">withHardLimits</a><wbr>(org.wpilib.units.measure.Distance&nbsp;min,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" class="member-name-link">withHardLimits</a><wbr>(org.wpilib.units.measure.Distance&nbsp;min,
  org.wpilib.units.measure.Distance&nbsp;max)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the Hard Limits for simulation</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHorizontalElevator()" class="member-name-link">withHorizontalElevator</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withHorizontalElevator()" class="member-name-link">withHorizontalElevator</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set elevator as horizontal to avoid gravity simulation</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.core.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMechanismPositionConfig(yams.core.mechanisms.config.MechanismPositionConfig)" class="member-name-link">withMechanismPositionConfig</a><wbr>(<a href="MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a>&nbsp;mechanismPositionConfig)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the elevator mechanism position configuration.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(org.wpilib.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(org.wpilib.util.Color8Bit&nbsp;simColor)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimColor(org.wpilib.util.Color8Bit)" class="member-name-link">withSimColor</a><wbr>(org.wpilib.util.Color8Bit&nbsp;simColor)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Publish the color in sim as this.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStages(org.wpilib.units.measure.Distance...)" class="member-name-link">withStages</a><wbr>(org.wpilib.units.measure.Distance...&nbsp;stageHeights)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the elevator's moving stages, for the pose of each stage from
+<code>Elevator.getCascadePose3d()</code> or <code>Elevator.getContinuousPose3d(boolean)</code>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;telemetryName,
@@ -400,11 +429,77 @@ Elevator elevator = new Elevator(config, motor);
 </section>
 </li>
 <li>
+<section class="detail" id="withStages(org.wpilib.units.measure.Distance...)">
+<h3>withStages</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></span>&nbsp;<span class="element-name">withStages</span><wbr><span class="parameters">(org.wpilib.units.measure.Distance...&nbsp;stageHeights)</span></div>
+<div class="block">Set the elevator's moving stages, for the pose of each stage from
+<code>Elevator.getCascadePose3d()</code> or <code>Elevator.getContinuousPose3d(boolean)</code>.
+
+<p>The stage heights must add up to the elevator's maximum height, from
+<a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>withHardLimits(Distance, Distance)</code></a>: the <code>Elevator</code> throws if they do not. Without hard
+limits, the elevator's height is from 0 to the stage heights' total.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>stageHeights</code> - How far each moving stage travels relative to the stage below it, from the
+                    stage nearest the fixed stage to the carriage, which is the last. One for each
+                    stage that moves.</dd>
+<dt>Returns:</dt>
+<dd><a href="ElevatorConfig.html" title="class in yams.core.mechanisms.config"><code>ElevatorConfig</code></a> for chaining.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if no height is given, or a height is not positive.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getStages()">
+<h3>getStages</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalInt.html" title="class or interface in java.util" class="external-link">OptionalInt</a></span>&nbsp;<span class="element-name">getStages</span>()</div>
+<div class="block">Get the number of stages that move, counting the carriage as the last.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The number of moving stages, or empty if <a href="#withStages(org.wpilib.units.measure.Distance...)"><code>withStages(Distance...)</code></a> was not called.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getStageHeights()">
+<h3>getStageHeights</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;org.wpilib.units.measure.Distance&gt;</span>&nbsp;<span class="element-name">getStageHeights</span>()</div>
+<div class="block">Get how far each moving stage travels relative to the stage below it.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Each moving stage's height, from the stage nearest the fixed stage to the carriage, or an
+        empty list if <a href="#withStages(org.wpilib.units.measure.Distance...)"><code>withStages(Distance...)</code></a> was not called.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getStageHeightTotal()">
+<h3>getStageHeightTotal</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Distance&gt;</span>&nbsp;<span class="element-name">getStageHeightTotal</span>()</div>
+<div class="block">Get how far the stages travel together, the sum of the stage heights.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The total of the stage heights, or empty if <a href="#withStages(org.wpilib.units.measure.Distance...)"><code>withStages(Distance...)</code></a> was not called.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getMaximumHeight()">
 <h3>getMaximumHeight</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Distance&gt;</span>&nbsp;<span class="element-name">getMaximumHeight</span>()</div>
-<div class="block">Get the Upper hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>.</div>
+<div class="block">Get the Upper hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the maximum height from
+<a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>withHardLimits(Distance, Distance)</code></a>, or the stage heights' total without hard limits, as the
+stages carry the carriage to the top.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><code>Distance</code> hard limit.</dd>
@@ -417,7 +512,9 @@ Elevator elevator = new Elevator(config, motor);
 <h3>getMinimumHeight</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Distance&gt;</span>&nbsp;<span class="element-name">getMinimumHeight</span>()</div>
-<div class="block">Get the lower hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
+<div class="block">Get the lower hard limit of the <a href="../positional/Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a>: the minimum height from
+<a href="#withHardLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)"><code>withHardLimits(Distance, Distance)</code></a>, or 0 without hard limits when the stages are set, as the
+stages start at the bottom.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><code>Distance</code> hard limit.</dd>

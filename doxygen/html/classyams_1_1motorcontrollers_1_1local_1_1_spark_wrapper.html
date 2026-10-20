@@ -122,6 +122,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a333932398a37c7c5e6cff720957a0609"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7587368b4d08c29e0fc7633f896e05aa" id="r_a7587368b4d08c29e0fc7633f896e05aa"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7587368b4d08c29e0fc7633f896e05aa">GetVoltage</a> () override</td></tr>
 <tr class="separator:a7587368b4d08c29e0fc7633f896e05aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a419afe99d7ddc4be61636fc3fcfbbde1" id="r_a419afe99d7ddc4be61636fc3fcfbbde1"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a419afe99d7ddc4be61636fc3fcfbbde1">GetVelocityMeasurementDelay</a> () const override</td></tr>
+<tr class="separator:a419afe99d7ddc4be61636fc3fcfbbde1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bf0987ef03ed05527e390b3168c7a8f" id="r_a3bf0987ef03ed05527e390b3168c7a8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3bf0987ef03ed05527e390b3168c7a8f">SetPosition</a> (wpi::units::turn_t angle) override</td></tr>
 <tr class="separator:a3bf0987ef03ed05527e390b3168c7a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5c23b8a0c6ad50262ff8de63b886c8e" id="r_ae5c23b8a0c6ad50262ff8de63b886c8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5c23b8a0c6ad50262ff8de63b886c8e">SetPosition</a> (wpi::units::meter_t distance) override</td></tr>
@@ -257,6 +259,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2026dd192b4f903f41aed09bb4332da3 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a82c193dc7dd1b4119d3c6425b6002906"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a82c193dc7dd1b4119d3c6425b6002906">SetVelocity</a> (wpi::units::meters_per_second_t velocity, wpi::units::newton_t feedforwardForce)</td></tr>
 <tr class="separator:a82c193dc7dd1b4119d3c6425b6002906 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc4154462c515f8ceb8d2c9ca8293e3c inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_adc4154462c515f8ceb8d2c9ca8293e3c"><td class="memItemLeft" align="right" valign="top">wpi::units::second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#adc4154462c515f8ceb8d2c9ca8293e3c">GetClosedLoopControllerPeriod</a> () const</td></tr>
+<tr class="separator:adc4154462c515f8ceb8d2c9ca8293e3c inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_aac0e6aa284a745bc0f126af1fd63b2c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#aac0e6aa284a745bc0f126af1fd63b2c9">StartClosedLoopController</a> ()</td></tr>
 <tr class="separator:aac0e6aa284a745bc0f126af1fd63b2c9 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ee466e963009350506cadc018c3dfc4 inherit pub_methods_classyams_1_1motorcontrollers_1_1_smart_motor_controller" id="r_a2ee466e963009350506cadc018c3dfc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a2ee466e963009350506cadc018c3dfc4">StopClosedLoopController</a> ()</td></tr>
@@ -1198,6 +1202,34 @@ Example usage SPARK Flex</h3>
 <dl class="section return"><dt>Returns</dt><dd>Struct with optional lists of unsupported boolean and double fields.   </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a63843ecff006713fb980137e85536204">yams::motorcontrollers::SmartMotorController</a>.</p>
+
+</div>
+</div>
+<a id="a419afe99d7ddc4be61636fc3fcfbbde1" name="a419afe99d7ddc4be61636fc3fcfbbde1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a419afe99d7ddc4be61636fc3fcfbbde1">&#9670;&#160;</a></span>GetVelocityMeasurementDelay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::second_t &gt; yams::motorcontrollers::local::SparkWrapper::GetVelocityMeasurementDelay </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Read from the SPARK's encoder settings when the config is applied. The SPARK's closed loop uses the velocity as soon as it is filtered. A closed loop run on the SystemCore reads it from its status frame instead, which on average is half the frame's period older. </p>
+
+<p>Reimplemented from <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a9171eb87fdcd0f217a8b30059891f706">yams::motorcontrollers::SmartMotorController</a>.</p>
 
 </div>
 </div>

@@ -131,8 +131,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa411aeb1b6ee50c6cbbbffb66806730c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a32fd685ad8caa8bcc038ba492db7e5" id="r_a7a32fd685ad8caa8bcc038ba492db7e5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html">config::ArmConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a32fd685ad8caa8bcc038ba492db7e5">GetConfig</a> () const</td></tr>
 <tr class="separator:a7a32fd685ad8caa8bcc038ba492db7e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a6c6407b3872954c22747e09be3cb6a" id="r_a2a6c6407b3872954c22747e09be3cb6a"><td class="memItemLeft" align="right" valign="top">wpi::math::Translation3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a6c6407b3872954c22747e09be3cb6a">GetRelativeMechanismPosition</a> () const</td></tr>
-<tr class="separator:a2a6c6407b3872954c22747e09be3cb6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff15accc8b55dcb0ab0b198521cd9e78" id="r_aff15accc8b55dcb0ab0b198521cd9e78"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff15accc8b55dcb0ab0b198521cd9e78">GetPose3d</a> () const override</td></tr>
+<tr class="separator:aff15accc8b55dcb0ab0b198521cd9e78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3346de3a18976f32c77f128794c0ca2c" id="r_a3346de3a18976f32c77f128794c0ca2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3346de3a18976f32c77f128794c0ca2c">SetAngle</a> (wpi::units::degree_t angle)</td></tr>
 <tr class="separator:a3346de3a18976f32c77f128794c0ca2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1_smart_positional_mechanism.html">yams::mechanisms::positional::SmartPositionalMechanism</a></td></tr>
@@ -239,7 +239,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="line"><span class="comment">// In commands or bindings:</span></div>
 <div class="line">m_arm-&gt;RunTo(45.0_deg);</div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1_mechanism_gearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1_mechanism_gearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
-<div class="ttc" id="aclassyams_1_1mechanisms_1_1_smart_mechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1_smart_mechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:144</div></div>
+<div class="ttc" id="aclassyams_1_1mechanisms_1_1_smart_mechanism_html_ac0687ea085d15713705322353588b87b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1_smart_mechanism.html#ac0687ea085d15713705322353588b87b">yams::mechanisms::SmartMechanism::m_smc</a></div><div class="ttdeci">motorcontrollers::SmartMotorController * m_smc</div><div class="ttdef"><b>Definition</b> SmartMechanism.hpp:153</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_arm_config_html_a285dd3e7b7c328d8bcca34961a08448b"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html#a285dd3e7b7c328d8bcca34961a08448b">yams::mechanisms::config::ArmConfig::WithTelemetryName</a></div><div class="ttdeci">ArmConfig &amp; WithTelemetryName(const std::string &amp;name)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_arm_config_html_a6194db00b66f2be79f7ab10866216317"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html#a6194db00b66f2be79f7ab10866216317">yams::mechanisms::config::ArmConfig::WithMaxAngle</a></div><div class="ttdeci">ArmConfig &amp; WithMaxAngle(wpi::units::degree_t angle)</div></div>
 <div class="ttc" id="aclassyams_1_1mechanisms_1_1config_1_1_arm_config_html_a88f5b4cbe1eae640a3a8ed218e326f97"><div class="ttname"><a href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html#a88f5b4cbe1eae640a3a8ed218e326f97">yams::mechanisms::config::ArmConfig::WithArmLength</a></div><div class="ttdeci">ArmConfig &amp; WithArmLength(wpi::units::meter_t length)</div></div>
@@ -383,22 +383,32 @@ Example usage (inside a subsystem constructor)</h3>
 
 </div>
 </div>
-<a id="a2a6c6407b3872954c22747e09be3cb6a" name="a2a6c6407b3872954c22747e09be3cb6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a6c6407b3872954c22747e09be3cb6a">&#9670;&#160;</a></span>GetRelativeMechanismPosition()</h2>
+<a id="aff15accc8b55dcb0ab0b198521cd9e78" name="aff15accc8b55dcb0ab0b198521cd9e78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff15accc8b55dcb0ab0b198521cd9e78">&#9670;&#160;</a></span>GetPose3d()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">wpi::math::Translation3d yams::mechanisms::positional::Arm::GetRelativeMechanismPosition </td>
+          <td class="memname">wpi::math::Pose3d yams::mechanisms::positional::Arm::GetPose3d </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Get the 3-D position of the arm tip relative to the robot origin.</p>
-<dl class="section return"><dt>Returns</dt><dd>Translation3d representing the mechanism endpoint. </dd></dl>
+<p>Get the arm's pose, for publishing to AdvantageScope as a component of a robot model: where it is mounted, as set in its MechanismPositionConfig, turned to the arm's angle about the axis normal to its movement plane.</p>
+<dl class="section return"><dt>Returns</dt><dd>The pose of the arm, relative to the robot. </dd></dl>
+
+<p>Implements <a class="el" href="classyams_1_1mechanisms_1_1_smart_mechanism.html#aaf7cff5cd9269098247104b56ecdafd4">yams::mechanisms::SmartMechanism</a>.</p>
 
 </div>
 </div>

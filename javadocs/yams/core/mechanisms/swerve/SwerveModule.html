@@ -85,6 +85,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#setSwerveModuleState(org.wpilib.math.kinematics.SwerveModuleVelocity,org.wpilib.units.measure.Force)" tabindex="0">setSwerveModuleState(SwerveModuleVelocity, Force)</a></li>
 <li><a href="#getState()" tabindex="0">getState()</a></li>
 <li><a href="#getPosition()" tabindex="0">getPosition()</a></li>
+<li><a href="#getCouplingVelocity()" tabindex="0">getCouplingVelocity()</a></li>
 <li><a href="#updateTelemetry()" tabindex="0">updateTelemetry()</a></li>
 <li><a href="#simIterate()" tabindex="0">simIterate()</a></li>
 <li><a href="#getAzimuthMotorController()" tabindex="0">getAzimuthMotorController()</a></li>
@@ -207,70 +208,75 @@ SwerveModuleVelocity current = frontLeft.getState();
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="../config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveModuleConfig</code></a> for the module.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDriveMotorController()" class="member-name-link">getDriveMotorController</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.LinearVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCouplingVelocity()" class="member-name-link">getCouplingVelocity</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Wheel speed the drive gearing produces from the azimuth turning at its current rate.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDriveMotorController()" class="member-name-link">getDriveMotorController</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the drive <a href="../../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the module.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModulePosition</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPosition()" class="member-name-link">getPosition</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModulePosition</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPosition()" class="member-name-link">getPosition</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>SwerveModulePosition</code> of the module.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Angle</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRawAbsoluteEncoderAngle()" class="member-name-link">getRawAbsoluteEncoderAngle</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Angle</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRawAbsoluteEncoderAngle()" class="member-name-link">getRawAbsoluteEncoderAngle</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the absolute encoder angle without any offsets applied.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleVelocityWithAzimuth.html" title="class in yams.core.mechanisms.swerve">SwerveModuleVelocityWithAzimuth</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getState()" class="member-name-link">getState</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveModuleVelocityWithAzimuth.html" title="class in yams.core.mechanisms.swerve">SwerveModuleVelocityWithAzimuth</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getState()" class="member-name-link">getState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>SwerveModuleVelocity</code> of the module, with how fast its azimuth is turning.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#seedAzimuthEncoder()" class="member-name-link">seedAzimuthEncoder</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#seedAzimuthEncoder()" class="member-name-link">seedAzimuthEncoder</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Seed the azimuth encoder with the absolute encoder angle.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAzimuthAngle(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">setAzimuthAngle</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAzimuthAngle(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">setAzimuthAngle</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Turn the wheel to the given angle without driving it, as for locking the drive in place or
 tuning the azimuth motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleState(org.wpilib.math.kinematics.SwerveModuleVelocity)" class="member-name-link">setSwerveModuleState</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity&nbsp;state)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleState(org.wpilib.math.kinematics.SwerveModuleVelocity)" class="member-name-link">setSwerveModuleState</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity&nbsp;state)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <code>SwerveModuleVelocity</code> of the module.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleState(org.wpilib.math.kinematics.SwerveModuleVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setSwerveModuleState</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity&nbsp;state,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleState(org.wpilib.math.kinematics.SwerveModuleVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setSwerveModuleState</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity&nbsp;state,
  org.wpilib.units.measure.Force&nbsp;feedforwardForce)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <code>SwerveModuleVelocity</code> of the module with an additional drive wheel feedforward
 <code>Force</code> applied on top, e.g.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechName)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupTelemetry(java.lang.String)" class="member-name-link">setupTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;mechName)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup telemetry for the module; the <a href="../../telemetry/SwerveModuleTelemetry.html" title="class in yams.core.telemetry"><code>SwerveModuleTelemetry</code></a> config used is either the one
 supplied via <a href="../config/SwerveModuleConfig.html#withTelemetry(java.lang.String,yams.core.telemetry.SwerveModuleTelemetryConfig)"><code>SwerveModuleConfig.withTelemetry(String, SwerveModuleTelemetryConfig)</code></a> or a
 default built from <a href="../config/SwerveModuleConfig.html#getTelemetryVerbosity()"><code>SwerveModuleConfig.getTelemetryVerbosity()</code></a> (defaulting to
 <a href="../../telemetry/enums/TelemetryVerbosity.html#HIGH"><code>TelemetryVerbosity.HIGH</code></a>).</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the simulation of the module.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry of the module.</div>
 </div>
 </div>
@@ -505,6 +511,22 @@ steer by where it is, does not apply (see <a href="../config/SwerveModuleConfig.
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the drive motor has no mechanism
                                                    circumference configured (e.g. via
                                                    <a href="../config/SwerveModuleConfig.html#withWheelRadius(org.wpilib.units.measure.Distance)"><code>SwerveModuleConfig.withWheelRadius(org.wpilib.units.measure.Distance)</code></a>).</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCouplingVelocity()">
+<h3>getCouplingVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.LinearVelocity</span>&nbsp;<span class="element-name">getCouplingVelocity</span>()</div>
+<div class="block">Wheel speed the drive gearing produces from the azimuth turning at its current rate.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Wheel speed caused by the coupling, zero if coupling is not compensated.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the drive motor has no mechanism
+                                                   circumference configured.</dd>
 </dl>
 </div>
 </section>

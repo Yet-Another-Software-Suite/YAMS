@@ -90,7 +90,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMechanismWindow()" tabindex="0">getMechanismWindow()</a></li>
 <li><a href="#publishMechanismWindow()" tabindex="0">publishMechanismWindow()</a></li>
 <li><a href="#visualizationUpdate()" tabindex="0">visualizationUpdate()</a></li>
-<li><a href="#getRelativeMechanismPosition()" tabindex="0">getRelativeMechanismPosition()</a></li>
+<li><a href="#getPose3d()" tabindex="0">getPose3d()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 </ol>
 </li>
@@ -243,10 +243,11 @@ setpoint converted with the mechanism circumference.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the name of the mechanism.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.math.geometry.Translation3d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getPose3d()" class="member-name-link">getPose3d</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Get the <code>Translation3d</code> of the mechanism using <code>Mechanism2d</code> coordinates.</div>
+<div class="block">Get the mechanism's pose relative to the robot, worked out from its motor's position and where it
+is mounted, as set in its <code>MechanismPositionConfig</code>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#publishMechanismWindow()" class="member-name-link">publishMechanismWindow</a>()</code></div>
@@ -536,14 +537,17 @@ setpoint converted with the mechanism circumference.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="getRelativeMechanismPosition()">
-<h3>getRelativeMechanismPosition</h3>
+<section class="detail" id="getPose3d()">
+<h3>getPose3d</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Translation3d</span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the <code>Translation3d</code> of the mechanism using <code>Mechanism2d</code> coordinates.</div>
+<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getPose3d</span>()</div>
+<div class="block">Get the mechanism's pose relative to the robot, worked out from its motor's position and where it
+is mounted, as set in its <code>MechanismPositionConfig</code>. Publish it, such as with
+<code>Telemetry.log("Mechanisms/Arm/pose", arm.getPose3d())</code>, as a component of an AdvantageScope
+robot model, whose part is modeled at the mechanism's zero position about its mount.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd><code>Translation3d</code> of the mechanism.</dd>
+<dd><code>Pose3d</code> of the mechanism, relative to the robot.</dd>
 </dl>
 </div>
 </section>

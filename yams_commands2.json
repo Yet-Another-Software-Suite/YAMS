@@ -1,7 +1,7 @@
 {
     "fileName": "yams_commands2.json",
     "name": "Yet Another Mechanism System (Commands v2)",
-    "version": "2026.10.15",
+    "version": "2026.10.19",
     "wpilibYear": "2027_alpha7",
     "uuid": "a1051e86-a979-4880-a28b-a0d5362d1d96",
     "mavenUrls": [
@@ -12,19 +12,19 @@
         {
             "groupId": "yams",
             "artifactId": "YAMS-core",
-            "version": "2026.10.15"
+            "version": "2026.10.19"
         },
         {
             "groupId": "yams",
             "artifactId": "YAMS-commands2",
-            "version": "2026.10.15"
+            "version": "2026.10.19"
         }
     ],
     "cppDependencies": [
         {
             "groupId": "yams",
             "artifactId": "YAMS-cpp",
-            "version": "2026.10.15",
+            "version": "2026.10.19",
             "libName": "YAMS",
             "headerClassifier": "headers",
             "sharedLibrary": true,

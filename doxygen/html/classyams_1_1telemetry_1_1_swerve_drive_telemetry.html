@@ -110,6 +110,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae67f6fe766b03e093c519a2abd8ded58" id="r_ae67f6fe766b03e093c519a2abd8ded58"><td class="memTemplParams" colspan="2">template&lt;std::size_t NumModules&gt; </td></tr>
 <tr class="memitem:ae67f6fe766b03e093c519a2abd8ded58"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ae67f6fe766b03e093c519a2abd8ded58">ApplyTuningValues</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt; *drive)</td></tr>
 <tr class="separator:ae67f6fe766b03e093c519a2abd8ded58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3265eb2f43e7e3ab98a45a862dc6df5" id="r_aa3265eb2f43e7e3ab98a45a862dc6df5"><td class="memTemplParams" colspan="2">template&lt;std::size_t NumModules&gt; </td></tr>
+<tr class="memitem:aa3265eb2f43e7e3ab98a45a862dc6df5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aa3265eb2f43e7e3ab98a45a862dc6df5">StopTuning</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt; *drive)</td></tr>
+<tr class="separator:aa3265eb2f43e7e3ab98a45a862dc6df5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac98b066ebf7fbaca9c20f29659cd82ae" id="r_ac98b066ebf7fbaca9c20f29659cd82ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac98b066ebf7fbaca9c20f29659cd82ae">Close</a> ()</td></tr>
 <tr class="separator:ac98b066ebf7fbaca9c20f29659cd82ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -299,6 +302,32 @@ template&lt;std::size_t NumModules&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">drive</td><td>Drive to set up telemetry for. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa3265eb2f43e7e3ab98a45a862dc6df5" name="aa3265eb2f43e7e3ab98a45a862dc6df5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3265eb2f43e7e3ab98a45a862dc6df5">&#9670;&#160;</a></span>StopTuning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t NumModules&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::telemetry::SwerveDriveTelemetry::StopTuning </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt; *</td>          <td class="paramname"><span class="paramname"><em>drive</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where it is with its closed-loop controller.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">drive</td><td>Drive being tuned. </td></tr>
   </table>
   </dd>
 </dl>

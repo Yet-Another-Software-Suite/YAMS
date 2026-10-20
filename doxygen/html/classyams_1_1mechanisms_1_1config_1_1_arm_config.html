@@ -99,6 +99,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a88f5b4cbe1eae640a3a8ed218e326f97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c33c42ccff91dc5ac8df9dc6328ba28" id="r_a6c33c42ccff91dc5ac8df9dc6328ba28"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html">ArmConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c33c42ccff91dc5ac8df9dc6328ba28">WithSimColor</a> (const wpi::util::Color8Bit &amp;color)</td></tr>
 <tr class="separator:a6c33c42ccff91dc5ac8df9dc6328ba28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28a08793bc1166b666d7a61124255497" id="r_a28a08793bc1166b666d7a61124255497"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html">ArmConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a28a08793bc1166b666d7a61124255497">WithMechanismPositionConfig</a> (const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;mechanismPositionConfig)</td></tr>
+<tr class="separator:a28a08793bc1166b666d7a61124255497"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7c349a62d1c1f55931f345c39621c03" id="r_ac7c349a62d1c1f55931f345c39621c03"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac7c349a62d1c1f55931f345c39621c03">GetTelemetryName</a> () const</td></tr>
 <tr class="separator:ac7c349a62d1c1f55931f345c39621c03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96b0bf8062894098c17dafcb8adf05e2" id="r_a96b0bf8062894098c17dafcb8adf05e2"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::degree_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96b0bf8062894098c17dafcb8adf05e2">GetMinAngle</a> () const</td></tr>
@@ -109,6 +111,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afa5ecd563faa0a567112654e49900872"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a129ec3a28dcf6fdca5080955c42fbae7" id="r_a129ec3a28dcf6fdca5080955c42fbae7"><td class="memItemLeft" align="right" valign="top">wpi::util::Color8Bit&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a129ec3a28dcf6fdca5080955c42fbae7">GetSimColor</a> () const</td></tr>
 <tr class="separator:a129ec3a28dcf6fdca5080955c42fbae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86c79cf2b58a74f0b64e144706221a55" id="r_a86c79cf2b58a74f0b64e144706221a55"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86c79cf2b58a74f0b64e144706221a55">GetMechanismPositionConfig</a> () const</td></tr>
+<tr class="separator:a86c79cf2b58a74f0b64e144706221a55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration class for an Arm mechanism.</p>
@@ -173,6 +177,32 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Get the optional maximum (upper hard-limit) angle. </p>
+
+</div>
+</div>
+<a id="a86c79cf2b58a74f0b64e144706221a55" name="a86c79cf2b58a74f0b64e144706221a55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86c79cf2b58a74f0b64e144706221a55">&#9670;&#160;</a></span>GetMechanismPositionConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp; yams::mechanisms::config::ArmConfig::GetMechanismPositionConfig </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get where the mechanism is on the robot. </p>
 
 </div>
 </div>
@@ -273,6 +303,39 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">angle</td><td>Maximum angle. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a28a08793bc1166b666d7a61124255497" name="a28a08793bc1166b666d7a61124255497"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28a08793bc1166b666d7a61124255497">&#9670;&#160;</a></span>WithMechanismPositionConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1mechanisms_1_1config_1_1_arm_config.html">ArmConfig</a> &amp; yams::mechanisms::config::ArmConfig::WithMechanismPositionConfig </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classyams_1_1mechanisms_1_1config_1_1_mechanism_position_config.html">MechanismPositionConfig</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mechanismPositionConfig</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set where the mechanism is on the robot, for GetPose3d(): where it is mounted, how it is turned there, the plane it moves in, and the mechanism it is mounted on, if any.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mechanismPositionConfig</td><td>The mechanism's position. </td></tr>
   </table>
   </dd>
 </dl>

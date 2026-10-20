@@ -75,7 +75,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#simIterate()" tabindex="0">simIterate()</a></li>
 <li><a href="#updateTelemetry()" tabindex="0">updateTelemetry()</a></li>
 <li><a href="#visualizationUpdate()" tabindex="0">visualizationUpdate()</a></li>
-<li><a href="#getRelativeMechanismPosition()" tabindex="0">getRelativeMechanismPosition()</a></li>
+<li><a href="#getPose3d()" tabindex="0">getPose3d()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#getShooterConfig()" tabindex="0">getShooterConfig()</a></li>
 </ol>
@@ -173,12 +173,12 @@ extends this class and has a full usage example in its Javadoc.
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the mechanism.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation3d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPose3d()" class="member-name-link">getPose3d</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model: where its
+axle is mounted, as set in its <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned by the wheel's position about
+the axis normal to its movement plane.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../config/FlyWheelConfig.html" title="class in yams.core.mechanisms.config">FlyWheelConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getShooterConfig()" class="member-name-link">getShooterConfig</a>()</code></div>
@@ -446,18 +446,18 @@ in the
 </section>
 </li>
 <li>
-<section class="detail" id="getRelativeMechanismPosition()">
-<h3>getRelativeMechanismPosition</h3>
+<section class="detail" id="getPose3d()">
+<h3>getPose3d</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Translation3d</span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getPose3d</span>()</div>
+<div class="block">Get the flywheel's pose, for publishing to AdvantageScope as a component of a robot model: where its
+axle is mounted, as set in its <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, turned by the wheel's position about
+the axis normal to its movement plane.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../SmartMechanism.html#getRelativeMechanismPosition()">getRelativeMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
+<dd><code><a href="../SmartMechanism.html#getPose3d()">getPose3d</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
 <dt>Returns:</dt>
-<dd>The relative position of the mechanism as a <code>Translation3d</code>.</dd>
+<dd>The flywheel's <code>Pose3d</code>, relative to the robot.</dd>
 </dl>
 </div>
 </section>

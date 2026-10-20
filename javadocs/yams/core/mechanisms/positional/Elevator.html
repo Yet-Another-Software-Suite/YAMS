@@ -67,7 +67,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#updateTelemetry()" tabindex="0">updateTelemetry()</a></li>
 <li><a href="#simIterate()" tabindex="0">simIterate()</a></li>
 <li><a href="#visualizationUpdate()" tabindex="0">visualizationUpdate()</a></li>
-<li><a href="#getRelativeMechanismPosition()" tabindex="0">getRelativeMechanismPosition()</a></li>
+<li><a href="#getPose3d()" tabindex="0">getPose3d()</a></li>
+<li><a href="#getCascadePose3d()" tabindex="0">getCascadePose3d()</a></li>
+<li><a href="#getContinuousPose3d(boolean)" tabindex="0">getContinuousPose3d(boolean)</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#getHeight()" tabindex="0">getHeight()</a></li>
 <li><a href="#getVelocity()" tabindex="0">getVelocity()</a></li>
@@ -153,10 +155,22 @@ extends this class and has a full usage example in its Javadoc.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;org.wpilib.math.geometry.Pose3d&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCascadePose3d()" class="member-name-link">getCascadePose3d</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+components of a robot model.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../config/ElevatorConfig.html" title="class in yams.core.mechanisms.config">ElevatorConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="../config/ElevatorConfig.html" title="class in yams.core.mechanisms.config"><code>ElevatorConfig</code></a> for this <a href="Elevator.html" title="class in yams.core.mechanisms.positional"><code>Elevator</code></a></div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;org.wpilib.math.geometry.Pose3d&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getContinuousPose3d(boolean)" class="member-name-link">getContinuousPose3d</a><wbr>(boolean&nbsp;carriageFirst)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
+components of a robot model.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Distance</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getHeight()" class="member-name-link">getHeight</a>()</code></div>
@@ -168,12 +182,12 @@ extends this class and has a full usage example in its Javadoc.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the mechanism.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation3d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPose3d()" class="member-name-link">getPose3d</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="block">Get the carriage's pose, for publishing to AdvantageScope as a component of a robot model: where the
+elevator is mounted, as set in its <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, moved up the elevator by its
+height, at the elevator's angle in its movement plane.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.LinearVelocity</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVelocity()" class="member-name-link">getVelocity</a>()</code></div>
@@ -269,6 +283,8 @@ meters.</div>
                                                    mass is not configured.</dd>
 <dd><code><a href="../../exceptions/ElevatorConfigurationException.html" title="class in yams.core.exceptions">ElevatorConfigurationException</a></code> - if running in simulation and the minimum or
                                                    maximum height is not configured.</dd>
+<dd><code><a href="../../exceptions/ElevatorConfigurationException.html" title="class in yams.core.exceptions">ElevatorConfigurationException</a></code> - if the stage heights do not add up to the
+                                                   maximum height.</dd>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if running in simulation and the starting
                                                    position is not set on the
                                                    <a href="../../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</dd>
@@ -338,18 +354,68 @@ meters.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="getRelativeMechanismPosition()">
-<h3>getRelativeMechanismPosition</h3>
+<section class="detail" id="getPose3d()">
+<h3>getPose3d</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Translation3d</span>&nbsp;<span class="element-name">getRelativeMechanismPosition</span>()</div>
-<div class="block">Get the relative position of the mechanism, taking into account the relative position defined
-in the
-<a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Pose3d</span>&nbsp;<span class="element-name">getPose3d</span>()</div>
+<div class="block">Get the carriage's pose, for publishing to AdvantageScope as a component of a robot model: where the
+elevator is mounted, as set in its <a href="../config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config"><code>MechanismPositionConfig</code></a>, moved up the elevator by its
+height, at the elevator's angle in its movement plane.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../SmartMechanism.html#getRelativeMechanismPosition()">getRelativeMechanismPosition</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
+<dd><code><a href="../SmartMechanism.html#getPose3d()">getPose3d</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></code></dd>
 <dt>Returns:</dt>
-<dd>The relative position of the mechanism as a <code>Translation3d</code>.</dd>
+<dd>The carriage's <code>Pose3d</code>, relative to the robot.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCascadePose3d()">
+<h3>getCascadePose3d</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;org.wpilib.math.geometry.Pose3d&gt;</span>&nbsp;<span class="element-name">getCascadePose3d</span>()</div>
+<div class="block">Get the pose of each moving stage of a cascade elevator, for publishing to AdvantageScope as
+components of a robot model. A cascade elevator's stages all move at once, each by its share of the
+carriage's height: a stage that travels a third of the elevator's total travel moves a third of the
+carriage's height relative to the stage below it.
+
+<p>The stages are set with <a href="../config/ElevatorConfig.html#withStages(org.wpilib.units.measure.Distance...)"><code>ElevatorConfig.withStages(Distance...)</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Each moving stage's <code>Pose3d</code>, relative to the robot, from the stage nearest the fixed
+        stage to the carriage. The last is the carriage, <a href="#getPose3d()"><code>getPose3d()</code></a>.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../exceptions/ElevatorConfigurationException.html" title="class in yams.core.exceptions">ElevatorConfigurationException</a></code> - if the stages are not set, or there are fewer than 2.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getContinuousPose3d(boolean)">
+<h3>getContinuousPose3d</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;org.wpilib.math.geometry.Pose3d&gt;</span>&nbsp;<span class="element-name">getContinuousPose3d</span><wbr><span class="parameters">(boolean&nbsp;carriageFirst)</span></div>
+<div class="block">Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
+components of a robot model. A continuous elevator's stages move one at a time. Which moves first
+depends on how it is rigged: watch it move to see which it is.
+<ul>
+  <li>Carriage first: the carriage rises the whole of its travel first, then the stage below it, and
+  so on out to the stage nearest the fixed stage. Going down, the stage nearest the fixed stage
+  lowers first.</li>
+  <li>Carriage last: the stage nearest the fixed stage rises the whole of its travel first, then the
+  next, and so on out to the carriage. Going down, the carriage lowers first.</li>
+</ul>
+
+<p>The stages are set with <a href="../config/ElevatorConfig.html#withStages(org.wpilib.units.measure.Distance...)"><code>ElevatorConfig.withStages(Distance...)</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>carriageFirst</code> - True if the carriage moves first, false if it moves last.</dd>
+<dt>Returns:</dt>
+<dd>Each moving stage's <code>Pose3d</code>, relative to the robot, from the stage nearest the fixed
+        stage to the carriage. The last is the carriage, <a href="#getPose3d()"><code>getPose3d()</code></a>.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../exceptions/ElevatorConfigurationException.html" title="class in yams.core.exceptions">ElevatorConfigurationException</a></code> - if the stages are not set, or there are fewer than 2.</dd>
 </dl>
 </div>
 </section>

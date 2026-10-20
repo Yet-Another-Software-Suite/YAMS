@@ -139,6 +139,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0fddaded17f00af36380dfd7c3c975af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b1e5d43939c368af5c9b1d2caad8483" id="r_a8b1e5d43939c368af5c9b1d2caad8483"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a8b1e5d43939c368af5c9b1d2caad8483">StartDriveToPoseTuning</a> ()</td></tr>
 <tr class="separator:a8b1e5d43939c368af5c9b1d2caad8483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384d5792a599cd95127fc50f2dabc236" id="r_a384d5792a599cd95127fc50f2dabc236"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a384d5792a599cd95127fc50f2dabc236">ApplyTuningValues</a> ()</td></tr>
+<tr class="separator:a384d5792a599cd95127fc50f2dabc236"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3823774ca12031a6992e4c013ee581f2" id="r_a3823774ca12031a6992e4c013ee581f2"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a3823774ca12031a6992e4c013ee581f2">GetSimPose</a> ()</td></tr>
 <tr class="separator:a3823774ca12031a6992e4c013ee581f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adca2293a038204e1fb1d951b4f7020a4" id="r_adca2293a038204e1fb1d951b4f7020a4"><td class="memItemLeft" align="right" valign="top">wpi::math::ChassisVelocities&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adca2293a038204e1fb1d951b4f7020a4">GetRobotRelativeSpeed</a> ()</td></tr>
@@ -280,7 +282,7 @@ Example usage (inside a four-module subsystem)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_html_ab805136bec30f6df6248dc451b03711a"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#ab805136bec30f6df6248dc451b03711a">yams::motorcontrollers::SmartMotorControllerConfig::WithMechanismCircumference</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMechanismCircumference(wpi::units::meter_t circumference)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:15</div></div>
+<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:17</div></div>
 <div class="ttc" id="anamespaceyams_1_1mechanisms_1_1swerve_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1swerve.html">yams::mechanisms::swerve</a></div><div class="ttdef"><b>Definition</b> SwerveDrive.hpp:49</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:38</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
@@ -417,6 +419,34 @@ template&lt;size_t NumModules = 4&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a384d5792a599cd95127fc50f2dabc236" name="a384d5792a599cd95127fc50f2dabc236"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384d5792a599cd95127fc50f2dabc236">&#9670;&#160;</a></span>ApplyTuningValues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::ApplyTuningValues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Apply the live tuning values from NetworkTables, as the tuning command does each loop. </p>
 
 </div>
 </div>

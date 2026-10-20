@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['yaw_0',['YAW',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aac461be1f8daa1e5194bbe058bf311b37',1,'yams::mechanisms::config']]]
+  ['xy_0',['XY',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325a74c53bcd3dcb2bb79993b2fec37d362a',1,'yams::mechanisms::config::MechanismPositionConfig']]],
+  ['xz_1',['XZ',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469',1,'yams::mechanisms::config::MechanismPositionConfig']]]
 ];

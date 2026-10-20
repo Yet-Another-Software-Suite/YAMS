@@ -120,6 +120,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:afcb0b8cb3418cb05466fb79cd9d6315f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42238e60a06fecc34240f8e850540857" id="r_a42238e60a06fecc34240f8e850540857"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42238e60a06fecc34240f8e850540857">GetAzimuthMotorController</a> () const</td></tr>
 <tr class="separator:a42238e60a06fecc34240f8e850540857"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ec99e5a3e6e9c303ebb70a31dde66c7" id="r_a7ec99e5a3e6e9c303ebb70a31dde66c7"><td class="memItemLeft" align="right" valign="top">wpi::units::meters_per_second_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7ec99e5a3e6e9c303ebb70a31dde66c7">GetCouplingVelocity</a> () const</td></tr>
+<tr class="separator:a7ec99e5a3e6e9c303ebb70a31dde66c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -197,7 +199,7 @@ Example usage (inside a subsystem constructor)</h3>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_a86825fd1f48eeed62df904ebc583f159"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a86825fd1f48eeed62df904ebc583f159">yams::motorcontrollers::SmartMotorControllerConfig::WithFeedback</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithFeedback(double kP, double kI, double kD, ClosedLoopControllerSlot slot=ClosedLoopControllerSlot::SLOT_0)</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1_smart_motor_controller_config_html_ab805136bec30f6df6248dc451b03711a"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#ab805136bec30f6df6248dc451b03711a">yams::motorcontrollers::SmartMotorControllerConfig::WithMechanismCircumference</a></div><div class="ttdeci">SmartMotorControllerConfig &amp; WithMechanismCircumference(wpi::units::meter_t circumference)</div></div>
 <div class="ttc" id="anamespaceyams_1_1gearing_html"><div class="ttname"><a href="namespaceyams_1_1gearing.html">yams::gearing</a></div><div class="ttdef"><b>Definition</b> GearBox.hpp:11</div></div>
-<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:15</div></div>
+<div class="ttc" id="anamespaceyams_1_1mechanisms_1_1config_html"><div class="ttname"><a href="namespaceyams_1_1mechanisms_1_1config.html">yams::mechanisms::config</a></div><div class="ttdef"><b>Definition</b> ArmConfig.hpp:17</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1remote_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1remote.html">yams::motorcontrollers::remote</a></div><div class="ttdef"><b>Definition</b> TalonFXSWrapper.hpp:38</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -273,6 +275,24 @@ Example usage (inside a subsystem constructor)</h3>
       </table>
 </div><div class="memdoc">
 <p>Get the module configuration. </p>
+
+</div>
+</div>
+<a id="a7ec99e5a3e6e9c303ebb70a31dde66c7" name="a7ec99e5a3e6e9c303ebb70a31dde66c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ec99e5a3e6e9c303ebb70a31dde66c7">&#9670;&#160;</a></span>GetCouplingVelocity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::units::meters_per_second_t yams::mechanisms::swerve::SwerveModule::GetCouplingVelocity </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Wheel velocity the drive encoder reads because the azimuth is turning. </p>
 
 </div>
 </div>

@@ -63,7 +63,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#AutoAlignEnabled" tabindex="0">AutoAlignEnabled</a></li>
 <li><a href="#ModulesDriveTuningEnabled" tabindex="0">ModulesDriveTuningEnabled</a></li>
 <li><a href="#ModulesDriveInPlace" tabindex="0">ModulesDriveInPlace</a></li>
+<li><a href="#ModulesDriveVoltageEnabled" tabindex="0">ModulesDriveVoltageEnabled</a></li>
 <li><a href="#ModulesAzimuthTuningEnabled" tabindex="0">ModulesAzimuthTuningEnabled</a></li>
+<li><a href="#ModulesAzimuthVoltageEnabled" tabindex="0">ModulesAzimuthVoltageEnabled</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -128,15 +130,27 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Enables or disables live tuning of every module's azimuth motor PID gains and angle setpoint.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesDriveInPlace" class="member-name-link">ModulesDriveInPlace</a></code></div>
+<div class="col-first even-row-color"><code><a href="#ModulesAzimuthVoltageEnabled" class="member-name-link">ModulesAzimuthVoltageEnabled</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">While azimuth tuning is on, turn every module's azimuth motor at
+<a href="SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesAzimuthVoltage</code></a> instead of the angle setpoint, without its
+closed loop controller, as for characterizing it.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveInPlace" class="member-name-link">ModulesDriveInPlace</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">When enabled ensure drive testing is done with all modules are oriented to the swerve drive
 will drive counter clockwise positive.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesDriveTuningEnabled" class="member-name-link">ModulesDriveTuningEnabled</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesDriveTuningEnabled" class="member-name-link">ModulesDriveTuningEnabled</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Enables or disables live tuning of every module's drive motor PID gains and velocity
 setpoint.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveVoltageEnabled" class="member-name-link">ModulesDriveVoltageEnabled</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">While drive tuning is on, drive every module's drive motor at
+<a href="SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesDriveVoltage</code></a> instead of the velocity setpoint, without its
+closed loop controller, as for characterizing it.</div>
 </div>
 </div>
 </section>
@@ -218,11 +232,33 @@ will drive counter clockwise positive.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="ModulesDriveVoltageEnabled">
+<h3>ModulesDriveVoltageEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></span>&nbsp;<span class="element-name">ModulesDriveVoltageEnabled</span></div>
+<div class="block">While drive tuning is on, drive every module's drive motor at
+<a href="SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesDriveVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesDriveVoltage</code></a> instead of the velocity setpoint, without its
+closed loop controller, as for characterizing it.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="ModulesAzimuthTuningEnabled">
 <h3>ModulesAzimuthTuningEnabled</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></span>&nbsp;<span class="element-name">ModulesAzimuthTuningEnabled</span></div>
 <div class="block">Enables or disables live tuning of every module's azimuth motor PID gains and angle setpoint.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ModulesAzimuthVoltageEnabled">
+<h3>ModulesAzimuthVoltageEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.BooleanTelemetryField</a></span>&nbsp;<span class="element-name">ModulesAzimuthVoltageEnabled</span></div>
+<div class="block">While azimuth tuning is on, turn every module's azimuth motor at
+<a href="SwerveDriveTelemetry.DoubleTelemetryField.html#ModulesAzimuthVoltage"><code>SwerveDriveTelemetry.DoubleTelemetryField.ModulesAzimuthVoltage</code></a> instead of the angle setpoint, without its
+closed loop controller, as for characterizing it.</div>
 </div>
 </section>
 </li>
