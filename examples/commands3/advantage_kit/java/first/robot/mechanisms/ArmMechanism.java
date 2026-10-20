@@ -209,7 +209,7 @@ public class ArmMechanism implements Mechanism {
   }
 
   public void simulationPeriodic() {
-    // Run in its own Notifier, started in Robot.simulationInit(), once per loop period during simulation
+    // Called by Robot.simulationPeriodic() once per loop during simulation
     arm.simIterate();
   }
 

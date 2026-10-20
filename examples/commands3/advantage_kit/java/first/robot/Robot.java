@@ -19,8 +19,6 @@ import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
 import first.robot.opmodes.teleop.AngularVelocityTeleop;
 import first.robot.opmodes.teleop.HeadingTeleop;
-import java.util.ArrayList;
-import java.util.List;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -34,7 +32,6 @@ import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
-import org.wpilib.system.Notifier;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
@@ -78,8 +75,6 @@ public class Robot extends LoggedRobot {
   private static final boolean HEADING_TELEOP = false;
 
   private final Scheduler scheduler = Scheduler.getDefault();
-  /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
-  private final List<Notifier> simulationNotifiers = new ArrayList<>();
 
   // Mechanisms are created after Logger.start() in the constructor so their hardware reads are
   // logged from the first loop.
@@ -203,29 +198,16 @@ public class Robot extends LoggedRobot {
   }
 
   /**
-   * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
-   * {@code simulationPeriodic()} on the main robot loop.
+   * Unlike the other Commands v3 examples, the simulation runs here on the main robot loop instead
+   * of in a Notifier per mechanism, so it stays in step with the AdvantageKit log.
    */
   @Override
-  public void simulationInit() {
-    startSimulation("Drive", drive::simulationPeriodic);
-    startSimulation("Arm", arm::simulationPeriodic);
-    startSimulation("Elevator", elevator::simulationPeriodic);
-    startSimulation("Shooter", shooter::simulationPeriodic);
-    startSimulation("Indexer", indexer::simulationPeriodic);
-  }
-
-  /**
-   * Run a mechanism's simulation in its own Notifier, every robot loop period.
-   *
-   * @param name               Name of the mechanism, used to name the Notifier's thread.
-   * @param simulationPeriodic The mechanism's simulation update.
-   */
-  private void startSimulation(String name, Runnable simulationPeriodic) {
-    final Notifier notifier = new Notifier(simulationPeriodic);
-    notifier.setName(name + " Simulation");
-    notifier.startPeriodic(getPeriod());
-    simulationNotifiers.add(notifier);
+  public void simulationPeriodic() {
+    drive.simulationPeriodic();
+    arm.simulationPeriodic();
+    elevator.simulationPeriodic();
+    shooter.simulationPeriodic();
+    indexer.simulationPeriodic();
   }
 
   @Override
