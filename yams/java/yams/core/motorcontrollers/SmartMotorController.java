@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.wpilib.framework.RobotBase;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.math.controller.ArmFeedforward;
 import org.wpilib.math.controller.ElevatorFeedforward;
@@ -262,6 +263,32 @@ public abstract class SmartMotorController {
       return Optional.of(new ExponentialProfile.State(getMeasurementPosition().in(Meters), getMeasurementVelocity().in(MetersPerSecond)));
     }
     return Optional.of(new ExponentialProfile.State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
+  }
+
+  /**
+   * Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+   * it, as WPILib's SysId works it out for its presets. Feedback gains worked out for the closed loop
+   * depend on it. In simulation, the simulation period, since the simulated sensor is updated once a
+   * period.
+   *
+   * @return The delay, or empty if it is not known for this motor controller.
+   */
+  public Optional<Time> getVelocityMeasurementDelay() {
+    return RobotBase.isSimulation() ? Optional.of(m_config.getSimulationPeriod()) : Optional.empty();
+  }
+
+  /**
+   * Get the period the closed loop controller runs at. A closed loop controller run on the SystemCore,
+   * such as an LQR or an exponential profile, runs at {@link SmartMotorControllerConfig#withClosedLoopControlPeriod(Time)},
+   * 20 ms by default. One run on the motor controller runs at 1 kHz.
+   *
+   * @return The closed loop controller's period.
+   */
+  public Time getClosedLoopControllerPeriod() {
+    if (m_closedLoopControllerThread != null) {
+      return m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    }
+    return Milliseconds.of(1);
   }
 
   /**

@@ -146,6 +146,12 @@ class SparkWrapper : public SmartMotorController {
   void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
   wpi::units::volt_t GetVoltage() override;
+  /**
+   * Read from the SPARK's encoder settings when the config is applied. The SPARK's closed loop uses
+   * the velocity as soon as it is filtered. A closed loop run on the SystemCore reads it from its
+   * status frame instead, which on average is half the frame's period older.
+   */
+  std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
   /** @copydoc SmartMotorController::SetPosition(wpi::units::turn_t) */
@@ -424,13 +430,51 @@ class SparkWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_rioControllerAlert;
   /** Shown when external encoder gearing is set alongside a discontinuity point. */
   std::optional<wpi::util::Alert> m_externalEncoderGearingDiscontinuityAlert;
+  /** Shown when the SPARK does not take the feedback gains. */
+  std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
+  /** How far behind the measured velocity is, from the encoder's filtering, read when the config
+   *  is applied. */
+  std::optional<wpi::units::second_t> m_velocityMeasurementDelay;
+  /** How often the SPARK sends the measured velocity over CAN, read when the config is applied. */
+  wpi::units::second_t m_velocitySignalPeriod{0.02};
+  /** Shown when the SPARK does not take the feedforward gains. */
+  std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
 
   void Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,
             SmartMotorControllerConfig* config);
   /** @return The SparkMaxConfig or SparkFlexConfig this wrapper owns. */
   rev::spark::SparkBaseConfig& SparkConfig();
-  /** Run a SPARK call until it returns kOk, up to 8 times. */
-  bool ConfigureSpark(const std::function<rev::REVLibError()>& call);
+  /** Run a SPARK call until it returns kOk, retrying silently for up to retryFor. */
+  bool ConfigureSpark(const std::function<rev::REVLibError()>& call,
+                      wpi::units::second_t retryFor = wpi::units::second_t{0.015});
+
+  /**
+   * Send part of the SPARK's config, such as only its closed loop gains, which uses less of the CAN
+   * bus than sending all of it. The part must also be in the SPARK's config, so it is kept when the
+   * whole config is sent.
+   *
+   * @param config The part of the config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::SparkBaseConfig& config);
+
+  /**
+   * Send only the closed loop part of the SPARK's config, such as its feedback gains. It must also
+   * be in the SPARK's config, so it is kept when the whole config is sent.
+   *
+   * @param closedLoop The closed loop config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::ClosedLoopConfig& closedLoop);
+
+  /**
+   * Send only the feedforward part of the SPARK's config. It must also be in the SPARK's config, so
+   * it is kept when the whole config is sent.
+   *
+   * @param feedForward The feedforward config to send.
+   * @return Whether the SPARK acknowledged it.
+   */
+  bool ConfigureSpark(rev::spark::FeedForwardConfig& feedForward);
   /** Persist parameters only while the robot is disabled. */
   rev::PersistMode PersistModeForState() const;
   /** Send the SPARK config without blocking or resetting (live setters). */

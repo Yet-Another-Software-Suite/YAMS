@@ -5,7 +5,9 @@ package yams.core.telemetry;
 
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Volts;
 
+import java.util.EnumSet;
 import java.util.Map;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
@@ -26,6 +28,8 @@ public class SwerveDriveTelemetry {
   private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>                m_boolTelemetry;
   private NetworkTable                                                                       m_dataNt;
   private NetworkTable                                                                       m_tuningNt;
+  /** The tuning modes on in the last loop, to send the setpoints again when they change, or null for none yet. */
+  private EnumSet<TuningMode>                                                                m_lastModes;
 
   /**
    * Create SwerveDrive telemetry for logging in NetworkTables and DataLog.
@@ -144,175 +148,294 @@ public class SwerveDriveTelemetry {
    *                               but no gyro supplier was set with
    *                               {@link yams.core.mechanisms.config.SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
-  @SuppressWarnings("unchecked")
   public void applyTuningValues(SwerveDrive drive) {
-    var cfg = drive.getConfig();
-    var translationPID = cfg.getTranslationPID();
-    var rotationPID = cfg.getRotationPID();
-    boolean nt4Enabled = m_config.getNT4Enabled();
+    if (!m_config.getNT4Enabled()) {
+      return;
+    }
+    var modules = drive.getModules();
+    var translationPID = drive.getConfig().getTranslationPID();
+    var rotationPID = drive.getConfig().getRotationPID();
 
-    var autoAlignBt = m_boolTelemetry.get(BooleanTelemetryField.AutoAlignEnabled);
-    var driveTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveTuningEnabled);
-    var azimuthTuningBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled);
-    var driveInPlaceBt = m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveInPlace);
-
-    // Auto-align fields are disabled when either drive to pose controller is missing.
-    boolean autoAlignOn = autoAlignBt.enabled && nt4Enabled && autoAlignBt.get();
-    boolean driveTuningOn = driveTuningBt.enabled && nt4Enabled && driveTuningBt.get();
-    boolean azimuthTuningOn = azimuthTuningBt.enabled && nt4Enabled && azimuthTuningBt.get();
-    boolean driveInPlaceOn = driveInPlaceBt.enabled && nt4Enabled && driveInPlaceBt.get();
-
-    // Only one tuning mode may drive the chassis at a time; enforce priority order
-    // (auto-align > drive tuning > azimuth tuning) and force the losers back off in
-    // NetworkTables so the dashboard reflects what's actually happening.
-    if (autoAlignOn) {
-      if (driveTuningOn) {
-        driveTuningBt.forceSet(false);
-        driveTuningOn = false;
+    // Read which tuning modes are on. Only one may drive the chassis at a time: auto-align, then drive
+    // tuning, then azimuth tuning. A mode that is on turns the ones it outranks back off, in
+    // NetworkTables too so the dashboard reflects what's actually happening, so the order the fields
+    // are read in does not matter. Auto-align fields are disabled when either drive to pose
+    // controller is missing.
+    var modes = EnumSet.noneOf(TuningMode.class);
+    for (BooleanTelemetry<BooleanTelemetryField> bt : m_boolTelemetry.values()) {
+      if (!bt.enabled || !bt.get()) {
+        continue;
       }
-      if (azimuthTuningOn) {
-        azimuthTuningBt.forceSet(false);
-        azimuthTuningOn = false;
+      switch (bt.getField()) {
+        case AutoAlignEnabled:
+          modes.add(TuningMode.AUTO_ALIGN);
+          modes.remove(TuningMode.DRIVE);
+          modes.remove(TuningMode.AZIMUTH);
+          m_boolTelemetry.get(BooleanTelemetryField.ModulesDriveTuningEnabled).forceSet(false);
+          m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled).forceSet(false);
+          break;
+        case ModulesDriveTuningEnabled:
+          if (!modes.contains(TuningMode.AUTO_ALIGN)) {
+            modes.add(TuningMode.DRIVE);
+            modes.remove(TuningMode.AZIMUTH);
+            m_boolTelemetry.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled).forceSet(false);
+          }
+          break;
+        case ModulesDriveInPlace:
+          modes.add(TuningMode.DRIVE_IN_PLACE);
+          break;
+        case ModulesDriveVoltageEnabled:
+          modes.add(TuningMode.DRIVE_VOLTAGE);
+          break;
+        case ModulesAzimuthTuningEnabled:
+          if (!modes.contains(TuningMode.AUTO_ALIGN) && !modes.contains(TuningMode.DRIVE)) {
+            modes.add(TuningMode.AZIMUTH);
+          }
+          break;
+        case ModulesAzimuthVoltageEnabled:
+          modes.add(TuningMode.AZIMUTH_VOLTAGE);
+          break;
       }
-    } else if (driveTuningOn && azimuthTuningOn) {
-      azimuthTuningBt.forceSet(false);
-      azimuthTuningOn = false;
+    }
+    // Spinning in place and a voltage only apply while their tuning mode is on.
+    if (!modes.contains(TuningMode.DRIVE)) {
+      modes.remove(TuningMode.DRIVE_IN_PLACE);
+      modes.remove(TuningMode.DRIVE_VOLTAGE);
+    }
+    if (!modes.contains(TuningMode.AZIMUTH)) {
+      modes.remove(TuningMode.AZIMUTH_VOLTAGE);
+    }
+    // The angle each module points while drive tuning: forward, or, to spin in place, tangent to its
+    // position around the robot center so a positive velocity spins the robot counter-clockwise
+    // (WPILib's positive rotation direction).
+    var driveAngles = new Rotation2d[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      driveAngles[i] = Rotation2d.ZERO;
+      if (modes.contains(TuningMode.DRIVE_IN_PLACE)) {
+        var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
+        driveAngles[i] = moduleLocation.getAngle().orElse(new Rotation2d()).plus(Rotation2d.fromDegrees(90));
+      }
     }
 
-    if (autoAlignOn) {
-      var poseX = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX);
-      var poseY = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY);
-      var poseRotation = m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation);
-      var targetPose = new Pose2d(poseX.get(), poseY.get(), Rotation2d.fromDegrees(poseRotation.get()));
+    // Auto-align drives to its target pose every loop.
+    if (modes.contains(TuningMode.AUTO_ALIGN)) {
+      var targetPose = new Pose2d(m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseX).get(),
+                                  m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseY).get(),
+                                  Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.AutoAlignPoseRotation).get()));
       drive.setFieldRelativeChassisSpeeds(drive.driveToPoseSetpoint(targetPose));
     }
 
-    if (driveTuningBt.enabled && nt4Enabled) {
-      var modules = drive.getModules();
-      var states = new SwerveModuleVelocity[modules.length];
-      if (driveTuningOn) {
-        var velocity = MetersPerSecond.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get());
-        for (int i = 0; i < modules.length; i++) {
-          if (driveInPlaceOn) {
-            // Point each module tangent to its position around the robot center so a positive
-            // velocity spins the robot counter-clockwise (WPILib's positive rotation direction).
-            var moduleLocation = modules[i].getConfig().getLocation().orElseThrow();
-            var tangentAngle = moduleLocation.getAngle().orElse(new Rotation2d()).plus(Rotation2d.fromDegrees(90));
-            states[i] = new SwerveModuleVelocity(velocity, tangentAngle);
-          } else {
-            states[i] = new SwerveModuleVelocity(velocity, Rotation2d.ZERO);
-          }
+    // When the tuning modes change, switch the motors over, and send the setpoints of the modes now on.
+    if (!modes.equals(m_lastModes)) {
+      var lastModes = m_lastModes == null ? EnumSet.noneOf(TuningMode.class) : m_lastModes;
+      m_lastModes = modes;
+      // Back to the closed loops when a voltage turns off.
+      for (SwerveModule module : modules) {
+        if (lastModes.contains(TuningMode.DRIVE_VOLTAGE) && !modes.contains(TuningMode.DRIVE_VOLTAGE)) {
+          module.getDriveMotorController().startClosedLoopController();
         }
-        drive.setSwerveModuleStates(states);
-      } else if (!autoAlignOn) {
-        // Drive tuning is off (and auto-align isn't driving the chassis instead); make sure the
-        // modules don't keep spinning at whatever velocity was last commanded while it was on.
+        if (lastModes.contains(TuningMode.AZIMUTH_VOLTAGE) && !modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+          module.getAzimuthMotorController().startClosedLoopController();
+        }
+      }
+      var states = new SwerveModuleVelocity[modules.length];
+      if (modes.isEmpty()) {
+        // No tuning mode is driving the chassis; make sure the modules don't keep spinning at whatever
+        // velocity was last commanded while drive tuning was on.
         for (int i = 0; i < modules.length; i++) {
           states[i] = new SwerveModuleVelocity(MetersPerSecond.of(0), modules[i].getState().angle);
         }
         drive.setSwerveModuleStates(states);
       }
-    }
-
-    if (azimuthTuningOn) {
-      // Zero speed states would be held where the wheels are by the velocity deadband, so turn the
-      // wheels without driving them.
-      drive.setAzimuthAngles(Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get()));
-    }
-
-    for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
-      var dt = entry.getValue();
-      if (!dt.tunable())
-        continue;
-      switch (dt.getField()) {
-        case TranslationP -> translationPID.ifPresent(pid -> {
-          pid.setP(dt.get());
-          drive.setTranslationPID(pid);
-        });
-        case TranslationI -> translationPID.ifPresent(pid -> {
-          pid.setI(dt.get());
-          drive.setTranslationPID(pid);
-        });
-        case TranslationD -> translationPID.ifPresent(pid -> {
-          pid.setD(dt.get());
-          drive.setTranslationPID(pid);
-        });
-        case RotationP -> rotationPID.ifPresent(pid -> {
-          pid.setP(dt.get());
-          drive.setRotationPID(pid);
-        });
-        case RotationI -> rotationPID.ifPresent(pid -> {
-          pid.setI(dt.get());
-          drive.setRotationPID(pid);
-        });
-        case RotationD -> rotationPID.ifPresent(pid -> {
-          pid.setD(dt.get());
-          drive.setRotationPID(pid);
-        });
-        case ModulesDriveP -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKp(dt.get());
-          }
-        }
-        case ModulesDriveI -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKi(dt.get());
-          }
-        }
-        case ModulesDriveD -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKd(dt.get());
-          }
-        }
-        case ModulesAzimuthP -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKp(dt.get());
-          }
-        }
-        case ModulesAzimuthI -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKi(dt.get());
-          }
-        }
-        case ModulesAzimuthD -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKd(dt.get());
-          }
-        }
-        case ModulesDriveKs -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKs(dt.get());
-          }
-        }
-        case ModulesDriveKv -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKv(dt.get());
-          }
-        }
-        case ModulesDriveKa -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getDriveMotorController().setKa(dt.get());
-          }
-        }
-        case ModulesAzimuthKs -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKs(dt.get());
-          }
-        }
-        case ModulesAzimuthKv -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKv(dt.get());
-          }
-        }
-        case ModulesAzimuthKa -> {
-          for (SwerveModule module : drive.getModules()) {
-            module.getAzimuthMotorController().setKa(dt.get());
-          }
-        }
-        default -> {
+      for (TuningMode mode : modes) {
+        switch (mode) {
+          case AUTO_ALIGN:
+            // Driven every loop, above.
+          case DRIVE_IN_PLACE:
+            // Sent with drive tuning's setpoint.
+            break;
+          case DRIVE:
+            if (!modes.contains(TuningMode.DRIVE_VOLTAGE)) {
+              for (int i = 0; i < modules.length; i++) {
+                states[i] = new SwerveModuleVelocity(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVelocity).get(), driveAngles[i]);
+              }
+              drive.setSwerveModuleStates(states);
+            }
+            break;
+          case DRIVE_VOLTAGE:
+            for (int i = 0; i < modules.length; i++) {
+              // A closed loop run on the SystemCore would replace the voltage on its next loop.
+              if (!lastModes.contains(TuningMode.DRIVE_VOLTAGE)) {
+                modules[i].getDriveMotorController().stopClosedLoopController();
+              }
+              // The wheels are not optimized, so they always drive the same way.
+              modules[i].getDriveMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesDriveVoltage).get()));
+              modules[i].getAzimuthMotorController().setPosition(driveAngles[i].getMeasure());
+            }
+            break;
+          case AZIMUTH:
+            if (!modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+              // Zero speed states would be held where the wheels are by the velocity deadband, so turn
+              // the wheels without driving them.
+              drive.setAzimuthAngles(Rotation2d.fromDegrees(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthAngle).get()));
+            }
+            break;
+          case AZIMUTH_VOLTAGE:
+            for (SwerveModule module : modules) {
+              // A closed loop run on the SystemCore would replace the voltage on its next loop.
+              if (!lastModes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+                module.getAzimuthMotorController().stopClosedLoopController();
+              }
+              // Hold the drive motors still while the azimuth motors turn.
+              module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
+              module.getAzimuthMotorController().setVoltage(Volts.of(m_doubleTelemetry.get(DoubleTelemetryField.ModulesAzimuthVoltage).get()));
+            }
+            break;
         }
       }
     }
+
+    // Set every gain and setpoint that changed.
+    for (DoubleTelemetryField field : DoubleTelemetryField.values()) {
+      var dt = m_doubleTelemetry.get(field);
+      if (!dt.enabled || !dt.tunable()) {
+        continue;
+      }
+      switch (field) {
+        case TranslationP:
+          translationPID.ifPresent(pid -> {
+            pid.setP(dt.get());
+            drive.setTranslationPID(pid);
+          });
+          break;
+        case TranslationI:
+          translationPID.ifPresent(pid -> {
+            pid.setI(dt.get());
+            drive.setTranslationPID(pid);
+          });
+          break;
+        case TranslationD:
+          translationPID.ifPresent(pid -> {
+            pid.setD(dt.get());
+            drive.setTranslationPID(pid);
+          });
+          break;
+        case RotationP:
+          rotationPID.ifPresent(pid -> {
+            pid.setP(dt.get());
+            drive.setRotationPID(pid);
+          });
+          break;
+        case RotationI:
+          rotationPID.ifPresent(pid -> {
+            pid.setI(dt.get());
+            drive.setRotationPID(pid);
+          });
+          break;
+        case RotationD:
+          rotationPID.ifPresent(pid -> {
+            pid.setD(dt.get());
+            drive.setRotationPID(pid);
+          });
+          break;
+        case AutoAlignPoseX:
+        case AutoAlignPoseY:
+        case AutoAlignPoseRotation:
+          // Auto-align reads its target pose every loop, above.
+          break;
+        case ModulesDriveP:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKp(dt.get());
+          break;
+        case ModulesDriveI:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKi(dt.get());
+          break;
+        case ModulesDriveD:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKd(dt.get());
+          break;
+        case ModulesDriveKs:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKs(dt.get());
+          break;
+        case ModulesDriveKv:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKv(dt.get());
+          break;
+        case ModulesDriveKa:
+          for (SwerveModule module : modules) module.getDriveMotorController().setKa(dt.get());
+          break;
+        case ModulesAzimuthP:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKp(dt.get());
+          break;
+        case ModulesAzimuthI:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKi(dt.get());
+          break;
+        case ModulesAzimuthD:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKd(dt.get());
+          break;
+        case ModulesAzimuthKs:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKs(dt.get());
+          break;
+        case ModulesAzimuthKv:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKv(dt.get());
+          break;
+        case ModulesAzimuthKa:
+          for (SwerveModule module : modules) module.getAzimuthMotorController().setKa(dt.get());
+          break;
+        case ModulesDriveVelocity:
+          if (modes.contains(TuningMode.DRIVE) && !modes.contains(TuningMode.DRIVE_VOLTAGE)) {
+            var states = new SwerveModuleVelocity[modules.length];
+            for (int i = 0; i < modules.length; i++) {
+              states[i] = new SwerveModuleVelocity(dt.get(), driveAngles[i]);
+            }
+            drive.setSwerveModuleStates(states);
+          }
+          break;
+        case ModulesDriveVoltage:
+          if (modes.contains(TuningMode.DRIVE_VOLTAGE)) {
+            for (int i = 0; i < modules.length; i++) {
+              // The wheels are not optimized, so they always drive the same way.
+              modules[i].getDriveMotorController().setVoltage(Volts.of(dt.get()));
+              modules[i].getAzimuthMotorController().setPosition(driveAngles[i].getMeasure());
+            }
+          }
+          break;
+        case ModulesAzimuthAngle:
+          if (modes.contains(TuningMode.AZIMUTH) && !modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+            // Zero speed states would be held where the wheels are by the velocity deadband, so turn
+            // the wheels without driving them.
+            drive.setAzimuthAngles(Rotation2d.fromDegrees(dt.get()));
+          }
+          break;
+        case ModulesAzimuthVoltage:
+          if (modes.contains(TuningMode.AZIMUTH_VOLTAGE)) {
+            for (SwerveModule module : modules) {
+              // Hold the drive motors still while the azimuth motors turn.
+              module.getDriveMotorController().setVelocity(MetersPerSecond.of(0).plus(module.getCouplingVelocity()));
+              module.getAzimuthMotorController().setVoltage(Volts.of(dt.get()));
+            }
+          }
+          break;
+        case Gyro:
+          break;
+      }
+    }
+  }
+
+  /**
+   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still where
+   * it is with its closed loop controller.
+   *
+   * @param drive {@link SwerveDrive} being tuned.
+   */
+  public void stopTuning(SwerveDrive drive) {
+    // Turn every tuning mode off and apply it, so a voltage stops and the wheels are held where they
+    // are.
+    for (BooleanTelemetry<BooleanTelemetryField> bt : m_boolTelemetry.values()) {
+      if (bt.enabled) {
+        bt.forceSet(false);
+      }
+    }
+    applyTuningValues(drive);
+    // Send everything again when tuning starts again.
+    m_lastModes = null;
   }
 
   /** Close and unpublish telemetry. */
@@ -337,6 +460,22 @@ public class SwerveDriveTelemetry {
         entry.getValue().close();
       }
     }
+  }
+
+  /** The live tuning modes that can be on. */
+  private enum TuningMode {
+    /** Driving to the auto-align target pose. */
+    AUTO_ALIGN,
+    /** Driving every module at the velocity setpoint. */
+    DRIVE,
+    /** Pointing the modules around the robot center while drive tuning. */
+    DRIVE_IN_PLACE,
+    /** Driving every drive motor at the voltage setpoint while drive tuning. */
+    DRIVE_VOLTAGE,
+    /** Turning every module to the angle setpoint. */
+    AZIMUTH,
+    /** Turning every azimuth motor at the voltage setpoint while azimuth tuning. */
+    AZIMUTH_VOLTAGE
   }
 
   /** Struct telemetry field for {@link SwerveDrive}s. */
@@ -482,6 +621,11 @@ public class SwerveDriveTelemetry {
     ModulesDriveKa("modules/drive/feedforward/a", 0, true, "none"),
     /** Tunable velocity setpoint applied to every module's drive motor, in meters per second. */
     ModulesDriveVelocity("modules/drive/velocity", 0, true, "meters_per_second"),
+    /**
+     * Tunable voltage applied to every module's drive motor, without its closed loop controller, while
+     * {@link BooleanTelemetryField#ModulesDriveVoltageEnabled} is on.
+     */
+    ModulesDriveVoltage("modules/drive/voltage/setpoint", 0, true, "volts"),
     /** Proportional gain for tuning every module's azimuth motor closed-loop controller. */
     ModulesAzimuthP("modules/azimuth/feedback/p", 0, true, "none"),
     /** Integral gain for tuning every module's azimuth motor closed-loop controller. */
@@ -496,6 +640,11 @@ public class SwerveDriveTelemetry {
     ModulesAzimuthKa("modules/azimuth/feedforward/a", 0, true, "none"),
     /** Tunable angle setpoint applied to every module's azimuth motor, in degrees. */
     ModulesAzimuthAngle("modules/azimuth/angle", 0, true, "degrees"),
+    /**
+     * Tunable voltage applied to every module's azimuth motor, without its closed loop controller,
+     * while {@link BooleanTelemetryField#ModulesAzimuthVoltageEnabled} is on.
+     */
+    ModulesAzimuthVoltage("modules/azimuth/voltage/setpoint", 0, true, "volts"),
     /** Gyro angle, in degrees. */
     Gyro("gyro", 0, false, "degrees");
 
@@ -552,9 +701,21 @@ public class SwerveDriveTelemetry {
      */
     ModulesDriveInPlace("modules/drive/inplace", false, true),
     /**
+     * While drive tuning is on, drive every module's drive motor at
+     * {@link DoubleTelemetryField#ModulesDriveVoltage} instead of the velocity setpoint, without its
+     * closed loop controller, as for characterizing it.
+     */
+    ModulesDriveVoltageEnabled("modules/drive/voltage/enabled", false, true),
+    /**
      * Enables or disables live tuning of every module's azimuth motor PID gains and angle setpoint.
      */
-    ModulesAzimuthTuningEnabled("modules/azimuth/enabled", false, true);
+    ModulesAzimuthTuningEnabled("modules/azimuth/enabled", false, true),
+    /**
+     * While azimuth tuning is on, turn every module's azimuth motor at
+     * {@link DoubleTelemetryField#ModulesAzimuthVoltage} instead of the angle setpoint, without its
+     * closed loop controller, as for characterizing it.
+     */
+    ModulesAzimuthVoltageEnabled("modules/azimuth/voltage/enabled", false, true);
 
     /** Default value of the boolean telemetry field. */
     private final boolean defaultVal;

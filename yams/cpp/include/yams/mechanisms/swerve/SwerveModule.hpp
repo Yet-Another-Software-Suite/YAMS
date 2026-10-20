@@ -147,6 +147,7 @@ class SwerveModule {
    */
   wpi::math::SwerveModuleVelocity SetAzimuthAngle(wpi::math::Rotation2d angle);
 
+
   /** Get the current measured module state (speed and heading). */
   SwerveModuleVelocityWithAzimuth GetState() const;
 
@@ -180,10 +181,10 @@ class SwerveModule {
   wpi::units::meter_t GetCouplingDistance(wpi::units::turn_t azimuthAngle) const;
   /** The drive motor's rotor to mechanism ratio, or 1 when no gearing is configured. */
   double GetDriveRotorToMechanismRatio() const;
+ public:
   /** Wheel velocity the drive encoder reads because the azimuth is turning. */
   wpi::units::meters_per_second_t GetCouplingVelocity() const;
 
- public:
   // Public so SwerveDrive can access them directly (mirrors Java protected fields).
   motorcontrollers::SmartMotorController* m_driveMotorController;
   motorcontrollers::SmartMotorController* m_azimuthMotorController;

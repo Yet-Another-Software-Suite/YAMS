@@ -144,6 +144,8 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.kI).enable();
         doubleFields.get(DoubleTelemetryField.kD).enable();
         doubleFields.get(DoubleTelemetryField.SetpointForce).enable();
+        doubleFields.get(DoubleTelemetryField.ClosedLoopPeriod).enable();
+        doubleFields.get(DoubleTelemetryField.VelocityMeasurementDelay).enable();
       case MID:
         doubleFields.get(DoubleTelemetryField.OutputVoltage).enable();
         doubleFields.get(DoubleTelemetryField.StatorCurrent).enable();
@@ -459,6 +461,26 @@ public class SmartMotorControllerTelemetryConfig {
    */
   public SmartMotorControllerTelemetryConfig withSetpointForce() {
     doubleFields.get(DoubleTelemetryField.SetpointForce).enable();
+    return this;
+  }
+
+  /**
+   * Enables logging how far behind the mechanism the measured velocity is, when it is known.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withVelocityMeasurementDelay() {
+    doubleFields.get(DoubleTelemetryField.VelocityMeasurementDelay).enable();
+    return this;
+  }
+
+  /**
+   * Enables logging the period the closed loop controller runs at.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withClosedLoopPeriod() {
+    doubleFields.get(DoubleTelemetryField.ClosedLoopPeriod).enable();
     return this;
   }
 

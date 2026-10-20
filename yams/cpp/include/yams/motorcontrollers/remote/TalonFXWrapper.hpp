@@ -169,6 +169,14 @@ class TalonFXWrapper : public SmartMotorController {
   void SetVoltage(wpi::units::volt_t voltage) override;
   /** @copydoc SmartMotorController::GetVoltage */
   wpi::units::volt_t GetVoltage() override;
+  /**
+   * Phoenix 6 filters velocity with a Kalman filter tuned for the least latency, about 1 ms, as
+   * WPILib's SysId takes it for its CTRE Phoenix 6 preset. A closed loop run on the SystemCore reads
+   * the velocity from its status signal instead, which on average is half the signal's update period
+   * older. Phoenix 6 simulates the Talon in its own thread with the same filtering, so the delay is
+   * the same in simulation.
+   */
+  std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const override;
 
   // ---- Closed-loop setpoints ----------------------------------------------
   /** @copydoc SmartMotorController::SetPosition(wpi::units::turn_t) */
@@ -412,6 +420,10 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_startingPositionExternalEncoderAlert;
   /** Shown when a zero offset is set without an external encoder. */
   std::optional<wpi::util::Alert> m_zeroOffsetNoExternalEncoderAlert;
+  /** Shown when the Talon does not take the feedback gains. */
+  std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
+  /** Shown when the Talon does not take the feedforward gains. */
+  std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
   /** Shown when a discontinuity point is set without an external encoder. */
   std::optional<wpi::util::Alert> m_discontinuityPointNoExternalEncoderAlert;
 
@@ -421,7 +433,8 @@ class TalonFXWrapper : public SmartMotorController {
   void EnsureRequest(const std::function<ctre::phoenix::StatusCode()>& request);
   /** Apply one configuration group, retrying every 10 ms up to 10 times. */
   template <typename Group>
-  ctre::phoenix::StatusCode ApplyGroup(const Group& group);
+  ctre::phoenix::StatusCode ApplyGroup(const Group& group,
+                                       wpi::units::second_t retryFor = wpi::units::second_t{0.1});
   /** Set FOC on the position and velocity requests. */
   void SetFOC(bool foc);
   /** Mechanism rotations per linear gain unit (1 when the closed loop is not linear). */

@@ -1401,4 +1401,108 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   CHECK_FALSE(ahead.IsAimLocked(1.0_deg));
 }
 
+// Voltage tuning drives the wheels, then turns them, without their closed loops, and
+// turning the voltage off holds the wheels still with their closed loops again.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWithoutTheClosedLoop",
+                 "[SwerveDriveTest]") {
+  // Release the fixture's drive so its modules can be reused by a drive with live tuning.
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+  m_driveCfg.WithTelemetry("SwerveVoltageTuning", SwerveDriveConfig::TelemetryVerbosity::HIGH);
+  m_drive.emplace(&m_driveCfg);
+  Hardware().sub->m_drive = &m_drive.value();
+  auto tuning =
+      wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(m_drive->GetName());
+  auto tuneFor = [this](int loops) {
+    for (int i = 0; i < loops; ++i) {
+      m_drive->ApplyTuningValues();
+      SchedulerHelper::RunForDuration(0.02_s);
+    }
+  };
+  std::vector<SwerveModule*> modules{&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()};
+
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/drive/voltage/setpoint").SetDouble(4);
+  tuning->GetEntry("modules/drive/voltage/enabled").SetBoolean(true);
+  tuneFor(30);
+  for (auto* module : modules) {
+    INFO(module->GetName());
+    CHECK(module->GetDriveMotorController()->GetVoltage().value() == Catch::Approx(4).margin(0.25));
+    CHECK(module->GetState().velocity.value() > 0.5);
+  }
+  tuning->GetEntry("modules/drive/voltage/enabled").SetBoolean(false);
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(false);
+
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/azimuth/voltage/setpoint").SetDouble(1);
+  tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(true);
+  tuneFor(20);
+  for (auto* module : modules) {
+    INFO(module->GetName());
+    CHECK(module->GetAzimuthMotorController()->GetVoltage().value() ==
+          Catch::Approx(1).margin(0.25));
+  }
+
+  // Turning the voltage off stops it and holds the wheels where they are.
+  tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(false);
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(false);
+  tuneFor(25);
+  std::vector<double> stopped;
+  for (auto* module : modules) stopped.push_back(module->GetState().angle.Degrees().value());
+  SchedulerHelper::RunForDuration(0.5_s);
+  for (size_t i = 0; i < modules.size(); ++i) {
+    INFO(modules[i]->GetName());
+    CHECK(modules[i]->GetState().angle.Degrees().value() == Catch::Approx(stopped[i]).margin(2));
+  }
+}
+
+// Only the highest tuning mode stays on: auto-align, then drive tuning, then azimuth tuning.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.OnlyTheHighestTuningModeStaysOn",
+                 "[SwerveDriveTest]") {
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+  m_driveCfg.WithTelemetry("SwerveTuningPriority", SwerveDriveConfig::TelemetryVerbosity::HIGH);
+  m_drive.emplace(&m_driveCfg);
+  Hardware().sub->m_drive = &m_drive.value();
+  auto tuning = wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(
+      m_drive->GetName());
+
+  tuning->GetEntry("modules/drive/enabled").SetBoolean(true);
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  m_drive->ApplyTuningValues();
+  CHECK(tuning->GetEntry("modules/drive/enabled").GetBoolean(false));
+  CHECK_FALSE(tuning->GetEntry("modules/azimuth/enabled").GetBoolean(true));
+
+  tuning->GetEntry("modules/azimuth/enabled").SetBoolean(true);
+  tuning->GetEntry("autoalign/enabled").SetBoolean(true);
+  m_drive->ApplyTuningValues();
+  CHECK(tuning->GetEntry("autoalign/enabled").GetBoolean(false));
+  CHECK_FALSE(tuning->GetEntry("modules/drive/enabled").GetBoolean(true));
+  CHECK_FALSE(tuning->GetEntry("modules/azimuth/enabled").GetBoolean(true));
+  tuning->GetEntry("autoalign/enabled").SetBoolean(false);
+  m_drive->ApplyTuningValues();
+}
+
+// A TalonFX's closed loop runs on the motor controller, at 1 kHz.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ClosedLoopPeriodIsOnTheMotorController",
+                 "[SwerveDriveTest]") {
+  CHECK(m_fl->GetDriveMotorController()->GetClosedLoopControllerPeriod().value() ==
+        Catch::Approx(0.001));
+  CHECK(m_fl->GetAzimuthMotorController()->GetClosedLoopControllerPeriod().value() ==
+        Catch::Approx(0.001));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveDriveTest.VelocityMeasurementDelayIsSimulatedForTalons",
+                 "[SwerveDriveTest]") {
+  // The Talons run these closed loops themselves, and Phoenix 6 simulates their filtering in its
+  // own thread, so the delay is not the simulation period.
+  REQUIRE(m_fl->GetDriveMotorController()->GetVelocityMeasurementDelay().has_value());
+  CHECK(m_fl->GetDriveMotorController()->GetVelocityMeasurementDelay()->value() ==
+        Catch::Approx(0.001));
+  REQUIRE(m_fl->GetAzimuthMotorController()->GetVelocityMeasurementDelay().has_value());
+  CHECK(m_fl->GetAzimuthMotorController()->GetVelocityMeasurementDelay()->value() ==
+        Catch::Approx(0.001));
+}
+
 }  // namespace yams::test

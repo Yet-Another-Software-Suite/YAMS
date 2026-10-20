@@ -106,6 +106,9 @@ class SwerveDriveTelemetryConfig {
     ModulesDriveKa,
     /** Tunable velocity setpoint applied to every module's drive motor, in meters per second. */
     ModulesDriveVelocity,
+    /** Tunable voltage applied to every module's drive motor, without its closed-loop controller,
+     *  while ModulesDriveVoltageEnabled is on. */
+    ModulesDriveVoltage,
     /** Proportional gain for tuning every module's azimuth motor closed-loop controller. */
     ModulesAzimuthP,
     /** Integral gain for tuning every module's azimuth motor closed-loop controller. */
@@ -120,6 +123,9 @@ class SwerveDriveTelemetryConfig {
     ModulesAzimuthKa,
     /** Tunable angle setpoint applied to every module's azimuth motor, in degrees. */
     ModulesAzimuthAngle,
+    /** Tunable voltage applied to every module's azimuth motor, without its closed-loop
+     *  controller, while ModulesAzimuthVoltageEnabled is on. */
+    ModulesAzimuthVoltage,
     /** Gyro angle, in degrees. */
     Gyro,
   };
@@ -134,9 +140,16 @@ class SwerveDriveTelemetryConfig {
     /** When enabled ensures drive testing is done with all modules oriented so the swerve drive
      *  will drive counter-clockwise positive. */
     ModulesDriveInPlace,
+    /** While drive tuning is on, drive every module's drive motor at ModulesDriveVoltage instead
+     *  of the velocity setpoint, without its closed-loop controller, as for characterizing it. */
+    ModulesDriveVoltageEnabled,
     /** Enables or disables live tuning of every module's azimuth motor PID gains and angle
      *  setpoint. */
     ModulesAzimuthTuningEnabled,
+    /** While azimuth tuning is on, turn every module's azimuth motor at ModulesAzimuthVoltage
+     *  instead of the angle setpoint, without its closed-loop controller, as for characterizing
+     *  it. */
+    ModulesAzimuthVoltageEnabled,
   };
 
   SwerveDriveTelemetryConfig();

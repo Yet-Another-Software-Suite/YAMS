@@ -83,6 +83,14 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                          DoubleTelemetry<DoubleTelemetryField>{
                              "modules/azimuth/angle", 0.0,
                              DoubleTelemetryField::ModulesAzimuthAngle, true, "degrees"});
+  m_doubleFields.emplace(DoubleTelemetryField::ModulesDriveVoltage,
+                         DoubleTelemetry<DoubleTelemetryField>{
+                             "modules/drive/voltage/setpoint", 0.0,
+                             DoubleTelemetryField::ModulesDriveVoltage, true, "volts"});
+  m_doubleFields.emplace(DoubleTelemetryField::ModulesAzimuthVoltage,
+                         DoubleTelemetry<DoubleTelemetryField>{
+                             "modules/azimuth/voltage/setpoint", 0.0,
+                             DoubleTelemetryField::ModulesAzimuthVoltage, true, "volts"});
   m_doubleFields.emplace(DoubleTelemetryField::Gyro,
                          DoubleTelemetry<DoubleTelemetryField>{
                              "gyro", 0.0, DoubleTelemetryField::Gyro, false, "degrees"});
@@ -103,6 +111,14 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                        BooleanTelemetry<BooleanTelemetryField>{
                            "modules/azimuth/enabled", false,
                            BooleanTelemetryField::ModulesAzimuthTuningEnabled, true});
+  m_boolFields.emplace(BooleanTelemetryField::ModulesDriveVoltageEnabled,
+                       BooleanTelemetry<BooleanTelemetryField>{
+                           "modules/drive/voltage/enabled", false,
+                           BooleanTelemetryField::ModulesDriveVoltageEnabled, true});
+  m_boolFields.emplace(BooleanTelemetryField::ModulesAzimuthVoltageEnabled,
+                       BooleanTelemetry<BooleanTelemetryField>{
+                           "modules/azimuth/voltage/enabled", false,
+                           BooleanTelemetryField::ModulesAzimuthVoltageEnabled, true});
 }
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
@@ -159,6 +175,10 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_boolFields.at(BooleanTelemetryField::ModulesDriveTuningEnabled).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesAzimuthTuningEnabled).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesDriveInPlace).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesDriveVoltage).Enable();
+      m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthVoltage).Enable();
+      m_boolFields.at(BooleanTelemetryField::ModulesDriveVoltageEnabled).Enable();
+      m_boolFields.at(BooleanTelemetryField::ModulesAzimuthVoltageEnabled).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
       m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();

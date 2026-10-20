@@ -895,6 +895,13 @@ void TalonFXSWrapper::SetVoltage(wpi::units::volt_t voltage) {
   m_talon->SetControl(m_voltageReq.WithOutput(voltage));
 }
 
+std::optional<wpi::units::second_t> TalonFXSWrapper::GetVelocityMeasurementDelay() const {
+  if (!m_closedLoopControllerThread) return wpi::units::second_t{0.001};
+  const wpi::units::hertz_t updateFrequency = m_talon->GetVelocity(false).GetAppliedUpdateFrequency();
+  if (updateFrequency <= 0_Hz) return std::nullopt;
+  return wpi::units::second_t{0.001} + 0.5 / updateFrequency;
+}
+
 wpi::units::volt_t TalonFXSWrapper::GetVoltage() {
   return m_talon->GetMotorVoltage(false).Refresh(m_reportStatusSignalErrors).GetValue();
 }

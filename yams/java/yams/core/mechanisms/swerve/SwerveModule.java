@@ -305,7 +305,7 @@ public class SwerveModule {
    * @throws SmartMotorControllerConfigurationException if the drive motor has no mechanism
    *                                                    circumference configured.
    */
-  private LinearVelocity getCouplingVelocity() {
+  public LinearVelocity getCouplingVelocity() {
     return m_config.getCouplingRatio().map(couplingRatio -> {
       final AngularVelocity coupledWheelVelocity = m_azimuthMotorController.getMechanismVelocity().times(couplingRatio.getOutputToInputConversionFactor()).times(m_driveMotorController.getConfig().getGearing().getRotorToMechanismRatio());
       return m_driveMotorController.getConfig().convertFromMechanism(coupledWheelVelocity);

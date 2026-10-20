@@ -5,6 +5,8 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <set>
 #include <wpi/nt/NetworkTable.hpp>
 
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
@@ -70,11 +72,39 @@ class SwerveDriveTelemetry {
   template <std::size_t NumModules>
   void ApplyTuningValues(mechanisms::swerve::SwerveDrive<NumModules>* drive);
 
+  /**
+   * Stop applying a tuning voltage, as when the tuning command ends, and hold every wheel still
+   * where it is with its closed-loop controller.
+   *
+   * @param drive Drive being tuned.
+   */
+  template <std::size_t NumModules>
+  void StopTuning(mechanisms::swerve::SwerveDrive<NumModules>* drive);
+
   /** Release all NT4 pub/sub handles. */
   void Close();
 
  private:
+  /** The live tuning modes that can be on. */
+  enum class TuningMode {
+    /** Driving to the auto-align target pose. */
+    AutoAlign,
+    /** Driving every module at the velocity setpoint. */
+    Drive,
+    /** Pointing the modules around the robot center while drive tuning. */
+    DriveInPlace,
+    /** Driving every drive motor at the voltage setpoint while drive tuning. */
+    DriveVoltage,
+    /** Turning every module to the angle setpoint. */
+    Azimuth,
+    /** Turning every azimuth motor at the voltage setpoint while azimuth tuning. */
+    AzimuthVoltage,
+  };
+
   SwerveDriveTelemetryConfig m_config;
+  /** The tuning modes on in the last loop, to send the setpoints again when they change, or none
+   *  yet. */
+  std::optional<std::set<TuningMode>> m_lastModes;
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;

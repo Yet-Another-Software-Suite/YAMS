@@ -139,6 +139,10 @@ public class SwerveDriveTelemetryConfig {
         boolFields.get(BooleanTelemetryField.ModulesDriveTuningEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesAzimuthTuningEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesDriveInPlace).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesDriveVoltage).enable();
+        doubleFields.get(DoubleTelemetryField.ModulesAzimuthVoltage).enable();
+        boolFields.get(BooleanTelemetryField.ModulesDriveVoltageEnabled).enable();
+        boolFields.get(BooleanTelemetryField.ModulesAzimuthVoltageEnabled).enable();
       case MID:
         structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();

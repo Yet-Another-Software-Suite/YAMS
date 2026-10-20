@@ -12,6 +12,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <wpi/framework/RobotBase.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/driverstation/DriverStation.hpp>
 #include <wpi/math/filter/Debouncer.hpp>
@@ -67,6 +68,18 @@ void SmartMotorController::StopClosedLoopController() {
     f->StopClosedLoopController();
     f->SetDutyCycle(0.0);
   }
+}
+
+std::optional<wpi::units::second_t> SmartMotorController::GetVelocityMeasurementDelay() const {
+  if (wpi::RobotBase::IsSimulation()) return m_config->GetSimulationPeriod();
+  return std::nullopt;
+}
+
+wpi::units::second_t SmartMotorController::GetClosedLoopControllerPeriod() const {
+  if (m_closedLoopControllerThread) {
+    return m_config->GetClosedLoopControlPeriod().value_or(20_ms);
+  }
+  return 1_ms;
 }
 
 void SmartMotorController::StartClosedLoopController() {

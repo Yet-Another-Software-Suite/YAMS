@@ -572,6 +572,26 @@ class SmartMotorController {
 
   // ---- Closed-loop controller thread --------------------------------------
 
+  /**
+   * Get the period the closed-loop controller runs at. A closed-loop controller run on the
+   * SystemCore, such as an LQR or an exponential profile, runs at
+   * SmartMotorControllerConfig::WithClosedLoopControlPeriod(), 20 ms by default. One run on the motor
+   * controller runs at 1 kHz.
+   *
+   * @return The closed-loop controller's period.
+   */
+  wpi::units::second_t GetClosedLoopControllerPeriod() const;
+
+  /**
+   * Get how far behind the mechanism the measured velocity is, from how the motor controller filters
+   * it, as WPILib's SysId works it out for its presets. Feedback gains worked out for the closed loop
+   * depend on it. In simulation, the simulation period, since the simulated sensor is updated once a
+   * period.
+   *
+   * @return The delay, or nullopt if it is not known for this motor controller.
+   */
+  virtual std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const;
+
   /** Start the background closed-loop controller thread, and the loosely coupled followers'. */
   void StartClosedLoopController();
 

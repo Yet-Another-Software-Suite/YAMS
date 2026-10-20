@@ -1971,6 +1971,24 @@ public class TalonFXSWrapper extends SmartMotorController {
   }
 
   /**
+   * {@inheritDoc}
+   *
+   * <p>Phoenix 6 filters velocity with a Kalman filter tuned for the least latency, about 1 ms, as
+   * WPILib's SysId takes it for its CTRE Phoenix 6 preset. A closed loop run on the SystemCore reads
+   * the velocity from its status signal instead, which on average is half the signal's update period
+   * older. Phoenix 6 simulates the Talon in its own thread with the same filtering, so the delay is
+   * the same in simulation.
+   */
+  @Override
+  public Optional<Time> getVelocityMeasurementDelay() {
+    if (m_closedLoopControllerThread == null) {
+      return Optional.of(Milliseconds.of(1));
+    }
+    final double updateFrequency = m_mechanismVelocity.getAppliedUpdateFrequency();
+    return updateFrequency > 0 ? Optional.of(Milliseconds.of(1).plus(Seconds.of(0.5 / updateFrequency))) : Optional.empty();
+  }
+
+  /**
    * Ensure setting is applied, retries every 10ms.
    *
    * @return {@link StatusCode} from CTRE

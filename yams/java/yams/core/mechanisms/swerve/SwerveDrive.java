@@ -77,7 +77,8 @@ public class SwerveDrive {
   /**
    * Pose, chassis speeds, gyro, and auto-align tuning telemetry.
    */
-  private SwerveDriveTelemetry m_swerveTelemetry;
+  /** Telemetry and live tuning of the drive. */
+  protected SwerveDriveTelemetry m_swerveTelemetry;
   /**
    * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
    */

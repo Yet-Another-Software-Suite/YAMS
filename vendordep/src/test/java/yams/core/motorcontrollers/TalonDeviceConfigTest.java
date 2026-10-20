@@ -4,6 +4,7 @@
 package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Celsius;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Radians;
@@ -242,5 +243,58 @@ public class TalonDeviceConfigTest {
         .setSMC(smc);
     assertEquals(80, smc.getConfig().getTemperatureCutoff().orElseThrow().in(Celsius), 1e-9);
     close(smc);
+  }
+
+  /**
+   * The velocity a closed loop on the Talon uses is only the Kalman filter's 1 ms late. One on the
+   * SystemCore, as for an LQR controller, reads it from the velocity status signal, on average half
+   * the signal's update period later.
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("createControllers")
+  void velocityMeasurementDelayDependsOnWhereTheClosedLoopRuns(Case testCase) {
+    final String name = testCase.name();
+    SmartMotorController smc = testCase.create().apply(config(name + " delay pid"));
+    try {
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
+      assertEquals(0.001, smc.getVelocityMeasurementDelay().orElseThrow().in(Seconds), 1e-9, name + ": closed loop on the Talon");
+    } finally {
+      close(smc);
+    }
+
+    smc =
+        testCase
+            .create()
+            .apply(
+                config(name + " delay lqr")
+                    .withClosedLoopController(
+                        new LQRController(
+                            new LQRConfig(
+                                    DCMotor.getNEO(1),
+                                    new MechanismGearing(GearBox.fromReductionStages(3, 4)),
+                                    KilogramSquareMeters.of(0.02))
+                                .withArm(
+                                    Radians.of(0.01),
+                                    RadiansPerSecond.of(0.5),
+                                    Radians.of(0.05),
+                                    RadiansPerSecond.of(0.5),
+                                    Radians.of(0.01))
+                                .withControlEffort(Volts.of(12))
+                                .withMaxVoltage(Volts.of(12)))));
+    try {
+      ((SmartMotorControllerTestSubsystem)
+              ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
+          .setSMC(smc);
+      final double updateFrequency =
+          smc.getMotorController() instanceof TalonFX talonFX
+              ? talonFX.getVelocity(false).getAppliedUpdateFrequency()
+              : ((TalonFXS) smc.getMotorController()).getVelocity(false).getAppliedUpdateFrequency();
+      assertTrue(updateFrequency > 0, name + ": velocity signal is published");
+      assertEquals(0.001 + 0.5 / updateFrequency, smc.getVelocityMeasurementDelay().orElseThrow().in(Seconds), 1e-9, name + ": closed loop on the SystemCore");
+    } finally {
+      close(smc);
+    }
   }
 }
