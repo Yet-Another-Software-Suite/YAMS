@@ -237,6 +237,14 @@ struct SwerveDriveTestFixture {
     InitializeHardware();
     SchedulerHelper::CancelAll();
     m_simGyro = 0_deg;
+    // The motors are shared by every test, so stop them and point the wheels forward again rather
+    // than starting from wherever the last test left them.
+    for (auto* smc : {hw.flDriveSMC, hw.frDriveSMC, hw.blDriveSMC, hw.brDriveSMC, hw.flAzimuthSMC,
+                      hw.frAzimuthSMC, hw.blAzimuthSMC, hw.brAzimuthSMC}) {
+      smc->SetDutyCycle(0.0);
+      if (auto* sim = smc->GetSimSupplier()) sim->SetMechanismVelocity(0_tps);
+      smc->SetEncoderPosition(0_tr);
+    }
 
     auto makeModuleCfg = [](remote::TalonFXWrapper* drive, remote::TalonFXWrapper* azimuth,
                             wpi::units::meter_t front, wpi::units::meter_t left,
