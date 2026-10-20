@@ -103,6 +103,7 @@ public class MechanismTelemetry {
     tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(mechanismTelemetryName);
     networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(mechanismTelemetryName);
     motorController.setupTelemetry(networkTable, tuningNetworkTable);
+    motorController.setupLiveTuning();
     setupLoopTime();
   }
 
@@ -150,6 +151,7 @@ public class MechanismTelemetry {
    */
   public void addMotorController(String subTableName, SmartMotorController motorController) {
     motorController.setupTelemetry(networkTable.getSubTable(subTableName), tuningNetworkTable.getSubTable(subTableName));
+    motorController.setupLiveTuning();
   }
 
   /**

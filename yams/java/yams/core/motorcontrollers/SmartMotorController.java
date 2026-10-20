@@ -139,6 +139,9 @@ public abstract class SmartMotorController {
    */
   protected final List<Runnable> m_closeHooks = new ArrayList<>();
 
+  /** Whether {@link #setupLiveTuning()} has already set up live tuning. */
+  private boolean m_liveTuningSetup = false;
+
   /** Parent table for telemetry. */
   protected Optional<NetworkTable> parentTable = Optional.empty();
 
@@ -978,7 +981,20 @@ public abstract class SmartMotorController {
     var tuningNetworkTable = NetworkTableInstance.getDefault().getTable("Tuning");
     var networkTable = NetworkTableInstance.getDefault().getTable("Mechanisms");
     setupTelemetry(networkTable, tuningNetworkTable);
-    if(m_config.getVerbosity().orElse(TelemetryVerbosity.LOW).equals(TelemetryVerbosity.HIGH)) {
+    setupLiveTuning();
+  }
+
+  /**
+   * Set up live tuning for this {@link SmartMotorController} when its telemetry verbosity is
+   * {@link TelemetryVerbosity#HIGH}, so the values under the Tuning table are applied while the
+   * "Live Tuning" command runs. Only sets it up once, however many times it is called.
+   */
+  public void setupLiveTuning() {
+    if (m_liveTuningSetup) {
+      return;
+    }
+    if (m_config.getVerbosity().orElse(TelemetryVerbosity.LOW).equals(TelemetryVerbosity.HIGH)) {
+      m_liveTuningSetup = true;
       m_config.setupLiveTuning();
     }
   }
