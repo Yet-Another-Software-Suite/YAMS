@@ -193,6 +193,75 @@ TEST_CASE("SMCRegression.MechanismTelemetryRegistersLiveTuning", "[SMCRegression
   }
 }
 
+TEST_CASE("SMCRegression.LiveTuningVoltage", "[SMCRegression]") {
+  TestSubsystem sub;
+  sub.SetName(UniqueName("SMCRegressionVoltageTuning"));
+  auto name = UniqueName("VoltageTuningMotor");
+  SmartMotorControllerConfig followerCfg;
+  followerCfg.WithFeedback(1.0, 0.0, 0.0);
+  FakeSmartMotorController follower{&followerCfg};
+  SmartMotorControllerConfig cfg;
+  cfg.WithFeedback(1.0, 0.0, 0.0)
+      .WithSubsystem(&sub)
+      .WithTelemetry(name, Verbosity::HIGH)
+      .WithLooselyCoupledFollowers({&follower});
+  FakeSmartMotorController smc{&cfg};
+  smc.LoadFollowers();
+  // A closed-loop controller run on the SystemCore, holding a setpoint.
+  smc.CreateIdleClosedLoopThread();
+  smc.StartClosedLoopController();
+  smc.SetPosition(0.1_tr);
+  smc.SetupTelemetry();
+  REQUIRE(smc.IsRunning());
+  auto tuning = wpi::nt::NetworkTableInstance::GetDefault().GetTable("Tuning")->GetSubTable(name);
+
+  SECTION("the voltage drives the motor and its follower instead of the closed loop") {
+    // Turning the voltage on starts at 0 V, with voltage/setpoint set back to 0 even if it was not.
+    tuning->GetEntry("voltage/setpoint").SetDouble(3.0);
+    tuning->GetEntry("voltage/enabled").SetBoolean(true);
+    smc.ApplyTuningValues();
+    CHECK_FALSE(smc.IsRunning());
+    CHECK(tuning->GetEntry("voltage/setpoint").GetDouble(-1.0) == Catch::Approx(0.0));
+    CHECK(smc.lastVoltage.value() == Catch::Approx(0.0));
+    CHECK(follower.lastVoltage.value() == Catch::Approx(0.0));
+
+    // The voltage typed then drives the motor and its follower.
+    tuning->GetEntry("voltage/setpoint").SetDouble(3.0);
+    smc.ApplyTuningValues();
+    CHECK(smc.lastVoltage.value() == Catch::Approx(3.0));
+    CHECK(follower.lastVoltage.value() == Catch::Approx(3.0));
+
+    // A setpoint entered while the voltage is on is not applied.
+    tuning->GetEntry("closedloop/setpoint/position").SetDouble(90.0);
+    smc.ApplyTuningValues();
+    CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.1));
+
+    SECTION("turning it off hands back to the closed loop") {
+      tuning->GetEntry("voltage/enabled").SetBoolean(false);
+      smc.ApplyTuningValues();
+      CHECK(smc.IsRunning());
+      CHECK(smc.lastVoltage.value() == Catch::Approx(0.0));
+      CHECK(follower.lastVoltage.value() == Catch::Approx(0.0));
+      // The setpoint held before the voltage was turned on is sent again.
+      CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.1));
+    }
+    SECTION("ending the Live Tuning command stops the voltage and turns it off") {
+      auto* liveTuning = SmartMotorControllerCommandRegistry::GetCommand("Live Tuning", &sub);
+      REQUIRE(liveTuning != nullptr);
+      liveTuning->End(true);
+      CHECK(smc.IsRunning());
+      CHECK(smc.lastVoltage.value() == Catch::Approx(0.0));
+      CHECK(follower.lastVoltage.value() == Catch::Approx(0.0));
+      CHECK(smc.GetMechanismPositionSetpoint()->value() == Catch::Approx(0.1));
+      CHECK_FALSE(tuning->GetEntry("voltage/enabled").GetBoolean(true));
+    }
+  }
+  smc.StopClosedLoopController();
+  smc.Close();
+  SmartMotorControllerCommandRegistry::RemoveCommands(&sub);
+  wpi::cmd::CommandScheduler::GetInstance().UnregisterSubsystem(&sub);
+}
+
 TEST_CASE("SMCRegression.RemoveCommandsUnpublishesTunable", "[SMCRegression]") {
   TestSubsystem sub;
   auto subName = UniqueName("SMCRegressionRemoveTunable");

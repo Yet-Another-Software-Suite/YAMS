@@ -50,6 +50,12 @@ class FakeSmartMotorController : public SmartMotorController {
   /** Mark the RoboRIO closed-loop controller running without starting its thread. */
   void SetRunning(bool running) { m_closedLoopControllerRunning = running; }
 
+  /** Whether the closed-loop controller is running. */
+  bool IsRunning() const { return m_closedLoopControllerRunning; }
+
+  /** Load the loosely coupled followers from the config, as the wrappers do. */
+  void LoadFollowers() { LoadLooselyCoupledFollowers(); }
+
   /** Give the controller a no-op closed-loop thread so StartClosedLoopController() works. */
   void CreateIdleClosedLoopThread() {
     m_closedLoopControllerThread = std::make_unique<wpi::Notifier>([] {});

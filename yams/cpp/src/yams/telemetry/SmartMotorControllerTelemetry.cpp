@@ -46,6 +46,8 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
   m_tuningTable = tuningTable;
   m_doubleFields = &doubleFields;
   m_boolFields = &boolFields;
+  // voltage/enabled cannot be read without NetworkTables, so it stays off.
+  if (!nt4Enabled) boolFields.at(BooleanTelemetryField::TunableVoltageEnabled).Disable();
 
   SmartMotorControllerConfig& cfg = smc.GetConfig();
 
@@ -202,14 +204,43 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
   }
 
   // Boolean tuning
+  bool closedLoop = true;
   for (auto& [field, bt] : *m_boolFields) {
-    if (!bt.IsTunable()) continue;
+    bool tunable = bt.IsTunable();
+    if (bt.IsEnabled() && field == BooleanTelemetryField::TunableVoltageEnabled) {
+      closedLoop = !bt.Get();
+    }
+    if (!tunable) continue;
     switch (bt.GetField()) {
       case BooleanTelemetryField::MotorInversion:
         smc.SetMotorInverted(bt.Get());
         break;
       case BooleanTelemetryField::EncoderInversion:
         smc.SetEncoderInverted(bt.Get());
+        break;
+      case BooleanTelemetryField::TunableVoltageEnabled:
+        if (closedLoop) {
+          smc.SetVoltage(wpi::units::volt_t{0.0});
+          for (auto* follower : smc.GetLooselyCoupledFollowers()) {
+            follower->SetVoltage(wpi::units::volt_t{0.0});
+          }
+          smc.StartClosedLoopController();
+          // The voltage replaced the setpoint on a closed-loop controller run on the motor
+          // controller, so it must be sent again. This sends it to the loosely coupled followers too.
+          if (auto position = smc.GetMechanismPositionSetpoint()) {
+            smc.SetPosition(*position);
+          } else if (auto velocity = smc.GetMechanismSetpointVelocity()) {
+            smc.SetVelocity(*velocity);
+          }
+        } else {
+          smc.StopClosedLoopController();
+          // Start at 0 V, with voltage/setpoint set back to 0 on the dashboard too.
+          m_doubleFields->at(DoubleTelemetryField::TunableVoltage).ForceSet(0);
+          for (auto* follower : smc.GetLooselyCoupledFollowers()) {
+            follower->SetVoltage(wpi::units::volt_t{0.0});
+          }
+          smc.SetVoltage(wpi::units::volt_t{0.0});
+        }
         break;
       default:
         break;
@@ -220,8 +251,16 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
 
   // Double tuning
   for (auto& [field, dt] : *m_doubleFields) {
+    if (!dt.IsEnabled()) continue;
     if (!dt.IsTunable()) continue;
     switch (dt.GetField()) {
+      case DoubleTelemetryField::TunableVoltage:
+        if (closedLoop) break;
+        for (auto* follower : smc.GetLooselyCoupledFollowers()) {
+          follower->SetVoltage(wpi::units::volt_t{dt.Get()});
+        }
+        smc.SetVoltage(wpi::units::volt_t{dt.Get()});
+        break;
       case DoubleTelemetryField::TunableClosedLoopControllerSlot: {
         int idx = static_cast<int>(dt.Get());
         if (idx >= 0 && idx <= 3) {
@@ -231,13 +270,14 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         break;
       }
       case DoubleTelemetryField::TunableSetpointPosition:
+        if (!closedLoop) break;
         if (linear)
           smc.SetPosition(wpi::units::meter_t{dt.Get()});
         else
           smc.SetPosition(wpi::units::degree_t{dt.Get()});
         break;
       case DoubleTelemetryField::TunableSetpointVelocity:
-        if (dt.Get() == 0.0) break;
+        if (dt.Get() == 0.0 || !closedLoop) break;
         if (linear)
           smc.SetVelocity(wpi::units::meters_per_second_t{dt.Get()});
         else
@@ -315,6 +355,22 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         break;
       case DoubleTelemetryField::ExponentialProfileMaxInput:
         smc.SetExponentialProfile(std::nullopt, std::nullopt, wpi::units::volt_t{dt.Get()});
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void SmartMotorControllerTelemetry::StopTuning(SmartMotorController& smc) {
+  if (!m_boolFields) return;
+  for (auto& [field, bt] : *m_boolFields) {
+    switch (field) {
+      case BooleanTelemetryField::TunableVoltageEnabled:
+        if (bt.Get()) {
+          bt.ForceSet(false);
+          ApplyTuningValues(smc);
+        }
         break;
       default:
         break;

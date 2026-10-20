@@ -119,7 +119,7 @@ public class SmartMotorControllerConfig extends yams.core.motorcontrollers.Smart
     }
     getAttachedController().ifPresent(controller -> {
       Subsystem sub = subsystem.get();
-      SmartMotorControllerCommandRegistry.addCommand("Live Tuning", sub, controller::applyTuningValues);
+      SmartMotorControllerCommandRegistry.addCommand("Live Tuning", sub, controller::applyTuningValues, controller::stopLiveTuning);
       controller.addCloseHook(() -> SmartMotorControllerCommandRegistry.removeCommands(sub));
     });
   }

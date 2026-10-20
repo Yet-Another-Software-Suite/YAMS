@@ -153,12 +153,12 @@ public class BooleanTelemetry<F> {
   /**
    * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
    * guard in {@link #set(boolean)}. Used to enforce mutual exclusion between tunable modes that
-   * share the same underlying drive/mechanism.
+   * share the same underlying drive/mechanism. The next {@link #tunable()} reports the change, as
+   * if it was made on the dashboard.
    *
    * @param value Value to force onto the tuning topic.
    */
   public void forceSet(boolean value) {
-    cachedValue = value;
     if (pubSub != null) {
       pubSub.accept(value);
     } else if (publisher != null) {

@@ -209,6 +209,21 @@ public class DoubleTelemetry<F> {
   }
 
   /**
+   * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+   * guard in {@link #set(double)}. The next {@link #tunable()} reports the change, as if it was made
+   * on the dashboard.
+   *
+   * @param value Value to force onto the tuning topic.
+   */
+  public void forceSet(double value) {
+    if (subPublisher != null) {
+      subPublisher.accept(value);
+    } else if (publisher.isPresent()) {
+      publisher.get().accept(value);
+    }
+  }
+
+  /**
    * Set the value of the publisher, checking to see if the value is the same as the subscriber.
    *
    * @param value Value to set.

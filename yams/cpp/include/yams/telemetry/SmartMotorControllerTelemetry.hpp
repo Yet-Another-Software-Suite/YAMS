@@ -54,6 +54,8 @@ enum class DoubleTelemetryField {
   SetpointForce,                      ///< Feedforward force applied on the velocity setpoint (N).
   ClosedLoopPeriod,                   ///< Period the closed-loop controller runs at (s).
   VelocityMeasurementDelay,           ///< How far behind the measured velocity is, when known (s).
+  TunableVoltage,  ///< Voltage applied to the motor and its loosely coupled followers, without the
+                   ///< closed-loop controller, while TunableVoltageEnabled is on (V, tunable).
   OutputVoltage,                      ///< Voltage currently applied to the motor (V).
   StatorCurrent,                      ///< Stator (output) current draw (A).
   StatorCurrentLimit,                 ///< Configured stator current limit (A, tunable).
@@ -90,6 +92,8 @@ enum class BooleanTelemetryField {
   MotionProfile,           ///< true when a motion profile (trapezoidal or exponential) is active.
   MotorInversion,          ///< true when the motor output direction is inverted (tunable).
   EncoderInversion,        ///< true when the encoder count direction is inverted (tunable).
+  TunableVoltageEnabled,   ///< Drive the motor and its loosely coupled followers at TunableVoltage
+                           ///< instead of the closed-loop controller while on (tunable).
 };
 
 // ---- UnsupportedTelemetryFields ---------------------------------------------
@@ -219,6 +223,21 @@ class DoubleTelemetry {
       m_unit = linear ? "meter_per_second_per_second" : "rotations_per_minute_per_second";
     } else if (m_unit == "acceleration") {
       m_unit = linear ? "meter_per_second_per_second" : "rotation_per_second_per_second";
+    }
+  }
+
+  /**
+   * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+   * guard in Set(double). The next IsTunable() reports the change, as if it was made on the
+   * dashboard.
+   *
+   * @param value Value to force.
+   */
+  void ForceSet(double value) {
+    if (m_subPublisher) {
+      m_subPublisher->Set(value);
+    } else if (m_publisher) {
+      m_publisher->Set(value);
     }
   }
 
@@ -438,12 +457,12 @@ class BooleanTelemetry {
   /**
    * Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
    * guard in Set(bool). Used to enforce mutual exclusion between tunable modes that share the
-   * same underlying drive/mechanism.
+   * same underlying drive/mechanism. The next IsTunable() reports the change, as if it was made on
+   * the dashboard.
    *
    * @param value Value to force.
    */
   void ForceSet(bool value) {
-    m_cachedValue = value;
     if (m_pubSub) {
       m_pubSub->Set(value);
     } else if (m_publisher) {
@@ -556,6 +575,15 @@ class SmartMotorControllerTelemetry {
    * @param smc Motor controller to tune.
    */
   void ApplyTuningValues(motorcontrollers::SmartMotorController& smc);
+
+  /**
+   * Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops and the
+   * closed-loop controller holds the setpoint again. The voltage is turned off in the Tuning table
+   * too, so it is not applied again as soon as live tuning starts again.
+   *
+   * @param smc SmartMotorController being tuned.
+   */
+  void StopTuning(motorcontrollers::SmartMotorController& smc);
 
   /** True if any live-setpoint tuning fields are enabled. */
   bool TuningEnabled() const;

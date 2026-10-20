@@ -124,6 +124,8 @@ public class SmartMotorControllerTelemetryConfig {
         boolFields.get(BooleanTelemetryField.MotionProfile).enable();
         boolFields.get(BooleanTelemetryField.MotorInversion).enable();
         boolFields.get(BooleanTelemetryField.EncoderInversion).enable();
+        boolFields.get(BooleanTelemetryField.TunableVoltageEnabled).enable();
+        doubleFields.get(DoubleTelemetryField.TunableVoltage).enable();
         doubleFields.get(DoubleTelemetryField.TunableSetpointPosition).enable();
         doubleFields.get(DoubleTelemetryField.TunableSetpointVelocity).enable();
         doubleFields.get(DoubleTelemetryField.TunableClosedLoopControllerSlot).enable();
