@@ -3,6 +3,7 @@
 
 package yams.core.motorcontrollers.simulation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.KilogramSquareMeters;
@@ -16,6 +17,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -443,6 +445,42 @@ public class BatterySimTest {
       BatterySim.removeCurrent(customCurveId);
       BatterySim.disableDischarge();
       restoreDefaultCapacityDerating();
+    }
+  }
+
+  @Test
+  void testCalculateVoltageIsThreadSafe() throws InterruptedException {
+    // Each mechanism may run its simulation in its own Notifier, so several threads register,
+    // update and remove their current draws at once.
+    final int threadCount = 8;
+    final int iterations = 20_000;
+    final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
+    final List<Thread> threads = new ArrayList<>();
+    for (int t = 0; t < threadCount; t++) {
+      Thread thread = new Thread(() -> {
+        for (int i = 0; i < iterations; i++) {
+          UUID id = UUID.randomUUID();
+          BatterySim.calculateVoltage(id, 1.0);
+          BatterySim.calculateVoltage(id, 2.0);
+          BatterySim.removeCurrent(id);
+        }
+      });
+      thread.setUncaughtExceptionHandler((th, e) -> failures.add(e));
+      threads.add(thread);
+    }
+    threads.forEach(Thread::start);
+    for (Thread thread : threads) {
+      thread.join();
+    }
+
+    assertTrue(failures.isEmpty(), "BatterySim threw from several threads: " + failures);
+    // Every thread removed the currents it added, so nothing is left loading the battery.
+    UUID probe = UUID.randomUUID();
+    try {
+      assertEquals(12.0, BatterySim.calculateVoltage(probe, 0.0), 1e-9,
+          "Currents added and removed from several threads should not be lost or left behind.");
+    } finally {
+      BatterySim.removeCurrent(probe);
     }
   }
 

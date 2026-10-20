@@ -46,7 +46,7 @@ A port of the West Coast Products 2026 Competitive Concept robot code to WPILib 
 
 ### Mechanisms
 
-Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX60(1)`). Each mechanism has HIGH verbosity YAMS telemetry and simulation through `simIterate()`, called from `Robot.robotPeriodic()` and `Robot.simulationPeriodic()`. The original's `initSendable` telemetry and SmartDashboard sendables were removed.
+Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX60(1)`). Each mechanism has HIGH verbosity YAMS telemetry, updated from `Robot.robotPeriodic()`, and simulation through `simIterate()`, run in its own `Notifier` started in `Robot.simulationInit()`. The original's `initSendable` telemetry and SmartDashboard sendables were removed.
 
 - **Feeder** (CAN 13)
   - A closed-loop YAMS `FlyWheel` with kP 1 and kV 12/100 rps, as in the original.
@@ -132,7 +132,7 @@ Every motor is a TalonFX wrapped in a YAMS `TalonFXWrapper` (`DCMotor.getKrakenX
 
 This is the Commands v3 version of `examples/commands2/WCPCC_2026`. The mechanisms, gains, bindings and timings match that port. What differs from it:
 
-- **Mechanisms instead of subsystems.** Each v2 subsystem is a class implementing `org.wpilib.command3.Mechanism` in the `mechanisms` package, still with one YAMS mechanism each. Their `periodic()`/`simulationPeriodic()` methods are called from `Robot`, since Commands v3 has no subsystem periodic.
+- **Mechanisms instead of subsystems.** Each v2 subsystem is a class implementing `org.wpilib.command3.Mechanism` in the `mechanisms` package, still with one YAMS mechanism each. Their `periodic()` methods are called from `Robot`, since Commands v3 has no subsystem periodic, and their `simulationPeriodic()` methods each run in a `Notifier`.
 - **Opmodes instead of `RobotContainer`.** `Robot` extends `OpModeRobot` and sets the global defaults (holding the heading, vision, and stopping the feeder, floor and intake rollers). It also binds homing to `RobotModeTriggers.autonomous().or(teleop())` with `whileTrue`, as the v2 port did, so disabling cancels it. The `AngularVelocityTeleop` and `HeadingTeleop` opmodes create the drive input stream and the bindings, and `OutpostAndDepotAuto` replaces `AutoRoutines` and its `AutoChooser`; it binds its routine to `RobotModeTriggers.autonomous()` in its constructor, so the binding only exists while the opmode is selected and disabling cancels the routine.
 - **Coroutines instead of decorators and groups.**
   - Each mechanism has command factories for its own actions, written as coroutines with `waitUntil`/`park` or a `while (true)` loop that yields: `Shooter.spinUp`/`runAt`, `Hood.moveTo`, `IntakePivot.moveTo`/`holdAt`/`agitate`/`home`, `Hanger.moveTo`/`home`, `Feeder.feed`, `Floor.feed`, `IntakeRollers.intake`. Where a YAMS command matches, it is used directly: `FlyWheel.run(supplier)` for the feeder, `setVoltage(...)` for the floor and intake rollers, `Arm.setAngle` for `holdAt` and `Elevator.runTo` for the hanger. `IntakePivot.moveTo` stays its own coroutine because YAMS `runTo` adds a 0.1 s debounce that would slow the agitate rocking. `whenCanceled` replaces `startEnd` and `handleInterrupt`, and the feeder, floor and intake rollers get a lowest priority `stop()` default command (also their `idle()`), so they stop whenever nothing uses them.

@@ -74,7 +74,7 @@ rotationTolerance)`:
 
 ### Mechanisms and commands
 
-- Each mechanism's `periodic()` and `simulationPeriodic()` is called from `Robot`.
+- Each mechanism's `periodic()` is called from `Robot`, and its `simulationPeriodic()` runs in its own `Notifier`, started in `Robot.simulationInit()`.
 - Default commands, set in `Robot` for every mode:
   - The shooter holds the operator's right stick velocity, as before.
   - The indexer is stopped at the lowest priority.

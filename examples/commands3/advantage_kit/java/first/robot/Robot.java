@@ -197,6 +197,10 @@ public class Robot extends LoggedRobot {
     scheduler.run();
   }
 
+  /**
+   * Unlike the other Commands v3 examples, the simulation runs here on the main robot loop instead
+   * of in a Notifier per mechanism, so it stays in step with the AdvantageKit log.
+   */
   @Override
   public void simulationPeriodic() {
     drive.simulationPeriodic();

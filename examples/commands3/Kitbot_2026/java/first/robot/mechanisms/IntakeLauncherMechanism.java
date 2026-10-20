@@ -90,7 +90,7 @@ public class IntakeLauncherMechanism implements Mechanism {
     intakeLauncherRoller.updateTelemetry();
   }
 
-  /** Steps the YAMS simulation. Called from {@link first.robot.Robot#simulationPeriodic()}. */
+  /** Steps the YAMS simulation. Run in its own Notifier, started in {@link first.robot.Robot#simulationInit()}. */
   public void simulationPeriodic() {
     intakeLauncherRoller.simIterate();
   }

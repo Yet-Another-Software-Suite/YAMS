@@ -51,7 +51,7 @@ public class ShooterMechanism implements Mechanism
     return flyWheel.getSpeed();
   }
 
-  /** Called from {@code Robot.simulationPeriodic()}. */
+  /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
   public void simulationPeriodic()
   {
     flyWheel.simIterate();

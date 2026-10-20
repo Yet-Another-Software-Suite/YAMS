@@ -23,11 +23,14 @@ import first.robot.opmodes.auto.AutoThreeAdvancedAuto;
 import first.robot.opmodes.auto.AutoThreeAdvancedMirrorAuto;
 import first.robot.opmodes.auto.AutoThreeAuto;
 import first.robot.opmodes.auto.AutoTwoAuto;
+import java.util.ArrayList;
+import java.util.List;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.framework.OpModeRobot;
 import org.wpilib.hardware.hal.RobotMode;
 import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.system.Notifier;
 import org.wpilib.telemetry.Telemetry;
 
 /**
@@ -56,6 +59,8 @@ public class Robot extends OpModeRobot {
     private final HubTracker hubTracker = new HubTracker(driver.getNiDsXboxController());
 
     private final Scheduler scheduler = Scheduler.getDefault();
+    /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
+    private final List<Notifier> simulationNotifiers = new ArrayList<>();
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -115,16 +120,33 @@ public class Robot extends OpModeRobot {
         Telemetry.log("Scheduler", scheduler, Scheduler.proto);
     }
 
+    /**
+     * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
+     * {@code simulationPeriodic()} on the main robot loop.
+     */
     @Override
-    public void simulationPeriodic() {
-        swerve.simulationPeriodic();
-        intakeRoller.simulationPeriodic();
-        intakeArm.simulationPeriodic();
-        shooter.simulationPeriodic();
-        indexer.simulationPeriodic();
-        agitator.simulationPeriodic();
-        kicker.simulationPeriodic();
-        hood.simulationPeriodic();
-        turret.simulationPeriodic();
+    public void simulationInit() {
+        startSimulation("Swerve", swerve::simulationPeriodic);
+        startSimulation("Intake Roller", intakeRoller::simulationPeriodic);
+        startSimulation("Intake Arm", intakeArm::simulationPeriodic);
+        startSimulation("Shooter", shooter::simulationPeriodic);
+        startSimulation("Indexer", indexer::simulationPeriodic);
+        startSimulation("Agitator", agitator::simulationPeriodic);
+        startSimulation("Kicker", kicker::simulationPeriodic);
+        startSimulation("Hood", hood::simulationPeriodic);
+        startSimulation("Turret", turret::simulationPeriodic);
+    }
+
+    /**
+     * Run a mechanism's simulation in its own Notifier, every robot loop period.
+     *
+     * @param name               Name of the mechanism, used to name the Notifier's thread.
+     * @param simulationPeriodic The mechanism's simulation update.
+     */
+    private void startSimulation(String name, Runnable simulationPeriodic) {
+        final Notifier notifier = new Notifier(simulationPeriodic);
+        notifier.setName(name + " Simulation");
+        notifier.startPeriodic(getPeriod());
+        simulationNotifiers.add(notifier);
     }
 }

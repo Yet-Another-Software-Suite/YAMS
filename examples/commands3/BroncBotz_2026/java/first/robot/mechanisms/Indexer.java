@@ -87,7 +87,7 @@ public class Indexer implements Mechanism {
         indexer.updateTelemetry();
     }
 
-    /** Called from {@code Robot.simulationPeriodic()}. */
+    /** Run in its own Notifier, started in {@code Robot.simulationInit()}. */
     public void simulationPeriodic() {
         indexer.simIterate();
     }

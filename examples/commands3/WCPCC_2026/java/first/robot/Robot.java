@@ -17,6 +17,8 @@ import first.robot.mechanisms.IntakeRollers;
 import first.robot.mechanisms.Limelight;
 import first.robot.mechanisms.Shooter;
 import first.robot.mechanisms.Swerve;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
@@ -24,6 +26,7 @@ import org.wpilib.command3.button.RobotModeTriggers;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.framework.OpModeRobot;
 import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.system.Notifier;
 import org.wpilib.system.RobotController;
 import org.wpilib.telemetry.Telemetry;
 
@@ -58,6 +61,8 @@ public class Robot extends OpModeRobot {
     );
 
     private final Scheduler scheduler = Scheduler.getDefault();
+    /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
+    private final List<Notifier> simulationNotifiers = new ArrayList<>();
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -99,15 +104,32 @@ public class Robot extends OpModeRobot {
         Telemetry.log("Scheduler", scheduler, Scheduler.proto);
     }
 
+    /**
+     * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
+     * {@code simulationPeriodic()} on the main robot loop.
+     */
     @Override
-    public void simulationPeriodic() {
-        swerve.simulationPeriodic();
-        intakePivot.simulationPeriodic();
-        intakeRollers.simulationPeriodic();
-        floor.simulationPeriodic();
-        feeder.simulationPeriodic();
-        shooter.simulationPeriodic();
-        hanger.simulationPeriodic();
+    public void simulationInit() {
+        startSimulation("Swerve", swerve::simulationPeriodic);
+        startSimulation("Intake Pivot", intakePivot::simulationPeriodic);
+        startSimulation("Intake Rollers", intakeRollers::simulationPeriodic);
+        startSimulation("Floor", floor::simulationPeriodic);
+        startSimulation("Feeder", feeder::simulationPeriodic);
+        startSimulation("Shooter", shooter::simulationPeriodic);
+        startSimulation("Hanger", hanger::simulationPeriodic);
+    }
+
+    /**
+     * Run a mechanism's simulation in its own Notifier, every robot loop period.
+     *
+     * @param name               Name of the mechanism, used to name the Notifier's thread.
+     * @param simulationPeriodic The mechanism's simulation update.
+     */
+    private void startSimulation(String name, Runnable simulationPeriodic) {
+        final Notifier notifier = new Notifier(simulationPeriodic);
+        notifier.setName(name + " Simulation");
+        notifier.startPeriodic(getPeriod());
+        simulationNotifiers.add(notifier);
     }
 
     private Command updateVisionCommand() {

@@ -9,12 +9,15 @@ import first.robot.commands.ShooterCommands;
 import first.robot.mechanisms.IndexerMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
+import java.util.ArrayList;
+import java.util.List;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.command3.button.CommandNiDsXboxController;
 import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.OpModeRobot;
 import org.wpilib.math.util.MathUtil;
+import org.wpilib.system.Notifier;
 import org.wpilib.telemetry.Telemetry;
 
 /**
@@ -34,6 +37,8 @@ public class Robot extends OpModeRobot
   public final ShooterCommands           shooterCommands    = new ShooterCommands(indexer, shooter);
 
   private final Scheduler scheduler = Scheduler.getDefault();
+  /** Notifiers running each mechanism's simulation, kept so they are not garbage collected. */
+  private final List<Notifier> simulationNotifiers = new ArrayList<>();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -70,12 +75,29 @@ public class Robot extends OpModeRobot
     Telemetry.log("Scheduler", scheduler, Scheduler.proto);
   }
 
-  /** This function is called periodically whilst in simulation. */
+  /**
+   * Runs each mechanism's simulation in its own Notifier, every robot loop period, instead of in
+   * {@code simulationPeriodic()} on the main robot loop.
+   */
   @Override
-  public void simulationPeriodic()
+  public void simulationInit()
   {
-    shooter.simulationPeriodic();
-    indexer.simulationPeriodic();
-    drivebase.simulationPeriodic();
+    startSimulation("Shooter", shooter::simulationPeriodic);
+    startSimulation("Indexer", indexer::simulationPeriodic);
+    startSimulation("Drivebase", drivebase::simulationPeriodic);
+  }
+
+  /**
+   * Run a mechanism's simulation in its own Notifier, every robot loop period.
+   *
+   * @param name               Name of the mechanism, used to name the Notifier's thread.
+   * @param simulationPeriodic The mechanism's simulation update.
+   */
+  private void startSimulation(String name, Runnable simulationPeriodic)
+  {
+    final Notifier notifier = new Notifier(simulationPeriodic);
+    notifier.setName(name + " Simulation");
+    notifier.startPeriodic(getPeriod());
+    simulationNotifiers.add(notifier);
   }
 }
