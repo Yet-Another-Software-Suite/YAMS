@@ -170,6 +170,10 @@ public abstract class SmartMotorController {
    */
   protected Optional<Alert> m_systemCoreClosedLoopAlert = Optional.empty();
 
+  /** Alerts shown when a closed-loop setpoint is clamped to a mechanism limit. */
+  private Optional<Alert> m_mechanismLowerLimitAlert = Optional.empty();
+  private Optional<Alert> m_mechanismUpperLimitAlert = Optional.empty();
+
   /** Battery simulation UUID used when standalone simulation. */
   public final UUID m_batterySimUUID = UUID.randomUUID();
 
@@ -384,14 +388,13 @@ public abstract class SmartMotorController {
     if (setpointPosition.isPresent()) {
       if (mechLowerLimit.isPresent()) {
         if (setpointPosition.get().lt(mechLowerLimit.get())) {
-          DriverStationBackend.reportWarning("[WARNING] Setpoint is lower than Mechanism " + (m_config.getTelemetryName().isPresent() ? m_config.getTelemetryName().get() : "Unnamed smart motor") + " lower limit, changing setpoint to lower limit.",
-              false);
+          reportMechanismLimitAlert(true);
           setpointPosition = mechLowerLimit;
         }
       }
       if (mechUpperLimit.isPresent()) {
         if (setpointPosition.get().gt(mechUpperLimit.get())) {
-          DriverStationBackend.reportWarning("[WARNING] Setpoint is higher than Mechanism " + (m_config.getTelemetryName().isPresent() ? getName() : "Unnamed smart motor") + " upper limit, changing setpoint to upper limit.", false);
+          reportMechanismLimitAlert(false);
           setpointPosition = mechUpperLimit;
         }
       }
@@ -1024,8 +1027,7 @@ public abstract class SmartMotorController {
     } else if (m_config.getVerbosity().isPresent()) {
       setupTelemetry();
     }
-    // TODO: Uncomment after the 2026 season
-    //    m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.updateTelemetry();}});
+      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.updateTelemetry();}});
   }
 
   /**
@@ -1375,6 +1377,23 @@ public abstract class SmartMotorController {
     return m_config.getTelemetryName().map(name -> prefix + "_" + alertType + "_" + name).orElseGet(() -> prefix + "_" + UUID.randomUUID() + "_" + alertType);
   }
 
+  private void reportMechanismLimitAlert(boolean lowerLimit) {
+    Optional<Alert> alert = lowerLimit ? m_mechanismLowerLimitAlert : m_mechanismUpperLimitAlert;
+    if (alert.isEmpty()) {
+      String limit = lowerLimit ? "lower" : "upper";
+      alert = Optional.of(new Alert("YAMS", "MechanismLimit_" + limit + "_" + UUID.randomUUID(),
+          getName() + " setpoint reached the mechanism " + limit + " limit; clamping setpoint.", Alert.Level.HIGH));
+      alert.get().set(true);
+      if (lowerLimit) {
+        m_mechanismLowerLimitAlert = alert;
+      } else {
+        m_mechanismUpperLimitAlert = alert;
+      }
+    } else {
+      alert.get().set(true);
+    }
+  }
+
   /** Close the SMC for unit testing. */
   public void close() {
     if (m_closedLoopControllerThread != null) {
@@ -1383,6 +1402,8 @@ public abstract class SmartMotorController {
       m_closedLoopControllerThread = null;
     }
     m_systemCoreClosedLoopAlert.ifPresent(Alert::close);
+    m_mechanismLowerLimitAlert.ifPresent(Alert::close);
+    m_mechanismUpperLimitAlert.ifPresent(Alert::close);
     BatterySim.removeCurrent(m_batterySimUUID);
     telemetry.close();
     m_closeHooks.forEach(Runnable::run);
