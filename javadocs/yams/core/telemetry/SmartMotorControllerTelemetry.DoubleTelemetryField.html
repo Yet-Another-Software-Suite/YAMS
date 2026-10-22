@@ -82,6 +82,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#SetpointForce" tabindex="0">SetpointForce</a></li>
 <li><a href="#ClosedLoopPeriod" tabindex="0">ClosedLoopPeriod</a></li>
 <li><a href="#VelocityMeasurementDelay" tabindex="0">VelocityMeasurementDelay</a></li>
+<li><a href="#TunableVoltage" tabindex="0">TunableVoltage</a></li>
 <li><a href="#OutputVoltage" tabindex="0">OutputVoltage</a></li>
 <li><a href="#StatorCurrent" tabindex="0">StatorCurrent</a></li>
 <li><a href="#StatorCurrentLimit" tabindex="0">StatorCurrentLimit</a></li>
@@ -333,8 +334,13 @@ control period on the SystemCore.</div>
 <div class="col-last even-row-color">
 <div class="block">Setpoint velocity</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#VelocityMeasurementDelay" class="member-name-link">VelocityMeasurementDelay</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#TunableVoltage" class="member-name-link">TunableVoltage</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Tunable voltage applied to the motor and its loosely coupled followers, without the closed loop
+controller, while <a href="SmartMotorControllerTelemetry.BooleanTelemetryField.html#TunableVoltageEnabled"><code>SmartMotorControllerTelemetry.BooleanTelemetryField.TunableVoltageEnabled</code></a> is on.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#VelocityMeasurementDelay" class="member-name-link">VelocityMeasurementDelay</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">How far behind the mechanism the measured velocity is, from how the motor controller filters it,
 when it is known.</div>
 </div>
@@ -585,6 +591,16 @@ control period on the SystemCore.</div>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">VelocityMeasurementDelay</span></div>
 <div class="block">How far behind the mechanism the measured velocity is, from how the motor controller filters it,
 when it is known.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="TunableVoltage">
+<h3>TunableVoltage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">TunableVoltage</span></div>
+<div class="block">Tunable voltage applied to the motor and its loosely coupled followers, without the closed loop
+controller, while <a href="SmartMotorControllerTelemetry.BooleanTelemetryField.html#TunableVoltageEnabled"><code>SmartMotorControllerTelemetry.BooleanTelemetryField.TunableVoltageEnabled</code></a> is on.</div>
 </div>
 </section>
 </li>

@@ -85,7 +85,10 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">BatterySim</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
 <div class="block">Battery Simulation that takes the entirety of the robot into account by storing all currently
-used currents on the robot.</div>
+used currents on the robot.
+
+<p>Thread safe: every method synchronizes on this class, so mechanisms can run their simulation
+in their own <code>Notifier</code>s while sharing the one battery.</div>
 </div>
 </section>
 <section class="summary">

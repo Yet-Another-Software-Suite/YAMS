@@ -93,6 +93,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0c3ecc937727e3fa1c0c691d7f95cb28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72068b66003a10b8f8a385a943b97754" id="r_a72068b66003a10b8f8a385a943b97754"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72068b66003a10b8f8a385a943b97754">ApplyTuningValues</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc)</td></tr>
 <tr class="separator:a72068b66003a10b8f8a385a943b97754"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62796212e003fa84ddd8af39eef4b033" id="r_a62796212e003fa84ddd8af39eef4b033"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62796212e003fa84ddd8af39eef4b033">StopTuning</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;smc)</td></tr>
+<tr class="separator:a62796212e003fa84ddd8af39eef4b033"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea15afadf8180621a6e5964c44f1a93f" id="r_aea15afadf8180621a6e5964c44f1a93f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea15afadf8180621a6e5964c44f1a93f">TuningEnabled</a> () const</td></tr>
 <tr class="separator:aea15afadf8180621a6e5964c44f1a93f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4208ee1107aa52ea8ea382b7af1f64ab" id="r_a4208ee1107aa52ea8ea382b7af1f64ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4208ee1107aa52ea8ea382b7af1f64ab">Close</a> ()</td></tr>
@@ -221,6 +223,30 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">boolFields</td><td>Configured <a class="el" href="classyams_1_1telemetry_1_1_boolean_telemetry.html">BooleanTelemetry</a> map from <a class="el" href="classyams_1_1telemetry_1_1_smart_motor_controller_telemetry_config.html">SmartMotorControllerTelemetryConfig</a>. </td></tr>
     <tr><td class="paramname">nt4Enabled</td><td>Whether to publish to NT4. </td></tr>
     <tr><td class="paramname">dataLogName</td><td>Optional DataLog prefix. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a62796212e003fa84ddd8af39eef4b033" name="a62796212e003fa84ddd8af39eef4b033"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62796212e003fa84ddd8af39eef4b033">&#9670;&#160;</a></span>StopTuning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::telemetry::SmartMotorControllerTelemetry::StopTuning </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">motorcontrollers::SmartMotorController</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>smc</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops and the closed-loop controller holds the setpoint again. The voltage is turned off in the Tuning table too, so it is not applied again as soon as live tuning starts again.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">smc</td><td>SmartMotorController being tuned. </td></tr>
   </table>
   </dd>
 </dl>

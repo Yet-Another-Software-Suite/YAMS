@@ -97,6 +97,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a11f5a7dea14999ed590665df60a4b77b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b18023311bde305553bbfd145675cd9" id="r_a3b18023311bde305553bbfd145675cd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#a3b18023311bde305553bbfd145675cd9">TransformUnit</a> (const <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html">motorcontrollers::SmartMotorControllerConfig</a> &amp;cfg)</td></tr>
 <tr class="separator:a3b18023311bde305553bbfd145675cd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0dd3e32ff448a1f3c45a1e7a4aa5321" id="r_ab0dd3e32ff448a1f3c45a1e7a4aa5321"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#ab0dd3e32ff448a1f3c45a1e7a4aa5321">ForceSet</a> (double value)</td></tr>
+<tr class="separator:ab0dd3e32ff448a1f3c45a1e7a4aa5321"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80f0342145e609386038a6c86412aba9" id="r_a80f0342145e609386038a6c86412aba9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#a80f0342145e609386038a6c86412aba9">Set</a> (double value)</td></tr>
 <tr class="separator:a80f0342145e609386038a6c86412aba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26004a1e3c13914925147b9d34393f21" id="r_a26004a1e3c13914925147b9d34393f21"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#a26004a1e3c13914925147b9d34393f21">Get</a> () const</td></tr>
@@ -312,6 +314,41 @@ template&lt;typename F &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Enable this field so it is published / read each loop. </p>
+
+</div>
+</div>
+<a id="ab0dd3e32ff448a1f3c45a1e7a4aa5321" name="ab0dd3e32ff448a1f3c45a1e7a4aa5321"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0dd3e32ff448a1f3c45a1e7a4aa5321">&#9670;&#160;</a></span>ForceSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename F &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html">yams::telemetry::DoubleTelemetry</a>&lt; F &gt;::ForceSet </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match guard in <a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#a80f0342145e609386038a6c86412aba9">Set(double)</a>. The next <a class="el" href="classyams_1_1telemetry_1_1DoubleTelemetry.html#a3068f091eb0c2fdb22982493b1032d32">IsTunable()</a> reports the change, as if it was made on the dashboard.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td>Value to force. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -371,7 +371,8 @@ guard in <a href="#set(boolean)"><code>set(boolean)</code></a>.</div>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">forceSet</span><wbr><span class="parameters">(boolean&nbsp;value)</span></div>
 <div class="block">Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
 guard in <a href="#set(boolean)"><code>set(boolean)</code></a>. Used to enforce mutual exclusion between tunable modes that
-share the same underlying drive/mechanism.</div>
+share the same underlying drive/mechanism. The next <a href="#tunable()"><code>tunable()</code></a> reports the change, as
+if it was made on the dashboard.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>value</code> - Value to force onto the tuning topic.</dd>

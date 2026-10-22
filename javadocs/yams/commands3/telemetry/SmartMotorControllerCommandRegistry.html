@@ -58,6 +58,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#addCommand(java.lang.String,org.wpilib.command3.Mechanism,java.lang.Runnable)" tabindex="0">addCommand(String, Mechanism, Runnable)</a></li>
+<li><a href="#addCommand(java.lang.String,org.wpilib.command3.Mechanism,java.lang.Runnable,java.lang.Runnable)" tabindex="0">addCommand(String, Mechanism, Runnable, Runnable)</a></li>
+<li><a href="#getCommand(java.lang.String,org.wpilib.command3.Mechanism)" tabindex="0">getCommand(String, Mechanism)</a></li>
 <li><a href="#commandExists(java.lang.String,org.wpilib.command3.Mechanism)" tabindex="0">commandExists(String, Mechanism)</a></li>
 <li><a href="#removeCommands(org.wpilib.command3.Mechanism)" tabindex="0">removeCommands(Mechanism)</a></li>
 </ol>
@@ -102,11 +104,25 @@ here so the scheduler can manage them.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Add a command to the registry.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#commandExists(java.lang.String,org.wpilib.command3.Mechanism)" class="member-name-link">commandExists</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#addCommand(java.lang.String,org.wpilib.command3.Mechanism,java.lang.Runnable,java.lang.Runnable)" class="member-name-link">addCommand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
+ org.wpilib.command3.Mechanism&nbsp;mechanism,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;callback,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;onEnd)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Add a command to the registry, with a <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link"><code>Runnable</code></a> run when the shared command ends.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#commandExists(java.lang.String,org.wpilib.command3.Mechanism)" class="member-name-link">commandExists</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
+ org.wpilib.command3.Mechanism&nbsp;mechanism)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Check if a command exists.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.command3.Command&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getCommand(java.lang.String,org.wpilib.command3.Mechanism)" class="member-name-link">getCommand</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
  org.wpilib.command3.Mechanism&nbsp;mechanism)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Check if a command exists.</div>
+<div class="block">Get a registered command, such as the "Live Tuning" command, to schedule it from code.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#removeCommands(org.wpilib.command3.Mechanism)" class="member-name-link">removeCommands</a><wbr>(org.wpilib.command3.Mechanism&nbsp;mechanism)</code></div>
@@ -146,6 +162,45 @@ here so the scheduler can manage them.</div>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if a different <code>Mechanism</code> instance with the same name has
                               already registered a command under <code>cmdName</code>.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="addCommand(java.lang.String,org.wpilib.command3.Mechanism,java.lang.Runnable,java.lang.Runnable)">
+<h3>addCommand</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addCommand</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
+ org.wpilib.command3.Mechanism&nbsp;mechanism,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;callback,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;onEnd)</span></div>
+<div class="block">Add a command to the registry, with a <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link"><code>Runnable</code></a> run when the shared command ends.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cmdName</code> - Command name to publish to NetworkTables.</dd>
+<dd><code>mechanism</code> - Mechanism to create the command for.</dd>
+<dd><code>callback</code> - Runnable to be added to the shared command.</dd>
+<dd><code>onEnd</code> - Runnable run when the shared command ends.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if a different <code>Mechanism</code> instance with the same name has
+                              already registered a command under <code>cmdName</code>.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCommand(java.lang.String,org.wpilib.command3.Mechanism)">
+<h3>getCommand</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.command3.Command&gt;</span>&nbsp;<span class="element-name">getCommand</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;cmdName,
+ org.wpilib.command3.Mechanism&nbsp;mechanism)</span></div>
+<div class="block">Get a registered command, such as the "Live Tuning" command, to schedule it from code.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>cmdName</code> - Command name.</dd>
+<dd><code>mechanism</code> - Mechanism the command was registered for.</dd>
+<dt>Returns:</dt>
+<dd>The command, or empty if none is registered under <code>cmdName</code>.</dd>
 </dl>
 </div>
 </section>

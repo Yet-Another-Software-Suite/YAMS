@@ -279,12 +279,18 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a28a214c858bd06bc5f9ccfce53d73871"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1eef408cc3fa1dd1a8d52b4b705f2519" id="r_a1eef408cc3fa1dd1a8d52b4b705f2519"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a1eef408cc3fa1dd1a8d52b4b705f2519">SetupTelemetry</a> ()</td></tr>
 <tr class="separator:a1eef408cc3fa1dd1a8d52b4b705f2519"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adce1cb175899f8cb71e01e445fd3a021" id="r_adce1cb175899f8cb71e01e445fd3a021"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#adce1cb175899f8cb71e01e445fd3a021">SetupLiveTuning</a> ()</td></tr>
+<tr class="separator:adce1cb175899f8cb71e01e445fd3a021"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a635181d357fd5870757ee2765516dcb1" id="r_a635181d357fd5870757ee2765516dcb1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a635181d357fd5870757ee2765516dcb1">UpdateTelemetry</a> ()</td></tr>
 <tr class="separator:a635181d357fd5870757ee2765516dcb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9532221ba058e13dff2b946ddae059b" id="r_ad9532221ba058e13dff2b946ddae059b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#ad9532221ba058e13dff2b946ddae059b">TuningEnabled</a> () const</td></tr>
 <tr class="separator:ad9532221ba058e13dff2b946ddae059b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7cfc84895b7352c329c2b7a7f655491" id="r_af7cfc84895b7352c329c2b7a7f655491"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#af7cfc84895b7352c329c2b7a7f655491">ApplyTuningValues</a> ()</td></tr>
 <tr class="separator:af7cfc84895b7352c329c2b7a7f655491"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d5202c2690e32efd9c4ab9f61fb31f5" id="r_a0d5202c2690e32efd9c4ab9f61fb31f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a0d5202c2690e32efd9c4ab9f61fb31f5">StopLiveTuning</a> ()</td></tr>
+<tr class="separator:a0d5202c2690e32efd9c4ab9f61fb31f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6af2c9d67af69396c1c6477d8ea95af" id="r_aa6af2c9d67af69396c1c6477d8ea95af"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#aa6af2c9d67af69396c1c6477d8ea95af">GetLooselyCoupledFollowers</a> () const</td></tr>
+<tr class="separator:aa6af2c9d67af69396c1c6477d8ea95af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cbf668d8658da13c22e8687acccb380" id="r_a5cbf668d8658da13c22e8687acccb380"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a5cbf668d8658da13c22e8687acccb380">AddCloseHook</a> (std::function&lt; void()&gt; hook)</td></tr>
 <tr class="separator:a5cbf668d8658da13c22e8687acccb380"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fcf8d0014e7c3828572e44c6c2efba5" id="r_a4fcf8d0014e7c3828572e44c6c2efba5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a4fcf8d0014e7c3828572e44c6c2efba5">WithTelemetry</a> (<a class="el" href="classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html">telemetry::SmartMotorControllerTelemetryConfig</a> config)</td></tr>
@@ -928,6 +934,33 @@ Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism velocity in turns per second from the external encoder, or empty if none is attached. </dd></dl>
 
 <p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#abd170ac971331a5a34308685276f2f31">yams::motorcontrollers::local::NovaWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html#a6d4d2a5e809a0ba0a049c21adc2415b3">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html#a7e8766cda278c85a6d12ef83ab2c39bf">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html#a02a7e9a0873fed1f2ebcc962f51f6396">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+
+</div>
+</div>
+<a id="aa6af2c9d67af69396c1c6477d8ea95af" name="aa6af2c9d67af69396c1c6477d8ea95af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6af2c9d67af69396c1c6477d8ea95af">&#9670;&#160;</a></span>GetLooselyCoupledFollowers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a> * &gt; &amp; yams::motorcontrollers::SmartMotorController::GetLooselyCoupledFollowers </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get the loosely coupled followers, which are sent the leader's setpoints and run their own closed-loop controllers.</p>
+<dl class="section return"><dt>Returns</dt><dd>The loosely coupled followers, empty if there are none. </dd></dl>
 
 </div>
 </div>
@@ -3090,6 +3123,24 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="adce1cb175899f8cb71e01e445fd3a021" name="adce1cb175899f8cb71e01e445fd3a021"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adce1cb175899f8cb71e01e445fd3a021">&#9670;&#160;</a></span>SetupLiveTuning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::SmartMotorController::SetupLiveTuning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set up live tuning for this motor controller when its telemetry verbosity is HIGH, so the values under the Tuning table are applied while the "Live Tuning" command runs. Only sets it up once, however many times it is called. </p>
+
+</div>
+</div>
 <a id="a73b0ff0abc5dfa53364ca93581874c0f" name="a73b0ff0abc5dfa53364ca93581874c0f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73b0ff0abc5dfa53364ca93581874c0f">&#9670;&#160;</a></span>SetupSimulation()</h2>
 
@@ -3457,6 +3508,24 @@ Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Stop the background closed-loop controller thread, and the loosely coupled followers'. The followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at. </p>
+
+</div>
+</div>
+<a id="a0d5202c2690e32efd9c4ab9f61fb31f5" name="a0d5202c2690e32efd9c4ab9f61fb31f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d5202c2690e32efd9c4ab9f61fb31f5">&#9670;&#160;</a></span>StopLiveTuning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::SmartMotorController::StopLiveTuning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops, it is turned off in the Tuning table, and the closed-loop controller holds the setpoint again. </p>
 
 </div>
 </div>

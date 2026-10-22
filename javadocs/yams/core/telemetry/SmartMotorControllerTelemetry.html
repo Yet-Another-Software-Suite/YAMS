@@ -72,6 +72,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#setupTelemetry(yams.core.motorcontrollers.SmartMotorController,org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable,yams.core.telemetry.SmartMotorControllerTelemetryConfig)" tabindex="0">setupTelemetry(SmartMotorController, NetworkTable, NetworkTable, SmartMotorControllerTelemetryConfig)</a></li>
 <li><a href="#publish(yams.core.motorcontrollers.SmartMotorController)" tabindex="0">publish(SmartMotorController)</a></li>
 <li><a href="#applyTuningValues(yams.core.motorcontrollers.SmartMotorController)" tabindex="0">applyTuningValues(SmartMotorController)</a></li>
+<li><a href="#stopTuning(yams.core.motorcontrollers.SmartMotorController)" tabindex="0">stopTuning(SmartMotorController)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 <li><a href="#tuningEnabled()" tabindex="0">tuningEnabled()</a></li>
 </ol>
@@ -197,9 +198,14 @@ motor.updateTelemetry();
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup Telemetry Pub/Sub fields.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tuningEnabled()" class="member-name-link">tuningEnabled</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stopTuning(yams.core.motorcontrollers.SmartMotorController)" class="member-name-link">stopTuning</a><wbr>(<a href="../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>&nbsp;smartMotorController)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stop live tuning, as when the "Live Tuning" command ends.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tuningEnabled()" class="member-name-link">tuningEnabled</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Whether or not tuning is enabled.</div>
 </div>
 </div>
@@ -293,6 +299,21 @@ motor.updateTelemetry();
                                                    not supported by the underlying motor
                                                    controller implementation (for example, slot
                                                    3 on a TalonFX or TalonFXS).</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="stopTuning(yams.core.motorcontrollers.SmartMotorController)">
+<h3>stopTuning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">stopTuning</span><wbr><span class="parameters">(<a href="../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>&nbsp;smartMotorController)</span></div>
+<div class="block">Stop live tuning, as when the "Live Tuning" command ends. A tuning voltage stops and the closed
+loop controller holds the setpoint again. The voltage is turned off in the Tuning table too, so
+it is not applied again as soon as live tuning starts again.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>smartMotorController</code> - <a href="../motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> being tuned.</dd>
 </dl>
 </div>
 </section>

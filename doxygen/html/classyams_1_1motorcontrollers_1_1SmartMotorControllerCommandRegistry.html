@@ -87,6 +87,10 @@ $(function() {
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:acadd8acd4675294d52ccb23783e14841" id="r_acadd8acd4675294d52ccb23783e14841"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html#acadd8acd4675294d52ccb23783e14841">AddCommand</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem, std::function&lt; void()&gt; callback)</td></tr>
 <tr class="separator:acadd8acd4675294d52ccb23783e14841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a427bdb98310ff8edce654a319792213f" id="r_a427bdb98310ff8edce654a319792213f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html#a427bdb98310ff8edce654a319792213f">AddCommand</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem, std::function&lt; void()&gt; callback, std::function&lt; void()&gt; onEnd)</td></tr>
+<tr class="separator:a427bdb98310ff8edce654a319792213f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a113f14fc68d6c24e6e8f7d620f56876e" id="r_a113f14fc68d6c24e6e8f7d620f56876e"><td class="memItemLeft" align="right" valign="top">static wpi::cmd::Command *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html#a113f14fc68d6c24e6e8f7d620f56876e">GetCommand</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem)</td></tr>
+<tr class="separator:a113f14fc68d6c24e6e8f7d620f56876e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa3f29422a81a96cc96089a37cba7590" id="r_aaa3f29422a81a96cc96089a37cba7590"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html#aaa3f29422a81a96cc96089a37cba7590">CommandExists</a> (const std::string &amp;cmdName, wpi::cmd::SubsystemBase *subsystem)</td></tr>
 <tr class="separator:aaa3f29422a81a96cc96089a37cba7590"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f484fbd111b938298e8541c588cb68a" id="r_a0f484fbd111b938298e8541c588cb68a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html#a0f484fbd111b938298e8541c588cb68a">RemoveCommands</a> (wpi::cmd::SubsystemBase *subsystem)</td></tr>
@@ -100,7 +104,7 @@ Static Public Member Functions</h2></td></tr>
 <p>The published SmartDashboard path is: Mechanisms/Commands/SubsystemName%/CommandName% </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="acadd8acd4675294d52ccb23783e14841" name="acadd8acd4675294d52ccb23783e14841"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acadd8acd4675294d52ccb23783e14841">&#9670;&#160;</a></span>AddCommand()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#acadd8acd4675294d52ccb23783e14841">&#9670;&#160;</a></span>AddCommand() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -145,6 +149,64 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramname">cmdName</td><td>Display name for the command (e.g. "Live Tuning"). </td></tr>
     <tr><td class="paramname">subsystem</td><td>Subsystem that owns the command (used for requirement and naming). </td></tr>
     <tr><td class="paramname">callback</td><td>Runnable invoked each loop while the command is running. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a427bdb98310ff8edce654a319792213f" name="a427bdb98310ff8edce654a319792213f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a427bdb98310ff8edce654a319792213f">&#9670;&#160;</a></span>AddCommand() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void yams::motorcontrollers::SmartMotorControllerCommandRegistry::AddCommand </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>cmdName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::cmd::SubsystemBase *&#160;</td>
+          <td class="paramname"><em>subsystem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
+          <td class="paramname"><em>callback</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
+          <td class="paramname"><em>onEnd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a callback for a command on a subsystem, with a callback run when the command ends.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmdName</td><td>Display name for the command (e.g. "Live Tuning"). </td></tr>
+    <tr><td class="paramname">subsystem</td><td>Subsystem that owns the command (used for requirement and naming). </td></tr>
+    <tr><td class="paramname">callback</td><td>Runnable invoked each loop while the command is running. </td></tr>
+    <tr><td class="paramname">onEnd</td><td>Runnable invoked when the command ends. </td></tr>
   </table>
   </dd>
 </dl>
@@ -220,6 +282,51 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the command is already registered. </dd></dl>
+
+</div>
+</div>
+<a id="a113f14fc68d6c24e6e8f7d620f56876e" name="a113f14fc68d6c24e6e8f7d620f56876e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a113f14fc68d6c24e6e8f7d620f56876e">&#9670;&#160;</a></span>GetCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static wpi::cmd::Command * yams::motorcontrollers::SmartMotorControllerCommandRegistry::GetCommand </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>cmdName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::cmd::SubsystemBase *&#160;</td>
+          <td class="paramname"><em>subsystem</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get a registered command, such as the "Live Tuning" command, to schedule it from code.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmdName</td><td>Command name. </td></tr>
+    <tr><td class="paramname">subsystem</td><td>Subsystem the command was registered for. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The command, or nullptr if none is registered under cmdName. </dd></dl>
 
 </div>
 </div>

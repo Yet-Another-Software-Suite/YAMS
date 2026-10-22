@@ -78,6 +78,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#setupDataLog(java.lang.String)" tabindex="0">setupDataLog(String)</a></li>
 <li><a href="#transformUnit(yams.core.motorcontrollers.SmartMotorControllerConfig)" tabindex="0">transformUnit(SmartMotorControllerConfig)</a></li>
 <li><a href="#setupNetworkTable(org.wpilib.networktables.NetworkTable)" tabindex="0">setupNetworkTable(NetworkTable)</a></li>
+<li><a href="#forceSet(double)" tabindex="0">forceSet(double)</a></li>
 <li><a href="#set(double)" tabindex="0">set(double)</a></li>
 <li><a href="#get()" tabindex="0">get()</a></li>
 <li><a href="#tunable()" tabindex="0">tunable()</a></li>
@@ -202,50 +203,56 @@ velocity.set(shooter.getVelocityRPS());
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enable the telemetry.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#forceSet(double)" class="member-name-link">forceSet</a><wbr>(double&nbsp;value)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+guard in <a href="#set(double)"><code>set(double)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#get()" class="member-name-link">get</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the value.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-F" title="type parameter in DoubleTelemetry">F</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getField()" class="member-name-link">getField</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-F" title="type parameter in DoubleTelemetry">F</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getField()" class="member-name-link">getField</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the field.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(double)" class="member-name-link">set</a><wbr>(double&nbsp;value)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(double)" class="member-name-link">set</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDefaultValue(double)" class="member-name-link">setDefaultValue</a><wbr>(double&nbsp;defaultValue)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDefaultValue(double)" class="member-name-link">setDefaultValue</a><wbr>(double&nbsp;defaultValue)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set default values.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup the <code>DataLog</code> with this entry.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTable(org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTable</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup network tables.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTables(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTables</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable,
- org.wpilib.networktables.NetworkTable&nbsp;tuningTable)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTable(org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTable</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup network tables.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="DoubleTelemetry.html" title="class in yams.core.telemetry">DoubleTelemetry</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#transformUnit(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">transformUnit</a><wbr>(<a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;cfg)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTables(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTables</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable,
+ org.wpilib.networktables.NetworkTable&nbsp;tuningTable)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup network tables.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="DoubleTelemetry.html" title="class in yams.core.telemetry">DoubleTelemetry</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#transformUnit(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">transformUnit</a><wbr>(<a href="../motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;cfg)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the unit.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tunable()" class="member-name-link">tunable</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tunable()" class="member-name-link">tunable</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check to see if the value has changed.</div>
 </div>
 </div>
@@ -378,6 +385,21 @@ velocity.set(shooter.getVelocityRPS());
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>dataTable</code> - Data tables.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="forceSet(double)">
+<h3>forceSet</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">forceSet</span><wbr><span class="parameters">(double&nbsp;value)</span></div>
+<div class="block">Forcibly overwrite the tunable value in NetworkTables, bypassing the subscriber-must-match
+guard in <a href="#set(double)"><code>set(double)</code></a>. The next <a href="#tunable()"><code>tunable()</code></a> reports the change, as if it was made
+on the dashboard.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>value</code> - Value to force onto the tuning topic.</dd>
 </dl>
 </div>
 </section>
