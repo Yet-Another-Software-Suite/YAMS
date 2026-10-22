@@ -331,9 +331,10 @@ jobs:
       - name: Output Pages Tree
         run: find ${{ env.workingDirectory }}/build/maven/ -type f
 
-      # Builds the release description: GitHub's generated notes (merged PRs, new contributors, full
-      # changelog link), then a "What's new" list of every commit since the previous full
-      # (non-prerelease, non-draft) release, then installation instructions.
+      # Builds the release description: first the example projects attached to this release, with a
+      # download link for each, then installation instructions, then a "What's new" list of every
+      # commit since the previous full (non-prerelease, non-draft) release, and last GitHub's
+      # generated notes (merged PRs, new contributors, full changelog link).
       - name: Write release notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -361,16 +362,45 @@ jobs:
           GENERATED=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
             -f tag_name="$TAG" --jq .body)
 
+          DOWNLOAD="$REPO_URL/releases/download/$TAG"
+          # An example's name from the first heading of its README, without the "(YAMS port)" suffix.
+          example_name() {
+            local base="$1" readme
+            for readme in "examples/commands2/$base/README.md" "examples/commands3/$base/README.md"; do
+              if [ -f "$readme" ]; then
+                grep -m1 '^# ' "$readme" | sed -e 's/^# //' -e 's/ *(YAMS port)$//'
+                return
+              fi
+            done
+            case "$base" in
+              advantage_kit) echo "AdvantageKit" ;;
+              BroncBotz_2026) echo "BroncBotz 3481 FRC2026" ;;
+              *) echo "${base//_/ }" ;;
+            esac
+          }
+          # Every Java example attached to this release, by its folder name: example-<name>.zip is the
+          # Commands v2 project and example-commands3-<name>.zip the Commands v3 one.
+          EXAMPLES=$(ls release-artifacts/example-*.zip | xargs -n1 basename | sed -e 's/^example-//' -e 's/\.zip$//' \
+            -e 's/^commands3-//' | grep -vx cpptest | sort -fu)
+
           {
-            printf '%s\n\n' "$GENERATED"
-            echo "## What's new"
+            echo "## Examples"
             echo
-            if [ -n "$SINCE" ]; then
-              echo "Commits $SINCE:"
+            echo "Complete robot projects built with YAMS, attached to this release. Download the zip for your command framework, extract it, and open the folder in WPILib VS Code. Each one already includes this release's YAMS vendordep, and runs in simulation with **WPILib: Simulate Robot Code**."
+            echo
+            echo "| Example | Commands v2 | Commands v3 |"
+            echo "| --- | --- | --- |"
+            for base in $EXAMPLES; do
+              v2="—"; v3="—"
+              [ -f "release-artifacts/example-$base.zip" ] && v2="[example-$base.zip]($DOWNLOAD/example-$base.zip)"
+              [ -f "release-artifacts/example-commands3-$base.zip" ] && v3="[example-commands3-$base.zip]($DOWNLOAD/example-commands3-$base.zip)"
+              echo "| $(example_name "$base") | $v2 | $v3 |"
+            done
+            echo
+            if [ -f release-artifacts/example-cpptest.zip ]; then
+              echo "For C++, [example-cpptest.zip]($DOWNLOAD/example-cpptest.zip) is a complete C++ robot: an arm, a turret, a hood, an elevator, a shooter, and swerve and differential drivetrains."
               echo
             fi
-            git log --no-merges --format="- %s ([%h]($REPO_URL/commit/%H))" "$RANGE"
-            echo
             # Quoted heredoc so backslashes and backticks stay literal; @WPILIB_YEAR@ is filled in below.
             cat <<'EOF'
           ## Installation
@@ -411,10 +441,17 @@ jobs:
           ```
 
           Afterwards you should have `wpilib/@WPILIB_YEAR@/maven/yams/...` and `wpilib/@WPILIB_YEAR@/vendordeps/yams_commands2.json` / `yams_commands3.json`. Then, in VS Code, run **WPILib: Manage Vendor Libraries > Install new libraries (offline)** and pick **Yet Another Mechanism System (Commands v2)** or **(Commands v3)**.
-
-          Example projects for both command frameworks are also attached below.
           EOF
             echo
+            echo "## What's new"
+            echo
+            if [ -n "$SINCE" ]; then
+              echo "Commits $SINCE:"
+              echo
+            fi
+            git log --no-merges --format="- %s ([%h]($REPO_URL/commit/%H))" "$RANGE"
+            echo
+            printf '%s\n' "$GENERATED"
           } > release-notes.md
           sed -i "s/@WPILIB_YEAR@/$WPILIB_YEAR/g" release-notes.md
           cat release-notes.md
