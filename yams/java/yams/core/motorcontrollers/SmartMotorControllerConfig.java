@@ -20,13 +20,13 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.hal.HAL;
 import org.wpilib.math.controller.ArmFeedforward;
@@ -57,7 +57,6 @@ import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.util.Pair;
-import org.wpilib.util.Alert;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.LQRController;
@@ -87,13 +86,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * @param <T> Concrete config type, so chained {@code with} calls keep the subclass type.
  */
 public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerConfig<T>> {
-  private final List<Alert> m_configurationAlerts = new ArrayList<>();
-
-  private void reportConfigurationAlert(String message) {
-    Alert alert = new Alert("YAMS", "SmartMotorControllerConfig_" + java.util.UUID.randomUUID(), message, Alert.Level.LOW);
-    alert.set(true);
-    m_configurationAlerts.add(alert);
-  }
   /**
    * Reset old configurations, so they are no longer persistent.
    */
@@ -1500,8 +1492,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withProfile(TrapezoidProfile.Constraints profile) {
-    reportConfigurationAlert("Trapezoidal profile will be given rotations/s and rotations/s^2 for rotational closed loop controllers.");
-    reportConfigurationAlert("Trapezoidal profile will be given meters/s and meters/s^2 for linear closed loop controllers.");
+    DriverStationBackend.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 " + "for rotational closed loop controllers.", true);
+    DriverStationBackend.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for " + "linear closed loop controllers.", true);
     this.exponentialProfile = Optional.empty();
     this.trapezoidProfile = Optional.ofNullable(profile);
     return self();
@@ -1571,8 +1563,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withProfile(ExponentialProfile.Constraints profile) {
-    reportConfigurationAlert("Exponential profile will be given rotations/s and rotations/s^2 for rotational closed loop controllers.");
-    reportConfigurationAlert("Exponential profile will be given meters/s and meters/s^2 for linear closed loop controllers.");
+    DriverStationBackend.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 " + "for rotational closed loop controllers.", true);
+    DriverStationBackend.reportWarning("Exponential profile will be given meters/s and meters/s^2 for " + "linear closed loop controllers.", true);
     this.exponentialProfile = Optional.ofNullable(profile);
     this.trapezoidProfile = Optional.empty();
     return self();
@@ -2255,8 +2247,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withExternalEncoderGearing(MechanismGearing externalEncoderGearing) {
     if (externalEncoderGearing.getRotorToMechanismRatio() > 1) {
-        reportConfigurationAlert(
-          "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the maximum reading, this WILL result in multiple angle's being read as the same 'angle.\n\tIgnore this warning IF your mechanism will never travel outside of the slice you are reading, adjust the offset accordingly.\n\tYou have been warned! (^.^) - Rivet");
+      DriverStationBackend.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external " + "encoder will exceed the maximum reading, " + "this WILL result in multiple angle's being read as the same 'angle.\n\t" + "Ignore this warning IF your mechanism will never travel outside of the slice you " + "are reading, adjust the offset accordingly.\n\t" + "You have been warned! (^.^) - Rivet",
+          true);
     }
     this.externalEncoderGearing = Optional.of(externalEncoderGearing);
     return self();
@@ -2271,8 +2264,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withExternalEncoderGearing(double reductionRatio) {
     if (reductionRatio > 1) {
-        reportConfigurationAlert(
-          "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the maximum reading, this WILL result in multiple angle's being read as the same 'angle.\n\tIgnore this warning IF your mechanism will never travel outside of the slice you are reading, adjust the offset accordingly.\n\tYou have been warned! (^.^) - Rivet");
+      DriverStationBackend.reportWarning(
+          "[IMPORTANT] Your gearing is set in a way that the external " + "encoder will exceed the maximum reading, " + "this WILL result in multiple angle's being read as the same 'angle.\n\t" + "Ignore this warning IF your mechanism will never travel outside of the slice you " + "are reading, adjust the offset accordingly.\n\t" + "You have been warned! (^.^) - Rivet",
+          true);
     }
     this.externalEncoderGearing = Optional.of(new MechanismGearing(reductionRatio));
     return self();
