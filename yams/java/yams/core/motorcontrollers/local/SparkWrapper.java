@@ -455,8 +455,7 @@ public class SparkWrapper extends SmartMotorController {
           m_detachedEncoderSimAngle = mSimSupplier.getMechanismPosition().times(mechanismToExternalEncoderRatio);
         }
       });
-      // TODO: Uncomment after the 2026 season
-      //      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});
+           m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});
     }
   }
 
