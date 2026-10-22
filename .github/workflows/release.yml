@@ -403,6 +403,13 @@ jobs:
             fi
             # Quoted heredoc so backslashes and backticks stay literal; @WPILIB_YEAR@ is filled in below.
             cat <<'EOF'
+          ## Getting started
+
+          1. **Install YAMS** in a WPILib @WPILIB_YEAR@ project, with the vendordep for your command framework (see [Installation](#installation) below).
+          2. **Create your mechanism's code with [YAMG](https://yamg.yassrobotics.com).** Fill in a form about your elevator, arm, pivot or flywheel, turn on **Use YAMS**, and copy the generated code into your project.
+          3. **Tune it with the [YAMS Live Tuner](https://tuning.yassrobotics.com).** Connect to your robot or the simulator, check the inversions and range of motion, then send setpoints and change the gains while it runs. Try it without a robot in [demo mode](https://tuning.yassrobotics.com/?demo).
+          4. **Read the [YAMS docs](https://yams.yassrobotics.com/documentation/) for even more.** Step by step tutorials for every mechanism and swerve, simulation, telemetry, absolute encoders, homing, AdvantageKit and more.
+
           ## Installation
 
           Pick the vendordep for the command framework your robot uses. Only install one of them.
