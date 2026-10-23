@@ -334,6 +334,7 @@ public abstract class SmartMotorController {
       }
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
+      m_closedLoopControllerThread.setName(getName()+" Closed Loop Controller");
       m_closedLoopControllerRunning = true;
     }
     m_looseFollowers.ifPresent(followers -> {
@@ -922,9 +923,6 @@ public abstract class SmartMotorController {
    *                  {@link SmartMotorControllerConfig#getTelemetryName()}.
    */
   public void setupTelemetry(NetworkTable telemetry, NetworkTable tuning) {
-    //    System.out.println(
-    //        "=====================================================\nSETUP
-    //        TELEMETRY\n=====================================================");
     m_config.attachController(this);
     if (parentTable.isEmpty()) {
       parentTable = Optional.of(telemetry);
