@@ -149,6 +149,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    */
   public Command run(AngularVelocity velocity) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopControllerIfStopped();
       while (true) {
         getMotorController().setVelocity(velocity);
         coroutine.yield();
@@ -239,6 +240,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
   public Command run(LinearVelocity speed) {
     AngularVelocity target = getShooterConfig().getAngularVelocity(speed);
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopControllerIfStopped();
       while (true) {
         getMotorController().setVelocity(target);
         coroutine.yield();

@@ -123,7 +123,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command run(Angle angle) {
-    return Commands.run(() -> getMotorController().setPosition(angle), subsystem).withName(subsystem.getName() + " SetAngle");
+    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(angle), subsystem).withName(subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -133,7 +133,7 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    * @return {@link Command} that sets the pivot to the desired angle.
    */
   public Command run(Supplier<Angle> angle) {
-    return Commands.run(() -> getMotorController().setPosition(angle.get()), subsystem).withName(subsystem.getName() + " RunAngle Supplier");
+    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(angle.get()), subsystem).withName(subsystem.getName() + " RunAngle Supplier");
   }
 
   /**
@@ -146,7 +146,10 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    *           the Subsystem.
    */
   public Command runTo(Angle angle, Angle tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(angle), subsystem).andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle");
+    return Commands.runOnce(() -> {
+      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().setPosition(angle);
+    }, subsystem).andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle");
   }
 
   /**
@@ -159,7 +162,10 @@ public class Pivot extends yams.core.mechanisms.positional.Pivot implements Comm
    *           the Subsystem.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
-    return Commands.runOnce(() -> getMotorController().setPosition(angle.get()), subsystem).andThen(Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle Supplier");
+    return Commands.runOnce(() -> {
+      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().setPosition(angle.get());
+    }, subsystem).andThen(Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle Supplier");
   }
 
   /**

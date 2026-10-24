@@ -156,7 +156,7 @@ wpi::cmd::CommandPtr FlyWheel::RunTo(wpi::units::degrees_per_second_t velocity,
   wpi::cmd::Trigger near = IsNear(velocity, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce(
              [this, velocity] {
-               m_smc->StartClosedLoopController();
+               m_smc->StartClosedLoopControllerIfStopped();
                m_smc->SetVelocity(velocity);
              },
              {m_subsystem})
@@ -170,7 +170,7 @@ wpi::cmd::CommandPtr FlyWheel::RunTo(std::function<wpi::units::degrees_per_secon
   wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
   return wpi::cmd::RunOnce(
              [this, target] {
-               m_smc->StartClosedLoopController();
+               m_smc->StartClosedLoopControllerIfStopped();
                m_smc->SetVelocity(target);
              },
              {m_subsystem})

@@ -133,34 +133,19 @@ LQRConfig::GetSystem() const {
   return m_armElevatorPlant.value();
 }
 
-std::variant<LQRConfig::Loop1, LQRConfig::Loop2> LQRConfig::GetLoop() const {
-  auto type = m_type.value();
-  if (type == LQRType::FLYWHEEL) {
-    auto plant = m_flywheelPlant.value();
-    wpi::math::LinearQuadraticRegulator<1, 1> controller{plant,
-                                                         {m_qElems.empty() ? 3.0 : m_qElems[0]},
-                                                         {m_rElems.empty() ? 12.0 : m_rElems[0]},
-                                                         m_period};
-    wpi::math::KalmanFilter<1, 1, 1> observer{plant,
-                                              {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]},
-                                              {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]},
-                                              m_period};
-    return Loop1{plant, controller, observer, m_maxVoltage, m_period};
-  } else {
-    auto plant = m_armElevatorPlant.value();
-    wpi::math::LinearQuadraticRegulator<2, 1> controller{
-        plant,
-        {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01},
-        {m_rElems.empty() ? 12.0 : m_rElems[0]},
-        m_period};
-    wpi::math::KalmanFilter<2, 1, 1> observer{
-        plant,
-        {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
-         m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01},
-        {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]},
-        m_period};
-    return Loop2{plant, controller, observer, m_maxVoltage, m_period};
+std::variant<std::unique_ptr<LQRConfig::LoopBundle<1>>, std::unique_ptr<LQRConfig::LoopBundle<2>>>
+LQRConfig::GetLoop() const {
+  const auto q = GetQElems();
+  const auto model = GetStateStdDevs();
+  const wpi::util::array<double, 1> r{GetRElems()[0]};
+  const wpi::util::array<double, 1> encoder{GetMeasurementStdDevs()[0]};
+  if (m_type.value() == LQRType::FLYWHEEL) {
+    return std::make_unique<LoopBundle<1>>(m_flywheelPlant.value(), wpi::util::array<double, 1>{q[0]}, r,
+                                           wpi::util::array<double, 1>{model[0]}, encoder, m_maxVoltage, m_period);
   }
+  return std::make_unique<LoopBundle<2>>(m_armElevatorPlant.value(), wpi::util::array<double, 2>{q[0], q[1]}, r,
+                                         wpi::util::array<double, 2>{model[0], model[1]}, encoder, m_maxVoltage,
+                                         m_period);
 }
 
 }  // namespace yams::math

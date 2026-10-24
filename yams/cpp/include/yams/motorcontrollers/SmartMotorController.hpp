@@ -611,6 +611,13 @@ class SmartMotorController {
   bool IsClosedLoopControllerStopped() const;
 
   /**
+   * Start a closed-loop controller run on the SystemCore if it has been stopped, as a duty cycle or voltage command
+   * does, without resetting one that is running, and the same for each loosely coupled follower. Setting a setpoint
+   * through a mechanism calls this, so the setpoint is followed.
+   */
+  void StartClosedLoopControllerIfStopped();
+
+  /**
    * The LQR this motor controller runs, which live tuning retunes.
    *
    * @return The LQR controller, or nullptr if it isn't configured with one.

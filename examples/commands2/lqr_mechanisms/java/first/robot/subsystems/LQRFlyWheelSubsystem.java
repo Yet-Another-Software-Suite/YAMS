@@ -77,9 +77,8 @@ public class LQRFlyWheelSubsystem extends SubsystemBase {
    * @return {@link Command}
    */
   public Command spinUp(AngularVelocity speed) {
-    // The Supplier version starts the closed loop controller, which runs the LQR on the SystemCore. The coasting
-    // default command stops it.
-    return flyWheel.run(() -> speed);
+    // Starts the closed loop controller, which runs the LQR on the SystemCore, if coasting stopped it.
+    return flyWheel.run(speed);
   }
 
   /**

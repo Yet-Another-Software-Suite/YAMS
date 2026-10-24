@@ -132,31 +132,9 @@ class LQRController {
   const std::optional<LQRConfig>& GetConfig() const;
 
  private:
-  // wpi::math::LinearSystemLoop stores raw pointers to the LQR and Kalman filter passed to its constructor, and
-  // wpi::math::KalmanFilter stores a raw pointer to its plant. These bundles heap-pin all four together, the plant
-  // first, so none of the pointers dangle.
-  template <int States>
-  struct Bundle {
-    wpi::math::LinearSystem<States, 1, 1> plant;
-    wpi::math::LinearQuadraticRegulator<States, 1> controller;
-    wpi::math::KalmanFilter<States, 1, 1> observer;
-    wpi::math::LinearSystemLoop<States, 1, 1> loop;
-
-    Bundle(const wpi::math::LinearSystem<States, 1, 1>& system, const wpi::util::array<double, States>& qElems,
-           const wpi::util::array<double, 1>& rElems, const wpi::util::array<double, States>& stateStdDevs,
-           const wpi::util::array<double, 1>& measStdDevs, wpi::units::volt_t maxV, wpi::units::second_t dt)
-        : plant{system},
-          controller{plant, qElems, rElems, dt},
-          observer{plant, stateStdDevs, measStdDevs, dt},
-          loop{plant, controller, observer, maxV, dt} {}
-
-    Bundle(const Bundle&) = delete;
-    Bundle& operator=(const Bundle&) = delete;
-    Bundle(Bundle&&) = delete;
-    Bundle& operator=(Bundle&&) = delete;
-  };
-  using FlywheelBundle = Bundle<1>;
-  using ArmElevatorBundle = Bundle<2>;
+  // Each loop with the plant, LQR and Kalman filter it points to, so none of its pointers dangle.
+  using FlywheelBundle = LQRConfig::LoopBundle<1>;
+  using ArmElevatorBundle = LQRConfig::LoopBundle<2>;
 
   static std::unique_ptr<FlywheelBundle> BuildFlywheel(const LQRConfig& cfg);
   static std::unique_ptr<ArmElevatorBundle> BuildArmElevator(const LQRConfig& cfg);

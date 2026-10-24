@@ -14,24 +14,12 @@ namespace yams::math {
 // ── Private factories ────────────────────────────────────────────────────────
 
 std::unique_ptr<LQRController::FlywheelBundle> LQRController::BuildFlywheel(const LQRConfig& cfg) {
-  const auto q = cfg.GetQElems();
-  const auto model = cfg.GetStateStdDevs();
-  return std::make_unique<FlywheelBundle>(cfg.m_flywheelPlant.value(), wpi::util::array<double, 1>{q[0]},
-                                          wpi::util::array<double, 1>{cfg.GetRElems()[0]},
-                                          wpi::util::array<double, 1>{model[0]},
-                                          wpi::util::array<double, 1>{cfg.GetMeasurementStdDevs()[0]},
-                                          cfg.m_maxVoltage, cfg.m_period);
+  return std::get<std::unique_ptr<FlywheelBundle>>(cfg.GetLoop());
 }
 
 std::unique_ptr<LQRController::ArmElevatorBundle> LQRController::BuildArmElevator(
     const LQRConfig& cfg) {
-  const auto q = cfg.GetQElems();
-  const auto model = cfg.GetStateStdDevs();
-  return std::make_unique<ArmElevatorBundle>(cfg.m_armElevatorPlant.value(), wpi::util::array<double, 2>{q[0], q[1]},
-                                             wpi::util::array<double, 1>{cfg.GetRElems()[0]},
-                                             wpi::util::array<double, 2>{model[0], model[1]},
-                                             wpi::util::array<double, 1>{cfg.GetMeasurementStdDevs()[0]},
-                                             cfg.m_maxVoltage, cfg.m_period);
+  return std::get<std::unique_ptr<ArmElevatorBundle>>(cfg.GetLoop());
 }
 
 // ── Constructors ─────────────────────────────────────────────────────────────

@@ -306,6 +306,24 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Start a closed loop controller run on the SystemCore if it has been stopped, as a duty cycle or voltage command
+   * does, without resetting one that is running, and the same for each loosely coupled follower. Setting a setpoint
+   * through a mechanism calls this, so the setpoint is followed.
+   */
+  public void startClosedLoopControllerIfStopped() {
+    if (isClosedLoopControllerStopped()) {
+      // Starts the followers too.
+      startClosedLoopController();
+      return;
+    }
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.startClosedLoopControllerIfStopped();
+      }
+    });
+  }
+
+  /**
    * Stop the closed loop controller, and the loosely coupled followers' closed loop controllers. The
    * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at
    * instead.
