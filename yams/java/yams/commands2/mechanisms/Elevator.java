@@ -102,7 +102,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, does not stop.
    */
   public Command run(Distance height) {
-    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(height), subsystem).withName(subsystem.getName() + " Run Height");
+    return Commands.startRun(getMotorController()::startClosedLoopController, () -> getMotorController().setPosition(height), subsystem).withName(subsystem.getName() + " Run Height");
   }
 
   /**
@@ -112,7 +112,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    * @return {@link Command} that sets the elevator height, stops immediately.
    */
   public Command run(Supplier<Distance> height) {
-    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(height.get()), subsystem).withName(subsystem.getName() + " Run Height Supplier");
+    return Commands.startRun(getMotorController()::startClosedLoopController, () -> getMotorController().setPosition(height.get()), subsystem).withName(subsystem.getName() + " Run Height Supplier");
   }
 
   /**
@@ -127,7 +127,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command runTo(Distance height, Distance tolerance) {
     return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(height);
     }, subsystem).andThen(Commands.waitUntil(near(height, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " Run To Height");
   }
@@ -144,7 +144,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
     return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(height.get());
     }, subsystem).andThen(Commands.waitUntil(near(height.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " Run To Height Supplier");
   }

@@ -40,22 +40,22 @@ wpi::cmd::CommandPtr SmartMechanism::SetVoltage(std::function<wpi::units::volt_t
 // ---- Direct setpoint helpers ------------------------------------------------
 
 void SmartMechanism::SetMechanismVelocitySetpoint(wpi::units::turns_per_second_t velocity) {
-  m_smc->StartClosedLoopControllerIfStopped();
+  m_smc->StartClosedLoopController();
   m_smc->SetVelocity(velocity);
 }
 
 void SmartMechanism::SetMeasurementVelocitySetpoint(wpi::units::meters_per_second_t velocity) {
-  m_smc->StartClosedLoopControllerIfStopped();
+  m_smc->StartClosedLoopController();
   m_smc->SetVelocity(velocity);
 }
 
 void SmartMechanism::SetMechanismPositionSetpoint(wpi::units::turn_t angle) {
-  m_smc->StartClosedLoopControllerIfStopped();
+  m_smc->StartClosedLoopController();
   m_smc->SetPosition(angle);
 }
 
 void SmartMechanism::SetMeasurementPositionSetpoint(wpi::units::meter_t distance) {
-  m_smc->StartClosedLoopControllerIfStopped();
+  m_smc->StartClosedLoopController();
   m_smc->SetPosition(distance);
 }
 

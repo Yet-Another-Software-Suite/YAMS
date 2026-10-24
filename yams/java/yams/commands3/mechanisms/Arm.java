@@ -85,7 +85,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command setAngle(Angle angle) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(angle);
         coroutine.yield();
@@ -101,7 +101,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command setAngle(Supplier<Angle> angle) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(angle.get());
         coroutine.yield();
@@ -117,7 +117,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command run(Angle angle) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(angle);
         coroutine.yield();
@@ -133,7 +133,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command run(Supplier<Angle> angle) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(angle.get());
         coroutine.yield();
@@ -152,7 +152,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command runTo(Angle angle, Angle tolerance) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(angle);
       coroutine.waitUntil(near(angle, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));
     }).named(mechanism.getName() + " RunTo Angle");
@@ -169,7 +169,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       Angle target = angle.get();
       getMotorController().setPosition(target);
       coroutine.waitUntil(near(target, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));

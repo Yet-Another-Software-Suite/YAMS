@@ -592,7 +592,11 @@ class SmartMotorController {
    */
   virtual std::optional<wpi::units::second_t> GetVelocityMeasurementDelay() const;
 
-  /** Start the background closed-loop controller thread, and the loosely coupled followers'. */
+  /**
+   * Start the background closed-loop controller thread, and the loosely coupled followers'. Only a stopped one is
+   * started, from where the mechanism is now: one that is already running carries on as it is, so setting a setpoint
+   * every loop doesn't reset it.
+   */
   void StartClosedLoopController();
 
   /**
@@ -609,13 +613,6 @@ class SmartMotorController {
    * @return true if the SystemCore closed-loop controller is stopped.
    */
   bool IsClosedLoopControllerStopped() const;
-
-  /**
-   * Start a closed-loop controller run on the SystemCore if it has been stopped, as a duty cycle or voltage command
-   * does, without resetting one that is running, and the same for each loosely coupled follower. Setting a setpoint
-   * through a mechanism calls this, so the setpoint is followed.
-   */
-  void StartClosedLoopControllerIfStopped();
 
   /**
    * The LQR this motor controller runs, which live tuning retunes.

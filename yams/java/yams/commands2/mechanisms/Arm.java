@@ -103,7 +103,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Angle angle) {
-    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(angle), subsystem).withName(subsystem.getName() + " SetAngle");
+    return Commands.startRun(getMotorController()::startClosedLoopController, () -> getMotorController().setPosition(angle), subsystem).withName(subsystem.getName() + " SetAngle");
   }
 
   /**
@@ -113,7 +113,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    * @return {@link Command} that sets the arm to the desired angle.
    */
   public Command run(Supplier<Angle> angle) {
-    return Commands.startRun(getMotorController()::startClosedLoopControllerIfStopped, () -> getMotorController().setPosition(angle.get()), subsystem).withName(subsystem.getName() + " RunAngle Supplier");
+    return Commands.startRun(getMotorController()::startClosedLoopController, () -> getMotorController().setPosition(angle.get()), subsystem).withName(subsystem.getName() + " RunAngle Supplier");
   }
 
   /**
@@ -127,7 +127,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command runTo(Angle angle, Angle tolerance) {
     return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(angle);
     }, subsystem).andThen(Commands.waitUntil(near(angle, tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle");
   }
@@ -143,7 +143,7 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
     return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopControllerIfStopped();
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(angle.get());
     }, subsystem).andThen(Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle Supplier");
   }

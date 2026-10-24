@@ -88,18 +88,9 @@ bool SmartMotorController::IsClosedLoopControllerStopped() const {
 
 math::LQRController* SmartMotorController::GetLQRController() { return m_lqr ? &*m_lqr : nullptr; }
 
-void SmartMotorController::StartClosedLoopControllerIfStopped() {
-  if (IsClosedLoopControllerStopped()) {
-    // Starts the followers too.
-    StartClosedLoopController();
-    return;
-  }
-  for (auto* f : m_looseFollowers) f->StartClosedLoopControllerIfStopped();
-}
-
 void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
-      m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+      m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
     if (m_pid) m_pid->Reset();
     m_lastClosedLoopMechanismPosition.reset();
     ResetProfileStates();

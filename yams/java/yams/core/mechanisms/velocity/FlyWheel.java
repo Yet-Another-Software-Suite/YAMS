@@ -161,7 +161,7 @@ public class FlyWheel extends SmartVelocityMechanism {
    */
   @Override
   public void setMeasurementVelocitySetpoint(LinearVelocity speed) {
-    m_smc.startClosedLoopControllerIfStopped();
+    m_smc.startClosedLoopController();
     m_smc.setVelocity(m_config.getAngularVelocity(speed));
   }
 

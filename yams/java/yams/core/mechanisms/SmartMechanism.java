@@ -87,7 +87,7 @@ public abstract class SmartMechanism {
    * @param velocity {@link LinearVelocity} to go to.
    */
   public void setMeasurementVelocitySetpoint(LinearVelocity velocity) {
-    m_smc.startClosedLoopControllerIfStopped();
+    m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
 
@@ -97,7 +97,7 @@ public abstract class SmartMechanism {
    * @param velocity {@link AngularVelocity} to go to.
    */
   public void setMechanismVelocitySetpoint(AngularVelocity velocity) {
-    m_smc.startClosedLoopControllerIfStopped();
+    m_smc.startClosedLoopController();
     m_smc.setVelocity(velocity);
   }
 
@@ -107,7 +107,7 @@ public abstract class SmartMechanism {
    * @param distance {@link Distance} to go to.
    */
   public void setMeasurementPositionSetpoint(Distance distance) {
-    m_smc.startClosedLoopControllerIfStopped();
+    m_smc.startClosedLoopController();
     m_smc.setPosition(distance);
   }
 
@@ -117,7 +117,7 @@ public abstract class SmartMechanism {
    * @param angle {@link Angle} to go to.
    */
   public void setMechanismPositionSetpoint(Angle angle) {
-    m_smc.startClosedLoopControllerIfStopped();
+    m_smc.startClosedLoopController();
     m_smc.setPosition(angle);
   }
 
