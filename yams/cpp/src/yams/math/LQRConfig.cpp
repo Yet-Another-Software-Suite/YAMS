@@ -3,7 +3,9 @@
 
 #include "yams/math/LQRConfig.hpp"
 
+#include <cmath>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <wpi/math/linalg/EigenCore.hpp>
 #include <wpi/math/system/Models.hpp>
@@ -73,6 +75,51 @@ LQRConfig& LQRConfig::WithMaxVoltage(wpi::units::volt_t maxVoltage) {
 }
 LQRConfig& LQRConfig::WithPeriod(wpi::units::second_t period) {
   m_period = period;
+  return *this;
+}
+
+std::vector<double> LQRConfig::GetQElems() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_qElems.empty() ? 3.0 : m_qElems[0]};
+  return {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01};
+}
+std::vector<double> LQRConfig::GetRElems() const { return {m_rElems.empty() ? 12.0 : m_rElems[0]}; }
+std::vector<double> LQRConfig::GetStateStdDevs() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]};
+  return {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
+          m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01};
+}
+std::vector<double> LQRConfig::GetMeasurementStdDevs() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]};
+  return {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]};
+}
+
+std::vector<double> LQRConfig::Checked(const std::vector<double>& values, size_t size, const char* name) {
+  if (values.size() != size) {
+    throw std::invalid_argument("Expected " + std::to_string(size) + " " + name + " for this LQR, got " +
+                                std::to_string(values.size()));
+  }
+  for (double v : values) {
+    if (!(v > 0) || !std::isfinite(v)) {
+      throw std::invalid_argument(std::string{"The "} + name + " must be above 0, got " + std::to_string(v));
+    }
+  }
+  return values;
+}
+
+LQRConfig& LQRConfig::WithQElems(const std::vector<double>& qElems) {
+  m_qElems = Checked(qElems, GetQElems().size(), "state error tolerances");
+  return *this;
+}
+LQRConfig& LQRConfig::WithRElems(const std::vector<double>& rElems) {
+  m_rElems = Checked(rElems, 1, "control effort tolerances");
+  return *this;
+}
+LQRConfig& LQRConfig::WithStateStdDevs(const std::vector<double>& stateStdDevs) {
+  m_stateStdDevs = Checked(stateStdDevs, GetStateStdDevs().size(), "model standard deviations");
+  return *this;
+}
+LQRConfig& LQRConfig::WithMeasurementStdDevs(const std::vector<double>& measStdDevs) {
+  m_measStdDevs = Checked(measStdDevs, 1, "encoder standard deviations");
   return *this;
 }
 

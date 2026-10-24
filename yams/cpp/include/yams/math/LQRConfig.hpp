@@ -154,6 +154,72 @@ class LQRConfig {
   wpi::units::volt_t GetMaxVoltage() const;
 
   /**
+   * Get the state error tolerances in use, in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for
+   * an elevator. Unset tolerances are the defaults the loop is built with.
+   *
+   * @return One tolerance per modeled state.
+   */
+  std::vector<double> GetQElems() const;
+
+  /**
+   * Get the control effort (voltage) tolerances in use, in volts.
+   *
+   * @return One tolerance per input.
+   */
+  std::vector<double> GetRElems() const;
+
+  /**
+   * Get the model's standard deviations in use, in the SI units of GetQElems().
+   *
+   * @return One standard deviation per modeled state.
+   */
+  std::vector<double> GetStateStdDevs() const;
+
+  /**
+   * Get the encoder's standard deviations in use, in SI units: rad/s for a flywheel, rad for an arm, m for an
+   * elevator.
+   *
+   * @return One standard deviation per measurement.
+   */
+  std::vector<double> GetMeasurementStdDevs() const;
+
+  /**
+   * Set the state error tolerances, as when live tuning them, checking them.
+   *
+   * @param qElems One tolerance per modeled state, each above 0, in the SI units of GetQElems().
+   * @return *this for chaining.
+   * @throws std::invalid_argument if the number of values doesn't match the mechanism type, or one isn't above 0.
+   */
+  LQRConfig& WithQElems(const std::vector<double>& qElems);
+
+  /**
+   * Set the control effort (voltage) tolerance, as when live tuning it, checking it.
+   *
+   * @param rElems One tolerance, above 0, in volts.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if there isn't one value, or it isn't above 0.
+   */
+  LQRConfig& WithRElems(const std::vector<double>& rElems);
+
+  /**
+   * Set the model's standard deviations, as when live tuning them, checking them.
+   *
+   * @param stateStdDevs One standard deviation per modeled state, each above 0.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if the number of values doesn't match the mechanism type, or one isn't above 0.
+   */
+  LQRConfig& WithStateStdDevs(const std::vector<double>& stateStdDevs);
+
+  /**
+   * Set the encoder's standard deviation, as when live tuning it, checking it.
+   *
+   * @param measStdDevs One standard deviation, above 0.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if there isn't one value, or it isn't above 0.
+   */
+  LQRConfig& WithMeasurementStdDevs(const std::vector<double>& measStdDevs);
+
+  /**
    * Build and return the linear plant model.
    *
    * @return Variant holding a 1-state system (flywheel) or 2-state system (arm/elevator).
@@ -170,6 +236,9 @@ class LQRConfig {
 
  private:
   friend class LQRController;
+
+  /** The values, checked against the count the mechanism type needs and that each is above 0. */
+  static std::vector<double> Checked(const std::vector<double>& values, size_t size, const char* name);
 
   std::optional<LQRType> m_type;
   std::optional<wpi::math::LinearSystem<1, 1, 1>> m_flywheelPlant;

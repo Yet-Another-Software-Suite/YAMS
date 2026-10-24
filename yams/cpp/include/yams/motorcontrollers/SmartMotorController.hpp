@@ -601,6 +601,22 @@ class SmartMotorController {
    */
   void StopClosedLoopController();
 
+  /**
+   * Whether a closed-loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
+   * stopped, as a duty cycle or voltage command does. False when the closed-loop controller runs on the motor
+   * controller.
+   *
+   * @return true if the SystemCore closed-loop controller is stopped.
+   */
+  bool IsClosedLoopControllerStopped() const;
+
+  /**
+   * The LQR this motor controller runs, which live tuning retunes.
+   *
+   * @return The LQR controller, or nullptr if it isn't configured with one.
+   */
+  math::LQRController* GetLQRController();
+
   /** Run one iteration of the closed-loop controller on the calling thread. */
   void IterateClosedLoopController();
 

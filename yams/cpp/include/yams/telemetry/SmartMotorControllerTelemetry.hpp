@@ -47,6 +47,14 @@ enum class DoubleTelemetryField {
   kP,                                 ///< Proportional feedback gain kP (tunable).
   kI,                                 ///< Integral feedback gain kI (tunable).
   kD,                                 ///< Derivative feedback gain kD (tunable).
+  LQRQelmsPosition,    ///< LQR position error tolerance, degrees or meters. Arm or elevator LQR only (tunable).
+  LQRQelmsVelocity,    ///< LQR velocity error tolerance, RPM or m/s (tunable).
+  LQRRelms,            ///< LQR control effort (voltage) tolerance, V (tunable).
+  LQRModelPosition,    ///< LQR model position std dev, degrees or meters. Arm or elevator LQR only (tunable).
+  LQRModelVelocity,    ///< LQR model velocity std dev, RPM or m/s (tunable).
+  LQREncoderPosition,  ///< LQR encoder position std dev, degrees or meters. Arm or elevator LQR only (tunable).
+  LQREncoderVelocity,  ///< LQR encoder velocity std dev, RPM. Flywheel LQR only (tunable).
+  LQRMaxVoltage,       ///< LQR maximum output voltage, V (tunable).
   TunableSetpointPosition,            ///< Live-tunable position setpoint degrees or meters.
   SetpointPosition,                   ///< Read-only position setpoint rotations or meters.
   TunableSetpointVelocity,            ///< Live-tunable velocity setpoint RPM or m/s.
@@ -592,6 +600,7 @@ class SmartMotorControllerTelemetry {
   void Close();
 
  private:
+
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
 

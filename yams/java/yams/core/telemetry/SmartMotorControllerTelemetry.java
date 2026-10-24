@@ -199,8 +199,6 @@ public class SmartMotorControllerTelemetry {
       throw new SmartMotorControllerConfigurationException("Live tuning does not work in OPEN_LOOP", "Cannot apply setpoints for Live Tuning.", ".withControlMode(ControlMode.CLOSED_LOOP) instead of " + ".withControlMode(ControlMode.OPEN_LOOP)");
     }
     boolean closedloop = true;
-    // The LQR is rebuilt once, after every changed LQR value is read.
-    boolean lqrChanged = false;
     for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : boolFields.entrySet()) {
       BooleanTelemetry<BooleanTelemetryField> bt = entry.getValue();
       boolean tunable = bt.tunable();
@@ -354,43 +352,34 @@ public class SmartMotorControllerTelemetry {
             smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.empty(), Optional.of(Volts.of(dt.get())));
           }
           case LQRQelmsPosition, LQRQelmsVelocity, LQRRelms, LQRModelPosition, LQRModelVelocity, LQREncoderPosition,
-               LQREncoderVelocity, LQRMaxVoltage -> lqrChanged = true;
+               LQREncoderVelocity, LQRMaxVoltage -> {
+            // Rebuilt from every LQR field, keeping the LQR's state estimate so its output doesn't jump. A value the LQR
+            // can't use, such as a tolerance of 0, leaves it as it was, with a warning.
+            cfg.getLQRClosedLoopController().ifPresent(lqr -> lqr.getConfig().ifPresent(lqrConfig -> {
+              LQRType type = lqrConfig.getType();
+              try {
+                if (type == LQRType.FLYWHEEL) {
+                  lqrConfig.withQelms(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
+                           .withModelStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
+                           .withEncoderStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).get()));
+                } else {
+                  lqrConfig.withQelms(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).get()),
+                                      LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
+                           .withModelStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRModelPosition).get()),
+                                             LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
+                           .withEncoderStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQREncoderPosition).get()));
+                }
+                lqrConfig.withRelms(Volts.of(doubleFields.get(DoubleTelemetryField.LQRRelms).get()))
+                         .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).get()));
+                lqr.retune(lqrConfig);
+              } catch (RuntimeException e) {
+                DriverStationBackend.reportWarning("[WARNING] " + smartMotorController.getName() + " LQR not retuned: " + e.getMessage(), false);
+              }
+            }));
+          }
         }
       }
     }
-    if (lqrChanged) {
-      retuneLQR(smartMotorController);
-    }
-  }
-
-  /**
-   * Rebuild the LQR from the LQR fields, keeping its state estimate so the output doesn't jump. Values the LQR can't
-   * use, such as a tolerance of 0, leave the LQR as it was, with a warning.
-   *
-   * @param smartMotorController {@link SmartMotorController} being tuned.
-   */
-  private void retuneLQR(SmartMotorController smartMotorController) {
-    smartMotorController.getConfig().getLQRClosedLoopController().ifPresent(lqr -> lqr.getConfig().ifPresent(lqrConfig -> {
-      LQRType type = lqrConfig.getType();
-      try {
-        if (type == LQRType.FLYWHEEL) {
-          lqrConfig.withQelms(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
-                   .withModelStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
-                   .withEncoderStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).get()));
-        } else {
-          lqrConfig.withQelms(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).get()),
-                              LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
-                   .withModelStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRModelPosition).get()),
-                                     LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
-                   .withEncoderStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQREncoderPosition).get()));
-        }
-        lqrConfig.withRelms(Volts.of(doubleFields.get(DoubleTelemetryField.LQRRelms).get()))
-                 .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).get()));
-        lqr.retune(lqrConfig);
-      } catch (RuntimeException e) {
-        DriverStationBackend.reportWarning("[WARNING] " + smartMotorController.getName() + " LQR not retuned: " + e.getMessage(), false);
-      }
-    }));
   }
 
   /**

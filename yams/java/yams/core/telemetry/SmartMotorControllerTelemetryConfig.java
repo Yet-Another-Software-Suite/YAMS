@@ -63,18 +63,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * }</pre>
  */
 public class SmartMotorControllerTelemetryConfig {
-  /** The LQR's tunable values, which replace kP, kI and kD on a motor controller configured with an LQR. */
-  private static final DoubleTelemetryField[] LQR_FIELDS = {
-      DoubleTelemetryField.LQRQelmsPosition,
-      DoubleTelemetryField.LQRQelmsVelocity,
-      DoubleTelemetryField.LQRRelms,
-      DoubleTelemetryField.LQRModelPosition,
-      DoubleTelemetryField.LQRModelVelocity,
-      DoubleTelemetryField.LQREncoderPosition,
-      DoubleTelemetryField.LQREncoderVelocity,
-      DoubleTelemetryField.LQRMaxVoltage,
-  };
-
   /** DataLog entry name */
   private Optional<String> dataLogName = Optional.empty();
   /** Enable telemetry over network tables. */
@@ -161,9 +149,14 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.kI).enable();
         doubleFields.get(DoubleTelemetryField.kD).enable();
         // Only kept for a motor controller configured with an LQR, see getDoubleFields.
-        for (DoubleTelemetryField field : LQR_FIELDS) {
-          doubleFields.get(field).enable();
-        }
+        doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).enable();
+        doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.LQRRelms).enable();
+        doubleFields.get(DoubleTelemetryField.LQRModelPosition).enable();
+        doubleFields.get(DoubleTelemetryField.LQRModelVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.LQREncoderPosition).enable();
+        doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).enable();
         doubleFields.get(DoubleTelemetryField.SetpointForce).enable();
         doubleFields.get(DoubleTelemetryField.ClosedLoopPeriod).enable();
         doubleFields.get(DoubleTelemetryField.VelocityMeasurementDelay).enable();
@@ -313,9 +306,14 @@ public class SmartMotorControllerTelemetryConfig {
     // An LQR replaces kP, kI and kD with its own values. Without one, its fields never appear.
     var lqr = config.getLQRClosedLoopController().flatMap(LQRController::getConfig);
     if (lqr.isEmpty()) {
-      for (DoubleTelemetryField field : LQR_FIELDS) {
-        doubleFields.get(field).disable();
-      }
+      doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).disable();
+      doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).disable();
+      doubleFields.get(DoubleTelemetryField.LQRRelms).disable();
+      doubleFields.get(DoubleTelemetryField.LQRModelPosition).disable();
+      doubleFields.get(DoubleTelemetryField.LQRModelVelocity).disable();
+      doubleFields.get(DoubleTelemetryField.LQREncoderPosition).disable();
+      doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).disable();
+      doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).disable();
     }
     lqr.ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kP).disable();
