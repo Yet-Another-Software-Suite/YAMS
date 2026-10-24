@@ -173,9 +173,13 @@ TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMo
   m_config = config;
   if (wpi::RobotBase::IsSimulation()) {
     // The simulated Talon FX models a Kraken X60 unless told otherwise. A Kraken X44 runs faster than an X60 can,
-    // and simulated as one, its current limits hold the output near its back-EMF, so it can't slow down. A Kraken X44
-    // has a free speed of about 7,500 RPM or more; a Kraken X60 6,000 RPM, or a Falcon 500 6,380 RPM.
-    const bool krakenX44 = wpi::units::revolutions_per_minute_t{dcMotor.freeSpeed}.value() > 7000;
+    // and simulated as one, its current limits hold the output near its back-EMF, so it can't slow down.
+    bool krakenX44 = false;
+    for (int i = 1; i <= 4; i++) {
+      if (IsMotor(dcMotor, wpi::math::DCMotor::KrakenX44(i)) || IsMotor(dcMotor, wpi::math::DCMotor::KrakenX44FOC(i))) {
+        krakenX44 = true;
+      }
+    }
     m_talon->GetSimState().SetMotorType(krakenX44 ? ctre::phoenix6::sim::TalonFXSimState::MotorType::KrakenX44
                                                   : ctre::phoenix6::sim::TalonFXSimState::MotorType::KrakenX60);
   }
