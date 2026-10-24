@@ -71,7 +71,8 @@ import yams.core.math.LQRConfig.LQRType;
 public class LQRController {
   private Optional<LQRConfig>       m_config = Optional.empty();
   private LQRType                   m_type;
-  private LinearSystemLoop<?, ?, ?> m_loop;
+  /** Read by the closed loop controller's thread, so a retune swaps in a whole new loop at once. */
+  private volatile LinearSystemLoop<?, ?, ?> m_loop;
   private Time                      m_period;
 
   /**
@@ -115,6 +116,29 @@ public class LQRController {
     m_type = config.getType();
     m_loop = config.getLoop();
     m_period = config.getPeriod();
+  }
+
+  /**
+   * Rebuild the loop from the config after its values changed, as when live tuning them, keeping the state estimate:
+   * the new loop starts where the old one was, so the output doesn't jump. Safe to call while the closed loop
+   * controller runs.
+   *
+   * @param config {@link LQRConfig} with the new values, of the same {@link LQRType}.
+   * @throws IllegalArgumentException if the config is for a different {@link LQRType}.
+   */
+  @SuppressWarnings("unchecked")
+  public void retune(LQRConfig config) {
+    if (config.getType() != m_type) {
+      throw new IllegalArgumentException("Cannot retune a " + m_type + " LQR with a " + config.getType() + " config");
+    }
+    LinearSystemLoop<?, ?, ?> next = config.getLoop();
+    switch (m_type) {
+      case FLYWHEEL -> ((LinearSystemLoop<N1, N1, N1>) next).reset(((LinearSystemLoop<N1, N1, N1>) m_loop).getXHat());
+      case ARM, ELEVATOR -> ((LinearSystemLoop<N2, N1, N1>) next).reset(((LinearSystemLoop<N2, N1, N1>) m_loop).getXHat());
+    }
+    m_config = Optional.of(config);
+    m_period = config.getPeriod();
+    m_loop = next;
   }
 
   /**

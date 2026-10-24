@@ -295,6 +295,17 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Whether a closed loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
+   * stopped, as a duty cycle or voltage command does. False when the closed loop controller runs on the motor
+   * controller.
+   *
+   * @return True if the SystemCore closed loop controller is stopped.
+   */
+  public boolean isClosedLoopControllerStopped() {
+    return m_closedLoopControllerThread != null && !m_closedLoopControllerRunning;
+  }
+
+  /**
    * Stop the closed loop controller, and the loosely coupled followers' closed loop controllers. The
    * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at
    * instead.

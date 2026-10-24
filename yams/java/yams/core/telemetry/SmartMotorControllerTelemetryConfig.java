@@ -9,11 +9,14 @@ import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import yams.core.math.LQRConfig.LQRType;
+import yams.core.math.LQRController;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
@@ -60,6 +63,18 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * }</pre>
  */
 public class SmartMotorControllerTelemetryConfig {
+  /** The LQR's tunable values, which replace kP, kI and kD on a motor controller configured with an LQR. */
+  private static final DoubleTelemetryField[] LQR_FIELDS = {
+      DoubleTelemetryField.LQRQelmsPosition,
+      DoubleTelemetryField.LQRQelmsVelocity,
+      DoubleTelemetryField.LQRRelms,
+      DoubleTelemetryField.LQRModelPosition,
+      DoubleTelemetryField.LQRModelVelocity,
+      DoubleTelemetryField.LQREncoderPosition,
+      DoubleTelemetryField.LQREncoderVelocity,
+      DoubleTelemetryField.LQRMaxVoltage,
+  };
+
   /** DataLog entry name */
   private Optional<String> dataLogName = Optional.empty();
   /** Enable telemetry over network tables. */
@@ -145,6 +160,10 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.kP).enable();
         doubleFields.get(DoubleTelemetryField.kI).enable();
         doubleFields.get(DoubleTelemetryField.kD).enable();
+        // Only kept for a motor controller configured with an LQR, see getDoubleFields.
+        for (DoubleTelemetryField field : LQR_FIELDS) {
+          doubleFields.get(field).enable();
+        }
         doubleFields.get(DoubleTelemetryField.SetpointForce).enable();
         doubleFields.get(DoubleTelemetryField.ClosedLoopPeriod).enable();
         doubleFields.get(DoubleTelemetryField.VelocityMeasurementDelay).enable();
@@ -291,10 +310,40 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.ExponentialProfileKV).setDefaultValue(defaultkV);
       doubleFields.get(DoubleTelemetryField.ExponentialProfileMaxInput).setDefaultValue(defaultMaxInput);
     });
-    config.getLQRClosedLoopController().ifPresent(e -> {
+    // An LQR replaces kP, kI and kD with its own values. Without one, its fields never appear.
+    var lqr = config.getLQRClosedLoopController().flatMap(LQRController::getConfig);
+    if (lqr.isEmpty()) {
+      for (DoubleTelemetryField field : LQR_FIELDS) {
+        doubleFields.get(field).disable();
+      }
+    }
+    lqr.ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kP).disable();
       doubleFields.get(DoubleTelemetryField.kI).disable();
       doubleFields.get(DoubleTelemetryField.kD).disable();
+      LQRType type = e.getType();
+      double[] qelms = e.getQelms();
+      double[] model = e.getModelStdDevs();
+      double[] encoder = e.getEncoderStdDevs();
+      doubleFields.get(DoubleTelemetryField.LQRRelms).setDefaultValue(e.getRelms().in(Volts));
+      doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).setDefaultValue(e.getMaxVoltage().in(Volts));
+      if (type == LQRType.FLYWHEEL) {
+        // One modeled state, velocity, measured by the encoder.
+        doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).disable();
+        doubleFields.get(DoubleTelemetryField.LQRModelPosition).disable();
+        doubleFields.get(DoubleTelemetryField.LQREncoderPosition).disable();
+        doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).setDefaultValue(LQRUnits.fromSI(type, false, qelms[0]));
+        doubleFields.get(DoubleTelemetryField.LQRModelVelocity).setDefaultValue(LQRUnits.fromSI(type, false, model[0]));
+        doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).setDefaultValue(LQRUnits.fromSI(type, false, encoder[0]));
+      } else {
+        // Two modeled states, position and velocity, with the encoder measuring position.
+        doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).disable();
+        doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).setDefaultValue(LQRUnits.fromSI(type, true, qelms[0]));
+        doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).setDefaultValue(LQRUnits.fromSI(type, false, qelms[1]));
+        doubleFields.get(DoubleTelemetryField.LQRModelPosition).setDefaultValue(LQRUnits.fromSI(type, true, model[0]));
+        doubleFields.get(DoubleTelemetryField.LQRModelVelocity).setDefaultValue(LQRUnits.fromSI(type, false, model[1]));
+        doubleFields.get(DoubleTelemetryField.LQREncoderPosition).setDefaultValue(LQRUnits.fromSI(type, true, encoder[0]));
+      }
     });
     config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();
