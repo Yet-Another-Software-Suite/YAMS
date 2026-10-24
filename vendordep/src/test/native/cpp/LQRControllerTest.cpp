@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cmath>
+#include <memory>
 #include <variant>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/units/angle.hpp>
@@ -88,15 +89,15 @@ TEST_CASE("LQRConfig.WithMaxVoltageStored", "[LQRConfig]") {
 // ── LQRConfig: loop variant type ─────────────────────────────────────────────
 
 TEST_CASE("LQRConfig.FlywheelGetLoopIsLoop1", "[LQRConfig]") {
-  CHECK(std::holds_alternative<LQRConfig::Loop1>(FlywheelConfig().GetLoop()));
+  CHECK(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<1>>>(FlywheelConfig().GetLoop()));
 }
 
 TEST_CASE("LQRConfig.ArmGetLoopIsLoop2", "[LQRConfig]") {
-  CHECK(std::holds_alternative<LQRConfig::Loop2>(ArmConfig().GetLoop()));
+  CHECK(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<2>>>(ArmConfig().GetLoop()));
 }
 
 TEST_CASE("LQRConfig.ElevatorGetLoopIsLoop2", "[LQRConfig]") {
-  CHECK(std::holds_alternative<LQRConfig::Loop2>(ElevatorConfig().GetLoop()));
+  CHECK(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<2>>>(ElevatorConfig().GetLoop()));
 }
 
 // ── LQRController: type and config accessors ─────────────────────────────────
