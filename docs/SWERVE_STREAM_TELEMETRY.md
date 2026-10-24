@@ -1,4 +1,4 @@
-# SwerveInputStream Telemetry and Live Tuning
+# SwerveInputStream telemetry and live tuning
 
 This document describes the telemetry and live tuning features for `SwerveInputStream`.
 
@@ -25,11 +25,11 @@ Call `withTelemetry` last, after the rest of the configuration, so the dashboard
 A `clone()` of a stream has no telemetry. Calling `withTelemetry` again replaces the stream's telemetry, and
 `getTelemetry().get().close()` stops publishing it, e.g. when replacing a stream with another of the same name.
 
-## Java Usage
+## Java usage
 
 The API is the same in Commands v2 (`yams.commands2.swerve.SwerveInputStream`) and Commands v3
-(`yams.commands3.swerve.SwerveInputStream`). The `Live Tuning` command is a commands v2 `Command` in v2, and a
-commands v3 `Command` published through `CommandTunable` in v3. Neither requires a subsystem or mechanism, so it
+(`yams.commands3.swerve.SwerveInputStream`). The `Live Tuning` command is a Commands v2 `Command` in v2, and a
+Commands v3 `Command` published through `CommandTunable` in v3. Neither requires a subsystem or mechanism, so it
 does not interrupt the command driving with the stream.
 
 ### Commands v2
@@ -59,12 +59,12 @@ robot.drive.setInputStream(SwerveInputStream.of(robot.drive.getSwerveDrive(),
 robot.drive.setDefaultCommand(robot.drive.driveInputStream());
 ```
 
-## C++ Usage
+## C++ usage
 
 C++ has the same API: `WithTelemetry(name, verbosity)` and `GetTelemetry()`, which returns a
 `std::optional<std::reference_wrapper<SwerveInputStreamTelemetry<N>>>`. The verbosities are
 `SwerveDriveConfig::TelemetryVerbosity`: `LOW`, `MEDIUM` (Java's `MID`) and `HIGH`, and `NONE` turns telemetry off.
-The `Live Tuning` command is a commands v2 `Command`, from `GetLiveTuningCommand()`.
+The `Live Tuning` command is a Commands v2 `Command`, from `GetLiveTuningCommand()`.
 
 The stream is a value type, so ownership works differently from Java:
 
@@ -95,9 +95,9 @@ void Periodic() override {
 }
 ```
 
-## NetworkTables Topics
+## NetworkTables topics
 
-### State (Read-Only)
+### State (read-only)
 
 Published to `/SwerveInputStream/<name>/`. `mode` at every verbosity; the configuration values below at `MID`
 (`MEDIUM` in C++) and `HIGH`.
@@ -109,7 +109,7 @@ Published to `/SwerveInputStream/<name>/`. `mode` at every verbosity; the config
 The output velocities are not published: reading them would call `get()` a second time each loop, which
 runs the heading controller twice. Log the speeds you send to the drive instead.
 
-### Live Tuning
+### Live tuning
 
 At `HIGH`, published to `/Tuning/SwerveInputStream/<name>/`, with the `Live Tuning` command in
 `/Tuning/SwerveInputStream/<name>/Live Tuning`. The same topics are published read-only under
@@ -127,9 +127,9 @@ At `HIGH`, published to `/Tuning/SwerveInputStream/<name>/`, with the `Live Tuni
 | `allianceRelative` | boolean | - | Enable alliance-relative translation flip |
 | `robotRelative` | boolean | - | Enable robot-relative output |
 
-## Dashboard Integration
+## Dashboard integration
 
-### Shuffleboard Example
+### Shuffleboard example
 
 For a stream with `withTelemetry("Driver", TelemetryVerbosity.HIGH)`, create a tab and add widgets:
 
@@ -141,13 +141,13 @@ For a stream with `withTelemetry("Driver", TelemetryVerbosity.HIGH)`, create a t
 
 3. **Slider widgets** for tuning, from `Tuning/SwerveInputStream/Driver`:
    - Deadband: slider 0.0 to 0.1
-   - Translation Scale: slider 0.1 to 1.0
-   - Rotation Scale: slider 0.1 to 1.0
-   - Max Linear Velocity: slider 0 to 10 m/s
-   - Max Angular Velocity: slider 0 to 2π rad/s
+   - Translation scale: slider 0.1 to 1.0
+   - Rotation scale: slider 0.1 to 1.0
+   - Max linear velocity: slider 0.1 to 10 m/s
+   - Max angular velocity: slider 0.1 to 2π rad/s
 
 4. **Toggle widgets** for features, from `Tuning/SwerveInputStream/Driver`:
-   - Translation Cube, Rotation Cube, Alliance Relative, Robot Relative
+   - Translation cube, rotation cube, alliance relative, robot relative
 
 Example JSON for Shuffleboard:
 ```json
@@ -160,8 +160,8 @@ Example JSON for Shuffleboard:
     "deadband": {"class": "Slider", "position": [0, 1], "min": 0.0, "max": 0.1},
     "translationScale": {"class": "Slider", "position": [1, 1], "min": 0.1, "max": 1.0},
     "rotationScale": {"class": "Slider", "position": [2, 1], "min": 0.1, "max": 1.0},
-    "maxLinearVelocity": {"class": "Slider", "position": [0, 2], "min": 0.0, "max": 10.0},
-    "maxAngularVelocity": {"class": "Slider", "position": [1, 2], "min": 0.0, "max": 6.283},
+    "maxLinearVelocity": {"class": "Slider", "position": [0, 2], "min": 0.1, "max": 10.0},
+    "maxAngularVelocity": {"class": "Slider", "position": [1, 2], "min": 0.1, "max": 6.283},
     "translationCube": {"class": "Toggle Button", "position": [0, 3]},
     "rotationCube": {"class": "Toggle Button", "position": [1, 3]},
     "allianceRelative": {"class": "Toggle Button", "position": [2, 3]},
@@ -170,33 +170,33 @@ Example JSON for Shuffleboard:
 }
 ```
 
-## Tuning Workflow
+## Tuning workflow
 
-### 1. Measure Baseline Performance
-- Deploy with telemetry enabled
-- Record current control parameters
-- Test vehicle responsiveness
+### 1. Measure a baseline
+- Deploy with telemetry at `TelemetryVerbosity.HIGH`
+- Note the values the stream starts with
+- Drive the robot and note how it responds
 
-### 2. Adjust Parameters Live
-- Dashboard updates take effect immediately in the next robot loop
+### 2. Adjust values live
+- Start the `Live Tuning` command, then change values on the dashboard. They apply on the next loop while it runs
 - No need to rebuild or redeploy
 
-### 3. Fine-Tune
+### 3. Fine-tune
 - **Deadband**: Increase if the joystick is jittery at rest
-- **Translation Scale**: Reduce for slower, more precise movements
-- **Rotation Scale**: Adjust for comfortable rotation feel
+- **Translation scale**: Reduce for slower, more precise movements
+- **Rotation scale**: Adjust for comfortable rotation feel
 - **Cube modes**: Enable for progressive control (sensitive at small inputs, full power at full input)
 
-### 4. Save Parameters
+### 4. Save the values
 - Once tuned, copy the final values from NetworkTables into your robot code
 - Commit to version control
 
-## Best Practices
+## Best practices
 
 1. **Publish during development only**: use `TelemetryVerbosity.LOW` in competition code. In Java,
    `getTelemetry().get().close()` stops publishing; in C++, `WithTelemetry(name, TelemetryVerbosity::NONE)` does
 2. **Use descriptive names**: Give each SwerveInputStream a clear name (e.g., "drive", "intake_aiming")
-3. **Monitor all parameters**: Check mode, velocities, and active features during testing
+3. **Watch the mode and features**: check the mode and which features are on during testing, and log the speeds you send to the drive, since the stream doesn't publish them
 4. **Document final values**: Keep notes on what worked best for your chassis and driver
 
 ## Troubleshooting
@@ -205,12 +205,12 @@ Example JSON for Shuffleboard:
 |-------|----------|
 | Telemetry not appearing | Check the stream was given `withTelemetry` and is read with `get()` every loop |
 | Changes don't apply | Start the `Live Tuning` command; it only exists at `TelemetryVerbosity.HIGH` |
-| A dashboard value snaps back | The value is outside the allowed range in the Live Tuning table |
+| A dashboard value snaps back | Enter a value inside its range in the [live tuning table](#live-tuning) |
 | Live tuning causes instability | Use slider ranges that respect your drivetrain limits |
-| High NetworkTables latency | Reduce update frequency or disable verbose logging on the dashboard |
+| High NetworkTables latency | Lower the stream's verbosity to `LOW`, or stop its telemetry as in [best practices](#best-practices) |
 
-## See Also
+## See also
 
-- `SwerveInputStream` documentation
-- NetworkTables integration guides
-- Dashboard software (Shuffleboard, AdvantageScope)
+- [Swerve input stream](https://yams.yassrobotics.com/documentation/details/swerve-input-stream) in the YAMS documentation
+- [`SwerveInputStream` Java API reference](https://yams.yassrobotics.com/api-reference/java-reference/swerve/swerve-input-stream)
+- [`SwerveInputStream` C++ API reference](https://yams.yassrobotics.com/api-reference/c++-reference/swerve/swerve-input-stream)
