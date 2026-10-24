@@ -129,46 +129,29 @@ At `HIGH`, published to `/Tuning/SwerveInputStream/<name>/`, with the `Live Tuni
 
 ## Dashboard integration
 
-### Shuffleboard example
+### Elastic example
 
-For a stream with `withTelemetry("Driver", TelemetryVerbosity.HIGH)`, create a tab and add widgets:
+For a stream with `withTelemetry("Driver", TelemetryVerbosity.HIGH)`, open a tab in
+[Elastic](https://frc-elastic.gitbook.io/docs) and drag these keys from the NetworkTables tree onto it:
 
-1. **Display widgets** for state monitoring, from `SwerveInputStream/Driver`:
-   - Mode indicator (String)
+1. **The drive mode**, `SwerveInputStream/Driver/mode`, as a text display.
 
-2. **Live Tuning toggle**, from `Tuning/SwerveInputStream/Driver/Live Tuning`. Edits below only apply while it
-   runs.
+2. **The `Live Tuning` command**, `Tuning/SwerveInputStream/Driver/Live Tuning`. Press its button to start it.
+   Edits below only apply while it runs.
 
-3. **Slider widgets** for tuning, from `Tuning/SwerveInputStream/Driver`:
-   - Deadband: slider 0.0 to 0.1
-   - Translation scale: slider 0.1 to 1.0
-   - Rotation scale: slider 0.1 to 1.0
-   - Max linear velocity: slider 0.1 to 10 m/s
-   - Max angular velocity: slider 0.1 to 2π rad/s
+3. **The numbers to tune**, from `Tuning/SwerveInputStream/Driver`, as number sliders. Set each slider's
+   range in its properties:
+   - `deadband`: 0.0 to 0.1
+   - `translationScale`: 0.1 to 1.0
+   - `rotationScale`: 0.1 to 1.0
+   - `maxLinearVelocity`: 0.1 to 10 m/s
+   - `maxAngularVelocity`: 0.1 to 2π (6.283) rad/s
 
-4. **Toggle widgets** for features, from `Tuning/SwerveInputStream/Driver`:
-   - Translation cube, rotation cube, alliance relative, robot relative
+4. **The features**, from `Tuning/SwerveInputStream/Driver`, as toggle switches:
+   - `translationCube`, `rotationCube`, `allianceRelative` and `robotRelative`
 
-Example JSON for Shuffleboard:
-```json
-{
-  "SwerveInputStream/Driver": {
-    "mode": {"class": "String", "position": [0, 0]}
-  },
-  "Tuning/SwerveInputStream/Driver": {
-    "Live Tuning": {"class": "Command", "position": [1, 0]},
-    "deadband": {"class": "Slider", "position": [0, 1], "min": 0.0, "max": 0.1},
-    "translationScale": {"class": "Slider", "position": [1, 1], "min": 0.1, "max": 1.0},
-    "rotationScale": {"class": "Slider", "position": [2, 1], "min": 0.1, "max": 1.0},
-    "maxLinearVelocity": {"class": "Slider", "position": [0, 2], "min": 0.1, "max": 10.0},
-    "maxAngularVelocity": {"class": "Slider", "position": [1, 2], "min": 0.1, "max": 6.283},
-    "translationCube": {"class": "Toggle Button", "position": [0, 3]},
-    "rotationCube": {"class": "Toggle Button", "position": [1, 3]},
-    "allianceRelative": {"class": "Toggle Button", "position": [2, 3]},
-    "robotRelative": {"class": "Toggle Button", "position": [3, 3]}
-  }
-}
-```
+Elastic can always write to NetworkTables, so there is nothing to turn on. Save the layout from Elastic's
+File menu to keep the tab for next time.
 
 ## Tuning workflow
 
