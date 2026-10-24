@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <utility>
 #include <variant>
@@ -47,6 +48,16 @@ class LQRController {
    * @param config New LQRConfig to apply.
    */
   void UpdateConfig(LQRConfig config);
+
+  /**
+   * Rebuild the loop from the config after its values changed, as when live tuning them, keeping the state estimate:
+   * the new loop starts where the old one was, so the output doesn't jump. Safe to call while the closed loop
+   * controller's thread runs Calculate().
+   *
+   * @param config LQRConfig with the new values, of the same LQRType.
+   * @throws std::invalid_argument if the config is for a different LQRType.
+   */
+  void Retune(LQRConfig config);
 
   /**
    * Reset the angular position+velocity state of the controller (arm/elevator).
@@ -121,45 +132,9 @@ class LQRController {
   const std::optional<LQRConfig>& GetConfig() const;
 
  private:
-  // wpi::math::LinearSystemLoop stores raw pointers to the LQR and Kalman filter passed to its
-  // constructor. These bundles heap-pin all three together so the pointers are never dangled.
-  struct FlywheelBundle {
-    wpi::math::LinearQuadraticRegulator<1, 1> controller;
-    wpi::math::KalmanFilter<1, 1, 1> observer;
-    LQRConfig::Loop1 loop;
-
-    FlywheelBundle(wpi::math::LinearSystem<1, 1, 1> plant,
-                   wpi::math::LinearQuadraticRegulator<1, 1> ctrl,
-                   wpi::math::KalmanFilter<1, 1, 1> obs, wpi::units::volt_t maxV,
-                   wpi::units::second_t dt)
-        : controller{std::move(ctrl)},
-          observer{std::move(obs)},
-          loop{plant, controller, observer, maxV, dt} {}
-
-    FlywheelBundle(const FlywheelBundle&) = delete;
-    FlywheelBundle& operator=(const FlywheelBundle&) = delete;
-    FlywheelBundle(FlywheelBundle&&) = delete;
-    FlywheelBundle& operator=(FlywheelBundle&&) = delete;
-  };
-
-  struct ArmElevatorBundle {
-    wpi::math::LinearQuadraticRegulator<2, 1> controller;
-    wpi::math::KalmanFilter<2, 1, 1> observer;
-    LQRConfig::Loop2 loop;
-
-    ArmElevatorBundle(wpi::math::LinearSystem<2, 1, 1> plant,
-                      wpi::math::LinearQuadraticRegulator<2, 1> ctrl,
-                      wpi::math::KalmanFilter<2, 1, 1> obs, wpi::units::volt_t maxV,
-                      wpi::units::second_t dt)
-        : controller{std::move(ctrl)},
-          observer{std::move(obs)},
-          loop{plant, controller, observer, maxV, dt} {}
-
-    ArmElevatorBundle(const ArmElevatorBundle&) = delete;
-    ArmElevatorBundle& operator=(const ArmElevatorBundle&) = delete;
-    ArmElevatorBundle(ArmElevatorBundle&&) = delete;
-    ArmElevatorBundle& operator=(ArmElevatorBundle&&) = delete;
-  };
+  // Each loop with the plant, LQR and Kalman filter it points to, so none of its pointers dangle.
+  using FlywheelBundle = LQRConfig::LoopBundle<1>;
+  using ArmElevatorBundle = LQRConfig::LoopBundle<2>;
 
   static std::unique_ptr<FlywheelBundle> BuildFlywheel(const LQRConfig& cfg);
   static std::unique_ptr<ArmElevatorBundle> BuildArmElevator(const LQRConfig& cfg);
@@ -168,6 +143,9 @@ class LQRController {
   LQRConfig::LQRType m_type;
   std::variant<std::unique_ptr<FlywheelBundle>, std::unique_ptr<ArmElevatorBundle>> m_bundle;
   wpi::units::second_t m_period;
+  // Calculate() runs on the closed loop controller's thread while Retune() swaps the loop on the robot's. Held on
+  // the heap so the controller can still be moved.
+  std::unique_ptr<std::mutex> m_mutex{std::make_unique<std::mutex>()};
 };
 
 }  // namespace yams::math

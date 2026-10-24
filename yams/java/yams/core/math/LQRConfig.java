@@ -329,6 +329,111 @@ public class LQRConfig {
   }
 
   /**
+   * Get the state error tolerances (qelms), in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for
+   * an elevator.
+   *
+   * @return A copy of the tolerances, one per modeled state.
+   * @throws NoSuchElementException if no mechanism type has been configured.
+   */
+  public double[] getQelms() {
+    return m_qelms.orElseThrow().getData().clone();
+  }
+
+  /**
+   * Set the state error tolerances (qelms), in the SI units of {@link #getQelms()}.
+   *
+   * @param qelms One tolerance per modeled state, each above 0.
+   * @return {@link LQRConfig} for chaining.
+   * @throws IllegalArgumentException if the number of values does not match the mechanism type, or one is not above 0.
+   */
+  public LQRConfig withQelms(double... qelms) {
+    m_qelms = Optional.of(vector(qelms, getQelms().length, "qelms"));
+    return this;
+  }
+
+  /**
+   * Get the model's standard deviations, in the SI units of {@link #getQelms()}.
+   *
+   * @return A copy of the standard deviations, one per modeled state.
+   * @throws NoSuchElementException if no mechanism type has been configured.
+   */
+  public double[] getModelStdDevs() {
+    return m_modelStdDevs.orElseThrow().getData().clone();
+  }
+
+  /**
+   * Set the model's standard deviations, in the SI units of {@link #getQelms()}.
+   *
+   * @param stdDevs One standard deviation per modeled state, each above 0.
+   * @return {@link LQRConfig} for chaining.
+   * @throws IllegalArgumentException if the number of values does not match the mechanism type, or one is not above 0.
+   */
+  public LQRConfig withModelStdDevs(double... stdDevs) {
+    m_modelStdDevs = Optional.of(vector(stdDevs, getModelStdDevs().length, "model standard deviations"));
+    return this;
+  }
+
+  /**
+   * Get the encoder's standard deviation, in SI units: rad/s for a flywheel, rad for an arm, m for an elevator.
+   *
+   * @return A copy of the standard deviation, as a one-element array.
+   * @throws NoSuchElementException if no mechanism type has been configured.
+   */
+  public double[] getEncoderStdDevs() {
+    return m_encoderStdDevs.orElseThrow().getData().clone();
+  }
+
+  /**
+   * Set the encoder's standard deviation, in the SI units of {@link #getEncoderStdDevs()}.
+   *
+   * @param stdDevs The standard deviation, above 0.
+   * @return {@link LQRConfig} for chaining.
+   * @throws IllegalArgumentException if the number of values does not match the mechanism type, or one is not above 0.
+   */
+  public LQRConfig withEncoderStdDevs(double... stdDevs) {
+    m_encoderStdDevs = Optional.of(vector(stdDevs, getEncoderStdDevs().length, "encoder standard deviations"));
+    return this;
+  }
+
+  /**
+   * Get the control effort (voltage) tolerance, relms.
+   *
+   * @return Control effort tolerance.
+   */
+  public Voltage getRelms() {
+    return m_relms;
+  }
+
+  /**
+   * Get the maximum voltage of the {@link org.wpilib.math.system.LinearSystemLoop}.
+   *
+   * @return Maximum voltage output.
+   */
+  public Voltage getMaxVoltage() {
+    return m_maxVoltage;
+  }
+
+  /**
+   * A vector of the given values, checked against the size the mechanism type needs.
+   *
+   * @param values Values, each above 0.
+   * @param size   Number of values the mechanism type needs.
+   * @param name   What the values are, for the error message.
+   * @return The values as a {@link Vector}.
+   */
+  private static Vector<?> vector(double[] values, int size, String name) {
+    if (values.length != size) {
+      throw new IllegalArgumentException("Expected " + size + " " + name + " for this LQR, got " + values.length);
+    }
+    for (double v : values) {
+      if (!(v > 0) || !Double.isFinite(v)) {
+        throw new IllegalArgumentException("The " + name + " must be above 0, got " + v);
+      }
+    }
+    return size == 1 ? VecBuilder.fill(values[0]) : VecBuilder.fill(values[0], values[1]);
+  }
+
+  /**
    * Get the {@link LinearSystem} for the LQR. with {@link Models}
    *
    * @return {@link LinearSystem} for the LQR.

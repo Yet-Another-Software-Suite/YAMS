@@ -3,6 +3,9 @@
 
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 
+#include <exception>
+#include <vector>
+#include <wpi/system/Errors.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -21,6 +24,7 @@
 
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/telemetry/LQRUnits.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::telemetry {
@@ -249,6 +253,18 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
 
   bool linear = cfg.GetLinearClosedLoopControllerUse();
 
+  // A duty cycle or voltage command, such as a default command that coasts, stops a closed-loop controller run on
+  // the SystemCore (an LQR or an exponential profile), and setting a setpoint doesn't start it again. Live tuning
+  // controls the motor in closed loop, so it starts it, holding the setpoint the motor controller still has.
+  if (closedLoop && smc.IsClosedLoopControllerStopped()) {
+    smc.StartClosedLoopController();
+    if (auto position = smc.GetMechanismPositionSetpoint()) {
+      smc.SetPosition(*position);
+    } else if (auto velocity = smc.GetMechanismSetpointVelocity()) {
+      smc.SetVelocity(*velocity);
+    }
+  }
+
   // Double tuning
   for (auto& [field, dt] : *m_doubleFields) {
     if (!dt.IsEnabled()) continue;
@@ -362,10 +378,50 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
       case DoubleTelemetryField::ExponentialProfileMaxInput:
         smc.SetExponentialProfile(std::nullopt, std::nullopt, wpi::units::volt_t{dt.Get()});
         break;
+      case DoubleTelemetryField::LQRQelmsPosition:
+      case DoubleTelemetryField::LQRQelmsVelocity:
+      case DoubleTelemetryField::LQRRelms:
+      case DoubleTelemetryField::LQRModelPosition:
+      case DoubleTelemetryField::LQRModelVelocity:
+      case DoubleTelemetryField::LQREncoderPosition:
+      case DoubleTelemetryField::LQREncoderVelocity:
+      case DoubleTelemetryField::LQRMaxVoltage: {
+        auto* lqr = smc.GetLQRController();
+        if (!lqr || !lqr->GetConfig()) break;
+        // Rebuilt from every LQR field, keeping the LQR's state estimate so its output doesn't jump.
+        math::LQRConfig config = *lqr->GetConfig();
+        using LQRType = math::LQRConfig::LQRType;
+        const auto type = config.GetType();
+        auto value = [this](DoubleTelemetryField field) { return m_doubleFields->at(field).Get(); };
+        try {
+          if (type == LQRType::FLYWHEEL) {
+            config.WithQElems(std::vector<double>{LQRToSI(type, false, value(DoubleTelemetryField::LQRQelmsVelocity))})
+                .WithStateStdDevs(std::vector<double>{LQRToSI(type, false, value(DoubleTelemetryField::LQRModelVelocity))})
+                .WithMeasurementStdDevs(
+                    std::vector<double>{LQRToSI(type, false, value(DoubleTelemetryField::LQREncoderVelocity))});
+          } else {
+            config
+                .WithQElems(std::vector<double>{LQRToSI(type, true, value(DoubleTelemetryField::LQRQelmsPosition)),
+                                                LQRToSI(type, false, value(DoubleTelemetryField::LQRQelmsVelocity))})
+                .WithStateStdDevs(std::vector<double>{LQRToSI(type, true, value(DoubleTelemetryField::LQRModelPosition)),
+                                                      LQRToSI(type, false, value(DoubleTelemetryField::LQRModelVelocity))})
+                .WithMeasurementStdDevs(
+                    std::vector<double>{LQRToSI(type, true, value(DoubleTelemetryField::LQREncoderPosition))});
+          }
+          config.WithRElems(std::vector<double>{value(DoubleTelemetryField::LQRRelms)})
+              .WithMaxVoltage(wpi::units::volt_t{value(DoubleTelemetryField::LQRMaxVoltage)});
+          lqr->Retune(config);
+        } catch (const std::exception& e) {
+          // A value the LQR can't use, such as a tolerance of 0, leaves it as it was.
+          WPILIB_ReportWarning("[WARNING] {} LQR not retuned: {}", smc.GetName(), e.what());
+        }
+        break;
+      }
       default:
         break;
     }
   }
+
 }
 
 void SmartMotorControllerTelemetry::StopTuning(SmartMotorController& smc) {

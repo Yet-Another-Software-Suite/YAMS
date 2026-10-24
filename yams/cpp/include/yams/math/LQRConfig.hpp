@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <variant>
 #include <vector>
@@ -22,7 +23,7 @@ namespace yams::math {
  *
  * Uses a fluent builder pattern; all With* methods return *this for chaining.
  * After configuring the plant type, gains, and noise parameters call GetLoop() to obtain
- * the ready-to-use LinearSystemLoop.
+ * the ready-to-use LinearSystemLoop, in a LoopBundle that owns everything it points to.
  */
 class LQRConfig {
  public:
@@ -37,6 +38,45 @@ class LQRConfig {
   using Loop1 = wpi::math::LinearSystemLoop<1, 1, 1>;
   /** LinearSystemLoop type alias for 2-state plants (arm, elevator). */
   using Loop2 = wpi::math::LinearSystemLoop<2, 1, 1>;
+
+  /**
+   * A LinearSystemLoop with everything it points to. wpi::math::LinearSystemLoop keeps raw pointers to its LQR and
+   * Kalman filter, and wpi::math::KalmanFilter keeps a raw pointer to its plant, so all four live together here, on
+   * the heap, the plant first. Neither copyable nor movable, so the pointers never dangle.
+   *
+   * @tparam States Number of modeled states: 1 for a flywheel, 2 for an arm or elevator.
+   */
+  template <int States>
+  struct LoopBundle {
+    wpi::math::LinearSystem<States, 1, 1> plant;             ///< The plant the filter points to.
+    wpi::math::LinearQuadraticRegulator<States, 1> controller;  ///< The LQR the loop points to.
+    wpi::math::KalmanFilter<States, 1, 1> observer;          ///< The Kalman filter the loop points to.
+    wpi::math::LinearSystemLoop<States, 1, 1> loop;          ///< The loop to run.
+
+    /**
+     * Build the loop.
+     *
+     * @param system       Plant.
+     * @param qElems       State error tolerances.
+     * @param rElems       Control effort tolerance.
+     * @param stateStdDevs Model standard deviations.
+     * @param measStdDevs  Encoder standard deviation.
+     * @param maxV         Maximum output voltage.
+     * @param dt           Loop period.
+     */
+    LoopBundle(const wpi::math::LinearSystem<States, 1, 1>& system, const wpi::util::array<double, States>& qElems,
+               const wpi::util::array<double, 1>& rElems, const wpi::util::array<double, States>& stateStdDevs,
+               const wpi::util::array<double, 1>& measStdDevs, wpi::units::volt_t maxV, wpi::units::second_t dt)
+        : plant{system},
+          controller{plant, qElems, rElems, dt},
+          observer{plant, stateStdDevs, measStdDevs, dt},
+          loop{plant, controller, observer, maxV, dt} {}
+
+    LoopBundle(const LoopBundle&) = delete;
+    LoopBundle& operator=(const LoopBundle&) = delete;
+    LoopBundle(LoopBundle&&) = delete;
+    LoopBundle& operator=(LoopBundle&&) = delete;
+  };
 
   /**
    * Set the LQR plant type explicitly.
@@ -154,6 +194,72 @@ class LQRConfig {
   wpi::units::volt_t GetMaxVoltage() const;
 
   /**
+   * Get the state error tolerances in use, in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for
+   * an elevator. Unset tolerances are the defaults the loop is built with.
+   *
+   * @return One tolerance per modeled state.
+   */
+  std::vector<double> GetQElems() const;
+
+  /**
+   * Get the control effort (voltage) tolerances in use, in volts.
+   *
+   * @return One tolerance per input.
+   */
+  std::vector<double> GetRElems() const;
+
+  /**
+   * Get the model's standard deviations in use, in the SI units of GetQElems().
+   *
+   * @return One standard deviation per modeled state.
+   */
+  std::vector<double> GetStateStdDevs() const;
+
+  /**
+   * Get the encoder's standard deviations in use, in SI units: rad/s for a flywheel, rad for an arm, m for an
+   * elevator.
+   *
+   * @return One standard deviation per measurement.
+   */
+  std::vector<double> GetMeasurementStdDevs() const;
+
+  /**
+   * Set the state error tolerances, as when live tuning them, checking them.
+   *
+   * @param qElems One tolerance per modeled state, each above 0, in the SI units of GetQElems().
+   * @return *this for chaining.
+   * @throws std::invalid_argument if the number of values doesn't match the mechanism type, or one isn't above 0.
+   */
+  LQRConfig& WithQElems(const std::vector<double>& qElems);
+
+  /**
+   * Set the control effort (voltage) tolerance, as when live tuning it, checking it.
+   *
+   * @param rElems One tolerance, above 0, in volts.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if there isn't one value, or it isn't above 0.
+   */
+  LQRConfig& WithRElems(const std::vector<double>& rElems);
+
+  /**
+   * Set the model's standard deviations, as when live tuning them, checking them.
+   *
+   * @param stateStdDevs One standard deviation per modeled state, each above 0.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if the number of values doesn't match the mechanism type, or one isn't above 0.
+   */
+  LQRConfig& WithStateStdDevs(const std::vector<double>& stateStdDevs);
+
+  /**
+   * Set the encoder's standard deviation, as when live tuning it, checking it.
+   *
+   * @param measStdDevs One standard deviation, above 0.
+   * @return *this for chaining.
+   * @throws std::invalid_argument if there isn't one value, or it isn't above 0.
+   */
+  LQRConfig& WithMeasurementStdDevs(const std::vector<double>& measStdDevs);
+
+  /**
    * Build and return the linear plant model.
    *
    * @return Variant holding a 1-state system (flywheel) or 2-state system (arm/elevator).
@@ -162,14 +268,17 @@ class LQRConfig {
       const;
 
   /**
-   * Build and return the complete LinearSystemLoop ready for use.
+   * Build and return the complete LinearSystemLoop ready for use, with the plant, LQR and Kalman filter it points to.
    *
-   * @return Variant holding Loop1 (flywheel) or Loop2 (arm/elevator).
+   * @return Variant holding a 1-state bundle (flywheel) or a 2-state bundle (arm/elevator).
    */
-  std::variant<Loop1, Loop2> GetLoop() const;
+  std::variant<std::unique_ptr<LoopBundle<1>>, std::unique_ptr<LoopBundle<2>>> GetLoop() const;
 
  private:
   friend class LQRController;
+
+  /** The values, checked against the count the mechanism type needs and that each is above 0. */
+  static std::vector<double> Checked(const std::vector<double>& values, size_t size, const char* name);
 
   std::optional<LQRType> m_type;
   std::optional<wpi::math::LinearSystem<1, 1, 1>> m_flywheelPlant;

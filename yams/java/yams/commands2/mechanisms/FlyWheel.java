@@ -136,7 +136,7 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
    * @return {@link Command} that sets the FlyWheel to the desired speed.
    */
   public Command run(AngularVelocity velocity) {
-    return Commands.run(() -> getMotorController().setVelocity(velocity), subsystem).withName(subsystem.getName() + " " + getName() + " SetSpeed");
+    return Commands.startRun(getMotorController()::startClosedLoopController, () -> getMotorController().setVelocity(velocity), subsystem).withName(subsystem.getName() + " " + getName() + " SetSpeed");
   }
 
   /**

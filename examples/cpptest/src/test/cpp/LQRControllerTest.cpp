@@ -76,15 +76,15 @@ TEST(LQRConfigTest, WithMaxVoltageChangesVoltage) {
 }
 
 TEST(LQRConfigTest, FlywheelGetLoopIsLoop1) {
-  EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop1>(FlywheelConfig().GetLoop()));
+  EXPECT_TRUE(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<1>>>(FlywheelConfig().GetLoop()));
 }
 
 TEST(LQRConfigTest, ArmGetLoopIsLoop2) {
-  EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop2>(ArmConfig().GetLoop()));
+  EXPECT_TRUE(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<2>>>(ArmConfig().GetLoop()));
 }
 
 TEST(LQRConfigTest, ElevatorGetLoopIsLoop2) {
-  EXPECT_TRUE(std::holds_alternative<LQRConfig::Loop2>(ElevatorConfig().GetLoop()));
+  EXPECT_TRUE(std::holds_alternative<std::unique_ptr<LQRConfig::LoopBundle<2>>>(ElevatorConfig().GetLoop()));
 }
 
 // ── LQRController type and config accessors ──────────────────────────────────

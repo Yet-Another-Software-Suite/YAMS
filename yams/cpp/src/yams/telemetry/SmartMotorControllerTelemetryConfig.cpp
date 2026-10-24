@@ -9,6 +9,7 @@
 #include <wpi/units/length.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/telemetry/LQRUnits.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 
 namespace yams::telemetry {
@@ -50,6 +51,22 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"closedloop/feedback/kI", 0.0, field, true, "none"};
     case DoubleTelemetryField::kD:
       return {"closedloop/feedback/kD", 0.0, field, true, "none"};
+    case DoubleTelemetryField::LQRQelmsPosition:
+      return {"closedloop/lqr/qelms/position", 0.0, field, true, "tunable_position"};
+    case DoubleTelemetryField::LQRQelmsVelocity:
+      return {"closedloop/lqr/qelms/velocity", 0.0, field, true, "tunable_velocity"};
+    case DoubleTelemetryField::LQRRelms:
+      return {"closedloop/lqr/relms", 12.0, field, true, "volts"};
+    case DoubleTelemetryField::LQRModelPosition:
+      return {"closedloop/lqr/model/position", 0.0, field, true, "tunable_position"};
+    case DoubleTelemetryField::LQRModelVelocity:
+      return {"closedloop/lqr/model/velocity", 0.0, field, true, "tunable_velocity"};
+    case DoubleTelemetryField::LQREncoderPosition:
+      return {"closedloop/lqr/encoder/position", 0.0, field, true, "tunable_position"};
+    case DoubleTelemetryField::LQREncoderVelocity:
+      return {"closedloop/lqr/encoder/velocity", 0.0, field, true, "tunable_velocity"};
+    case DoubleTelemetryField::LQRMaxVoltage:
+      return {"closedloop/lqr/maxVoltage", 12.0, field, true, "volts"};
     case DoubleTelemetryField::TunableSetpointPosition:
       return {"closedloop/setpoint/position", 0.0, field, true, "tunable_position"};
     case DoubleTelemetryField::SetpointPosition:
@@ -162,6 +179,14 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::kP,
            DoubleTelemetryField::kI,
            DoubleTelemetryField::kD,
+           DoubleTelemetryField::LQRQelmsPosition,
+           DoubleTelemetryField::LQRQelmsVelocity,
+           DoubleTelemetryField::LQRRelms,
+           DoubleTelemetryField::LQRModelPosition,
+           DoubleTelemetryField::LQRModelVelocity,
+           DoubleTelemetryField::LQREncoderPosition,
+           DoubleTelemetryField::LQREncoderVelocity,
+           DoubleTelemetryField::LQRMaxVoltage,
            DoubleTelemetryField::TunableSetpointPosition,
            DoubleTelemetryField::SetpointPosition,
            DoubleTelemetryField::TunableSetpointVelocity,
@@ -266,6 +291,15 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::kP).Enable();
     m_doubleFields.at(DoubleTelemetryField::kI).Enable();
     m_doubleFields.at(DoubleTelemetryField::kD).Enable();
+    // Only kept for a motor controller configured with an LQR, see the LQR defaults below.
+    m_doubleFields.at(DoubleTelemetryField::LQRQelmsPosition).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQRQelmsVelocity).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQRRelms).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQRModelPosition).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQRModelVelocity).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQREncoderPosition).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQREncoderVelocity).Enable();
+    m_doubleFields.at(DoubleTelemetryField::LQRMaxVoltage).Enable();
     m_doubleFields.at(DoubleTelemetryField::SetpointForce).Enable();
     m_doubleFields.at(DoubleTelemetryField::ClosedLoopPeriod).Enable();
     m_doubleFields.at(DoubleTelemetryField::VelocityMeasurementDelay).Enable();
@@ -546,11 +580,44 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
           .SetDefaultValue(maxInput->value());
   }
 
-  // LQR: disable PID tuning (LQR computes gains internally)
-  if (cfg.GetLQR(slot)) {
+  // LQR: its own values replace kP, kI and kD. Without an LQR, its fields never appear.
+  if (auto lqr = cfg.GetLQR(slot)) {
     m_doubleFields.at(DoubleTelemetryField::kP).Disable();
     m_doubleFields.at(DoubleTelemetryField::kI).Disable();
     m_doubleFields.at(DoubleTelemetryField::kD).Disable();
+    using LQRType = math::LQRConfig::LQRType;
+    const auto type = lqr->GetType();
+    const auto qelms = lqr->GetQElems();
+    const auto model = lqr->GetStateStdDevs();
+    const auto encoder = lqr->GetMeasurementStdDevs();
+    m_doubleFields.at(DoubleTelemetryField::LQRRelms).SetDefaultValue(lqr->GetRElems()[0]);
+    m_doubleFields.at(DoubleTelemetryField::LQRMaxVoltage).SetDefaultValue(lqr->GetMaxVoltage().value());
+    if (type == LQRType::FLYWHEEL) {
+      // One modeled state, velocity, measured by the encoder.
+      m_doubleFields.at(DoubleTelemetryField::LQRQelmsPosition).Disable();
+      m_doubleFields.at(DoubleTelemetryField::LQRModelPosition).Disable();
+      m_doubleFields.at(DoubleTelemetryField::LQREncoderPosition).Disable();
+      m_doubleFields.at(DoubleTelemetryField::LQRQelmsVelocity).SetDefaultValue(LQRFromSI(type, false, qelms[0]));
+      m_doubleFields.at(DoubleTelemetryField::LQRModelVelocity).SetDefaultValue(LQRFromSI(type, false, model[0]));
+      m_doubleFields.at(DoubleTelemetryField::LQREncoderVelocity).SetDefaultValue(LQRFromSI(type, false, encoder[0]));
+    } else {
+      // Two modeled states, position and velocity, with the encoder measuring position.
+      m_doubleFields.at(DoubleTelemetryField::LQREncoderVelocity).Disable();
+      m_doubleFields.at(DoubleTelemetryField::LQRQelmsPosition).SetDefaultValue(LQRFromSI(type, true, qelms[0]));
+      m_doubleFields.at(DoubleTelemetryField::LQRQelmsVelocity).SetDefaultValue(LQRFromSI(type, false, qelms[1]));
+      m_doubleFields.at(DoubleTelemetryField::LQRModelPosition).SetDefaultValue(LQRFromSI(type, true, model[0]));
+      m_doubleFields.at(DoubleTelemetryField::LQRModelVelocity).SetDefaultValue(LQRFromSI(type, false, model[1]));
+      m_doubleFields.at(DoubleTelemetryField::LQREncoderPosition).SetDefaultValue(LQRFromSI(type, true, encoder[0]));
+    }
+  } else {
+    m_doubleFields.at(DoubleTelemetryField::LQRQelmsPosition).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQRQelmsVelocity).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQRRelms).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQRModelPosition).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQRModelVelocity).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQREncoderPosition).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQREncoderVelocity).Disable();
+    m_doubleFields.at(DoubleTelemetryField::LQRMaxVoltage).Disable();
   }
 
   // Feedforward defaults getters return units types, use .value() for raw doubles

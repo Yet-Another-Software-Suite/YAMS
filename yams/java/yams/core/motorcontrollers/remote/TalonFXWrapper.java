@@ -12,6 +12,8 @@ import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.RPM;
+import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
@@ -51,6 +53,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -193,6 +196,17 @@ public class TalonFXWrapper extends SmartMotorController {
   private final boolean m_reportStatusSignalErrors = !RobotBase.isSimulation();
 
   /**
+   * The motor the simulated Talon FX should model, from the {@link DCMotor} it drives: a Kraken X44, whose free speed
+   * is about 7,500 RPM or more, or otherwise a Kraken X60 (6,000 RPM, or 6,380 RPM for a Falcon 500).
+   *
+   * @param motor {@link DCMotor} the Talon FX drives.
+   * @return The simulated motor type.
+   */
+  private static TalonFXSimState.MotorType simMotorType(DCMotor motor) {
+    return RadiansPerSecond.of(motor.freeSpeed).in(RPM) > 7000 ? TalonFXSimState.MotorType.KrakenX44 : TalonFXSimState.MotorType.KrakenX60;
+  }
+
+  /**
    * Create the {@link TalonFX} wrapper
    *
    * @param controller  {@link TalonFX}
@@ -233,6 +247,11 @@ public class TalonFXWrapper extends SmartMotorController {
       if (!m_config.getResetPreviousConfig()) {
         m_configurator.refresh(m_talonConfig);
       }
+    }
+    if (RobotBase.isSimulation()) {
+      // The simulated Talon FX models a Kraken X60 unless told otherwise. A Kraken X44 runs faster than an X60 can,
+      // and simulated as one, its current limits hold the output near its back-EMF, so it can't slow down.
+      m_talonfx.getSimState().setMotorType(simMotorType(motor));
     }
     m_mechanismPosition = m_talonfx.getPosition(false);
     m_mechanismVelocity = m_talonfx.getVelocity(false);

@@ -83,6 +83,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command setHeight(Distance height) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(height);
         coroutine.yield();
@@ -98,6 +99,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command setHeight(Supplier<Distance> height) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(height.get());
         coroutine.yield();
@@ -113,6 +115,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command run(Distance height) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(height);
         coroutine.yield();
@@ -128,6 +131,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command run(Supplier<Distance> height) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       while (true) {
         getMotorController().setPosition(height.get());
         coroutine.yield();
@@ -147,6 +151,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command runTo(Distance height, Distance tolerance) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       getMotorController().setPosition(height);
       coroutine.waitUntil(near(height, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));
     }).named(mechanism.getName() + " Run To Height");
@@ -164,6 +169,7 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
     return mechanism.run(coroutine -> {
+      getMotorController().startClosedLoopController();
       Distance target = height.get();
       getMotorController().setPosition(target);
       coroutine.waitUntil(near(target, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));

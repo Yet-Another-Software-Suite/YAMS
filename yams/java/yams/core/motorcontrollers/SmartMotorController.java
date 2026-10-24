@@ -295,6 +295,17 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Whether a closed loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
+   * stopped, as a duty cycle or voltage command does. False when the closed loop controller runs on the motor
+   * controller.
+   *
+   * @return True if the SystemCore closed loop controller is stopped.
+   */
+  public boolean isClosedLoopControllerStopped() {
+    return m_closedLoopControllerThread != null && !m_closedLoopControllerRunning;
+  }
+
+  /**
    * Stop the closed loop controller, and the loosely coupled followers' closed loop controllers. The
    * followers are stopped too, as they are not sent the duty cycle or voltage the leader is driven at
    * instead.
@@ -316,14 +327,15 @@ public abstract class SmartMotorController {
 
   /**
    * Start the closed loop controller with the period, and the loosely coupled followers' closed loop
-   * controllers.
+   * controllers. Only a stopped one is started, from where the mechanism is now: one that is already running carries
+   * on as it is, so setting a setpoint every loop doesn't reset it.
    *
    * @throws SmartMotorControllerConfigurationException if the control mode is closed loop, a linear
    *                                                    closed loop controller is in use, and the
    *                                                    mechanism circumference is not configured.
    */
   public void startClosedLoopController() {
-    if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP) {
+    if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP && !m_closedLoopControllerRunning) {
       m_pid.ifPresent(PIDController::reset);
       m_lastClosedLoopMechanismPosition = Optional.empty();
       m_trapState = getTrapezoidalProfileState();

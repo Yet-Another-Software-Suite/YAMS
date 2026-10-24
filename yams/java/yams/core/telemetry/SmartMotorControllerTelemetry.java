@@ -21,12 +21,14 @@ import static org.wpilib.units.Units.Volts;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.networktables.NetworkTable;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.math.LQRConfig.LQRType;
 
 /**
  * Smart motor controller telemetry.
@@ -242,6 +244,18 @@ public class SmartMotorControllerTelemetry {
         }
       }
     }
+    // A duty cycle or voltage command, such as a default command that coasts, stops a closed loop controller run on
+    // the SystemCore (an LQR or an exponential profile), and setting a setpoint doesn't start it again. Live tuning
+    // controls the motor in closed loop, so it starts it, holding the setpoint the motor controller still has.
+    if (closedloop && smartMotorController.isClosedLoopControllerStopped()) {
+      smartMotorController.startClosedLoopController();
+      var position = smartMotorController.getMechanismPositionSetpoint();
+      if (position.isPresent()) {
+        smartMotorController.setPosition(position.get());
+      } else {
+        smartMotorController.getMechanismSetpointVelocity().ifPresent(smartMotorController::setVelocity);
+      }
+    }
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
       DoubleTelemetry<DoubleTelemetryField> dt = entry.getValue();
       if (!dt.enabled)
@@ -336,6 +350,32 @@ public class SmartMotorControllerTelemetry {
           }
           case ExponentialProfileMaxInput -> {
             smartMotorController.setExponentialProfile(OptionalDouble.empty(), OptionalDouble.empty(), Optional.of(Volts.of(dt.get())));
+          }
+          case LQRQelmsPosition, LQRQelmsVelocity, LQRRelms, LQRModelPosition, LQRModelVelocity, LQREncoderPosition,
+               LQREncoderVelocity, LQRMaxVoltage -> {
+            // Rebuilt from every LQR field, keeping the LQR's state estimate so its output doesn't jump. A value the LQR
+            // can't use, such as a tolerance of 0, leaves it as it was, with a warning.
+            cfg.getLQRClosedLoopController().ifPresent(lqr -> lqr.getConfig().ifPresent(lqrConfig -> {
+              LQRType type = lqrConfig.getType();
+              try {
+                if (type == LQRType.FLYWHEEL) {
+                  lqrConfig.withQelms(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
+                           .withModelStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
+                           .withEncoderStdDevs(LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQREncoderVelocity).get()));
+                } else {
+                  lqrConfig.withQelms(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).get()),
+                                      LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).get()))
+                           .withModelStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQRModelPosition).get()),
+                                             LQRUnits.toSI(type, false, doubleFields.get(DoubleTelemetryField.LQRModelVelocity).get()))
+                           .withEncoderStdDevs(LQRUnits.toSI(type, true, doubleFields.get(DoubleTelemetryField.LQREncoderPosition).get()));
+                }
+                lqrConfig.withRelms(Volts.of(doubleFields.get(DoubleTelemetryField.LQRRelms).get()))
+                         .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.LQRMaxVoltage).get()));
+                lqr.retune(lqrConfig);
+              } catch (RuntimeException e) {
+                DriverStationBackend.reportWarning("[WARNING] " + smartMotorController.getName() + " LQR not retuned: " + e.getMessage(), false);
+              }
+            }));
           }
         }
       }
@@ -483,6 +523,22 @@ public class SmartMotorControllerTelemetry {
     kI("closedloop/feedback/kI", 0, true, "none"),
     /** kD */
     kD("closedloop/feedback/kD", 0, true, "none"),
+    /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */
+    LQRQelmsPosition("closedloop/lqr/qelms/position", 0, true, "tunable_position"),
+    /** LQR velocity error tolerance (qelms), in RPM or meters per second. */
+    LQRQelmsVelocity("closedloop/lqr/qelms/velocity", 0, true, "tunable_velocity"),
+    /** LQR control effort (voltage) tolerance (relms). */
+    LQRRelms("closedloop/lqr/relms", 12, true, "volts"),
+    /** LQR model position standard deviation, in degrees or meters. Only with an arm or elevator LQR. */
+    LQRModelPosition("closedloop/lqr/model/position", 0, true, "tunable_position"),
+    /** LQR model velocity standard deviation, in RPM or meters per second. */
+    LQRModelVelocity("closedloop/lqr/model/velocity", 0, true, "tunable_velocity"),
+    /** LQR encoder position standard deviation, in degrees or meters. Only with an arm or elevator LQR. */
+    LQREncoderPosition("closedloop/lqr/encoder/position", 0, true, "tunable_position"),
+    /** LQR encoder velocity standard deviation, in RPM. Only with a flywheel LQR. */
+    LQREncoderVelocity("closedloop/lqr/encoder/velocity", 0, true, "tunable_velocity"),
+    /** LQR maximum output voltage. */
+    LQRMaxVoltage("closedloop/lqr/maxVoltage", 12, true, "volts"),
     /** Setpoint position */
     TunableSetpointPosition("closedloop/setpoint/position", 0, true, "tunable_position"),
     /** Setpoint position */

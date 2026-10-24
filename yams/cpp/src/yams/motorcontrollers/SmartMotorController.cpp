@@ -82,9 +82,15 @@ wpi::units::second_t SmartMotorController::GetClosedLoopControllerPeriod() const
   return 1_ms;
 }
 
+bool SmartMotorController::IsClosedLoopControllerStopped() const {
+  return m_closedLoopControllerThread && !m_closedLoopControllerRunning;
+}
+
+math::LQRController* SmartMotorController::GetLQRController() { return m_lqr ? &*m_lqr : nullptr; }
+
 void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
-      m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP) {
+      m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
     if (m_pid) m_pid->Reset();
     m_lastClosedLoopMechanismPosition.reset();
     ResetProfileStates();

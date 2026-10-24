@@ -3,7 +3,9 @@
 
 #include "yams/math/LQRConfig.hpp"
 
+#include <cmath>
 #include <stdexcept>
+#include <string>
 #include <vector>
 #include <wpi/math/linalg/EigenCore.hpp>
 #include <wpi/math/system/Models.hpp>
@@ -76,6 +78,51 @@ LQRConfig& LQRConfig::WithPeriod(wpi::units::second_t period) {
   return *this;
 }
 
+std::vector<double> LQRConfig::GetQElems() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_qElems.empty() ? 3.0 : m_qElems[0]};
+  return {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01};
+}
+std::vector<double> LQRConfig::GetRElems() const { return {m_rElems.empty() ? 12.0 : m_rElems[0]}; }
+std::vector<double> LQRConfig::GetStateStdDevs() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]};
+  return {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
+          m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01};
+}
+std::vector<double> LQRConfig::GetMeasurementStdDevs() const {
+  if (m_type.value() == LQRType::FLYWHEEL) return {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]};
+  return {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]};
+}
+
+std::vector<double> LQRConfig::Checked(const std::vector<double>& values, size_t size, const char* name) {
+  if (values.size() != size) {
+    throw std::invalid_argument("Expected " + std::to_string(size) + " " + name + " for this LQR, got " +
+                                std::to_string(values.size()));
+  }
+  for (double v : values) {
+    if (!(v > 0) || !std::isfinite(v)) {
+      throw std::invalid_argument(std::string{"The "} + name + " must be above 0, got " + std::to_string(v));
+    }
+  }
+  return values;
+}
+
+LQRConfig& LQRConfig::WithQElems(const std::vector<double>& qElems) {
+  m_qElems = Checked(qElems, GetQElems().size(), "state error tolerances");
+  return *this;
+}
+LQRConfig& LQRConfig::WithRElems(const std::vector<double>& rElems) {
+  m_rElems = Checked(rElems, 1, "control effort tolerances");
+  return *this;
+}
+LQRConfig& LQRConfig::WithStateStdDevs(const std::vector<double>& stateStdDevs) {
+  m_stateStdDevs = Checked(stateStdDevs, GetStateStdDevs().size(), "model standard deviations");
+  return *this;
+}
+LQRConfig& LQRConfig::WithMeasurementStdDevs(const std::vector<double>& measStdDevs) {
+  m_measStdDevs = Checked(measStdDevs, 1, "encoder standard deviations");
+  return *this;
+}
+
 LQRConfig::LQRType LQRConfig::GetType() const { return m_type.value(); }
 wpi::units::second_t LQRConfig::GetPeriod() const { return m_period; }
 wpi::units::volt_t LQRConfig::GetMaxVoltage() const { return m_maxVoltage; }
@@ -86,34 +133,19 @@ LQRConfig::GetSystem() const {
   return m_armElevatorPlant.value();
 }
 
-std::variant<LQRConfig::Loop1, LQRConfig::Loop2> LQRConfig::GetLoop() const {
-  auto type = m_type.value();
-  if (type == LQRType::FLYWHEEL) {
-    auto plant = m_flywheelPlant.value();
-    wpi::math::LinearQuadraticRegulator<1, 1> controller{plant,
-                                                         {m_qElems.empty() ? 3.0 : m_qElems[0]},
-                                                         {m_rElems.empty() ? 12.0 : m_rElems[0]},
-                                                         m_period};
-    wpi::math::KalmanFilter<1, 1, 1> observer{plant,
-                                              {m_stateStdDevs.empty() ? 3.0 : m_stateStdDevs[0]},
-                                              {m_measStdDevs.empty() ? 0.01 : m_measStdDevs[0]},
-                                              m_period};
-    return Loop1{plant, controller, observer, m_maxVoltage, m_period};
-  } else {
-    auto plant = m_armElevatorPlant.value();
-    wpi::math::LinearQuadraticRegulator<2, 1> controller{
-        plant,
-        {m_qElems.size() > 0 ? m_qElems[0] : 0.01, m_qElems.size() > 1 ? m_qElems[1] : 0.01},
-        {m_rElems.empty() ? 12.0 : m_rElems[0]},
-        m_period};
-    wpi::math::KalmanFilter<2, 1, 1> observer{
-        plant,
-        {m_stateStdDevs.size() > 0 ? m_stateStdDevs[0] : 0.01,
-         m_stateStdDevs.size() > 1 ? m_stateStdDevs[1] : 0.01},
-        {m_measStdDevs.empty() ? 0.0001 : m_measStdDevs[0]},
-        m_period};
-    return Loop2{plant, controller, observer, m_maxVoltage, m_period};
+std::variant<std::unique_ptr<LQRConfig::LoopBundle<1>>, std::unique_ptr<LQRConfig::LoopBundle<2>>>
+LQRConfig::GetLoop() const {
+  const auto q = GetQElems();
+  const auto model = GetStateStdDevs();
+  const wpi::util::array<double, 1> r{GetRElems()[0]};
+  const wpi::util::array<double, 1> encoder{GetMeasurementStdDevs()[0]};
+  if (m_type.value() == LQRType::FLYWHEEL) {
+    return std::make_unique<LoopBundle<1>>(m_flywheelPlant.value(), wpi::util::array<double, 1>{q[0]}, r,
+                                           wpi::util::array<double, 1>{model[0]}, encoder, m_maxVoltage, m_period);
   }
+  return std::make_unique<LoopBundle<2>>(m_armElevatorPlant.value(), wpi::util::array<double, 2>{q[0], q[1]}, r,
+                                         wpi::util::array<double, 2>{model[0], model[1]}, encoder, m_maxVoltage,
+                                         m_period);
 }
 
 }  // namespace yams::math
