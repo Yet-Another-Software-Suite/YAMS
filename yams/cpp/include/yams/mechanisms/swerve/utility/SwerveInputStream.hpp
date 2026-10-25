@@ -122,6 +122,22 @@ class SwerveInputStream {
     return "UNKNOWN";
   }
 
+  /**
+   * Measurement the rotation controller was given by the last Get(), in TRANSLATION_ONLY, HEADING or
+   * AIM: the robot's heading in the gyro's frame. Empty if the last Get() did not use the controller.
+   */
+  std::optional<wpi::units::radian_t> GetRotationControllerMeasurement() const {
+    return m_rotationControllerMeasurement;
+  }
+
+  /**
+   * Setpoint the rotation controller was given by the last Get(), in TRANSLATION_ONLY, HEADING or AIM:
+   * the heading being turned to in the gyro's frame. Empty if the last Get() did not use the controller.
+   */
+  std::optional<wpi::units::radian_t> GetRotationControllerSetpoint() const {
+    return m_rotationControllerSetpoint;
+  }
+
   double GetAxisDeadband() const { return m_axisDeadband.value_or(0.0); }
   void SetAxisDeadband(double deadband) {
     m_axisDeadband = (deadband == 0.0) ? std::nullopt : std::optional<double>{deadband};
@@ -313,9 +329,8 @@ class SwerveInputStream {
    * controller and the WithAimFeedforward feedforward if there is one.
    */
   wpi::units::radians_per_second_t CalculateAngularVelocity(wpi::units::radian_t target) {
-    double omega = RequireRotationPID().Calculate(
-        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}}.Radians().value(),
-        target.value());
+    double omega = CalculateRotation(
+        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}}.Radians(), target);
     if (m_aimFeedforward.has_value()) {
       omega += m_aimFeedforward
                    ->Calculate(m_swerveDrive->GetRobotRelativeSpeed().omega,
@@ -378,6 +393,8 @@ class SwerveInputStream {
   }
 
   wpi::math::ChassisVelocities Get() {
+    m_rotationControllerMeasurement = std::nullopt;
+    m_rotationControllerSetpoint = std::nullopt;
     // Starts from the drive config's maximums (see the constructor); WithMaximum*Velocity and live
     // tuning override them.
     double maxLinear = m_maximumChassisLinearVelocity.value();
@@ -400,9 +417,8 @@ class SwerveInputStream {
 
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY: {
-        auto& pid = RequireRotationPID();
-        omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
-                              m_lockedHeading.value().Radians().value());
+        omega = CalculateRotation(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()},
+                                  m_lockedHeading.value().Radians());
         break;
       }
       case SwerveInputMode::ANGULAR_VELOCITY: {
@@ -411,9 +427,8 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::HEADING: {
-        auto& pid = RequireRotationPID();
-        omega = pid.Calculate(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}.value(),
-                              m_headingSupplier.value()().value());
+        omega = CalculateRotation(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()},
+                                  m_headingSupplier.value()());
         if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value() &&
             m_axisDeadband.has_value() &&
             std::abs(m_controllerHeadingX.value()()) + std::abs(m_controllerHeadingY.value()()) <
@@ -502,6 +517,10 @@ class SwerveInputStream {
   std::optional<std::function<bool()>> m_aimHeadingOffsetEnabled;
   // Heading the robot is turning to in AIM, in the gyro's frame.
   std::optional<wpi::math::Rotation2d> m_aimGoalHeading;
+  // Measurement and setpoint the rotation controller was given in the last Get(), empty when it
+  // wasn't used.
+  std::optional<wpi::units::radian_t> m_rotationControllerMeasurement;
+  std::optional<wpi::units::radian_t> m_rotationControllerSetpoint;
   SwerveInputMode m_currentMode{SwerveInputMode::ANGULAR_VELOCITY};
   wpi::units::meters_per_second_t m_maximumChassisLinearVelocity{4.0};
   wpi::units::radians_per_second_t m_maximumChassisAngularVelocity{2.0 * std::numbers::pi};
@@ -549,6 +568,13 @@ class SwerveInputStream {
           "error.");
     }
     return pid->get();
+  }
+
+  // Run the rotation controller, keeping its measurement and setpoint for telemetry. Returns rad/s.
+  double CalculateRotation(wpi::units::radian_t measurement, wpi::units::radian_t setpoint) {
+    m_rotationControllerMeasurement = measurement;
+    m_rotationControllerSetpoint = setpoint;
+    return RequireRotationPID().Calculate(measurement.value(), setpoint.value());
   }
 
   SwerveInputMode FindMode() {

@@ -72,6 +72,10 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
   private Optional<BooleanSupplier> aimHeadingOffsetEnabled = Optional.empty();
   /** Heading the robot is turning to in {@link SwerveInputMode#AIM}, in the gyro's frame. */
   private Optional<Rotation2d> aimGoalHeading = Optional.empty();
+  /** Measurement the rotation controller was given in the last {@link #get()}, empty when it wasn't used. */
+  private Optional<Angle> rotationControllerMeasurement = Optional.empty();
+  /** Setpoint the rotation controller was given in the last {@link #get()}, empty when it wasn't used. */
+  private Optional<Angle> rotationControllerSetpoint = Optional.empty();
   private SwerveInputMode currentMode = SwerveInputMode.ANGULAR_VELOCITY;
   private LinearVelocity maximumChassisLinearVelocity = MetersPerSecond.of(4);
   private AngularVelocity maximumChassisAngularVelocity = RotationsPerSecond.of(1);
@@ -190,6 +194,27 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    */
   public String getCurrentModeName() {
     return currentMode.name();
+  }
+
+  /**
+   * Get the measurement the rotation controller was given by the last {@link #get()} call, in
+   * {@link SwerveInputMode#TRANSLATION_ONLY}, {@link SwerveInputMode#HEADING} or {@link SwerveInputMode#AIM}.
+   *
+   * @return The robot's heading, in the gyro's frame, or empty if the last call did not use the rotation controller.
+   */
+  public Optional<Angle> getRotationControllerMeasurement() {
+    return rotationControllerMeasurement;
+  }
+
+  /**
+   * Get the setpoint the rotation controller was given by the last {@link #get()} call, in
+   * {@link SwerveInputMode#TRANSLATION_ONLY}, {@link SwerveInputMode#HEADING} or {@link SwerveInputMode#AIM}.
+   *
+   * @return The heading being turned to, in the gyro's frame, or empty if the last call did not use the rotation
+   *     controller.
+   */
+  public Optional<Angle> getRotationControllerSetpoint() {
+    return rotationControllerSetpoint;
   }
 
   /**
@@ -718,8 +743,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
    * @return {@link AngularVelocity} that turns the robot toward the heading.
    */
   public AngularVelocity calculateAngularVelocity(Angle target) {
-    double omegaRadiansPerSecond = requireRotationPID(swerveDrive.getConfig())
-        .calculate(swerveDrive.getGyroRotation3d().toRotation2d().getRadians(), target.in(Radians));
+    double omegaRadiansPerSecond =
+        calculateRotation(swerveDrive.getGyroRotation3d().toRotation2d().getRadians(), target.in(Radians));
     if (aimFeedforward.isPresent()) {
       omegaRadiansPerSecond += aimFeedforward.get()
           .calculate(swerveDrive.getRobotRelativeSpeed().omega, omegaRadiansPerSecond);
@@ -870,9 +895,23 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
             "Use SwerveDriveConfig.withRotationController to configure a rotation PID controller"));
   }
 
+  /**
+   * Run the rotation controller, keeping its measurement and setpoint for telemetry.
+   *
+   * @param measurementRadians Robot heading in the gyro's frame, in radians.
+   * @param setpointRadians    Heading to turn to in the gyro's frame, in radians.
+   * @return Angular velocity, in radians per second.
+   */
+  private double calculateRotation(double measurementRadians, double setpointRadians) {
+    rotationControllerMeasurement = Optional.of(Radians.of(measurementRadians));
+    rotationControllerSetpoint = Optional.of(Radians.of(setpointRadians));
+    return requireRotationPID(swerveDrive.getConfig()).calculate(measurementRadians, setpointRadians);
+  }
+
   @Override
   public ChassisVelocities get() {
-    var config = swerveDrive.getConfig();
+    rotationControllerMeasurement = Optional.empty();
+    rotationControllerSetpoint = Optional.empty();
     double maximumChassisVelocity = maximumChassisLinearVelocity.in(MetersPerSecond);
     double maximumChassisRotVelocity = maximumChassisAngularVelocity.in(RadiansPerSecond);
     Translation2d scaledTranslation =
@@ -891,10 +930,8 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
     }
     switch (newMode) {
       case TRANSLATION_ONLY -> {
-        var azimuthPIDs = requireRotationPID(config);
         omegaRadiansPerSecond =
-            azimuthPIDs.calculate(
-                swerveDrive.getGyroRotation3d().getZ(), lockedHeading.orElseThrow().getRadians());
+            calculateRotation(swerveDrive.getGyroRotation3d().getZ(), lockedHeading.orElseThrow().getRadians());
         speeds = new ChassisVelocities(vxMetersPerSecond, vyMetersPerSecond, omegaRadiansPerSecond);
         break;
       }
@@ -906,8 +943,7 @@ public class SwerveInputStream implements Supplier<ChassisVelocities> {
         break;
       }
       case HEADING -> {
-        var azimuthPIDs = requireRotationPID(config);
-        omegaRadiansPerSecond = azimuthPIDs.calculate(
+        omegaRadiansPerSecond = calculateRotation(
             swerveDrive.getGyroRotation3d().getZ(), headingSupplier.orElseThrow().get().in(Radians));
 
         if (controllerHeadingX.isPresent()

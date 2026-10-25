@@ -4,6 +4,7 @@
 package yams.commands2.telemetry;
 
 import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.networktables.PubSub;
 import org.wpilib.networktables.StringPublisher;
 import org.wpilib.tunable.Tunables;
+import org.wpilib.units.measure.Angle;
 import yams.commands2.swerve.SwerveInputStream;
 import yams.core.telemetry.NetworkTablesBackends;
 import yams.core.telemetry.enums.TelemetryVerbosity;
@@ -36,7 +38,9 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * <ul>
  *   <li>{@link TelemetryVerbosity#LOW}: the current drive mode, under {@code SwerveInputStream/<name>}.</li>
  *   <li>{@link TelemetryVerbosity#MID}: also the stream's configuration (deadband, scales, maximum velocities, cubing,
- *   alliance and robot relative), read-only.</li>
+ *   alliance and robot relative), read-only, and the rotation controller's {@code measurement} and {@code setpoint}
+ *   under {@code rotationController}, in radians in the gyro's frame. Those are what heading, aim and translation only
+ *   control give the controller, and are {@code NaN} while the stream isn't using it.</li>
  *   <li>{@link TelemetryVerbosity#HIGH}: also editable copies of the configuration under
  *   {@code Tuning/SwerveInputStream/<name>}, and a {@code Live Tuning} command there that applies them to the stream
  *   every loop while it runs.</li>
@@ -156,6 +160,13 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
     publishBoolean(table, "rotationCube", stream::isOmegaCubeEnabled);
     publishBoolean(table, "allianceRelative", stream::isAllianceRelativeEnabled);
     publishBoolean(table, "robotRelative", stream::isRobotRelativeEnabled);
+    NetworkTable rotationController = table.getSubTable("rotationController");
+    publishDouble(rotationController, "measurement", () -> radiansOrNaN(stream.getRotationControllerMeasurement()));
+    publishDouble(rotationController, "setpoint", () -> radiansOrNaN(stream.getRotationControllerSetpoint()));
+  }
+
+  private static double radiansOrNaN(Optional<Angle> angle) {
+    return angle.map(value -> value.in(Radians)).orElse(Double.NaN);
   }
 
   private void publishDouble(NetworkTable table, String key, DoubleSupplier value) {

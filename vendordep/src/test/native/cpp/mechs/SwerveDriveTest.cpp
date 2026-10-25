@@ -976,6 +976,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveInputStreamTelemetryTest.LowPubl
 
   CHECK(nt.Mode() == "ANGULAR_VELOCITY");
   CHECK_FALSE(nt.data->GetTopic("deadband").Exists());
+  CHECK_FALSE(nt.data->GetSubTable("rotationController")->GetTopic("setpoint").Exists());
   CHECK_FALSE(nt.tuning->GetTopic("deadband").Exists());
   CHECK_FALSE(stream.GetTelemetry()->get().GetLiveTuningCommand().has_value());
 }
@@ -1045,6 +1046,49 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   headingControl = true;
   stream.Get();
   CHECK(nt.Mode() == "HEADING");
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.MediumPublishesTheRotationControllerInputsWhileAligning",
+                 "[SwerveInputStreamTelemetryTest]") {
+  StreamTables nt;
+  bool aim = false;
+  bool heading = false;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithAim([] { return wpi::math::Pose2d{1_m, 1_m, wpi::math::Rotation2d{}}; },
+                 [&] { return aim; })
+      .WithHeading([] { return wpi::units::radian_t{-90.0_deg}; })
+      .WithHeadingControl([&] { return heading; })
+      .WithTelemetry(nt.name, Verbosity::MEDIUM);
+  auto rotationController = nt.data->GetSubTable("rotationController");
+  auto input = [&](std::string_view key) {
+    return rotationController->GetEntry(key).GetDouble(0.0);
+  };
+
+  // Driving by angular velocity does not use the rotation controller.
+  stream.Get();
+  CHECK(std::isnan(input("measurement")));
+  CHECK(std::isnan(input("setpoint")));
+  CHECK_FALSE(stream.GetRotationControllerSetpoint().has_value());
+
+  // The drive faces 0 at the origin, so aiming at (1, 1) turns to 45 degrees.
+  aim = true;
+  stream.Get();
+  CHECK(input("measurement") == Catch::Approx(0.0).margin(1e-9));
+  CHECK(input("setpoint") == Catch::Approx(std::numbers::pi / 4));
+  CHECK(stream.GetRotationControllerSetpoint()->value() == Catch::Approx(std::numbers::pi / 4));
+  CHECK(stream.GetRotationControllerMeasurement()->value() == Catch::Approx(0.0).margin(1e-9));
+
+  aim = false;
+  heading = true;
+  stream.Get();
+  CHECK(input("setpoint") == Catch::Approx(-std::numbers::pi / 2));
+
+  heading = false;
+  stream.Get();
+  CHECK(std::isnan(input("setpoint")));
+  CHECK_FALSE(stream.GetRotationControllerMeasurement().has_value());
 }
 
 TEST_CASE_METHOD(SwerveDriveTestFixture,
