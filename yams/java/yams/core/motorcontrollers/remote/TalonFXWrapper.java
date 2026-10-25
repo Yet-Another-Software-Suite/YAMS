@@ -12,8 +12,6 @@ import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
-import static org.wpilib.units.Units.RPM;
-import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
@@ -196,14 +194,19 @@ public class TalonFXWrapper extends SmartMotorController {
   private final boolean m_reportStatusSignalErrors = !RobotBase.isSimulation();
 
   /**
-   * The motor the simulated Talon FX should model, from the {@link DCMotor} it drives: a Kraken X44, whose free speed
-   * is about 7,500 RPM or more, or otherwise a Kraken X60 (6,000 RPM, or 6,380 RPM for a Falcon 500).
+   * The motor the simulated Talon FX should model, from the {@link DCMotor} it drives: a Kraken X44 for one or more
+   * Kraken X44s, with or without FOC, or otherwise a Kraken X60.
    *
    * @param motor {@link DCMotor} the Talon FX drives.
    * @return The simulated motor type.
    */
-  private static TalonFXSimState.MotorType simMotorType(DCMotor motor) {
-    return RadiansPerSecond.of(motor.freeSpeed).in(RPM) > 7000 ? TalonFXSimState.MotorType.KrakenX44 : TalonFXSimState.MotorType.KrakenX60;
+  private TalonFXSimState.MotorType simMotorType(DCMotor motor) {
+    for (int i = 1; i <= 4; i++) {
+      if (isMotor(motor, DCMotor.getKrakenX44(i)) || isMotor(motor, DCMotor.getKrakenX44Foc(i))) {
+        return TalonFXSimState.MotorType.KrakenX44;
+      }
+    }
+    return TalonFXSimState.MotorType.KrakenX60;
   }
 
   /**
