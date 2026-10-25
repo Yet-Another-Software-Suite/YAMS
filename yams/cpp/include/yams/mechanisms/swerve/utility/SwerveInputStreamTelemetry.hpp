@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -32,7 +33,9 @@ namespace yams::mechanisms::swerve::utility {
  *
  * - LOW: the current drive mode, under SwerveInputStream/<name>.
  * - MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance
- *   and robot relative), read-only.
+ *   and robot relative), read-only, and the rotation controller's measurement and setpoint under
+ *   rotationController, in radians in the gyro's frame. Those are what heading, aim and translation
+ *   only control give the controller, and are NaN while the stream isn't using it.
  * - HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/<name>, and a
  *   "Live Tuning" command there that applies them to the stream every loop while it runs.
  *
@@ -195,6 +198,15 @@ class SwerveInputStreamTelemetry {
     PublishBoolean(table, "allianceRelative",
                    [this] { return m_stream->IsAllianceRelativeEnabled(); });
     PublishBoolean(table, "robotRelative", [this] { return m_stream->IsRobotRelativeEnabled(); });
+    auto rotationController = table.GetSubTable("rotationController");
+    PublishDouble(*rotationController, "measurement",
+                  [this] { return RadiansOrNaN(m_stream->GetRotationControllerMeasurement()); });
+    PublishDouble(*rotationController, "setpoint",
+                  [this] { return RadiansOrNaN(m_stream->GetRotationControllerSetpoint()); });
+  }
+
+  static double RadiansOrNaN(std::optional<wpi::units::radian_t> angle) {
+    return angle ? angle->value() : std::numeric_limits<double>::quiet_NaN();
   }
 
   void PublishDouble(wpi::nt::NetworkTable& table, std::string_view key,

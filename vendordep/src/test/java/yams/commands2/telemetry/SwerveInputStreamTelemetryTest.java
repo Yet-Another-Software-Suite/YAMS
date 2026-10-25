@@ -27,6 +27,7 @@ import org.wpilib.command2.CommandScheduler;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
@@ -200,6 +201,10 @@ public class SwerveInputStreamTelemetryTest {
     return dataTable(name).getEntry(key).getDouble(Double.NaN);
   }
 
+  private NetworkTable rotationController() {
+    return dataTable(name).getSubTable("rotationController");
+  }
+
   private String mode() {
     return dataTable(name).getEntry("mode").getString("");
   }
@@ -231,6 +236,7 @@ public class SwerveInputStreamTelemetryTest {
 
     assertEquals("ANGULAR_VELOCITY", mode());
     assertFalse(dataTable(name).getTopic("deadband").exists());
+    assertFalse(rotationController().getTopic("setpoint").exists());
     assertTrue(tuningTable(name).getTopics().isEmpty());
     assertTrue(stream.getTelemetry().orElseThrow().getLiveTuningCommand().isEmpty());
   }
@@ -293,6 +299,43 @@ public class SwerveInputStreamTelemetryTest {
     headingControl[0] = true;
     stream.get();
     assertEquals("HEADING", mode());
+  }
+
+  @Test
+  void midPublishesTheRotationControllerInputsWhileAligning() {
+    boolean[] aim = {false};
+    boolean[] heading = {false};
+    SwerveInputStream stream =
+        withTelemetry(
+            stream()
+                .withAim(() -> new Pose2d(1, 1, new Rotation2d()), () -> aim[0])
+                .withHeading(() -> Degrees.of(-90))
+                .withHeadingControl(() -> heading[0]),
+            TelemetryVerbosity.MID);
+
+    // Driving by angular velocity does not use the rotation controller.
+    stream.get();
+    assertTrue(Double.isNaN(rotationController().getEntry("measurement").getDouble(0)));
+    assertTrue(Double.isNaN(rotationController().getEntry("setpoint").getDouble(0)));
+    assertTrue(stream.getRotationControllerSetpoint().isEmpty());
+
+    // The drive faces 0 at the origin, so aiming at (1, 1) turns to 45 degrees.
+    aim[0] = true;
+    stream.get();
+    assertEquals(0, rotationController().getEntry("measurement").getDouble(Double.NaN), kTolerance);
+    assertEquals(Math.PI / 4, rotationController().getEntry("setpoint").getDouble(Double.NaN), kTolerance);
+    assertEquals(Math.PI / 4, stream.getRotationControllerSetpoint().orElseThrow().in(Radians), kTolerance);
+    assertEquals(0, stream.getRotationControllerMeasurement().orElseThrow().in(Radians), kTolerance);
+
+    aim[0] = false;
+    heading[0] = true;
+    stream.get();
+    assertEquals(-Math.PI / 2, rotationController().getEntry("setpoint").getDouble(Double.NaN), kTolerance);
+
+    heading[0] = false;
+    stream.get();
+    assertTrue(Double.isNaN(rotationController().getEntry("setpoint").getDouble(0)));
+    assertTrue(stream.getRotationControllerMeasurement().isEmpty());
   }
 
   // ---- Live tuning
