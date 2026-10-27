@@ -6,6 +6,7 @@ package yams.core.mechanisms.positional;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.Seconds;
 
 import java.util.Optional;
 import org.wpilib.framework.RobotBase;
@@ -14,7 +15,6 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Transform3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Translation3d;
-import org.wpilib.simulation.SingleJointedArmSim;
 import org.wpilib.smartdashboard.Mechanism2d;
 import org.wpilib.smartdashboard.MechanismLigament2d;
 import org.wpilib.smartdashboard.MechanismRoot2d;
@@ -22,12 +22,17 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.DoubleJointedArmConfigurationException;
+import yams.core.math.DoubleJointedArmPath;
+import yams.core.math.DoubleJointedArmPathPlanner;
 import yams.core.mechanisms.config.ArmConfig;
+import yams.core.mechanisms.config.DoubleJointedArmConfig;
 import yams.core.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.core.mechanisms.config.MechanismPositionConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
-import yams.core.motorcontrollers.simulation.ArmSimSupplier;
+import yams.core.motorcontrollers.simulation.DoubleJointedArmSim;
+import yams.core.motorcontrollers.simulation.DoubleJointedArmSimSupplier;
+import yams.core.motorcontrollers.simulation.DoubleJointedArmSimSupplier.Joint;
 
 /**
  * A two-segment arm where each joint has its own independent motor controller.
@@ -61,6 +66,19 @@ import yams.core.motorcontrollers.simulation.ArmSimSupplier;
  * DoubleJointedArm arm = new DoubleJointedArm(lowerConfig, upperConfig);
  * }</pre>
  *
+ * <p>Both arm angles are from horizontal, so the upper arm's angle does not change when only the lower arm moves, as on
+ * an arm whose elbow is driven from the base, e.g. by a chain through the shoulder. Positions are in the arm's frame,
+ * from the shoulder with X away from it and Y up.
+ *
+ * <h2>Exclusion zones</h2>
+ * Boxes the arm must never enter, such as the robot's frame and bumpers, are set on a {@link DoubleJointedArmConfig}.
+ * Moves to an angle or position then follow a path planned with A* in joint space that keeps both segments out of
+ * every zone the whole way; see {@link DoubleJointedArmPathFollower}. Duty cycle control doesn't follow a path.
+ *
+ * <h2>Simulation</h2>
+ * Both joints are simulated together by a {@link DoubleJointedArmSim}, so the shoulder carries the upper arm's weight
+ * and inertia, and swinging either arm pushes on the other.
+ *
  * <p>This core class holds arm state, kinematics, and physics simulation only. Command and
  * Trigger factories live on {@link yams.commands2.mechanisms.DoubleJointedArm}, which extends
  * this class and has control examples in its Javadoc.
@@ -83,13 +101,17 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    */
   private final ArmConfig               m_upperArmConfig;
   /**
-   * Simulation for the arm.
+   * Double jointed arm config.
    */
-  private Optional<SingleJointedArmSim> m_lowerArmSim = Optional.empty();
+  private final DoubleJointedArmConfig  m_config;
   /**
-   * Simulation for the arm.
+   * Simulation of both joints together.
    */
-  private Optional<SingleJointedArmSim> m_upperArmSim = Optional.empty();
+  private Optional<DoubleJointedArmSim> m_armSim      = Optional.empty();
+  /**
+   * Plans paths around the exclusion zones.
+   */
+  private final DoubleJointedArmPathPlanner m_planner;
   /**
    * Lower ligament
    */
@@ -116,7 +138,7 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
   private final Distance                m_upperArmLength;
 
   /**
-   * Constructor for the Arm mechanism.
+   * Constructor for the Arm mechanism, without exclusion zones.
    *
    * @param lowerConfig Lower {@link ArmConfig} to use.
    * @param lowerSMC    {@link SmartMotorController} driving the lower joint.
@@ -132,6 +154,28 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    *                                                hard limit.
    */
   protected DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
+    this(new DoubleJointedArmConfig(lowerConfig, lowerSMC, upperConfig, upperSMC));
+  }
+
+  /**
+   * Constructor for the Arm mechanism.
+   *
+   * @param config {@link DoubleJointedArmConfig} with both arms and the exclusion zones.
+   * @implNote Protected so only {@link yams.commands2.mechanisms.DoubleJointedArm} can construct
+   *           this.
+   * @throws DoubleJointedArmConfigurationException if either {@link SmartMotorControllerConfig}
+   *                                                has no starting position.
+   * @throws DoubleJointedArmConfigurationException if either {@link ArmConfig} has no length.
+   * @throws DoubleJointedArmConfigurationException if running in simulation and either
+   *                                                {@link ArmConfig} is missing its lower or upper
+   *                                                hard limit.
+   */
+  protected DoubleJointedArm(DoubleJointedArmConfig config) {
+    m_config = config;
+    ArmConfig            lowerConfig = config.getLowerConfig();
+    SmartMotorController lowerSMC    = config.getLowerMotorController();
+    ArmConfig            upperConfig = config.getUpperConfig();
+    SmartMotorController upperSMC    = config.getUpperMotorController();
     m_lowerArmConfig = lowerConfig;
     m_upperArmConfig = upperConfig;
     m_lowerSMC = lowerSMC;
@@ -155,6 +199,15 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     var lowerMechPosCfg = lowerConfig.getMechanismPositionConfig();
     var upperMechPosCfg = upperConfig.getMechanismPositionConfig();
     m_lowerArmRootPos = new Translation2d(m_lowerArmLength.plus(m_upperArmLength).in(Meters), 0);
+
+    // The planner keeps each joint within its hard limits, or else its motor controller's mechanism limits.
+    m_planner = new DoubleJointedArmPathPlanner(m_lowerArmLength, m_upperArmLength,
+                                                lowerConfig.getLowerHardLimit().or(lowerSMCConfig::getMechanismLowerLimit).orElse(Radians.of(Double.NEGATIVE_INFINITY)),
+                                                lowerConfig.getUpperHardLimit().or(lowerSMCConfig::getMechanismUpperLimit).orElse(Radians.of(Double.POSITIVE_INFINITY)),
+                                                upperConfig.getLowerHardLimit().or(upperSMCConfig::getMechanismLowerLimit).orElse(Radians.of(Double.NEGATIVE_INFINITY)),
+                                                upperConfig.getUpperHardLimit().or(upperSMCConfig::getMechanismUpperLimit).orElse(Radians.of(Double.POSITIVE_INFINITY)),
+                                                config.getExclusionZones(), config.getExclusionZoneClearance(), config.getPathResolution(),
+                                                config.getPathTolerance());
 
     // Seed the relative encoder
     m_lowerSMC.getConfig().getExternalEncoder().ifPresent(encoder -> {
@@ -183,13 +236,14 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
         throw new DoubleJointedArmConfigurationException("Arm upper hard limit is empty", "Cannot create simulation.", "withHardLimits(Angle,Angle)");
       }
 
-      // Setup Sim
-      m_lowerArmSim = Optional.of(new SingleJointedArmSim(m_lowerSMC.getDCMotor(), m_lowerSMC.getConfig().getGearing().getMechanismToRotorRatio(), lowerSMCConfig.getMOI(), lowerConfig.getLength().get().in(Meters), lowerConfig.getLowerHardLimit()
-          .get().in(Radians), lowerConfig.getUpperHardLimit().get().in(Radians), true, lowerSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
-      m_lowerSMC.setSimSupplier(new ArmSimSupplier(m_lowerArmSim.get(), m_lowerSMC));
-      m_upperArmSim = Optional.of(new SingleJointedArmSim(m_upperSMC.getDCMotor(), m_upperSMC.getConfig().getGearing().getMechanismToRotorRatio(), upperSMCConfig.getMOI(), m_upperArmLength.in(Meters), upperConfig.getLowerHardLimit().get().in(
-          Radians), upperConfig.getUpperHardLimit().get().in(Radians), true, upperSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
-      m_upperSMC.setSimSupplier(new ArmSimSupplier(m_upperArmSim.get(), m_upperSMC));
+      // Setup Sim: both joints together, as each moves the other.
+      m_armSim = Optional.of(new DoubleJointedArmSim(m_lowerSMC.getDCMotor(), lowerSMCConfig.getGearing().getMechanismToRotorRatio(), lowerSMCConfig.getMOI(), m_lowerArmLength,
+                                                     lowerConfig.getLowerHardLimit().get(), lowerConfig.getUpperHardLimit().get(), lowerSMCConfig.getStartingPosition().get(),
+                                                     m_upperSMC.getDCMotor(), upperSMCConfig.getGearing().getMechanismToRotorRatio(), upperSMCConfig.getMOI(), m_upperArmLength,
+                                                     upperConfig.getLowerHardLimit().get(), upperConfig.getUpperHardLimit().get(), upperSMCConfig.getStartingPosition().get(),
+                                                     true));
+      m_lowerSMC.setSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.LOWER, m_lowerSMC));
+      m_upperSMC.setSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.UPPER, m_upperSMC));
 
       var lowerStartingAngle = lowerSMCConfig.getStartingPosition().get();
       var upperStartingAngle = upperSMCConfig.getStartingPosition().get();
@@ -233,25 +287,25 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
   }
 
   /**
-   * Inverse Kinematics for a DoubleJointedArm
+   * Inverse Kinematics for a DoubleJointedArm: the angles that put the end of the arm at a position, both from
+   * horizontal as {@link #getPosition()} takes them. A position out of reach gives the angles reaching straight toward
+   * it, as far as the arm goes.
    *
-   * @param translation Translations from root in Meters.
-   * @param invert      Invert the elbow.
+   * @param translation Position from the shoulder in meters, X away from it and Y up.
+   * @param invert      Bend the elbow the other way.
    * @return {@link Pair} with the shoulder angle then elbow angle.
    */
   public Pair<Angle, Angle> getAnglesForPosition(Translation2d translation, boolean invert) {
-    var x = Meters.of(translation.getX()).in(Meters);
-    var y = Meters.of(translation.getY()).in(Meters);
+    var x  = translation.getX();
+    var y  = translation.getY();
     var l1 = m_lowerArmLength.in(Meters);
     var l2 = m_upperArmLength.in(Meters);
-    var theta2 = Math.acos(((x * x) + (y * y) - ((l1 * l1) + (l2 * l2))) / (2 * l1 * l2));
-    theta2 = invert ? -theta2 : theta2;
+    // Angle of the upper arm from the lower arm, from the law of cosines.
+    var bend = Math.acos(Math.max(-1, Math.min(1, ((x * x) + (y * y) - ((l1 * l1) + (l2 * l2))) / (2 * l1 * l2))));
+    bend = invert ? -bend : bend;
 
-    var theta1 = Math.atan2(y, x) - Math.atan2(l2 * Math.sin(theta2), l1 + (l2 * Math.cos(theta2)));
-    if (invert) {
-      theta2 += Math.PI / 2;
-    }
-    return Pair.of(Radians.of(theta1), Radians.of(theta2));
+    var lower = Math.atan2(y, x) - Math.atan2(l2 * Math.sin(bend), l1 + (l2 * Math.cos(bend)));
+    return Pair.of(Radians.of(lower), Radians.of(lower + bend));
   }
 
   /**
@@ -301,17 +355,69 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     return getPosition().getDistance(target) < tolerance.in(Meters);
   }
 
-  //    def inv_kinematics(self, pos, invert = False):
-  //        """Inverse kinematics for a target position pos (x,y). Invert controls elbow
-  //        direction.""" [x,y] = pos.flat
-  //        theta2 = np.arccos((x*x + y*y - (self.l1*self.l1 + self.l2*self.l2)) / \
-  //            (2*self.l1*self.l2))
-  //
-  //        if invert:
-  //            theta2 = -theta2
-  //
-  //        theta1 = np.arctan2(y, x) - np.arctan2(self.l2*np.sin(theta2), self.l1 +
-  //        self.l2*np.cos(theta2)) return np.array([[theta1, theta2]]).T
+  /**
+   * Get the {@link DoubleJointedArmConfig}.
+   *
+   * @return {@link DoubleJointedArmConfig} the arm was made with.
+   */
+  public DoubleJointedArmConfig getDoubleJointedArmConfig() {
+    return m_config;
+  }
+
+  /**
+   * Whether exclusion zones are configured, so moves follow planned paths.
+   *
+   * @return True if there are exclusion zones.
+   */
+  public boolean hasExclusionZones() {
+    return !m_config.getExclusionZones().isEmpty();
+  }
+
+  /**
+   * Whether the arm at these angles is in an exclusion zone, or closer to one than the clearance.
+   *
+   * @param lowerAngle Lower arm angle, from horizontal.
+   * @param upperAngle Upper arm angle, from horizontal.
+   * @return True if either segment is in or too close to an exclusion zone.
+   */
+  public boolean isInExclusionZone(Angle lowerAngle, Angle upperAngle) {
+    return m_planner.isInExclusionZone(lowerAngle, upperAngle);
+  }
+
+  /**
+   * Whether the arm is in an exclusion zone, or closer to one than the clearance.
+   *
+   * @return True if either segment is in or too close to an exclusion zone.
+   */
+  public boolean isInExclusionZone() {
+    return isInExclusionZone(getLowerAngle(), getUpperAngle());
+  }
+
+  /**
+   * Plan a path from where the arm is to the given angles that never enters an exclusion zone. Without exclusion zones
+   * the path is just the goal.
+   *
+   * @param lowerAngle Goal lower arm angle, from horizontal.
+   * @param upperAngle Goal upper arm angle, from horizontal.
+   * @return The {@link DoubleJointedArmPath}, or empty when the goal is outside the joint limits, in an exclusion zone,
+   *     or can't be reached without entering one.
+   */
+  public Optional<DoubleJointedArmPath> planPath(Angle lowerAngle, Angle upperAngle) {
+    if (!hasExclusionZones()) {
+      return Optional.of(DoubleJointedArmPath.to(lowerAngle, upperAngle));
+    }
+    return m_planner.plan(getLowerAngle().in(Radians), getUpperAngle().in(Radians), lowerAngle.in(Radians), upperAngle.in(Radians));
+  }
+
+  /**
+   * How close each joint must get to a waypoint before the arm moves on to the next.
+   *
+   * @return Path tolerance {@link Angle}.
+   * @see DoubleJointedArmConfig#withPathTolerance(Angle)
+   */
+  public Angle getPathTolerance() {
+    return m_config.getPathTolerance();
+  }
 
   @Override
   public void updateTelemetry() {
@@ -320,15 +426,23 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     m_telemetry.updateLoopTime();
   }
 
+  /**
+   * Step the simulation once with both joints' voltages, then iterate both motor controllers' simulations.
+   */
   @Override
   public void simIterate() {
-    if (m_lowerArmSim.isPresent() && m_lowerSMC.getSimSupplier().isPresent() && m_upperArmSim.isPresent() && m_upperSMC.getSimSupplier().isPresent()) {
-      m_lowerSMC.getSimSupplier().get().updateSimState();
+    if (m_armSim.isPresent() && m_lowerSMC.getSimSupplier().isPresent() && m_upperSMC.getSimSupplier().isPresent()) {
+      var lowerSupplier = m_lowerSMC.getSimSupplier().get();
+      var upperSupplier = m_upperSMC.getSimSupplier().get();
+      lowerSupplier.updateSimState();
+      upperSupplier.updateSimState();
+      m_armSim.get().update(m_lowerSMC.getConfig().getSimulationPeriod().in(Seconds));
+      lowerSupplier.feedUpdateSim();
+      upperSupplier.feedUpdateSim();
       m_lowerSMC.simIterate();
-      m_lowerSMC.getSimSupplier().get().starveUpdateSim();
-      m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
-      m_upperSMC.getSimSupplier().get().starveUpdateSim();
+      lowerSupplier.starveUpdateSim();
+      upperSupplier.starveUpdateSim();
       visualizationUpdate();
     }
   }
