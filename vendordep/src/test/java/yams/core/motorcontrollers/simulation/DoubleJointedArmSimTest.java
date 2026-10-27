@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.simulation.SingleJointedArmSim;
+import yams.core.math.DoubleJointedArmDynamics;
+import yams.core.mechanisms.config.DoubleJointedArmConfig.UpperAngleReference;
 import yams.helpers.MockHardwareExtension;
 
 class DoubleJointedArmSimTest {
@@ -36,34 +38,46 @@ class DoubleJointedArmSimTest {
     MockHardwareExtension.afterAll();
   }
 
-  private static DoubleJointedArmSim sim(double lowerStart, double upperStart, boolean gravity) {
+  private static DoubleJointedArmDynamics dynamics(UpperAngleReference reference) {
+    return new DoubleJointedArmDynamics(
+        Meters.of(kLowerLength), kLowerMOI, Meters.of(kUpperLength), kUpperMOI, reference);
+  }
+
+  private static DoubleJointedArmSim sim(
+      UpperAngleReference reference, double lowerStart, double upperStart, boolean gravity) {
     return new DoubleJointedArmSim(
+        dynamics(reference),
         kMotor,
         kGearing,
-        kLowerMOI,
-        Meters.of(kLowerLength),
         Degrees.of(-360),
         Degrees.of(360),
         Degrees.of(lowerStart),
         kMotor,
         kGearing,
-        kUpperMOI,
-        Meters.of(kUpperLength),
         Degrees.of(-360),
         Degrees.of(360),
         Degrees.of(upperStart),
         gravity);
   }
 
-  /** Voltage that holds a still arm against a torque, from the motor's equation at 0 speed. */
+  private static DoubleJointedArmSim sim(double lowerStart, double upperStart, boolean gravity) {
+    return sim(UpperAngleReference.HORIZONTAL, lowerStart, upperStart, gravity);
+  }
+
+  /** Voltage that holds a still joint against a torque, from the motor's equation at 0 speed. */
   private static double holdingVoltage(double torque) {
     return -torque / kGearing / kMotor.Kt * kMotor.R;
   }
 
+  private static void run(DoubleJointedArmSim sim, int loops) {
+    for (int loop = 0; loop < loops; loop++) {
+      sim.update(0.02);
+    }
+  }
+
   @Test
   void theShoulderCarriesTheUpperArmsWeight() {
-    DoubleJointedArmSim sim = sim(0, 0, true);
-    double[] gravity = sim.getGravityTorques(0, 0);
+    double[] gravity = sim(0, 0, true).getGravityTorques(0, 0);
 
     // Both arms horizontal: the lower arm's own weight at half its length, and the upper arm's
     // whole weight at the elbow.
@@ -73,32 +87,53 @@ class DoubleJointedArmSimTest {
   }
 
   @Test
-  void theUpperArmsWeightDependsOnItsOwnAngle() {
-    DoubleJointedArmSim sim = sim(0, 0, true);
-
-    // Pointing straight up, the upper arm puts no torque on itself, but its weight still hangs off
-    // the elbow.
-    double[] gravity = sim.getGravityTorques(0, Math.PI / 2);
+  void anElbowDrivenFromTheBaseCarriesTheUpperArmsTurningWeight() {
+    // Pointing straight up, the upper arm puts no torque on its joint, and with the elbow driven
+    // from the base none on
+    // the shoulder either, but its weight still hangs off the elbow.
+    double[] gravity = sim(0, 0, true).getGravityTorques(0, Math.PI / 2);
     assertEquals(0, gravity[1], 1e-9);
     assertEquals(
         -(kLowerMass * kLowerLength / 2 + kUpperMass * kLowerLength) * 9.8, gravity[0], 1e-9);
   }
 
   @Test
+  void anElbowMotorOnTheLowerArmPutsTheUpperArmsTurningWeightOnTheShoulder() {
+    DoubleJointedArmSim sim = sim(UpperAngleReference.LOWER_ARM, 0, 0, true);
+
+    // Straight out horizontally, the shoulder also holds the upper arm's weight about the elbow.
+    double[] straight = sim.getGravityTorques(0, 0);
+    assertEquals(
+        -(kLowerMass * kLowerLength / 2 + kUpperMass * kLowerLength + kUpperMass * kUpperLength / 2)
+            * 9.8,
+        straight[0],
+        1e-9);
+    assertEquals(-kUpperMass * kUpperLength / 2 * 9.8, straight[1], 1e-9);
+    // The upper joint at 90 degrees from the lower arm, which is horizontal, points the upper arm
+    // straight up.
+    double[] up = sim.getGravityTorques(0, Math.PI / 2);
+    assertEquals(0, up[1], 1e-9);
+    assertEquals(-(kLowerMass * kLowerLength / 2 + kUpperMass * kLowerLength) * 9.8, up[0], 1e-9);
+    // With the lower arm straight up and the upper joint at -90 degrees the upper arm is horizontal
+    // again.
+    double[] bent = sim.getGravityTorques(Math.PI / 2, -Math.PI / 2);
+    assertEquals(-kUpperMass * kUpperLength / 2 * 9.8, bent[1], 1e-9);
+    assertEquals(-kUpperMass * kUpperLength / 2 * 9.8, bent[0], 1e-9);
+  }
+
+  @Test
   void holdingVoltagesKeepTheArmStill() {
-    double lower = Math.toRadians(30);
-    double upper = Math.toRadians(-20);
-    DoubleJointedArmSim sim = sim(30, -20, true);
-    double[] gravity = sim.getGravityTorques(lower, upper);
-    sim.setLowerInputVoltage(holdingVoltage(gravity[0]));
-    sim.setUpperInputVoltage(holdingVoltage(gravity[1]));
+    for (UpperAngleReference reference : UpperAngleReference.values()) {
+      DoubleJointedArmSim sim = sim(reference, 30, -20, true);
+      double[] gravity = sim.getGravityTorques(Math.toRadians(30), Math.toRadians(-20));
+      sim.setLowerInputVoltage(holdingVoltage(gravity[0]));
+      sim.setUpperInputVoltage(holdingVoltage(gravity[1]));
 
-    for (int loop = 0; loop < 50; loop++) {
-      sim.update(0.02);
+      run(sim, 50);
+
+      assertEquals(Math.toRadians(30), sim.getLowerAngle(), 1e-6, reference.toString());
+      assertEquals(Math.toRadians(-20), sim.getUpperAngle(), 1e-6, reference.toString());
     }
-
-    assertEquals(lower, sim.getLowerAngle(), 1e-6);
-    assertEquals(upper, sim.getUpperAngle(), 1e-6);
   }
 
   @Test
@@ -108,9 +143,7 @@ class DoubleJointedArmSimTest {
     sim.setLowerInputVoltage(holdingVoltage(-kLowerMass * kLowerLength / 2 * 9.8));
     sim.setUpperInputVoltage(holdingVoltage(sim.getGravityTorques(0, 0)[1]));
 
-    for (int loop = 0; loop < 10; loop++) {
-      sim.update(0.02);
-    }
+    run(sim, 10);
 
     assertTrue(
         sim.getLowerAngle() < Math.toRadians(-1),
@@ -123,13 +156,28 @@ class DoubleJointedArmSimTest {
     DoubleJointedArmSim sim = sim(0, 0, false);
     sim.setUpperInputVoltage(12);
 
-    for (int loop = 0; loop < 5; loop++) {
-      sim.update(0.02);
-    }
+    run(sim, 5);
 
     assertTrue(sim.getUpperVelocity() > 0);
     assertTrue(
         sim.getLowerVelocity() < 0, "the lower arm turns the other way: " + sim.getLowerVelocity());
+  }
+
+  @Test
+  void anElbowMotorOnTheLowerArmTurnsTheLowerArmBack() {
+    // The elbow motor pushes back on the lower arm it is mounted on, so the lower arm turns the
+    // other way much more.
+    DoubleJointedArmSim fromBase = sim(UpperAngleReference.HORIZONTAL, 0, 0, false);
+    DoubleJointedArmSim onArm = sim(UpperAngleReference.LOWER_ARM, 0, 0, false);
+    fromBase.setUpperInputVoltage(12);
+    onArm.setUpperInputVoltage(12);
+
+    run(fromBase, 5);
+    run(onArm, 5);
+
+    assertTrue(
+        onArm.getLowerVelocity() < fromBase.getLowerVelocity(),
+        onArm.getLowerVelocity() + " vs " + fromBase.getLowerVelocity());
   }
 
   @Test
@@ -140,17 +188,19 @@ class DoubleJointedArmSimTest {
     DCMotor weak = new DCMotor(12, 1e-9, 1e-3, 0, 1000, 1);
     DoubleJointedArmSim sim =
         new DoubleJointedArmSim(
+            new DoubleJointedArmDynamics(
+                Meters.of(kLowerLength),
+                kLowerMOI,
+                Meters.of(kUpperLength),
+                1e-6,
+                UpperAngleReference.HORIZONTAL),
             kMotor,
             kGearing,
-            kLowerMOI,
-            Meters.of(kLowerLength),
             Degrees.of(-360),
             Degrees.of(360),
             Degrees.of(0),
             weak,
             1,
-            1e-6,
-            Meters.of(kUpperLength),
             Degrees.of(-360),
             Degrees.of(360),
             Degrees.of(0),
@@ -183,29 +233,24 @@ class DoubleJointedArmSimTest {
     double moi = SingleJointedArmSim.estimateMOI(0.3, 0.5);
     DoubleJointedArmSim sim =
         new DoubleJointedArmSim(
+            new DoubleJointedArmDynamics(
+                Meters.of(0.3), moi, Meters.of(0.3), moi, UpperAngleReference.LOWER_ARM),
             kMotor,
             100,
-            moi,
-            Meters.of(0.3),
             Degrees.of(-360),
             Degrees.of(360),
             Degrees.of(0),
             kMotor,
             100,
-            moi,
-            Meters.of(0.3),
             Degrees.of(-360),
             Degrees.of(360),
             Degrees.of(0),
             true);
     sim.setLowerInputVoltage(12);
 
-    for (int loop = 0; loop < 50; loop++) {
-      sim.update(0.02);
-    }
+    run(sim, 50);
 
     assertTrue(Double.isFinite(sim.getLowerAngle()) && Double.isFinite(sim.getUpperAngle()));
-    // Near the free speed of the motor through the reduction, less what gravity takes.
     assertTrue(
         Math.abs(sim.getLowerVelocity()) < kMotor.freeSpeed / 100 * 1.01,
         "no faster than the motor goes: " + sim.getLowerVelocity());
@@ -215,25 +260,20 @@ class DoubleJointedArmSimTest {
   void theArmStopsAtItsHardLimits() {
     DoubleJointedArmSim sim =
         new DoubleJointedArmSim(
+            dynamics(UpperAngleReference.HORIZONTAL),
             kMotor,
             kGearing,
-            kLowerMOI,
-            Meters.of(kLowerLength),
             Degrees.of(-10),
             Degrees.of(10),
             Degrees.of(0),
             kMotor,
             kGearing,
-            kUpperMOI,
-            Meters.of(kUpperLength),
             Degrees.of(-10),
             Degrees.of(10),
             Degrees.of(0),
             true);
 
-    for (int loop = 0; loop < 50; loop++) {
-      sim.update(0.02);
-    }
+    run(sim, 50);
 
     assertEquals(Math.toRadians(-10), sim.getLowerAngle(), 1e-9);
     assertEquals(Math.toRadians(-10), sim.getUpperAngle(), 1e-9);

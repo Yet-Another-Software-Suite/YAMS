@@ -12,12 +12,16 @@ import java.util.Optional;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.core.mechanisms.config.DoubleJointedArmConfig.ExclusionZone;
+import yams.core.mechanisms.config.DoubleJointedArmConfig.UpperAngleReference;
 
 /**
  * Plans paths for a double jointed arm that keep both of its segments out of exclusion zones, with A* on a grid in
  * joint space.
  *
- * <p>Both angles are from horizontal, and the arm's frame has its origin at the shoulder with X away from it and Y up.
+ * <p>Paths are in the motor controllers' joint angles: the lower arm's from horizontal, and the upper arm's from
+ * horizontal or from the lower arm (see {@link UpperAngleReference}), so each joint's limits and following error are in
+ * the angles its closed loop controller works in. The arm's frame has its origin at the shoulder with X away from it and
+ * Y up.
  * The lower segment runs from the shoulder to the elbow, and the upper segment from the elbow to the end of the arm.
  *
  * <p>Each step of a path moves to a neighboring grid point, and is checked over the whole box of joint angles it
@@ -76,7 +80,9 @@ public class DoubleJointedArmPathPlanner {
   /** Largest spacing of the grid, in radians. */
   private final double   resolution;
   /** Following error allowed in each joint, in radians. */
-  private final double   tolerance;
+  private double         tolerance;
+  /** 0 when the upper joint angle is from horizontal, 1 when it is from the lower arm. */
+  private final double   k;
 
   // ---- The plan being made. Kept between plans, so planning allocates nothing.
 
@@ -140,11 +146,12 @@ public class DoubleJointedArmPathPlanner {
    * @param clearance   Distance to keep from the exclusion zones.
    * @param resolution  Largest spacing of the joint space grid.
    * @param tolerance   Following error allowed in each joint, which paths keep away from the zones too.
+   * @param reference   What the upper joint angle is measured from.
    * @throws IllegalArgumentException if a joint's lowest angle is above its highest, or the resolution or tolerance is
    *                                  not above 0.
    */
   public DoubleJointedArmPathPlanner(Distance lowerLength, Distance upperLength, Angle lowerMin, Angle lowerMax, Angle upperMin, Angle upperMax,
-                                     List<ExclusionZone> zones, Distance clearance, Angle resolution, Angle tolerance) {
+                                     List<ExclusionZone> zones, Distance clearance, Angle resolution, Angle tolerance, UpperAngleReference reference) {
     this.lowerLength = lowerLength.in(Meters);
     this.upperLength = upperLength.in(Meters);
     this.lowerMin = lowerMin.in(Radians);
@@ -154,6 +161,7 @@ public class DoubleJointedArmPathPlanner {
     this.clearance = clearance.in(Meters);
     this.resolution = resolution.in(Radians);
     this.tolerance = tolerance.in(Radians);
+    this.k = reference == UpperAngleReference.LOWER_ARM ? 1 : 0;
     if (this.lowerMin > this.lowerMax || this.upperMin > this.upperMax) {
       throw new IllegalArgumentException("A joint's lowest angle is above its highest");
     }
@@ -173,14 +181,87 @@ public class DoubleJointedArmPathPlanner {
   }
 
   /**
-   * Whether the arm at these angles is in an exclusion zone, or closer to one than the clearance.
+   * Whether the arm at these joint angles is in an exclusion zone, or closer to one than the clearance.
    *
-   * @param lowerAngle Lower arm angle.
-   * @param upperAngle Upper arm angle.
+   * @param lowerAngle Lower joint angle.
+   * @param upperAngle Upper joint angle.
    * @return True if either segment is in or too close to an exclusion zone.
    */
   public boolean isInExclusionZone(Angle lowerAngle, Angle upperAngle) {
     return collides(lowerAngle.in(Radians), upperAngle.in(Radians), clearance);
+  }
+
+  /**
+   * Set the following error allowed in each joint, which paths plan for from then on.
+   *
+   * @param tolerance Following error allowed in each joint.
+   * @throws IllegalArgumentException if the tolerance is not above 0.
+   */
+  public void setTolerance(Angle tolerance) {
+    if (!(tolerance.in(Radians) > 0)) {
+      throw new IllegalArgumentException("Tolerance must be above 0");
+    }
+    this.tolerance = tolerance.in(Radians);
+  }
+
+  /**
+   * Get the following error allowed in each joint.
+   *
+   * @return Tolerance, in radians.
+   */
+  public double getTolerance() {
+    return tolerance;
+  }
+
+  /**
+   * Whether the arm can move straight between two sets of joint angles, each joint on its own, and stay clear of the
+   * exclusion zones with the following error to spare: the whole box of joint angles between them, widened by the
+   * tolerance, is clear by the clearance.
+   *
+   * @param fromLower Lower joint angle to start at, in radians.
+   * @param fromUpper Upper joint angle to start at, in radians.
+   * @param toLower   Lower joint angle to end at, in radians.
+   * @param toUpper   Upper joint angle to end at, in radians.
+   * @return True if the move is clear.
+   */
+  public boolean isMoveClear(double fromLower, double fromUpper, double toLower, double toUpper) {
+    return isBoxClear((fromLower + toLower) / 2, (fromUpper + toUpper) / 2, Math.abs(toLower - fromLower) / 2, Math.abs(toUpper - fromUpper) / 2);
+  }
+
+  /**
+   * Whether a box of joint angles, widened by the tolerance, is clear by the clearance. Checked at its center with the
+   * zones grown by the farthest the arm moves in it, and split in half along its wider side while that might collide,
+   * down to half the resolution, so a big box is only as conservative as a grid step.
+   *
+   * @param centerLower Lower joint angle at the center, in radians.
+   * @param centerUpper Upper joint angle at the center, in radians.
+   * @param halfLower   Half the lower joint angles the box spans, in radians.
+   * @param halfUpper   Half the upper joint angles the box spans, in radians.
+   * @return True if the box is clear.
+   */
+  private boolean isBoxClear(double centerLower, double centerUpper, double halfLower, double halfUpper) {
+    if (!collides(centerLower, centerUpper, clearance + motion(halfLower + tolerance, halfUpper + tolerance))) {
+      return true;
+    }
+    if (halfLower <= resolution / 2 && halfUpper <= resolution / 2) {
+      return false;
+    }
+    if (halfLower >= halfUpper) {
+      return isBoxClear(centerLower - halfLower / 2, centerUpper, halfLower / 2, halfUpper) && isBoxClear(centerLower + halfLower / 2, centerUpper, halfLower / 2, halfUpper);
+    }
+    return isBoxClear(centerLower, centerUpper - halfUpper / 2, halfLower, halfUpper / 2) && isBoxClear(centerLower, centerUpper + halfUpper / 2, halfLower, halfUpper / 2);
+  }
+
+  /**
+   * The farthest any point on the arm can move when each joint turns by up to its angle: the lower arm swings the whole
+   * arm, and the upper arm's angle from horizontal also turns with the lower joint when measured from the lower arm.
+   *
+   * @param lowerAngle Largest lower joint turn, in radians.
+   * @param upperAngle Largest upper joint turn, in radians.
+   * @return Distance, in meters.
+   */
+  private double motion(double lowerAngle, double upperAngle) {
+    return lowerLength * lowerAngle + upperLength * (upperAngle + k * lowerAngle);
   }
 
   /**
@@ -197,7 +278,8 @@ public class DoubleJointedArmPathPlanner {
     if (toLower < lowerMin || toLower > lowerMax || toUpper < upperMin || toUpper > upperMax || collides(toLower, toUpper, clearance)) {
       return Optional.empty();
     }
-    if (zoneMinX.length == 0) {
+    // Without zones, or with nothing in the way, the goal is the path.
+    if (zoneMinX.length == 0 || isMoveClear(fromLower, fromUpper, toLower, toUpper)) {
       return Optional.of(DoubleJointedArmPath.to(Radians.of(toLower), Radians.of(toUpper)));
     }
     startLower = fromLower;
@@ -276,12 +358,12 @@ public class DoubleJointedArmPathPlanner {
         final double  upperDelta    = nextUpper - nodeUpper;
         final double  centerLower   = (nodeLower + nextLower) / 2;
         final double  centerUpper   = (nodeUpper + nextUpper) / 2;
-        final double  stepMargin    = clearance + lowerLength * Math.abs(lowerDelta) / 2 + upperLength * Math.abs(upperDelta) / 2;
+        final double  stepMargin    = clearance + motion(Math.abs(lowerDelta) / 2, Math.abs(upperDelta) / 2);
         final boolean stepColliding = collides(centerLower, centerUpper, stepMargin);
         if (stepColliding && !leaving) {
           continue;
         }
-        final boolean inMargin = stepColliding || collides(centerLower, centerUpper, stepMargin + (lowerLength + upperLength) * tolerance);
+        final boolean inMargin = stepColliding || collides(centerLower, centerUpper, stepMargin + motion(tolerance, tolerance));
         final double nextCost = cost[node] + Math.hypot(lowerDelta, upperDelta) * (stepColliding ? kCollidingStepCost : inMargin ? kMarginStepCost : 1);
         if (nextCost < cost[next]) {
           cost[next] = nextCost;
@@ -481,8 +563,8 @@ public class DoubleJointedArmPathPlanner {
   private boolean collides(double lowerAngle, double upperAngle, double margin) {
     final double elbowX = lowerLength * Math.cos(lowerAngle);
     final double elbowY = lowerLength * Math.sin(lowerAngle);
-    final double endX   = elbowX + upperLength * Math.cos(upperAngle);
-    final double endY   = elbowY + upperLength * Math.sin(upperAngle);
+    final double endX   = elbowX + upperLength * Math.cos(upperAngle + k * lowerAngle);
+    final double endY   = elbowY + upperLength * Math.sin(upperAngle + k * lowerAngle);
     for (int z = 0; z < zoneMinX.length; z++) {
       final double minX = zoneMinX[z] - margin;
       final double minY = zoneMinY[z] - margin;

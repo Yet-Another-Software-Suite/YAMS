@@ -3,147 +3,102 @@
 
 package yams.core.motorcontrollers.simulation;
 
-import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.measure.Angle;
-import org.wpilib.units.measure.Distance;
+import yams.core.math.DoubleJointedArmDynamics;
 
 /**
  * Physics simulation of a double jointed arm, with both joints simulated together so each moves the other.
  *
  * <p>Two {@link org.wpilib.simulation.SingleJointedArmSim}s can't simulate a double jointed arm: the shoulder carries
- * the upper arm's weight, which depends on where the upper arm points, and the upper arm's inertia, which depends on the
- * angle between the arms, and swinging either arm pushes on the other. This simulates the two-link equations of
- * motion,
+ * the upper arm's weight and its inertia, which depends on the angle between the arms, and swinging either arm pushes
+ * on the other. This integrates the equations of motion of {@link DoubleJointedArmDynamics}, in the motor controllers'
+ * joint angles, so each motor's torque and back-EMF are on its own joint.
  *
- * <pre>
- *   M(θ) θ'' + C(θ, θ') + G(θ) = τ
- *
- *   M = [ J1 + m2 l1²              m2 l1 r2 cos(θ1 − θ2) ]
- *       [ m2 l1 r2 cos(θ1 − θ2)    J2                    ]
- *   C = [  m2 l1 r2 sin(θ1 − θ2) θ2'² ]
- *       [ −m2 l1 r2 sin(θ1 − θ2) θ1'² ]
- *   G = [ (m1 r1 + m2 l1) g cos θ1 ]
- *       [ m2 r2 g cos θ2           ]
- * </pre>
- *
- * <p>Both angles are from horizontal, as {@link yams.core.mechanisms.positional.DoubleJointedArm} measures them. That
- * is an arm whose elbow is driven from the base, e.g. by a chain through the shoulder, so the elbow motor's torque and
- * speed are those of the upper arm itself.
- *
- * <p>Each arm is a uniform rod, as {@link org.wpilib.simulation.SingleJointedArmSim} assumes: its moment of inertia
- * {@code J} about its own pivot gives its mass, {@code m = 3 J / l²}, with its center of mass halfway along it,
- * {@code r = l / 2}. A moment of inertia from
- * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withMomentOfInertia(Distance, org.wpilib.units.measure.Mass)}
- * gives back the mass it was made from.
+ * <p>Not thread safe: it keeps working arrays, so stepping allocates nothing.
  */
 public class DoubleJointedArmSim {
-  /** Acceleration of gravity, in meters per second squared, as WPILib's arm simulation uses. */
-  private static final double kGravity      = 9.8;
   /** Longest integration step, in seconds. */
-  private static final double kMaxStep      = 0.001;
+  private static final double            kMaxStep     = 0.001;
+  /** Equations of motion. */
+  private final DoubleJointedArmDynamics dynamics;
   /** Lower arm motors. */
-  private final DCMotor       lowerMotor;
+  private final DCMotor                  lowerMotor;
   /** Upper arm motors. */
-  private final DCMotor       upperMotor;
+  private final DCMotor                  upperMotor;
   /** Lower arm gearing, rotor rotations per arm rotation. */
-  private final double        lowerGearing;
+  private final double                   lowerGearing;
   /** Upper arm gearing, rotor rotations per arm rotation. */
-  private final double        upperGearing;
-  /** Lower arm length, in meters. */
-  private final double        lowerLength;
-  /** Lower arm moment of inertia about the shoulder, in kilogram square meters. */
-  private final double        lowerMOI;
-  /** Upper arm moment of inertia about the elbow, in kilogram square meters. */
-  private final double        upperMOI;
-  /** Lower arm mass times the distance from the shoulder to its center of mass, in kilogram meters. */
-  private final double        lowerMassMoment;
-  /** Upper arm mass, in kilograms. */
-  private final double        upperMass;
-  /** Distance from the elbow to the upper arm's center of mass, in meters. */
-  private final double        upperCenterOfMass;
-  /** Lower arm angle limits, in radians. */
-  private final double        lowerMin;
-  /** Lower arm angle limits, in radians. */
-  private final double        lowerMax;
-  /** Upper arm angle limits, in radians. */
-  private final double        upperMin;
-  /** Upper arm angle limits, in radians. */
-  private final double        upperMax;
+  private final double                   upperGearing;
+  /** Lowest lower joint angle, in radians. */
+  private final double                   lowerMin;
+  /** Highest lower joint angle, in radians. */
+  private final double                   lowerMax;
+  /** Lowest upper joint angle, in radians. */
+  private final double                   upperMin;
+  /** Highest upper joint angle, in radians. */
+  private final double                   upperMax;
   /** Simulate gravity? */
-  private final boolean       simulateGravity;
+  private final boolean                  simulateGravity;
   /**
-   * Fastest rate a joint's motor can slow it, in 1/s: its back-EMF damping over the least inertia it can have. Integration
-   * steps are kept short enough for it, so a light arm on a big reduction doesn't blow up.
+   * Fastest rate a joint's motor can slow it, in 1/s: its back-EMF damping over the least inertia it can have.
+   * Integration steps are kept short enough for it, so a light arm on a big reduction doesn't blow up.
    */
-  private final double        stiffness;
+  private final double                   stiffness;
   /** State: lower angle, upper angle, lower velocity, upper velocity, in radians and radians per second. */
-  private final double[]      state         = new double[4];
+  private final double[]                 state        = new double[4];
   /** RK4 slopes and the state they're taken at, kept so stepping allocates nothing. */
-  private final double[]      k1            = new double[4];
-  private final double[]      k2            = new double[4];
-  private final double[]      k3            = new double[4];
-  private final double[]      k4            = new double[4];
-  private final double[]      stage         = new double[4];
-  /** Gravity torques, kept so stepping allocates nothing. */
-  private final double[]      gravity       = new double[2];
+  private final double[]                 k1           = new double[4];
+  private final double[]                 k2           = new double[4];
+  private final double[]                 k3           = new double[4];
+  private final double[]                 k4           = new double[4];
+  private final double[]                 stage        = new double[4];
+  /** Mass matrix, passive torques and gravity torques, kept so stepping allocates nothing. */
+  private final double[]                 massMatrix   = new double[3];
+  private final double[]                 passive      = new double[2];
+  private final double[]                 gravity      = new double[2];
   /** Lower arm motor voltage. */
-  private double              lowerVoltage  = 0;
+  private double                         lowerVoltage = 0;
   /** Upper arm motor voltage. */
-  private double              upperVoltage  = 0;
+  private double                         upperVoltage = 0;
 
   /**
-   * Create a double jointed arm simulation.
+   * Create a double jointed arm simulation. Angles are the motor controllers' joint angles.
    *
-   * @param lowerMotor        Lower arm motors.
-   * @param lowerGearing      Lower arm gearing, rotor rotations per arm rotation.
-   * @param lowerMOI          Lower arm moment of inertia about the shoulder, in kilogram square meters.
-   * @param lowerLength       Lower arm length, from the shoulder to the elbow.
-   * @param lowerMin          Lowest lower arm angle, from horizontal.
-   * @param lowerMax          Highest lower arm angle, from horizontal.
-   * @param lowerStart        Starting lower arm angle, from horizontal.
-   * @param upperMotor        Upper arm motors.
-   * @param upperGearing      Upper arm gearing, rotor rotations per arm rotation.
-   * @param upperMOI          Upper arm moment of inertia about the elbow, in kilogram square meters.
-   * @param upperLength       Upper arm length.
-   * @param upperMin          Lowest upper arm angle, from horizontal.
-   * @param upperMax          Highest upper arm angle, from horizontal.
-   * @param upperStart        Starting upper arm angle, from horizontal.
-   * @param simulateGravity   Whether gravity acts on the arm.
-   * @throws IllegalArgumentException if an arm's length, moment of inertia or gearing is not above 0.
+   * @param dynamics        Equations of motion of the arm.
+   * @param lowerMotor      Lower arm motors.
+   * @param lowerGearing    Lower arm gearing, rotor rotations per arm rotation.
+   * @param lowerMin        Lowest lower joint angle.
+   * @param lowerMax        Highest lower joint angle.
+   * @param lowerStart      Starting lower joint angle.
+   * @param upperMotor      Upper arm motors.
+   * @param upperGearing    Upper arm gearing, rotor rotations per arm rotation.
+   * @param upperMin        Lowest upper joint angle.
+   * @param upperMax        Highest upper joint angle.
+   * @param upperStart      Starting upper joint angle.
+   * @param simulateGravity Whether gravity acts on the arm.
+   * @throws IllegalArgumentException if a gearing is not above 0.
    */
-  public DoubleJointedArmSim(DCMotor lowerMotor, double lowerGearing, double lowerMOI, Distance lowerLength, Angle lowerMin, Angle lowerMax, Angle lowerStart,
-                             DCMotor upperMotor, double upperGearing, double upperMOI, Distance upperLength, Angle upperMin, Angle upperMax, Angle upperStart,
-                             boolean simulateGravity) {
+  public DoubleJointedArmSim(DoubleJointedArmDynamics dynamics, DCMotor lowerMotor, double lowerGearing, Angle lowerMin, Angle lowerMax, Angle lowerStart,
+                             DCMotor upperMotor, double upperGearing, Angle upperMin, Angle upperMax, Angle upperStart, boolean simulateGravity) {
+    if (!(lowerGearing > 0 && upperGearing > 0)) {
+      throw new IllegalArgumentException("Gearings must be above 0");
+    }
+    this.dynamics = dynamics;
     this.lowerMotor = lowerMotor;
     this.upperMotor = upperMotor;
     this.lowerGearing = lowerGearing;
     this.upperGearing = upperGearing;
-    this.lowerLength = lowerLength.in(Meters);
-    this.lowerMOI = lowerMOI;
-    this.upperMOI = upperMOI;
-    final double upperLengthMeters = upperLength.in(Meters);
-    if (!(this.lowerLength > 0 && upperLengthMeters > 0 && lowerMOI > 0 && upperMOI > 0 && lowerGearing > 0 && upperGearing > 0)) {
-      throw new IllegalArgumentException("Arm lengths, moments of inertia and gearings must be above 0");
-    }
-    // Uniform rods: m = 3 J / l², with the center of mass at l / 2.
-    this.lowerMassMoment = 3 * lowerMOI / (this.lowerLength * this.lowerLength) * (this.lowerLength / 2);
-    this.upperMass = 3 * upperMOI / (upperLengthMeters * upperLengthMeters);
-    this.upperCenterOfMass = upperLengthMeters / 2;
     this.lowerMin = lowerMin.in(Radians);
     this.lowerMax = lowerMax.in(Radians);
     this.upperMin = upperMin.in(Radians);
     this.upperMax = upperMax.in(Radians);
     this.simulateGravity = simulateGravity;
-    // A joint's effective inertia is least when the other joint is free and lined up with it: M11 − M12² / M22 and
-    // M22 − M12² / M11 at cos(θ1 − θ2) = ±1.
-    final double coupling  = upperMass * this.lowerLength * upperCenterOfMass;
-    final double m11       = lowerMOI + upperMass * this.lowerLength * this.lowerLength;
     final double lowerDamping = lowerGearing * lowerGearing * lowerMotor.Kt / (lowerMotor.R * lowerMotor.Kv);
     final double upperDamping = upperGearing * upperGearing * upperMotor.Kt / (upperMotor.R * upperMotor.Kv);
-    this.stiffness = Math.max(lowerDamping / (m11 - coupling * coupling / upperMOI), upperDamping / (upperMOI - coupling * coupling / m11));
+    this.stiffness = Math.max(lowerDamping / dynamics.getLeastEffectiveInertia(0), upperDamping / dynamics.getLeastEffectiveInertia(1));
     state[0] = lowerStart.in(Radians);
     state[1] = upperStart.in(Radians);
   }
@@ -185,12 +140,12 @@ public class DoubleJointedArmSim {
   }
 
   /**
-   * Set the arm's state.
+   * Set the arm's state, in joint angles.
    *
-   * @param lowerAngle    Lower arm angle, in radians.
-   * @param lowerVelocity Lower arm velocity, in radians per second.
-   * @param upperAngle    Upper arm angle, in radians.
-   * @param upperVelocity Upper arm velocity, in radians per second.
+   * @param lowerAngle    Lower joint angle, in radians.
+   * @param lowerVelocity Lower joint velocity, in radians per second.
+   * @param upperAngle    Upper joint angle, in radians.
+   * @param upperVelocity Upper joint velocity, in radians per second.
    */
   public void setState(double lowerAngle, double lowerVelocity, double upperAngle, double upperVelocity) {
     state[0] = lowerAngle;
@@ -229,41 +184,41 @@ public class DoubleJointedArmSim {
   }
 
   /**
-   * Torque on each arm from gravity, in newton meters, positive raising the arm.
+   * Torque gravity puts on each joint, in newton meters, positive raising the joint.
    *
-   * @param lowerAngle Lower arm angle, in radians.
-   * @param upperAngle Upper arm angle, in radians.
-   * @return Lower then upper arm gravity torque.
+   * @param lowerAngle Lower joint angle, in radians.
+   * @param upperAngle Upper joint angle, in radians.
+   * @return Lower then upper joint gravity torque.
    */
   public double[] getGravityTorques(double lowerAngle, double upperAngle) {
     final double[] torques = new double[2];
-    gravityTorques(lowerAngle, upperAngle, torques);
+    if (simulateGravity) {
+      dynamics.getGravityTorques(lowerAngle, upperAngle, torques);
+    }
     return torques;
   }
 
-  /** Put the gravity torques into {@code torques}, lower then upper. */
-  private void gravityTorques(double lowerAngle, double upperAngle, double[] torques) {
-    torques[0] = simulateGravity ? -(lowerMassMoment + upperMass * lowerLength) * kGravity * Math.cos(lowerAngle) : 0;
-    torques[1] = simulateGravity ? -upperMass * upperCenterOfMass * kGravity * Math.cos(upperAngle) : 0;
-  }
-
   /**
-   * State derivative into {@code dx}: velocities, then the accelerations solved from M(θ) θ'' = τ − C(θ, θ') − G(θ).
+   * State derivative into {@code dx}: velocities, then the accelerations solved from Aᵀ M A q'' = τ + Aᵀ (G − C).
    */
   private void derivative(double[] x, double[] dx) {
-    final double delta   = x[0] - x[1];
-    final double coupling = upperMass * lowerLength * upperCenterOfMass;
-    final double m11     = lowerMOI + upperMass * lowerLength * lowerLength;
-    final double m12     = coupling * Math.cos(delta);
-    final double m22     = upperMOI;
-    gravityTorques(x[0], x[1], gravity);
-    final double lowerTorque = motorTorque(lowerMotor, lowerGearing, x[2], lowerVoltage) - coupling * Math.sin(delta) * x[3] * x[3] + gravity[0];
-    final double upperTorque = motorTorque(upperMotor, upperGearing, x[3], upperVoltage) + coupling * Math.sin(delta) * x[2] * x[2] + gravity[1];
+    dynamics.getMassMatrix(x[0], x[1], massMatrix);
+    dynamics.getPassiveTorques(x[0], x[1], x[2], x[3], passive);
+    if (!simulateGravity) {
+      dynamics.getGravityTorques(x[0], x[1], gravity);
+      passive[0] -= gravity[0];
+      passive[1] -= gravity[1];
+    }
+    final double lowerTorque = motorTorque(lowerMotor, lowerGearing, x[2], lowerVoltage) + passive[0];
+    final double upperTorque = motorTorque(upperMotor, upperGearing, x[3], upperVoltage) + passive[1];
+    final double m11         = massMatrix[0];
+    final double m12         = massMatrix[1];
+    final double m22         = massMatrix[2];
     final double determinant = m11 * m22 - m12 * m12;
     double lowerAcceleration = (m22 * lowerTorque - m12 * upperTorque) / determinant;
     double upperAcceleration = (m11 * upperTorque - m12 * lowerTorque) / determinant;
     // A joint pushed into its hard stop is held there, so it can't accelerate, and the other joint moves as if it was
-    // fixed: M θ'' = τ with that joint's θ'' = 0. Holding one can push the other into its stop, so check twice.
+    // fixed. Holding one can push the other into its stop, so check twice.
     boolean lowerStopped = false;
     boolean upperStopped = false;
     for (int check = 0; check < 2; check++) {
@@ -284,9 +239,9 @@ public class DoubleJointedArmSim {
     return (angle <= min + epsilon && velocity <= 0 && acceleration < 0) || (angle >= max - epsilon && velocity >= 0 && acceleration > 0);
   }
 
-  /** Torque at the arm from its motors, in newton meters. */
-  private static double motorTorque(DCMotor motor, double gearing, double armVelocity, double volts) {
-    return gearing * motor.getTorque(motor.getCurrent(armVelocity * gearing, volts));
+  /** Torque at the joint from its motors, in newton meters. */
+  private static double motorTorque(DCMotor motor, double gearing, double jointVelocity, double volts) {
+    return gearing * motor.getTorque(motor.getCurrent(jointVelocity * gearing, volts));
   }
 
   /** {@code x + k * scale}, into {@code out}. */
@@ -298,25 +253,25 @@ public class DoubleJointedArmSim {
   }
 
   /**
-   * Get the lower arm angle.
+   * Get the lower joint angle.
    *
-   * @return Angle from horizontal, in radians.
+   * @return Angle, in radians.
    */
   public double getLowerAngle() {
     return state[0];
   }
 
   /**
-   * Get the upper arm angle.
+   * Get the upper joint angle.
    *
-   * @return Angle from horizontal, in radians.
+   * @return Angle, in radians.
    */
   public double getUpperAngle() {
     return state[1];
   }
 
   /**
-   * Get the lower arm velocity.
+   * Get the lower joint velocity.
    *
    * @return Radians per second.
    */
@@ -325,7 +280,7 @@ public class DoubleJointedArmSim {
   }
 
   /**
-   * Get the upper arm velocity.
+   * Get the upper joint velocity.
    *
    * @return Radians per second.
    */

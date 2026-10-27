@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.geometry.Translation2d;
 import yams.core.mechanisms.config.DoubleJointedArmConfig.ExclusionZone;
+import yams.core.mechanisms.config.DoubleJointedArmConfig.UpperAngleReference;
 
 class DoubleJointedArmPathPlannerTest {
   private static final double kLowerLength = 1.0;
@@ -40,7 +41,8 @@ class DoubleJointedArmPathPlannerTest {
         List.of(zones),
         Meters.of(0),
         Degrees.of(2),
-        Degrees.of(1));
+        Degrees.of(1),
+        UpperAngleReference.HORIZONTAL);
   }
 
   private static Optional<DoubleJointedArmPath> plan(
@@ -215,7 +217,8 @@ class DoubleJointedArmPathPlannerTest {
             List.of(wall),
             Meters.of(0),
             Degrees.of(2),
-            Degrees.of(1));
+            Degrees.of(1),
+            UpperAngleReference.HORIZONTAL);
 
     assertTrue(planner.isInExclusionZone(Degrees.of(21), Degrees.of(22)));
     assertTrue(planner.isInExclusionZone(Degrees.of(0), Degrees.of(0)));
@@ -238,7 +241,8 @@ class DoubleJointedArmPathPlannerTest {
             List.of(wall),
             Meters.of(0.03),
             Degrees.of(2),
-            Degrees.of(3));
+            Degrees.of(3),
+            UpperAngleReference.HORIZONTAL);
     DoubleJointedArmPath path = plan(planner, 30, 30, -30, -30).orElseThrow();
 
     double lower = Math.toRadians(30);
@@ -311,7 +315,8 @@ class DoubleJointedArmPathPlannerTest {
             List.of(zone),
             Meters.of(0.1),
             Degrees.of(2),
-            Degrees.of(1));
+            Degrees.of(1),
+            UpperAngleReference.HORIZONTAL);
 
     assertFalse(planner(zone).isInExclusionZone(Degrees.of(0), Degrees.of(0)));
     assertTrue(planner.isInExclusionZone(Degrees.of(0), Degrees.of(0)), "within the clearance");
@@ -354,7 +359,8 @@ class DoubleJointedArmPathPlannerTest {
             List.of(kAbove),
             Meters.of(0),
             Degrees.of(2),
-            Degrees.of(1));
+            Degrees.of(1),
+            UpperAngleReference.HORIZONTAL);
     assertTrue(plan(small, 0, 0, 5, 5).isPresent());
     DoubleJointedArmPath again = plan(planner, 0, 0, -180, -180).orElseThrow();
 
@@ -378,7 +384,8 @@ class DoubleJointedArmPathPlannerTest {
             List.of(kAbove),
             Meters.of(0),
             Degrees.of(2),
-            Degrees.of(1));
+            Degrees.of(1),
+            UpperAngleReference.HORIZONTAL);
     DoubleJointedArmPath path = plan(planner, 0, 0, -180, -180).orElseThrow();
 
     assertPathAvoids(path, 0, 0, List.of(kAbove));
@@ -391,5 +398,85 @@ class DoubleJointedArmPathPlannerTest {
 
     assertEquals(new Translation2d(-2, -1), zone.min());
     assertEquals(new Translation2d(1, 3), zone.max());
+  }
+
+  @Test
+  void aClearMoveIsJustTheGoal() {
+    // Nothing between reaching forward and reaching forward and down.
+    DoubleJointedArmPath path = plan(planner(kAbove), 0, 0, -30, -30).orElseThrow();
+
+    assertEquals(1, path.size());
+    assertEndsAt(path, -30, -30);
+  }
+
+  @Test
+  void anUpperAngleFromTheLowerArmIsPlannedInItsOwnJointAngles() {
+    // The upper joint is measured from the lower arm: 0 is the arm straight, whatever the lower
+    // arm's angle.
+    DoubleJointedArmPathPlanner planner =
+        new DoubleJointedArmPathPlanner(
+            Meters.of(kLowerLength),
+            Meters.of(kUpperLength),
+            Degrees.of(-270),
+            Degrees.of(270),
+            Degrees.of(-270),
+            Degrees.of(270),
+            List.of(kAbove),
+            Meters.of(0),
+            Degrees.of(2),
+            Degrees.of(1),
+            UpperAngleReference.LOWER_ARM);
+
+    // The lower arm straight up with the upper joint at -90 degrees points the upper arm forward:
+    // the lower arm is in
+    // the zone above the shoulder either way.
+    assertTrue(planner.isInExclusionZone(Degrees.of(90), Degrees.of(-90)));
+    // The lower arm forward with the upper joint at 90 degrees points the upper arm up, clear of
+    // the zone.
+    assertFalse(planner.isInExclusionZone(Degrees.of(0), Degrees.of(90)));
+    // Reaching back under the shoulder: the lower arm at -180 degrees and the arm straight.
+    DoubleJointedArmPath path = plan(planner, 0, 0, -180, 0).orElseThrow();
+    assertEndsAt(path, -180, 0);
+    double lower = 0;
+    double upper = 0;
+    for (int k = 0; k < path.size(); k++) {
+      // Check the step in angles from horizontal, which is what the independent check uses.
+      for (int i = 0; i <= 10; i++) {
+        double l = lower + (path.getLowerRadians(k) - lower) * i / 10;
+        double u = upper + (path.getUpperRadians(k) - upper) * i / 10;
+        assertFalse(touches(l, u + l, List.of(kAbove)), "step " + k + " enters the zone");
+      }
+      lower = path.getLowerRadians(k);
+      upper = path.getUpperRadians(k);
+    }
+  }
+
+  @Test
+  void aChangedToleranceIsUsed() {
+    // A gap between two zones that the arm only fits through with a small following error.
+    ExclusionZone left = new ExclusionZone(new Translation2d(-2, 0.2), new Translation2d(-0.05, 2));
+    ExclusionZone right = new ExclusionZone(new Translation2d(0.05, 0.2), new Translation2d(2, 2));
+    DoubleJointedArmPathPlanner planner =
+        new DoubleJointedArmPathPlanner(
+            Meters.of(kLowerLength),
+            Meters.of(kUpperLength),
+            Degrees.of(-270),
+            Degrees.of(270),
+            Degrees.of(-270),
+            Degrees.of(270),
+            List.of(left, right),
+            Meters.of(0),
+            Degrees.of(1),
+            Degrees.of(0.5),
+            UpperAngleReference.HORIZONTAL);
+    double up = Math.PI / 2;
+    assertTrue(planner.isMoveClear(up, up, up, up), "the straight up arm fits in the gap");
+
+    planner.setTolerance(Degrees.of(10));
+
+    assertEquals(Math.toRadians(10), planner.getTolerance(), 1e-12);
+    assertFalse(
+        planner.isMoveClear(up, up, up, up),
+        "10 degrees of following error doesn't fit in the gap");
   }
 }

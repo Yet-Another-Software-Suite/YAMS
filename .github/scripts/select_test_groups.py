@@ -36,6 +36,9 @@ JAVA_GROUPS = [
     {"group": "pivot", "test-filter": '--tests "yams.mechs.PivotTest"'},
     {"group": "shooter", "test-filter": '--tests "yams.mechs.ShooterTest"'},
     {"group": "mechanism-limits", "test-filter": '--tests "yams.mechs.MechanismLimitTest"'},
+    # A double jointed arm on two SPARK MAXes moving around exclusion zones, compensating kG for where it is, and its
+    # telemetry and live tuning.
+    {"group": "double-jointed-arm", "test-filter": '--tests "yams.mechs.DoubleJointedArmTest"'},
     # Loosely coupled followers whose closed loop runs on the motor controller or on the SystemCore
     # (a Nova, a SPARK with an exponential profile and a SPARK with an LQR) following and stopping
     # with their leader. A TalonFX leads one, which Phoenix runs in real time.
@@ -104,12 +107,13 @@ JAVA_GROUPS = [
     # an elevator, on the motor controller and on the SystemCore.
     {"group": "closed-loop-gain-units",
      "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'},
-    # Everything else: swerve config tests, the battery and motor simulation unit tests, and the
-    # standalone math test. Gradle's --tests cannot exclude the groups above, so each class is
+    # Everything else: swerve config tests, the battery, motor and double jointed arm simulation unit
+    # tests, and the math tests. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.
     {"group": "other",
      "test-filter": '--tests "yams.core.mechanisms.*"'
                     ' --tests "yams.core.motorcontrollers.simulation.*"'
+                    ' --tests "yams.core.math.*"'
                     ' --tests "yams.ChineseRemainderTheoremTest"'},
 ]
 
@@ -138,7 +142,7 @@ CPP_GROUPS = [
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "loose-followers", "live-tuning", "swerve-drive", "other"}
+                         "loose-followers", "live-tuning", "swerve-drive", "double-jointed-arm", "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
 

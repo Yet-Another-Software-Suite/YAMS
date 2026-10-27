@@ -17,14 +17,22 @@ import org.wpilib.units.measure.Distance;
 import yams.core.exceptions.DoubleJointedArmConfigurationException;
 import yams.core.mechanisms.positional.DoubleJointedArm;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
  * Double jointed arm configuration: the lower (shoulder) and upper (elbow) arms, and the exclusion zones the arm must
  * never enter while it travels.
  *
- * <p>Both arm angles are measured from horizontal, so the upper arm's angle does not change when only the lower arm
- * moves. The arm's frame has its origin at the shoulder, with X away from the shoulder and Y up, the same as
- * {@link DoubleJointedArm#getPosition()} and {@link DoubleJointedArm#getAnglesForPosition(Translation2d, boolean)}.
+ * <p>The lower arm's angle is measured from horizontal. The upper arm's angle is the upper motor controller's, which is
+ * measured from horizontal by default, as on an arm whose elbow is driven from the base, e.g. by a chain through the
+ * shoulder, or from the lower arm with {@link #withUpperAngleReference(UpperAngleReference)}, as on an arm with its elbow
+ * motor on the lower arm. The arm's frame has its origin at the shoulder, with X away from the shoulder and Y up, the
+ * same as {@link DoubleJointedArm#getPosition()} and
+ * {@link DoubleJointedArm#getAnglesForPosition(Translation2d, boolean)}.
+ *
+ * <p>Gravity on each joint depends on where both arms are, which an {@link org.wpilib.math.controller.ArmFeedforward}
+ * can't know, so {@link DoubleJointedArm} changes each joint's kG as the arm moves. Tune each kG with the arm held
+ * straight out horizontally; see {@link #withKgUpdateThreshold(double)}.
  *
  * <p>When exclusion zones are configured, every move to an angle or position follows a path planned with A* in joint
  * space, so neither segment of the arm passes through a zone on the way.
@@ -57,6 +65,28 @@ public class DoubleJointedArmConfig {
   private Angle                      pathResolution = Degrees.of(2);
   /** How close each joint must get to a waypoint before moving on, or empty for half the resolution. */
   private Optional<Angle>            pathTolerance  = Optional.empty();
+  /** What the upper arm's angle is measured from. */
+  private UpperAngleReference        upperAngleReference = UpperAngleReference.HORIZONTAL;
+  /** Fraction kG must change by before it is sent to a motor controller again. */
+  private double                     kGUpdateThreshold   = 0.05;
+  /** Telemetry name. */
+  private Optional<String>           telemetryName       = Optional.empty();
+  /** Telemetry verbosity. */
+  private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+
+  /** What the upper arm's angle, as its motor controller reports it, is measured from. */
+  public enum UpperAngleReference {
+    /**
+     * From horizontal, so it doesn't change when only the lower arm moves: an elbow driven from the base, e.g. by a
+     * chain through the shoulder. The elbow motor's torque then acts between the base and the upper arm.
+     */
+    HORIZONTAL,
+    /**
+     * From the lower arm, so it is 0 with the arm straight: an elbow motor on the lower arm. The elbow motor's torque
+     * then acts between the lower and upper arms.
+     */
+    LOWER_ARM
+  }
 
   /**
    * Double jointed arm configuration.
@@ -147,6 +177,101 @@ public class DoubleJointedArmConfig {
     }
     this.pathTolerance = Optional.of(tolerance);
     return this;
+  }
+
+  /**
+   * Set what the upper arm's angle, as its motor controller reports it, is measured from. Defaults to
+   * {@link UpperAngleReference#HORIZONTAL}.
+   *
+   * @param reference {@link UpperAngleReference} of the upper arm's angle.
+   * @return {@link DoubleJointedArmConfig} for chaining.
+   */
+  public DoubleJointedArmConfig withUpperAngleReference(UpperAngleReference reference) {
+    this.upperAngleReference = Objects.requireNonNull(reference, "reference cannot be null");
+    return this;
+  }
+
+  /**
+   * Set how much each joint's kG must change, as a fraction, before it is sent to its motor controller again. Each send
+   * reconfigures the motor controller, so small changes are left until they add up. Defaults to 0.05.
+   *
+   * <p>Each joint's kG is scaled from the one its {@link org.wpilib.math.controller.ArmFeedforward} was configured or
+   * last live tuned with, by how much gravity on the joint has changed from when the arm is held straight out
+   * horizontally, as a uniform rod model of each arm, from its motor controller's moment of inertia, works it out:
+   *
+   * <ul>
+   *   <li>With the upper arm's angle from {@link UpperAngleReference#HORIZONTAL horizontal}, the upper arm's own weight
+   *   is carried from the base, so gravity on each joint only depends on its own angle, as an ArmFeedforward assumes,
+   *   and kG never changes.</li>
+   *   <li>With it from {@link UpperAngleReference#LOWER_ARM the lower arm}, the shoulder also carries the upper arm's
+   *   weight wherever it points, and the elbow's gravity depends on the angle of the upper arm from horizontal, not
+   *   from the lower arm.</li>
+   * </ul>
+   *
+   * <p>Near a joint pointing straight up or down its ArmFeedforward gives almost nothing whatever kG is, so kG is left
+   * as it was there.
+   *
+   * @param fraction Change in kG, as a fraction of it, before it is sent again.
+   * @return {@link DoubleJointedArmConfig} for chaining.
+   * @throws DoubleJointedArmConfigurationException if the fraction is negative.
+   */
+  public DoubleJointedArmConfig withKgUpdateThreshold(double fraction) {
+    if (!(fraction >= 0)) {
+      throw new DoubleJointedArmConfigurationException("kG update threshold is negative", "Cannot compensate kG for the arm's position.",
+                                                       "withKgUpdateThreshold(double) with 0 or more");
+    }
+    this.kGUpdateThreshold = fraction;
+    return this;
+  }
+
+  /**
+   * Publish the arm's own telemetry: where the end of the arm and the elbow are, the path it is following, each joint's
+   * kG, and at {@link TelemetryVerbosity#HIGH} a live tunable path tolerance.
+   *
+   * @param name      Telemetry name, which also names the arm.
+   * @param verbosity {@link TelemetryVerbosity} to publish at.
+   * @return {@link DoubleJointedArmConfig} for chaining.
+   */
+  public DoubleJointedArmConfig withTelemetry(String name, TelemetryVerbosity verbosity) {
+    this.telemetryName = Optional.of(Objects.requireNonNull(name, "name cannot be null"));
+    this.telemetryVerbosity = Optional.of(Objects.requireNonNull(verbosity, "verbosity cannot be null"));
+    return this;
+  }
+
+  /**
+   * Get what the upper arm's angle is measured from.
+   *
+   * @return {@link UpperAngleReference}.
+   */
+  public UpperAngleReference getUpperAngleReference() {
+    return upperAngleReference;
+  }
+
+  /**
+   * Get how much each joint's kG must change, as a fraction, before it is sent to its motor controller again.
+   *
+   * @return kG update threshold.
+   */
+  public double getKgUpdateThreshold() {
+    return kGUpdateThreshold;
+  }
+
+  /**
+   * Get the telemetry name.
+   *
+   * @return Telemetry name, or empty without the arm's own telemetry.
+   */
+  public Optional<String> getTelemetryName() {
+    return telemetryName;
+  }
+
+  /**
+   * Get the telemetry verbosity.
+   *
+   * @return {@link TelemetryVerbosity}, or empty without the arm's own telemetry.
+   */
+  public Optional<TelemetryVerbosity> getTelemetryVerbosity() {
+    return telemetryVerbosity;
   }
 
   /**

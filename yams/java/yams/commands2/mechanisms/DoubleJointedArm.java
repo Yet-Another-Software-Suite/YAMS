@@ -8,6 +8,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
@@ -17,6 +18,7 @@ import yams.core.mechanisms.config.ArmConfig;
 import yams.core.mechanisms.config.DoubleJointedArmConfig;
 import yams.core.mechanisms.positional.DoubleJointedArmPathFollower;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.telemetry.NetworkTablesBackends;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.positional.DoubleJointedArm} that adds
@@ -80,6 +82,8 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    *                                                upper hard limit is not configured.
    * @throws DoubleJointedArmConfigurationException if the two motor controllers' configs do not
    *                                                share the same {@link Subsystem}.
+   * @throws DoubleJointedArmConfigurationException if the arm's telemetry is at HIGH verbosity and has the name of
+   *                                                its {@link Subsystem}.
    * @throws SmartMotorControllerConfigurationException if either motor controller's config does not
    *                                                    have a {@link Subsystem} set via
    *                                                    {@code withSubsystem(Subsystem)}.
@@ -92,6 +96,18 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
       throw new DoubleJointedArmConfigurationException("SmartMotorControllers do not have the same subsystem!", "Cannot create commands for single subsystem.", "withSubsystem(this)");
     }
     this.subsystem = lowerCfg.getSubsystem();
+    // No requirements, so tuning doesn't interrupt the command moving the arm.
+    getArmTelemetry().ifPresent(telemetry -> {
+      if (config.getTelemetryVerbosity().orElseThrow() == yams.core.telemetry.enums.TelemetryVerbosity.HIGH) {
+        if (subsystem.getName().equals(getName())) {
+          throw new DoubleJointedArmConfigurationException("Arm telemetry name \"" + getName() + "\" is also the name of the arm's subsystem",
+                                                           "Cannot publish the arm's Live Tuning next to its motor controllers' Live Tuning.",
+                                                           "DoubleJointedArmConfig.withTelemetry(String, TelemetryVerbosity) with another name");
+        }
+        NetworkTablesBackends.ensureTuningTunableBackend();
+        Tunables.publish("Tuning/" + getName() + "/Live Tuning", Commands.run(() -> telemetry.applyTuningValues(this)).withName("Live Tuning"));
+      }
+    });
   }
 
   @Override
@@ -143,7 +159,7 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    * @return {@link Command} that follows the target.
    */
   private Command follow(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
-    DoubleJointedArmPathFollower follower = new DoubleJointedArmPathFollower(this);
+    DoubleJointedArmPathFollower follower = getPathFollower();
     return Commands.startRun(() -> {
       var thetas = getAnglesForPosition(translation.get(), invert.get());
       follower.setGoal(thetas.getFirst(), thetas.getSecond());
@@ -185,13 +201,13 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   /**
    * Set the shoulder and elbow angle of the DoubleJointedArm.
    *
-   * @param lowerAngle {@link Angle} of the shoulder, or null to keep it at the angle it's at.
-   * @param upperAngle {@link Angle} of the elbow, or null to keep it at the angle it's at.
+   * @param lowerAngle {@link Angle} of the shoulder, or null to keep its setpoint.
+   * @param upperAngle {@link Angle} of the elbow, or null to keep its setpoint.
    * @return {@link Command} that will set the angles.
    */
   public Command setAngle(Angle lowerAngle, Angle upperAngle) {
-    DoubleJointedArmPathFollower follower = new DoubleJointedArmPathFollower(this);
-    return Commands.startRun(() -> follower.setGoal(lowerAngle != null ? lowerAngle : getLowerAngle(), upperAngle != null ? upperAngle : getUpperAngle()),
+    DoubleJointedArmPathFollower follower = getPathFollower();
+    return Commands.startRun(() -> follower.setGoal(lowerAngle != null ? lowerAngle : getLowerSetpoint(), upperAngle != null ? upperAngle : getUpperSetpoint()),
                              follower::execute, subsystem).withName(subsystem.getName() + " SetAngle");
   }
 
