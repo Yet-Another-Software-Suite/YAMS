@@ -7,12 +7,17 @@ import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.tunable.Tunables;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Distance;
 import yams.core.exceptions.DoubleJointedArmConfigurationException;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.mechanisms.config.ArmConfig;
+import yams.core.mechanisms.config.DoubleJointedArmConfig;
+import yams.core.mechanisms.positional.DoubleJointedArmPathFollower;
+import yams.commands3.telemetry.CommandTunable;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.telemetry.NetworkTablesBackends;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.positional.DoubleJointedArm} that adds
@@ -56,13 +61,55 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    *                                                    {@code withMechanism(Mechanism)}.
    */
   public DoubleJointedArm(ArmConfig lowerConfig, SmartMotorController lowerSMC, ArmConfig upperConfig, SmartMotorController upperSMC) {
-    super(lowerConfig, lowerSMC, upperConfig, upperSMC);
-    yams.commands3.config.SmartMotorControllerConfig lowerCfg = (yams.commands3.config.SmartMotorControllerConfig) lowerSMC.getConfig();
-    yams.commands3.config.SmartMotorControllerConfig upperCfg = (yams.commands3.config.SmartMotorControllerConfig) upperSMC.getConfig();
+    this(new DoubleJointedArmConfig(lowerConfig, lowerSMC, upperConfig, upperSMC));
+  }
+
+  /**
+   * Constructor for the Arm mechanism.
+   *
+   * @param config {@link DoubleJointedArmConfig} with both arms and the exclusion zones.
+   * @implNote Both motor controllers' configs must be
+   *           {@link yams.commands3.config.SmartMotorControllerConfig}s that share the same
+   *           {@link Mechanism} set via {@code withMechanism(Mechanism)}.
+   * @throws DoubleJointedArmConfigurationException if either motor controller's starting position
+   *                                                is not configured.
+   * @throws DoubleJointedArmConfigurationException if either arm length is not configured.
+   * @throws DoubleJointedArmConfigurationException if running in simulation and any arm lower or
+   *                                                upper hard limit is not configured.
+   * @throws DoubleJointedArmConfigurationException if the two motor controllers' configs do not
+   *                                                share the same {@link Mechanism}.
+   * @throws DoubleJointedArmConfigurationException if the arm's telemetry is at HIGH verbosity and has the name of
+   *                                                its {@link Mechanism}.
+   * @throws SmartMotorControllerConfigurationException if either motor controller's config does not
+   *                                                    have a {@link Mechanism} set via
+   *                                                    {@code withMechanism(Mechanism)}.
+   */
+  public DoubleJointedArm(DoubleJointedArmConfig config) {
+    super(config);
+    yams.commands3.config.SmartMotorControllerConfig lowerCfg = (yams.commands3.config.SmartMotorControllerConfig) config.getLowerMotorController().getConfig();
+    yams.commands3.config.SmartMotorControllerConfig upperCfg = (yams.commands3.config.SmartMotorControllerConfig) config.getUpperMotorController().getConfig();
     if (lowerCfg.getMechanism() != upperCfg.getMechanism()) {
       throw new DoubleJointedArmConfigurationException("SmartMotorControllers do not have the same mechanism!", "Cannot create commands for single mechanism.", "withMechanism(this)");
     }
     this.mechanism = lowerCfg.getMechanism();
+    // No requirements, so tuning doesn't interrupt the command moving the arm.
+    getArmTelemetry().ifPresent(telemetry -> {
+      if (config.getTelemetryVerbosity().orElseThrow() == yams.core.telemetry.enums.TelemetryVerbosity.HIGH) {
+        if (mechanism.getName().equals(getName())) {
+          throw new DoubleJointedArmConfigurationException("Arm telemetry name \"" + getName() + "\" is also the name of the arm's mechanism",
+                                                           "Cannot publish the arm's Live Tuning next to its motor controllers' Live Tuning.",
+                                                           "DoubleJointedArmConfig.withTelemetry(String, TelemetryVerbosity) with another name");
+        }
+        Command liveTuning = Command.noRequirements(coroutine -> {
+          while (true) {
+            telemetry.applyTuningValues(this);
+            coroutine.yield();
+          }
+        }).named("Live Tuning");
+        NetworkTablesBackends.ensureTuningTunableBackend();
+        Tunables.publish("Tuning/" + getName() + "/Live Tuning", new CommandTunable(liveTuning));
+      }
+    });
   }
 
   @Override
@@ -103,16 +150,39 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    * @return {@link Command} that will reach the specified goal.
    */
   public Command run(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
-    SmartMotorController lower = getLowerMotorController();
-    SmartMotorController upper = getUpperMotorController();
     return mechanism.run(coroutine -> {
+      startFollowing(translation, invert);
       while (true) {
-        var thetas = getAnglesForPosition(translation.get(), invert.get());
-        lower.setPosition(thetas.getFirst());
-        upper.setPosition(thetas.getSecond());
+        follow(translation, invert);
         coroutine.yield();
       }
     }).named(mechanism.getName() + " Run Position");
+  }
+
+  /**
+   * Plan a path to a target, as a command following it starts.
+   *
+   * @param translation Target position.
+   * @param invert      Invert the elbow direction.
+   */
+  private void startFollowing(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
+    var thetas = getAnglesForPosition(translation.get(), invert.get());
+    getPathFollower().setGoal(thetas.getFirst(), thetas.getSecond());
+  }
+
+  /**
+   * Follow the path to a target for a loop, planning again when the target has moved.
+   *
+   * @param translation Target position.
+   * @param invert      Invert the elbow direction.
+   */
+  private void follow(Supplier<Translation2d> translation, Supplier<Boolean> invert) {
+    DoubleJointedArmPathFollower follower = getPathFollower();
+    var thetas = getAnglesForPosition(translation.get(), invert.get());
+    if (!follower.hasGoal(thetas.getFirst(), thetas.getSecond())) {
+      follower.setGoal(thetas.getFirst(), thetas.getSecond());
+    }
+    follower.execute();
   }
 
   /**
@@ -138,13 +208,10 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
    * @return {@link Command} that will reach the specified goal.
    */
   public Command runTo(Supplier<Translation2d> translation, Supplier<Boolean> invert, Distance tolerance) {
-    SmartMotorController lower = getLowerMotorController();
-    SmartMotorController upper = getUpperMotorController();
     return mechanism.run(coroutine -> {
+      startFollowing(translation, invert);
       while (!isNear(translation.get(), tolerance)) {
-        var thetas = getAnglesForPosition(translation.get(), invert.get());
-        lower.setPosition(thetas.getFirst());
-        upper.setPosition(thetas.getSecond());
+        follow(translation, invert);
         coroutine.yield();
       }
     }).named(mechanism.getName() + " RunTo Position");
@@ -153,21 +220,16 @@ public class DoubleJointedArm extends yams.core.mechanisms.positional.DoubleJoin
   /**
    * Set the shoulder and elbow angle of the DoubleJointedArm.
    *
-   * @param lowerAngle {@link Angle} of the shoulder.
-   * @param upperAngle {@link Angle} of the elbow.
+   * @param lowerAngle {@link Angle} of the shoulder, or null to keep its setpoint.
+   * @param upperAngle {@link Angle} of the elbow, or null to keep its setpoint.
    * @return {@link Command} that will set the angles.
    */
   public Command setAngle(Angle lowerAngle, Angle upperAngle) {
-    SmartMotorController lower = getLowerMotorController();
-    SmartMotorController upper = getUpperMotorController();
     return mechanism.run(coroutine -> {
+      DoubleJointedArmPathFollower follower = getPathFollower();
+      follower.setGoal(lowerAngle != null ? lowerAngle : getLowerSetpoint(), upperAngle != null ? upperAngle : getUpperSetpoint());
       while (true) {
-        if (lowerAngle != null) {
-          lower.setPosition(lowerAngle);
-        }
-        if (upperAngle != null) {
-          upper.setPosition(upperAngle);
-        }
+        follower.execute();
         coroutine.yield();
       }
     }).named(mechanism.getName() + " SetAngle");
