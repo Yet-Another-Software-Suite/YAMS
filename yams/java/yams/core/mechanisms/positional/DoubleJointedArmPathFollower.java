@@ -19,12 +19,23 @@ import yams.core.math.DoubleJointedArmPath;
  * <p>Each loop {@link #execute()} compensates each joint's kG for where the arm is (see
  * {@link DoubleJointedArm#updateKg()}), and gives both joints' closed loop controllers the current waypoint. It moves on
  * to the next waypoint once both joints are within the path tolerance of the current one, or as soon as the arm can
- * move straight from where it is to the next one and stay clear of the zones. So the arm also moves on when gravity
- * holds a joint further from a waypoint than the tolerance, and skips waypoints it has a clear way past. Without
+ * move straight from where it is to the next one and stay clear of the zones. That is line of sight path simplification,
+ * as PathPlanner does to its paths, but from where the arm really is: the arm skips to the farthest waypoint it has a
+ * clear way to, and also moves on when gravity holds a joint further from a waypoint than the tolerance. Without
  * exclusion zones the goal is the only waypoint.
  *
+ * <p>The path is planned again from where the arm is, as PathPlanner's pathfinding does, when:
+ *
+ * <ul>
+ *   <li>the dynamic exclusion zones change and block the rest of it
+ *   (see {@link DoubleJointedArm#setDynamicExclusionZones(java.util.List)}).</li>
+ *   <li>the arm is pushed off it, so moving on to its waypoint is no longer clear.</li>
+ * </ul>
+ *
  * <p>When the goal can't be reached without entering an exclusion zone, or is in one, the arm holds where it was and a
- * warning is reported.
+ * warning is reported, or with
+ * {@link yams.core.mechanisms.config.DoubleJointedArmConfig.GoalInExclusionZone#NEAREST_CLEAR} moves to the nearest
+ * clear angles to it.
  */
 public class DoubleJointedArmPathFollower {
   /** Arm to move. */
@@ -41,6 +52,10 @@ public class DoubleJointedArmPathFollower {
   private double                         holdLower = Double.NaN;
   /** Upper joint angle held when there's no path, in radians. */
   private double                         holdUpper = Double.NaN;
+  /** Dynamic exclusion zone change the path was planned or checked against. */
+  private int                            zoneVersion;
+  /** Whether the path was planned again after the arm was pushed off it, until it is back on it. */
+  private boolean                        replannedOffPath = false;
 
   /**
    * Create the path follower of an arm. Each arm has one, from {@link DoubleJointedArm#getPathFollower()}.
@@ -61,8 +76,25 @@ public class DoubleJointedArmPathFollower {
   public boolean setGoal(Angle lowerAngle, Angle upperAngle) {
     goalLower = lowerAngle.in(Radians);
     goalUpper = upperAngle.in(Radians);
+    replannedOffPath = false;
+    return plan();
+  }
+
+  /** Plan a path from where the arm is to the goal. */
+  private boolean plan() {
+    final Angle lowerAngle = Radians.of(goalLower);
+    final Angle upperAngle = Radians.of(goalUpper);
     index = 0;
+    zoneVersion = arm.getExclusionZoneVersion();
     path = arm.planPath(lowerAngle, upperAngle);
+    path.ifPresent(waypoints -> {
+      final int last = waypoints.size() - 1;
+      if (Math.abs(waypoints.getLowerRadians(last) - goalLower) > 1e-9 || Math.abs(waypoints.getUpperRadians(last) - goalUpper) > 1e-9) {
+        DriverStationBackend.reportWarning("[WARNING] " + arm.getName() + " goal " + lowerAngle.in(Degrees) + "°, " + upperAngle.in(Degrees) +
+                                           "° is in an exclusion zone; moving to the nearest clear angles, " + waypoints.getLowerAngle(last).in(Degrees) + "°, " +
+                                           waypoints.getUpperAngle(last).in(Degrees) + "°.", false);
+      }
+    });
     if (path.isEmpty()) {
       holdLower = arm.getLowerAngle().in(Radians);
       holdUpper = arm.getUpperAngle().in(Radians);
@@ -88,16 +120,33 @@ public class DoubleJointedArmPathFollower {
   /** Compensate kG, and give the joints the current waypoint, moving on as soon as the arm safely can. */
   public void execute() {
     arm.updateKg();
-    if (path.isEmpty()) {
-      if (!Double.isNaN(holdLower)) {
-        arm.getLowerMotorController().setPosition(Radians.of(holdLower));
-        arm.getUpperMotorController().setPosition(Radians.of(holdUpper));
+    if (Double.isNaN(goalLower)) {
+      // No goal yet.
+      return;
+    }
+    final double lower = arm.getLowerAngle().in(Radians);
+    final double upper = arm.getUpperAngle().in(Radians);
+    if (zoneVersion != arm.getExclusionZoneVersion()) {
+      // The dynamic zones changed: plan again if they block the path, or may have cleared the way to the goal.
+      zoneVersion = arm.getExclusionZoneVersion();
+      if (!isRestOfPathClear(lower, upper)) {
+        plan();
       }
+    } else if (path.isPresent() && !arm.isMoveClear(lower, upper, path.get().getLowerRadians(index), path.get().getUpperRadians(index))) {
+      // Pushed off the path: plan again from here, once, until the arm is back on a path.
+      if (!replannedOffPath) {
+        replannedOffPath = true;
+        plan();
+      }
+    } else {
+      replannedOffPath = false;
+    }
+    if (path.isEmpty()) {
+      arm.getLowerMotorController().setPosition(Radians.of(holdLower));
+      arm.getUpperMotorController().setPosition(Radians.of(holdUpper));
       return;
     }
     final DoubleJointedArmPath waypoints = path.get();
-    final double lower = arm.getLowerAngle().in(Radians);
-    final double upper = arm.getUpperAngle().in(Radians);
     while (index < waypoints.size() - 1 &&
            (isNear(waypoints, index, lower, upper) || arm.isMoveClear(lower, upper, waypoints.getLowerRadians(index + 1), waypoints.getUpperRadians(index + 1)))) {
       index++;
@@ -149,6 +198,24 @@ public class DoubleJointedArmPathFollower {
    */
   public double getGoalUpperRadians() {
     return goalUpper;
+  }
+
+  /** Whether the arm can still move from where it is through the rest of the path's waypoints. */
+  private boolean isRestOfPathClear(double lower, double upper) {
+    if (path.isEmpty()) {
+      return false;
+    }
+    final DoubleJointedArmPath waypoints = path.get();
+    double fromLower = lower;
+    double fromUpper = upper;
+    for (int k = index; k < waypoints.size(); k++) {
+      if (!arm.isMoveClear(fromLower, fromUpper, waypoints.getLowerRadians(k), waypoints.getUpperRadians(k))) {
+        return false;
+      }
+      fromLower = waypoints.getLowerRadians(k);
+      fromUpper = waypoints.getUpperRadians(k);
+    }
+    return true;
   }
 
   /** Whether both joints are within the path tolerance of a waypoint. */

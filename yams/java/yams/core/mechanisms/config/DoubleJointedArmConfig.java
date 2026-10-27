@@ -69,10 +69,23 @@ public class DoubleJointedArmConfig {
   private UpperAngleReference        upperAngleReference = UpperAngleReference.HORIZONTAL;
   /** Fraction kG must change by before it is sent to a motor controller again. */
   private double                     kGUpdateThreshold   = 0.05;
+  /** What to do with a goal in an exclusion zone. */
+  private GoalInExclusionZone        goalInExclusionZone = GoalInExclusionZone.HOLD;
   /** Telemetry name. */
   private Optional<String>           telemetryName       = Optional.empty();
   /** Telemetry verbosity. */
   private Optional<TelemetryVerbosity> telemetryVerbosity = Optional.empty();
+
+  /** What the arm does when it is given a goal in an exclusion zone, or closer to one than the clearance. */
+  public enum GoalInExclusionZone {
+    /** Hold where the arm is, and report a warning. */
+    HOLD,
+    /**
+     * Move to the nearest clear joint angles to the goal on the path planning grid instead, as PathPlanner moves a goal
+     * in an obstacle to the nearest clear node, and report a warning.
+     */
+    NEAREST_CLEAR
+  }
 
   /** What the upper arm's angle, as its motor controller reports it, is measured from. */
   public enum UpperAngleReference {
@@ -236,6 +249,27 @@ public class DoubleJointedArmConfig {
     this.telemetryName = Optional.of(Objects.requireNonNull(name, "name cannot be null"));
     this.telemetryVerbosity = Optional.of(Objects.requireNonNull(verbosity, "verbosity cannot be null"));
     return this;
+  }
+
+  /**
+   * Set what the arm does when it is given a goal in an exclusion zone, or closer to one than the clearance, such as a
+   * position whose inverse kinematics put the elbow in a zone. Defaults to {@link GoalInExclusionZone#HOLD}.
+   *
+   * @param behavior {@link GoalInExclusionZone} behavior.
+   * @return {@link DoubleJointedArmConfig} for chaining.
+   */
+  public DoubleJointedArmConfig withGoalInExclusionZone(GoalInExclusionZone behavior) {
+    this.goalInExclusionZone = Objects.requireNonNull(behavior, "behavior cannot be null");
+    return this;
+  }
+
+  /**
+   * Get what the arm does when it is given a goal in an exclusion zone.
+   *
+   * @return {@link GoalInExclusionZone} behavior.
+   */
+  public GoalInExclusionZone getGoalInExclusionZone() {
+    return goalInExclusionZone;
   }
 
   /**

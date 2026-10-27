@@ -38,7 +38,8 @@ import yams.core.mechanisms.config.DoubleJointedArmConfig.UpperAngleReference;
  * </ul>
  *
  * <p>When the arm starts within the clearance of an exclusion zone, the path leaves it along the shortest way out, and
- * never comes back.
+ * never comes back. Only the clearance is let through on the way out: the path only goes through a zone itself when the
+ * arm starts inside it.
  *
  * <p>Planning allocates nothing but the path it returns: its working arrays are kept and reused, and only grow when a
  * plan needs a bigger grid. So a planner is not thread safe.
@@ -67,14 +68,18 @@ public class DoubleJointedArmPathPlanner {
   private final double   upperMin;
   /** Highest upper arm angle, in radians. */
   private final double   upperMax;
-  /** Exclusion zones' lowest X, in meters. */
-  private final double[] zoneMinX;
+  /** Exclusion zones that never change. */
+  private final List<ExclusionZone> staticZones;
+  /** Exclusion zones' lowest X, in meters: the static zones, then the dynamic ones. */
+  private double[] zoneMinX;
   /** Exclusion zones' lowest Y, in meters. */
-  private final double[] zoneMinY;
+  private double[] zoneMinY;
   /** Exclusion zones' highest X, in meters. */
-  private final double[] zoneMaxX;
+  private double[] zoneMaxX;
   /** Exclusion zones' highest Y, in meters. */
-  private final double[] zoneMaxY;
+  private double[] zoneMaxY;
+  /** Counts changes to the dynamic exclusion zones, so a path follower can tell its path may be blocked. */
+  private int      zoneVersion = 0;
   /** Distance to keep from the exclusion zones, in meters. */
   private final double   clearance;
   /** Largest spacing of the grid, in radians. */
@@ -168,15 +173,53 @@ public class DoubleJointedArmPathPlanner {
     if (!(this.resolution > 0 && this.tolerance > 0)) {
       throw new IllegalArgumentException("Resolution and tolerance must be above 0");
     }
-    zoneMinX = new double[zones.size()];
-    zoneMinY = new double[zones.size()];
-    zoneMaxX = new double[zones.size()];
-    zoneMaxY = new double[zones.size()];
-    for (int z = 0; z < zones.size(); z++) {
-      zoneMinX[z] = zones.get(z).min().getX();
-      zoneMinY[z] = zones.get(z).min().getY();
-      zoneMaxX[z] = zones.get(z).max().getX();
-      zoneMaxY[z] = zones.get(z).max().getY();
+    staticZones = List.copyOf(zones);
+    setZones(List.of());
+  }
+
+  /**
+   * Set the exclusion zones that change while the robot runs, such as where another mechanism is, in place of the
+   * previous ones. Paths are planned around them and the static zones from then on; a
+   * {@link yams.core.mechanisms.positional.DoubleJointedArmPathFollower} plans again if they block its path.
+   *
+   * @param zones Dynamic exclusion zones, or an empty list for none.
+   */
+  public void setDynamicZones(List<ExclusionZone> zones) {
+    setZones(zones);
+    zoneVersion++;
+  }
+
+  /**
+   * Get how many times the dynamic exclusion zones have changed.
+   *
+   * @return Number of changes, which only goes up.
+   */
+  public int getZoneVersion() {
+    return zoneVersion;
+  }
+
+  /**
+   * Whether there are any exclusion zones, static or dynamic.
+   *
+   * @return True if there is at least one zone.
+   */
+  public boolean hasZones() {
+    return zoneMinX.length > 0;
+  }
+
+  /** Put the static zones and these dynamic zones into the zone arrays. */
+  private void setZones(List<ExclusionZone> dynamicZones) {
+    final int count = staticZones.size() + dynamicZones.size();
+    zoneMinX = new double[count];
+    zoneMinY = new double[count];
+    zoneMaxX = new double[count];
+    zoneMaxY = new double[count];
+    for (int z = 0; z < count; z++) {
+      final ExclusionZone zone = z < staticZones.size() ? staticZones.get(z) : dynamicZones.get(z - staticZones.size());
+      zoneMinX[z] = zone.min().getX();
+      zoneMinY[z] = zone.min().getY();
+      zoneMaxX[z] = zone.max().getX();
+      zoneMaxY[z] = zone.max().getY();
     }
   }
 
@@ -275,11 +318,54 @@ public class DoubleJointedArmPathPlanner {
    *     limits, in an exclusion zone, or can't be reached without entering one.
    */
   public Optional<DoubleJointedArmPath> plan(double fromLower, double fromUpper, double toLower, double toUpper) {
-    if (toLower < lowerMin || toLower > lowerMax || toUpper < upperMin || toUpper > upperMax || collides(toLower, toUpper, clearance)) {
+    return plan(fromLower, fromUpper, toLower, toUpper, false, true);
+  }
+
+  /**
+   * Plan a path between two sets of joint angles that never enters an exclusion zone, to the nearest clear angles on
+   * the grid when the goal is in or too close to a zone, as PathPlanner moves a goal in an obstacle to the nearest clear
+   * node. The path's last waypoint is then those angles.
+   *
+   * @param fromLower Lower arm angle to start at, in radians.
+   * @param fromUpper Upper arm angle to start at, in radians.
+   * @param toLower   Lower arm angle to end at, in radians.
+   * @param toUpper   Upper arm angle to end at, in radians.
+   * @return The angles to move through after the start, ending at the goal or the nearest clear angles to it, or empty
+   *     when the goal is outside the joint limits, or no clear angles can be reached.
+   */
+  public Optional<DoubleJointedArmPath> planToNearestClear(double fromLower, double fromUpper, double toLower, double toUpper) {
+    return plan(fromLower, fromUpper, toLower, toUpper, true, true);
+  }
+
+  /**
+   * Search the whole grid once, so the JIT compiles the search and the working arrays are as big as a plan needs before
+   * the first real plan, as PathPlanner warms up its pathfinder. The result is thrown away.
+   *
+   * @param fromLower Lower arm angle to plan from, in radians.
+   * @param fromUpper Upper arm angle to plan from, in radians.
+   */
+  public void warmUp(double fromLower, double fromUpper) {
+    final double toLower = Double.isInfinite(lowerMax) ? fromLower + Math.PI : lowerMax;
+    final double toUpper = Double.isInfinite(upperMin) ? fromUpper - Math.PI : upperMin;
+    plan(fromLower, fromUpper, toLower, toUpper, true, false);
+  }
+
+  /**
+   * Plan a path.
+   *
+   * @param nearestClear Plan to the nearest clear angles when the goal is in a zone, instead of giving up.
+   * @param shortcut     Return the goal without searching when the straight move to it is clear.
+   */
+  private Optional<DoubleJointedArmPath> plan(double fromLower, double fromUpper, double toLower, double toUpper, boolean nearestClear, boolean shortcut) {
+    if (toLower < lowerMin || toLower > lowerMax || toUpper < upperMin || toUpper > upperMax) {
+      return Optional.empty();
+    }
+    final boolean goalColliding = collides(toLower, toUpper, clearance);
+    if (goalColliding && !nearestClear) {
       return Optional.empty();
     }
     // Without zones, or with nothing in the way, the goal is the path.
-    if (zoneMinX.length == 0 || isMoveClear(fromLower, fromUpper, toLower, toUpper)) {
+    if (zoneMinX.length == 0 || (shortcut && !goalColliding && isMoveClear(fromLower, fromUpper, toLower, toUpper))) {
       return Optional.of(DoubleJointedArmPath.to(Radians.of(toLower), Radians.of(toUpper)));
     }
     startLower = fromLower;
@@ -303,9 +389,14 @@ public class DoubleJointedArmPathPlanner {
     final int goal  = gridNodes + 1;
     beginPlan(gridNodes + 2);
 
+    if (goalColliding && !moveGoalToNearestClear(lowerSteps, upperSteps)) {
+      return Optional.empty();
+    }
     cellCorners(fromLower, fromUpper, lowerSteps, upperSteps, startCorners);
-    cellCorners(toLower, toUpper, lowerSteps, upperSteps, goalCorners);
+    cellCorners(goalLower, goalUpper, lowerSteps, upperSteps, goalCorners);
     final boolean startColliding = isColliding(start);
+    // Inside a zone itself, not just within its clearance.
+    final boolean startInZone = collides(fromLower, fromUpper, 0);
 
     cost[start] = 0;
     push(start, heuristic(fromLower, fromUpper));
@@ -321,7 +412,7 @@ public class DoubleJointedArmPathPlanner {
         for (int corner : startCorners) {
           neighbors[count++] = corner;
         }
-        if (Math.abs(toLower - fromLower) <= lowerStep && Math.abs(toUpper - fromUpper) <= upperStep) {
+        if (Math.abs(goalLower - fromLower) <= lowerStep && Math.abs(goalUpper - fromUpper) <= upperStep) {
           neighbors[count++] = goal;
         }
       } else {
@@ -363,6 +454,10 @@ public class DoubleJointedArmPathPlanner {
         if (stepColliding && !leaving) {
           continue;
         }
+        // Leaving only lets the arm through the clearance: into a zone itself only when leaving one it started in.
+        if (stepColliding && collides(centerLower, centerUpper, stepMargin - clearance) && !(startInZone && collides(nodeLower, nodeUpper, 0))) {
+          continue;
+        }
         final boolean inMargin = stepColliding || collides(centerLower, centerUpper, stepMargin + motion(tolerance, tolerance));
         final double nextCost = cost[node] + Math.hypot(lowerDelta, upperDelta) * (stepColliding ? kCollidingStepCost : inMargin ? kMarginStepCost : 1);
         if (nextCost < cost[next]) {
@@ -373,6 +468,51 @@ public class DoubleJointedArmPathPlanner {
       }
     }
     return Optional.empty();
+  }
+
+  /**
+   * Move the goal to the nearest grid point clear of the zones by a grid step's motion, searching rings of grid points
+   * around it outward. A
+   * point in ring {@code r} can be nearer than one in ring {@code r - 1} by up to √2, so the rings are searched until
+   * none nearer can be left.
+   *
+   * @return True if a clear grid point was found.
+   */
+  private boolean moveGoalToNearestClear(int lowerSteps, int upperSteps) {
+    final int goalI = (int) Math.round((goalLower - gridLowerMin) / lowerStep);
+    final int goalJ = (int) Math.round((goalUpper - gridUpperMin) / upperStep);
+    int    best         = -1;
+    double bestDistance = Double.POSITIVE_INFINITY;
+    final int rings = Math.max(lowerSteps, upperSteps);
+    for (int r = 0; r <= rings; r++) {
+      // Every point in this ring is at least r grid steps away along one joint.
+      if (best >= 0 && r * Math.min(lowerStep, upperStep) > bestDistance) {
+        break;
+      }
+      for (int i = goalI - r; i <= goalI + r; i++) {
+        for (int j = goalJ - r; j <= goalJ + r; j++) {
+          if ((Math.abs(i - goalI) != r && Math.abs(j - goalJ) != r) || i < 0 || i > lowerSteps || j < 0 || j > upperSteps) {
+            continue;
+          }
+          final int node = i * upperPoints + j;
+          final double distance = Math.hypot(lowerOf(node) - goalLower, upperOf(node) - goalUpper);
+          // Clear by a grid step's motion too, so a step onto it can be clear.
+          if (distance < bestDistance && !collides(lowerOf(node), upperOf(node), clearance + motion(lowerStep, upperStep))) {
+            best = node;
+            bestDistance = distance;
+          }
+        }
+      }
+    }
+    if (best < 0) {
+      return false;
+    }
+    // Read both before setting either: the goal node's angles are the goal's.
+    final double nearestLower = lowerOf(best);
+    final double nearestUpper = upperOf(best);
+    goalLower = nearestLower;
+    goalUpper = nearestUpper;
+    return true;
   }
 
   /** Start a plan over this many nodes, growing the working arrays if they're too small. */
@@ -453,6 +593,10 @@ public class DoubleJointedArmPathPlanner {
    * The path to a node from the step after the start, with steps that move only one joint the same way merged: the
    * other joint holds still, so the arm can't stray from the line between them. Diagonal steps are kept, as the joints
    * can reach them at different times.
+   *
+   * <p>The path isn't simplified by line of sight here, as PathPlanner simplifies its paths: the
+   * {@link yams.core.mechanisms.positional.DoubleJointedArmPathFollower} does that as it follows, from where the arm
+   * really is, and needs the close waypoints near the zones when gravity holds the arm short of one.
    */
   private DoubleJointedArmPath reconstruct(int node) {
     int length = 0;

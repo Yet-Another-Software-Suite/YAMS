@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Seconds;
 
 import com.revrobotics.spark.SparkMax;
+import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.ArmConfig;
 import yams.core.mechanisms.config.DoubleJointedArmConfig;
 import yams.core.mechanisms.config.DoubleJointedArmConfig.ExclusionZone;
+import yams.core.mechanisms.config.DoubleJointedArmConfig.GoalInExclusionZone;
 import yams.core.mechanisms.config.DoubleJointedArmConfig.UpperAngleReference;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
@@ -439,5 +441,61 @@ public class DoubleJointedArmTest {
     telemetry.applyTuningValues(arm);
     assertEquals(2, tuning.getEntry("path/tolerance").getDouble(Double.NaN), 1e-9);
     assertEquals(2, arm.getPathTolerance().in(Degrees), 1e-9);
+  }
+
+  @Test
+  void aDynamicZoneInTheWayIsPlannedAround() throws InterruptedException {
+    // Swinging from reaching forward to reaching back under the shoulder, when something moves in
+    // under it.
+    DoubleJointedArm arm = arm(0, kAbove);
+    ExclusionZone under =
+        new ExclusionZone(new Translation2d(-0.1, -1.5), new Translation2d(0.1, -0.15));
+    TestWithScheduler.schedule(arm.setAngle(Degrees.of(-170), Degrees.of(-170)));
+    TestWithScheduler.cycle(Seconds.of(0.04));
+    assertTrue(
+        arm.getLowerAngle().in(Degrees) > -30,
+        "not near it yet: " + arm.getLowerAngle().in(Degrees));
+
+    arm.setDynamicExclusionZones(List.of(under));
+    boolean[] touched = {false};
+    TestWithScheduler.cycle(
+        Seconds.of(3),
+        () -> touched[0] |= simulatedArmTouches(under) || simulatedArmTouches(kAbove));
+
+    // Both ways round are blocked now, so the arm stops short of the new zone.
+    assertFalse(touched[0], "the arm entered an exclusion zone");
+    assertTrue(
+        arm.getLowerAngle().in(Degrees) > -90,
+        "the arm stopped before swinging under: " + arm.getLowerAngle().in(Degrees));
+
+    // Clearing the zone lets the arm finish.
+    arm.setDynamicExclusionZones(List.of());
+    TestWithScheduler.cycle(Seconds.of(4));
+    assertEquals(-170, arm.getLowerAngle().in(Degrees), 5);
+    assertEquals(-170, arm.getUpperAngle().in(Degrees), 5);
+  }
+
+  @Test
+  void aGoalInAZoneCanGoToTheNearestClearAngles() throws InterruptedException {
+    DoubleJointedArm arm =
+        arm(
+            0,
+            0,
+            100,
+            0,
+            0,
+            config -> config.withGoalInExclusionZone(GoalInExclusionZone.NEAREST_CLEAR),
+            kAbove);
+    TestWithScheduler.schedule(arm.setAngle(Degrees.of(90), Degrees.of(90)));
+
+    boolean[] touched = {false};
+    TestWithScheduler.cycle(Seconds.of(4), () -> touched[0] |= simulatedArmTouches(kAbove));
+
+    assertFalse(touched[0], "the arm entered the exclusion zone");
+    // A lower arm pointing up between about 31 and 149 degrees goes through the zone, so it goes up
+    // to just under 31.
+    assertTrue(
+        arm.getLowerAngle().in(Degrees) > 5 && arm.getLowerAngle().in(Degrees) < 31,
+        "the arm went up as far as it can: " + arm.getLowerAngle().in(Degrees));
   }
 }

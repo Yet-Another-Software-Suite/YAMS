@@ -479,4 +479,105 @@ class DoubleJointedArmPathPlannerTest {
         planner.isMoveClear(up, up, up, up),
         "10 degrees of following error doesn't fit in the gap");
   }
+
+  @Test
+  void dynamicZonesAreKeptOutOfAndReplaced() {
+    DoubleJointedArmPathPlanner planner = planner(kAbove);
+    int version = planner.getZoneVersion();
+    assertFalse(planner.isInExclusionZone(Degrees.of(-90), Degrees.of(-90)));
+
+    planner.setDynamicZones(List.of(kBelow));
+    assertTrue(planner.getZoneVersion() > version);
+    assertTrue(
+        planner.isInExclusionZone(Degrees.of(-90), Degrees.of(-90)),
+        "the dynamic zone below the shoulder");
+    assertTrue(
+        planner.isInExclusionZone(Degrees.of(90), Degrees.of(90)),
+        "the static zone above it is still there");
+    assertTrue(plan(planner, 0, 0, -180, -180).isEmpty(), "both ways round are blocked");
+
+    planner.setDynamicZones(List.of());
+    assertFalse(planner.isInExclusionZone(Degrees.of(-90), Degrees.of(-90)));
+    assertTrue(plan(planner, 0, 0, -180, -180).isPresent());
+  }
+
+  @Test
+  void aGoalInAZoneCanGoToTheNearestClearAngles() {
+    DoubleJointedArmPathPlanner planner = planner(kAbove);
+    // Straight up is in the zone above the shoulder.
+    assertTrue(plan(planner, 0, 0, 90, 90).isEmpty());
+
+    DoubleJointedArmPath path =
+        planner.planToNearestClear(0, 0, Math.toRadians(90), Math.toRadians(90)).orElseThrow();
+    int last = path.size() - 1;
+    double lower = path.getLowerRadians(last);
+    double upper = path.getUpperRadians(last);
+    assertFalse(touches(lower, upper, List.of(kAbove)), "the goal moved out of the zone");
+    // A lower arm pointing up between about 34 and 146 degrees goes through the zone, which starts
+    // 0.2 m above the
+    // shoulder and is 0.6 m wide, so the nearest clear angles have the lower arm just under 34
+    // degrees.
+    assertTrue(
+        lower > Math.toRadians(15) && lower < Math.toRadians(34),
+        "lower at " + Math.toDegrees(lower));
+    assertPathAvoids(path, 0, 0, List.of(kAbove));
+  }
+
+  @Test
+  void warmingUpDoesNotChangePlans() {
+    DoubleJointedArmPathPlanner warm = planner(kAbove);
+    DoubleJointedArmPathPlanner cold = planner(kAbove);
+    warm.warmUp(0, 0);
+
+    DoubleJointedArmPath warmPath = plan(warm, 30, 30, -150, -150).orElseThrow();
+    DoubleJointedArmPath coldPath = plan(cold, 30, 30, -150, -150).orElseThrow();
+    assertEquals(coldPath.size(), warmPath.size());
+    for (int k = 0; k < coldPath.size(); k++) {
+      assertEquals(coldPath.getLowerRadians(k), warmPath.getLowerRadians(k), kTolerance);
+      assertEquals(coldPath.getUpperRadians(k), warmPath.getUpperRadians(k), kTolerance);
+    }
+  }
+
+  @Test
+  void leavingTheClearanceOfAZoneNeverGoesThroughTheZone() {
+    // The arm next to a post under the shoulder, within its 3 cm clearance but not in it, with the
+    // way over the top
+    // blocked too: the only way to the goal is through the post, so there is no path.
+    ExclusionZone above =
+        new ExclusionZone(new Translation2d(-0.25, 0.15), new Translation2d(0.25, 2));
+    ExclusionZone post =
+        new ExclusionZone(new Translation2d(-0.1, -1.5), new Translation2d(0.1, -0.15));
+    DoubleJointedArmPathPlanner planner =
+        new DoubleJointedArmPathPlanner(
+            Meters.of(0.6),
+            Meters.of(0.5),
+            Degrees.of(-270),
+            Degrees.of(270),
+            Degrees.of(-270),
+            Degrees.of(270),
+            List.of(above, post),
+            Meters.of(0.03),
+            Degrees.of(2),
+            Degrees.of(3),
+            UpperAngleReference.HORIZONTAL);
+    DoubleJointedArmPathPlanner noClearance =
+        new DoubleJointedArmPathPlanner(
+            Meters.of(0.6),
+            Meters.of(0.5),
+            Degrees.of(-270),
+            Degrees.of(270),
+            Degrees.of(-270),
+            Degrees.of(270),
+            List.of(above, post),
+            Meters.of(0),
+            Degrees.of(2),
+            Degrees.of(3),
+            UpperAngleReference.HORIZONTAL);
+    // 35 degrees from straight down the lower arm just misses the post's corner.
+    assertTrue(planner.isInExclusionZone(Degrees.of(-55), Degrees.of(-60)), "within the clearance");
+    assertFalse(
+        noClearance.isInExclusionZone(Degrees.of(-55), Degrees.of(-60)), "but not in the post");
+
+    assertTrue(plan(planner, -55, -60, -170, -170).isEmpty());
+  }
 }

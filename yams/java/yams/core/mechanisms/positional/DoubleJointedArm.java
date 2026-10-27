@@ -299,6 +299,11 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
       m_lowerSMC.setupSimulation();
     }
 
+    // Plan once now, so the first move doesn't wait on the JIT or the planner's arrays.
+    if (hasExclusionZones()) {
+      m_planner.warmUp(lowerSMCConfig.getStartingPosition().get().in(Radians), upperSMCConfig.getStartingPosition().get().in(Radians));
+    }
+
     config.getTelemetryVerbosity().ifPresent(verbosity -> {
       m_armTelemetry = Optional.of(new DoubleJointedArmTelemetry(verbosity, m_telemetry.getDataTable(), m_telemetry.getTuningTable(), this));
     });
@@ -428,7 +433,27 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @return True if there are exclusion zones.
    */
   public boolean hasExclusionZones() {
-    return !m_config.getExclusionZones().isEmpty();
+    return m_planner.hasZones();
+  }
+
+  /**
+   * Set the exclusion zones that change while the robot runs, such as where another mechanism is, in place of the
+   * previous ones, as PathPlanner's dynamic obstacles. They are kept out of along with the configured zones, and a path
+   * being followed is planned again from where the arm is if they block the rest of it.
+   *
+   * @param zones Dynamic {@link DoubleJointedArmConfig.ExclusionZone}s, or an empty list for none.
+   */
+  public void setDynamicExclusionZones(java.util.List<DoubleJointedArmConfig.ExclusionZone> zones) {
+    m_planner.setDynamicZones(zones);
+  }
+
+  /**
+   * Get how many times the dynamic exclusion zones have changed, so a path follower can tell its path may be blocked.
+   *
+   * @return Number of changes, which only goes up.
+   */
+  public int getExclusionZoneVersion() {
+    return m_planner.getZoneVersion();
   }
 
   /**
@@ -458,11 +483,16 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
    * @param lowerAngle Goal lower arm angle, from horizontal.
    * @param upperAngle Goal upper arm angle, from horizontal.
    * @return The {@link DoubleJointedArmPath}, or empty when the goal is outside the joint limits, in an exclusion zone,
-   *     or can't be reached without entering one.
+   *     or can't be reached without entering one. With
+   *     {@link DoubleJointedArmConfig.GoalInExclusionZone#NEAREST_CLEAR} a goal in a zone gives a path to the nearest
+   *     clear angles instead, which is its last waypoint.
    */
   public Optional<DoubleJointedArmPath> planPath(Angle lowerAngle, Angle upperAngle) {
     if (!hasExclusionZones()) {
       return Optional.of(DoubleJointedArmPath.to(lowerAngle, upperAngle));
+    }
+    if (m_config.getGoalInExclusionZone() == DoubleJointedArmConfig.GoalInExclusionZone.NEAREST_CLEAR) {
+      return m_planner.planToNearestClear(getLowerAngle().in(Radians), getUpperAngle().in(Radians), lowerAngle.in(Radians), upperAngle.in(Radians));
     }
     return m_planner.plan(getLowerAngle().in(Radians), getUpperAngle().in(Radians), lowerAngle.in(Radians), upperAngle.in(Radians));
   }
