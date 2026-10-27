@@ -38,6 +38,8 @@ import yams.core.math.DoubleJointedArmPath;
  * clear angles to it.
  */
 public class DoubleJointedArmPathFollower {
+  /** Joint angle difference that is the same goal, in radians: floating point error, not a move. */
+  private static final double kSameGoal = 1e-9;
   /** Arm to move. */
   private final DoubleJointedArm         arm;
   /** Path being followed, or empty while holding. */
@@ -106,15 +108,16 @@ public class DoubleJointedArmPathFollower {
   }
 
   /**
-   * Whether the goal is within the path tolerance of the one being followed, so it doesn't need planning again.
+   * Whether the goal is the one being followed, so it doesn't need planning again. Any real change is a new goal, however
+   * small: goals a few inches apart are only a degree or two apart, often less than the path tolerance, and the arm must
+   * still end at the new one. A clear move to it is planned without a search.
    *
    * @param lowerAngle Lower joint angle.
    * @param upperAngle Upper joint angle.
-   * @return True if the goal is the same, within the path tolerance.
+   * @return True if the goal is the same, to within floating point error.
    */
   public boolean hasGoal(Angle lowerAngle, Angle upperAngle) {
-    final double tolerance = arm.getPathTolerance().in(Radians);
-    return Math.abs(lowerAngle.in(Radians) - goalLower) <= tolerance && Math.abs(upperAngle.in(Radians) - goalUpper) <= tolerance;
+    return Math.abs(lowerAngle.in(Radians) - goalLower) <= kSameGoal && Math.abs(upperAngle.in(Radians) - goalUpper) <= kSameGoal;
   }
 
   /** Compensate kG, and give the joints the current waypoint, moving on as soon as the arm safely can. */

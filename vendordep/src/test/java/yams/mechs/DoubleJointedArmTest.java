@@ -498,4 +498,48 @@ public class DoubleJointedArmTest {
         arm.getLowerAngle().in(Degrees) > 5 && arm.getLowerAngle().in(Degrees) < 31,
         "the arm went up as far as it can: " + arm.getLowerAngle().in(Degrees));
   }
+
+  @Test
+  void goalsTwoInchesApartAreEachReached() throws InterruptedException {
+    // kG holds the arm, so it settles where it is sent.
+    double lowerKg =
+        holdingVolts((kLowerMass * kLowerLength / 2 + kUpperMass * kLowerLength) * 9.8);
+    double upperKg = holdingVolts(kUpperMass * kUpperLength / 2 * 9.8);
+    DoubleJointedArm arm =
+        arm(
+            0,
+            0,
+            100,
+            lowerKg,
+            upperKg,
+            config -> config.withPathTolerance(Degrees.of(10)),
+            kAbove);
+    Translation2d[] goals = {
+      new Translation2d(0.6, 0.2),
+      new Translation2d(0.65, 0.2),
+      new Translation2d(0.65, 0.25),
+      new Translation2d(0.6, 0.25)
+    };
+    // Each move is 2 inches, which is less than the path tolerance on both joints.
+    for (int k = 1; k < goals.length; k++) {
+      var from = arm.getAnglesForPosition(goals[k - 1], false);
+      var to = arm.getAnglesForPosition(goals[k], false);
+      assertTrue(
+          Math.abs(to.getFirst().in(Degrees) - from.getFirst().in(Degrees)) < 10
+              && Math.abs(to.getSecond().in(Degrees) - from.getSecond().in(Degrees)) < 10,
+          "move " + k + " is within the tolerance");
+    }
+    Translation2d[] target = {goals[0]};
+    TestWithScheduler.schedule(arm.run(() -> target[0], () -> false));
+
+    for (Translation2d goal : goals) {
+      target[0] = goal;
+      TestWithScheduler.cycle(Seconds.of(1.5));
+      assertEquals(
+          0,
+          arm.getPosition().getDistance(goal),
+          0.01,
+          "reached " + goal + ", at " + arm.getPosition());
+    }
+  }
 }
