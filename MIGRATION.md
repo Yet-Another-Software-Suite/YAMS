@@ -329,9 +329,6 @@ reinstall it from `cdn.yassrobotics.com`).
 
 ### Fixes
 
-- **A NEO's velocity measurement delay on a SPARK MAX is no longer reported.** YAMS reported 112 ms,
-  from the moving average SPARK MAX firmware 27 replaced with a filter REV does not describe, so
-  `getVelocityMeasurementDelay()` is now empty for it, as for an absolute encoder.
 - **A TalonFX's loosely coupled followers switch closed loop slot with it.** `setClosedLoopSlot`
   on a TalonFX now passes the slot on to the followers from `withLooselyCoupledFollowers(...)`, as
   the TalonFXS, SPARK and Thrifty Nova already did. C++ already did this.
