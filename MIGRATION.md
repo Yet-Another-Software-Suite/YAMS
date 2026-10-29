@@ -241,7 +241,8 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
 
 ## Checklist
 
-1. Update the project to WPILib 2027 (`2027_alpha7`), Java 25 and the 2027 vendor libraries.
+1. Update the project to WPILib 2027 (`2027_alpha7`), Java 25 and the 2027 vendor libraries, and
+   flash SPARK MAX and SPARK Flex firmware 27.0.0.
 2. Replace `edu.wpi.first.*` imports with `org.wpilib.*`, and pass a CAN bus to vendor device
    constructors.
 3. Remove the old `yams.json` vendordep and install the Commands v2 or Commands v3 vendordep from
@@ -301,6 +302,14 @@ reinstall it from `cdn.yassrobotics.com`).
 
 ### Changes that can need code changes
 
+- **Flash SPARK MAX and SPARK Flex firmware 27.0.0** to match REVLib 2027. REVLib 2027 no longer
+  sets conversion factors, the zero centered duty cycle or the hall sensor averaging, and this
+  firmware drops them from the SPARK too; YAMS already works without them. The firmware also changes
+  how mechanisms run, so check their gains: followers no longer run about 1% slower than their
+  leader, nor apply voltage compensation twice when the leader and follower both have it; kS no
+  longer turns the motor at a velocity setpoint of 0; and a SPARK MAX closing its loop on an
+  absolute or alternate encoder keeps using it after a reboot, where it could switch sensors in
+  brake mode, when inverted, or with a control type other than duty cycle.
 - **The `SwerveDrive` tuning command is now `NT:/Tuning/<name>/Live Tuning`**, named `Live Tuning`,
   like every other mechanism's. It was `NT:/Mechanisms/<name>/tuning`. Move a dashboard button or
   anything else that starts it, such as setting `running` to `true`. It now also requires the drive's

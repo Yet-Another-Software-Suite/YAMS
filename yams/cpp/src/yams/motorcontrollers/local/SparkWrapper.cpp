@@ -670,9 +670,12 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // How far behind the measured velocity is, from the encoder's filtering, as WPILib's SysId works it
   // out for its REV presets: a backward difference over the measurement period is half the period
   // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
-  // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
+  // encoder averaged 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
   // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
   // waits for too. An absolute or detached encoder's delay is not known.
+  // TODO: SPARK MAX firmware 27 replaced the NEO's moving average with a filter REV does not describe,
+  // so the 112 ms is from older firmware and may be off. SysId needs a delay, so it stays until the new
+  // filter's is measured.
   auto& signals = m_maxConfig ? static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.signals
                               : static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.signals;
   m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetPrimaryEncoderVelocityPeriodMs())};
