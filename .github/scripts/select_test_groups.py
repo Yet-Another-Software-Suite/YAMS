@@ -110,7 +110,8 @@ JAVA_GROUPS = [
     {"group": "other",
      "test-filter": '--tests "yams.core.mechanisms.*"'
                     ' --tests "yams.core.motorcontrollers.simulation.*"'
-                    ' --tests "yams.ChineseRemainderTheoremTest"'},
+                    ' --tests "yams.ChineseRemainderTheoremTest"'
+                    ' --tests "yams.commands2.mechanisms.RunToSupplierTest"'},
 ]
 
 # C++ unit test groups: the same groups as the Java unit tests, for the groups the C++ tests cover.
