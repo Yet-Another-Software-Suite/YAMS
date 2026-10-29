@@ -616,6 +616,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Set the {@link SmartMotorController} to reset the old configurations and only apply what is
    * given to {@link SmartMotorControllerConfig}
    *
+   * <p>When false, settings saved on the device that YAMS does not manage are kept. A vendor config
+   * from {@link #withVendorConfig(Object)} still wins over the saved settings: on a TalonFX or
+   * TalonFXS, whose vendor config holds every setting, it replaces them all.
+   *
    * @param resetPreviousConfig Reset the old config?
    * @return {@link SmartMotorControllerConfig} for chaining.
    */

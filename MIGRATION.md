@@ -282,26 +282,6 @@ reinstall it from `cdn.yassrobotics.com`).
   `externalencoder/position` and `externalencoder/velocity` keep their names, and hold the
   mechanism position and velocity.
 
-### Fixes
-
-- **Simulated SPARKs follow their profile and feedforward.** REVLib's simulation does not run
-  MAXMotion, and works out kCos from the setpoint instead of the position, so in simulation a
-  SPARK with a trapezoidal profile runs the profile on the SystemCore and sends kV, kA and an
-  arm's gravity as an arbitrary feedforward. On the robot it still uses MAXMotion. See
-  [wpilibsuite/SystemcoreTesting#425](https://github.com/wpilibsuite/SystemcoreTesting/issues/425).
-- **Simulated SPARKs start where they should and report their real voltage.** A simulated SPARK
-  started at its starting position divided by the gear ratio, and reported a voltage that was off
-  by the gear ratio.
-- **Every motor controller reacts the same to the same gains.** The SPARK MAX, SPARK Flex,
-  TalonFX, TalonFXS and Thrifty Nova are now tested to give the same voltage for the same kP, kI,
-  kD, kS, kV, kA and kG in YAMS units, from every closed loop slot. This also fixed an elevator
-  feedforward under velocity control on the SystemCore (the Nova), which left out kV.
-- A mechanism iterating its simulation no longer replaces the shared `BatterySim` voltage.
-- `ExponentialProfilePIDController.createConstraints(...)` is fixed.
-- `DifferentialMechanism.set(...)` mixes its two outputs correctly.
-- C++ swerve fixes that Java already had, and C++ swerve azimuth live tuning.
-- The vendordep JSONs now require the matching WPILib command library (`command2` or `command3`).
-
 ### New
 
 - **`SwerveDrive.driveToPose(pose, translationTolerance, rotationTolerance)`** in Commands v2, as
@@ -337,6 +317,34 @@ reinstall it from `cdn.yassrobotics.com`).
   on another mechanism, such as an arm on `elevator::getPose3d`. In C++, `MechanismPositionConfig` is
   now this class (it was an unused, undefined named-setpoint class), and `ArmConfig`, `ElevatorConfig`,
   `PivotConfig` and `FlyWheelConfig` take one with `WithMechanismPositionConfig(...)`.
+
+### Fixes
+
+- **A TalonFX's loosely coupled followers switch closed loop slot with it.** `setClosedLoopSlot`
+  on a TalonFX now passes the slot on to the followers from `withLooselyCoupledFollowers(...)`, as
+  the TalonFXS, SPARK and Thrifty Nova already did. C++ already did this.
+- **A TalonFX or TalonFXS vendor config wins over the device's saved settings.** With
+  `withResetPreviousConfig(false)`, the Java wrappers read the settings saved on the device into the
+  `TalonFXConfiguration` (or `TalonFXSConfiguration`) given to `withVendorConfig(...)`, which
+  replaced the vendor config's settings. A vendor config is now the base, as in C++, and the
+  device's settings are only read when there is no vendor config.
+- **Simulated SPARKs follow their profile and feedforward.** REVLib's simulation does not run
+  MAXMotion, and works out kCos from the setpoint instead of the position, so in simulation a
+  SPARK with a trapezoidal profile runs the profile on the SystemCore and sends kV, kA and an
+  arm's gravity as an arbitrary feedforward. On the robot it still uses MAXMotion. See
+  [wpilibsuite/SystemcoreTesting#425](https://github.com/wpilibsuite/SystemcoreTesting/issues/425).
+- **Simulated SPARKs start where they should and report their real voltage.** A simulated SPARK
+  started at its starting position divided by the gear ratio, and reported a voltage that was off
+  by the gear ratio.
+- **Every motor controller reacts the same to the same gains.** The SPARK MAX, SPARK Flex,
+  TalonFX, TalonFXS and Thrifty Nova are now tested to give the same voltage for the same kP, kI,
+  kD, kS, kV, kA and kG in YAMS units, from every closed loop slot. This also fixed an elevator
+  feedforward under velocity control on the SystemCore (the Nova), which left out kV.
+- A mechanism iterating its simulation no longer replaces the shared `BatterySim` voltage.
+- `ExponentialProfilePIDController.createConstraints(...)` is fixed.
+- `DifferentialMechanism.set(...)` mixes its two outputs correctly.
+- C++ swerve fixes that Java already had, and C++ swerve azimuth live tuning.
+- The vendordep JSONs now require the matching WPILib command library (`command2` or `command3`).
 
 ## Why this split
 
