@@ -1145,10 +1145,11 @@ public class SparkWrapper extends SmartMotorController {
 
     // How far behind the measured velocity is, from the encoder's filtering, as WPILib's SysId works it
     // out for its REV presets: a backward difference over the measurement period is half the period
-    // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
-    // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
+    // behind, and a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind. The settings are read
     // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
-    // waits for too. An absolute or detached encoder's delay is not known.
+    // waits for too. An absolute or detached encoder's delay is not known, nor is a NEO's built-in
+    // encoder's on a SPARK MAX: firmware 27 replaced its moving average with a filter REV does not
+    // describe.
     var signals = m_spark instanceof SparkMax max ? max.configAccessor.signals : ((SparkFlex) m_spark).configAccessor.signals;
     m_velocitySignalPeriod = Milliseconds.of(signals.getPrimaryEncoderVelocityPeriodMs());
     Object velocityEncoder = config.getUseExternalFeedback() ? config.getExternalEncoder().orElse(null) : null;
@@ -1160,10 +1161,8 @@ public class SparkWrapper extends SmartMotorController {
       var encoder = flex.configAccessor.externalEncoder;
       m_velocitySignalPeriod = Milliseconds.of(signals.getExternalOrAltEncoderVelocityPeriodMs());
       m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getMeasurementPeriod() / 2.0 + (encoder.getAverageDepth() - 1) / 2.0));
-    } else if (velocityEncoder != null) {
+    } else if (velocityEncoder != null || (m_spark instanceof SparkMax && m_spark.getMotorType() == MotorType.kBrushless)) {
       m_velocityMeasurementDelay = Optional.empty();
-    } else if (m_spark instanceof SparkMax && m_spark.getMotorType() == MotorType.kBrushless) {
-      m_velocityMeasurementDelay = Optional.of(Milliseconds.of(112));
     } else {
       var encoder = m_spark instanceof SparkMax max ? max.configAccessor.encoder : ((SparkFlex) m_spark).configAccessor.encoder;
       m_velocityMeasurementDelay = Optional.of(Milliseconds.of(encoder.getQuadratureMeasurementPeriod() / 2.0 + (encoder.getQuadratureAverageDepth() - 1) / 2.0));

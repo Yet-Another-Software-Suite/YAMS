@@ -669,10 +669,11 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 
   // How far behind the measured velocity is, from the encoder's filtering, as WPILib's SysId works it
   // out for its REV presets: a backward difference over the measurement period is half the period
-  // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
-  // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
+  // behind, and a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind. The settings are read
   // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
-  // waits for too. An absolute or detached encoder's delay is not known.
+  // waits for too. An absolute or detached encoder's delay is not known, nor is a NEO's built-in
+  // encoder's on a SPARK MAX: firmware 27 replaced its moving average with a filter REV does not
+  // describe.
   auto& signals = m_maxConfig ? static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.signals
                               : static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.signals;
   m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetPrimaryEncoderVelocityPeriodMs())};
@@ -688,10 +689,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     auto& accessor = static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.externalEncoder;
     m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetExternalOrAltEncoderVelocityPeriodMs())};
     m_velocityMeasurementDelay = delayOf(accessor.GetMeasurementPeriod(), accessor.GetAverageDepth());
-  } else if (enc) {
+  } else if (enc || (m_maxConfig && m_spark->GetMotorType() == rev::spark::SparkLowLevel::MotorType::kBrushless)) {
     m_velocityMeasurementDelay = std::nullopt;
-  } else if (m_maxConfig && m_spark->GetMotorType() == rev::spark::SparkLowLevel::MotorType::kBrushless) {
-    m_velocityMeasurementDelay = wpi::units::second_t{0.112};
   } else {
     auto& accessor = m_maxConfig ? static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.encoder
                                  : static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.encoder;
