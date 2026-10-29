@@ -3,8 +3,10 @@
 
 package yams.commands3.swerve;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
+import org.wpilib.command3.Coroutine;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -67,13 +69,16 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
     this.mechanism = config.getMechanism();
     // Drive to pose tuning needs both controllers, so only offer it when they are configured.
     if (config.getTranslationPID().isPresent() && config.getRotationPID().isPresent()) {
-      Tunables.publish("Mechanisms/" + getName() + "/tuning", new CommandTunable(Command.noRequirements(coroutine -> {
+      // The tuning command requires the drive, so the default drive command does not undo its setpoints.
+      Consumer<Coroutine> tuning = coroutine -> {
         startDriveToPoseTuning();
         while (true) {
           applyTuningValues();
           coroutine.yield();
         }
-      }).whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named(getName() + " Tuning")));
+      };
+      var builder = mechanism == null ? Command.noRequirements(tuning) : mechanism.run(tuning);
+      Tunables.publish("Mechanisms/" + getName() + "/tuning", new CommandTunable(builder.whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named(getName() + " Tuning")));
     }
   }
 

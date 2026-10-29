@@ -807,7 +807,9 @@ class SwerveDrive {
             ResetTranslationPID();
             ResetRotationPID();
           },
-          [this] { m_swerveTelemetry->ApplyTuningValues(this); });
+          [this] { m_swerveTelemetry->ApplyTuningValues(this); },
+          // Requires the drive, so the default drive command does not undo its setpoints.
+          {m_config->GetSubsystem()});
       // Stop any tuning voltage when the command ends.
       m_driveToPoseTuningCommand.emplace(
           std::move(tuningCommand).FinallyDo([this] { m_swerveTelemetry->StopTuning(this); }));
