@@ -347,16 +347,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.externalEncoder = cfg.externalEncoder;
     this.externalEncoderInverted = cfg.externalEncoderInverted;
     this.followers = cfg.followers;
-    this.simpleFeedforward = cfg.simpleFeedforward;
-    this.elevatorFeedforward = cfg.elevatorFeedforward;
-    this.armFeedforward = cfg.armFeedforward;
-    this.sim_simpleFeedforward = cfg.sim_simpleFeedforward;
-    this.sim_elevatorFeedforward = cfg.sim_elevatorFeedforward;
-    this.sim_armFeedforward = cfg.sim_armFeedforward;
-    this.sim_lqr = cfg.sim_lqr;
-    this.lqr = cfg.lqr;
-    this.pid = cfg.pid;
-    this.sim_pid = cfg.sim_pid;
+    this.simpleFeedforward = copyMap(cfg.simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
+    this.elevatorFeedforward = copyMap(cfg.elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
+    this.armFeedforward = copyMap(cfg.armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
+    this.sim_simpleFeedforward = copyMap(cfg.sim_simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
+    this.sim_elevatorFeedforward = copyMap(cfg.sim_elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
+    this.sim_armFeedforward = copyMap(cfg.sim_armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
+    this.sim_lqr = cfg.sim_lqr.map(SmartMotorControllerConfig::copyLqr);
+    this.lqr = cfg.lqr.map(SmartMotorControllerConfig::copyLqr);
     this.exponentialProfile = cfg.exponentialProfile;
     this.trapezoidProfile = cfg.trapezoidProfile;
     this.sim_exponentialProfile = cfg.sim_exponentialProfile;
@@ -395,6 +393,45 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
+    // Copy the PID controllers last, so they get this config's continuous wrapping.
+    this.pid = copyMap(cfg.pid, this::copyPid);
+    this.sim_pid = copyMap(cfg.sim_pid, this::copyPid);
+  }
+
+  /**
+   * Copy a map of per-slot controllers, so a cloned config never shares controller state, such as
+   * gains changed by live tuning, with the config it was cloned from.
+   */
+  private static <V> EnumMap<ClosedLoopControllerSlot, V> copyMap(EnumMap<ClosedLoopControllerSlot, V> map,
+                                                                 java.util.function.UnaryOperator<V> copy) {
+    EnumMap<ClosedLoopControllerSlot, V> copied = new EnumMap<>(ClosedLoopControllerSlot.class);
+    map.forEach((slot, value) -> copied.put(slot, copy.apply(value)));
+    return copied;
+  }
+
+  private PIDController copyPid(PIDController pid) {
+    PIDController copied = applyContinuousWrapping(new PIDController(pid.getP(), pid.getI(), pid.getD(), pid.getPeriod()));
+    copied.setIZone(pid.getIZone());
+    copied.setTolerance(pid.getErrorTolerance(), pid.getErrorDerivativeTolerance());
+    return copied;
+  }
+
+  private static SimpleMotorFeedforward copySimpleFeedforward(SimpleMotorFeedforward ff) {
+    return new SimpleMotorFeedforward(ff.getKs(), ff.getKv(), ff.getKa(), ff.getDt());
+  }
+
+  private static ElevatorFeedforward copyElevatorFeedforward(ElevatorFeedforward ff) {
+    return new ElevatorFeedforward(ff.getKs(), ff.getKg(), ff.getKv(), ff.getKa(), ff.getDt());
+  }
+
+  private static ArmFeedforward copyArmFeedforward(ArmFeedforward ff) {
+    return new ArmFeedforward(ff.getKs(), ff.getKg(), ff.getKv(), ff.getKa(), ff.getDt());
+  }
+
+  private static LQRController copyLqr(LQRController lqr) {
+    // An LQR built from an LQRConfig is rebuilt from it. One built from a loop has no config to
+    // rebuild from, so it stays shared.
+    return lqr.getConfig().map(LQRController::new).orElse(lqr);
   }
 
   /**
@@ -829,20 +866,40 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Add the mechanism moment of inertia to the {@link SmartMotorController}s simulation when not
-   * run under a formal mechanism.
+   * Set the moment of inertia of an arm-like mechanism: a rod of the given length and mass turning
+   * about one end, {@code 1/3 * mass * length^2}. For a wheel or roller, use
+   * {@link #withWheelMomentOfInertia(Distance, Mass)}, which is about a third of this for the same
+   * size, or {@link #withMomentOfInertia(MomentOfInertia)} with a value from CAD.
    *
-   * @param length Length of the mechanism for MOI.
-   * @param weight Weight of the mechanism for MOI.
+   * @param length Length of the mechanism from its pivot.
+   * @param weight Mass of the mechanism.
    * @return {@link SmartMotorControllerConfig} for chaining
    * @throws SmartMotorControllerConfigurationException if the length or weight is null.
    */
   public T withMomentOfInertia(Distance length, Mass weight) {
     if (length == null || weight == null) {
-      throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withMOI(Inches.of(4),Pounds.of(1))");
+      throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withMomentOfInertia(Inches.of(18), Pounds.of(8))");
     } else {
       moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
     }
+    return self();
+  }
+
+  /**
+   * Set the moment of inertia of a wheel, roller or flywheel: a solid disk of the given diameter and
+   * mass spinning about its center, {@code 1/2 * mass * radius^2}.
+   *
+   * @param diameter Diameter of the wheel.
+   * @param mass     Mass of the wheel, including anything that spins with it.
+   * @return {@link SmartMotorControllerConfig} for chaining
+   * @throws SmartMotorControllerConfigurationException if the diameter or mass is null.
+   */
+  public T withWheelMomentOfInertia(Distance diameter, Mass mass) {
+    if (diameter == null || mass == null) {
+      throw new SmartMotorControllerConfigurationException("Diameter or mass cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withWheelMomentOfInertia(Inches.of(4), Pounds.of(1))");
+    }
+    double radius = diameter.in(Meters) / 2.0;
+    moi = KilogramSquareMeters.of(0.5 * mass.in(Kilograms) * radius * radius);
     return self();
   }
 
@@ -2246,7 +2303,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withExternalEncoderGearing(MechanismGearing externalEncoderGearing) {
-    if (externalEncoderGearing.getRotorToMechanismRatio() > 1) {
+    if (externalEncoderGearing.getMechanismToRotorRatio() > 1) {
       DriverStationBackend.reportWarning(
           "[IMPORTANT] Your gearing is set in a way that the external " + "encoder will exceed the maximum reading, " + "this WILL result in multiple angle's being read as the same 'angle.\n\t" + "Ignore this warning IF your mechanism will never travel outside of the slice you " + "are reading, adjust the offset accordingly.\n\t" + "You have been warned! (^.^) - Rivet",
           true);

@@ -594,7 +594,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderZeroO
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGearing(
     const gearing::MechanismGearing& gearing) {
-  if (gearing.GetRotorToMechanismRatio() > 1.0) {
+  if (gearing.GetMechanismToRotorRatio() > 1.0) {
     WPILIB_ReportWarning(
         "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the "
         "maximum reading, this WILL result in multiple angles being read as the same angle. "
@@ -666,6 +666,12 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(wpi::units::meter_t length,
                                                                 wpi::units::kilogram_t mass) {
   m_moi = wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass);
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithWheelMOI(wpi::units::meter_t diameter,
+                                                                     wpi::units::kilogram_t mass) {
+  wpi::units::meter_t radius = diameter / 2.0;
+  m_moi = 0.5 * mass * radius * radius;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(

@@ -81,7 +81,8 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.ForceFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.SimulationPeriodTest"'
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
-                    ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'},
+                    ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'
+                    ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'},
     # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
     # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
     # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
