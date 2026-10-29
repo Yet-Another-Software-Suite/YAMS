@@ -838,6 +838,17 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithMOI(wpi::units::meter_t length, wpi::units::kilogram_t mass);
 
   /**
+   * Set the moment of inertia of a wheel, roller or flywheel for simulation: a solid disk of the
+   * given diameter and mass spinning about its center (1/2 * mass * radius²). The length and mass
+   * WithMOI overload is for arms, and gives about three times this for the same size.
+   *
+   * @param diameter Wheel diameter.
+   * @param mass     Mass of the wheel, including anything that spins with it.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithWheelMOI(wpi::units::meter_t diameter, wpi::units::kilogram_t mass);
+
+  /**
    * Set the starting mechanism position (seeds the encoder and sim objects on init).
    *
    * Throws std::invalid_argument if WithStartingPosition(meter_t) was already called.
