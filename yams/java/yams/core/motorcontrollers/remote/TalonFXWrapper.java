@@ -777,6 +777,13 @@ public class TalonFXWrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
+   * <p>With {@link SmartMotorControllerConfig#withResetPreviousConfig(boolean)} false and no vendor
+   * config, the settings saved on the device are read first, so settings YAMS does not manage are
+   * kept. A {@link TalonFXConfiguration} supplied with
+   * {@link SmartMotorControllerConfig#withVendorConfig(Object)} is used as the base instead, and
+   * since it holds every setting, its values replace the ones saved on the device. The
+   * {@link SmartMotorControllerConfig} options are then applied over either base.
+   *
    * @throws SmartMotorControllerConfigurationException if a closed loop tolerance is configured
    *                                                    without an LQR controller.
    * @throws SmartMotorControllerConfigurationException if a feedforward is configured for SLOT_3.
@@ -805,7 +812,9 @@ public class TalonFXWrapper extends SmartMotorController {
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {
     config.resetValidationCheck();
     this.m_config = config;
-    if (!m_config.getResetPreviousConfig()) {
+    // A supplied vendor config is the base, so its settings win over the ones saved on the device.
+    // Without one, start from the device's settings so the ones YAMS does not manage are kept.
+    if (!m_config.getResetPreviousConfig() && config.getVendorConfig().isEmpty()) {
       m_configurator.refresh(m_talonConfig);
     }
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
@@ -2153,6 +2162,11 @@ public class TalonFXWrapper extends SmartMotorController {
       default:
         throw new SmartMotorControllerConfigurationException("TalonFX(" + m_talonfx.getDeviceID() + ") does not support the '" + m_velocityReq.getName() + "' control request!", "Cannot use given control request", "withVendorControlRequest()");
     }
+    m_looseFollowers.ifPresent(smcs -> {
+      for (var f : smcs) {
+        f.setClosedLoopSlot(slot);
+      }
+    });
   }
 
   @Override

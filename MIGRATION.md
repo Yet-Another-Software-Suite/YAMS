@@ -338,6 +338,17 @@ reinstall it from `cdn.yassrobotics.com`).
   now this class (it was an unused, undefined named-setpoint class), and `ArmConfig`, `ElevatorConfig`,
   `PivotConfig` and `FlyWheelConfig` take one with `WithMechanismPositionConfig(...)`.
 
+### Fixes
+
+- **A TalonFX's loosely coupled followers switch closed loop slot with it.** `setClosedLoopSlot`
+  on a TalonFX now passes the slot on to the followers from `withLooselyCoupledFollowers(...)`, as
+  the TalonFXS, SPARK and Thrifty Nova already did. C++ already did this.
+- **A TalonFX or TalonFXS vendor config wins over the device's saved settings.** With
+  `withResetPreviousConfig(false)`, the Java wrappers read the settings saved on the device into the
+  `TalonFXConfiguration` (or `TalonFXSConfiguration`) given to `withVendorConfig(...)`, which
+  replaced the vendor config's settings. A vendor config is now the base, as in C++, and the
+  device's settings are only read when there is no vendor config.
+
 ## Why this split
 
 Separating state/physics (`yams.core`) from command-framework bindings (`yams.commands2`,
