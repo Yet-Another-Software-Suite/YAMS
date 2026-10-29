@@ -11,6 +11,7 @@
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/driverstation/DriverStation.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -166,15 +167,17 @@ wpi::cmd::CommandPtr FlyWheel::RunTo(wpi::units::degrees_per_second_t velocity,
 
 wpi::cmd::CommandPtr FlyWheel::RunTo(std::function<wpi::units::degrees_per_second_t()> velocity,
                                      wpi::units::degrees_per_second_t tolerance) {
-  wpi::units::degrees_per_second_t target = velocity();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce(
-             [this, target] {
-               m_smc->StartClosedLoopController();
-               m_smc->SetVelocity(target);
-             },
-             {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([this, atTarget] {
+        atTarget->Calculate(false);
+        m_smc->StartClosedLoopController();
+      },
+                           [this, velocity] { m_smc->SetVelocity(velocity()); }, {m_subsystem})
+      .Until([this, velocity, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(velocity(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

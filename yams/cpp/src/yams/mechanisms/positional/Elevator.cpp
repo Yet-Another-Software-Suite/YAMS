@@ -13,6 +13,7 @@
 #include <vector>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -222,11 +223,14 @@ wpi::cmd::CommandPtr Elevator::RunTo(wpi::units::meter_t height, wpi::units::met
 
 wpi::cmd::CommandPtr Elevator::RunTo(std::function<wpi::units::meter_t()> height,
                                      wpi::units::meter_t tolerance) {
-  wpi::units::meter_t target = height();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
-                           {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([atTarget] { atTarget->Calculate(false); },
+                           [this, height] { SetMeasurementPositionSetpoint(height()); }, {m_subsystem})
+      .Until([this, height, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(height(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

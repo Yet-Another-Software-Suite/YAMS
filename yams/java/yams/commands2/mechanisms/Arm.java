@@ -8,6 +8,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
+import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Angle;
 import yams.core.exceptions.ArmConfigurationException;
@@ -135,6 +136,10 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
   /**
    * Set the arm to the given angle then end the command.
    *
+   * <p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
+   *
    * @param angle     {@link Angle} to go to.
    * @param tolerance Tolerance {@link Angle}
    * @return {@link Command} that sets the arm to the desired angle.
@@ -142,10 +147,13 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    *           continue. It should NOT be used when there is a default command on the Subsystem.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
-    return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopController();
-      getMotorController().setPosition(angle.get());
-    }, subsystem).andThen(Commands.waitUntil(near(angle.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " RunTo Angle Supplier");
+    SmartMotorController smc = getMotorController();
+    // One debouncer per command, reset when the command starts.
+    Debouncer atTarget = new Debouncer(0.1, DebounceType.RISING);
+    return Commands.startRun(() -> {
+      atTarget.calculate(false);
+      smc.startClosedLoopController();
+    }, () -> smc.setPosition(angle.get()), subsystem).until(() -> atTarget.calculate(isNear(angle.get(), tolerance))).withName(subsystem.getName() + " RunTo Angle Supplier");
   }
 
   /**

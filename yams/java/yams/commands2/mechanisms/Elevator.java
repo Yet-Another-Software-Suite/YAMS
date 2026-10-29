@@ -8,6 +8,7 @@ import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.Subsystem;
 import org.wpilib.command2.button.Trigger;
+import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Distance;
 import yams.core.exceptions.ElevatorConfigurationException;
@@ -135,6 +136,10 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
   /**
    * Run the elevator to the desired height with a tolerance, then move on.
    *
+   * <p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
+   *
    * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
@@ -143,10 +148,13 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    *           after this to allow for easy chaining.
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
-    return Commands.runOnce(() -> {
-      getMotorController().startClosedLoopController();
-      getMotorController().setPosition(height.get());
-    }, subsystem).andThen(Commands.waitUntil(near(height.get(), tolerance).debounce(0.1, DebounceType.RISING))).withName(subsystem.getName() + " Run To Height Supplier");
+    SmartMotorController smc = getMotorController();
+    // One debouncer per command, reset when the command starts.
+    Debouncer atTarget = new Debouncer(0.1, DebounceType.RISING);
+    return Commands.startRun(() -> {
+      atTarget.calculate(false);
+      smc.startClosedLoopController();
+    }, () -> smc.setPosition(height.get()), subsystem).until(() -> atTarget.calculate(isNear(height.get(), tolerance))).withName(subsystem.getName() + " Run To Height Supplier");
   }
 
   /**
