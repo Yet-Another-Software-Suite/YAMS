@@ -46,6 +46,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 public class VendorConfigTest {
   private static final double kSavedDeadband = 0.05;
   private static final double kVendorDeadband = 0.1;
+  /** The device stores the deadband in steps of about 0.0004. */
+  private static final double kTolerance = 0.002;
 
   private static int offset = 0;
 
@@ -99,6 +101,12 @@ public class VendorConfigTest {
   }
 
   private static SmartMotorController create(boolean talonFXS, boolean vendorConfig) {
+    final SmartMotorController smc = createWrapper(talonFXS, vendorConfig);
+    ((SmartMotorControllerTestSubsystem) ((SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+    return smc;
+  }
+
+  private static SmartMotorController createWrapper(boolean talonFXS, boolean vendorConfig) {
     final String name = (talonFXS ? "TalonFXS" : "TalonFX") + (vendorConfig ? " vendor config" : " saved config");
     final SmartMotorControllerConfig cfg = config("VendorConfigTest " + name);
     if (talonFXS) {
@@ -143,9 +151,9 @@ public class VendorConfigTest {
   void keepsTheSavedSettingsWithoutAVendorConfig(boolean talonFXS) {
     final SmartMotorController smc = create(talonFXS, false);
     try {
-      assertEquals(kSavedDeadband, deviceDeadband(smc.getMotorController()), 1e-9, "after construction");
+      assertEquals(kSavedDeadband, deviceDeadband(smc.getMotorController()), kTolerance, "after construction");
       smc.applyConfig(smc.getConfig());
-      assertEquals(kSavedDeadband, deviceDeadband(smc.getMotorController()), 1e-9, "after applying the config again");
+      assertEquals(kSavedDeadband, deviceDeadband(smc.getMotorController()), kTolerance, "after applying the config again");
     } finally {
       close(smc);
     }
@@ -156,9 +164,9 @@ public class VendorConfigTest {
   void vendorConfigWinsOverTheSavedSettings(boolean talonFXS) {
     final SmartMotorController smc = create(talonFXS, true);
     try {
-      assertEquals(kVendorDeadband, deviceDeadband(smc.getMotorController()), 1e-9, "after construction");
+      assertEquals(kVendorDeadband, deviceDeadband(smc.getMotorController()), kTolerance, "after construction");
       smc.applyConfig(smc.getConfig());
-      assertEquals(kVendorDeadband, deviceDeadband(smc.getMotorController()), 1e-9, "after applying the config again");
+      assertEquals(kVendorDeadband, deviceDeadband(smc.getMotorController()), kTolerance, "after applying the config again");
     } finally {
       close(smc);
     }

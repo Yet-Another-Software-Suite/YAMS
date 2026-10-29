@@ -232,6 +232,8 @@ public class LooselyCoupledFollowerTest {
     SmartMotorController follower = sparkMax(config("SlotFollower(" + name + ")[" + offset + "]"));
     SmartMotorController leader = createLeader.apply(
         (SmartMotorControllerConfig) config("SlotLeader(" + name + ")[" + offset + "]").withLooselyCoupledFollowers(follower));
+    subsystem(follower).setSMC(follower);
+    subsystem(leader).setSMC(leader);
     try {
       for (ClosedLoopControllerSlot slot : new ClosedLoopControllerSlot[] {ClosedLoopControllerSlot.SLOT_1, ClosedLoopControllerSlot.SLOT_2, ClosedLoopControllerSlot.SLOT_0}) {
         leader.setClosedLoopSlot(slot);
