@@ -139,7 +139,9 @@ class Arm : public SmartPositionalMechanism {
   /**
    * Command the arm to an angle from a supplier, then end when within tolerance.
    *
-   * The supplier is evaluated once when the command is created.
+   * The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
    *
    * @param angle     Supplier for the target angle.
    * @param tolerance Acceptable error.

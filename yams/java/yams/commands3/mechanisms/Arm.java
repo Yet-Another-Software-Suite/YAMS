@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.command3.Trigger;
+import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Angle;
 import yams.core.exceptions.ArmConfigurationException;
@@ -161,6 +162,10 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
   /**
    * Set the arm to the given angle then end the command.
    *
+   * <p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
+   *
    * @param angle     {@link Angle} to go to.
    * @param tolerance Tolerance {@link Angle}
    * @return {@link Command} that sets the arm to the desired angle.
@@ -168,11 +173,18 @@ public class Arm extends yams.core.mechanisms.positional.Arm implements CommandM
    *           continue. It should NOT be used when there is a default command on the Mechanism.
    */
   public Command runTo(Supplier<Angle> angle, Angle tolerance) {
+    SmartMotorController smc = getMotorController();
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopController();
-      Angle target = angle.get();
-      getMotorController().setPosition(target);
-      coroutine.waitUntil(near(target, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));
+      Debouncer atTarget = new Debouncer(0.1, DebounceType.RISING);
+      smc.startClosedLoopController();
+      while (true) {
+        Angle target = angle.get();
+        smc.setPosition(target);
+        if (atTarget.calculate(isNear(target, tolerance))) {
+          return;
+        }
+        coroutine.yield();
+      }
     }).named(mechanism.getName() + " RunTo Angle Supplier");
   }
 

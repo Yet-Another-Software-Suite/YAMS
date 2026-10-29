@@ -8,6 +8,7 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -201,10 +202,14 @@ wpi::cmd::CommandPtr Pivot::RunTo(wpi::units::degree_t angle, wpi::units::degree
 
 wpi::cmd::CommandPtr Pivot::RunTo(std::function<wpi::units::degree_t()> angle,
                                   wpi::units::degree_t tolerance) {
-  wpi::units::degree_t target = angle();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([atTarget] { atTarget->Calculate(false); },
+                           [this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
+      .Until([this, angle, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(angle(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 
