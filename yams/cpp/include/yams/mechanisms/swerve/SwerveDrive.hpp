@@ -812,9 +812,11 @@ class SwerveDrive {
           {m_config->GetSubsystem()});
       // Stop any tuning voltage when the command ends.
       m_driveToPoseTuningCommand.emplace(
-          std::move(tuningCommand).FinallyDo([this] { m_swerveTelemetry->StopTuning(this); }));
-      telemetry::EnsureMechanismsTunableBackend();
-      wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning",
+          std::move(tuningCommand)
+              .FinallyDo([this] { m_swerveTelemetry->StopTuning(this); })
+              .WithName("Live Tuning"));
+      telemetry::EnsureTuningTunableBackend();
+      wpi::tunables::Publish("Tuning/" + GetName() + "/Live Tuning",
                              *m_driveToPoseTuningCommand->get());
     }
   }

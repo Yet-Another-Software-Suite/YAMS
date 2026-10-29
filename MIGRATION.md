@@ -321,6 +321,11 @@ reinstall it from `cdn.yassrobotics.com`).
 
 ### Changes that can need code changes
 
+- **The `SwerveDrive` tuning command is now `NT:/Tuning/<name>/Live Tuning`**, named `Live Tuning`,
+  like every other mechanism's. It was `NT:/Mechanisms/<name>/tuning`. Move a dashboard button or
+  anything else that starts it, such as setting `running` to `true`. It now also requires the drive's
+  subsystem (Commands v2, C++) or mechanism (Commands v3), so it pauses the default drive command
+  while it runs; before, the default drive command kept pointing the wheels back where they were.
 - **`getRelativeMechanismPosition()` is replaced by `getPose3d()`** (`GetPose3d()` in C++) on every
   mechanism. It returns the mechanism's `Pose3d` relative to the robot, worked out from its motor's
   position, so it works on the real robot as well as in simulation: an arm's or pivot's axis turned to
