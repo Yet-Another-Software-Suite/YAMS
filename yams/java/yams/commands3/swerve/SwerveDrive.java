@@ -17,6 +17,7 @@ import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.telemetry.CommandTunable;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
+import yams.core.telemetry.NetworkTablesBackends;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.swerve.SwerveDrive} that adds the
@@ -78,7 +79,8 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
         }
       };
       var builder = mechanism == null ? Command.noRequirements(tuning) : mechanism.run(tuning);
-      Tunables.publish("Mechanisms/" + getName() + "/tuning", new CommandTunable(builder.whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named(getName() + " Tuning")));
+      NetworkTablesBackends.ensureTuningTunableBackend();
+      Tunables.publish("Tuning/" + getName() + "/Live Tuning", new CommandTunable(builder.whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named("Live Tuning")));
     }
   }
 
