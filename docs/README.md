@@ -33,7 +33,7 @@ layout:
 
 <table data-card-size="large" data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th><th data-hidden data-card-cover data-type="image">Cover image</th></tr></thead><tbody><tr><td><i class="fa-wand-magic-sparkles">:wand-magic-sparkles:</i></td><td><strong>Generate a mechanism</strong></td><td>Fill in a form and YAMG writes the subsystem for you: elevators, arms, pivots, turrets, and flywheels, with absolute encoders and homing switches, ready to drop into your robot.</td><td><a href="https://yamg.yassrobotics.com">https://yamg.yassrobotics.com</a></td><td><a href=".gitbook/assets/yamg.png">yamg.png</a></td></tr><tr><td><i class="fa-robot">:robot:</i></td><td><strong>Examples</strong></td><td>Download complete robot projects built with YAMS from the latest release, for Commands v2 and v3: BroncBotz, Everybot, Kitbot, the REV and WCP 2026 robots, and more, each ready to simulate.</td><td><a href="https://github.com/Yet-Another-Software-Suite/YAMS/releases/latest">https://github.com/Yet-Another-Software-Suite/YAMS/releases/latest</a></td><td><a href=".gitbook/assets/examples.png">examples.png</a></td></tr></tbody></table>
 
-<table data-card-size="large" data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><i class="fa-book">:book:</i></td><td><strong>Documentation</strong></td><td>Step-by-step tutorials for every mechanism, from your first arm to swerve, simulation, and live tuning.</td><td><a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ZM0CFmYiQzcrY4zDcTtZ/">Documentation</a></td></tr><tr><td><i class="fa-code">:code:</i></td><td><strong>API reference</strong></td><td>Every class and every config option, with what it does and how to use it.</td><td><a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ezOwaXLQ3h1N7tr3zYnj/">API Reference</a></td></tr></tbody></table>
+<table data-card-size="large" data-view="cards"><thead><tr><th></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><i class="fa-book">:book:</i></td><td><strong>Documentation</strong></td><td>Step-by-step tutorials for arms, elevators, flywheels, and swerve, then simulation, live tuning, and running on the robot.</td><td><a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ZM0CFmYiQzcrY4zDcTtZ/">Documentation</a></td></tr><tr><td><i class="fa-code">:code:</i></td><td><strong>API reference</strong></td><td>Every class and every config option, with what it does and how to use it.</td><td><a href="https://app.gitbook.com/o/MwECAyhaWCMK5V9K79gd/s/ezOwaXLQ3h1N7tr3zYnj/">API Reference</a></td></tr></tbody></table>
 
 {% columns %}
 {% column %}
@@ -56,19 +56,22 @@ YAMS brings those ideas together in one open source library, so your team can us
 ### Getting started
 
 1. **Create a project and install YAMS.** It is one vendordep in a standard WPILib 2027 project.
-2. **Describe your mechanism.** Configure the motor controller, then the mechanism, as in the code here. The tutorials walk you through it, or [YAMG](https://yamg.yassrobotics.com) writes it for you from a form.
+2. **Describe your mechanism.** Configure the motor controller, then the mechanism, inside a subsystem, as in the code here. [How YAMS drives a motor](https://yams.yassrobotics.com/documentation/tutorials/how-yams-drives-a-motor) explains how those pieces fit together, the [Arm tutorial](https://yams.yassrobotics.com/documentation/tutorials/arm) walks you through them, or [YAMG](https://yamg.yassrobotics.com) writes them for you from a form.
 3. **Run it in simulation.** Every mechanism simulates itself. Drive it, tune it, and graph it in AdvantageScope before the robot is built.
+4. **Run it on the robot.** Set the CAN IDs, check the motor direction with the robot disabled, and rest the mechanism at its starting position. Then enable it and tune it on the real mechanism, as in [Run it on the robot](https://yams.yassrobotics.com/documentation/tutorials/arm/robot). If it misbehaves, [Troubleshooting](https://yams.yassrobotics.com/documentation/tutorials/troubleshooting) covers the common failures.
 
 <a href="https://yams.yassrobotics.com/documentation/tutorials/project-setup" class="button primary" data-icon="rocket-launch">Get started</a> <a href="https://yamg.yassrobotics.com" class="button secondary" data-icon="wand-magic-sparkles">Open YAMG</a> <a href="https://github.com/Yet-Another-Software-Suite/YAMS/releases/latest" class="button secondary" data-icon="download">Download examples</a>
 {% endcolumn %}
 
 {% column %}
-{% code title="An arm, from motor to command" %}
+{% code title="An arm, from motor to command (Java, Commands v2)" %}
 ```java
+// This goes inside your arm subsystem's constructor: `this` is the subsystem.
+
 // 1. Configure the motor controller: control, gains, gearing and limits.
 SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
     .withControlMode(ControlMode.CLOSED_LOOP)
-    .withClosedLoopController(4, 0, 0)
+    .withClosedLoopController(4, 0, 0) // Example gain, tune it for your arm.
     .withTrapezoidalProfile(DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
     .withFeedforward(new ArmFeedforward(0, 0, 0, 0)) // Placeholder gains, until you tune them.
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
@@ -93,6 +96,8 @@ Arm arm = new Arm(armConfig, motor);
 Command raise = arm.setAngle(Degrees.of(90));
 ```
 {% endcode %}
+
+For the whole subsystem with its imports, see [the complete arm file](https://yams.yassrobotics.com/documentation/tutorials/arm/mechanism#the-complete-file) in the Arm tutorial.
 {% endcolumn %}
 {% endcolumns %}
 
