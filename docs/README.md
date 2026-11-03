@@ -27,7 +27,7 @@ layout:
 
 # Yet Another Mechanism System
 
-<h2 align="center"><mark style="color:green;">Yet Another Mechanism System</mark></h2>
+<h2 align="center"><mark style="color:$primary;">Yet Another Mechanism System</mark></h2>
 
 <p align="center">Describe your mechanism once. YAMS gives you the commands, simulation, telemetry, and live tuning that top FRC teams spend seasons building, all in one open-source library.</p>
 
@@ -120,7 +120,7 @@ YAMS brings those ideas together in one open-source library. Now any team can us
 {% endcolumn %}
 {% endcolumns %}
 
-<h2 align="center"><mark style="color:$success;">Join a community of over 500 teams</mark></h2>
+<h2 align="center"><mark style="color:$primary;">Join a community of over 500 teams</mark></h2>
 
 <p align="center">Stuck on a config, found a bug, or just wanna talk about robots? Here's where to find us. </p>
 
