@@ -54,6 +54,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">Contents&nbsp;<input type="text" class="filter-input" disabled placeholder="Filter contents (type .)" aria-label="Filter table of contents" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="Reset"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">Description</a></li>
+<li><a href="#nested-class-summary" tabindex="0">Nested Class Summary</a></li>
 <li><a href="#constructor-summary" tabindex="0">Constructor Summary</a></li>
 <li><a href="#method-summary" tabindex="0">Method Summary</a></li>
 <li><a href="#constructor-detail" tabindex="0">Constructor Details</a>
@@ -95,11 +96,16 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
 <ul>
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#LOW"><code>TelemetryVerbosity.LOW</code></a>: the current drive mode, under <code>SwerveInputStream/&lt;name&gt;</code>.</li>
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#MID"><code>TelemetryVerbosity.MID</code></a>: also the stream's configuration (deadband, scales, maximum velocities, cubing,
-  alliance and robot relative), read-only.</li>
+  alliance and robot relative), read-only, and the rotation controller's <code>measurement</code> and <code>setpoint</code>
+  under <code>rotationController</code>, in radians in the gyro's frame. Those are what heading, aim and translation only
+  control give the controller, and are <code>NaN</code> while the stream isn't using it.</li>
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#HIGH"><code>TelemetryVerbosity.HIGH</code></a>: also editable copies of the configuration under
   <code>Tuning/SwerveInputStream/&lt;name&gt;</code>, and a <code>Live Tuning</code> command there that applies them to the stream
   every loop while it runs.</li>
 </ul>
+
+<p>Each value is a <a href="SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands3.telemetry"><code>SwerveInputStreamTelemetry.DoubleTelemetryField</code></a>, <a href="SwerveInputStreamTelemetry.BooleanTelemetryField.html" title="enum class in yams.commands3.telemetry"><code>SwerveInputStreamTelemetry.BooleanTelemetryField</code></a> or <a href="SwerveInputStreamTelemetry.StringTelemetryField.html" title="enum class in yams.commands3.telemetry"><code>SwerveInputStreamTelemetry.StringTelemetryField</code></a>, which
+gives its key and whether it is tunable.
 
 <p>While live tuning, values stay in sync both ways: a dashboard edit is applied to the stream, and a change made in
 code, e.g. a binding that changes the translation scale, is published to the dashboard. Invalid dashboard values are
@@ -108,6 +114,33 @@ replaced with the stream's current value.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>Nested Class Summary</h2>
+<div class="caption"><span>Nested Classes</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">Modifier and Type</div>
+<div class="table-header col-second">Class</div>
+<div class="table-header col-last">Description</div>
+<div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="SwerveInputStreamTelemetry.BooleanTelemetryField.html" class="type-name-link" title="enum class in yams.commands3.telemetry">SwerveInputStreamTelemetry.BooleanTelemetryField</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Boolean telemetry field for <a href="../swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a>s.</div>
+</div>
+<div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="SwerveInputStreamTelemetry.DoubleTelemetryField.html" class="type-name-link" title="enum class in yams.commands3.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Double telemetry field for <a href="../swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a>s.</div>
+</div>
+<div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="SwerveInputStreamTelemetry.StringTelemetryField.html" class="type-name-link" title="enum class in yams.commands3.telemetry">SwerveInputStreamTelemetry.StringTelemetryField</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">String telemetry field for <a href="../swerve/SwerveInputStream.html" title="class in yams.commands3.swerve"><code>SwerveInputStream</code></a>s.</div>
+</div>
+</div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">

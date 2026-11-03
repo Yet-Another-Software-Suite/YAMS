@@ -75,6 +75,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#kP" tabindex="0">kP</a></li>
 <li><a href="#kI" tabindex="0">kI</a></li>
 <li><a href="#kD" tabindex="0">kD</a></li>
+<li><a href="#LQRQelmsPosition" tabindex="0">LQRQelmsPosition</a></li>
+<li><a href="#LQRQelmsVelocity" tabindex="0">LQRQelmsVelocity</a></li>
+<li><a href="#LQRRelms" tabindex="0">LQRRelms</a></li>
+<li><a href="#LQRModelPosition" tabindex="0">LQRModelPosition</a></li>
+<li><a href="#LQRModelVelocity" tabindex="0">LQRModelVelocity</a></li>
+<li><a href="#LQREncoderPosition" tabindex="0">LQREncoderPosition</a></li>
+<li><a href="#LQREncoderVelocity" tabindex="0">LQREncoderVelocity</a></li>
+<li><a href="#LQRMaxVoltage" tabindex="0">LQRMaxVoltage</a></li>
 <li><a href="#TunableSetpointPosition" tabindex="0">TunableSetpointPosition</a></li>
 <li><a href="#SetpointPosition" tabindex="0">SetpointPosition</a></li>
 <li><a href="#TunableSetpointVelocity" tabindex="0">TunableSetpointVelocity</a></li>
@@ -221,6 +229,38 @@ control period on the SystemCore.</div>
 <div class="col-first even-row-color"><code><a href="#kV" class="member-name-link">kV</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">kV</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#LQREncoderPosition" class="member-name-link">LQREncoderPosition</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">LQR encoder position standard deviation, in degrees or meters.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#LQREncoderVelocity" class="member-name-link">LQREncoderVelocity</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">LQR encoder velocity standard deviation, in RPM.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#LQRMaxVoltage" class="member-name-link">LQRMaxVoltage</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">LQR maximum output voltage.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#LQRModelPosition" class="member-name-link">LQRModelPosition</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">LQR model position standard deviation, in degrees or meters.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#LQRModelVelocity" class="member-name-link">LQRModelVelocity</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">LQR model velocity standard deviation, in RPM or meters per second.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#LQRQelmsPosition" class="member-name-link">LQRQelmsPosition</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">LQR position error tolerance (qelms), in degrees or meters.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#LQRQelmsVelocity" class="member-name-link">LQRQelmsVelocity</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">LQR velocity error tolerance (qelms), in RPM or meters per second.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#LQRRelms" class="member-name-link">LQRRelms</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">LQR control effort (voltage) tolerance (relms).</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#MeasurementAcceleration" class="member-name-link">MeasurementAcceleration</a></code></div>
 <div class="col-last odd-row-color">
@@ -526,6 +566,78 @@ the order they are declared.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">kD</span></div>
 <div class="block">kD</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRQelmsPosition">
+<h3>LQRQelmsPosition</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRQelmsPosition</span></div>
+<div class="block">LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRQelmsVelocity">
+<h3>LQRQelmsVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRQelmsVelocity</span></div>
+<div class="block">LQR velocity error tolerance (qelms), in RPM or meters per second.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRRelms">
+<h3>LQRRelms</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRRelms</span></div>
+<div class="block">LQR control effort (voltage) tolerance (relms).</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRModelPosition">
+<h3>LQRModelPosition</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRModelPosition</span></div>
+<div class="block">LQR model position standard deviation, in degrees or meters. Only with an arm or elevator LQR.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRModelVelocity">
+<h3>LQRModelVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRModelVelocity</span></div>
+<div class="block">LQR model velocity standard deviation, in RPM or meters per second.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQREncoderPosition">
+<h3>LQREncoderPosition</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQREncoderPosition</span></div>
+<div class="block">LQR encoder position standard deviation, in degrees or meters. Only with an arm or elevator LQR.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQREncoderVelocity">
+<h3>LQREncoderVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQREncoderVelocity</span></div>
+<div class="block">LQR encoder velocity standard deviation, in RPM. Only with a flywheel LQR.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LQRMaxVoltage">
+<h3>LQRMaxVoltage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">LQRMaxVoltage</span></div>
+<div class="block">LQR maximum output voltage.</div>
 </div>
 </section>
 </li>

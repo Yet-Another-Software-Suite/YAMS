@@ -1,0 +1,35 @@
+var classyams_1_1math_1_1LQRConfig =
+[
+    [ "LoopBundle", "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html", "structyams_1_1math_1_1LQRConfig_1_1LoopBundle" ],
+    [ "Loop1", "classyams_1_1math_1_1LQRConfig.html#ac3f330d10b5cd491a9a5ff332f4e08c0", null ],
+    [ "Loop2", "classyams_1_1math_1_1LQRConfig.html#a40fe7bb38385c73e3b37d1a96734f92d", null ],
+    [ "LQRType", "classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2b", [
+      [ "FLYWHEEL", "classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba302102ee6e4e1b49bd6c5dcb56cce0ec", null ],
+      [ "ARM", "classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba47f45e65244c17ec9fa8771a5c6d60e1", null ],
+      [ "ELEVATOR", "classyams_1_1math_1_1LQRConfig.html#a4d0a59fc149cead7a47bce892a7d2f2ba0727a5b7a92dc07a4e5ed231272d0bde", null ]
+    ] ],
+    [ "GetLoop", "classyams_1_1math_1_1LQRConfig.html#a0f8e55f8ff652e2c706fe5372e5ab857", null ],
+    [ "GetMaxVoltage", "classyams_1_1math_1_1LQRConfig.html#a56099388e81950657066b0c3e866be2d", null ],
+    [ "GetMeasurementStdDevs", "classyams_1_1math_1_1LQRConfig.html#a44e8c5bddd4cfd8cdb71941f51372de5", null ],
+    [ "GetPeriod", "classyams_1_1math_1_1LQRConfig.html#a47c84f8e3f6118a682d724373b0095b9", null ],
+    [ "GetQElems", "classyams_1_1math_1_1LQRConfig.html#a8c7655a88826937c8ba1b115c7745861", null ],
+    [ "GetRElems", "classyams_1_1math_1_1LQRConfig.html#aba25e337bcbf05a36f35185ec92854c0", null ],
+    [ "GetStateStdDevs", "classyams_1_1math_1_1LQRConfig.html#a9a911efd1379b9b860f8891240a4a394", null ],
+    [ "GetSystem", "classyams_1_1math_1_1LQRConfig.html#a5978dcf883048577f621a719fd5ee177", null ],
+    [ "GetType", "classyams_1_1math_1_1LQRConfig.html#ab9beafc01eb61d4e173de28c333216c9", null ],
+    [ "WithArmSystem", "classyams_1_1math_1_1LQRConfig.html#a3755b3da2e3d1260519a249ddea20eb8", null ],
+    [ "WithElevatorSystem", "classyams_1_1math_1_1LQRConfig.html#a0511f44d60881458c16823edb308cd26", null ],
+    [ "WithFlywheelSystem", "classyams_1_1math_1_1LQRConfig.html#ace91df934883c64b83b00f60f44c5688", null ],
+    [ "WithMaxVoltage", "classyams_1_1math_1_1LQRConfig.html#a29ea9d08c7494c2ad859c50e0a51727c", null ],
+    [ "WithMeasurementStdDevs", "classyams_1_1math_1_1LQRConfig.html#a8124323b8ac0c46d31c0f17bb2b01be5", null ],
+    [ "WithMeasurementStdDevs", "classyams_1_1math_1_1LQRConfig.html#a78c3cf3ecf5fb9b0654bb2c786d612cd", null ],
+    [ "WithPeriod", "classyams_1_1math_1_1LQRConfig.html#a9c66b191da0108701453de8819ba528b", null ],
+    [ "WithQElems", "classyams_1_1math_1_1LQRConfig.html#a9967b40605f5c170b0d842ec5c58d5a5", null ],
+    [ "WithQElems", "classyams_1_1math_1_1LQRConfig.html#a305a6ca2b9297123dde9780463500632", null ],
+    [ "WithRElems", "classyams_1_1math_1_1LQRConfig.html#ae360d31af7981de0964efcfde977252d", null ],
+    [ "WithRElems", "classyams_1_1math_1_1LQRConfig.html#a4f28ba5543459d48dd7f79dff225253a", null ],
+    [ "WithStateStdDevs", "classyams_1_1math_1_1LQRConfig.html#a7337d99b4328f22218a3e5f612313e05", null ],
+    [ "WithStateStdDevs", "classyams_1_1math_1_1LQRConfig.html#a0354e76db98843ce8ecfbf22ca47f593", null ],
+    [ "WithType", "classyams_1_1math_1_1LQRConfig.html#a449f37b537b3f8183f58ab1a19ee4ff8", null ],
+    [ "LQRController", "classyams_1_1math_1_1LQRConfig.html#ab053a4079b31ff7393859fd2f4da22cb", null ]
+];

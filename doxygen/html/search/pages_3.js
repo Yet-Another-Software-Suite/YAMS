@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['yams_20yet_20another_20mechanism_20system_0',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
-  ['yet_20another_20mechanism_20system_1',['YAMS Yet Another Mechanism System',['../index.html',1,'']]]
+  ['directly_0',['Basic usage (construct directly)',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md15',1,'']]]
 ];

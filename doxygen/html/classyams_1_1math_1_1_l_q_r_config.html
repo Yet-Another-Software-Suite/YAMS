@@ -77,6 +77,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#friends">Friends</a> &#124;
@@ -87,6 +88,11 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="_l_q_r_config_8hpp_source.html">LQRConfig.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a4d0a59fc149cead7a47bce892a7d2f2b" id="r_a4d0a59fc149cead7a47bce892a7d2f2b"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d0a59fc149cead7a47bce892a7d2f2b">LQRType</a> { <a class="el" href="#a4d0a59fc149cead7a47bce892a7d2f2ba302102ee6e4e1b49bd6c5dcb56cce0ec">FLYWHEEL</a>
@@ -127,10 +133,26 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a47c84f8e3f6118a682d724373b0095b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56099388e81950657066b0c3e866be2d" id="r_a56099388e81950657066b0c3e866be2d"><td class="memItemLeft" align="right" valign="top">wpi::units::volt_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a56099388e81950657066b0c3e866be2d">GetMaxVoltage</a> () const</td></tr>
 <tr class="separator:a56099388e81950657066b0c3e866be2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c7655a88826937c8ba1b115c7745861" id="r_a8c7655a88826937c8ba1b115c7745861"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c7655a88826937c8ba1b115c7745861">GetQElems</a> () const</td></tr>
+<tr class="separator:a8c7655a88826937c8ba1b115c7745861"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba25e337bcbf05a36f35185ec92854c0" id="r_aba25e337bcbf05a36f35185ec92854c0"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba25e337bcbf05a36f35185ec92854c0">GetRElems</a> () const</td></tr>
+<tr class="separator:aba25e337bcbf05a36f35185ec92854c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a911efd1379b9b860f8891240a4a394" id="r_a9a911efd1379b9b860f8891240a4a394"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a911efd1379b9b860f8891240a4a394">GetStateStdDevs</a> () const</td></tr>
+<tr class="separator:a9a911efd1379b9b860f8891240a4a394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44e8c5bddd4cfd8cdb71941f51372de5" id="r_a44e8c5bddd4cfd8cdb71941f51372de5"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44e8c5bddd4cfd8cdb71941f51372de5">GetMeasurementStdDevs</a> () const</td></tr>
+<tr class="separator:a44e8c5bddd4cfd8cdb71941f51372de5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9967b40605f5c170b0d842ec5c58d5a5" id="r_a9967b40605f5c170b0d842ec5c58d5a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9967b40605f5c170b0d842ec5c58d5a5">WithQElems</a> (const std::vector&lt; double &gt; &amp;qElems)</td></tr>
+<tr class="separator:a9967b40605f5c170b0d842ec5c58d5a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae360d31af7981de0964efcfde977252d" id="r_ae360d31af7981de0964efcfde977252d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae360d31af7981de0964efcfde977252d">WithRElems</a> (const std::vector&lt; double &gt; &amp;rElems)</td></tr>
+<tr class="separator:ae360d31af7981de0964efcfde977252d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7337d99b4328f22218a3e5f612313e05" id="r_a7337d99b4328f22218a3e5f612313e05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7337d99b4328f22218a3e5f612313e05">WithStateStdDevs</a> (const std::vector&lt; double &gt; &amp;stateStdDevs)</td></tr>
+<tr class="separator:a7337d99b4328f22218a3e5f612313e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8124323b8ac0c46d31c0f17bb2b01be5" id="r_a8124323b8ac0c46d31c0f17bb2b01be5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8124323b8ac0c46d31c0f17bb2b01be5">WithMeasurementStdDevs</a> (const std::vector&lt; double &gt; &amp;measStdDevs)</td></tr>
+<tr class="separator:a8124323b8ac0c46d31c0f17bb2b01be5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5978dcf883048577f621a719fd5ee177" id="r_a5978dcf883048577f621a719fd5ee177"><td class="memItemLeft" align="right" valign="top">std::variant&lt; wpi::math::LinearSystem&lt; 1, 1, 1 &gt;, wpi::math::LinearSystem&lt; 2, 1, 1 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5978dcf883048577f621a719fd5ee177">GetSystem</a> () const</td></tr>
 <tr class="separator:a5978dcf883048577f621a719fd5ee177"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a976ecaa1f1ccb8e2e5512f9fb184c14c" id="r_a976ecaa1f1ccb8e2e5512f9fb184c14c"><td class="memItemLeft" align="right" valign="top">std::variant&lt; <a class="el" href="#ac3f330d10b5cd491a9a5ff332f4e08c0">Loop1</a>, <a class="el" href="#a40fe7bb38385c73e3b37d1a96734f92d">Loop2</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a976ecaa1f1ccb8e2e5512f9fb184c14c">GetLoop</a> () const</td></tr>
-<tr class="separator:a976ecaa1f1ccb8e2e5512f9fb184c14c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f8e55f8ff652e2c706fe5372e5ab857" id="r_a0f8e55f8ff652e2c706fe5372e5ab857"><td class="memItemLeft" align="right" valign="top">std::variant&lt; std::unique_ptr&lt; <a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a>&lt; 1 &gt; &gt;, std::unique_ptr&lt; <a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a>&lt; 2 &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f8e55f8ff652e2c706fe5372e5ab857">GetLoop</a> () const</td></tr>
+<tr class="separator:a0f8e55f8ff652e2c706fe5372e5ab857"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -139,7 +161,7 @@ Friends</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Configuration for an LQR (Linear Quadratic Regulator) closed-loop controller.</p>
-<p>Uses a fluent builder pattern; all With* methods return *this for chaining. After configuring the plant type, gains, and noise parameters call <a class="el" href="#a976ecaa1f1ccb8e2e5512f9fb184c14c">GetLoop()</a> to obtain the ready-to-use LinearSystemLoop. </p>
+<p>Uses a fluent builder pattern; all With* methods return *this for chaining. After configuring the plant type, gains, and noise parameters call <a class="el" href="#a0f8e55f8ff652e2c706fe5372e5ab857">GetLoop()</a> to obtain the ready-to-use LinearSystemLoop, in a <a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a> that owns everything it points to. </p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="ac3f330d10b5cd491a9a5ff332f4e08c0" name="ac3f330d10b5cd491a9a5ff332f4e08c0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac3f330d10b5cd491a9a5ff332f4e08c0">&#9670;&#160;</a></span>Loop1</h2>
@@ -204,22 +226,22 @@ Friends</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a976ecaa1f1ccb8e2e5512f9fb184c14c" name="a976ecaa1f1ccb8e2e5512f9fb184c14c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a976ecaa1f1ccb8e2e5512f9fb184c14c">&#9670;&#160;</a></span>GetLoop()</h2>
+<a id="a0f8e55f8ff652e2c706fe5372e5ab857" name="a0f8e55f8ff652e2c706fe5372e5ab857"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f8e55f8ff652e2c706fe5372e5ab857">&#9670;&#160;</a></span>GetLoop()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::variant&lt; <a class="el" href="#ac3f330d10b5cd491a9a5ff332f4e08c0">Loop1</a>, <a class="el" href="#a40fe7bb38385c73e3b37d1a96734f92d">Loop2</a> &gt; yams::math::LQRConfig::GetLoop </td>
+          <td class="memname">std::variant&lt; std::unique_ptr&lt; <a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a>&lt; 1 &gt; &gt;, std::unique_ptr&lt; <a class="el" href="structyams_1_1math_1_1_l_q_r_config_1_1_loop_bundle.html">LoopBundle</a>&lt; 2 &gt; &gt; &gt; yams::math::LQRConfig::GetLoop </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Build and return the complete LinearSystemLoop ready for use.</p>
-<dl class="section return"><dt>Returns</dt><dd>Variant holding Loop1 (flywheel) or Loop2 (arm/elevator). </dd></dl>
+<p>Build and return the complete LinearSystemLoop ready for use, with the plant, LQR and Kalman filter it points to.</p>
+<dl class="section return"><dt>Returns</dt><dd>Variant holding a 1-state bundle (flywheel) or a 2-state bundle (arm/elevator). </dd></dl>
 
 </div>
 </div>
@@ -242,6 +264,25 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a44e8c5bddd4cfd8cdb71941f51372de5" name="a44e8c5bddd4cfd8cdb71941f51372de5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44e8c5bddd4cfd8cdb71941f51372de5">&#9670;&#160;</a></span>GetMeasurementStdDevs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; yams::math::LQRConfig::GetMeasurementStdDevs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the encoder's standard deviations in use, in SI units: rad/s for a flywheel, rad for an arm, m for an elevator.</p>
+<dl class="section return"><dt>Returns</dt><dd>One standard deviation per measurement. </dd></dl>
+
+</div>
+</div>
 <a id="a47c84f8e3f6118a682d724373b0095b9" name="a47c84f8e3f6118a682d724373b0095b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a47c84f8e3f6118a682d724373b0095b9">&#9670;&#160;</a></span>GetPeriod()</h2>
 
@@ -258,6 +299,63 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p>Get the configured loop period.</p>
 <dl class="section return"><dt>Returns</dt><dd>Loop period. </dd></dl>
+
+</div>
+</div>
+<a id="a8c7655a88826937c8ba1b115c7745861" name="a8c7655a88826937c8ba1b115c7745861"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c7655a88826937c8ba1b115c7745861">&#9670;&#160;</a></span>GetQElems()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; yams::math::LQRConfig::GetQElems </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the state error tolerances in use, in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for an elevator. Unset tolerances are the defaults the loop is built with.</p>
+<dl class="section return"><dt>Returns</dt><dd>One tolerance per modeled state. </dd></dl>
+
+</div>
+</div>
+<a id="aba25e337bcbf05a36f35185ec92854c0" name="aba25e337bcbf05a36f35185ec92854c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba25e337bcbf05a36f35185ec92854c0">&#9670;&#160;</a></span>GetRElems()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; yams::math::LQRConfig::GetRElems </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the control effort (voltage) tolerances in use, in volts.</p>
+<dl class="section return"><dt>Returns</dt><dd>One tolerance per input. </dd></dl>
+
+</div>
+</div>
+<a id="a9a911efd1379b9b860f8891240a4a394" name="a9a911efd1379b9b860f8891240a4a394"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a911efd1379b9b860f8891240a4a394">&#9670;&#160;</a></span>GetStateStdDevs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; yams::math::LQRConfig::GetStateStdDevs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the model's standard deviations in use, in the SI units of <a class="el" href="#a8c7655a88826937c8ba1b115c7745861">GetQElems()</a>.</p>
+<dl class="section return"><dt>Returns</dt><dd>One standard deviation per modeled state. </dd></dl>
 
 </div>
 </div>
@@ -438,8 +536,39 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a8124323b8ac0c46d31c0f17bb2b01be5" name="a8124323b8ac0c46d31c0f17bb2b01be5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8124323b8ac0c46d31c0f17bb2b01be5">&#9670;&#160;</a></span>WithMeasurementStdDevs() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp; yams::math::LQRConfig::WithMeasurementStdDevs </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>measStdDevs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the encoder's standard deviation, as when live tuning it, checking it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">measStdDevs</td><td>One standard deviation, above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if there isn't one value, or it isn't above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a78c3cf3ecf5fb9b0654bb2c786d612cd" name="a78c3cf3ecf5fb9b0654bb2c786d612cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a78c3cf3ecf5fb9b0654bb2c786d612cd">&#9670;&#160;</a></span>WithMeasurementStdDevs()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a78c3cf3ecf5fb9b0654bb2c786d612cd">&#9670;&#160;</a></span>WithMeasurementStdDevs() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -488,8 +617,39 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a9967b40605f5c170b0d842ec5c58d5a5" name="a9967b40605f5c170b0d842ec5c58d5a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9967b40605f5c170b0d842ec5c58d5a5">&#9670;&#160;</a></span>WithQElems() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp; yams::math::LQRConfig::WithQElems </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>qElems</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the state error tolerances, as when live tuning them, checking them.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">qElems</td><td>One tolerance per modeled state, each above 0, in the SI units of <a class="el" href="#a8c7655a88826937c8ba1b115c7745861">GetQElems()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if the number of values doesn't match the mechanism type, or one isn't above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a305a6ca2b9297123dde9780463500632" name="a305a6ca2b9297123dde9780463500632"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a305a6ca2b9297123dde9780463500632">&#9670;&#160;</a></span>WithQElems()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a305a6ca2b9297123dde9780463500632">&#9670;&#160;</a></span>WithQElems() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -514,8 +674,39 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="ae360d31af7981de0964efcfde977252d" name="ae360d31af7981de0964efcfde977252d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae360d31af7981de0964efcfde977252d">&#9670;&#160;</a></span>WithRElems() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp; yams::math::LQRConfig::WithRElems </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rElems</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the control effort (voltage) tolerance, as when live tuning it, checking it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rElems</td><td>One tolerance, above 0, in volts. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if there isn't one value, or it isn't above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4f28ba5543459d48dd7f79dff225253a" name="a4f28ba5543459d48dd7f79dff225253a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f28ba5543459d48dd7f79dff225253a">&#9670;&#160;</a></span>WithRElems()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f28ba5543459d48dd7f79dff225253a">&#9670;&#160;</a></span>WithRElems() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -540,8 +731,39 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="a7337d99b4328f22218a3e5f612313e05" name="a7337d99b4328f22218a3e5f612313e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7337d99b4328f22218a3e5f612313e05">&#9670;&#160;</a></span>WithStateStdDevs() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> &amp; yams::math::LQRConfig::WithStateStdDevs </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>stateStdDevs</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the model's standard deviations, as when live tuning them, checking them.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stateStdDevs</td><td>One standard deviation per modeled state, each above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if the number of values doesn't match the mechanism type, or one isn't above 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a0354e76db98843ce8ecfbf22ca47f593" name="a0354e76db98843ce8ecfbf22ca47f593"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0354e76db98843ce8ecfbf22ca47f593">&#9670;&#160;</a></span>WithStateStdDevs()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0354e76db98843ce8ecfbf22ca47f593">&#9670;&#160;</a></span>WithStateStdDevs() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

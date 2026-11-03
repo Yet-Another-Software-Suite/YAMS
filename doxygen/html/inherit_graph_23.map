@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html" title=" " alt="" coords="5,5,209,60"/>
+<area shape="rect" id="Node000000" href="$classyams_1_1motorcontrollers_1_1SimSupplier.html" title=" " alt="" coords="5,75,179,119"/>
+<area shape="rect" id="Node000001" href="$classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html" title=" " alt="" coords="242,5,453,50"/>
+<area shape="poly" id="edge16_Node000000_Node000001" title=" " alt="" coords="191,68,265,49,260,52,192,73"/>
+<area shape="rect" id="Node000002" href="$classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html" title=" " alt="" coords="227,75,468,119"/>
+<area shape="poly" id="edge17_Node000000_Node000002" title=" " alt="" coords="194,94,229,96,224,98,195,100"/>
+<area shape="rect" id="Node000003" href="$classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html" title=" " alt="" coords="228,144,466,189"/>
+<area shape="poly" id="edge18_Node000000_Node000003" title=" " alt="" coords="192,121,265,143,260,144,191,127"/>
 </map>

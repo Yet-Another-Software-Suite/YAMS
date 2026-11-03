@@ -257,6 +257,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa112dc2376af2f3ebd39de87870ae28e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a263b43e32eef1c306cc34f9df3fa5902" id="r_a263b43e32eef1c306cc34f9df3fa5902"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a263b43e32eef1c306cc34f9df3fa5902">WithMOI</a> (wpi::units::meter_t length, wpi::units::kilogram_t mass)</td></tr>
 <tr class="separator:a263b43e32eef1c306cc34f9df3fa5902"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26ed1b58e1eb2083a2a791efe0fe9076" id="r_a26ed1b58e1eb2083a2a791efe0fe9076"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26ed1b58e1eb2083a2a791efe0fe9076">WithWheelMOI</a> (wpi::units::meter_t diameter, wpi::units::kilogram_t mass)</td></tr>
+<tr class="separator:a26ed1b58e1eb2083a2a791efe0fe9076"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b90c1b615b24eca42263a08c20b95ae" id="r_a3b90c1b615b24eca42263a08c20b95ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b90c1b615b24eca42263a08c20b95ae">WithStartingPosition</a> (wpi::units::degree_t startingAngle)</td></tr>
 <tr class="separator:a3b90c1b615b24eca42263a08c20b95ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06a07fea1abdcbfba737f94a8c16e9f1" id="r_a06a07fea1abdcbfba737f94a8c16e9f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06a07fea1abdcbfba737f94a8c16e9f1">WithStartingPosition</a> (wpi::units::meter_t startingDistance)</td></tr>
@@ -4341,6 +4343,36 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">voltage</td><td>Ideal (compensated) voltage. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a26ed1b58e1eb2083a2a791efe0fe9076" name="a26ed1b58e1eb2083a2a791efe0fe9076"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26ed1b58e1eb2083a2a791efe0fe9076">&#9670;&#160;</a></span>WithWheelMOI()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp; yams::motorcontrollers::SmartMotorControllerConfig::WithWheelMOI </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::meter_t</td>          <td class="paramname"><span class="paramname"><em>diameter</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::kilogram_t</td>          <td class="paramname"><span class="paramname"><em>mass</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the moment of inertia of a wheel, roller or flywheel for simulation: a solid disk of the given diameter and mass spinning about its center (1/2 * mass * radius²). The length and mass WithMOI overload is for arms, and gives about three times this for the same size.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">diameter</td><td>Wheel diameter. </td></tr>
+    <tr><td class="paramname">mass</td><td>Mass of the wheel, including anything that spins with it. </td></tr>
   </table>
   </dd>
 </dl>

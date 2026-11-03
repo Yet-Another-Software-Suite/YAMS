@@ -419,7 +419,11 @@ atSpeed.onTrue(Commands.print("Shooter at speed!"));
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.command2.Command</span>&nbsp;<span class="element-name">runTo</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.units.measure.AngularVelocity&gt;&nbsp;velocity,
  org.wpilib.units.measure.AngularVelocity&nbsp;tolerance)</span></div>
-<div class="block">Run the FlyWheel to a velocity within a tolerance, then end the command.</div>
+<div class="block">Run the FlyWheel to a velocity within a tolerance, then end the command.
+
+<p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+command runs is followed. The command ends once the mechanism has been within tolerance of the
+supplier's current value for 0.1 s.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>velocity</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a> of <code>AngularVelocity</code></dd>

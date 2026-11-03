@@ -78,6 +78,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#withFlyWheel(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.AngularVelocity)" tabindex="0">withFlyWheel(AngularVelocity, AngularVelocity, AngularVelocity)</a></li>
 <li><a href="#withElevator(org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass,org.wpilib.units.measure.Distance)" tabindex="0">withElevator(Distance, LinearVelocity, Distance, LinearVelocity, Distance, Mass, Distance)</a></li>
 <li><a href="#withArm(org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle)" tabindex="0">withArm(Angle, AngularVelocity, Angle, AngularVelocity, Angle)</a></li>
+<li><a href="#getQelms()" tabindex="0">getQelms()</a></li>
+<li><a href="#withQelms(double...)" tabindex="0">withQelms(double...)</a></li>
+<li><a href="#getModelStdDevs()" tabindex="0">getModelStdDevs()</a></li>
+<li><a href="#withModelStdDevs(double...)" tabindex="0">withModelStdDevs(double...)</a></li>
+<li><a href="#getEncoderStdDevs()" tabindex="0">getEncoderStdDevs()</a></li>
+<li><a href="#withEncoderStdDevs(double...)" tabindex="0">withEncoderStdDevs(double...)</a></li>
+<li><a href="#getRelms()" tabindex="0">getRelms()</a></li>
+<li><a href="#getMaxVoltage()" tabindex="0">getMaxVoltage()</a></li>
 <li><a href="#getSystem()" tabindex="0">getSystem()</a></li>
 <li><a href="#getKalmanFilter(org.wpilib.math.system.LinearSystem)" tabindex="0">getKalmanFilter(LinearSystem)</a></li>
 <li><a href="#getRegulator(org.wpilib.math.system.LinearSystem)" tabindex="0">getRegulator(LinearSystem)</a></li>
@@ -105,11 +113,12 @@ loadScripts(document, 'script');</script>
 <p>The LQR cost matrices determine how the regulator balances state error against control effort:
 <ul>
 <li><b>Q (state cost, via qelms)</b> penalizes deviation from the desired state (position,
-velocity). Smaller values tolerate larger state errors; larger values drive the controller
-to correct errors more aggressively.</li>
-<li><b>R (control effort cost, via relms)</b> penalizes the voltage applied to the motor.
-Smaller values allow higher voltages (more aggressive); larger values keep the output
-gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
+velocity). Each qelms value is the largest error you accept: smaller values drive the
+controller to correct errors more aggressively; larger values tolerate larger errors.</li>
+<li><b>R (control effort cost, via relms)</b> penalizes the voltage applied to the motor. The
+relms value is the largest voltage you accept: smaller values keep the output gentler; larger
+values allow higher voltages (more aggressive). 12 V matches the approximate maximum battery
+voltage.</li>
 </ul>
 
 <h2 id="example-arm-lqr-configuration-heading">Example Arm LQR configuration</h2>
@@ -127,7 +136,7 @@ LQRConfig config = new LQRConfig(
         Radians.of(0.01))          // encoder position std dev
     .withControlEffort(Volts.of(12))
     .withMaxVoltage(Volts.of(12))
-    .withAggressiveness(10);
+    ;
 
 LQRController armController = new LQRController(config);
 </code></pre></div>
@@ -174,78 +183,111 @@ LQRController armController = new LQRController(config);
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button><button id="method-summary-table-tab6" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab6', 3)" class="table-tab">Deprecated Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.estimator.KalmanFilter<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getKalmanFilter(org.wpilib.math.system.LinearSystem)" class="member-name-link">getKalmanFilter</a><wbr>(org.wpilib.math.system.LinearSystem&lt;?,<wbr>?,<wbr>?&gt;&nbsp;plant)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEncoderStdDevs()" class="member-name-link">getEncoderStdDevs</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the encoder's standard deviation, in SI units: rad/s for a flywheel, rad for an arm, m for an elevator.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.estimator.KalmanFilter<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getKalmanFilter(org.wpilib.math.system.LinearSystem)" class="member-name-link">getKalmanFilter</a><wbr>(org.wpilib.math.system.LinearSystem&lt;?,<wbr>?,<wbr>?&gt;&nbsp;plant)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>KalmanFilter</code> for the LQR.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystemLoop<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLoop()" class="member-name-link">getLoop</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystemLoop<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLoop()" class="member-name-link">getLoop</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>LinearSystemLoop</code> with the currently configured LQR.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystemLoop<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLoop(org.wpilib.math.system.LinearSystem,org.wpilib.math.controller.LinearQuadraticRegulator,org.wpilib.math.estimator.KalmanFilter)" class="member-name-link">getLoop</a><wbr>(org.wpilib.math.system.LinearSystem&lt;?,<wbr>?,<wbr>?&gt;&nbsp;plant,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystemLoop<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLoop(org.wpilib.math.system.LinearSystem,org.wpilib.math.controller.LinearQuadraticRegulator,org.wpilib.math.estimator.KalmanFilter)" class="member-name-link">getLoop</a><wbr>(org.wpilib.math.system.LinearSystem&lt;?,<wbr>?,<wbr>?&gt;&nbsp;plant,
  org.wpilib.math.controller.LinearQuadraticRegulator&lt;?,<wbr>?,<wbr>?&gt;&nbsp;controller,
  org.wpilib.math.estimator.KalmanFilter&lt;?,<wbr>?,<wbr>?&gt;&nbsp;observer)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>LinearSystemLoop</code>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Time</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPeriod()" class="member-name-link">getPeriod</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Voltage</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxVoltage()" class="member-name-link">getMaxVoltage</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the maximum voltage of the <code>LinearSystemLoop</code>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getModelStdDevs()" class="member-name-link">getModelStdDevs</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the model's standard deviations, in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Time</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPeriod()" class="member-name-link">getPeriod</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the loop time for the LQR.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getQelms()" class="member-name-link">getQelms</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the state error tolerances (qelms), in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for
+an elevator.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.controller.LinearQuadraticRegulator<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRegulator(org.wpilib.math.system.LinearSystem)" class="member-name-link">getRegulator</a><wbr>(org.wpilib.math.system.LinearSystem&lt;?,<wbr>?,<wbr>?&gt;&nbsp;plant)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>LinearQuadraticRegulator</code>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystem<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSystem()" class="member-name-link">getSystem</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Voltage</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelms()" class="member-name-link">getRelms</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the control effort (voltage) tolerance, relms.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.LinearSystem<wbr>&lt;?,<wbr>?,<wbr>?&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSystem()" class="member-name-link">getSystem</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>LinearSystem</code> for the LQR.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.LQRType.html" title="enum class in yams.core.math">LQRConfig.LQRType</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getType()" class="member-name-link">getType</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.LQRType.html" title="enum class in yams.core.math">LQRConfig.LQRType</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getType()" class="member-name-link">getType</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="LQRConfig.LQRType.html" title="enum class in yams.core.math"><code>LQRConfig.LQRType</code></a> of the LQR.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAggressiveness(double)" class="member-name-link">withAggressiveness</a><wbr>(double&nbsp;aggressiveness)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Aggressiveness of the LQR, how fast it will attempt to achieve the desired state.</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#withAggressiveness(double)" class="member-name-link">withAggressiveness</a><wbr>(double&nbsp;aggressiveness)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">This value has never changed the LQR.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withArm(org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle)" class="member-name-link">withArm</a><wbr>(org.wpilib.units.measure.Angle&nbsp;qelmsPosition,
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withArm(org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Angle)" class="member-name-link">withArm</a><wbr>(org.wpilib.units.measure.Angle&nbsp;qelmsPosition,
  org.wpilib.units.measure.AngularVelocity&nbsp;qelmsVelocity,
  org.wpilib.units.measure.Angle&nbsp;modelPositionTrust,
  org.wpilib.units.measure.AngularVelocity&nbsp;modelVelocityTrust,
  org.wpilib.units.measure.Angle&nbsp;encoderPositionTrust)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Construct an Arm LQR Configuration.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withControlEffort(org.wpilib.units.measure.Voltage)" class="member-name-link">withControlEffort</a><wbr>(org.wpilib.units.measure.Voltage&nbsp;effort)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withControlEffort(org.wpilib.units.measure.Voltage)" class="member-name-link">withControlEffort</a><wbr>(org.wpilib.units.measure.Voltage&nbsp;effort)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the control effort for the LQR.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withElevator(org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass,org.wpilib.units.measure.Distance)" class="member-name-link">withElevator</a><wbr>(org.wpilib.units.measure.Distance&nbsp;qelmsPosition,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withElevator(org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass,org.wpilib.units.measure.Distance)" class="member-name-link">withElevator</a><wbr>(org.wpilib.units.measure.Distance&nbsp;qelmsPosition,
  org.wpilib.units.measure.LinearVelocity&nbsp;qelmsVelocity,
  org.wpilib.units.measure.Distance&nbsp;modelPositionTrust,
  org.wpilib.units.measure.LinearVelocity&nbsp;modelVelocityTrust,
  org.wpilib.units.measure.Distance&nbsp;encoderPositionTrust,
  org.wpilib.units.measure.Mass&nbsp;mass,
  org.wpilib.units.measure.Distance&nbsp;drumRadius)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Construct an Elevator LQR Configuration.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withEncoderStdDevs(double...)" class="member-name-link">withEncoderStdDevs</a><wbr>(double...&nbsp;stdDevs)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the encoder's standard deviation, in the SI units of <a href="#getEncoderStdDevs()"><code>getEncoderStdDevs()</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withFlyWheel(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.AngularVelocity)" class="member-name-link">withFlyWheel</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;qelms,
@@ -262,7 +304,18 @@ LQRController armController = new LQRController(config);
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMeasurementDelay(org.wpilib.units.measure.Time)" class="member-name-link">withMeasurementDelay</a><wbr>(org.wpilib.units.measure.Time&nbsp;delay)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the measurement delay of the LQR.</div>
+<div class="block">Set how far behind the sensor measurement is, such as a velocity filtered by the motor
+controller.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withModelStdDevs(double...)" class="member-name-link">withModelStdDevs</a><wbr>(double...&nbsp;stdDevs)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the model's standard deviations, in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withQelms(double...)" class="member-name-link">withQelms</a><wbr>(double...&nbsp;qelms)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the state error tolerances (qelms), in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRelms(org.wpilib.units.measure.Voltage)" class="member-name-link">withRelms</a><wbr>(org.wpilib.units.measure.Voltage&nbsp;relms)</code></div>
@@ -401,7 +454,9 @@ LQRController armController = new LQRController(config);
 <h3>withMeasurementDelay</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withMeasurementDelay</span><wbr><span class="parameters">(org.wpilib.units.measure.Time&nbsp;delay)</span></div>
-<div class="block">Set the measurement delay of the LQR.</div>
+<div class="block">Set how far behind the sensor measurement is, such as a velocity filtered by the motor
+controller. The LQR's gains are compensated for this delay, which keeps a slow sensor from
+making the controller overshoot.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>delay</code> - Measurement delay.</dd>
@@ -415,7 +470,12 @@ LQRController armController = new LQRController(config);
 <section class="detail" id="withAggressiveness(double)">
 <h3>withAggressiveness</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withAggressiveness</span><wbr><span class="parameters">(double&nbsp;aggressiveness)</span></div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="class or interface in java.lang" class="external-link">@Deprecated</a>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html#forRemoval()" title="class or interface in java.lang" class="external-link">forRemoval</a>=true)
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withAggressiveness</span><wbr><span class="parameters">(double&nbsp;aggressiveness)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">This value has never changed the LQR. Lower the state error tolerance (qelms) or
+            raise the control effort (relms) to make the LQR more aggressive.</div>
+</div>
 <div class="block">Aggressiveness of the LQR, how fast it will attempt to achieve the desired state.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -512,6 +572,129 @@ LQRController armController = new LQRController(config);
                             <code>Angle</code>.</dd>
 <dt>Returns:</dt>
 <dd><a href="LQRConfig.html" title="class in yams.core.math"><code>LQRConfig</code></a> for chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getQelms()">
+<h3>getQelms</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getQelms</span>()</div>
+<div class="block">Get the state error tolerances (qelms), in SI units: rad/s for a flywheel, rad and rad/s for an arm, m and m/s for
+an elevator.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>A copy of the tolerances, one per modeled state.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if no mechanism type has been configured.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withQelms(double...)">
+<h3>withQelms</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withQelms</span><wbr><span class="parameters">(double...&nbsp;qelms)</span></div>
+<div class="block">Set the state error tolerances (qelms), in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>qelms</code> - One tolerance per modeled state, each above 0.</dd>
+<dt>Returns:</dt>
+<dd><a href="LQRConfig.html" title="class in yams.core.math"><code>LQRConfig</code></a> for chaining.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the number of values does not match the mechanism type, or one is not above 0.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getModelStdDevs()">
+<h3>getModelStdDevs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getModelStdDevs</span>()</div>
+<div class="block">Get the model's standard deviations, in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>A copy of the standard deviations, one per modeled state.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if no mechanism type has been configured.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withModelStdDevs(double...)">
+<h3>withModelStdDevs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withModelStdDevs</span><wbr><span class="parameters">(double...&nbsp;stdDevs)</span></div>
+<div class="block">Set the model's standard deviations, in the SI units of <a href="#getQelms()"><code>getQelms()</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>stdDevs</code> - One standard deviation per modeled state, each above 0.</dd>
+<dt>Returns:</dt>
+<dd><a href="LQRConfig.html" title="class in yams.core.math"><code>LQRConfig</code></a> for chaining.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the number of values does not match the mechanism type, or one is not above 0.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getEncoderStdDevs()">
+<h3>getEncoderStdDevs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getEncoderStdDevs</span>()</div>
+<div class="block">Get the encoder's standard deviation, in SI units: rad/s for a flywheel, rad for an arm, m for an elevator.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>A copy of the standard deviation, as a one-element array.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if no mechanism type has been configured.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withEncoderStdDevs(double...)">
+<h3>withEncoderStdDevs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a></span>&nbsp;<span class="element-name">withEncoderStdDevs</span><wbr><span class="parameters">(double...&nbsp;stdDevs)</span></div>
+<div class="block">Set the encoder's standard deviation, in the SI units of <a href="#getEncoderStdDevs()"><code>getEncoderStdDevs()</code></a>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>stdDevs</code> - The standard deviation, above 0.</dd>
+<dt>Returns:</dt>
+<dd><a href="LQRConfig.html" title="class in yams.core.math"><code>LQRConfig</code></a> for chaining.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the number of values does not match the mechanism type, or one is not above 0.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRelms()">
+<h3>getRelms</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.Voltage</span>&nbsp;<span class="element-name">getRelms</span>()</div>
+<div class="block">Get the control effort (voltage) tolerance, relms.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Control effort tolerance.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMaxVoltage()">
+<h3>getMaxVoltage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.Voltage</span>&nbsp;<span class="element-name">getMaxVoltage</span>()</div>
+<div class="block">Get the maximum voltage of the <code>LinearSystemLoop</code>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>Maximum voltage output.</dd>
 </dl>
 </div>
 </section>

@@ -69,6 +69,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#updateConfig(yams.core.math.LQRConfig)" tabindex="0">updateConfig(LQRConfig)</a></li>
+<li><a href="#retune(yams.core.math.LQRConfig)" tabindex="0">retune(LQRConfig)</a></li>
 <li><a href="#reset(org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity)" tabindex="0">reset(Angle, AngularVelocity)</a></li>
 <li><a href="#reset(org.wpilib.units.measure.Distance,org.wpilib.units.measure.LinearVelocity)" tabindex="0">reset(Distance, LinearVelocity)</a></li>
 <li><a href="#calculate(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle,org.wpilib.units.measure.AngularVelocity)" tabindex="0">calculate(Angle, Angle, AngularVelocity)</a></li>
@@ -219,8 +220,14 @@ motor.setVoltage(output.in(Volts));
 <div class="block">Reset the Elevator LQR.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateConfig(yams.core.math.LQRConfig)" class="member-name-link">updateConfig</a><wbr>(<a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a>&nbsp;config)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#retune(yams.core.math.LQRConfig)" class="member-name-link">retune</a><wbr>(<a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a>&nbsp;config)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Rebuild the loop from the config after its values changed, as when live tuning them, keeping the state estimate:
+the new loop starts where the old one was, so the output doesn't jump.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateConfig(yams.core.math.LQRConfig)" class="member-name-link">updateConfig</a><wbr>(<a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a>&nbsp;config)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update LQR based off config.</div>
 </div>
 </div>
@@ -295,6 +302,23 @@ motor.setVoltage(output.in(Volts));
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/NoSuchElementException.html" title="class or interface in java.util" class="external-link">NoSuchElementException</a></code> - if <code>config</code> has no mechanism type configured (none of
                                <code>withFlyWheel</code>, <code>withArm</code>, or <code>withElevator</code>
                                was called).</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="retune(yams.core.math.LQRConfig)">
+<h3>retune</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">retune</span><wbr><span class="parameters">(<a href="LQRConfig.html" title="class in yams.core.math">LQRConfig</a>&nbsp;config)</span></div>
+<div class="block">Rebuild the loop from the config after its values changed, as when live tuning them, keeping the state estimate:
+the new loop starts where the old one was, so the output doesn't jump. Safe to call while the closed loop
+controller runs.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>config</code> - <a href="LQRConfig.html" title="class in yams.core.math"><code>LQRConfig</code></a> with the new values, of the same <a href="LQRConfig.LQRType.html" title="enum class in yams.core.math"><code>LQRConfig.LQRType</code></a>.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the config is for a different <a href="LQRConfig.LQRType.html" title="enum class in yams.core.math"><code>LQRConfig.LQRType</code></a>.</dd>
 </dl>
 </div>
 </section>

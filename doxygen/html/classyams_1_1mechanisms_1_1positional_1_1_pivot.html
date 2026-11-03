@@ -618,7 +618,7 @@ Example usage (inside a subsystem constructor)</h3>
       </table>
 </div><div class="memdoc">
 <p>Command the pivot to an angle from a supplier, then end when within tolerance.</p>
-<p>The supplier is evaluated once when the command is created.</p>
+<p>The supplier is read every loop and sent as the setpoint, so a target that changes while the command runs is followed. The command ends once the mechanism has been within tolerance of the supplier's current value for 0.1 s.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">angle</td><td>Supplier for the target angle. </td></tr>

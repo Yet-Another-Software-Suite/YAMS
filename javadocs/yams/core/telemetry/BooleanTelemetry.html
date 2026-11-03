@@ -83,6 +83,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#enable()" tabindex="0">enable()</a></li>
 <li><a href="#disable()" tabindex="0">disable()</a></li>
 <li><a href="#display(boolean)" tabindex="0">display(boolean)</a></li>
+<li><a href="#isEnabled()" tabindex="0">isEnabled()</a></li>
 <li><a href="#getField()" tabindex="0">getField()</a></li>
 <li><a href="#setDefaultValue(boolean)" tabindex="0">setDefaultValue(boolean)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
@@ -217,34 +218,39 @@ guard in <a href="#set(boolean)"><code>set(boolean)</code></a>.</div>
 <div class="block">Get the field.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(boolean)" class="member-name-link">set</a><wbr>(boolean&nbsp;value)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEnabled()" class="member-name-link">isEnabled</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDefaultValue(boolean)" class="member-name-link">setDefaultValue</a><wbr>(boolean&nbsp;value)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the default value.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup the DataLog entry for this telemetry field.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTable(org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTable</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup network tables.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTables(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTables</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable,
- org.wpilib.networktables.NetworkTable&nbsp;tuningTable)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Setup network tables.</div>
+<div class="block">Whether the telemetry is enabled.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tunable()" class="member-name-link">tunable</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#set(boolean)" class="member-name-link">set</a><wbr>(boolean&nbsp;value)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the value of the publisher, checking to see if the value is the same as the subscriber.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDefaultValue(boolean)" class="member-name-link">setDefaultValue</a><wbr>(boolean&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the default value.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupDataLog(java.lang.String)" class="member-name-link">setupDataLog</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;prefix)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup the DataLog entry for this telemetry field.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTable(org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTable</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup network tables.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupNetworkTables(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" class="member-name-link">setupNetworkTables</a><wbr>(org.wpilib.networktables.NetworkTable&nbsp;dataTable,
+ org.wpilib.networktables.NetworkTable&nbsp;tuningTable)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Setup network tables.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tunable()" class="member-name-link">tunable</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check to see if the value has changed.</div>
 </div>
 </div>
@@ -437,6 +443,19 @@ if it was made on the dashboard.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>state</code> - Enable or disable.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isEnabled()">
+<h3>isEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isEnabled</span>()</div>
+<div class="block">Whether the telemetry is enabled.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>True if the telemetry is published.</dd>
 </dl>
 </div>
 </section>

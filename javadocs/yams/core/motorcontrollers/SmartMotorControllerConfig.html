@@ -101,6 +101,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getStatorStallCurrentLimit()" tabindex="0">getStatorStallCurrentLimit()</a></li>
 <li><a href="#withSoftLimits(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" tabindex="0">withSoftLimits(Distance, Distance)</a></li>
 <li><a href="#withMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)" tabindex="0">withMomentOfInertia(Distance, Mass)</a></li>
+<li><a href="#withWheelMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)" tabindex="0">withWheelMomentOfInertia(Distance, Mass)</a></li>
 <li><a href="#withMomentOfInertia(org.wpilib.units.measure.MomentOfInertia)" tabindex="0">withMomentOfInertia(MomentOfInertia)</a></li>
 <li><a href="#withSoftLimits(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" tabindex="0">withSoftLimits(Angle, Angle)</a></li>
 <li><a href="#getSupplyStallCurrentLimit()" tabindex="0">getSupplyStallCurrentLimit()</a></li>
@@ -914,8 +915,8 @@ per second squared.</div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)" class="member-name-link">withMomentOfInertia</a><wbr>(org.wpilib.units.measure.Distance&nbsp;length,
  org.wpilib.units.measure.Mass&nbsp;weight)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
-run under a formal mechanism.</div>
+<div class="block">Set the moment of inertia of an arm-like mechanism: a rod of the given length and mass turning
+about one end, <code>1/3 * mass * length^2</code>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMomentOfInertia(org.wpilib.units.measure.MomentOfInertia)" class="member-name-link">withMomentOfInertia</a><wbr>(org.wpilib.units.measure.MomentOfInertia&nbsp;MOI)</code></div>
@@ -1162,13 +1163,20 @@ in place of default or calculated ones.</div>
 <div class="block">Set the wheel diameter for the mechanism.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withWheelRadius(org.wpilib.units.measure.Distance)" class="member-name-link">withWheelRadius</a><wbr>(org.wpilib.units.measure.Distance&nbsp;radius)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withWheelMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)" class="member-name-link">withWheelMomentOfInertia</a><wbr>(org.wpilib.units.measure.Distance&nbsp;diameter,
+ org.wpilib.units.measure.Mass&nbsp;mass)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the wheel radius for the mechanism.</div>
+<div class="block">Set the moment of inertia of a wheel, roller or flywheel: a solid disk of the given diameter and
+mass spinning about its center, <code>1/2 * mass * radius^2</code>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">withZeroPower</a><wbr>(<a href="enums/MotorMode.html" title="enum class in yams.core.motorcontrollers.enums">MotorMode</a>&nbsp;zeroPower)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withWheelRadius(org.wpilib.units.measure.Distance)" class="member-name-link">withWheelRadius</a><wbr>(org.wpilib.units.measure.Distance&nbsp;radius)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the wheel radius for the mechanism.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">withZeroPower</a><wbr>(<a href="enums/MotorMode.html" title="enum class in yams.core.motorcontrollers.enums">MotorMode</a>&nbsp;zeroPower)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> to brake or coast mode.</div>
 </div>
 </div>
@@ -1482,7 +1490,11 @@ absolute encoder at this point.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></span>&nbsp;<span class="element-name">withResetPreviousConfig</span><wbr><span class="parameters">(boolean&nbsp;resetPreviousConfig)</span></div>
 <div class="block">Set the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> to reset the old configurations and only apply what is
-given to <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+given to <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>
+
+<p>When false, settings saved on the device that YAMS does not manage are kept. A vendor config
+from <a href="#withVendorConfig(java.lang.Object)"><code>withVendorConfig(Object)</code></a> still wins over the saved settings: on a TalonFX or
+TalonFXS, whose vendor config holds every setting, it replaces them all.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>resetPreviousConfig</code> - Reset the old config?</dd>
@@ -1741,16 +1753,38 @@ given to <a href="SmartMotorControllerConfig.html" title="class in yams.core.mot
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></span>&nbsp;<span class="element-name">withMomentOfInertia</span><wbr><span class="parameters">(org.wpilib.units.measure.Distance&nbsp;length,
  org.wpilib.units.measure.Mass&nbsp;weight)</span></div>
-<div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
-run under a formal mechanism.</div>
+<div class="block">Set the moment of inertia of an arm-like mechanism: a rod of the given length and mass turning
+about one end, <code>1/3 * mass * length^2</code>. For a wheel or roller, use
+<a href="#withWheelMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)"><code>withWheelMomentOfInertia(Distance, Mass)</code></a>, which is about a third of this for the same
+size, or <a href="#withMomentOfInertia(org.wpilib.units.measure.MomentOfInertia)"><code>withMomentOfInertia(MomentOfInertia)</code></a> with a value from CAD.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>length</code> - Length of the mechanism for MOI.</dd>
-<dd><code>weight</code> - Weight of the mechanism for MOI.</dd>
+<dd><code>length</code> - Length of the mechanism from its pivot.</dd>
+<dd><code>weight</code> - Mass of the mechanism.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining</dd>
 <dt>Throws:</dt>
 <dd><code><a href="../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the length or weight is null.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withWheelMomentOfInertia(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Mass)">
+<h3>withWheelMomentOfInertia</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></span>&nbsp;<span class="element-name">withWheelMomentOfInertia</span><wbr><span class="parameters">(org.wpilib.units.measure.Distance&nbsp;diameter,
+ org.wpilib.units.measure.Mass&nbsp;mass)</span></div>
+<div class="block">Set the moment of inertia of a wheel, roller or flywheel: a solid disk of the given diameter and
+mass spinning about its center, <code>1/2 * mass * radius^2</code>.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>diameter</code> - Diameter of the wheel.</dd>
+<dd><code>mass</code> - Mass of the wheel, including anything that spins with it.</dd>
+<dt>Returns:</dt>
+<dd><a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the diameter or mass is null.</dd>
 </dl>
 </div>
 </section>

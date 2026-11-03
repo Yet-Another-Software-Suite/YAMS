@@ -1,0 +1,27 @@
+var classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier =
+[
+    [ "ArmSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#af069983ba37f723637a3a398ff48ae63", null ],
+    [ "FeedInput", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a83ad6cf49a9ed47532b77939d5037c3a", null ],
+    [ "FeedUpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ab9bc3ad067220b15fc02f28cee7aff26", null ],
+    [ "GetMechanismAcceleration", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ad5a1acad06e5d61672f9d0883fd80540", null ],
+    [ "GetMechanismPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a15116c882a73c75250dee29a5c629985", null ],
+    [ "GetMechanismStatorVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ace148d8a34183a1cfe6bc5f90bbde0b9", null ],
+    [ "GetMechanismSupplyVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ac15f65b7dda3defc1fd57ad9f18313ae", null ],
+    [ "GetMechanismVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#af2fec56fe736ccd98a73fffd4992da8c", null ],
+    [ "GetRotorAcceleration", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#aab5c6b4f560811d7ef1dd7130a14a77f", null ],
+    [ "GetRotorPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#aa4fe9ac7345f5aeb87bee3000df1ffaa", null ],
+    [ "GetRotorVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a9e8ad668ef0d77160685dca2b164b288", null ],
+    [ "GetStatorCurrent", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a942baf94edb9e6a61ce912fb279ccb5a", null ],
+    [ "GetSupplyCurrent", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a2ce84aa938849864db037add4e344873", null ],
+    [ "GetUpdatedSim", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#acf7a3bb892f68196c54d10775dd56c93", null ],
+    [ "IsInputFed", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a8c19a65895e231d7dc4fd1b76f54cbcb", null ],
+    [ "SetMechanismPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ac022a88548b7c8d2ac9eda2a9fd24e21", null ],
+    [ "SetMechanismStatorDutyCycle", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ae1bb5ba75d7890c4a67e9a6e6ec1b7bd", null ],
+    [ "SetMechanismStatorVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a1131d57caf20b6854ff1c362491427df", null ],
+    [ "SetMechanismVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a9fa22e10f4952aaf79de35e8934652e5", null ],
+    [ "SetRotorPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#ac62081eaeeb3570c548608f0fd61fd06", null ],
+    [ "SetRotorVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a7ba120c938fb0c2f960b41e96259db2d", null ],
+    [ "StarveInput", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a9511d18761a56a68a68d2854c482b3f6", null ],
+    [ "StarveUpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#a0be7bdbcf1d318a2c75812b068d29597", null ],
+    [ "UpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html#aa97ce8ec8e0658ddbcf27e46031c97ad", null ]
+];

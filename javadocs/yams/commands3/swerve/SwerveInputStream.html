@@ -68,6 +68,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#of(yams.core.mechanisms.swerve.SwerveDrive,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier,java.util.function.DoubleSupplier)" tabindex="0">of(SwerveDrive, DoubleSupplier, DoubleSupplier, DoubleSupplier)</a></li>
 <li><a href="#clone()" tabindex="0">clone()</a></li>
 <li><a href="#getCurrentModeName()" tabindex="0">getCurrentModeName()</a></li>
+<li><a href="#getRotationControllerMeasurement()" tabindex="0">getRotationControllerMeasurement()</a></li>
+<li><a href="#getRotationControllerSetpoint()" tabindex="0">getRotationControllerSetpoint()</a></li>
 <li><a href="#getAxisDeadband()" tabindex="0">getAxisDeadband()</a></li>
 <li><a href="#setAxisDeadband(double)" tabindex="0">setAxisDeadband(double)</a></li>
 <li><a href="#getTranslationAxisScale()" tabindex="0">getTranslationAxisScale()</a></li>
@@ -229,6 +231,18 @@ controller and the <a href="#withAimFeedforward(org.wpilib.math.controller.Simpl
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOmegaAxisScale()" class="member-name-link">getOmegaAxisScale</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the angular velocity axis scalar.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotationControllerMeasurement()" class="member-name-link">getRotationControllerMeasurement</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the measurement the rotation controller was given by the last <a href="#get()"><code>get()</code></a> call, in
+<code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotationControllerSetpoint()" class="member-name-link">getRotationControllerSetpoint</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the setpoint the rotation controller was given by the last <a href="#get()"><code>get()</code></a> call, in
+<code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Translation2d</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTargetVector(org.wpilib.math.geometry.Pose2d)" class="member-name-link">getTargetVector</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;target)</code></div>
@@ -597,6 +611,35 @@ Heading control is only used while <a href="#withHeadingControl(java.util.functi
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>Mode name, e.g. <code>ANGULAR_VELOCITY</code>, <code>HEADING</code>, <code>AIM</code> or <code>TRANSLATION_ONLY</code>.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRotationControllerMeasurement()">
+<h3>getRotationControllerMeasurement</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Angle&gt;</span>&nbsp;<span class="element-name">getRotationControllerMeasurement</span>()</div>
+<div class="block">Get the measurement the rotation controller was given by the last <a href="#get()"><code>get()</code></a> call, in
+<code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The robot's heading, in the gyro's frame, or empty if the last call did not use the rotation controller.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRotationControllerSetpoint()">
+<h3>getRotationControllerSetpoint</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Angle&gt;</span>&nbsp;<span class="element-name">getRotationControllerSetpoint</span>()</div>
+<div class="block">Get the setpoint the rotation controller was given by the last <a href="#get()"><code>get()</code></a> call, in
+<code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The heading being turned to, in the gyro's frame, or empty if the last call did not use the rotation
+    controller.</dd>
 </dl>
 </div>
 </section>

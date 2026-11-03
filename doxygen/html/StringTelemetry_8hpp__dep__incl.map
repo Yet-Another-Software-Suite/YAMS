@@ -1,0 +1,10 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/StringTelemetry.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/telemetry/StringTelemetry.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="17,5,280,67"/>
+<area shape="rect" id="Node000002" href="$SwerveInputStreamTelemetry_8hpp.html" title=" " alt="" coords="5,115,292,194"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,80,151,115,146,114,148,85"/>
+<area shape="rect" id="Node000003" href="$SwerveInputStream_8hpp.html" title=" " alt="" coords="37,242,260,320"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="140,207,143,242,138,241,139,212"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="155,225,156,197,158,192,160,227"/>
+<area shape="rect" id="Node000004" href="$YAMS_8hpp.html" title=" " alt="" coords="56,368,241,430"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="150,334,151,369,146,367,147,338"/>
+</map>

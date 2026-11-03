@@ -106,6 +106,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a99f7f0fe6a4c806e8b8261bfbecebfe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af991180a5f98df720f64e999940bef8c" id="r_af991180a5f98df720f64e999940bef8c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af991180a5f98df720f64e999940bef8c">GetCurrentModeName</a> () <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">const</a></td></tr>
 <tr class="separator:af991180a5f98df720f64e999940bef8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71dd837e08622f44e44904326137dbdb" id="r_a71dd837e08622f44e44904326137dbdb"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::radian_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71dd837e08622f44e44904326137dbdb">GetRotationControllerMeasurement</a> () <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">const</a></td></tr>
+<tr class="separator:a71dd837e08622f44e44904326137dbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d1d7e471cb0b3160d7c3700d2c32404" id="r_a9d1d7e471cb0b3160d7c3700d2c32404"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::radian_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d1d7e471cb0b3160d7c3700d2c32404">GetRotationControllerSetpoint</a> () <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">const</a></td></tr>
+<tr class="separator:a9d1d7e471cb0b3160d7c3700d2c32404"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae789c8e47962fc7e5a1f615b598ff559" id="r_ae789c8e47962fc7e5a1f615b598ff559"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">double</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae789c8e47962fc7e5a1f615b598ff559">GetAxisDeadband</a> () <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">const</a></td></tr>
 <tr class="separator:ae789c8e47962fc7e5a1f615b598ff559"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a306b2fc52ddbe1c3e03285fe1ba36fde" id="r_a306b2fc52ddbe1c3e03285fe1ba36fde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a306b2fc52ddbe1c3e03285fe1ba36fde">SetAxisDeadband</a> (<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">double</a> <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">deadband</a>)</td></tr>
@@ -559,6 +563,62 @@ template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a71dd837e08622f44e44904326137dbdb" name="a71dd837e08622f44e44904326137dbdb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71dd837e08622f44e44904326137dbdb">&#9670;&#160;</a></span>GetRotationControllerMeasurement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">size_t</a> NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::radian_t &gt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">yams::mechanisms::swerve::utility::SwerveInputStream</a>&lt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">NumModules</a> &gt;::GetRotationControllerMeasurement </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Measurement the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the robot's heading in the gyro's frame. Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
+
+</div>
+</div>
+<a id="a9d1d7e471cb0b3160d7c3700d2c32404" name="a9d1d7e471cb0b3160d7c3700d2c32404"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d1d7e471cb0b3160d7c3700d2c32404">&#9670;&#160;</a></span>GetRotationControllerSetpoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">size_t</a> NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::radian_t &gt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">yams::mechanisms::swerve::utility::SwerveInputStream</a>&lt; <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1_swerve_input_stream.html">NumModules</a> &gt;::GetRotationControllerSetpoint </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Setpoint the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the heading being turned to in the gyro's frame. Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
 
 </div>
 </div>

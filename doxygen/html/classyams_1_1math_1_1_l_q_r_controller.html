@@ -91,6 +91,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac9237ce84b0a778ebae4dbd67e54b41b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ca5936f537db32d0953a412a52204e3" id="r_a1ca5936f537db32d0953a412a52204e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1ca5936f537db32d0953a412a52204e3">UpdateConfig</a> (<a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> config)</td></tr>
 <tr class="separator:a1ca5936f537db32d0953a412a52204e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3218fa38a13843de01bb684484c298eb" id="r_a3218fa38a13843de01bb684484c298eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3218fa38a13843de01bb684484c298eb">Retune</a> (<a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> config)</td></tr>
+<tr class="separator:a3218fa38a13843de01bb684484c298eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a945658263678f0c181a8471b58b86092" id="r_a945658263678f0c181a8471b58b86092"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a945658263678f0c181a8471b58b86092">Reset</a> (wpi::units::radian_t angle, wpi::units::radians_per_second_t velocity)</td></tr>
 <tr class="separator:a945658263678f0c181a8471b58b86092"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a385e9c2c10b56a9a57815048b9dcc8e8" id="r_a385e9c2c10b56a9a57815048b9dcc8e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a385e9c2c10b56a9a57815048b9dcc8e8">Reset</a> (wpi::units::meter_t distance, wpi::units::meters_per_second_t velocity)</td></tr>
@@ -368,6 +370,36 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">angle</td><td>Current mechanism angle. </td></tr>
     <tr><td class="paramname">velocity</td><td>Current mechanism velocity. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3218fa38a13843de01bb684484c298eb" name="a3218fa38a13843de01bb684484c298eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3218fa38a13843de01bb684484c298eb">&#9670;&#160;</a></span>Retune()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::math::LQRController::Retune </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a></td>          <td class="paramname"><span class="paramname"><em>config</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Rebuild the loop from the config after its values changed, as when live tuning them, keeping the state estimate: the new loop starts where the old one was, so the output doesn't jump. Safe to call while the closed loop controller's thread runs <a class="el" href="#a103a637516f5f119604e015628285f84">Calculate()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td><a class="el" href="classyams_1_1math_1_1_l_q_r_config.html">LQRConfig</a> with the new values, of the same LQRType. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if the config is for a different LQRType. </td></tr>
   </table>
   </dd>
 </dl>
