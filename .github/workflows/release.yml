@@ -168,9 +168,12 @@ jobs:
     steps:
       - run: git config --global user.name "thenetworkgrinch" && git config --global user.email "thenetworkgrinch@noreply.users.github.com"
 
+      # Full history for the release tag and notes, but blob:none skips file contents outside the
+      # checkout, so the gh-pages history (every release's binaries) is not downloaded.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          filter: blob:none
 
       - uses: actions/setup-java@v5
         with:
