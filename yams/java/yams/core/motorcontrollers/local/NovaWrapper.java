@@ -381,14 +381,14 @@ public class NovaWrapper extends SmartMotorController {
         m_nova.setQuadPosition(externalEncoderRotations);
       }
     });
-//    if (!RobotBase.isSimulation()) {
-//      m_canEncoder.ifPresent(canEncoder -> {
-//        // Move the zero offset so the encoder reads the angle where it is now.
-//        final var status = canEncoder.status();
-//        canEncoder.configure(CanEncoderConfig.zeroOffset(MathUtil.inputModulus(
-//            status.getPositionAbs() + status.getZeroOffset() - externalEncoderRotations, 0, 1)));
-//      });
-//    }
+    if (!RobotBase.isSimulation()) {
+      m_canEncoder.ifPresent(canEncoder -> {
+        // Move the zero offset so the encoder reads the angle where it is now.
+        final var status = canEncoder.status();
+        canEncoder.configure(CanEncoderConfig.zeroOffset(MathUtil.inputModulus(
+            status.getPositionAbs() + status.getZeroOffset() - externalEncoderRotations, 0, 1)));
+      });
+    }
     m_nova.setIntPosition(
         angle.times(m_config.getGearing().getMechanismToRotorRatio()).in(Rotations));
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
