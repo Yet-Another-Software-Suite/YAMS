@@ -92,8 +92,6 @@ std::string_view SmartMotorControllerConfig::ToString(ExternalEncoderOptions opt
   switch (opt) {
     case ExternalEncoderOptions::ZeroOffset:
       return "ZeroOffset";
-    case ExternalEncoderOptions::DiscontinuityPoint:
-      return "DiscontinuityPoint";
     case ExternalEncoderOptions::UseExternalFeedback:
       return "UseExternalFeedback";
     case ExternalEncoderOptions::ExternalGearing:
@@ -137,7 +135,6 @@ void SmartMotorControllerConfig::ResetValidationCheck() const {
   };
   m_externalEncoderOptions = {
       ExternalEncoderOptions::ZeroOffset,
-      ExternalEncoderOptions::DiscontinuityPoint,
       ExternalEncoderOptions::UseExternalFeedback,
       ExternalEncoderOptions::ExternalGearing,
       ExternalEncoderOptions::ExternalEncoderInverted,
@@ -608,19 +605,6 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGeari
     double reductionRatio) {
   return WithExternalEncoderGearing(gearing::MechanismGearing{reductionRatio});
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderDiscontinuityPoint(
-    wpi::units::turn_t discontinuityPoint) {
-  if (discontinuityPoint != wpi::units::turn_t{0.5} &&
-      discontinuityPoint != wpi::units::turn_t{1.0}) {
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "Cannot set external encoder discontinuity point",
-        "Discontinuity point must be 0.5 or 1 rotations",
-        "WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{0.5})");
-  }
-  m_externalEncoderDiscontinuityPoint = discontinuityPoint;
-  return *this;
-}
-
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
     const std::string& name, TelemetryVerbosity verbosity) {
   m_telemetryName = name;
@@ -1076,11 +1060,6 @@ const std::optional<gearing::MechanismGearing>&
 SmartMotorControllerConfig::GetExternalEncoderGearing() const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::ExternalGearing);
   return m_externalEncoderGearing;
-}
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetExternalEncoderDiscontinuityPoint()
-    const {
-  m_externalEncoderOptions.erase(ExternalEncoderOptions::DiscontinuityPoint);
-  return m_externalEncoderDiscontinuityPoint;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearExponentialProfile(

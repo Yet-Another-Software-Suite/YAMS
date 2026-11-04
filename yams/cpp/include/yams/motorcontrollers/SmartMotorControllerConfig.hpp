@@ -540,7 +540,7 @@ class SmartMotorControllerConfig {
    *       of `SyncCANdiPWM1`, `RemoteCANdiPWM1`, `SyncCANdiPWM2`, or
    *       `RemoteCANdiPWM2` via a vendor config so that ApplyConfig() knows which
    *       PWM channel to configure. Without this, offset, inversion, and
-   *       discontinuity-point settings will not be applied to either channel.
+   *       continuous wrapping settings will not be applied to either channel.
    *
    * @param encoder External encoder hardware object pointer.
    * @return *this for chaining.
@@ -612,18 +612,6 @@ class SmartMotorControllerConfig {
    * @return *this for chaining.
    */
   SmartMotorControllerConfig& WithExternalEncoderGearing(double reductionRatio);
-
-  /**
-   * Set the discontinuity point for absolute encoder wrapping.
-   *
-   * Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]).
-   * Throws SmartMotorControllerConfigurationException otherwise.
-   *
-   * @param discontinuityPoint Wrap-around point (0.5 or 1 turns).
-   * @return *this for chaining.
-   */
-  SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
-      wpi::units::turn_t discontinuityPoint);
 
   /**
    * Enable continuous position wrapping for the closed-loop controller.
@@ -1183,8 +1171,6 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> GetExternalEncoderZeroOffset() const;
   /** @return Optional external encoder gearing. */
   const std::optional<gearing::MechanismGearing>& GetExternalEncoderGearing() const;
-  /** @return Optional external encoder discontinuity point (turns). */
-  std::optional<wpi::units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
@@ -1355,7 +1341,6 @@ class SmartMotorControllerConfig {
   };
   enum class ExternalEncoderOptions {
     ZeroOffset,
-    DiscontinuityPoint,
     UseExternalFeedback,
     ExternalGearing,
     ExternalEncoderInverted,
@@ -1436,7 +1421,6 @@ class SmartMotorControllerConfig {
   std::optional<double> m_externalEncoderConversionFactor;
   std::optional<wpi::units::turn_t> m_externalEncoderZeroOffset;
   std::optional<gearing::MechanismGearing> m_externalEncoderGearing;
-  std::optional<wpi::units::turn_t> m_externalEncoderDiscontinuityPoint;
 
   // Telemetry
   std::optional<std::string> m_telemetryName;

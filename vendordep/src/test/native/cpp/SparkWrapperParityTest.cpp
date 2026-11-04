@@ -412,18 +412,19 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SetMechanismGearingRewritesSca
 // ---- External encoders ------------------------------------------------------------------------
 
 TEST_CASE_METHOD(SparkParityFixture, "SparkParity.AbsoluteEncoderRangeOffset", "[SparkParity]") {
-  for (double discontinuity : {0.5, 1.0}) {
+  for (double wrappingMax : {0.5, 1.0}) {
     auto spark = MakeSparkMax();
     auto cfg = BaseConfig(1.0);
     cfg.WithFeedback(1.0, 0.0, 0.0)
         .WithExternalEncoder(&spark->GetAbsoluteEncoder())
-        .WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{discontinuity});
+        .WithContinuousWrapping(wpi::units::turn_t{wrappingMax - 1.0}, wpi::units::turn_t{wrappingMax});
     {
       SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
-      // The range offset is the middle of the reported range: [-0.5, 0.5) -> 0, [0, 1) -> 0.5.
-      CheckDevice(discontinuity - 0.5,
+      // The encoder reads the wrapping range; the range offset is its middle: [-0.5, 0.5) -> 0,
+      // [0, 1) -> 0.5.
+      CheckDevice(wrappingMax - 0.5,
                   [&] { return spark->configAccessor.absoluteEncoder.GetRangeOffset(); },
-                  "range offset for discontinuity point " + std::to_string(discontinuity));
+                  "range offset for the wrapping maximum " + std::to_string(wrappingMax));
     }
     ResetSpark(*spark);
   }
@@ -506,30 +507,6 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.SetEncoderPositionSendsAbsolut
   ResetSpark(*spark);
 }
 
-TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ExternalGearingWithDiscontinuityRaisesAlert",
-                 "[SparkParity]") {
-  auto spark = MakeSparkMax();
-  auto cfg = BaseConfig();
-  cfg.WithFeedback(1.0, 0.0, 0.0)
-      .WithExternalEncoder(&spark->GetAbsoluteEncoder())
-      .WithExternalEncoderGearing(2.0)
-      .WithExternalEncoderDiscontinuityPoint(0.5_tr);
-  auto gearingAlertActive = [] {
-    for (auto& alert : wpi::sim::AlertSim::GetActive()) {
-      if (alert.level == wpi::util::Alert::Level::HIGH &&
-          alert.text.find("gearing") != std::string::npos)
-        return true;
-    }
-    return false;
-  };
-  {
-    SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
-    CHECK(gearingAlertActive());
-  }
-  CHECK_FALSE(gearingAlertActive());
-  ResetSpark(*spark);
-}
-
 TEST_CASE_METHOD(SparkParityFixture, "SparkParity.QuadratureAndDetachedEncoders",
                  "[SparkParity]") {
   SECTION("Alternate encoder") {
@@ -553,7 +530,7 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.QuadratureAndDetachedEncoders"
     auto cfg = BaseConfig();
     cfg.WithFeedback(1.0, 0.0, 0.0)
         .WithExternalEncoder(&encoder)
-        .WithExternalEncoderDiscontinuityPoint(0.5_tr);
+        .WithContinuousWrapping(-0.5_tr, 0.5_tr);
     {
       std::unique_ptr<SparkWrapper> smc;
       REQUIRE_NOTHROW(smc = std::make_unique<SparkWrapper>(spark.get(),

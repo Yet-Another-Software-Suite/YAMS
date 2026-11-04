@@ -37,8 +37,8 @@ namespace yams::motorcontrollers::local {
  *   `thrifty::NovaConfig::QuadratureEncoderType(thrifty::Motor::QuadratureEncoderType::Custom(2048))`.
  * - `thrifty::CanEncoder*`: a Thrifty CAN Encoder on the same CAN bus.
  *
- * External encoder discontinuity point (absolute and CAN encoders): 0.5 rotations reports
- * [-0.5, 0.5), 1 rotation (the default) reports [0, 1).
+ * An absolute or CAN external encoder reads the continuous wrapping range, or [0, 1) without
+ * continuous wrapping; the Nova closes its loop on one over [0, 1) only.
  *
  * The vendor config, if any, must be a `thrifty::NovaConfigBatch`; it is applied before the YAMS
  * config, which overrides it.
@@ -291,11 +291,6 @@ class NovaWrapper : public SmartMotorController {
   std::optional<thrifty::Motor::FeedbackSensorType> m_dataPortEncoder;
   /** CAN encoder used as the external encoder. */
   thrifty::CanEncoder* m_canEncoder{nullptr};
-  /**
-   * Discontinuity point of the external absolute encoder: it reports angles from one rotation
-   * below it up to it.
-   */
-  wpi::units::turn_t m_absoluteEncoderDiscontinuityPoint{1.0};
   /**
    * Whether the closed loop runs on the Nova. An LQR, an exponential profile and a velocity
    * trapezoidal profile run on the SystemCore instead.

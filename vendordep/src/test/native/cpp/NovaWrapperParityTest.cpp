@@ -216,7 +216,7 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.UnsupportedOptionsThrow", "[Nova
   }
 }
 
-TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportBelowDiscontinuityPoint",
+TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportTheWrappingRange",
                  "[NovaParity]") {
   for (const bool canEncoderUsed : {false, true}) {
     DYNAMIC_SECTION((canEncoderUsed ? "CAN encoder" : "data port absolute encoder")) {
@@ -226,10 +226,13 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportBelowDisco
       cfg.WithExternalEncoder(canEncoderUsed ? std::any{canEncoder.get()}
                                              : std::any{FeedbackSensorType::ABS})
           .WithUseExternalFeedbackEncoder(true)
-          .WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{0.5});
+          // An exponential profile runs on the SystemCore, which wraps any range.
+          .WithFeedback(1.0, 0.0, 0.0)
+          .WithExponentialProfile(1.0, 0.1, 12_V)
+          .WithContinuousWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5});
       NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
       smc.SetEncoderPosition(wpi::units::turn_t{0.7});
-      // An absolute encoder reports angles within one rotation: [-0.5, 0.5) here.
+      // An absolute encoder reports angles in the wrapping range: [-0.5, 0.5) here.
       CHECK(smc.GetMechanismPosition().value() == Catch::Approx(-0.3).margin(1e-6));
       CHECK(smc.GetExternalEncoderMechanismPosition()->value() == Catch::Approx(-0.3).margin(1e-6));
       // The motor's encoder is not wrapped.

@@ -464,17 +464,12 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
   // gains in mechanism rotations.
   m_dataPortEncoder.reset();
   m_canEncoder = nullptr;
-  m_absoluteEncoderDiscontinuityPoint = wpi::units::turn_t{1.0};
   m_feedbackSensor = FeedbackSensorType::INTERNAL;
   m_mechanismToFeedbackSensorRatio = MechanismToRotorRatio();
   const bool useExternalFeedback = config.GetUseExternalFeedback();
 
   auto enc = config.GetExternalEncoder();
   if (!enc) {
-    if (config.GetExternalEncoderDiscontinuityPoint().has_value())
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "External encoder discontinuity point is only available for external encoders",
-          "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
     if (config.GetExternalEncoderZeroOffset().has_value())
       throw exceptions::SmartMotorControllerConfigurationException(
           "Zero offset is only available for external encoders",
@@ -495,9 +490,7 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
   config.GetExternalEncoderGearing();
   const double mechToEncoder = MechanismToExternalEncoderRatio();
   const auto zeroOffset = config.GetExternalEncoderZeroOffset();
-  const auto discontinuityPoint = config.GetExternalEncoderDiscontinuityPoint();
   const auto inverted = config.GetExternalEncoderInverted();
-  m_absoluteEncoderDiscontinuityPoint = discontinuityPoint.value_or(wpi::units::turn_t{1.0});
   // Zero offsets are in [0, 1) rotations of the encoder.
   const double zeroOffsetRotations =
       zeroOffset ? wpi::math::InputModulus(zeroOffset->value() * mechToEncoder, 0.0, 1.0) : 0.0;
@@ -514,11 +507,6 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
           "Zero offset is only available for absolute encoders",
           "Zero offset could not be applied to the quadrature encoder",
           "WithExternalEncoderZeroOffset");
-    if (discontinuityPoint)
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "Discontinuity point is only available for absolute encoders",
-          "Discontinuity point could not be applied to the quadrature encoder",
-          "WithExternalEncoderDiscontinuityPoint");
     if (inverted)
       novaConfig.Add(thrifty::NovaConfig::QuadratureDirection(*inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE : thrifty::Motor::Direction::CLOCKWISE));
   } else if (auto* canEncoder = std::any_cast<thrifty::CanEncoder*>(&*enc);
@@ -546,13 +534,6 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
                      thrifty::NovaConfig::CanEncoderMode(thrifty::Motor::CanEncoderMode::ABSOLUTE),
                      thrifty::NovaConfig::CanEncoderSource(thrifty::Motor::CanEncoderSource::DIRECT));
     }
-    // The Nova reads an absolute encoder over [0, 1) rotations.
-    if (m_closedLoopOnNova && m_feedbackSensor != FeedbackSensorType::QUAD &&
-        std::abs(m_absoluteEncoderDiscontinuityPoint.value() - 1.0) > 1e-9)
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
-          "External encoder discontinuity point could not be applied",
-          "WithExternalEncoderDiscontinuityPoint(1_tr)");
   }
 }
 
@@ -592,11 +573,11 @@ std::optional<wpi::units::turn_t> NovaWrapper::GetExternalEncoderSensorPosition(
   } else {
     rotations = m_nova->Status().GetQuadPosition();
   }
-  // An absolute encoder reports angles within one rotation, below its discontinuity point.
-  if (absolute) {
-    const double dp = m_absoluteEncoderDiscontinuityPoint.value();
-    rotations = wpi::math::InputModulus(rotations, dp - 1.0, dp);
-  }
+  // An absolute encoder reports angles in the continuous wrapping range, or [0, 1) rotations.
+  if (absolute)
+    rotations = wpi::math::InputModulus(rotations,
+                                        m_config->GetContinuousWrappingMin().value_or(0_tr).value(),
+                                        m_config->GetContinuousWrapping().value_or(1_tr).value());
   return wpi::units::turn_t{rotations};
 }
 

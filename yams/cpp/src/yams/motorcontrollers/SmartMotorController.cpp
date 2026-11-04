@@ -92,7 +92,9 @@ void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
       m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
     if (m_pid) m_pid->Reset();
-    m_lastClosedLoopMechanismPosition.reset();
+    // The motion profile starts from this position, so continuous wrapping keeps the angles the
+    // loop measures next to it, rather than a whole wrapping range away from it.
+    m_lastClosedLoopMechanismPosition = GetMechanismPosition();
     ResetProfileStates();
     if (m_lqr) {
       if (m_config->GetLinearClosedLoopControllerUse()) {
