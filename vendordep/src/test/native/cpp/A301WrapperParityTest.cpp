@@ -19,6 +19,7 @@
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/units/angle.hpp>
+#include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/current.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/voltage.hpp>
@@ -36,8 +37,8 @@ using motorcontrollers::SmartMotorControllerConfig;
 using motorcontrollers::local::A301Wrapper;
 using ConfigException = exceptions::SmartMotorControllerConfigurationException;
 
-/** Motor rotations per mechanism rotation. */
-constexpr double kRatio = 12.0;
+/** Motor rotations per mechanism rotation: the A301's 64:1 gearbox. */
+constexpr double kRatio = 64.0;
 
 /** CAN IDs on a bus no other test uses. */
 int NextA301CanId() {
@@ -72,28 +73,28 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.RejectsWhatTheA301DoesNotHave", 
     auto a301 = MakeA301();
     auto cfg = BaseConfig();
     cfg.WithStatorCurrentLimit(40_A);
-    CHECK_THROWS_AS((A301Wrapper{a301.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+    CHECK_THROWS_AS((A301Wrapper{a301.get(), &cfg}), ConfigException);
   }
   {
     INFO("ramp rates");
     auto a301 = MakeA301();
     auto cfg = BaseConfig();
     cfg.WithOpenLoopRampRate(0.1_s);
-    CHECK_THROWS_AS((A301Wrapper{a301.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+    CHECK_THROWS_AS((A301Wrapper{a301.get(), &cfg}), ConfigException);
   }
   {
     INFO("voltage compensation");
     auto a301 = MakeA301();
     auto cfg = BaseConfig();
     cfg.WithVoltageCompensation(12_V);
-    CHECK_THROWS_AS((A301Wrapper{a301.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+    CHECK_THROWS_AS((A301Wrapper{a301.get(), &cfg}), ConfigException);
   }
   {
     INFO("vendor config");
     auto a301 = MakeA301();
     auto cfg = BaseConfig();
     cfg.WithVendorConfig(std::string{"not an A301 config"});
-    CHECK_THROWS_AS((A301Wrapper{a301.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+    CHECK_THROWS_AS((A301Wrapper{a301.get(), &cfg}), ConfigException);
   }
   {
     INFO("only the A301's own absolute encoder is an external encoder");
@@ -101,15 +102,14 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.RejectsWhatTheA301DoesNotHave", 
     auto other = MakeA301();
     auto cfg = BaseConfig();
     cfg.WithExternalEncoder(other.get()).WithUseExternalFeedbackEncoder(true);
-    CHECK_THROWS_AS((A301Wrapper{a301.get(), wpi::math::DCMotor::NEO(1), &cfg}),
-                    std::invalid_argument);
+    CHECK_THROWS_AS((A301Wrapper{a301.get(), &cfg}), std::invalid_argument);
   }
 }
 
 TEST_CASE_METHOD(A301ParityFixture, "A301Parity.ClosedLoopConvergesInSimulation", "[A301Parity]") {
   auto a301 = MakeA301();
   auto cfg = BaseConfig();
-  A301Wrapper smc{a301.get(), wpi::math::DCMotor::NEO(1), &cfg};
+  A301Wrapper smc{a301.get(), &cfg};
   smc.SetPosition(wpi::units::turn_t{0.25});
   // Step the SystemCore's closed loop and the simulation together, 3 s in 20 ms steps.
   for (int i = 0; i < 150; i++) {
@@ -129,7 +129,7 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.AbsoluteEncoderReadsInTheWrappin
     cfg.WithExternalEncoder(a301.get())
         .WithUseExternalFeedbackEncoder(true)
         .WithStartingPosition(wpi::units::turn_t{-0.2});
-    A301Wrapper smc{a301.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    A301Wrapper smc{a301.get(), &cfg};
     CHECK(smc.GetMechanismPosition().value() == Catch::Approx(0.8).margin(1e-6));
   }
   {
@@ -140,9 +140,21 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.AbsoluteEncoderReadsInTheWrappin
         .WithUseExternalFeedbackEncoder(true)
         .WithWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5})
         .WithStartingPosition(wpi::units::turn_t{-0.2});
-    A301Wrapper smc{a301.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    A301Wrapper smc{a301.get(), &cfg};
     CHECK(smc.GetMechanismPosition().value() == Catch::Approx(-0.2).margin(1e-6));
   }
+}
+
+TEST_CASE_METHOD(A301ParityFixture, "A301Parity.MotorIsTheA301s", "[A301Parity]") {
+  // The A301's motor: 13,500 RPM free, and 5.27 Nm at peak power through 135:1.
+  const auto motor = motorcontrollers::YMotors::A301();
+  CHECK(wpi::units::revolutions_per_minute_t{motor.freeSpeed}.value() == Catch::Approx(13500.0));
+  CHECK(motor.stallTorque.value() * 135.0 / 2.0 == Catch::Approx(5.27));
+
+  auto a301 = MakeA301();
+  auto cfg = BaseConfig();
+  A301Wrapper smc{a301.get(), &cfg};
+  CHECK(smc.GetDCMotor().freeSpeed.value() == Catch::Approx(motor.freeSpeed.value()));
 }
 
 }  // namespace yams::test

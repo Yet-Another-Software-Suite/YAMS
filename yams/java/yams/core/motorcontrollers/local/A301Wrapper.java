@@ -50,6 +50,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.math.DerivativeTimeFilter;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
+import yams.core.motorcontrollers.YMotors;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
@@ -63,37 +64,41 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <p>The A301 has no closed loop gains, so the closed loop controller runs on the SystemCore and
  * commands the A301 with voltage. It also has no current limits, ramp rates, voltage compensation
  * or follower mode, and configuring them throws a {@link
- * SmartMotorControllerConfigurationException}. REVLib reports the A301's encoder in rotations of
- * the motor, so the gearing given to {@link SmartMotorControllerConfig#withGearing} is from the
- * motor to the mechanism.
+ * SmartMotorControllerConfigurationException}.
  *
- * <p>REVLib does not simulate the A301, so in simulation the wrapper drives a {@link DCMotorSim}
- * of the motor given to the constructor.
+ * <p>The gearing given to {@link SmartMotorControllerConfig#withGearing} is from the A301's rotor
+ * to the mechanism: usually the gearbox attached to the A301, and any gearing after it. The A301
+ * has one motor, {@link YMotors#getA301(int)}.
  *
- * <p><b>External encoder</b>: the A301's own absolute encoder, used by giving the {@link A301}
- * itself to {@link SmartMotorControllerConfig#withExternalEncoder(Object)}. Its zero offset,
- * inversion and wrapping range are applied by the wrapper; without {@link
- * SmartMotorControllerConfig#withWrapping} it reads [0, 1) rotations of the encoder.
+ * <p>REVLib does not simulate the A301, so in simulation the wrapper drives a {@link DCMotorSim}.
+ *
+ * <p><b>External encoder</b>: the A301's own absolute encoder, on its output shaft, used by giving
+ * the {@link A301} itself to {@link SmartMotorControllerConfig#withExternalEncoder(Object)}. Its
+ * gearing, given to {@link SmartMotorControllerConfig#withExternalEncoderGearing}, is from the
+ * output shaft to the mechanism. Its zero offset, inversion and wrapping range are applied by the
+ * wrapper; without {@link SmartMotorControllerConfig#withWrapping} it reads [0, 1) rotations of the
+ * encoder.
  *
  * <h2>Example</h2>
  *
  * <pre>{@code
- * // Configure and create an A301 on CAN bus 0, CAN ID 3
+ * // Configure and create an A301 on CAN bus 0, CAN ID 3, with its 64:1 gearbox
  * A301 a301 = new A301(CANPort.CAN_S0, 3);
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
+ *     .withGearing(new MechanismGearing(GearBox.fromReductionStages(64)))
  *     .withMotorInverted(false)
  *     .withClosedLoopController(0.2, 0, 0)
  *     .withExternalEncoder(a301)
  *     .withUseExternalFeedbackEncoder(true);
- * SmartMotorController motor = new A301Wrapper(a301, DCMotor.getNEO(1), config);
+ * SmartMotorController motor = new A301Wrapper(a301, config);
  * }</pre>
  */
 public class A301Wrapper extends SmartMotorController {
   /** FIRST A301 smart motor. */
   private final A301 m_a301;
 
-  /** Motor characteristics of the {@link A301}, for simulation. */
-  private final DCMotor m_motor;
+  /** Motor of the {@link A301}. */
+  private final DCMotor m_motor = YMotors.getA301(1);
 
   /** Sim for the A301. */
   private Optional<DCMotorSim> m_dcMotorSim = Optional.empty();
@@ -116,16 +121,14 @@ public class A301Wrapper extends SmartMotorController {
    * Construct the A301 Wrapper for the generic {@link SmartMotorController}.
    *
    * @param controller {@link A301} to use.
-   * @param motor {@link DCMotor} of the {@link A301}, for simulation.
    * @param config {@link SmartMotorControllerConfig} to apply to the {@link A301}.
    * @throws SmartMotorControllerConfigurationException if {@link
    *     #applyConfig(SmartMotorControllerConfig)} rejects the config.
    * @throws IllegalArgumentException if {@link #applyConfig(SmartMotorControllerConfig)} rejects
    *     the config.
    */
-  public A301Wrapper(A301 controller, DCMotor motor, SmartMotorControllerConfig<?> config) {
+  public A301Wrapper(A301 controller, SmartMotorControllerConfig<?> config) {
     m_a301 = controller;
-    m_motor = motor;
     m_config = config;
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS",
         buildAlertId("A301", m_a301.getDeviceId(), "ClosedLoop"),
@@ -156,7 +159,7 @@ public class A301Wrapper extends SmartMotorController {
   /**
    * Create the simulated motor, and its sim supplier, for a gearing.
    *
-   * @param gearing Gearing from the motor to the mechanism.
+   * @param gearing Gearing from the A301's rotor to the mechanism.
    */
   private void createMotorSim(MechanismGearing gearing) {
     var plant = Models.singleJointedArmFromPhysicalConstants(
@@ -626,8 +629,8 @@ public class A301Wrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
-   * <p>The A301 does not report its absolute encoder's velocity, so this is the motor's encoder's
-   * velocity at the mechanism.
+   * <p>The A301 does not report its absolute encoder's velocity, so this is the A301's relative
+   * encoder's velocity at the mechanism.
    */
   @Override
   public AngularVelocity getMechanismVelocity() {
@@ -686,8 +689,8 @@ public class A301Wrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
-   * <p>The A301 does not report its absolute encoder's velocity, so this is the motor's encoder's
-   * velocity at the mechanism.
+   * <p>The A301 does not report its absolute encoder's velocity, so this is the A301's relative
+   * encoder's velocity at the mechanism.
    */
   @Override
   public Optional<AngularVelocity> getExternalEncoderMechanismVelocity() {

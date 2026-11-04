@@ -12,6 +12,7 @@
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/YMotors.hpp"
 
 namespace yams::motorcontrollers::local {
 
@@ -21,15 +22,17 @@ namespace yams::motorcontrollers::local {
  * The A301 has no closed loop gains, so the closed loop controller runs on the SystemCore and
  * commands the A301 with voltage. It also has no current limits, ramp rates, voltage compensation
  * or follower mode, and configuring them throws a SmartMotorControllerConfigurationException.
- * REVLib reports the A301's encoder in rotations of the motor, so the gearing given to
- * WithMotorGearing is from the motor to the mechanism.
  *
- * REVLib does not simulate the A301, so in simulation the wrapper drives a DCMotorSim of the motor
- * given to the constructor.
+ * The gearing given to WithMotorGearing is from the A301's rotor to the mechanism: usually the
+ * gearbox attached to the A301, and any gearing after it. The A301 has one motor, YMotors::A301().
  *
- * External encoder: the A301's own absolute encoder, used by giving the `first::a301::A301*`
- * itself to WithExternalEncoder. Its zero offset, inversion and wrapping range are applied by the
- * wrapper; without WithWrapping it reads [0, 1) rotations of the encoder.
+ * REVLib does not simulate the A301, so in simulation the wrapper drives a DCMotorSim.
+ *
+ * External encoder: the A301's own absolute encoder, on its output shaft, used by giving the
+ * `first::a301::A301*` itself to WithExternalEncoder. Its gearing, given to
+ * WithExternalEncoderGearing, is from the output shaft to the mechanism. Its zero offset, inversion
+ * and wrapping range are applied by the wrapper; without WithWrapping it reads [0, 1) rotations of
+ * the encoder.
  *
  * ### Example usage (inside a subsystem constructor)
  * @code{.cpp}
@@ -41,7 +44,9 @@ namespace yams::motorcontrollers::local {
  * //   SmartMotorControllerConfig    m_cfg;
  * //   std::optional<A301Wrapper>    m_smc;
  *
+ * // The A301 has its 64:1 gearbox.
  * m_cfg.WithSubsystem(this)
+ *     .WithMotorGearing(yams::gearing::MechanismGearing{64.0})
  *     .WithFeedback(1.0, 0.0, 0.0)
  *     .WithMotorInverted(false)
  *     .WithExternalEncoder(&m_a301)
@@ -49,7 +54,7 @@ namespace yams::motorcontrollers::local {
  *     .WithClosedLoopMode()
  *     .WithTelemetry("ArmMotor", SmartMotorControllerConfig::TelemetryVerbosity::HIGH);
  *
- * m_smc.emplace(&m_a301, wpi::math::DCMotor::NEO(1), &m_cfg);
+ * m_smc.emplace(&m_a301, &m_cfg);
  * @endcode
  */
 class A301Wrapper : public SmartMotorController {
@@ -61,11 +66,9 @@ class A301Wrapper : public SmartMotorController {
    * Construct an A301Wrapper around a FIRST A301.
    *
    * @param a301   Pointer to the A301 hardware object (must outlive this wrapper).
-   * @param motor  DC motor model used for simulation.
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
-  A301Wrapper(first::a301::A301* a301, wpi::math::DCMotor motor,
-              SmartMotorControllerConfig* config);
+  A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* config);
   ~A301Wrapper();
 
   // ---- Configuration ------------------------------------------------------
@@ -137,8 +140,8 @@ class A301Wrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::GetMechanismPosition */
   wpi::units::turn_t GetMechanismPosition() override;
   /**
-   * The A301 does not report its absolute encoder's velocity, so this is the motor's encoder's
-   * velocity at the mechanism.
+   * The A301 does not report its absolute encoder's velocity, so this is the A301's relative
+   * encoder's velocity at the mechanism.
    */
   wpi::units::turns_per_second_t GetMechanismVelocity() override;
   /** @copydoc SmartMotorController::GetRelativeMechanismPosition */
@@ -160,8 +163,8 @@ class A301Wrapper : public SmartMotorController {
   /** @copydoc SmartMotorController::GetExternalEncoderMechanismPosition */
   std::optional<wpi::units::turn_t> GetExternalEncoderMechanismPosition() override;
   /**
-   * The A301 does not report its absolute encoder's velocity, so this is the motor's encoder's
-   * velocity at the mechanism, or empty without the absolute encoder.
+   * The A301 does not report its absolute encoder's velocity, so this is the A301's relative
+   * encoder's velocity at the mechanism, or empty without the absolute encoder.
    */
   std::optional<wpi::units::turns_per_second_t> GetExternalEncoderMechanismVelocity() override;
 
@@ -272,7 +275,8 @@ class A301Wrapper : public SmartMotorController {
 
  private:
   first::a301::A301* m_a301{nullptr};
-  wpi::math::DCMotor m_motor;
+  /** Motor of the A301. */
+  wpi::math::DCMotor m_motor{YMotors::A301()};
   std::optional<wpi::sim::DCMotorSim> m_motorSim;
   /** Whether the A301's absolute encoder is the external encoder. */
   bool m_useAbsoluteEncoder{false};

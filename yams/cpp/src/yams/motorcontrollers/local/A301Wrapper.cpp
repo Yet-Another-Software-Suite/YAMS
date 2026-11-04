@@ -72,11 +72,10 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
 
 // ---- Construction -----------------------------------------------------------
 
-A301Wrapper::A301Wrapper(first::a301::A301* a301, wpi::math::DCMotor motor,
-                         SmartMotorControllerConfig* cfg)
-    : SmartMotorController(), m_a301(a301), m_motor(motor) {
+A301Wrapper::A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* cfg)
+    : SmartMotorController(), m_a301(a301) {
   m_config = cfg;
-  m_config->WithSimMotor(motor);
+  m_config->WithSimMotor(m_motor);
   m_systemCoreClosedLoopAlert.emplace(
       "YAMS", AlertId("ClosedLoop"),
       GetName() + " closed loop controller is running on the SystemCore.",

@@ -23,6 +23,8 @@ import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.telemetry.enums.TelemetryVerbosity;
@@ -38,10 +40,10 @@ public class A301WrapperTest {
   private static final ClosedLoopCases.Controller kA301 =
       new ClosedLoopCases.Controller(
           "A301",
-          DCMotor.getNEO(1),
+          YMotors.getA301(1),
           4,
           false,
-          (motor, cfg) -> new A301Wrapper(DeviceCreator.createA301(), motor, cfg));
+          (motor, cfg) -> new A301Wrapper(DeviceCreator.createA301(), cfg));
 
   /** A301s created by a test, closed after it. */
   private final List<A301> m_devices = new ArrayList<>();
@@ -63,7 +65,8 @@ public class A301WrapperTest {
   private static yams.commands2.config.SmartMotorControllerConfig config(String name) {
     return new yams.commands2.config.SmartMotorControllerConfig()
         .withSubsystem(new SmartMotorControllerTestSubsystem())
-        .withGearing(ClosedLoopCases.kGearing)
+        // The A301's 64:1 gearbox.
+        .withGearing(new MechanismGearing(GearBox.fromReductionStages(64)))
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withClosedLoopController(10, 0, 0)
         .withTelemetry("A301WrapperTest " + name, TelemetryVerbosity.LOW);
@@ -79,10 +82,7 @@ public class A301WrapperTest {
       Class<? extends RuntimeException> exception,
       String name,
       UnaryOperator<yams.commands2.config.SmartMotorControllerConfig> option) {
-    assertThrows(
-        exception,
-        () -> new A301Wrapper(createA301(), DCMotor.getNEO(1), option.apply(config(name))),
-        name);
+    assertThrows(exception, () -> new A301Wrapper(createA301(), option.apply(config(name))), name);
   }
 
   @Test
@@ -124,7 +124,6 @@ public class A301WrapperTest {
     final SmartMotorController defaultRange =
         new A301Wrapper(
             zeroToOne,
-            DCMotor.getNEO(1),
             config("default range")
                 .withExternalEncoder(zeroToOne)
                 .withUseExternalFeedbackEncoder(true)
@@ -135,7 +134,6 @@ public class A301WrapperTest {
     final SmartMotorController wrapped =
         new A301Wrapper(
             centered,
-            DCMotor.getNEO(1),
             config("centered range")
                 .withExternalEncoder(centered)
                 .withUseExternalFeedbackEncoder(true)
@@ -145,5 +143,17 @@ public class A301WrapperTest {
     assertTrue(wrapped.getExternalEncoderMechanismPosition().isPresent());
     defaultRange.close();
     wrapped.close();
+  }
+
+  @Test
+  void motorIsTheA301s() {
+    // The A301's motor: 13,500 RPM free, and 5.27 Nm at peak power through 135:1.
+    final DCMotor motor = YMotors.getA301(1);
+    assertEquals(13500, motor.freeSpeed * 60 / (2 * Math.PI), 1e-6);
+    assertEquals(5.27, motor.stallTorque * 135 / 2, 1e-9);
+
+    final A301Wrapper smc = new A301Wrapper(createA301(), config("motor"));
+    assertEquals(motor.freeSpeed, smc.getDCMotor().freeSpeed, 1e-9);
+    smc.close();
   }
 }
