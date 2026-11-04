@@ -359,10 +359,12 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
     cfg.WithFeedback(1.0, 0.0, 0.0).WithTemperatureCutoff(wpi::units::celsius_t{70.0});
     CHECK_THROWS_AS((NovaWrapper{nova.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
   }
-  SECTION("The tolerance is the slots' allowable error") {
+  SECTION("The tolerance is the allowable error of the slots with a PID") {
     auto nova = MakeNova();
     auto cfg = BaseConfig();
-    cfg.WithFeedback(1.0, 0.0, 0.0).WithClosedLoopTolerance(wpi::units::turn_t{0.025});
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1)
+        .WithClosedLoopTolerance(wpi::units::turn_t{0.025});
     NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
     CheckNova(0.025, [&] { return nova->Status().Pid0.GetAllowableError(); }, "slot 0");
     CheckNova(0.025, [&] { return nova->Status().Pid1.GetAllowableError(); }, "slot 1");
@@ -394,6 +396,17 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
         .WithContinuousWrapping(wpi::units::turn_t{0.0}, wpi::units::turn_t{1.0});
     NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
     CheckNova(1.0, [&] { return nova->Status().GetAbsWrapping() ? 1.0 : 0.0; }, "wrapping");
+
+    // A Nova wraps an absolute encoder closing its loop by default.
+    auto notWrappingNova = MakeNova();
+    auto notWrappingEncoder = MakeCanEncoder();
+    auto notWrappingCfg = BaseConfig();
+    notWrappingCfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(notWrappingEncoder.get())
+        .WithUseExternalFeedbackEncoder(true);
+    NovaWrapper notWrapping{notWrappingNova.get(), wpi::math::DCMotor::NEO(1), &notWrappingCfg};
+    CheckNova(0.0, [&] { return notWrappingNova->Status().GetAbsWrapping() ? 1.0 : 0.0; },
+              "no wrapping");
 
     auto motorEncoderNova = MakeNova();
     auto motorEncoderCfg = BaseConfig();
