@@ -149,34 +149,14 @@ public class A301Wrapper extends SmartMotorController {
   public void setupSimulation() {
     if (RobotBase.isSimulation()) {
       if (m_dcMotorSim.isEmpty()) {
-        createMotorSim(m_config.getGearing());
+        var plant = Models.singleJointedArmFromPhysicalConstants(
+            m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio());
+        m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
+        setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
       }
       m_config.getStartingPosition().ifPresent(
           startingPos -> m_simSupplier.ifPresent(sim -> sim.setMechanismPosition(startingPos)));
     }
-  }
-
-  /**
-   * Create the simulated motor, and its sim supplier, for a gearing.
-   *
-   * @param gearing Gearing from the A301's rotor to the mechanism.
-   */
-  private void createMotorSim(MechanismGearing gearing) {
-    var plant = Models.singleJointedArmFromPhysicalConstants(
-        m_motor, m_config.getMOI(), gearing.getMechanismToRotorRatio());
-    m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
-    setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
-  }
-
-  /**
-   * External encoder rotations per mechanism rotation.
-   *
-   * @return Ratio from the mechanism to the external encoder.
-   */
-  private double getMechanismToExternalEncoderRatio() {
-    return m_config.getExternalEncoderGearing()
-        .orElse(MechanismGearing.kOne)
-        .getMechanismToRotorRatio();
   }
 
   /**
@@ -191,8 +171,12 @@ public class A301Wrapper extends SmartMotorController {
     final double rotations;
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
       // REVLib does not simulate the A301, so the encoder follows the simulated mechanism.
-      rotations = m_simSupplier.get().getMechanismPosition().in(
-          Rotations) *getMechanismToExternalEncoderRatio();
+      rotations = m_simSupplier.get()
+                      .getMechanismPosition()
+                      .times(m_config.getExternalEncoderGearing()
+                              .orElse(MechanismGearing.kOne)
+                              .getMechanismToRotorRatio())
+                      .in(Rotations);
     } else {
       final double raw = m_a301.getAbsoluteEncoderPosition().get(0.0);
       rotations = (m_config.getExternalEncoderInverted().orElse(false) ? -raw : raw)
@@ -211,7 +195,12 @@ public class A301Wrapper extends SmartMotorController {
    */
   private double getZeroOffsetRotations() {
     return m_config.getExternalEncoderZeroOffset()
-        .map(offset -> offset.in(Rotations) *getMechanismToExternalEncoderRatio())
+        .map(offset
+            -> offset
+                .times(m_config.getExternalEncoderGearing()
+                        .orElse(MechanismGearing.kOne)
+                        .getMechanismToRotorRatio())
+                .in(Rotations))
         .orElse(0.0);
   }
 
@@ -219,7 +208,7 @@ public class A301Wrapper extends SmartMotorController {
   public void seedRelativeEncoder() {
     getExternalEncoderMechanismPosition().ifPresent(mechanismAngle
         -> m_a301.setRelativeEncoderPosition(
-            mechanismAngle.in(Rotations) *m_config.getGearing().getMechanismToRotorRatio()));
+            mechanismAngle.times(m_config.getGearing().getMechanismToRotorRatio()).in(Rotations)));
   }
 
   @Override
@@ -281,14 +270,18 @@ public class A301Wrapper extends SmartMotorController {
   public void setEncoderPosition(Angle angle) {
     if (m_useAbsoluteEncoder && !RobotBase.isSimulation()) {
       // Write the raw reading that the zero offset and inversion turn into this angle.
-      final double encoderRotations =
-          angle.in(Rotations) *getMechanismToExternalEncoderRatio() + getZeroOffsetRotations();
+      final double encoderRotations = angle
+                                          .times(m_config.getExternalEncoderGearing()
+                                                  .orElse(MechanismGearing.kOne)
+                                                  .getMechanismToRotorRatio())
+                                          .in(Rotations)
+          + getZeroOffsetRotations();
       m_a301.setAbsoluteEncoderPosition(m_config.getExternalEncoderInverted().orElse(false)
               ? -encoderRotations
               : encoderRotations);
     }
     m_a301.setRelativeEncoderPosition(
-        angle.in(Rotations) *m_config.getGearing().getMechanismToRotorRatio());
+        angle.times(m_config.getGearing().getMechanismToRotorRatio()).in(Rotations));
     m_simSupplier.ifPresent(simSupplier -> simSupplier.setMechanismPosition(angle));
   }
 
@@ -505,8 +498,8 @@ public class A301Wrapper extends SmartMotorController {
     if (config.getStartingPosition().isPresent()) {
       m_a301.setRelativeEncoderPosition(config.getStartingPosition()
               .get()
-              .in(Rotations) *config.getGearing()
-              .getMechanismToRotorRatio());
+              .times(config.getGearing().getMechanismToRotorRatio())
+              .in(Rotations));
       m_simSupplier.ifPresent(sim -> sim.setMechanismPosition(config.getStartingPosition().get()));
     } else if (m_useAbsoluteEncoder) {
       seedRelativeEncoder();
@@ -682,8 +675,10 @@ public class A301Wrapper extends SmartMotorController {
 
   @Override
   public Optional<Angle> getExternalEncoderMechanismPosition() {
-    return getExternalEncoderSensorPosition().map(
-        angle -> angle.div(getMechanismToExternalEncoderRatio()));
+    return getExternalEncoderSensorPosition().map(angle
+        -> angle.times(m_config.getExternalEncoderGearing()
+                .orElse(MechanismGearing.kOne)
+                .getRotorToMechanismRatio()));
   }
 
   /**
@@ -1096,7 +1091,11 @@ public class A301Wrapper extends SmartMotorController {
   public void setMechanismGearing(MechanismGearing gearing) {
     m_config.withGearing(gearing);
     if (RobotBase.isSimulation()) {
-      createMotorSim(gearing);
+      // The simulated motor's reduction comes from the gearing.
+      var plant = Models.singleJointedArmFromPhysicalConstants(
+          m_motor, m_config.getMOI(), gearing.getMechanismToRotorRatio());
+      m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
+      setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
