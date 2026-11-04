@@ -102,7 +102,7 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * <ul>
  * <li>{@link com.revrobotics.spark.SparkAbsoluteEncoder}: the SPARK's range offset, for a wrapping
  * maximum from 0 to 1 rotation, such as [-0.5, 0.5) or [0, 1).
- * <li>{@link com.revrobotics.spark.DetachedEncoder}: zero centered or not, for [-0.5, 0.5) or [0, 1).
+ * <li>{@link com.revrobotics.encoder.DetachedEncoder}: zero centered or not, for [-0.5, 0.5) or [0, 1).
  * </ul>
  *
  * Without continuous wrapping, an absolute encoder reads [0, 1).
