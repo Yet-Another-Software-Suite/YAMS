@@ -271,7 +271,8 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.HardStops", "[PivotTest]") {
 }
 
 // A loosely coupled follower follows its leader, whether its closed loop runs on the motor
-// controller or on the SystemCore, as a Nova's always does and a SPARK's with an exponential profile
+// controller, as a Nova's does with its motion profile, or on the SystemCore, as a SPARK's with an
+// exponential profile
 // does. When the leader's closed loop is stopped, such as to drive it at a duty cycle, the follower
 // is stopped too, rather than its closed loop driving it on to the last setpoint. Each motor drives
 // its own simulated pivot.
@@ -287,10 +288,11 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       {"SparkMax following a SparkFlex",
        {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlex"},
        {HardwareType::SparkMax, ProfileType::None, "LooseFollowerSparkMax"}},
-      // The follower's closed loop runs on the SystemCore.
+      // The follower's closed loop runs on the Nova, which needs a motion profile for its
+      // feedforward.
       {"Nova following a SparkMax",
        {HardwareType::SparkMax, ProfileType::None, "LooseLeaderSparkMax"},
-       {HardwareType::Nova, ProfileType::None, "LooseFollowerNova"}},
+       {HardwareType::Nova, ProfileType::Trapezoid, "LooseFollowerNova"}},
       {"SparkMax with an exponential profile following a SparkFlex",
        {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlexExpo"},
        {HardwareType::SparkMax, ProfileType::Exponential, "LooseFollowerSparkMaxExpo"}},

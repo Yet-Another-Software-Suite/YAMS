@@ -113,7 +113,7 @@ final class ClosedLoopCases {
         DCMotor.getNEO(1),
         4,
         false,
-        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, cfg)),
+        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, DeviceCreator.withNovaProfile(cfg, false))),
   };
 
   /** Every motor controller. */

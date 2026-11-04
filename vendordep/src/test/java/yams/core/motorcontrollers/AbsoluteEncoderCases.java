@@ -240,8 +240,8 @@ final class AbsoluteEncoderCases {
         yield new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
-            encoderOptions.apply(
-                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
+            DeviceCreator.withNovaProfile(encoderOptions.apply(
+                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)), false));
       }
     };
   }
@@ -265,11 +265,11 @@ final class AbsoluteEncoderCases {
         return new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
-            feedback == RelativeFeedback.NOVA_QUADRATURE
+            DeviceCreator.withNovaProfile(feedback == RelativeFeedback.NOVA_QUADRATURE
                 ? config
                     .withExternalEncoder(FeedbackSensorType.QUAD)
                     .withUseExternalFeedbackEncoder(true)
-                : config);
+                : config, false));
       } catch (RuntimeException e) {
         // The Nova rejected the config; release it for the tests after this one.
         CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());

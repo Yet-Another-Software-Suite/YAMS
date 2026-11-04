@@ -98,7 +98,7 @@ public class HardStopTest {
   }
 
   private static SmartMotorController nova(String label) {
-    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config(label));
+    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(config(label), false));
   }
 
   private static Stream<Arguments> everyMotorController() {

@@ -5,8 +5,11 @@
 
 #include <thrifty/canEncoder/CanEncoder.h>
 #include <thrifty/core/Motor.h>
+#include <thrifty/core/MotorControl.h>
 #include <thrifty/nova/Nova.h>
+#include <thrifty/sim/MotorSim.h>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <wpi/simulation/DCMotorSim.hpp>
@@ -14,6 +17,7 @@
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/simulation/NovaSimSupplier.hpp"
 
 namespace yams::motorcontrollers::local {
 
@@ -268,7 +272,16 @@ class NovaWrapper : public SmartMotorController {
    */
   void* GetMotorControllerConfig() override;
 
+  /**
+   * Attach the mechanism's SimSupplier, driven by a simulated Nova, which runs the Nova's closed
+   * loop as ThriftyLib's simulation does not.
+   *
+   * @param supplier Mechanism's SimSupplier, or nullptr to detach.
+   */
+  void SetSimSupplier(std::shared_ptr<SimSupplier> supplier) override;
+
  private:
+  using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
   thrifty::Nova* m_nova{nullptr};
   /** Vendor config applied to the Nova before the YAMS config. */
   std::optional<thrifty::NovaConfigBatch> m_vendorConfig;
@@ -284,11 +297,28 @@ class NovaWrapper : public SmartMotorController {
    */
   wpi::units::turn_t m_absoluteEncoderDiscontinuityPoint{1.0};
   /**
-   * Duty cycle last applied to the simulated motor. The simulation holds it between commands, as
-   * the Nova holds its output, so it must be what was commanded and not read back from the motor
-   * model.
+   * Whether the closed loop runs on the Nova. An LQR, an exponential profile and a velocity
+   * trapezoidal profile run on the SystemCore instead.
    */
-  double m_simDutyCycle{0.0};
+  bool m_closedLoopOnNova{false};
+  /** Nova slot of the closed loop slot in use. */
+  thrifty::MotorControl::Slot m_novaSlot{thrifty::MotorControl::Slot::SLOT0};
+  /**
+   * Mechanism rotations per unit of the closed loop gains and profile: 1, or the mechanism
+   * rotations per meter for a linear closed loop controller.
+   */
+  double m_rotationsPerGainUnit{1.0};
+  /** Feedback sensor rotations per mechanism rotation, the Nova's sensor-to-mechanism ratio. */
+  double m_mechanismToFeedbackSensorRatio{1.0};
+  /** Sensor the Nova closes its loop on. */
+  thrifty::Motor::FeedbackSensorType m_feedbackSensor{thrifty::Motor::FeedbackSensorType::INTERNAL};
+  /** Simulated Nova, which runs its closed loop in simulation. */
+  std::shared_ptr<simulation::NovaSimSupplier> m_novaSim;
+  /**
+   * Simulated external encoder shaft, from the mechanism's sim supplier: its rotations and
+   * rotations per second, made by setSimSupplier. A CAN encoder reads it in simulation.
+   */
+  std::optional<thrifty::MotorSim> m_externalEncoderSim;
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   std::optional<wpi::util::Alert> m_systemCoreClosedLoopAlert;
@@ -305,7 +335,10 @@ class NovaWrapper : public SmartMotorController {
   void ApplyFeedback(double kP, double kI, double kD);
   /** Create the simulated motor and its sim supplier from the config. */
   void CreateMotorSim();
-  /** Configure the external encoder from the config, adding Nova settings to @p novaConfig. */
+  /**
+   * Configure the external encoder, and the sensor the Nova closes its loop on with its ratio, from
+   * the config, adding Nova settings to @p novaConfig.
+   */
   void ApplyExternalEncoder(const SmartMotorControllerConfig& config,
                             thrifty::NovaConfigBatch& novaConfig);
   /** Angle of the external encoder's shaft, if any. */

@@ -122,7 +122,7 @@ public class LooselyCoupledFollowerTest {
   }
 
   private static SmartMotorController nova(SmartMotorControllerConfig cfg) {
-    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), cfg);
+    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false));
   }
 
   private static Arguments pair(

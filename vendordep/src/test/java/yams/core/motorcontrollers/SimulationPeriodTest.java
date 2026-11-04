@@ -102,9 +102,9 @@ public class SimulationPeriodTest {
             new NovaWrapper(
                 DeviceCreator.createNova(),
                 DCMotor.getNEO(1),
-                ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
-                    .withTelemetry("SimulationPeriodTest Nova", TelemetryVerbosity.LOW))));
+                    .withTelemetry("SimulationPeriodTest Nova", TelemetryVerbosity.LOW), false))));
   }
 
   private static void closeSmc(SmartMotorController smc) {

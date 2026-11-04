@@ -120,10 +120,10 @@ public class BatterySimTest {
         new NovaWrapper(
             DeviceCreator.createNova(),
             DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+            DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
-                    "BatterySim Nova(" + (50 + offset) + ") NEO", TelemetryVerbosity.LOW)));
+                    "BatterySim Nova(" + (50 + offset) + ") NEO", TelemetryVerbosity.LOW), false)));
 
     for (SmartMotorController smc : smcs) {
       SmartMotorControllerTestSubsystem subsys =

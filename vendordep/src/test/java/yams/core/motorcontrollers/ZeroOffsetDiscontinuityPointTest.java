@@ -76,8 +76,11 @@ public class ZeroOffsetDiscontinuityPointTest {
     final List<Case> cases = new ArrayList<>();
     for (Encoder encoder : Encoder.values()) {
       // 120 degrees is only in [-180, 180) when the discontinuity point moved with the zero offset.
-      cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(120)));
-      cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(-120)));
+      // A Nova closing its loop on an absolute encoder reads it over [0, 1) rotations only.
+      if (encoder != Encoder.NOVA_ABSOLUTE && encoder != Encoder.NOVA_CAN) {
+        cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(120)));
+        cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(-120)));
+      }
       // 300 degrees is only in [0, 360) when the discontinuity point moved with the zero offset.
       cases.add(new Case(encoder, Rotations.of(1), Degrees.of(300)));
       cases.add(new Case(encoder, Rotations.of(1), Degrees.of(30)));

@@ -180,7 +180,9 @@ public class ElevatorTest {
                   new NovaWrapper(
                       nova,
                       DCMotor.getNEO(1),
-                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                      // A Nova applies its feedforward only with a motion profile.
+                      ((yams.commands2.config.SmartMotorControllerConfig)
+                              (i == 0 ? addTrapezoidalProfile(smcConfig.clone()) : smcConfig.clone()))
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "Nova(" + (50 + offset) + "[" + i + "]) NEO",

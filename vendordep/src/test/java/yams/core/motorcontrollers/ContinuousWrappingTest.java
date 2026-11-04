@@ -291,15 +291,20 @@ public class ContinuousWrappingTest {
                           ? withEncoder(cfg, DeviceCreator.createCANcoderFor(talon))
                           : cfg);
                 }));
-        cases.add(
-            new Case(
-                "Nova" + suffix,
-                controller,
-                cfg ->
-                    new NovaWrapper(
-                        DeviceCreator.createNova(),
-                        DCMotor.getNEO(1),
-                        attachedEncoder ? withEncoder(cfg, FeedbackSensorType.ABS) : cfg)));
+        // A Nova running the closed loop wraps only over [0, 1) rotations of an absolute encoder on
+        // the mechanism; the SystemCore wraps any range on any sensor.
+        if (attachedEncoder || systemCore(controller)) {
+          cases.add(
+              new Case(
+                  "Nova" + suffix,
+                  controller,
+                  cfg ->
+                      new NovaWrapper(
+                          DeviceCreator.createNova(),
+                          DCMotor.getNEO(1),
+                          DeviceCreator.withNovaProfile(
+                              attachedEncoder ? novaWrapping(withEncoder(cfg, FeedbackSensorType.ABS)) : cfg, false))));
+        }
       }
       // A Through Bore Encoder on either SPARK, on the mechanism: its quadrature output, which is
       // not
@@ -336,16 +341,18 @@ public class ContinuousWrappingTest {
       }
       // A Nova with a quadrature encoder on its data port, which is not absolute, or a Thrifty CAN
       // Encoder.
-      cases.add(
-          new Case(
-              "Nova " + controller + " with quadrature encoder",
-              controller,
-              cfg ->
-                  new NovaWrapper(
-                      DeviceCreator.createNova(),
-                      DCMotor.getNEO(1),
-                      cfg.withExternalEncoder(FeedbackSensorType.QUAD)
-                          .withUseExternalFeedbackEncoder(true))));
+      if (systemCore(controller)) {
+        cases.add(
+            new Case(
+                "Nova " + controller + " with quadrature encoder",
+                controller,
+                cfg ->
+                    new NovaWrapper(
+                        DeviceCreator.createNova(),
+                        DCMotor.getNEO(1),
+                        DeviceCreator.withNovaProfile(cfg.withExternalEncoder(FeedbackSensorType.QUAD)
+                            .withUseExternalFeedbackEncoder(true), false))));
+      }
       cases.add(
           new Case(
               "Nova " + controller + " with CAN encoder",
@@ -354,7 +361,7 @@ public class ContinuousWrappingTest {
                   new NovaWrapper(
                       DeviceCreator.createNova(),
                       DCMotor.getNEO(1),
-                      withEncoder(cfg, DeviceCreator.createCanEncoder()))));
+                      DeviceCreator.withNovaProfile(novaWrapping(withEncoder(cfg, DeviceCreator.createCanEncoder())), false))));
       // A CANdi on either Talon, its encoder wired to PWM1.
       final String suffix = " " + controller + " with attached CANdi";
       cases.add(
@@ -392,6 +399,19 @@ public class ContinuousWrappingTest {
       SparkBase spark, DCMotor motor, SmartMotorControllerConfig cfg, boolean attachedEncoder) {
     return new SparkWrapper(
         spark, motor, attachedEncoder ? withEncoder(cfg, spark.getAbsoluteEncoder()) : cfg);
+  }
+
+  /** Whether the closed loop controller runs on the SystemCore on a Nova: an exponential profile or an LQR. */
+  private static boolean systemCore(Controller controller) {
+    return controller == Controller.EXPONENTIAL_PROFILE || controller == Controller.LQR;
+  }
+
+  /**
+   * Wrap over [0, 1) rotations of an absolute encoder reporting [0, 1) rotations, the only range a
+   * Nova reads and wraps over itself.
+   */
+  private static SmartMotorControllerConfig novaWrapping(SmartMotorControllerConfig cfg) {
+    return cfg.withExternalEncoderDiscontinuityPoint(Rotations.of(1)).withContinuousWrapping(Rotations.of(0), Rotations.of(1));
   }
 
   /** Close the loop on an encoder mounted on the mechanism, 1:1. */
