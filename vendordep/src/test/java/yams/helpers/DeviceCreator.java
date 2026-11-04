@@ -3,6 +3,12 @@
 
 package yams.helpers;
 
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -22,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
+import yams.core.motorcontrollers.SmartMotorControllerConfig;
 
 /**
  * Centralised factory for test motor controller devices.
@@ -109,7 +117,10 @@ public class DeviceCreator {
     if (device > 0 && device % (idsPerBus * kThriftyBuses) == 0) {
       System.err.println("Warning: used every Thrifty device ID on every bus, reusing them");
     }
-    return new Nova(device / idsPerBus % kThriftyBuses, device % idsPerBus);
+    return new Nova(
+        device / idsPerBus % kThriftyBuses,
+        device % idsPerBus,
+        com.thrifty.core.Motor.MotorType.NEO);
   }
 
   /**
@@ -224,5 +235,36 @@ public class DeviceCreator {
       }
     }
     throw new AssertionError("Could not read the device's configuration: " + status);
+  }
+
+  /**
+   * Give a config for a Nova the motion profile its feedforward needs, as a Nova applies a
+   * feedforward only with a motion profile: a trapezoidal profile, run on the Nova, for a position
+   * mechanism, or a velocity trapezoidal profile, run on the SystemCore, for a velocity one. A config
+   * without a feedforward, or with a motion profile or an LQR, is returned as it is.
+   *
+   * @param cfg      Config for the Nova.
+   * @param velocity Whether the mechanism is controlled by velocity.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(C cfg, boolean velocity) {
+    boolean feedforward = false;
+    for (ClosedLoopControllerSlot slot : ClosedLoopControllerSlot.values()) {
+      feedforward |= cfg.getArmFeedforward(slot).isPresent() || cfg.getElevatorFeedforward(slot).isPresent() || cfg.getSimpleFeedforward(slot).isPresent();
+    }
+    if (!feedforward || cfg.getTrapezoidProfile().isPresent() || cfg.getExponentialProfile().isPresent() || cfg.getLQRClosedLoopController().isPresent()) {
+      return cfg;
+    }
+    final boolean linear = cfg.getLinearClosedLoopControllerUse();
+    if (velocity && linear) {
+      cfg.withTrapezoidalProfile(MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
+    } else if (velocity) {
+      cfg.withTrapezoidalProfile(DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
+    } else if (linear) {
+      cfg.withTrapezoidalProfile(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
+    } else {
+      cfg.withTrapezoidalProfile(DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
+    }
+    return cfg;
   }
 }

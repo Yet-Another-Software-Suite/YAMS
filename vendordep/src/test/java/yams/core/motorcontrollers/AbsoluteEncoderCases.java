@@ -42,7 +42,7 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Every absolute external encoder on every motor controller, and every closed loop controller, for
- * the tests of options that apply to absolute encoders: {@link DiscontinuityPointTest},
+ * the tests of options that apply to absolute encoders: {@link AbsoluteEncoderRangeTest},
  * {@link ZeroOffsetTest}, and {@link StartingPositionTest}. Each encoder is mounted on the
  * mechanism 1:1, behind 12:1 gearing, and closes the loop.
  */
@@ -178,7 +178,7 @@ final class AbsoluteEncoderCases {
    *
    * @param encoder        Encoder.
    * @param config         Mechanism config.
-   * @param encoderOptions Options for the encoder, such as its discontinuity point or zero offset.
+   * @param encoderOptions Options for the encoder, such as its continuous wrapping or zero offset.
    * @return The motor controller.
    */
   static SmartMotorController create(
@@ -240,8 +240,8 @@ final class AbsoluteEncoderCases {
         yield new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
-            encoderOptions.apply(
-                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
+            DeviceCreator.withNovaProfile(encoderOptions.apply(
+                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)), false));
       }
     };
   }
@@ -265,11 +265,11 @@ final class AbsoluteEncoderCases {
         return new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
-            feedback == RelativeFeedback.NOVA_QUADRATURE
+            DeviceCreator.withNovaProfile(feedback == RelativeFeedback.NOVA_QUADRATURE
                 ? config
                     .withExternalEncoder(FeedbackSensorType.QUAD)
                     .withUseExternalFeedbackEncoder(true)
-                : config);
+                : config, false));
       } catch (RuntimeException e) {
         // The Nova rejected the config; release it for the tests after this one.
         CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
@@ -303,7 +303,7 @@ final class AbsoluteEncoderCases {
   }
 
   /**
-   * The encoder's own absolute angle: what it reports, in the range set by its discontinuity point.
+   * The encoder's own absolute angle: what it reports, in the range set by the continuous wrapping.
    * A Talon fuses its encoder with the motor's, so its mechanism position does not wrap; the
    * encoder's absolute position still does.
    *

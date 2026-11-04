@@ -153,7 +153,7 @@ public class ThroughBoreEncoderTest {
     return switch (connection) {
       case ABSOLUTE ->
           cfg.withExternalEncoder(spark.getAbsoluteEncoder())
-              .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+              .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
       case QUADRATURE -> {
         // The vendor config gives the Through Bore Encoder's counts per revolution.
         if (spark instanceof SparkMax sparkMax) {
@@ -172,7 +172,7 @@ public class ThroughBoreEncoderTest {
       }
       case CAN ->
           cfg.withExternalEncoder(DeviceCreator.createDetachedEncoder())
-              .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+              .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
     };
   }
 
@@ -293,13 +293,13 @@ public class ThroughBoreEncoderTest {
           assertTrue(
               eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark)) < 1e-6),
               name
-                  + ": a 0.5 rotation discontinuity point is a range offset of 0, but it was "
+                  + ": wrapping over [-0.5, 0.5) rotations is a range offset of 0, but it was "
                   + absoluteEncoderRangeOffset(spark));
-          smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1)));
+          smc.applyConfig(smc.getConfig().withContinuousWrapping(Rotations.of(0), Rotations.of(1)));
           assertTrue(
               eventually(() -> Math.abs(absoluteEncoderRangeOffset(spark) - 0.5) < 1e-6),
               name
-                  + ": a 1 rotation discontinuity point is a range offset of 0.5, but it was "
+                  + ": wrapping over [0, 1) rotations is a range offset of 0.5, but it was "
                   + absoluteEncoderRangeOffset(spark));
         }
         case QUADRATURE -> {
@@ -321,11 +321,11 @@ public class ThroughBoreEncoderTest {
           }
           assertTrue(
               encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
-              name + ": a 0.5 rotation discontinuity point is zero-centered");
-          smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1)));
+              name + ": wrapping over [-0.5, 0.5) rotations is zero-centered");
+          smc.applyConfig(smc.getConfig().withContinuousWrapping(Rotations.of(0), Rotations.of(1)));
           assertTrue(
               !encoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
-              name + ": a 1 rotation discontinuity point is not zero-centered");
+              name + ": wrapping over [0, 1) rotations is not zero-centered");
         }
       }
     } finally {

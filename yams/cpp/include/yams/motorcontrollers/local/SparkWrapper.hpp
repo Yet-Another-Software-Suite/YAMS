@@ -49,8 +49,8 @@ namespace yams::motorcontrollers::local {
  * `rev::spark::SparkMaxAlternateEncoder*` / `rev::spark::SparkFlexExternalEncoder*` (quadrature),
  * and `rev::detached::DetachedEncoder*` / `rev::detached::SplineEncoder*` (read over CAN).
  *
- * External encoder discontinuity point (absolute and detached encoders): 0.5 rotations reports
- * [-0.5, 0.5), 1 rotation (the default) reports [0, 1).
+ * An absolute or detached external encoder reads the continuous wrapping range, [-0.5, 0.5) or
+ * [0, 1) for a detached encoder, or [0, 1) without continuous wrapping.
  *
  * ### Example usage SPARK Max (inside a subsystem constructor)
  * @code{.cpp}
@@ -388,11 +388,6 @@ class SparkWrapper : public SmartMotorController {
   double m_detachedEncoderZeroOffset{0.0};
   /** Zero offset of the SPARK absolute encoder, in its rotations. */
   double m_absEncoderZeroOffset{0.0};
-  /**
-   * Discontinuity point of the external absolute encoder: it reports angles from one rotation
-   * below it up to it.
-   */
-  wpi::units::turn_t m_absoluteEncoderDiscontinuityPoint{1.0};
   /** Simulated (unwrapped) angle of the detached encoder; REVLib does not wire it to the SPARK. */
   wpi::units::turn_t m_detachedEncoderSimAngle{0.0};
   wpi::math::DCMotor m_motor;
@@ -428,8 +423,6 @@ class SparkWrapper : public SmartMotorController {
   rev::spark::ClosedLoopSlot m_closedLoopSlot{rev::spark::ClosedLoopSlot::kSlot0};
 
   std::optional<wpi::util::Alert> m_rioControllerAlert;
-  /** Shown when external encoder gearing is set alongside a discontinuity point. */
-  std::optional<wpi::util::Alert> m_externalEncoderGearingDiscontinuityAlert;
   /** Shown when the SPARK does not take the feedback gains. */
   std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
   /** How far behind the measured velocity is, from the encoder's filtering, read when the config

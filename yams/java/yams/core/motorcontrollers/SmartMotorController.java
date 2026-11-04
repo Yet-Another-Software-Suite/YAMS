@@ -337,7 +337,9 @@ public abstract class SmartMotorController {
   public void startClosedLoopController() {
     if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP && !m_closedLoopControllerRunning) {
       m_pid.ifPresent(PIDController::reset);
-      m_lastClosedLoopMechanismPosition = Optional.empty();
+      // The motion profile starts from this position, so continuous wrapping keeps the angles the
+      // loop measures next to it, rather than a whole wrapping range away from it.
+      m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
       m_trapState = getTrapezoidalProfileState();
       m_expoState = getExponentialProfileState();
       m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
@@ -389,7 +391,7 @@ public abstract class SmartMotorController {
     // With continuous wrapping, an absolute encoder's angle jumps by a whole wrapping range at the
     // wrapping point. Use the equivalent angle nearest the last one, so the motion profile's state and
     // the LQR's estimate, which carry over from the last loop, do not see the jump.
-    final Angle mechanismPosition = m_config.getContinuousWrapping().isPresent() && m_lastClosedLoopMechanismPosition.isPresent()
+    final Angle mechanismPosition = m_config.isWrappingContinuous() && m_lastClosedLoopMechanismPosition.isPresent()
                                     ? m_config.getContinuousWrappingSetpoint(getMechanismPosition(), m_lastClosedLoopMechanismPosition.get())
                                     : getMechanismPosition();
     m_lastClosedLoopMechanismPosition = Optional.of(mechanismPosition);
@@ -412,7 +414,7 @@ public abstract class SmartMotorController {
 
     // With continuous wrapping, go to the equivalent setpoint nearest the current position, so the
     // motion profile and the closed loop controller take the short way around.
-    Optional<Angle> wrappedSetpointPosition = setpointPosition.map(angle -> m_config.getContinuousWrapping().isPresent()
+    Optional<Angle> wrappedSetpointPosition = setpointPosition.map(angle -> m_config.isWrappingContinuous()
                                                                             ? m_config.getContinuousWrappingSetpoint(angle, mechanismPosition)
                                                                             : angle);
 

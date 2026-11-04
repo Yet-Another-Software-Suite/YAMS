@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/local/NovaWrapper.hpp"
 
 #include <thrifty/canEncoder/CanEncoderConfig.h>
+#include <thrifty/core/MotorControl.h>
 #include <thrifty/nova/NovaConfig.h>
 
 #include <algorithm>
@@ -20,6 +21,7 @@
 #include "yams/math/LQRController.hpp"
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
+#include "yams/motorcontrollers/simulation/NovaSimSupplier.hpp"
 
 namespace yams::motorcontrollers::local {
 
@@ -30,12 +32,6 @@ using FeedbackSensorType = thrifty::Motor::FeedbackSensorType;
 using TurnKv = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit;
 using TurnKa = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit;
 
-/** Direction a Thrifty device counts as positive; inverted is counter-clockwise. */
-thrifty::Motor::Direction ToDirection(bool inverted) {
-  return inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE
-                  : thrifty::Motor::Direction::CLOCKWISE;
-}
-
 /** Gains of the configured feedforward in its own units (ArmFeedforward kV/kA per radian). */
 struct NativeFeedforward {
   double kS{0.0}, kV{0.0}, kA{0.0}, kG{0.0};
@@ -43,10 +39,23 @@ struct NativeFeedforward {
 
 /**
  * Apply @p update to the slot's configured feedforward in its native units and store it back in
- * the config, where the SystemCore closed loop reads it.
+ * the config, where the SystemCore closed loop reads it. With @p nova, also send it to the Nova's
+ * motion profile slot, per mechanism rotation: an arm's feedforward is per radian, an elevator's per
+ * meter.
  */
 template <typename F>
-void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& update) {
+void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& update,
+                             thrifty::Nova* nova, bool novaSlot1) {
+  const auto sendToNova = [&](double kS, double kV, double kA, double kG) {
+    if (!nova) return;
+    if (novaSlot1) {
+      nova->Configure(thrifty::NovaConfig::Mp1::kS(kS), thrifty::NovaConfig::Mp1::kV(kV),
+                      thrifty::NovaConfig::Mp1::kA(kA), thrifty::NovaConfig::Mp1::kG(kG));
+    } else {
+      nova->Configure(thrifty::NovaConfig::Mp0::kS(kS), thrifty::NovaConfig::Mp0::kV(kV),
+                      thrifty::NovaConfig::Mp0::kA(kA), thrifty::NovaConfig::Mp0::kG(kG));
+    }
+  };
   if (auto ff = config.GetArmFeedforward(slot)) {
     NativeFeedforward v{ff->GetKs().value(), ff->GetKv().value(), ff->GetKa().value(),
                         ff->GetKg().value()};
@@ -57,6 +66,8 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
     ff->SetKa(wpi::units::unit_t<Arm::ka_unit>{v.kA});
     ff->SetKg(wpi::units::volt_t{v.kG});
     config.WithFeedforward(*ff, slot);
+    sendToNova(v.kS, wpi::units::unit_t<TurnKv>{ff->GetKv()}.value(),
+               wpi::units::unit_t<TurnKa>{ff->GetKa()}.value(), v.kG);
   } else if (auto ff = config.GetElevatorFeedforward(slot)) {
     NativeFeedforward v{ff->GetKs().value(), ff->GetKv().value(), ff->GetKa().value(),
                         ff->GetKg().value()};
@@ -67,6 +78,10 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
     ff->SetKa(wpi::units::unit_t<Elevator::ka_unit>{v.kA});
     ff->SetKg(wpi::units::volt_t{v.kG});
     config.WithFeedforward(*ff, slot);
+    if (nova) {
+      const double rotationsPerMeter = config.ConvertToMechanism(wpi::units::meter_t{1.0}).value();
+      sendToNova(v.kS, v.kV / rotationsPerMeter, v.kA / rotationsPerMeter, v.kG);
+    }
   } else if (auto ff = config.GetSimpleFeedforward(slot)) {
     NativeFeedforward v{ff->GetKs().value(), ff->GetKv().value(), ff->GetKa().value(), 0.0};
     update(v);
@@ -74,6 +89,7 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
     ff->SetKv(wpi::units::unit_t<TurnKv>{v.kV});
     ff->SetKa(wpi::units::unit_t<TurnKa>{v.kA});
     config.WithFeedforward(*ff, slot);
+    sendToNova(v.kS, v.kV, v.kA, 0.0);
   }
 }
 
@@ -174,32 +190,64 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
             ") does not support the custom control requests!",
         "Cannot use given control request", "WithVendorControlRequest()");
 
-  // The closed loop, motion profiles and feedforwards run on the SystemCore.
+  // An LQR, an exponential profile and a velocity trapezoidal profile run on the SystemCore; every
+  // other closed loop runs on the Nova.
   LoadClosedLoopController(config);
   if (m_lqr && config.GetClosedLoopTolerance())
     throw std::invalid_argument("[Error] Closed loop tolerance is not supported in LQR mode.");
   ConfigureSoftwarePID(config);
-  config.HasTrapezoidProfile();
-  config.HasExponentialProfile();
-  config.GetMechanismLowerLimit();
-  config.GetMechanismUpperLimit();
-  config.GetTemperatureCutoff();
-  config.GetClosedLoopControllerMaximumVoltage();
-  config.GetFeedbackSynchronizationThreshold();
+  const bool closedLoop = config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
+  const bool trapezoidProfile = config.HasTrapezoidProfile();
+  const bool exponentialProfile =
+      config.HasExponentialProfile() || config.HasLinearExponentialProfile();
+  const bool velocityProfile = trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse();
+  m_closedLoopOnNova = closedLoop && !m_lqr && !exponentialProfile && !velocityProfile;
+  m_novaSlot = m_slot == Slot::SLOT_1 ? thrifty::MotorControl::Slot::SLOT1
+                                      : thrifty::MotorControl::Slot::SLOT0;
   config.GetMotorGearing();
 
+  // Options only the SystemCore's closed loop applies.
+  const bool temperatureCutoff = config.GetTemperatureCutoff().has_value();
+  const bool maximumVoltage = config.GetClosedLoopControllerMaximumVoltage().has_value();
+  const bool synchronizationThreshold = config.GetFeedbackSynchronizationThreshold().has_value();
+  const auto closedLoopControlPeriod = config.GetClosedLoopControlPeriod();
+  if (m_closedLoopOnNova && temperatureCutoff)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Temperature cutoff is only available for exponentially profiled or LQR closed loop "
+        "controllers",
+        "Temperature cutoff could not be applied", "WithTemperatureCutoff");
+  if (m_closedLoopOnNova && maximumVoltage)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Closed loop controller maximum voltage is only available for exponentially profiled or "
+        "LQR closed loop controllers",
+        "Closed loop controller maximum voltage could not be applied",
+        "WithClosedLoopControllerMaximumVoltage");
+  if (m_closedLoopOnNova && synchronizationThreshold)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Feedback synchronization threshold is only available for exponentially profiled or LQR "
+        "closed loop controllers",
+        "Feedback synchronization threshold could not be applied",
+        "WithFeedbackSynchronizationThreshold");
+  if (m_closedLoopOnNova && closedLoopControlPeriod)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Closed loop control period is only available for exponentially profiled or LQR closed "
+        "loop controllers",
+        "Closed loop control period does not take effect", "WithClosedLoopControlPeriod");
+  if (!closedLoop && closedLoopControlPeriod)
+    throw std::invalid_argument(
+        "[Error] Closed loop control period is only supported in closed loop mode.");
+
+  // The SystemCore's closed loop controller, unless the Nova runs the closed loop. Without it,
+  // StartClosedLoopController() does nothing, so the two never drive the Nova together.
   if (m_closedLoopControllerThread) {
     StopClosedLoopController();
     m_closedLoopControllerThread.reset();
   }
-  m_closedLoopControllerThread =
-      std::make_unique<wpi::Notifier>([this] { IterateClosedLoopController(); });
-  if (auto name = config.GetTelemetryName(); name) m_closedLoopControllerThread->SetName(*name);
-  const bool closedLoop = config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
-  const auto closedLoopControlPeriod = config.GetClosedLoopControlPeriod();
-  if (!closedLoop && closedLoopControlPeriod)
-    throw std::invalid_argument(
-        "[Error] Closed loop control period is only supported in closed loop mode.");
+  if (!m_closedLoopOnNova) {
+    m_closedLoopControllerThread =
+        std::make_unique<wpi::Notifier>([this] { IterateClosedLoopController(); });
+    if (auto name = config.GetTelemetryName(); name) m_closedLoopControllerThread->SetName(*name);
+  }
 
   // Settings are sent to the Nova together, in order: reset the Nova if configured, then the
   // vendor config, then the YAMS config, which overrides the vendor config.
@@ -208,20 +256,20 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   thrifty::NovaConfigBatch novaConfig;
 
   // Ramp rates. The Nova has one ramp rate, applied to the SystemCore's closed loop output too.
-  const auto openLoopRampRate = config.GetOpenLoopRampRate();
-  const auto closedLoopRampRate = config.GetClosedLoopRampRate();
-  if (openLoopRampRate && closedLoopRampRate && *openLoopRampRate != *closedLoopRampRate)
+  if (config.GetOpenLoopRampRate() && config.GetClosedLoopRampRate() &&
+      *config.GetOpenLoopRampRate() != *config.GetClosedLoopRampRate())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Thrifty Nova has one ramp rate for open and closed loop control",
         "Different open and closed loop ramp rates could not be applied",
         "WithOpenLoopRampRate or WithClosedLoopRampRate, not both");
-  if (auto rate = openLoopRampRate ? openLoopRampRate : closedLoopRampRate) {
+  if (auto rate = config.GetOpenLoopRampRate() ? config.GetOpenLoopRampRate()
+                                               : config.GetClosedLoopRampRate()) {
     novaConfig.Add(thrifty::NovaConfig::RampForward(rate->value()),
                    thrifty::NovaConfig::RampReverse(rate->value()));
   }
 
   if (auto inverted = config.GetMotorInverted())
-    novaConfig.Add(thrifty::NovaConfig::Direction(ToDirection(*inverted)));
+    novaConfig.Add(thrifty::NovaConfig::Direction(*inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE : thrifty::Motor::Direction::CLOCKWISE));
   if (config.GetEncoderInverted())
     throw std::invalid_argument("[ERROR] Thrifty Nova internal encoder cannot be inverted!");
 
@@ -235,6 +283,124 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     novaConfig.Add(thrifty::NovaConfig::BrakeMode(*zp == MotorMode::BRAKE));
 
   ApplyExternalEncoder(config, novaConfig);
+  novaConfig.Add(thrifty::NovaConfig::SensorToMechanismRatio(m_mechanismToFeedbackSensorRatio));
+
+  // The mechanism limits are the Nova's soft limits, on its feedback sensor in mechanism rotations,
+  // in closed loop. The Nova has one enable for both, so they are set together.
+  if (config.GetMechanismUpperLimit().has_value() != config.GetMechanismLowerLimit().has_value())
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Thrifty Nova soft limits need both an upper and a lower mechanism limit",
+        "Mechanism limit could not be applied", "WithMechanismLimits(lower, upper)");
+  if (config.GetMechanismUpperLimit()) {
+    novaConfig.Add(thrifty::NovaConfig::SoftLimitSource(m_feedbackSensor),
+                   thrifty::NovaConfig::SoftLimits(config.GetMechanismUpperLimit()->value(),
+                                                   config.GetMechanismLowerLimit()->value()),
+                   thrifty::NovaConfig::SoftLimitEnable(closedLoop));
+  }
+  // Continuous wrapping, on the Nova: an absolute encoder's reading wraps over [0, 1) rotations,
+  // so only that range, with an absolute encoder on the mechanism closing the loop.
+  const bool absoluteFeedback = m_feedbackSensor == FeedbackSensorType::ABS ||
+                                m_feedbackSensor == FeedbackSensorType::CAN_ENCODER;
+  // The Nova reads an absolute encoder closing its loop over [0, 1) rotations.
+  if (config.GetWrappingMax() && m_closedLoopOnNova && absoluteFeedback &&
+      std::abs(config.GetWrappingMin()->value()) > 1e-9)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
+        "Wrapping could not be applied", "WithWrapping(0_tr, 1_tr)");
+  if (config.IsWrappingContinuous() && m_closedLoopOnNova &&
+      (std::abs(config.GetWrappingMin()->value()) > 1e-9 ||
+                   (m_feedbackSensor != FeedbackSensorType::ABS &&
+                    m_feedbackSensor != FeedbackSensorType::CAN_ENCODER) ||
+                   m_mechanismToFeedbackSensorRatio != 1.0))
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Thrifty Nova wraps continuously only over [0, 1) rotations of an absolute encoder on the "
+        "mechanism closing the loop",
+        "Continuous wrapping could not be applied",
+        "WithContinuousWrapping(0_tr, 1_tr) with an absolute encoder and "
+        "WithUseExternalFeedbackEncoder(true)");
+  // A Nova wraps an absolute encoder closing its loop by default, so it is told either way.
+  if (absoluteFeedback)
+    novaConfig.Add(
+        thrifty::NovaConfig::AbsWrapping(config.IsWrappingContinuous() && m_closedLoopOnNova));
+
+  // Each closed loop slot's PID gains, tolerance, motion profile and feedforward, on the Nova's two
+  // slots when it runs the closed loop. Its sensor-to-mechanism ratio puts them in mechanism
+  // rotations, its voltage closed loops and motion profile output volts, like YAMS gains. The feedforward is the motion
+  // profile slot's, so the PID slots' F is 0.
+  if (m_closedLoopOnNova) {
+    // Gains of a linear mechanism are per meter; the Nova's are per mechanism rotation.
+    m_rotationsPerGainUnit = config.GetLinearClosedLoopControllerUse()
+                                 ? config.ConvertToMechanism(wpi::units::meter_t{1.0}).value()
+                                 : 1.0;
+    double maxVelocity = 0.0;
+    double maxAcceleration = 0.0;
+    if (auto linearVelocity = config.GetTrapMaxVelocityLinear();
+        linearVelocity && !config.GetTrapMaxVelocityTurns()) {
+      maxVelocity = config.ConvertToMechanism(*linearVelocity).value();
+      maxAcceleration = config.ConvertToMechanism(*config.GetTrapMaxAccelLinear()).value();
+    } else if (auto velocity = config.GetTrapMaxVelocityTurns()) {
+      maxVelocity = velocity->value();
+      maxAcceleration = config.GetTrapMaxAccelTurns()->value();
+    }
+    for (auto slot : {Slot::SLOT_0, Slot::SLOT_1, Slot::SLOT_2, Slot::SLOT_3}) {
+      const auto gains = config.GetSlotGains(slot);
+      const bool feedforward = gains.armFF || gains.elevatorFF || gains.simpleFF;
+      if (slot == Slot::SLOT_2 || slot == Slot::SLOT_3) {
+        if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0 || feedforward)
+          throw exceptions::SmartMotorControllerConfigurationException(
+              "Thrifty Nova has two closed loop slots, SLOT_0 and SLOT_1",
+              "Closed loop slot could not be configured", "SLOT_0 or SLOT_1");
+        continue;
+      }
+      if (feedforward && !trapezoidProfile)
+        throw exceptions::SmartMotorControllerConfigurationException(
+            "Thrifty Nova applies a feedforward only with a motion profile",
+            "Feedforward could not be applied without a motion profile", "WithTrapezoidProfile");
+      const bool slot0 = slot == Slot::SLOT_0;
+      if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
+        const double kP = gains.kP / m_rotationsPerGainUnit;
+        const double kI = gains.kI / m_rotationsPerGainUnit;
+        const double kD = gains.kD / m_rotationsPerGainUnit;
+        if (slot0) {
+          novaConfig.Add(thrifty::NovaConfig::Pid0::P(kP), thrifty::NovaConfig::Pid0::I(kI),
+                         thrifty::NovaConfig::Pid0::D(kD));
+        } else {
+          novaConfig.Add(thrifty::NovaConfig::Pid1::P(kP), thrifty::NovaConfig::Pid1::I(kI),
+                         thrifty::NovaConfig::Pid1::D(kD));
+        }
+        if (auto tolerance = config.GetClosedLoopTolerance())
+          novaConfig.Add(slot0 ? thrifty::NovaConfig::Pid0::AllowableError(tolerance->value())
+                               : thrifty::NovaConfig::Pid1::AllowableError(tolerance->value()));
+      }
+
+      // The motion profile, and its feedforward, which needs one.
+      if (!trapezoidProfile) continue;
+      double kS = 0.0, kV = 0.0, kA = 0.0, kG = 0.0;
+      auto gravityType = thrifty::Motor::MPGravityType::CONSTANT;
+      if (auto ff = config.GetArmFeedforward(slot)) {
+        // ArmFeedforward gains are per radian; the Nova's are per rotation.
+        kS = ff->GetKs().value();
+        kV = wpi::units::unit_t<TurnKv>{ff->GetKv()}.value();
+        kA = wpi::units::unit_t<TurnKa>{ff->GetKa()}.value();
+        kG = ff->GetKg().value();
+        gravityType = thrifty::Motor::MPGravityType::COSINE;
+      } else if (auto ff = config.GetElevatorFeedforward(slot)) {
+        // An elevator's feedforward is per meter.
+        const double rotationsPerMeter = config.ConvertToMechanism(wpi::units::meter_t{1.0}).value();
+        kS = ff->GetKs().value();
+        kV = ff->GetKv().value() / rotationsPerMeter;
+        kA = ff->GetKa().value() / rotationsPerMeter;
+        kG = ff->GetKg().value();
+      } else if (auto ff = config.GetSimpleFeedforward(slot)) {
+        kS = ff->GetKs().value();
+        kV = ff->GetKv().value();
+        kA = ff->GetKa().value();
+      }
+      novaConfig.Add(
+          slot0 ? thrifty::NovaConfig::mp0(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType)
+                : thrifty::NovaConfig::mp1(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType));
+    }
+  }
 
   if (m_vendorConfig) {
     m_nova->Configure(resetConfig, *m_vendorConfig, novaConfig);
@@ -278,26 +444,52 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   config.ValidateBasicOptions();
   config.ValidateExternalEncoderOptions();
 
-  if (closedLoop) {
+  if (closedLoop && !m_closedLoopOnNova) {
     m_systemCoreClosedLoopAlert->Set(true);
     StartClosedLoopController();
   }
   return true;
 }
 
+void NovaWrapper::SetSimSupplier(std::shared_ptr<SimSupplier> supplier) {
+  // The mechanism is driven by a simulated Nova, which runs the Nova's closed loop.
+  // The external encoder's shaft is driven by a MotorSim of the mechanism.
+  if (!supplier) {
+    m_novaSim.reset();
+    m_externalEncoderSim.reset();
+    SmartMotorController::SetSimSupplier(nullptr);
+    return;
+  }
+  m_externalEncoderSim.emplace(
+      [this, supplier] {
+        return supplier->GetMechanismPosition().value() * MechanismToExternalEncoderRatio();
+      },
+      [this, supplier] {
+        return supplier->GetMechanismVelocity().value() * MechanismToExternalEncoderRatio();
+      });
+  if (m_canEncoder)
+    m_canEncoder->Configure(thrifty::CanEncoderConfig::SimMotor(*m_externalEncoderSim));
+  auto novaSim = std::make_shared<simulation::NovaSimSupplier>(std::move(supplier), *m_nova,
+                                                               m_config->GetSimulationPeriod());
+  if (m_novaSim && m_novaSim->GetControlRequest())
+    novaSim->SetControlRequest(*m_novaSim->GetControlRequest());
+  m_novaSim = novaSim;
+  SmartMotorController::SetSimSupplier(std::move(novaSim));
+}
+
 void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
                                        thrifty::NovaConfigBatch& novaConfig) {
+  // The external encoder, and the sensor the Nova closes its loop on: the motor's encoder or the
+  // external encoder, with its rotations per mechanism rotation, which put the Nova's targets and
+  // gains in mechanism rotations.
   m_dataPortEncoder.reset();
   m_canEncoder = nullptr;
-  m_absoluteEncoderDiscontinuityPoint = wpi::units::turn_t{1.0};
-  config.GetUseExternalFeedback();
+  m_feedbackSensor = FeedbackSensorType::INTERNAL;
+  m_mechanismToFeedbackSensorRatio = MechanismToRotorRatio();
+  const bool useExternalFeedback = config.GetUseExternalFeedback();
 
   auto enc = config.GetExternalEncoder();
   if (!enc) {
-    if (config.GetExternalEncoderDiscontinuityPoint().has_value())
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "External encoder discontinuity point is only available for external encoders",
-          "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
     if (config.GetExternalEncoderZeroOffset().has_value())
       throw exceptions::SmartMotorControllerConfigurationException(
           "Zero offset is only available for external encoders",
@@ -318,9 +510,7 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
   config.GetExternalEncoderGearing();
   const double mechToEncoder = MechanismToExternalEncoderRatio();
   const auto zeroOffset = config.GetExternalEncoderZeroOffset();
-  const auto discontinuityPoint = config.GetExternalEncoderDiscontinuityPoint();
   const auto inverted = config.GetExternalEncoderInverted();
-  m_absoluteEncoderDiscontinuityPoint = discontinuityPoint.value_or(wpi::units::turn_t{1.0});
   // Zero offsets are in [0, 1) rotations of the encoder.
   const double zeroOffsetRotations =
       zeroOffset ? wpi::math::InputModulus(zeroOffset->value() * mechToEncoder, 0.0, 1.0) : 0.0;
@@ -328,7 +518,7 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
   if (auto* sensor = std::any_cast<FeedbackSensorType>(&*enc);
       sensor && *sensor == FeedbackSensorType::ABS) {
     m_dataPortEncoder = FeedbackSensorType::ABS;
-    if (inverted) novaConfig.Add(thrifty::NovaConfig::AbsoluteDirection(ToDirection(*inverted)));
+    if (inverted) novaConfig.Add(thrifty::NovaConfig::AbsoluteDirection(*inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE : thrifty::Motor::Direction::CLOCKWISE));
     if (zeroOffset) novaConfig.Add(thrifty::NovaConfig::AbsOffset(zeroOffsetRotations));
   } else if (sensor && *sensor == FeedbackSensorType::QUAD) {
     m_dataPortEncoder = FeedbackSensorType::QUAD;
@@ -337,27 +527,34 @@ void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
           "Zero offset is only available for absolute encoders",
           "Zero offset could not be applied to the quadrature encoder",
           "WithExternalEncoderZeroOffset");
-    if (discontinuityPoint)
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "Discontinuity point is only available for absolute encoders",
-          "Discontinuity point could not be applied to the quadrature encoder",
-          "WithExternalEncoderDiscontinuityPoint");
     if (inverted)
-      novaConfig.Add(thrifty::NovaConfig::QuadratureDirection(ToDirection(*inverted)));
+      novaConfig.Add(thrifty::NovaConfig::QuadratureDirection(*inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE : thrifty::Motor::Direction::CLOCKWISE));
   } else if (auto* canEncoder = std::any_cast<thrifty::CanEncoder*>(&*enc);
              canEncoder && *canEncoder) {
     m_canEncoder = *canEncoder;
     thrifty::CanEncoderConfigBatch canEncoderConfig;
-    if (inverted) canEncoderConfig.Add(thrifty::CanEncoderConfig::Direction(ToDirection(*inverted)));
+    if (inverted) canEncoderConfig.Add(thrifty::CanEncoderConfig::Direction(*inverted ? thrifty::Motor::Direction::COUNTER_CLOCKWISE : thrifty::Motor::Direction::CLOCKWISE));
     if (zeroOffset)
       canEncoderConfig.Add(
           thrifty::CanEncoderConfig::ZeroOffset(static_cast<float>(zeroOffsetRotations)));
     m_canEncoder->Configure(canEncoderConfig);
+    if (m_externalEncoderSim)
+      m_canEncoder->Configure(thrifty::CanEncoderConfig::SimMotor(*m_externalEncoderSim));
   } else {
     throw std::invalid_argument(
         "[ERROR] Unsupported external encoder: NovaWrapper accepts thrifty::Motor::"
         "FeedbackSensorType::ABS, thrifty::Motor::FeedbackSensorType::QUAD or thrifty::"
         "CanEncoder*");
+  }
+  if (useExternalFeedback) {
+    m_feedbackSensor = m_canEncoder ? FeedbackSensorType::CAN_ENCODER : *m_dataPortEncoder;
+    m_mechanismToFeedbackSensorRatio = mechToEncoder;
+    novaConfig.Add(thrifty::NovaConfig::FeedbackSensor(m_feedbackSensor));
+    if (m_canEncoder) {
+      novaConfig.Add(thrifty::NovaConfig::CanEncoderId(m_canEncoder->Status().GetCanId()),
+                     thrifty::NovaConfig::CanEncoderMode(thrifty::Motor::CanEncoderMode::ABSOLUTE),
+                     thrifty::NovaConfig::CanEncoderSource(thrifty::Motor::CanEncoderSource::DIRECT));
+    }
   }
 }
 
@@ -387,29 +584,30 @@ std::optional<wpi::units::turn_t> NovaWrapper::GetExternalEncoderSensorPosition(
   if (!m_dataPortEncoder && !m_canEncoder) return std::nullopt;
   const bool absolute = m_canEncoder || m_dataPortEncoder == FeedbackSensorType::ABS;
   double rotations = 0.0;
-  if (wpi::RobotBase::IsSimulation() && m_simSupplier) {
-    // ThriftyLib's simulation does not move the external encoders with the mechanism.
-    rotations = m_simSupplier->GetMechanismPosition().value() * MechanismToExternalEncoderRatio();
-  } else if (m_canEncoder) {
+  if (m_canEncoder) {
     rotations = m_canEncoder->Status().GetPositionAbs();
+  } else if (m_externalEncoderSim) {
+    // ThriftyLib's Nova simulation does not move its data port encoders with the mechanism.
+    rotations = m_externalEncoderSim->GetPosition();
   } else if (absolute) {
     rotations = m_nova->Status().GetAbsPosition();
   } else {
     rotations = m_nova->Status().GetQuadPosition();
   }
-  // An absolute encoder reports angles within one rotation, below its discontinuity point.
-  if (absolute) {
-    const double dp = m_absoluteEncoderDiscontinuityPoint.value();
-    rotations = wpi::math::InputModulus(rotations, dp - 1.0, dp);
-  }
+  // An absolute encoder reports angles in the continuous wrapping range, or [0, 1) rotations.
+  if (absolute)
+    rotations = wpi::math::InputModulus(rotations,
+                                        m_config->GetWrappingMin().value_or(0_tr).value(),
+                                        m_config->GetWrappingMax().value_or(1_tr).value());
   return wpi::units::turn_t{rotations};
 }
 
 std::optional<wpi::units::turns_per_second_t> NovaWrapper::GetExternalEncoderSensorVelocity() {
   if (!m_dataPortEncoder && !m_canEncoder) return std::nullopt;
-  if (wpi::RobotBase::IsSimulation() && m_simSupplier)
-    return m_simSupplier->GetMechanismVelocity() * MechanismToExternalEncoderRatio();
   if (m_canEncoder) return wpi::units::turns_per_second_t{m_canEncoder->Status().GetVelocity()};
+  // ThriftyLib's Nova simulation does not move its data port encoders with the mechanism.
+  if (m_externalEncoderSim)
+    return wpi::units::turns_per_second_t{m_externalEncoderSim->GetVelocity()};
   // The absolute encoder's velocity reads 0 until NovaConfig::AbsoluteFramePeriod enables its
   // frame.
   return wpi::units::turns_per_second_t{m_dataPortEncoder == FeedbackSensorType::ABS
@@ -435,31 +633,23 @@ void NovaWrapper::SynchronizeRelativeEncoder() {
 
 void NovaWrapper::SetDutyCycle(double dc) {
   m_nova->SetThrottle(dc);
-  if (m_simSupplier) {
-    m_simDutyCycle = std::clamp(dc, -1.0, 1.0);
-    m_simSupplier->SetMechanismStatorDutyCycle(m_simDutyCycle);
-  }
+  if (m_simSupplier) m_simSupplier->SetMechanismStatorDutyCycle(dc);
   if (dc == 0.0) {
     for (auto* f : m_looseFollowers) f->SetDutyCycle(dc);
   }
 }
 
 double NovaWrapper::GetDutyCycle() {
-  return m_simSupplier ? m_simDutyCycle : m_nova->Status().GetAppliedPower();
+  return m_novaSim ? m_novaSim->GetDutyCycle() : m_nova->Status().GetAppliedPower();
 }
 
 void NovaWrapper::SetVoltage(wpi::units::volt_t voltage) {
   m_nova->SetVoltage(voltage);
-  if (m_simSupplier) {
-    // The Nova cannot apply more than its supply voltage.
-    const auto supplyVoltage = m_simSupplier->GetMechanismSupplyVoltage();
-    m_simDutyCycle = std::clamp(voltage.value() / supplyVoltage.value(), -1.0, 1.0);
-    m_simSupplier->SetMechanismStatorVoltage(supplyVoltage * m_simDutyCycle);
-  }
+  if (m_simSupplier) m_simSupplier->SetMechanismStatorVoltage(voltage);
 }
 
 wpi::units::volt_t NovaWrapper::GetVoltage() {
-  if (m_simSupplier) return m_simSupplier->GetMechanismSupplyVoltage() * m_simDutyCycle;
+  if (m_novaSim) return m_novaSim->GetMechanismSupplyVoltage() * m_novaSim->GetDutyCycle();
   return wpi::units::volt_t{m_nova->Status().GetAppliedVoltage()};
 }
 
@@ -469,6 +659,16 @@ void NovaWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointVelocity.reset();
   m_setpointFeedforwardForce.reset();
   m_setpointPosition = angle;
+  if (m_closedLoopOnNova) {
+    // In mechanism rotations of the Nova's feedback sensor. The Nova keeps the mechanism within its
+    // soft limits, and wraps continuously, itself.
+    const double target = angle.value();
+    const auto request = (m_config->HasTrapezoidProfile() ? thrifty::MotorControl::MotionProfile(target)
+                                                          : thrifty::MotorControl::VoltagePosition(target))
+                             .WithSlot(m_novaSlot);
+    m_nova->Control(request);
+    if (m_novaSim) m_novaSim->SetControlRequest(request);
+  }
   ForwardPositionToFollowers(angle);
 }
 
@@ -480,6 +680,12 @@ void NovaWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
+  if (m_closedLoopOnNova) {
+    const auto request =
+        thrifty::MotorControl::VoltageVelocity(velocity.value()).WithSlot(m_novaSlot);
+    m_nova->Control(request);
+    if (m_novaSim) m_novaSim->SetControlRequest(request);
+  }
   ForwardVelocityToFollowers(velocity);
 }
 
@@ -488,6 +694,13 @@ void NovaWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce = feedforwardForce;
+  if (m_closedLoopOnNova) {
+    const auto request = thrifty::MotorControl::VoltageVelocity(velocity.value())
+                             .WithFeedForward(m_config->ConvertToVoltage(m_motor, feedforwardForce).value())
+                             .WithSlot(m_novaSlot);
+    m_nova->Control(request);
+    if (m_novaSim) m_novaSim->SetControlRequest(request);
+  }
   for (auto* f : m_looseFollowers) f->SetVelocity(velocity, feedforwardForce);
 }
 
@@ -628,6 +841,18 @@ void NovaWrapper::ApplyFeedback(double kP, double kI, double kD) {
     m_pid->SetI(kI);
     m_pid->SetD(kD);
   }
+  if (m_closedLoopOnNova) {
+    const double novaKp = kP / m_rotationsPerGainUnit;
+    const double novaKi = kI / m_rotationsPerGainUnit;
+    const double novaKd = kD / m_rotationsPerGainUnit;
+    if (m_novaSlot == thrifty::MotorControl::Slot::SLOT1) {
+      m_nova->Configure(thrifty::NovaConfig::Pid1::P(novaKp), thrifty::NovaConfig::Pid1::I(novaKi),
+                        thrifty::NovaConfig::Pid1::D(novaKd));
+    } else {
+      m_nova->Configure(thrifty::NovaConfig::Pid0::P(novaKp), thrifty::NovaConfig::Pid0::I(novaKi),
+                        thrifty::NovaConfig::Pid0::D(novaKd));
+    }
+  }
 }
 
 void NovaWrapper::SetKp(double kP) {
@@ -654,22 +879,30 @@ void NovaWrapper::SetFeedback(double kP, double kI, double kD) {
 }
 
 void NovaWrapper::SetKs(double kS) {
-  UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kS = kS; });
+  UpdateConfigFeedforward(
+      *m_config, m_slot, [&](NativeFeedforward& v) { v.kS = kS;; },
+      m_closedLoopOnNova ? m_nova : nullptr, m_novaSlot == thrifty::MotorControl::Slot::SLOT1);
   for (auto* f : m_looseFollowers) f->SetKs(kS);
 }
 
 void NovaWrapper::SetKv(double kV) {
-  UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kV = kV; });
+  UpdateConfigFeedforward(
+      *m_config, m_slot, [&](NativeFeedforward& v) { v.kV = kV;; },
+      m_closedLoopOnNova ? m_nova : nullptr, m_novaSlot == thrifty::MotorControl::Slot::SLOT1);
   for (auto* f : m_looseFollowers) f->SetKv(kV);
 }
 
 void NovaWrapper::SetKa(double kA) {
-  UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kA = kA; });
+  UpdateConfigFeedforward(
+      *m_config, m_slot, [&](NativeFeedforward& v) { v.kA = kA;; },
+      m_closedLoopOnNova ? m_nova : nullptr, m_novaSlot == thrifty::MotorControl::Slot::SLOT1);
   for (auto* f : m_looseFollowers) f->SetKa(kA);
 }
 
 void NovaWrapper::SetKg(double kG) {
-  UpdateConfigFeedforward(*m_config, m_slot, [&](NativeFeedforward& v) { v.kG = kG; });
+  UpdateConfigFeedforward(
+      *m_config, m_slot, [&](NativeFeedforward& v) { v.kG = kG;; },
+      m_closedLoopOnNova ? m_nova : nullptr, m_novaSlot == thrifty::MotorControl::Slot::SLOT1);
   for (auto* f : m_looseFollowers) f->SetKg(kG);
 }
 
@@ -679,7 +912,7 @@ void NovaWrapper::SetFeedforward(double kS, double kV, double kA, double kG) {
     v.kV = kV;
     v.kA = kA;
     v.kG = kG;
-  });
+  }, m_closedLoopOnNova ? m_nova : nullptr, m_novaSlot == thrifty::MotorControl::Slot::SLOT1);
   for (auto* f : m_looseFollowers) f->SetFeedforward(kS, kV, kA, kG);
 }
 
@@ -711,21 +944,31 @@ void NovaWrapper::SetOpenLoopRampRate(wpi::units::second_t r) {
 
 void NovaWrapper::SetMechanismUpperLimit(wpi::units::turn_t upper) {
   if (auto lower = m_config->GetMechanismLowerLimit()) m_config->WithMechanismLimits(*lower, upper);
+  if (auto upperLimit = m_config->GetMechanismUpperLimit(),
+      lowerLimit = m_config->GetMechanismLowerLimit();
+      upperLimit && lowerLimit)
+    m_nova->Configure(thrifty::NovaConfig::SoftLimits(upperLimit->value(), lowerLimit->value()));
   for (auto* f : m_looseFollowers) f->SetMechanismUpperLimit(upper);
 }
 
 void NovaWrapper::SetMechanismLowerLimit(wpi::units::turn_t lower) {
   if (auto upper = m_config->GetMechanismUpperLimit()) m_config->WithMechanismLimits(lower, *upper);
+  if (auto upperLimit = m_config->GetMechanismUpperLimit(),
+      lowerLimit = m_config->GetMechanismLowerLimit();
+      upperLimit && lowerLimit)
+    m_nova->Configure(thrifty::NovaConfig::SoftLimits(upperLimit->value(), lowerLimit->value()));
   for (auto* f : m_looseFollowers) f->SetMechanismLowerLimit(lower);
 }
 
 void NovaWrapper::SetMechanismLimits(wpi::units::turn_t lower, wpi::units::turn_t upper) {
   m_config->WithMechanismLimits(lower, upper);
+  m_nova->Configure(thrifty::NovaConfig::SoftLimits(upper.value(), lower.value()));
   for (auto* f : m_looseFollowers) f->SetMechanismLimits(lower, upper);
 }
 
 void NovaWrapper::SetMechanismLimitsEnabled(bool enabled) {
-  // The closed loop controller on the SystemCore enforces the mechanism limits.
+  // The mechanism limits are the Nova's soft limits.
+  m_nova->Configure(thrifty::NovaConfig::SoftLimitEnable(enabled));
   for (auto* f : m_looseFollowers) f->SetMechanismLimitsEnabled(enabled);
 }
 
@@ -733,6 +976,10 @@ void NovaWrapper::SetMeasurementUpperLimit(wpi::units::meter_t upper) {
   auto lowerAngle = m_config->GetMechanismLowerLimit();
   if (!m_config->GetMechanismCircumference() || !lowerAngle) return;
   m_config->WithMeasurementLimits(m_config->ConvertFromMechanism(*lowerAngle), upper);
+  if (auto upperLimit = m_config->GetMechanismUpperLimit(),
+      lowerLimit = m_config->GetMechanismLowerLimit();
+      upperLimit && lowerLimit)
+    m_nova->Configure(thrifty::NovaConfig::SoftLimits(upperLimit->value(), lowerLimit->value()));
   for (auto* f : m_looseFollowers) f->SetMeasurementUpperLimit(upper);
 }
 
@@ -740,6 +987,10 @@ void NovaWrapper::SetMeasurementLowerLimit(wpi::units::meter_t lower) {
   auto upperAngle = m_config->GetMechanismUpperLimit();
   if (!m_config->GetMechanismCircumference() || !upperAngle) return;
   m_config->WithMeasurementLimits(lower, m_config->ConvertFromMechanism(*upperAngle));
+  if (auto upperLimit = m_config->GetMechanismUpperLimit(),
+      lowerLimit = m_config->GetMechanismLowerLimit();
+      upperLimit && lowerLimit)
+    m_nova->Configure(thrifty::NovaConfig::SoftLimits(upperLimit->value(), lowerLimit->value()));
   for (auto* f : m_looseFollowers) f->SetMeasurementLowerLimit(lower);
 }
 
@@ -751,6 +1002,23 @@ void NovaWrapper::SetMotionProfileMaxVelocity(wpi::units::turns_per_second_t vel
     } else if (auto acc = m_config->GetTrapMaxAccelTurns()) {
       m_config->WithTrapezoidProfile(vel, *acc);
     }
+  }
+  if (m_closedLoopOnNova) {
+    // The constraints are in the closed loop's units, per meter for a linear one.
+    const double maxVelocity =
+        (m_config->GetTrapMaxVelocityTurns() ? m_config->GetTrapMaxVelocityTurns()->value()
+         : m_config->GetTrapMaxVelocityLinear() ? m_config->GetTrapMaxVelocityLinear()->value()
+                                                : 0.0) *
+        (m_config->GetTrapMaxVelocityTurns() ? 1.0 : m_rotationsPerGainUnit);
+    const double maxAcceleration =
+        (m_config->GetTrapMaxAccelTurns() ? m_config->GetTrapMaxAccelTurns()->value()
+         : m_config->GetTrapMaxAccelLinear() ? m_config->GetTrapMaxAccelLinear()->value()
+                                             : 0.0) *
+        (m_config->GetTrapMaxAccelTurns() ? 1.0 : m_rotationsPerGainUnit);
+    m_nova->Configure(thrifty::NovaConfig::Mp0::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp0::MaxAccel(maxAcceleration),
+                      thrifty::NovaConfig::Mp1::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp1::MaxAccel(maxAcceleration));
   }
   for (auto* f : m_looseFollowers) f->SetMotionProfileMaxVelocity(vel);
 }
@@ -764,6 +1032,23 @@ void NovaWrapper::SetMotionProfileMaxVelocity(wpi::units::meters_per_second_t ve
     } else if (auto acc = m_config->GetTrapMaxAccelTurns()) {
       m_config->WithTrapezoidProfile(mechanismVelocity, *acc);
     }
+  }
+  if (m_closedLoopOnNova) {
+    // The constraints are in the closed loop's units, per meter for a linear one.
+    const double maxVelocity =
+        (m_config->GetTrapMaxVelocityTurns() ? m_config->GetTrapMaxVelocityTurns()->value()
+         : m_config->GetTrapMaxVelocityLinear() ? m_config->GetTrapMaxVelocityLinear()->value()
+                                                : 0.0) *
+        (m_config->GetTrapMaxVelocityTurns() ? 1.0 : m_rotationsPerGainUnit);
+    const double maxAcceleration =
+        (m_config->GetTrapMaxAccelTurns() ? m_config->GetTrapMaxAccelTurns()->value()
+         : m_config->GetTrapMaxAccelLinear() ? m_config->GetTrapMaxAccelLinear()->value()
+                                             : 0.0) *
+        (m_config->GetTrapMaxAccelTurns() ? 1.0 : m_rotationsPerGainUnit);
+    m_nova->Configure(thrifty::NovaConfig::Mp0::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp0::MaxAccel(maxAcceleration),
+                      thrifty::NovaConfig::Mp1::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp1::MaxAccel(maxAcceleration));
   }
   for (auto* f : m_looseFollowers) f->SetMotionProfileMaxVelocity(vel);
 }
@@ -786,6 +1071,23 @@ void NovaWrapper::SetMotionProfileMaxAcceleration(wpi::units::turns_per_second_s
   } else if (auto vel = m_config->GetTrapMaxVelocityTurns()) {
     m_config->WithTrapezoidProfile(*vel, acc);
   }
+  if (m_closedLoopOnNova) {
+    // The constraints are in the closed loop's units, per meter for a linear one.
+    const double maxVelocity =
+        (m_config->GetTrapMaxVelocityTurns() ? m_config->GetTrapMaxVelocityTurns()->value()
+         : m_config->GetTrapMaxVelocityLinear() ? m_config->GetTrapMaxVelocityLinear()->value()
+                                                : 0.0) *
+        (m_config->GetTrapMaxVelocityTurns() ? 1.0 : m_rotationsPerGainUnit);
+    const double maxAcceleration =
+        (m_config->GetTrapMaxAccelTurns() ? m_config->GetTrapMaxAccelTurns()->value()
+         : m_config->GetTrapMaxAccelLinear() ? m_config->GetTrapMaxAccelLinear()->value()
+                                             : 0.0) *
+        (m_config->GetTrapMaxAccelTurns() ? 1.0 : m_rotationsPerGainUnit);
+    m_nova->Configure(thrifty::NovaConfig::Mp0::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp0::MaxAccel(maxAcceleration),
+                      thrifty::NovaConfig::Mp1::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp1::MaxAccel(maxAcceleration));
+  }
   for (auto* f : m_looseFollowers) f->SetMotionProfileMaxAcceleration(acc);
 }
 
@@ -805,6 +1107,23 @@ void NovaWrapper::SetMotionProfileMaxAcceleration(wpi::units::meters_per_second_
     m_config->WithLinearTrapezoidProfile(*m_config->GetTrapMaxVelocityLinear(), acc);
   } else if (auto vel = m_config->GetTrapMaxVelocityTurns()) {
     m_config->WithTrapezoidProfile(*vel, mechanismAcceleration);
+  }
+  if (m_closedLoopOnNova) {
+    // The constraints are in the closed loop's units, per meter for a linear one.
+    const double maxVelocity =
+        (m_config->GetTrapMaxVelocityTurns() ? m_config->GetTrapMaxVelocityTurns()->value()
+         : m_config->GetTrapMaxVelocityLinear() ? m_config->GetTrapMaxVelocityLinear()->value()
+                                                : 0.0) *
+        (m_config->GetTrapMaxVelocityTurns() ? 1.0 : m_rotationsPerGainUnit);
+    const double maxAcceleration =
+        (m_config->GetTrapMaxAccelTurns() ? m_config->GetTrapMaxAccelTurns()->value()
+         : m_config->GetTrapMaxAccelLinear() ? m_config->GetTrapMaxAccelLinear()->value()
+                                             : 0.0) *
+        (m_config->GetTrapMaxAccelTurns() ? 1.0 : m_rotationsPerGainUnit);
+    m_nova->Configure(thrifty::NovaConfig::Mp0::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp0::MaxAccel(maxAcceleration),
+                      thrifty::NovaConfig::Mp1::MaxVel(maxVelocity),
+                      thrifty::NovaConfig::Mp1::MaxAccel(maxAcceleration));
   }
   for (auto* f : m_looseFollowers) f->SetMotionProfileMaxAcceleration(acc);
 }
@@ -839,6 +1158,9 @@ void NovaWrapper::SetExponentialProfile(std::optional<double> kV, std::optional<
 
 void NovaWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
   m_slot = slot;
+  // SLOT_2 and SLOT_3 have no gains on the Nova; ApplyConfig rejects any.
+  m_novaSlot = slot == Slot::SLOT_1 ? thrifty::MotorControl::Slot::SLOT1
+                                    : thrifty::MotorControl::Slot::SLOT0;
   LoadClosedLoopController(*m_config);
   ConfigureSoftwarePID(*m_config);
   for (auto* f : m_looseFollowers) f->SetClosedLoopSlot(slot);
@@ -846,6 +1168,10 @@ void NovaWrapper::SetClosedLoopSlot(ClosedLoopControllerSlot slot) {
 
 void NovaWrapper::SetMechanismGearing(const gearing::MechanismGearing& gearing) {
   SmartMotorController::SetMechanismGearing(gearing);
+  if (m_feedbackSensor == FeedbackSensorType::INTERNAL) {
+    m_mechanismToFeedbackSensorRatio = MechanismToRotorRatio();
+    m_nova->Configure(thrifty::NovaConfig::SensorToMechanismRatio(m_mechanismToFeedbackSensorRatio));
+  }
   if (wpi::RobotBase::IsSimulation()) {
     // The simulated motor's reduction comes from the gearing.
     const auto position = m_simSupplier ? m_simSupplier->GetMechanismPosition() : wpi::units::turn_t{0.0};

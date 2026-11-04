@@ -5,8 +5,10 @@ robot project means updating WPILib and the vendor libraries, installing a new Y
 changing imports for the package split, and fixing a handful of renamed APIs. Each step is
 covered below, with a [checklist](#checklist) at the end.
 
-Already on YAMS 2027 v2026.10.09? See
-[Updating from v2026.10.09 to v2026.10.15](#updating-from-v20261009-to-v20261015).
+Already on YAMS 2027? See
+[Updating from v2026.10.09 to v2026.10.15](#updating-from-v20261009-to-v20261015),
+[Updating from v2026.10.15 to v2026.11.03](#updating-from-v20261015-to-v20261103) and
+[Updating from v2026.11.03](#updating-from-v20261103).
 
 ## WPILib 2027
 
@@ -140,6 +142,8 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `SwerveDrive.getGyroAngle()`, `SwerveDriveConfig.getGyroAngle()` (Java) | `getGyroRotation3d()` |
 | `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withGyro(Supplier<Rotation3d>)`, for example `withGyro(gyro::getRotation3d)` |
 | `isNear(...)` Trigger factory (Java) | `near(...)`, see below |
+| `withExternalEncoderDiscontinuityPoint(...)` | `withWrapping(min, max)`, see [Wrapping](#wrapping) |
+| `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 
 New alongside the renames:
 
@@ -255,6 +259,8 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
    Triggers.
 7. If you set up motor controller telemetry yourself, call `setupLiveTuning()` after
    `setupTelemetry(...)` to get the "Live Tuning" command.
+8. Replace `withExternalEncoderDiscontinuityPoint(...)` with `withWrapping(...)`, or
+   `withContinuousWrapping(...)` where the closed loop should take the shortest path.
 
 ## Updating from v2026.10.09 to v2026.10.15
 
@@ -298,7 +304,7 @@ reinstall it from `cdn.yassrobotics.com`).
   module speed desaturation, the coupling ratio, feedforward forces and the default velocity
   deadband.
 
-## Updating from v2026.10.15
+## Updating from v2026.10.15 to v2026.11.03
 
 ### Changes that can need code changes
 
@@ -354,6 +360,67 @@ reinstall it from `cdn.yassrobotics.com`).
 - `DifferentialMechanism.set(...)` mixes its two outputs correctly.
 - C++ swerve fixes that Java already had, and C++ swerve azimuth live tuning.
 - The vendordep JSONs now require the matching WPILib command library (`command2` or `command3`).
+
+## Updating from v2026.11.03
+
+### Changes that can need code changes
+
+- **Discontinuity points are replaced by wrapping.** `withExternalEncoderDiscontinuityPoint(...)`
+  is removed; see [Wrapping](#wrapping).
+- **The Thrifty Nova runs its own closed loop.** A PID, with or without a trapezoidal position
+  profile, now runs on the Nova. An LQR, an exponential profile and a velocity trapezoidal profile
+  still run on the SystemCore, and accept every option as before. When the Nova runs the closed
+  loop:
+  - A feedforward needs a trapezoidal position profile (`withTrapezoidalProfile(...)`), since the
+    Nova applies its feedforward in its motion profile, which is for position only; without one the
+    config is rejected. For a feedforward under velocity control, use a velocity trapezoidal profile,
+    which runs on the SystemCore.
+  - Only closed loop slots `SLOT_0` and `SLOT_1` exist.
+  - The closed loop tolerance is the slot's allowable error.
+  - Mechanism limits are the Nova's soft limits, and need both an upper and a lower limit.
+  - `withTemperatureCutoff`, `withClosedLoopControllerMaximumVoltage`,
+    `withFeedbackSynchronizationThreshold` and `withClosedLoopControlPeriod` are rejected, since
+    only the SystemCore's closed loop applies them. They still work when the SystemCore runs it.
+  - An absolute encoder closing the Nova's loop reads [0, 1) rotations, so its wrapping must be
+    [0, 1).
+- **REVLib 2027.0.0-alpha-9 and ThriftyLib 2027.0.0-alpha-6.** Update the vendordeps. A SPARK wraps
+  its position over the mechanism's continuous wrapping range with alpha-9's input range, for
+  MAXMotion too.
+
+### Wrapping
+
+`withWrapping(min, max)` sets the range an absolute external encoder reads, such as
+[-0.5, 0.5) or [0, 1) rotations, without changing the closed loop. `withContinuousWrapping(min,
+max)` sets the same range and also makes the closed loop take the shortest path to a setpoint,
+which can be the other way round. Use `withWrapping` on an arm whose encoder must read across zero,
+and `withContinuousWrapping` on a swerve azimuth or turret that can turn all the way round.
+
+```java
+// Before
+.withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
+
+// After: the encoder reads [-0.5, 0.5) rotations
+.withWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+```
+
+- The range is one rotation, and an absolute encoder reads it only within what its vendor accepts;
+  anything else is rejected with a `SmartMotorControllerConfigurationException`:
+  - CANcoder and CANdi PWM: a maximum from 0 to 1 rotation (their `AbsoluteSensorDiscontinuityPoint`).
+  - SPARK absolute encoder: a range from [-1, 0) to [0, 1) (its range offset, the middle of the range).
+  - SPARK detached encoder: [-0.5, 0.5) or [0, 1).
+  - Thrifty Nova: [0, 1) when the Nova closes its loop on the encoder.
+- Without wrapping, a SPARK or Nova absolute encoder reads [0, 1), and a CANcoder or CANdi keeps its
+  own range.
+- Continuous wrapping and soft limits cannot be used together; wrapping and soft limits can.
+- `getContinuousWrapping()` and `getContinuousWrappingMin()` are now `getWrappingMax()` and
+  `getWrappingMin()`, and `isWrappingContinuous()` says whether the closed loop wraps. C++ has
+  `WithWrapping`, `GetWrappingMax`, `GetWrappingMin` and `IsWrappingContinuous`.
+
+### Fixes
+
+- **A mechanism starting at the edge of its continuous wrapping range no longer runs away** under a
+  closed loop on the SystemCore, such as one at 0 with [0, 1) wrapping.
+- A simulated CANdi reports its PWM position in the wrapping range, as a real CANdi does.
 
 ## Why this split
 

@@ -56,7 +56,9 @@ public class CoralArm implements Mechanism {
         .withExternalEncoder(motor.getAbsoluteEncoder())
         .withUseExternalFeedbackEncoder(false)
         .withExternalEncoderZeroOffset(kAbsoluteEncoderOffset)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
+        // The encoder reads the wrapping range, [-180, 180) degrees, which the arm's travel stays
+        // within. The closed loop does not wrap, so it never takes the arm the other way round.
+        .withWrapping(Rotations.of(-0.5), Rotations.of(0.5))
         .withSimStartingPosition(kStartingAngle)
         .withMomentOfInertia(kLength, kMass)
         .withTelemetry("CoralArmMotor", TelemetryVerbosity.HIGH);

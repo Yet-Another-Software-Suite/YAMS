@@ -443,8 +443,6 @@ class TalonFXSWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_startingPositionExternalEncoderAlert;
   /** Shown when a zero offset is set without an external encoder. */
   std::optional<wpi::util::Alert> m_zeroOffsetNoExternalEncoderAlert;
-  /** Shown when a discontinuity point is set without an external encoder. */
-  std::optional<wpi::util::Alert> m_discontinuityPointNoExternalEncoderAlert;
 
   /** Motor arrangement of a recognised brushless motor; throws std::invalid_argument otherwise. */
   static MotorArrangement ArrangementForMotor(ctre::phoenix6::hardware::TalonFXS* talon,

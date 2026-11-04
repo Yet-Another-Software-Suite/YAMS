@@ -18,6 +18,7 @@ import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -26,6 +27,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.canEncoder.CanEncoder;
 import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -239,6 +241,11 @@ public class SwerveDriveTest {
           case Nova nova -> nova.close();
           default -> {}
         }
+        smc.getConfig().getExternalEncoder().ifPresent(encoder -> {
+          if (encoder instanceof CanEncoder canEncoder) {
+            canEncoder.close();
+          }
+        });
       }
       DeviceCreator.silence(pigeon);
       pigeon.close();
@@ -277,7 +284,7 @@ public class SwerveDriveTest {
               new TalonFXSWrapper(DeviceCreator.createTalonFXS(), dcMotor(motor), config);
           case TALON_FX ->
               new TalonFXWrapper(DeviceCreator.createTalonFX(), dcMotor(motor), config);
-          case NOVA -> new NovaWrapper(DeviceCreator.createNova(), dcMotor(motor), config);
+          case NOVA -> new NovaWrapper(DeviceCreator.createNova(), dcMotor(motor), DeviceCreator.withNovaProfile(config, true));
         };
     hardware.motorControllers.add(smc);
     return smc;
@@ -317,6 +324,14 @@ public class SwerveDriveTest {
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
             .withStatorCurrentLimit(Amps.of(40))
             .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
+    if (azimuthMotor == Motor.NOVA) {
+      // A Nova wraps only over [0, 1) rotations of an absolute encoder on the mechanism, here a
+      // Thrifty CAN Encoder on the azimuth.
+      azimuthCfg
+          .withExternalEncoder(DeviceCreator.createCanEncoder())
+          .withUseExternalFeedbackEncoder(true)
+          .withContinuousWrapping(Rotations.of(0), Rotations.of(1));
+    }
     SwerveModuleConfig moduleCfg =
         new SwerveModuleConfig(
                 createMotor(hardware, driveMotor, driveCfg),

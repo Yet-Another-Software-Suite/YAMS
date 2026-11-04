@@ -229,10 +229,10 @@ public class MechanismLimitTest {
         new NovaWrapper(
             DeviceCreator.createNova(),
             DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig)
+            DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig)
                     pivotBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+                .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
   }
 
   private static SmartMotorController makeArmSparkMax(Angle startPos, String label) {
@@ -284,10 +284,10 @@ public class MechanismLimitTest {
         new NovaWrapper(
             DeviceCreator.createNova(),
             DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig)
+            DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig)
                     armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+                .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
   }
 
   private static SmartMotorController makeElevSparkMax(Distance startHeight, String label) {
@@ -339,10 +339,10 @@ public class MechanismLimitTest {
         new NovaWrapper(
             DeviceCreator.createNova(),
             DCMotor.getNEO(1),
-            ((yams.commands2.config.SmartMotorControllerConfig)
+            DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig)
                     elevatorBase().withStartingPosition(startHeight))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
-                .withTelemetry(label, TelemetryVerbosity.HIGH)));
+                .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
   }
 
   // ──────────────────────────────────────────────

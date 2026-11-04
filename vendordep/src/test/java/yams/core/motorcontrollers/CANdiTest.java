@@ -154,7 +154,7 @@ public class CANdiTest {
         cfg.withVendorConfig(vendorConfig(testCase.talonFXS(), testCase.pwm(), candi))
             .withExternalEncoder(candi)
             .withUseExternalFeedbackEncoder(true)
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
     return testCase.zeroOffset().isEquivalent(Rotations.zero())
         ? cfg
         : cfg.withExternalEncoderZeroOffset(testCase.zeroOffset());
@@ -206,9 +206,9 @@ public class CANdiTest {
     assertConfigured(smc, testCase, when, 0.5);
   }
 
-  /** Check that the Talon closes its loop on the CANdi, with the discontinuity point in rotations. */
+  /** Check that the Talon closes its loop on the CANdi, with its AbsoluteSensorDiscontinuityPoint in rotations. */
   private static void assertConfigured(
-      SmartMotorController smc, Case testCase, String when, double expectedDiscontinuityPoint) {
+      SmartMotorController smc, Case testCase, String when, double expectedAbsoluteSensorDiscontinuityPoint) {
     final String name = testCase.name() + " " + when;
     final CANdi candi = (CANdi) smc.getConfig().getExternalEncoder().orElseThrow();
     if (testCase.talonFXS()) {
@@ -251,7 +251,7 @@ public class CANdiTest {
 
     final CANdiConfiguration candiConfig = new CANdiConfiguration();
     DeviceCreator.refreshConfig(() -> candi.getConfigurator().refresh(candiConfig, 1.0));
-    final double discontinuityPoint =
+    final double absoluteSensorDiscontinuityPoint =
         testCase.pwm() == 1
             ? candiConfig.PWM1.AbsoluteSensorDiscontinuityPoint
             : candiConfig.PWM2.AbsoluteSensorDiscontinuityPoint;
@@ -260,7 +260,7 @@ public class CANdiTest {
             ? candiConfig.PWM1.AbsoluteSensorOffset
             : candiConfig.PWM2.AbsoluteSensorOffset;
     assertEquals(
-        expectedDiscontinuityPoint, discontinuityPoint, 1e-9, name + ": CANdi discontinuity point");
+        expectedAbsoluteSensorDiscontinuityPoint, absoluteSensorDiscontinuityPoint, 1e-9, name + ": CANdi AbsoluteSensorDiscontinuityPoint");
     assertEquals(
         testCase.zeroOffset().in(Rotations), zeroOffset, 1e-3, name + ": CANdi zero offset");
   }
@@ -292,9 +292,9 @@ public class CANdiTest {
       assertTrue(smc.applyConfig(smc.getConfig()), testCase.name() + ": applying the config again");
       assertConfigured(smc, testCase, "after applying the config again");
       assertTrue(
-          smc.applyConfig(smc.getConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(1))),
-          testCase.name() + ": applying a 1 rotation discontinuity point");
-      assertConfigured(smc, testCase, "with a 1 rotation discontinuity point", 1);
+          smc.applyConfig(smc.getConfig().withContinuousWrapping(Rotations.of(0), Rotations.of(1))),
+          testCase.name() + ": applying wrapping over [0, 1) rotations");
+      assertConfigured(smc, testCase, "wrapping over [0, 1) rotations", 1);
     } finally {
       closeSmc(smc);
     }

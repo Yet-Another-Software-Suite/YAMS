@@ -5,6 +5,8 @@ package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
@@ -33,6 +35,7 @@ import com.revrobotics.encoder.config.DetachedEncoderConfig;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.thrifty.canEncoder.CanEncoder;
@@ -40,6 +43,7 @@ import com.thrifty.core.Motor.FeedbackSensorType;
 import com.thrifty.nova.Nova;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +51,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.wpilib.command2.CommandScheduler;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
@@ -55,6 +60,7 @@ import org.wpilib.preferences.Preferences;
 import org.wpilib.units.measure.Angle;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.LQRConfig;
@@ -80,9 +86,9 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
  * Nova reads over CAN) or not (a quadrature encoder on a SPARK or Nova).
  *
  * <p>The mechanisms are geared 12:1, so the motor's own encoder turns twelve times per mechanism
- * rotation. A SPARK's onboard position wrapping wraps every rotation of its feedback sensor, so
- * before {@link SparkWrapper} sent the nearest equivalent setpoint itself, a SPARK without an
- * attached encoder could only stop within 15° of a multiple of 30° from its target.
+ * rotation. A SPARK's onboard position wrapping range is in rotations of its feedback sensor, so
+ * {@link SparkWrapper} scales the mechanism's range to it. Wrapping every motor rotation instead, a
+ * SPARK without an attached encoder could only stop within 15° of a multiple of 30° from its target.
  */
 public class ContinuousWrappingTest {
   private static final Angle kTolerance = Degrees.of(5);
@@ -137,6 +143,47 @@ public class ContinuousWrappingTest {
         0.25,
         config.getContinuousWrappingSetpoint(Rotations.of(0.25), Rotations.of(0.0)).in(Rotations),
         1e-9);
+  }
+
+  /**
+   * Wrapping gives an absolute encoder its range without the closed loop controller wrapping, so
+   * it never takes the mechanism the other way round, and it can have soft limits.
+   */
+  @Test
+  void wrappingIsNotContinuous() {
+    final SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withClosedLoopController(8, 0, 0)
+            .withSoftLimits(Degrees.of(-90), Degrees.of(90))
+            .withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    assertEquals(-0.5, config.getWrappingMin().orElseThrow().in(Rotations), 1e-9);
+    assertEquals(0.5, config.getWrappingMax().orElseThrow().in(Rotations), 1e-9);
+    assertFalse(config.isWrappingContinuous());
+    assertFalse(
+        config.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+    // The setpoint is not moved to the nearest equivalent.
+    assertEquals(
+        0.45,
+        config.getContinuousWrappingSetpoint(Rotations.of(0.45), Rotations.of(-0.45)).in(Rotations),
+        1e-9);
+
+    // Continuous wrapping wraps the closed loop controller too; wrapping again stops it.
+    final SmartMotorControllerConfig continuous = wrappingConfig();
+    assertTrue(continuous.isWrappingContinuous());
+    assertTrue(
+        continuous.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+    continuous.withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    assertFalse(
+        continuous.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+
+    // Soft limits and continuous wrapping, in either order, are rejected.
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> wrappingConfig().withSoftLimits(Degrees.of(-90), Degrees.of(90)));
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> new yams.commands2.config.SmartMotorControllerConfig()
+            .withClosedLoopController(8, 0, 0)
+            .withSoftLimits(Degrees.of(-90), Degrees.of(90))
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5)));
   }
 
   @Test
@@ -288,15 +335,20 @@ public class ContinuousWrappingTest {
                           ? withEncoder(cfg, DeviceCreator.createCANcoderFor(talon))
                           : cfg);
                 }));
-        cases.add(
-            new Case(
-                "Nova" + suffix,
-                controller,
-                cfg ->
-                    new NovaWrapper(
-                        DeviceCreator.createNova(),
-                        DCMotor.getNEO(1),
-                        attachedEncoder ? withEncoder(cfg, FeedbackSensorType.ABS) : cfg)));
+        // A Nova running the closed loop wraps only over [0, 1) rotations of an absolute encoder on
+        // the mechanism; the SystemCore wraps any range on any sensor.
+        if (attachedEncoder || systemCore(controller)) {
+          cases.add(
+              new Case(
+                  "Nova" + suffix,
+                  controller,
+                  cfg ->
+                      new NovaWrapper(
+                          DeviceCreator.createNova(),
+                          DCMotor.getNEO(1),
+                          DeviceCreator.withNovaProfile(
+                              attachedEncoder ? novaWrapping(withEncoder(cfg, FeedbackSensorType.ABS)) : cfg, false))));
+        }
       }
       // A Through Bore Encoder on either SPARK, on the mechanism: its quadrature output, which is
       // not
@@ -333,16 +385,18 @@ public class ContinuousWrappingTest {
       }
       // A Nova with a quadrature encoder on its data port, which is not absolute, or a Thrifty CAN
       // Encoder.
-      cases.add(
-          new Case(
-              "Nova " + controller + " with quadrature encoder",
-              controller,
-              cfg ->
-                  new NovaWrapper(
-                      DeviceCreator.createNova(),
-                      DCMotor.getNEO(1),
-                      cfg.withExternalEncoder(FeedbackSensorType.QUAD)
-                          .withUseExternalFeedbackEncoder(true))));
+      if (systemCore(controller)) {
+        cases.add(
+            new Case(
+                "Nova " + controller + " with quadrature encoder",
+                controller,
+                cfg ->
+                    new NovaWrapper(
+                        DeviceCreator.createNova(),
+                        DCMotor.getNEO(1),
+                        DeviceCreator.withNovaProfile(cfg.withExternalEncoder(FeedbackSensorType.QUAD)
+                            .withUseExternalFeedbackEncoder(true), false))));
+      }
       cases.add(
           new Case(
               "Nova " + controller + " with CAN encoder",
@@ -351,7 +405,7 @@ public class ContinuousWrappingTest {
                   new NovaWrapper(
                       DeviceCreator.createNova(),
                       DCMotor.getNEO(1),
-                      withEncoder(cfg, DeviceCreator.createCanEncoder()))));
+                      DeviceCreator.withNovaProfile(novaWrapping(withEncoder(cfg, DeviceCreator.createCanEncoder())), false))));
       // A CANdi on either Talon, its encoder wired to PWM1.
       final String suffix = " " + controller + " with attached CANdi";
       cases.add(
@@ -391,12 +445,24 @@ public class ContinuousWrappingTest {
         spark, motor, attachedEncoder ? withEncoder(cfg, spark.getAbsoluteEncoder()) : cfg);
   }
 
+  /** Whether the closed loop controller runs on the SystemCore on a Nova: an exponential profile or an LQR. */
+  private static boolean systemCore(Controller controller) {
+    return controller == Controller.EXPONENTIAL_PROFILE || controller == Controller.LQR;
+  }
+
+  /**
+   * Wrap over [0, 1) rotations of an absolute encoder reporting [0, 1) rotations, the only range a
+   * Nova reads and wraps over itself.
+   */
+  private static SmartMotorControllerConfig novaWrapping(SmartMotorControllerConfig cfg) {
+    return cfg.withContinuousWrapping(Rotations.of(0), Rotations.of(1));
+  }
+
   /** Close the loop on an encoder mounted on the mechanism, 1:1. */
   private static SmartMotorControllerConfig withEncoder(
       SmartMotorControllerConfig cfg, Object encoder) {
     return cfg.withExternalEncoder(encoder)
-        .withUseExternalFeedbackEncoder(true)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+        .withUseExternalFeedbackEncoder(true);
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -465,6 +531,102 @@ public class ContinuousWrappingTest {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }
+  }
+
+  /** How a SPARK's absolute encoder is set up in the wrapping range tests. */
+  private enum SparkEncoder {
+    /** No external encoder: the motor's encoder closes the loop. */
+    NONE,
+    /** The absolute encoder is set, but the motor's encoder still closes the loop. */
+    DEFINED_NOT_USED,
+    /** The absolute encoder, on the mechanism, closes the loop. */
+    USED_FOR_FEEDBACK
+  }
+
+  /**
+   * The SPARK's onboard wrapping range is the mechanism's range in rotations of its feedback sensor:
+   * the motor's encoder turns 12 times per mechanism rotation, an absolute encoder on the mechanism
+   * once.
+   */
+  @ParameterizedTest(name = "{0}")
+  @EnumSource(SparkEncoder.class)
+  void sparkWrapsOverTheMechanismRangeInFeedbackSensorRotations(SparkEncoder encoder)
+      throws InterruptedException {
+    final SparkMax sparkMax = DeviceCreator.createSparkMax();
+    SmartMotorControllerConfig cfg =
+        config("ContinuousWrappingTest SPARK range " + encoder, Controller.PID);
+    if (encoder != SparkEncoder.NONE) {
+      cfg =
+          withEncoder(cfg, sparkMax.getAbsoluteEncoder())
+              .withUseExternalFeedbackEncoder(encoder == SparkEncoder.USED_FOR_FEEDBACK);
+    }
+    final SmartMotorController smc = new SparkWrapper(sparkMax, DCMotor.getNEO(1), cfg);
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) cfg).getSubsystem())
+        .setSMC(smc);
+    try {
+      final double sensorRotationsPerMechanismRotation =
+          encoder == SparkEncoder.USED_FOR_FEEDBACK ? 1 : kGearing.getMechanismToRotorRatio();
+      final var closedLoop = sparkMax.configAccessor.closedLoop;
+      assertTrue(
+          AbsoluteEncoderCases.eventually(closedLoop::getPositionWrappingEnabled),
+          "expected position wrapping enabled on the SPARK");
+      assertSpark(
+          -0.5 * sensorRotationsPerMechanismRotation,
+          closedLoop::getPositionWrappingMinInput,
+          "wrapping min input");
+      assertSpark(
+          0.5 * sensorRotationsPerMechanismRotation,
+          closedLoop::getPositionWrappingMaxInput,
+          "wrapping max input");
+    } finally {
+      closeSmc(smc);
+    }
+  }
+
+  /** Without continuous wrapping, the SPARK's wrapping is turned off, whatever its encoder. */
+  @ParameterizedTest(name = "{0}")
+  @EnumSource(SparkEncoder.class)
+  void sparkDoesNotWrapWithoutContinuousWrapping(SparkEncoder encoder)
+      throws InterruptedException {
+    final SparkMax sparkMax = DeviceCreator.createSparkMax();
+    // Turn wrapping on first, so the test sees YAMS turn it off.
+    sparkMax.configure(
+        new SparkMaxConfig().apply(new ClosedLoopConfig().positionWrappingEnabled(true)),
+        ResetMode.kNoResetSafeParameters,
+        PersistMode.kNoPersistParameters);
+    SmartMotorControllerConfig cfg =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withSubsystem(new SmartMotorControllerTestSubsystem())
+            .withGearing(kGearing)
+            .withControlMode(ControlMode.CLOSED_LOOP)
+            .withClosedLoopController(8, 0, 0)
+            .withTelemetry(
+                "ContinuousWrappingTest SPARK no wrapping " + encoder, TelemetryVerbosity.LOW);
+    if (encoder != SparkEncoder.NONE) {
+      cfg =
+          withEncoder(cfg, sparkMax.getAbsoluteEncoder())
+              .withUseExternalFeedbackEncoder(encoder == SparkEncoder.USED_FOR_FEEDBACK);
+    }
+    final SmartMotorController smc = new SparkWrapper(sparkMax, DCMotor.getNEO(1), cfg);
+    ((SmartMotorControllerTestSubsystem)
+            ((yams.commands2.config.SmartMotorControllerConfig) cfg).getSubsystem())
+        .setSMC(smc);
+    try {
+      assertTrue(
+          AbsoluteEncoderCases.eventually(
+              () -> !sparkMax.configAccessor.closedLoop.getPositionWrappingEnabled()),
+          "expected position wrapping disabled on the SPARK");
+    } finally {
+      closeSmc(smc);
+    }
+  }
+
+  private static void assertSpark(double expected, DoubleSupplier actual, String what)
+      throws InterruptedException {
+    assertTrue(
+        AbsoluteEncoderCases.eventually(() -> Math.abs(actual.getAsDouble() - expected) <= 1e-4),
+        what + ": expected " + expected + " on the SPARK but was " + actual.getAsDouble());
   }
 
   /** Difference between two angles, wrapped into [-180°, 180°). */

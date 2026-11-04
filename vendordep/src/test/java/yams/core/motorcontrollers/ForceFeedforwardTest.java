@@ -143,10 +143,10 @@ public class ForceFeedforwardTest {
             new NovaWrapper(
                 DeviceCreator.createNova(),
                 DCMotor.getNEO(1),
-                ((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
+                DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest Nova(" + offset + ")", TelemetryVerbosity.LOW))));
+                        "ForceFeedforwardTest Nova(" + offset + ")", TelemetryVerbosity.LOW), true))));
   }
 
   private static void closeSmc(SmartMotorController smc) {

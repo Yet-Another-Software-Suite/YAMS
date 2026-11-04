@@ -211,13 +211,6 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
   m_feedforwardNotAppliedAlert.emplace("YAMS", AlertId("FeedforwardNotApplied"),
                                        GetName() + " feedforward gains were not applied.",
                                        wpi::util::Alert::Level::HIGH);
-  m_externalEncoderGearingDiscontinuityAlert.emplace(
-      "YAMS", AlertId("ExternalEncoderGearingDiscontinuity"),
-      GetName() +
-          " external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; "
-          "the discontinuity point will NOT be moved by the gearing, wrapping will occur "
-          "non-uniformly",
-      wpi::util::Alert::Level::HIGH);
 
   UpdateFeedbackSensorRatio(*m_config);
   SetupSimulation();
@@ -235,8 +228,6 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
 SparkWrapper::~SparkWrapper() {
   Close();
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
-  if (m_externalEncoderGearingDiscontinuityAlert)
-    m_externalEncoderGearingDiscontinuityAlert->Set(false);
 }
 
 // ---- SPARK configuration helpers ---------------------------------------------
@@ -477,7 +468,6 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_config = const_cast<SmartMotorControllerConfig*>(&config);
   config.ResetValidationCheck();
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
-  m_externalEncoderGearingDiscontinuityAlert->Set(false);
 
   if (config.GetVendorControlRequest().has_value())
     throw exceptions::SmartMotorControllerConfigurationException(
@@ -589,19 +579,17 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   if (auto start = config.GetStartingPosition(); start)
     m_relEncoder->SetPosition(start->value() * mechToRotorRatio);
 
-  // Position wrapping. REVLib's wrapping has no input range: the SPARK wraps every rotation of its
-  // feedback sensor, which is one mechanism rotation only for an absolute encoder on the
-  // mechanism. Otherwise SetPosition() sends the equivalent setpoint nearest the current position.
-  bool absoluteFeedback = false;
-  if (useExternalEncoder) {
-    if (auto enc = config.GetExternalEncoder(); enc) {
-      absoluteFeedback = std::any_cast<SparkAbsoluteEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::DetachedEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::SplineEncoder*>(&*enc);
-    }
-  }
-  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetContinuousWrapping().has_value() &&
-                                              absoluteFeedback);
+  // Position wrapping. The input range is the wrapping range, but the SPARK wraps only when the
+  // wrapping is continuous. The SPARK's range is in rotations of its feedback sensor, so scale the
+  // mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
+  // gearing turns several times per mechanism rotation.
+  if (config.GetWrappingMax() && config.GetWrappingMin())
+    sparkCfg.closedLoop.PositionWrappingInputRange(
+        config.GetWrappingMin()->value() * m_mechanismToFeedbackSensorRatio,
+        config.GetWrappingMax()->value() * m_mechanismToFeedbackSensorRatio);
+  // Set either way: the SPARK keeps its previous configuration.
+  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetWrappingMax().has_value() &&
+                                              config.IsWrappingContinuous());
 
   ApplyExternalEncoder(config, useExternalEncoder);
 
@@ -723,10 +711,6 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
 
   auto enc = config.GetExternalEncoder();
   if (!enc) {
-    if (config.GetExternalEncoderDiscontinuityPoint().has_value())
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "External encoder discontinuity point is only available for external encoders",
-          "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
     if (config.GetExternalEncoderZeroOffset().has_value())
       throw exceptions::SmartMotorControllerConfigurationException(
           "Zero offset is only available for external encoders",
@@ -747,10 +731,9 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
   const double mechToEncoder = MechanismToExternalEncoderRatio();
   const auto startingPosition = config.GetStartingPosition();
   const auto zeroOffset = config.GetExternalEncoderZeroOffset();
-  const auto discontinuityPoint = config.GetExternalEncoderDiscontinuityPoint();
+  const auto wrappingMin = config.GetWrappingMin();
+  const auto wrappingMax = config.GetWrappingMax();
   const auto inverted = config.GetExternalEncoderInverted();
-  const bool hasExternalGearing = config.GetExternalEncoderGearing().has_value();
-  m_absoluteEncoderDiscontinuityPoint = discontinuityPoint.value_or(wpi::units::turn_t{1.0});
   // Zero offsets are in [0, 1) rotations of the encoder.
   const double zeroOffsetRotations =
       zeroOffset ? wpi::math::InputModulus(zeroOffset->value() * mechToEncoder, 0.0, 1.0) : 0.0;
@@ -767,11 +750,18 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
     if (useExternalEncoder) sparkCfg.closedLoop.SetFeedbackSensor(FeedbackSensor::kAbsoluteEncoder);
     m_absEncoderZeroOffset = zeroOffsetRotations;
     if (zeroOffset) sparkCfg.absoluteEncoder.ZeroOffset(zeroOffsetRotations);
-    if (discontinuityPoint) {
-      if (hasExternalGearing) m_externalEncoderGearingDiscontinuityAlert->Set(true);
-      // REVLib's range offset is the middle of the range the encoder reports: 0 for
-      // [-0.5, 0.5) rotations, 0.5 for [0, 1).
-      sparkCfg.absoluteEncoder.RangeOffset(discontinuityPoint->value() - 0.5);
+    // The absolute encoder reads the continuous wrapping range: one rotation, offset by REVLib's
+    // range offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5
+    // for [0, 1).
+    if (wrappingMin && wrappingMax) {
+      const double rangeOffset = (wrappingMin->value() + wrappingMax->value()) / 2.0;
+      if (std::abs(wrappingMax->value() - wrappingMin->value() - 1.0) > 1e-9 ||
+          rangeOffset < -0.5 || rangeOffset > 0.5)
+        throw exceptions::SmartMotorControllerConfigurationException(
+            "SPARK absolute encoder reads one rotation, from [-1, 0) to [0, 1) rotations",
+            "Continuous wrapping could not be applied to the absolute encoder",
+            "WithContinuousWrapping(-0.5_tr, 0.5_tr)");
+      sparkCfg.absoluteEncoder.RangeOffset(rangeOffset);
     }
     if (sim) {
       if (m_maxConfig)
@@ -793,11 +783,6 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
           "Zero offset is only available for absolute encoders",
           "Zero offset could not be applied to the quadrature encoder",
           "WithExternalEncoderZeroOffset");
-    if (discontinuityPoint)
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "Discontinuity point is only available for absolute encoders",
-          "Discontinuity point could not be applied to the quadrature encoder",
-          "WithExternalEncoderDiscontinuityPoint");
     // A SPARK MAX's data port is shared with the absolute encoder; select the alternate encoder.
     if (m_maxConfig) m_maxConfig->alternateEncoder.SetSparkMaxDataPortConfig();
     if (inverted) {
@@ -827,11 +812,15 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
     if (inverted) detachedConfig.Inverted(*inverted);
     m_detachedEncoderZeroOffset = zeroOffsetRotations;
     detachedConfig.ZeroOffset(m_detachedEncoderZeroOffset);
-    if (discontinuityPoint && hasExternalGearing)
-      m_externalEncoderGearingDiscontinuityAlert->Set(true);
-    // The discontinuity point is 0.5 or 1 rotation; a zero-centered angle wraps at half a turn.
-    detachedConfig.ZeroCentered(
-        std::abs(m_absoluteEncoderDiscontinuityPoint.value() - 0.5) < 1e-9);
+    // The detached encoder reads the continuous wrapping range: [0, 1), or [-0.5, 0.5) zero
+    // centered.
+    const bool zeroCentered = wrappingMin && std::abs(wrappingMin->value() + 0.5) < 1e-9;
+    if (wrappingMin && !zeroCentered && std::abs(wrappingMin->value()) > 1e-9)
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "SPARK detached encoder reads [-0.5, 0.5) or [0, 1) rotations",
+          "Continuous wrapping could not be applied to the detached encoder",
+          "WithContinuousWrapping(-0.5_tr, 0.5_tr) or WithContinuousWrapping(0_tr, 1_tr)");
+    detachedConfig.ZeroCentered(zeroCentered);
     m_detachedEncoder->Configure(detachedConfig, rev::ResetMode::kNoResetSafeParameters);
     if (useExternalEncoder)
       sparkCfg.closedLoop.SetFeedbackSensor(FeedbackSensor::kDetachedAbsoluteEncoder,
@@ -937,7 +926,7 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
       Profile::State{GetMechanismPosition(), GetMechanismVelocity()});
   // Wrap the goal against the profile, which is continuous even where the sensor wraps.
   const wpi::units::turn_t goal =
-      m_config->GetContinuousWrapping()
+      m_config->IsWrappingContinuous()
           ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, state.position)
           : *m_setpointPosition;
   // The profile runs in mechanism rotations, like MAXMotion.
@@ -992,10 +981,7 @@ void SparkWrapper::IterateSimulatedArmGravity() {
   }
   const auto ff = GetSlotFeedforward(*m_config, m_slot);
   if (!ff) return;
-  const wpi::units::turn_t setpoint =
-      m_config->GetContinuousWrapping()
-          ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, GetMechanismPosition())
-          : *m_setpointPosition;
+  const wpi::units::turn_t setpoint = *m_setpointPosition;
   // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
   const double gravityVolts = ff->kG * std::cos(wpi::units::radian_t{GetMechanismPosition()}.value());
   UseVelocityGains(false);
@@ -1019,10 +1005,12 @@ std::optional<wpi::units::turn_t> SparkWrapper::GetExternalEncoderSensorPosition
   }
   if (!absoluteRotations) return std::nullopt;
   // REVLib does not wrap a simulated absolute encoder and does not simulate detached encoders:
-  // report simulated angles in the range the encoder reports, below its discontinuity point.
+  // report simulated angles in the range the encoder reports, the continuous wrapping's or [0, 1)
+  // rotations.
   if (wpi::RobotBase::IsSimulation()) {
-    const double dp = m_absoluteEncoderDiscontinuityPoint.value();
-    absoluteRotations = wpi::math::InputModulus(*absoluteRotations, dp - 1.0, dp);
+    absoluteRotations = wpi::math::InputModulus(
+        *absoluteRotations, m_config->GetWrappingMin().value_or(0_tr).value(),
+        m_config->GetWrappingMax().value_or(1_tr).value());
   }
   return wpi::units::turn_t{*absoluteRotations};
 }
@@ -1097,13 +1085,10 @@ void SparkWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointPosition = angle;
   // While simulating MAXMotion, SimIterate() follows the profile to this setpoint instead.
   if (!HasExponentialProfile() && !m_lqr && !SimulatingMaxMotion()) {
-    const wpi::units::turn_t setpoint =
-        m_config->GetContinuousWrapping()
-            ? m_config->GetContinuousWrappingSetpoint(angle, GetMechanismPosition())
-            : angle;
     UseVelocityGains(false);
+    // The SPARK wraps the setpoint over the continuous wrapping range itself.
     ConfigureSpark([&] {
-      return m_sparkPid->SetSetpoint(setpoint.value() * m_mechanismToFeedbackSensorRatio,
+      return m_sparkPid->SetSetpoint(angle.value() * m_mechanismToFeedbackSensorRatio,
                                      m_positionControlType, m_closedLoopSlot);
     });
   }

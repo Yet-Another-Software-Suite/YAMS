@@ -151,7 +151,7 @@ public class LiveTuningTest {
                 "Nova" + suffix,
                 controller,
                 linear,
-                cfg -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), cfg)));
+                cfg -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false))));
       }
     }
     return cases.stream();

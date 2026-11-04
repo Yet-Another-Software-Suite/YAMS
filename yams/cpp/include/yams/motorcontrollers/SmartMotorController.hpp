@@ -79,7 +79,7 @@ class SmartMotorController {
    *
    * @param supplier Shared SimSupplier instance, or nullptr to detach.
    */
-  void SetSimSupplier(std::shared_ptr<SimSupplier> supplier);
+  virtual void SetSimSupplier(std::shared_ptr<SimSupplier> supplier);
 
   /**
    * Get the attached SimSupplier, or nullptr if none is set.

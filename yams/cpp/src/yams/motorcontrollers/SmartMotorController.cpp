@@ -92,7 +92,9 @@ void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
       m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
     if (m_pid) m_pid->Reset();
-    m_lastClosedLoopMechanismPosition.reset();
+    // The motion profile starts from this position, so continuous wrapping keeps the angles the
+    // loop measures next to it, rather than a whole wrapping range away from it.
+    m_lastClosedLoopMechanismPosition = GetMechanismPosition();
     ResetProfileStates();
     if (m_lqr) {
       if (m_config->GetLinearClosedLoopControllerUse()) {
@@ -138,7 +140,7 @@ void SmartMotorController::IterateClosedLoopController() {
   // With continuous wrapping an absolute encoder's angle jumps by a whole wrapping range at the
   // wrapping point; use the equivalent angle nearest the last one so the profile state and the
   // LQR estimate, which carry over from the last loop, do not see the jump.
-  const bool wrapping = cfg.GetContinuousWrapping().has_value();
+  const bool wrapping = cfg.IsWrappingContinuous();
   const wpi::units::turn_t mechanismPosition =
       wrapping && m_lastClosedLoopMechanismPosition
           ? cfg.GetContinuousWrappingSetpoint(GetMechanismPosition(),
@@ -611,10 +613,14 @@ void SmartMotorController::LoadLooselyCoupledFollowers() {
 
 void SmartMotorController::ConfigureSoftwarePID(const SmartMotorControllerConfig& config) {
   auto tolerance = config.GetClosedLoopTolerance();
-  auto wrapMax = config.GetContinuousWrapping();
-  auto wrapMin = config.GetContinuousWrappingMin();
+  auto wrapMax = config.GetWrappingMax();
+  auto wrapMin = config.GetWrappingMin();
   if (!m_pid) return;
-  if (wrapMax && wrapMin) m_pid->EnableContinuousInput(wrapMin->value(), wrapMax->value());
+  // The PID wraps only when the wrapping is continuous.
+  if (config.IsWrappingContinuous() && wrapMax && wrapMin)
+    m_pid->EnableContinuousInput(wrapMin->value(), wrapMax->value());
+  else
+    m_pid->DisableContinuousInput();
   if (tolerance) {
     m_pid->SetTolerance(config.GetLinearClosedLoopControllerUse()
                             ? config.ConvertFromMechanism(*tolerance).value()

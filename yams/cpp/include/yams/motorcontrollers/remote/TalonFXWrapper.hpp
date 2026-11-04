@@ -424,8 +424,6 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
   /** Shown when the Talon does not take the feedforward gains. */
   std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
-  /** Shown when a discontinuity point is set without an external encoder. */
-  std::optional<wpi::util::Alert> m_discontinuityPointNoExternalEncoderAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;

@@ -37,8 +37,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Every motor controller, for tests that give each one the same closed loop gains in YAMS units and
- * expect the same reaction. The SPARK and Talons close their loops onboard; the Nova's loop runs on
- * the SystemCore.
+ * expect the same reaction. The SPARK, Talons and Nova close their loops onboard; the Nova's runs on
+ * the SystemCore with an LQR, an exponential profile or a velocity profile.
  */
 final class ClosedLoopCases {
   private ClosedLoopCases() {}
@@ -111,9 +111,9 @@ final class ClosedLoopCases {
     new Controller(
         "Nova",
         DCMotor.getNEO(1),
-        4,
+        2,
         false,
-        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, cfg)),
+        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, DeviceCreator.withNovaProfile(cfg, false))),
   };
 
   /** Every motor controller. */
@@ -144,6 +144,14 @@ final class ClosedLoopCases {
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .setSMC(smc);
     return smc;
+  }
+
+  /**
+   * Create the motor controller for velocity control. A Nova applies a feedforward to velocity
+   * control with a velocity profile, which runs on the SystemCore.
+   */
+  static SmartMotorController createForVelocity(Controller controller, SmartMotorControllerConfig cfg) {
+    return create(controller, controller.name().equals("Nova") ? DeviceCreator.withNovaProfile(cfg, true) : cfg);
   }
 
   static void close(SmartMotorController smc) {

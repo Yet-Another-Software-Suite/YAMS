@@ -86,6 +86,10 @@ public class ShooterTest {
     return cfg.withExponentialProfile(Volts.of(12), RPM.of(6000), RPM.per(Second).of(9000));
   }
 
+  private static SmartMotorControllerConfig addVelocityProfile(SmartMotorControllerConfig cfg) {
+    return cfg.withTrapezoidalProfile(RPM.per(Second).of(9000), RPM.per(Second).per(Second).of(90000));
+  }
+
   private static SmartMotorControllerConfig addTrapezoidalProfile(SmartMotorControllerConfig cfg) {
     return cfg.withTrapezoidalProfile(RPM.of(6000), RPM.per(Second).of(9000));
   }
@@ -163,7 +167,10 @@ public class ShooterTest {
                   new NovaWrapper(
                       nova,
                       DCMotor.getNEO(1),
-                      ((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                      // A Nova applies its feedforward only with a motion profile, and a velocity
+                      // profile runs on the SystemCore.
+                      ((yams.commands2.config.SmartMotorControllerConfig)
+                              (i == 0 || i == 3 ? addVelocityProfile(smcConfig.clone()) : smcConfig.clone()))
                           .withSubsystem(new SmartMotorControllerTestSubsystem())
                           .withTelemetry(
                               "Nova(" + (50 + offset) + "[" + i + "]) NEO",

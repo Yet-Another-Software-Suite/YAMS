@@ -70,6 +70,7 @@ import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.system.Notifier;
 import org.wpilib.system.Timer;
 import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -100,17 +101,10 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 /**
  * TalonFXS wrapper for CTRE TalonFXS motor controllers.
  *
- * <p><b>External encoder discontinuity point support (CANcoder):</b>
- *
- * <ul>
- * <li>{@code 0.5} rotations maps to {@code AbsoluteSensorDiscontinuityPoint = 0.5}, sensor
- * range is [-0.5, 0.5)
- * <li>{@code 1.0} rotations maps to {@code AbsoluteSensorDiscontinuityPoint = 1.0}, sensor
- * range is [0, 1)
- * </ul>
- *
- * Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default is
- * used. Set via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}.
+ * <p><b>Absolute encoder range (CANcoder, CANdi PWM):</b> with continuous wrapping, the encoder reads
+ * the wrapping range, such as [-0.5, 0.5) or [0, 1): its {@code AbsoluteSensorDiscontinuityPoint} is
+ * the wrapping maximum, from 0 to 1 rotation. Without continuous wrapping, the encoder keeps its
+ * own range.
  *
  * <h2>Example</h2>
  *
@@ -180,8 +174,6 @@ public class TalonFXSWrapper extends SmartMotorController {
   private Alert m_startingPositionExternalEncoderAlert;
   /** Alert shown when a zero offset is set without an external encoder present. */
   private Alert m_zeroOffsetNoExternalEncoderAlert;
-  /** Alert shown when a discontinuity point is set without an external encoder present. */
-  private Alert m_discontinuityPointNoExternalEncoderAlert;
   /**
    * Whether {@link StatusSignal} refreshes should report errors; false in simulation, where status
    * signals are not always updated before they are read.
@@ -216,7 +208,6 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_startingPositionExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "StartingPosition"), getName() + " starting position is not applied because an external encoder is used!", Alert.Level.HIGH);
     m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
-    m_discontinuityPointNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFXS", m_talonfxs.getDeviceID(), "DiscontinuityPoint"), getName() + " discontinuity point is not supported without an external encoder.", Alert.Level.HIGH);
     m_configurator = m_talonfxs.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
       var genCfg = smartConfig.getVendorConfig().get();
@@ -435,13 +426,21 @@ public class TalonFXSWrapper extends SmartMotorController {
         candiSim.setSupplyVoltage(m_simSupplier.get().getMechanismSupplyVoltage());
         if (useCANdiPWM1()) {
           candiSim.setPwm1Connected(true);
-          candiSim.setPwm1Position(m_simSupplier.get().getMechanismPosition().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()).minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations
-              .zero())));
+          // Phoenix does not wrap a simulated CANdi's PWM position: report it in the range the CANdi
+          // reads, the wrapping's. The CANdi adds its zero offset to the raw position.
+          final Angle pwm1Position = m_simSupplier.get().getMechanismPosition().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio());
+          candiSim.setPwm1Position((m_config.getWrappingMax().isPresent()
+              ? Rotations.of(MathUtil.inputModulus(pwm1Position.in(Rotations), m_config.getWrappingMin().orElseThrow().in(Rotations), m_config.getWrappingMax().get().in(Rotations)))
+              : pwm1Position).minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations.zero())));
           candiSim.setPwm1Velocity(m_simSupplier.get().getMechanismVelocity().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()));
         } else if (useCANdiPWM2()) {
           candiSim.setPwm2Connected(true);
-          candiSim.setPwm2Position(m_simSupplier.get().getMechanismPosition().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()).minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations
-              .zero())));
+          // Phoenix does not wrap a simulated CANdi's PWM position: report it in the range the CANdi
+          // reads, the wrapping's. The CANdi adds its zero offset to the raw position.
+          final Angle pwm2Position = m_simSupplier.get().getMechanismPosition().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio());
+          candiSim.setPwm2Position((m_config.getWrappingMax().isPresent()
+              ? Rotations.of(MathUtil.inputModulus(pwm2Position.in(Rotations), m_config.getWrappingMin().orElseThrow().in(Rotations), m_config.getWrappingMax().get().in(Rotations)))
+              : pwm2Position).minus(m_config.getExternalEncoderZeroOffset().orElse(Rotations.zero())));
           candiSim.setPwm2Velocity(m_simSupplier.get().getMechanismVelocity().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()));
         }
       }
@@ -815,7 +814,6 @@ public class TalonFXSWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_startingPositionExternalEncoderAlert.set(false);
     m_zeroOffsetNoExternalEncoderAlert.set(false);
-    m_discontinuityPointNoExternalEncoderAlert.set(false);
     m_lqr = config.getLQRClosedLoopController();
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
 
@@ -995,6 +993,12 @@ public class TalonFXSWrapper extends SmartMotorController {
       m_talonConfig.ExternalFeedback.RotorToSensorRatio = config.getGearing().getMechanismToRotorRatio() * config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getRotorToMechanismRatio();
       // config.getExternalEncoderGearing().getMechanismToRotorRatio() *
       m_talonConfig.ExternalFeedback.SensorToMechanismRatio = config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio();
+      // A CANcoder or CANdi reads the wrapping range: its AbsoluteSensorDiscontinuityPoint,
+      // the wrapping maximum, is from 0 to 1 rotation.
+      if ((config.getExternalEncoder().get() instanceof CANcoder || config.getExternalEncoder().get() instanceof CANdi)
+          && config.getWrappingMax().map(max -> max.lt(Rotations.zero()) || max.gt(Rotations.of(1))).orElse(false)) {
+        throw new SmartMotorControllerConfigurationException("CANcoder and CANdi read a range from [-1, 0) to [0, 1) rotations", "Continuous wrapping could not be applied to the absolute encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))");
+      }
       if (config.getExternalEncoder().get() instanceof CANcoder encoder) {
         m_cancoder = Optional.of((CANcoder) config.getExternalEncoder().get());
         var configurator = encoder.getConfigurator();
@@ -1012,10 +1016,8 @@ public class TalonFXSWrapper extends SmartMotorController {
           cfg.MagnetSensor.withMagnetOffset(config.getExternalEncoderZeroOffset().get());
           m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
         }
-        // Discontinuity Point
-        if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-          cfg.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(config.getExternalEncoderDiscontinuityPoint().get());
-        }
+        // The encoder reads the wrapping range.
+        config.getWrappingMax().ifPresent(cfg.MagnetSensor::withAbsoluteSensorDiscontinuityPoint);
         configurator.apply(cfg);
       } else if (config.getExternalEncoder().get() instanceof CANdi encoder) {
         m_candi = Optional.of((CANdi) config.getExternalEncoder().get());
@@ -1038,10 +1040,8 @@ public class TalonFXSWrapper extends SmartMotorController {
             cfg.PWM1.withAbsoluteSensorOffset(config.getExternalEncoderZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
           }
-          // Discontinuity point
-          if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-            cfg.PWM1.withAbsoluteSensorDiscontinuityPoint(config.getExternalEncoderDiscontinuityPoint().get());
-          }
+          // The encoder reads the wrapping range.
+          config.getWrappingMax().ifPresent(cfg.PWM1::withAbsoluteSensorDiscontinuityPoint);
         } else if (useCANdiPWM2()) {
           config.getExternalEncoderInverted().ifPresent(cfg.PWM2::withSensorDirection);
           // Zero offset
@@ -1049,10 +1049,8 @@ public class TalonFXSWrapper extends SmartMotorController {
             cfg.PWM2.withAbsoluteSensorOffset(config.getExternalEncoderZeroOffset().get());
             m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0;
           }
-          // Discontinuity point
-          if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-            cfg.PWM2.withAbsoluteSensorDiscontinuityPoint(config.getExternalEncoderDiscontinuityPoint().get());
-          }
+          // The encoder reads the wrapping range.
+          config.getWrappingMax().ifPresent(cfg.PWM2::withAbsoluteSensorDiscontinuityPoint);
         } else {
           throw new SmartMotorControllerConfigurationException("CANdi is the external feedback encoder but no PWM input is selected", "The CANdi cannot be used as the feedback sensor!", "withVendorConfig() with the feedback sensor source set to SyncCANdiPWM1 or SyncCANdiPWM2");
         }
@@ -1087,13 +1085,10 @@ public class TalonFXSWrapper extends SmartMotorController {
         } while (!applied.equals(StatusCode.OK));
       }
 
-      if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-        m_discontinuityPointNoExternalEncoderAlert.set(true);
-      }
     }
 
-    // Continuous wrapping. Set either way: the configuration starts from the device's previous one.
-    m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.getContinuousWrapping().isPresent();
+    // Continuous wrapping, only when the wrapping is continuous. Set either way: the configuration starts from the device's previous one.
+    m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.getWrappingMax().isPresent() && config.isWrappingContinuous();
 
     // Invert the encoder.
     if (config.getEncoderInverted().isPresent()) {
@@ -2041,6 +2036,5 @@ public class TalonFXSWrapper extends SmartMotorController {
     super.close();
     m_startingPositionExternalEncoderAlert.close();
     m_zeroOffsetNoExternalEncoderAlert.close();
-    m_discontinuityPointNoExternalEncoderAlert.close();
   }
 }

@@ -15,6 +15,7 @@
 #include <type_traits>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/system/Models.hpp>
+#include <wpi/math/util/MathUtil.hpp>
 #include <wpi/units/angular_jerk.hpp>
 #include <wpi/units/dimensionless.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
@@ -210,10 +211,6 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS* talon, wpi::math::DCMotor d
       "YAMS", AlertId("ZeroOffset"),
       GetName() + " zero offset is not supported without an external encoder.",
       wpi::util::Alert::Level::HIGH);
-  m_discontinuityPointNoExternalEncoderAlert.emplace(
-      "YAMS", AlertId("DiscontinuityPoint"),
-      GetName() + " discontinuity point is not supported without an external encoder.",
-      wpi::util::Alert::Level::HIGH);
 
   SetupSimulation();
   try {
@@ -232,8 +229,6 @@ TalonFXSWrapper::~TalonFXSWrapper() {
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
   if (m_startingPositionExternalEncoderAlert) m_startingPositionExternalEncoderAlert->Set(false);
   if (m_zeroOffsetNoExternalEncoderAlert) m_zeroOffsetNoExternalEncoderAlert->Set(false);
-  if (m_discontinuityPointNoExternalEncoderAlert)
-    m_discontinuityPointNoExternalEncoderAlert->Set(false);
 }
 
 // ---- Helpers ----------------------------------------------------------------
@@ -475,7 +470,6 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_rioControllerAlert->Set(false);
   m_startingPositionExternalEncoderAlert->Set(false);
   m_zeroOffsetNoExternalEncoderAlert->Set(false);
-  m_discontinuityPointNoExternalEncoderAlert->Set(false);
   LoadLooselyCoupledFollowers();
 
   // LQR and software PID from the active gain slot for IterateClosedLoopController.
@@ -595,7 +589,8 @@ bool TalonFXSWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   ApplyExternalEncoder(config);
 
   // Continuous wrapping. Set either way: the configuration starts from the device's previous one.
-  m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.GetContinuousWrapping().has_value();
+  m_talonConfig.ClosedLoopGeneral.ContinuousWrap =
+      config.GetWrappingMax().has_value() && config.IsWrappingContinuous();
 
   if (auto inv = config.GetEncoderInverted(); inv)
     m_talonConfig.ExternalFeedback.SensorPhase =
@@ -632,6 +627,16 @@ void TalonFXSWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& con
     // The external encoder sets the position; the starting position is not applied.
     if (startingPosition) m_startingPositionExternalEncoderAlert->Set(true);
 
+    // A CANcoder or CANdi reads the wrapping range: its AbsoluteSensorDiscontinuityPoint,
+    // the wrapping maximum, is from 0 to 1 rotation.
+    const bool absoluteEncoder = std::any_cast<hardware::CANcoder*>(&*encoder) ||
+                                 std::any_cast<hardware::CANdi*>(&*encoder);
+    if (auto max = config.GetWrappingMax();
+        absoluteEncoder && max && (*max < 0_tr || *max > 1_tr))
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "CANcoder and CANdi read a range from [-1, 0) to [0, 1) rotations",
+          "Continuous wrapping could not be applied to the absolute encoder",
+          "WithContinuousWrapping(-0.5_tr, 0.5_tr)");
     if (auto* pp = std::any_cast<hardware::CANcoder*>(&*encoder); pp && *pp) {
       m_cancoder = *pp;
       WriteSensorRatios(config);
@@ -649,8 +654,9 @@ void TalonFXSWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& con
         cancoderConfig.MagnetSensor.MagnetOffset = *offset;
         m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0_tr;
       }
-      if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
-        cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *dp;
+      // The CANcoder reads the wrapping range.
+      if (auto max = config.GetWrappingMax(); max)
+        cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *max;
       configurator.Apply(cancoderConfig);
     } else if (auto* pp = std::any_cast<hardware::CANdi*>(&*encoder); pp && *pp) {
       m_candi = *pp;
@@ -672,8 +678,8 @@ void TalonFXSWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& con
           pwm.AbsoluteSensorOffset = *offset;
           m_talonConfig.ExternalFeedback.AbsoluteSensorOffset = 0_tr;
         }
-        if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
-          pwm.AbsoluteSensorDiscontinuityPoint = *dp;
+        // The CANdi reads the wrapping range.
+        if (auto max = config.GetWrappingMax(); max) pwm.AbsoluteSensorDiscontinuityPoint = *max;
       };
       if (UseCANdiPWM1()) {
         configurePWM(candiConfig.PWM1);
@@ -724,8 +730,6 @@ void TalonFXSWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& con
       if (applied.IsOK()) break;
     }
   }
-  if (config.GetExternalEncoderDiscontinuityPoint())
-    m_discontinuityPointNoExternalEncoderAlert->Set(true);
 }
 
 void TalonFXSWrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
@@ -854,15 +858,23 @@ void TalonFXSWrapper::SimIterate() {
     cancoderSim.SetMagnetHealth(signals::MagnetHealthValue::Magnet_Green);
   }
   if (m_candi) {
+    // Phoenix does not wrap a simulated CANdi's PWM position: report it in the range the CANdi
+    // reads, the wrapping's. The CANdi adds its zero offset to the raw position.
+    wpi::units::turn_t candiPosition = sensorPosition;
+    if (auto max = m_config->GetWrappingMax(); max)
+      candiPosition = wpi::units::turn_t{wpi::math::InputModulus(
+                          (sensorPosition + zeroOffset).value(),
+                          m_config->GetWrappingMin()->value(), max->value())} -
+                      zeroOffset;
     auto& candiSim = m_candi->GetSimState();
     candiSim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
     if (UseCANdiPWM1()) {
       candiSim.SetPwm1Connected(true);
-      candiSim.SetPwm1Position(sensorPosition);
+      candiSim.SetPwm1Position(candiPosition);
       candiSim.SetPwm1Velocity(sensorVelocity);
     } else if (UseCANdiPWM2()) {
       candiSim.SetPwm2Connected(true);
-      candiSim.SetPwm2Position(sensorPosition);
+      candiSim.SetPwm2Position(candiPosition);
       candiSim.SetPwm2Velocity(sensorVelocity);
     }
   }

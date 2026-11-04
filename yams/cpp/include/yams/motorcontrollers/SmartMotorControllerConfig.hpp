@@ -540,7 +540,7 @@ class SmartMotorControllerConfig {
    *       of `SyncCANdiPWM1`, `RemoteCANdiPWM1`, `SyncCANdiPWM2`, or
    *       `RemoteCANdiPWM2` via a vendor config so that ApplyConfig() knows which
    *       PWM channel to configure. Without this, offset, inversion, and
-   *       discontinuity-point settings will not be applied to either channel.
+   *       continuous wrapping settings will not be applied to either channel.
    *
    * @param encoder External encoder hardware object pointer.
    * @return *this for chaining.
@@ -614,19 +614,20 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithExternalEncoderGearing(double reductionRatio);
 
   /**
-   * Set the discontinuity point for absolute encoder wrapping.
+   * Set the wrapping range: an absolute external encoder reads angles in it, from @p min up to
+   * @p max. The closed loop controller does not wrap, so it never takes the mechanism the other way
+   * round; use WithContinuousWrapping() for that.
    *
-   * Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]).
-   * Throws SmartMotorControllerConfigurationException otherwise.
-   *
-   * @param discontinuityPoint Wrap-around point (0.5 or 1 turns).
+   * @param min Bottom of the wrapping range (turns).
+   * @param max Top of the wrapping range (turns), one rotation above @p min.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
-      wpi::units::turn_t discontinuityPoint);
+  SmartMotorControllerConfig& WithWrapping(wpi::units::turn_t min, wpi::units::turn_t max);
 
   /**
-   * Enable continuous position wrapping for the closed-loop controller.
+   * Enable continuous position wrapping for the closed-loop controller: the wrapping range, as
+   * WithWrapping(), and the closed loop controller wraps over it, taking the shortest path to a
+   * setpoint.
    *
    * Throws SmartMotorControllerConfigurationException if soft limits or a linear closed-loop
    * controller are already configured, or if no PID or LQR controller is configured.
@@ -1073,11 +1074,16 @@ class SmartMotorControllerConfig {
   /** @return Optional upper linear soft limit. */
   std::optional<wpi::units::meter_t> GetMeasurementUpperLimit() const;
 
-  /** @return Optional upper continuous wrapping bound (turns). Erases ContinuousWrapping tracking.
+  /** @return Optional top of the wrapping range (turns). Erases ContinuousWrapping tracking. */
+  std::optional<wpi::units::turn_t> GetWrappingMax() const;
+  /** @return Optional bottom of the wrapping range (turns). */
+  std::optional<wpi::units::turn_t> GetWrappingMin() const;
+  /**
+   * @return Whether the closed loop controller wraps continuously over the wrapping range, taking
+   *         the shortest path to a setpoint, as WithContinuousWrapping() sets. Throws
+   *         SmartMotorControllerConfigurationException if soft limits are also configured.
    */
-  std::optional<wpi::units::turn_t> GetContinuousWrapping() const;
-  /** @return Optional lower continuous wrapping bound (turns). */
-  std::optional<wpi::units::turn_t> GetContinuousWrappingMin() const;
+  bool IsWrappingContinuous() const;
 
   /**
    * Get the position setpoint to command with continuous wrapping: the angle equivalent to
@@ -1085,8 +1091,8 @@ class SmartMotorControllerConfig {
    *
    * @param setpoint Mechanism angle to go to.
    * @param current  Current mechanism angle.
-   * @return The equivalent setpoint nearest @p current, or @p setpoint unchanged when continuous
-   *         wrapping is not configured.
+   * @return The equivalent setpoint nearest @p current, or @p setpoint unchanged when the wrapping
+   *         is not continuous.
    */
   wpi::units::turn_t GetContinuousWrappingSetpoint(wpi::units::turn_t setpoint,
                                                    wpi::units::turn_t current) const;
@@ -1183,8 +1189,6 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> GetExternalEncoderZeroOffset() const;
   /** @return Optional external encoder gearing. */
   const std::optional<gearing::MechanismGearing>& GetExternalEncoderGearing() const;
-  /** @return Optional external encoder discontinuity point (turns). */
-  std::optional<wpi::units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
@@ -1355,7 +1359,6 @@ class SmartMotorControllerConfig {
   };
   enum class ExternalEncoderOptions {
     ZeroOffset,
-    DiscontinuityPoint,
     UseExternalFeedback,
     ExternalGearing,
     ExternalEncoderInverted,
@@ -1410,8 +1413,10 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> m_feedbackSynchronizationThreshold;
   std::optional<wpi::units::turn_t> m_closedLoopTolerance;
   bool m_resetPreviousConfig{true};
-  std::optional<wpi::units::turn_t> m_continuousWrappingMin;
-  std::optional<wpi::units::turn_t> m_continuousWrappingMax;
+  std::optional<wpi::units::turn_t> m_wrappingMin;
+  std::optional<wpi::units::turn_t> m_wrappingMax;
+  /** Whether the closed loop controller wraps continuously over the wrapping range. */
+  bool m_wrappingContinuous{false};
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
@@ -1436,7 +1441,6 @@ class SmartMotorControllerConfig {
   std::optional<double> m_externalEncoderConversionFactor;
   std::optional<wpi::units::turn_t> m_externalEncoderZeroOffset;
   std::optional<gearing::MechanismGearing> m_externalEncoderGearing;
-  std::optional<wpi::units::turn_t> m_externalEncoderDiscontinuityPoint;
 
   // Telemetry
   std::optional<std::string> m_telemetryName;

@@ -255,10 +255,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private Optional<Angle> zeroOffset = Optional.empty();
   /**
-   * External absolute encoder discontinuity point.
-   */
-  private Optional<Angle> externalEncoderDiscontinuityPoint = Optional.empty();
-  /**
    * Temperature cutoff for the {@link SmartMotorController} to prevent
    running if above. */
   private Optional<Temperature> temperatureCutoff = Optional.empty();
@@ -295,13 +291,18 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private ControlMode motorControllerMode = ControlMode.CLOSED_LOOP;
   /**
-   * Closed loop controller continuous wrapping point.
+   * Top of the wrapping range, where an absolute encoder wraps.
    */
-  private Optional<Angle> maxContinuousWrappingAngle = Optional.empty();
+  private Optional<Angle> maxWrappingAngle = Optional.empty();
   /**
-   * Closed loop controller continuous wrapping point.
+   * Bottom of the wrapping range.
    */
-  private Optional<Angle> minContinuousWrappingAngle = Optional.empty();
+  private Optional<Angle> minWrappingAngle = Optional.empty();
+  /**
+   * Whether the closed loop controller wraps continuously over the wrapping range, taking the
+   * shortest path to a setpoint.
+   */
+  private boolean wrappingContinuous = false;
   /**
    * Closed loop controller tolerance.
    */
@@ -376,7 +377,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.verbosity = cfg.verbosity;
     this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.zeroOffset = cfg.zeroOffset;
-    this.externalEncoderDiscontinuityPoint = cfg.externalEncoderDiscontinuityPoint;
     this.temperatureCutoff = cfg.temperatureCutoff;
     this.encoderInverted = cfg.encoderInverted;
     this.motorInverted = cfg.motorInverted;
@@ -386,8 +386,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.closedLoopControllerMaximumVoltage = cfg.closedLoopControllerMaximumVoltage;
     this.feedbackSynchronizationThreshold = cfg.feedbackSynchronizationThreshold;
     this.motorControllerMode = cfg.motorControllerMode;
-    this.maxContinuousWrappingAngle = cfg.maxContinuousWrappingAngle;
-    this.minContinuousWrappingAngle = cfg.minContinuousWrappingAngle;
+    this.maxWrappingAngle = cfg.maxWrappingAngle;
+    this.minWrappingAngle = cfg.minWrappingAngle;
+    this.wrappingContinuous = cfg.wrappingContinuous;
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
@@ -655,25 +656,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the external encoder absolute position to wrap around a defined discontinuity point.
-   *
-   * @param discontinuityPoint Discontinuity point of the external encoder, when provided 0.5rot the
-   *                           external encoder will read between [-0.5, 0.5]; when provided 1rot
-   *                           the external encoder will read between [0, 1].
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @throws SmartMotorControllerConfigurationException if the discontinuity point is not equivalent
-   *                                                    to 0.5 or 1 rotations.
-   * @implNote Only works for External Absolute Encoders.
-   */
-  public T withExternalEncoderDiscontinuityPoint(Angle discontinuityPoint) {
-    if (!discontinuityPoint.isEquivalent(Rotations.of(1)) && !discontinuityPoint.isEquivalent(Rotations.of(0.5))) {
-      throw new SmartMotorControllerConfigurationException("Cannot set external encoder discontinuity point", "Discontinuity point must be 0.5 or 1 rotations", "withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)");
-    }
-    externalEncoderDiscontinuityPoint = Optional.of(discontinuityPoint);
-    return self();
-  }
-
-  /**
    * Set the zero offset of the {@link SmartMotorController}'s external Encoder.
    *
    * @param angle {@link Angle} to 0.
@@ -689,7 +671,28 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set continuous wrapping for the {@link SmartMotorController}
+   * Set the wrapping range of the {@link SmartMotorController}: an absolute external encoder reads
+   * angles in it, from {@code bottom} up to {@code top}. The closed loop controller does not wrap,
+   * so it never takes the mechanism the other way round; use
+   * {@link #withContinuousWrapping(Angle, Angle)} for that.
+   *
+   * @param bottom Bottom of the wrapping range.
+   * @param top    Top of the wrapping range, one rotation above {@code bottom}.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public T withWrapping(Angle bottom, Angle top) {
+    maxWrappingAngle = Optional.of(top);
+    minWrappingAngle = Optional.of(bottom);
+    wrappingContinuous = false;
+    pid.values().forEach(this::applyContinuousWrapping);
+    sim_pid.values().forEach(this::applyContinuousWrapping);
+    return self();
+  }
+
+  /**
+   * Set continuous wrapping for the {@link SmartMotorController}: the wrapping range, as
+   * {@link #withWrapping(Angle, Angle)}, and the closed loop controller wraps over it, taking the
+   * shortest path to a setpoint.
    *
    * @param bottom Bottom value to wrap to.
    * @param top    Top value to wrap to.
@@ -710,23 +713,27 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       throw new SmartMotorControllerConfigurationException("No closed loop controller used", "Cannot set continuous wrapping!", "withClosedLoopController()");
     }
 
-    maxContinuousWrappingAngle = Optional.of(top);
-    minContinuousWrappingAngle = Optional.of(bottom);
+    maxWrappingAngle = Optional.of(top);
+    minWrappingAngle = Optional.of(bottom);
+    wrappingContinuous = true;
     pid.values().forEach(this::applyContinuousWrapping);
     sim_pid.values().forEach(this::applyContinuousWrapping);
     return self();
   }
 
   /**
-   * Make a PID controller wrap at the continuous wrapping bounds, if they are configured. Applied to
-   * every PID controller, including simulation ones and ones set after continuous wrapping.
+   * Make a PID controller wrap at the wrapping bounds when the wrapping is continuous, or not wrap
+   * otherwise. Applied to every PID controller, including simulation ones and ones set after the
+   * wrapping.
    *
    * @param controller PID controller, in rotations.
    * @return The same controller.
    */
   private PIDController applyContinuousWrapping(PIDController controller) {
-    if (minContinuousWrappingAngle.isPresent() && maxContinuousWrappingAngle.isPresent()) {
-      controller.enableContinuousInput(minContinuousWrappingAngle.get().in(Rotations), maxContinuousWrappingAngle.get().in(Rotations));
+    if (wrappingContinuous && minWrappingAngle.isPresent() && maxWrappingAngle.isPresent()) {
+      controller.enableContinuousInput(minWrappingAngle.get().in(Rotations), maxWrappingAngle.get().in(Rotations));
+    } else {
+      controller.disableContinuousInput();
     }
     return controller;
   }
@@ -925,11 +932,15 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param low  Low angle soft limit.
    * @param high High angle soft limit.
    * @return {@link SmartMotorControllerConfig} for chaining.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured.
    * @throws SmartMotorControllerConfigurationException if both limits are non-null and the lower
    *                                                    limit is greater than or equal to the upper
    *                                                    limit.
    */
   public T withSoftLimits(Angle low, Angle high) {
+    if (wrappingContinuous && maxWrappingAngle.isPresent()) {
+      throw new SmartMotorControllerConfigurationException("Soft limits set while configuring continuous wrapping", "Cannot set soft limits", "withContinuousWrapping(Angle,Angle) should be removed, or withWrapping(Angle,Angle) used instead");
+    }
     if (low != null && high != null && low.gte(high)) {
       throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
     }
@@ -2334,36 +2345,52 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
+   * Get the top of the wrapping range, where an absolute encoder wraps.
    *
-   * @return {@link Angle} where the encoder wraps around.
-   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
-   *                                                    bounds that do not span exactly one rotation
+   * @return Top of the wrapping range, or empty without wrapping.
+   * @throws SmartMotorControllerConfigurationException if the wrapping is configured with bounds
+   *                                                    that do not span exactly one rotation
    *                                                    (minimum is not maximum minus 1 rotation).
    */
-  public Optional<Angle> getContinuousWrapping() {
-    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the discontinuity point.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
-          Rotations) + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations) + ")) instead ");
+  public Optional<Angle> getWrappingMax() {
+    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent() && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) - 1))) {
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxWrappingAngle.get().in(Rotations) - 1).in(
+          Rotations) + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     basicOptions.remove(BasicOptions.ContinuousWrapping);
-    return maxContinuousWrappingAngle;
+    return maxWrappingAngle;
   }
 
   /**
-   * Get the continuous wrapping point for the {@link SmartMotorController} encoder.
+   * Get the bottom of the wrapping range.
    *
-   * @return {@link Angle} where the encoder wraps around.
-   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
-   *                                                    bounds that do not span exactly one rotation
+   * @return Bottom of the wrapping range, or empty without wrapping.
+   * @throws SmartMotorControllerConfigurationException if the wrapping is configured with bounds
+   *                                                    that do not span exactly one rotation
    *                                                    (minimum is not maximum minus 1 rotation).
    */
-  public Optional<Angle> getContinuousWrappingMin() {
-    if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the discontinuity point.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
-          Rotations) + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations) + ")) instead ");
+  public Optional<Angle> getWrappingMin() {
+    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent() && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) - 1))) {
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxWrappingAngle.get().in(Rotations) - 1).in(
+          Rotations) + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
     }
-    return minContinuousWrappingAngle;
+    return minWrappingAngle;
+  }
+
+  /**
+   * Whether the closed loop controller wraps continuously over the wrapping range, taking the
+   * shortest path to a setpoint, as {@link #withContinuousWrapping(Angle, Angle)} sets.
+   *
+   * @return Whether the wrapping is continuous.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping and soft limits are
+   *                                                    both configured.
+   */
+  public boolean isWrappingContinuous() {
+    if (wrappingContinuous && maxWrappingAngle.isPresent()
+        && (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent())) {
+      throw new SmartMotorControllerConfigurationException("Soft limits set with continuous wrapping", "Cannot use continuous wrapping", "withSoftLimits(Angle,Angle) should be removed, or withWrapping(Angle,Angle) used instead");
+    }
+    return wrappingContinuous;
   }
 
   /**
@@ -2374,16 +2401,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param setpoint Mechanism angle to go to.
    * @param current  Current mechanism angle.
    * @return The equivalent setpoint nearest {@code current}, or {@code setpoint} unchanged when
-   *     continuous wrapping is not configured.
+   *     the wrapping is not continuous.
    * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured with
    *                                                    bounds that do not span exactly one rotation
    *                                                    (minimum is not maximum minus 1 rotation).
    */
   public Angle getContinuousWrappingSetpoint(Angle setpoint, Angle current) {
-    if (getContinuousWrapping().isEmpty() || getContinuousWrappingMin().isEmpty()) {
+    if (!wrappingContinuous || getWrappingMax().isEmpty() || getWrappingMin().isEmpty()) {
       return setpoint;
     }
-    final double halfRange = (maxContinuousWrappingAngle.get().in(Rotations) - minContinuousWrappingAngle.get().in(Rotations)) / 2;
+    final double halfRange = (maxWrappingAngle.get().in(Rotations) - minWrappingAngle.get().in(Rotations)) / 2;
     final double currentRotations = current.in(Rotations);
     return Rotations.of(currentRotations + MathUtil.inputModulus(setpoint.in(Rotations) - currentRotations, -halfRange, halfRange));
   }
@@ -2508,16 +2535,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the external encoder discontinuity point.
-   *
-   * @return External encoder discontinuity point.
-   */
-  public Optional<Angle> getExternalEncoderDiscontinuityPoint() {
-    externalEncoderOptions.remove(ExternalEncoderOptions.DiscontinuityPoint);
-    return externalEncoderDiscontinuityPoint;
-  }
-
-  /**
    * Setup live tuning for the {@link SmartMotorController}
    */
   public void setupLiveTuning()
@@ -2599,8 +2616,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private enum ExternalEncoderOptions {
     /** External encoder offset. */
     ZeroOffset,
-    /** External encoder zero centered. */
-    DiscontinuityPoint,
     /** Use the encoder as a feedback device. */
     UseExternalFeedbackEncoder,
     /** External gearing. */
