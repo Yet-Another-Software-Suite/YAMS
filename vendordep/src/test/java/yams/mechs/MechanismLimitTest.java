@@ -15,6 +15,7 @@ import static org.wpilib.units.Units.Pounds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -50,6 +51,7 @@ import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -235,6 +237,16 @@ public class MechanismLimitTest {
                 .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
   }
 
+  private static SmartMotorController makePivotA301(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new A301Wrapper(
+            DeviceCreator.createA301(),
+            DeviceCreator.forA301(((yams.commands2.config.SmartMotorControllerConfig)
+                    pivotBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH))));
+  }
+
   private static SmartMotorController makeArmSparkMax(Angle startPos, String label) {
     return setupTestSubsystem(
         new SparkWrapper(
@@ -288,6 +300,16 @@ public class MechanismLimitTest {
                     armBase().withStartingPosition(startPos))
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
+  }
+
+  private static SmartMotorController makeArmA301(Angle startPos, String label) {
+    return setupTestSubsystem(
+        new A301Wrapper(
+            DeviceCreator.createA301(),
+            DeviceCreator.forA301(((yams.commands2.config.SmartMotorControllerConfig)
+                    armBase().withStartingPosition(startPos))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH))));
   }
 
   private static SmartMotorController makeElevSparkMax(Distance startHeight, String label) {
@@ -345,6 +367,16 @@ public class MechanismLimitTest {
                 .withTelemetry(label, TelemetryVerbosity.HIGH), false)));
   }
 
+  private static SmartMotorController makeElevA301(Distance startHeight, String label) {
+    return setupTestSubsystem(
+        new A301Wrapper(
+            DeviceCreator.createA301(),
+            DeviceCreator.forA301(((yams.commands2.config.SmartMotorControllerConfig)
+                    elevatorBase().withStartingPosition(startHeight))
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry(label, TelemetryVerbosity.HIGH))));
+  }
+
   // ──────────────────────────────────────────────
   // Argument stream factories
   //
@@ -380,6 +412,7 @@ public class MechanismLimitTest {
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotNova(pos, "Nova(pMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotA301(pos, "A301(pMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -410,6 +443,7 @@ public class MechanismLimitTest {
           Arguments.of(
               makePivotTalonFX(pos, "TalonFX(pMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makePivotNova(pos, "Nova(pMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makePivotA301(pos, "A301(pMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -439,6 +473,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmNova(pos, "Nova(aMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmA301(pos, "A301(aMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -469,6 +504,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(makeArmTalonFX(pos, "TalonFX(aMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeArmNova(pos, "Nova(aMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeArmA301(pos, "A301(aMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -498,6 +534,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMin" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevNova(pos, "Nova(eMin" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevA301(pos, "A301(eMin" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -527,6 +564,7 @@ public class MechanismLimitTest {
       args.add(
           Arguments.of(makeElevTalonFX(pos, "TalonFX(eMax" + sfx + ")[" + offset + "]"), expected));
       args.add(Arguments.of(makeElevNova(pos, "Nova(eMax" + sfx + ")[" + offset + "]"), expected));
+      args.add(Arguments.of(makeElevA301(pos, "A301(eMax" + sfx + ")[" + offset + "]"), expected));
     }
     return args.stream();
   }
@@ -539,6 +577,7 @@ public class MechanismLimitTest {
     args.add(Arguments.of(makePivotTalonFXS(Degrees.of(45), "TalonFXS(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotTalonFX(Degrees.of(45), "TalonFX(spos)[" + offset + "]")));
     args.add(Arguments.of(makePivotNova(Degrees.of(45), "Nova(spos)[" + offset + "]")));
+    args.add(Arguments.of(makePivotA301(Degrees.of(45), "A301(spos)[" + offset + "]")));
     return args.stream();
   }
 
@@ -584,6 +623,8 @@ public class MechanismLimitTest {
       ((TalonFX) motor).close();
     } else if (motor instanceof Nova) {
       ((Nova) motor).close();
+    } else if (motor instanceof A301 a301) {
+      a301.close();
     }
   }
 

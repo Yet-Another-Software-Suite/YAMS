@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.revrobotics.encoder.DetachedEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
@@ -131,8 +132,10 @@ public class AbsoluteEncoderRangeTest {
           point == 0.5,
           detachedEncoder.detachedEncoderAccessor.isDutyCycleZeroCentered(),
           name + ": CAN encoder zero-centered");
-    } else if (encoder instanceof CanEncoder || encoder == FeedbackSensorType.ABS) {
-      // A Nova's encoders have no range of their own: NovaWrapper wraps their
+    } else if (encoder instanceof CanEncoder
+        || encoder == FeedbackSensorType.ABS
+        || encoder instanceof A301) {
+      // A Nova's and an A301's encoders have no range of their own: their wrappers wrap their
       // readings, which the test checks below.
     } else {
       // REVLib's range offset is the middle of the range the encoder reports.

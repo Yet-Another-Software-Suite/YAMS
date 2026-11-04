@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -38,6 +39,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -124,6 +126,12 @@ public class BatterySimTest {
                 .withSubsystem(new SmartMotorControllerTestSubsystem())
                 .withTelemetry(
                     "BatterySim Nova(" + (50 + offset) + ") NEO", TelemetryVerbosity.LOW), false)));
+    smcs.add(
+        new A301Wrapper(
+            DeviceCreator.createA301(),
+            DeviceCreator.withoutCurrentLimits(((yams.commands2.config.SmartMotorControllerConfig) baseConfig.clone())
+                .withSubsystem(new SmartMotorControllerTestSubsystem())
+                .withTelemetry("BatterySim A301(" + (60 + offset) + ")", TelemetryVerbosity.LOW))));
 
     for (SmartMotorController smc : smcs) {
       SmartMotorControllerTestSubsystem subsys =
@@ -195,6 +203,8 @@ public class BatterySimTest {
       ((TalonFX) motorController).close();
     } else if (motorController instanceof Nova) {
       ((Nova) motorController).close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 

@@ -66,6 +66,8 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.mechanisms.config.SwerveModuleConfig;
 import yams.core.mechanisms.swerve.SwerveModule;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.YMotors;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -98,7 +100,8 @@ public class SwerveDriveTest {
     SPARK_FLEX,
     TALON_FXS,
     TALON_FX,
-    NOVA
+    NOVA,
+    A301
   }
 
   /**
@@ -127,6 +130,7 @@ public class SwerveDriveTest {
   private static final Motor TFXS = Motor.TALON_FXS;
   private static final Motor TFX = Motor.TALON_FX;
   private static final Motor NOVA = Motor.NOVA;
+  private static final Motor A301 = Motor.A301;
 
   /** TalonFX drive motors and SPARK MAX azimuth motors. */
   private static final Layout kTalonFXDriveSparkMaxAzimuth =
@@ -156,7 +160,15 @@ public class SwerveDriveTest {
         new Layout(
             "Pigeon2, mixed: NOVA/SMAX, SFLEX/NOVA, NOVA/TFXS, TFX/NOVA",
             new Motor[] {NOVA, SFLEX, NOVA, TFX},
-            new Motor[] {SMAX, NOVA, TFXS, NOVA}));
+            new Motor[] {SMAX, NOVA, TFXS, NOVA}),
+        Layout.uniform("Pigeon2, A301 drive, A301 azimuth", A301, A301),
+        // An A301 azimuth paired with every other motor controller's drive. An A301 drive has a
+        // tenth of the others' power, so it drives only beside other A301s: next to them it would
+        // speed up more slowly, and the robot would drift.
+        new Layout(
+            "Pigeon2, mixed: SMAX/A301, SFLEX/A301, TFXS/A301, TFX/A301",
+            new Motor[] {SMAX, SFLEX, TFXS, TFX},
+            new Motor[] {A301, A301, A301, A301}));
   }
 
   /** Subsystem that runs the drive's telemetry and simulation, like a robot's swerve subsystem. */
@@ -239,6 +251,7 @@ public class SwerveDriveTest {
           case TalonFXS talon -> talon.close();
           case TalonFX talon -> talon.close();
           case Nova nova -> nova.close();
+          case com.revrobotics.spark.A301 a301 -> a301.close();
           default -> {}
         }
         smc.getConfig().getExternalEncoder().ifPresent(encoder -> {
@@ -261,14 +274,15 @@ public class SwerveDriveTest {
   private SwerveDrive drive;
 
   /**
-   * The motor each motor controller drives: a NEO, NEO Vortex, NEO on a TalonFXS, Kraken X60, or NEO
-   * on a Nova.
+   * The motor each motor controller drives: a NEO, NEO Vortex, NEO on a TalonFXS, Kraken X60, NEO
+   * on a Nova, or the A301's own motor.
    */
   private static DCMotor dcMotor(Motor motor) {
     return switch (motor) {
       case SPARK_MAX, TALON_FXS, NOVA -> DCMotor.getNEO(1);
       case SPARK_FLEX -> DCMotor.getNeoVortex(1);
       case TALON_FX -> DCMotor.getKrakenX60(1);
+      case A301 -> YMotors.getA301(1);
     };
   }
 
@@ -285,6 +299,7 @@ public class SwerveDriveTest {
           case TALON_FX ->
               new TalonFXWrapper(DeviceCreator.createTalonFX(), dcMotor(motor), config);
           case NOVA -> new NovaWrapper(DeviceCreator.createNova(), dcMotor(motor), DeviceCreator.withNovaProfile(config, true));
+          case A301 -> new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.withoutCurrentLimits(config));
         };
     hardware.motorControllers.add(smc);
     return smc;
@@ -293,13 +308,51 @@ public class SwerveDriveTest {
   /** Drive gear reduction. */
   private static final double kDriveReduction = 6.75;
 
+  /** Azimuth gear reduction. */
+  private static final double kAzimuthReduction = 12.8;
+
+  /**
+   * Gearing of an A301 module: its motor is too small for the module's reductions alone, so it has
+   * the 3:1 gearbox ahead of the drive reduction and the 13.5:1 gearbox ahead of the azimuth's,
+   * fast enough for the drive's speeds and the azimuth's turns.
+   */
+  private static final double kA301DriveGearbox = 3;
+
+  private static final double kA301AzimuthGearbox = 13.5;
+
+  /**
+   * Drive kP, volts per wheel rotation per second of error. An A301 drive makes a tenth of the
+   * others' torque per volt at the wheel, so it is tuned ten times higher.
+   */
+  private static double driveKP(Motor motor) {
+    return motor == A301 ? 4 : 0.4;
+  }
+
+  /**
+   * Azimuth gains scale, as a multiple of the others'. An A301 azimuth makes 0.4 times the others'
+   * torque per volt, so its gains are 2.5 times higher.
+   */
+  private static double azimuthGainScale(Motor motor) {
+    return motor == A301 ? 2.5 : 1;
+  }
+
+  /** Motor rotations per wheel rotation. */
+  private static double driveReduction(Motor motor) {
+    return motor == A301 ? kA301DriveGearbox * kDriveReduction : kDriveReduction;
+  }
+
+  /** Motor rotations per azimuth rotation. */
+  private static double azimuthReduction(Motor motor) {
+    return motor == A301 ? kA301AzimuthGearbox * kAzimuthReduction : kAzimuthReduction;
+  }
+
   /**
    * Drive velocity feedforward, volts per wheel rotation per second: 12 V over the motor's free
    * speed at the wheel. kV is a property of the motor; the PID gains below are the same on every
    * motor controller, as a team switching vendors would leave them.
    */
   private static double driveKV(Motor motor) {
-    return 12.0 / (dcMotor(motor).freeSpeed / (2 * Math.PI) / kDriveReduction);
+    return 12.0 / (dcMotor(motor).freeSpeed / (2 * Math.PI) / driveReduction(motor));
   }
 
   private static SwerveModule createModule(
@@ -312,16 +365,17 @@ public class SwerveDriveTest {
     SmartMotorControllerConfig driveCfg =
         new SmartMotorControllerConfig(hardware.subsystem)
             .withWheelDiameter(Inches.of(4))
-            .withClosedLoopController(0.4, 0, 0)
+            .withClosedLoopController(driveKP(driveMotor), 0, 0)
             .withFeedforward(new SimpleMotorFeedforward(0, driveKV(driveMotor)))
-            .withGearing(new MechanismGearing(GearBox.fromReductionStages(kDriveReduction)))
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(driveReduction(driveMotor))))
             .withStatorCurrentLimit(Amps.of(40))
             .withTelemetry(name + "Drive", TelemetryVerbosity.LOW);
     SmartMotorControllerConfig azimuthCfg =
         new SmartMotorControllerConfig(hardware.subsystem)
-            .withClosedLoopController(50, 0, 0.5)
+            .withClosedLoopController(
+                50 * azimuthGainScale(azimuthMotor), 0, 0.5 * azimuthGainScale(azimuthMotor))
             .withContinuousWrapping(Radians.of(-Math.PI), Radians.of(Math.PI))
-            .withGearing(new MechanismGearing(GearBox.fromReductionStages(12.8)))
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(azimuthReduction(azimuthMotor))))
             .withStatorCurrentLimit(Amps.of(40))
             .withTelemetry(name + "Azimuth", TelemetryVerbosity.LOW);
     if (azimuthMotor == Motor.NOVA) {
@@ -745,8 +799,9 @@ public class SwerveDriveTest {
   void closedLoopPeriodIsWhereTheClosedLoopRuns(Layout layout) {
     build(layout);
     for (int i = 0; i < modules.length; i++) {
-      // A Nova's closed loop runs on the SystemCore, every other one on the motor controller.
-      double expected = layout.drives()[i] == NOVA ? 0.02 : 0.001;
+      // A Nova's and an A301's closed loops run on the SystemCore, every other one on the motor
+      // controller.
+      double expected = layout.drives()[i] == NOVA || layout.drives()[i] == A301 ? 0.02 : 0.001;
       assertEquals(expected, modules[i].getDriveMotorController().getClosedLoopControllerPeriod().in(Seconds), 1e-9, modules[i].getName() + " drive period");
     }
   }

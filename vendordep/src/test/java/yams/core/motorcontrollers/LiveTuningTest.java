@@ -22,6 +22,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
@@ -51,6 +52,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -152,6 +154,12 @@ public class LiveTuningTest {
                 controller,
                 linear,
                 cfg -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false))));
+        cases.add(
+            new Case(
+                "A301" + suffix,
+                controller,
+                linear,
+                cfg -> new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.withoutCurrentLimits(cfg))));
       }
     }
     return cases.stream();
@@ -221,6 +229,8 @@ public class LiveTuningTest {
       // The Nova's closed loop runs on the SystemCore, so it holds no gains to put back to
       // defaults.
       nova.close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 
@@ -239,9 +249,9 @@ public class LiveTuningTest {
   /** The kP on the motor controller itself, in its own units, waiting for an asynchronous apply. */
   private static double deviceKp(SmartMotorController smc, double expected)
       throws InterruptedException {
-    if (smc instanceof NovaWrapper) {
-      // The Nova has no gains to read back; its closed loop runs on the SystemCore with this
-      // controller.
+    if (smc instanceof NovaWrapper || smc instanceof A301Wrapper) {
+      // The Nova and A301 have no gains to read back; their closed loops run on the SystemCore with
+      // this controller.
       return smc.m_pid.orElseThrow().getP();
     }
     double kP = Double.NaN;
@@ -389,7 +399,7 @@ public class LiveTuningTest {
       final double expectedDeviceKp =
           smc instanceof SparkWrapper
               ? 2.5 / (12 * kGearing.getMechanismToRotorRatio() * rotationsPerGainUnit)
-              : smc instanceof NovaWrapper ? 2.5 : 2.5 / rotationsPerGainUnit;
+              : smc instanceof NovaWrapper || smc instanceof A301Wrapper ? 2.5 : 2.5 / rotationsPerGainUnit;
       final double deviceKp = deviceKp(smc, expectedDeviceKp);
       assertTrue(
           Math.abs(deviceKp - expectedDeviceKp) <= 1e-6 * expectedDeviceKp,

@@ -15,6 +15,7 @@ import static org.wpilib.units.Units.Seconds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -39,6 +40,7 @@ import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -101,6 +103,10 @@ public class HardStopTest {
     return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(config(label), false));
   }
 
+  private static SmartMotorController a301(String label) {
+    return new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(config(label)));
+  }
+
   private static Stream<Arguments> everyMotorController() {
     offset++;
     return Stream.of(
@@ -108,7 +114,8 @@ public class HardStopTest {
         Arguments.of("SPARK Flex", (Supplier<SmartMotorController>) () -> sparkFlex("SparkFlex(hardStop)[" + offset + "]")),
         Arguments.of("TalonFXS", (Supplier<SmartMotorController>) () -> talonFXS("TalonFXS(hardStop)[" + offset + "]")),
         Arguments.of("TalonFX", (Supplier<SmartMotorController>) () -> talonFX("TalonFX(hardStop)[" + offset + "]")),
-        Arguments.of("Nova", (Supplier<SmartMotorController>) () -> nova("Nova(hardStop)[" + offset + "]")));
+        Arguments.of("Nova", (Supplier<SmartMotorController>) () -> nova("Nova(hardStop)[" + offset + "]")),
+        Arguments.of("A301", (Supplier<SmartMotorController>) () -> a301("A301(hardStop)[" + offset + "]")));
   }
 
   private static Stream<Arguments> talons() {
@@ -248,6 +255,8 @@ public class HardStopTest {
       talon.close();
     } else if (motor instanceof Nova nova) {
       nova.close();
+    } else if (motor instanceof A301 a301) {
+      a301.close();
     }
   }
 

@@ -41,6 +41,7 @@ public class A301WrapperTest {
       new ClosedLoopCases.Controller(
           "A301",
           YMotors.getA301(1),
+          ClosedLoopCases.kA301Ratio,
           4,
           false,
           (motor, cfg) -> new A301Wrapper(DeviceCreator.createA301(), cfg));

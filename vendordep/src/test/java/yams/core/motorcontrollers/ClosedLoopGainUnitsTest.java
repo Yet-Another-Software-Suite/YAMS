@@ -36,6 +36,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -109,30 +110,62 @@ public class ClosedLoopGainUnitsTest {
     assertSpark(kAVoltsPerRotationPerSecondSquared / encoderRpmPerMechanismRotationPerSecond, feedForward::getkA, "kA per RPM per second");
   }
 
+  /** kA of {@link #systemCoreArmConfig(String)}, in volts per rotation per second squared. */
+  private static final double kSystemCoreKa = 0.05;
+
   /**
-   * A Nova's velocity profile runs on the SystemCore. From rest to 1 rotation per second in one 20 ms
-   * loop is 50 rotations per second squared, so a kA of 0.05 volts per rotation per second squared
-   * asks for 2.5 V. Read per radian, the same kA would ask for 2π times as much.
+   * An arm with only a kA, and a velocity profile fast enough to reach 1 rotation per second in one
+   * loop.
    */
+  private static SmartMotorControllerConfig systemCoreArmConfig(String name) {
+    return config(name)
+        .withFeedforward(new ArmFeedforward(0, 0, 0, kSystemCoreKa))
+        .withTrapezoidalProfile(RotationsPerSecondPerSecond.of(1000), RotationsPerSecondPerSecond.per(Second).of(1e6));
+  }
+
+  /**
+   * A closed loop on the SystemCore uses an arm's kA per rotation. From rest to 1 rotation per second
+   * in one 20 ms loop is 50 rotations per second squared, so a kA of 0.05 volts per rotation per
+   * second squared asks for 2.5 V. Read per radian, the same kA would ask for 2π times as much.
+   *
+   * @param smc Motor controller made from {@link #systemCoreArmConfig(String)}.
+   * @param commandedVolts The voltage the motor controller was last commanded.
+   */
+  private static void assertSystemCoreUsesArmGainsPerRotation(SmartMotorController smc, AtomicReference<Double> commandedVolts) {
+    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+    smc.setVelocity(RotationsPerSecond.of(1));
+    commandedVolts.set(Double.NaN);
+    smc.iterateClosedLoopController();
+    final double accelerationRotationsPerSecondSquared = RotationsPerSecond.of(1).in(RotationsPerSecond) / 0.020;
+    assertEquals(kSystemCoreKa * accelerationRotationsPerSecondSquared, commandedVolts.get(), 0.1, "volts from kA per rotation per second squared");
+  }
+
+  /** A Nova's velocity profile runs on the SystemCore. */
   @Test
   void systemCoreUsesArmGainsPerRotation() {
-    final double kA = 0.05;
     final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
-    final var smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config("Nova").withFeedforward(new ArmFeedforward(0, 0, 0, kA))
-        // Fast enough to reach 1 rotation per second in one loop.
-        .withTrapezoidalProfile(RotationsPerSecondPerSecond.of(1000), RotationsPerSecondPerSecond.per(Second).of(1e6))) {
+    final var smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), systemCoreArmConfig("Nova")) {
       @Override
       public void setVoltage(Voltage voltage) {
         commandedVolts.set(voltage.in(Volts));
         super.setVoltage(voltage);
       }
     };
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
-    smc.setVelocity(RotationsPerSecond.of(1));
-    commandedVolts.set(Double.NaN);
-    smc.iterateClosedLoopController();
-    final double accelerationRotationsPerSecondSquared = RotationsPerSecond.of(1).in(RotationsPerSecond) / 0.020;
-    assertEquals(kA * accelerationRotationsPerSecondSquared, commandedVolts.get(), 0.1, "volts from kA per rotation per second squared");
+    assertSystemCoreUsesArmGainsPerRotation(smc, commandedVolts);
+  }
+
+  /** An A301's closed loop always runs on the SystemCore. */
+  @Test
+  void a301UsesArmGainsPerRotation() {
+    final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
+    final var smc = new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(systemCoreArmConfig("A301"))) {
+      @Override
+      public void setVoltage(Voltage voltage) {
+        commandedVolts.set(voltage.in(Volts));
+        super.setVoltage(voltage);
+      }
+    };
+    assertSystemCoreUsesArmGainsPerRotation(smc, commandedVolts);
   }
 
   /** An elevator whose drum moves 0.2 m per mechanism rotation. */

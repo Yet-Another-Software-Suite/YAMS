@@ -41,7 +41,6 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::ArmFeedforward{
           0.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{1.0},
@@ -51,6 +50,7 @@ static SmartMotorControllerConfig MakeArmSMCConfig(ProfileType profile, Hardware
       .WithStartingPosition(0.0_deg)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
+  ForHardware(cfg, hardware, 40.0_A);
 
   switch (profile) {
     case ProfileType::Trapezoid:

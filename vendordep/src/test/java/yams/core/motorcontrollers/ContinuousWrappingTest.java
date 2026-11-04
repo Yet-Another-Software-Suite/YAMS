@@ -32,6 +32,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.encoder.DetachedEncoder;
 import com.revrobotics.encoder.config.DetachedEncoderConfig;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
@@ -68,6 +69,7 @@ import yams.core.math.LQRController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -349,6 +351,17 @@ public class ContinuousWrappingTest {
                           DeviceCreator.withNovaProfile(
                               attachedEncoder ? novaWrapping(withEncoder(cfg, FeedbackSensorType.ABS)) : cfg, false))));
         }
+        // An A301 runs every closed loop on the SystemCore, on its motor's encoder or on its own
+        // absolute encoder, on the mechanism.
+        cases.add(
+            new Case(
+                "A301" + suffix,
+                controller,
+                cfg -> {
+                  final A301 a301 = DeviceCreator.createA301();
+                  return new A301Wrapper(
+                      a301, DeviceCreator.forA301(attachedEncoder ? withEncoder(cfg, a301) : cfg));
+                }));
       }
       // A Through Bore Encoder on either SPARK, on the mechanism: its quadrature output, which is
       // not
@@ -521,6 +534,8 @@ public class ContinuousWrappingTest {
     } else if (motorController instanceof Nova nova) {
       // A Nova is put back to factory defaults when YAMS configures it, so only close it.
       nova.close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 
@@ -652,7 +667,7 @@ public class ContinuousWrappingTest {
         final Angle[] setpoint = {Degrees.of(170)};
         smc.setPosition(setpoint[0]);
         scheduler.addPeriodic(smc::simIterate, Milliseconds.of(10));
-        if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper)) {
+        if (!(smc instanceof SparkWrapper || smc instanceof NovaWrapper || smc instanceof A301Wrapper)) {
           // Phoenix simulates a Talon on its own thread in real time: its onboard motion profiles
           // advance with the wall clock, and its status signals refresh on it. Keep the simulation
           // in

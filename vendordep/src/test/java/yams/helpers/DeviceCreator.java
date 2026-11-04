@@ -28,6 +28,8 @@ import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
@@ -87,11 +89,57 @@ public class DeviceCreator {
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }
 
-  /** A301s take CAN IDs 1 to 62 on a bus of their own, and are closed by the test that creates them. */
-  private static final AtomicInteger a301Id = new AtomicInteger(0);
+  /** Next A301 CAN ID. Like SPARKs, simulated A301s take any ID, so none is reused in a run. */
+  private static final AtomicInteger a301Id = new AtomicInteger(1);
 
+  /** Create an A301, on a bus no other device uses. */
   public static A301 createA301() {
-    return new A301(CANPorts.fromBusId(2), a301Id.getAndIncrement() % MAX_DETACHED_ID + 1);
+    return new A301(CANPorts.fromBusId(2), a301Id.getAndIncrement());
+  }
+
+  /**
+   * Motor rotations per output shaft rotation of the A301's 64:1 gearbox, for arms and general use.
+   * The A301's gearboxes are 135:1, 64:1, 36:1, 27:1, 13.5:1 and 3:1.
+   */
+  public static final double kA301Gearbox = 64;
+
+  /**
+   * Clear the current limits of a config shared with the other motor controllers, which an A301
+   * does not have.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C withoutCurrentLimits(C cfg) {
+    cfg.withStatorCurrentLimit(null);
+    cfg.withSupplyCurrentLimit(null);
+    return cfg;
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301 on its 64:1 gearbox: see
+   * {@link #forA301(SmartMotorControllerConfig, double)}.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg) {
+    return forA301(cfg, kA301Gearbox);
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301: without current limits,
+   * and geared through an A301 gearbox, since its motor is too small to move the tests' mechanisms
+   * through the gearing they give the other motors.
+   *
+   * @param cfg Config to change.
+   * @param gearbox Motor rotations per output shaft rotation of the A301's gearbox.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg, double gearbox) {
+    withoutCurrentLimits(cfg);
+    cfg.withGearing(new MechanismGearing(GearBox.fromReductionStages(gearbox)));
+    return cfg;
   }
 
   // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the

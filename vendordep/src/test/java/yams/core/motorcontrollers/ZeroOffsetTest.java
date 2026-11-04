@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.revrobotics.encoder.DetachedEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
@@ -37,6 +38,7 @@ import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Controller;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.Encoder;
 import yams.core.motorcontrollers.AbsoluteEncoderCases.RelativeFeedback;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
 
@@ -112,6 +114,8 @@ public class ZeroOffsetTest {
           detachedEncoder.detachedEncoderAccessor.getDutyCycleOffset(),
           1e-6,
           name + ": CAN encoder duty cycle offset");
+    } else if (encoder instanceof A301) {
+      // The A301Wrapper applies the zero offset to the encoder's readings, which the test checks.
     } else if (encoder instanceof CanEncoder || smc.getMotorController() instanceof Nova) {
       // ThriftyLib keeps the CAN encoder's offset in 1/16384ths of a rotation.
       final double[] zeroOffset = new double[1];
@@ -229,11 +233,11 @@ public class ZeroOffsetTest {
         AbsoluteEncoderCases.config("ZeroOffsetTest " + name, testCase.controller())
             .withExternalEncoderZeroOffset(kZeroOffset);
     if (!testCase.feedback().talon()) {
-      // A SPARK or Nova rejects the option without an absolute encoder to give it to.
+      // A SPARK, Nova or A301 rejects the option without an absolute encoder to give it to.
       assertThrows(
           SmartMotorControllerConfigurationException.class,
           () -> AbsoluteEncoderCases.create(testCase.feedback(), config),
-          name + ": a SPARK or Nova without an absolute encoder has no zero offset");
+          name + ": a SPARK, Nova or A301 without an absolute encoder has no zero offset");
       return;
     }
     // A Talon alerts that the zero offset is not applied without an external encoder: the mechanism
