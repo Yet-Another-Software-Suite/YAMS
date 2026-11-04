@@ -122,7 +122,12 @@ public class NovaConfigTest {
     assertEventually(() -> limited.status().getSoftLimitEnable(), "soft limits enabled");
     assertEventually(() -> Math.abs(limited.status().getSoftLimitForward() - 0.125) < 1e-6, "forward soft limit in mechanism rotations");
     assertEventually(() -> Math.abs(limited.status().getSoftLimitReverse() + 0.25) < 1e-6, "reverse soft limit in mechanism rotations");
-    assertEventually(() -> !limited.status().getAbsWrapping(), "no wrapping");
+
+    // A Nova wraps an absolute encoder closing its loop by default.
+    final Nova notWrapping = DeviceCreator.createNova();
+    new NovaWrapper(notWrapping, DCMotor.getNEO(1),
+        config("not wrapping").withExternalEncoder(DeviceCreator.createCanEncoder()).withUseExternalFeedbackEncoder(true));
+    assertEventually(() -> !notWrapping.status().getAbsWrapping(), "no wrapping");
 
     final Nova wrapping = DeviceCreator.createNova();
     new NovaWrapper(wrapping, DCMotor.getNEO(1),

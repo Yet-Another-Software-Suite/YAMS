@@ -957,12 +957,15 @@ public class SparkWrapper extends SmartMotorController {
           m_sparkBaseConfig.absoluteEncoder.zeroOffset(config.getExternalEncoderZeroOffset().get().times(mechToEncoder).in(Rotations));
         }
 
-        // The absolute encoder reads the continuous wrapping range. REVLib's range offset is the
-        // middle of it, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5 for [0, 1).
+        // The absolute encoder reads the continuous wrapping range: one rotation, offset by
+        // REVLib's range offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5)
+        // rotations, 0.5 for [0, 1).
         if (config.getContinuousWrapping().isPresent()) {
-          final double rangeOffset = config.getContinuousWrapping().get().in(Rotations) - 0.5;
-          if (rangeOffset < -0.5 || rangeOffset > 0.5) {
-            throw new SmartMotorControllerConfigurationException("SPARK absolute encoder reads a range from [-1, 0) to [0, 1) rotations", "Continuous wrapping could not be applied to the absolute encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))");
+          final double min = config.getContinuousWrappingMin().orElseThrow().in(Rotations);
+          final double max = config.getContinuousWrapping().get().in(Rotations);
+          final double rangeOffset = (min + max) / 2;
+          if (Math.abs(max - min - 1) > 1e-9 || rangeOffset < -0.5 || rangeOffset > 0.5) {
+            throw new SmartMotorControllerConfigurationException("SPARK absolute encoder reads one rotation, from [-1, 0) to [0, 1) rotations", "Continuous wrapping could not be applied to the absolute encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))");
           }
           m_sparkBaseConfig.absoluteEncoder.rangeOffset(rangeOffset);
         }

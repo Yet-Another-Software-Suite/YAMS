@@ -752,13 +752,15 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
     if (useExternalEncoder) sparkCfg.closedLoop.SetFeedbackSensor(FeedbackSensor::kAbsoluteEncoder);
     m_absEncoderZeroOffset = zeroOffsetRotations;
     if (zeroOffset) sparkCfg.absoluteEncoder.ZeroOffset(zeroOffsetRotations);
-    // The absolute encoder reads the continuous wrapping range. REVLib's range offset is the
-    // middle of it, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5 for [0, 1).
-    if (wrappingMax) {
-      const double rangeOffset = wrappingMax->value() - 0.5;
-      if (rangeOffset < -0.5 || rangeOffset > 0.5)
+    // The absolute encoder reads the continuous wrapping range: one rotation, offset by REVLib's
+    // range offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5
+    // for [0, 1).
+    if (wrappingMin && wrappingMax) {
+      const double rangeOffset = (wrappingMin->value() + wrappingMax->value()) / 2.0;
+      if (std::abs(wrappingMax->value() - wrappingMin->value() - 1.0) > 1e-9 ||
+          rangeOffset < -0.5 || rangeOffset > 0.5)
         throw exceptions::SmartMotorControllerConfigurationException(
-            "SPARK absolute encoder reads a range from [-1, 0) to [0, 1) rotations",
+            "SPARK absolute encoder reads one rotation, from [-1, 0) to [0, 1) rotations",
             "Continuous wrapping could not be applied to the absolute encoder",
             "WithContinuousWrapping(-0.5_tr, 0.5_tr)");
       sparkCfg.absoluteEncoder.RangeOffset(rangeOffset);
