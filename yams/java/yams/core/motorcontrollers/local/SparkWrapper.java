@@ -470,7 +470,7 @@ public class SparkWrapper extends SmartMotorController {
     if (!RobotBase.isSimulation() || m_config.getArmFeedforward(m_slot).isEmpty() || setpointPosition.isEmpty() || simulatingMaxMotion || m_expoProfile.isPresent() || m_lqr.isPresent()) {
       return;
     }
-    final Angle setpoint = m_config.getContinuousWrapping().isPresent() ? m_config.getContinuousWrappingSetpoint(setpointPosition.get(), getMechanismPosition()) : setpointPosition.get();
+    final Angle setpoint = setpointPosition.get();
     // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
     final double gravityVolts = m_config.getArmFeedforward(m_slot).get().getKg() * Math.cos(getMechanismPosition().in(Radians));
     useVelocityGains(false);
@@ -669,9 +669,9 @@ public class SparkWrapper extends SmartMotorController {
     // While simulating MAXMotion, simIterate() follows the profile to this setpoint instead.
     final boolean simulatingMaxMotion = RobotBase.isSimulation() && m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse();
     if (m_expoProfile.isEmpty() && m_lqr.isEmpty() && angle != null && !simulatingMaxMotion) {
-      final Angle setpoint = m_config.getContinuousWrapping().isPresent() ? m_config.getContinuousWrappingSetpoint(angle, getMechanismPosition()) : angle;
       useVelocityGains(false);
-      configureSpark(() -> m_sparkPidController.setSetpoint(setpoint.times(m_mechanismToFeedbackSensorRatio).in(Rotations), m_positionControlType, m_closedLoopSlot));
+      // The SPARK wraps the setpoint over the continuous wrapping range itself.
+      configureSpark(() -> m_sparkPidController.setSetpoint(angle.times(m_mechanismToFeedbackSensorRatio).in(Rotations), m_positionControlType, m_closedLoopSlot));
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -943,8 +943,7 @@ public class SparkWrapper extends SmartMotorController {
     if (wrappingMin.isPresent() && wrappingMax.isPresent()) {
       // The SPARK's wrapping range is in rotations of its feedback sensor, so scale the mechanism's
       // range by the sensor rotations per mechanism rotation: the motor's encoder behind gearing
-      // turns several times per mechanism rotation. setPosition(Angle) still sends the equivalent
-      // setpoint nearest the current position, so the profiles and controllers YAMS runs agree.
+      // turns several times per mechanism rotation.
       m_sparkBaseConfig.closedLoop.positionWrappingEnabled(true)
                                   .positionWrappingInputRange(wrappingMin.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations),
                                                               wrappingMax.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations));

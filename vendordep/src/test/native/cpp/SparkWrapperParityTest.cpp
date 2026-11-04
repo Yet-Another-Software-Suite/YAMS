@@ -588,9 +588,9 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ContinuousWrappingRangeInFeedb
         return spark->configAccessor.closedLoop.GetPositionWrappingMaxInput();
       }, "wrapping max input");
       smc.SetPosition(0.9_tr);
-      // Nearest equivalent of 0.9 rotations from 0 is -0.1 rotations = -1 motor rotation.
-      CheckDevice(-1.0, [&] { return spark->GetClosedLoopController().GetSetpoint().Get(); },
-                  "wrapped setpoint");
+      // Position control wraps on the SPARK, so the setpoint is sent as is: 9 motor rotations.
+      CheckDevice(9.0, [&] { return spark->GetClosedLoopController().GetSetpoint().Get(); },
+                  "setpoint");
     }
     ResetSpark(*spark);
   }

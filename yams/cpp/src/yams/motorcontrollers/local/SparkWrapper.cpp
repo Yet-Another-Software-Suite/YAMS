@@ -591,8 +591,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 
   // Position wrapping. The SPARK's wrapping range is in rotations of its feedback sensor, so scale
   // the mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
-  // gearing turns several times per mechanism rotation. SetPosition() still sends the equivalent
-  // setpoint nearest the current position, so the profiles and controllers YAMS runs agree.
+  // gearing turns several times per mechanism rotation.
   // Wrap only over a full range: both the minimum and the maximum.
   const auto wrapMin = config.GetContinuousWrappingMin();
   const auto wrapMax = config.GetContinuousWrapping();
@@ -993,10 +992,7 @@ void SparkWrapper::IterateSimulatedArmGravity() {
   }
   const auto ff = GetSlotFeedforward(*m_config, m_slot);
   if (!ff) return;
-  const wpi::units::turn_t setpoint =
-      m_config->GetContinuousWrapping()
-          ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, GetMechanismPosition())
-          : *m_setpointPosition;
+  const wpi::units::turn_t setpoint = *m_setpointPosition;
   // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
   const double gravityVolts = ff->kG * std::cos(wpi::units::radian_t{GetMechanismPosition()}.value());
   UseVelocityGains(false);
@@ -1098,13 +1094,10 @@ void SparkWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointPosition = angle;
   // While simulating MAXMotion, SimIterate() follows the profile to this setpoint instead.
   if (!HasExponentialProfile() && !m_lqr && !SimulatingMaxMotion()) {
-    const wpi::units::turn_t setpoint =
-        m_config->GetContinuousWrapping()
-            ? m_config->GetContinuousWrappingSetpoint(angle, GetMechanismPosition())
-            : angle;
     UseVelocityGains(false);
+    // The SPARK wraps the setpoint over the continuous wrapping range itself.
     ConfigureSpark([&] {
-      return m_sparkPid->SetSetpoint(setpoint.value() * m_mechanismToFeedbackSensorRatio,
+      return m_sparkPid->SetSetpoint(angle.value() * m_mechanismToFeedbackSensorRatio,
                                      m_positionControlType, m_closedLoopSlot);
     });
   }
