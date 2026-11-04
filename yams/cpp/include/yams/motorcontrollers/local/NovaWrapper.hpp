@@ -24,9 +24,13 @@ namespace yams::motorcontrollers::local {
 /**
  * SmartMotorController implementation for The Thrifty Bot's Thrifty Nova, using ThriftyLib 2027.
  *
- * The closed loop controller runs on the SystemCore and commands the Nova with voltage, like the
- * profiled controllers of the other wrappers. ThriftyLib's simulation ignores the Nova's onboard
- * PID gains, so running the loop on the SystemCore keeps simulation and the robot the same.
+ * The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
+ * gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
+ * kV, kA and kG and a constant or cosine gravity. The Nova applies a feedforward only with a motion
+ * profile, so a feedforward needs a trapezoidal profile. An LQR, an exponential profile and a
+ * velocity trapezoidal profile run on the SystemCore instead, and command the Nova with voltage.
+ * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
+ * closed loop, so in simulation a NovaSimSupplier runs it.
  *
  * Supported external encoders (WithExternalEncoder):
  * - `thrifty::Motor::FeedbackSensorType::ABS`: an absolute encoder on the Nova's data port. Its
