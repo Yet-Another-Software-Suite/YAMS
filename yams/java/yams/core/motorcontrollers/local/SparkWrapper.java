@@ -937,17 +937,17 @@ public class SparkWrapper extends SmartMotorController {
       m_sparkRelativeEncoder.setPosition(config.getStartingPosition().get().times(mechToRotorRatio).in(Rotations));
     }
     // PID Wrapping
-    if (config.getContinuousWrapping().isPresent() || config.getContinuousWrappingMin().isPresent()) {
-      // TODO: Continuous wrapping no longer has bounds, double check bounds and throw an error when
-      // unexpected bound shows up
-      // REVLib's position wrapping has no input range: the SPARK wraps every rotation of its
-      // feedback sensor. That is one mechanism rotation for an absolute encoder on the mechanism,
-      // but behind any gearing the motor's own encoder turns several times per mechanism rotation.
-      // Then setPosition(Angle) sends the equivalent setpoint nearest the current position, from
-      // SmartMotorControllerConfig#getContinuousWrappingSetpoint, instead.
-      final boolean absoluteEncoderFeedback = config.getUseExternalFeedback()
-                                              && config.getExternalEncoder().filter(encoder -> encoder instanceof SparkAbsoluteEncoder || encoder instanceof DetachedEncoder).isPresent();
-      m_sparkBaseConfig.closedLoop.positionWrappingEnabled(absoluteEncoderFeedback);
+    // Wrap only over a full range: both the minimum and the maximum.
+    final Optional<Angle> wrappingMin = config.getContinuousWrappingMin();
+    final Optional<Angle> wrappingMax = config.getContinuousWrapping();
+    if (wrappingMin.isPresent() && wrappingMax.isPresent()) {
+      // The SPARK's wrapping range is in rotations of its feedback sensor, so scale the mechanism's
+      // range by the sensor rotations per mechanism rotation: the motor's encoder behind gearing
+      // turns several times per mechanism rotation. setPosition(Angle) still sends the equivalent
+      // setpoint nearest the current position, so the profiles and controllers YAMS runs agree.
+      m_sparkBaseConfig.closedLoop.positionWrappingEnabled(true)
+                                  .positionWrappingInputRange(wrappingMin.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations),
+                                                              wrappingMax.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations));
     } else {
       // Set either way: the SPARK keeps its previous configuration.
       m_sparkBaseConfig.closedLoop.positionWrappingEnabled(false);

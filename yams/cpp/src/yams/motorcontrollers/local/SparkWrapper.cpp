@@ -589,19 +589,20 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   if (auto start = config.GetStartingPosition(); start)
     m_relEncoder->SetPosition(start->value() * mechToRotorRatio);
 
-  // Position wrapping. REVLib's wrapping has no input range: the SPARK wraps every rotation of its
-  // feedback sensor, which is one mechanism rotation only for an absolute encoder on the
-  // mechanism. Otherwise SetPosition() sends the equivalent setpoint nearest the current position.
-  bool absoluteFeedback = false;
-  if (useExternalEncoder) {
-    if (auto enc = config.GetExternalEncoder(); enc) {
-      absoluteFeedback = std::any_cast<SparkAbsoluteEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::DetachedEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::SplineEncoder*>(&*enc);
-    }
+  // Position wrapping. The SPARK's wrapping range is in rotations of its feedback sensor, so scale
+  // the mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
+  // gearing turns several times per mechanism rotation. SetPosition() still sends the equivalent
+  // setpoint nearest the current position, so the profiles and controllers YAMS runs agree.
+  // Wrap only over a full range: both the minimum and the maximum.
+  const auto wrapMin = config.GetContinuousWrappingMin();
+  const auto wrapMax = config.GetContinuousWrapping();
+  if (wrapMin && wrapMax) {
+    sparkCfg.closedLoop.PositionWrappingEnabled(true).PositionWrappingInputRange(
+        wrapMin->value() * m_mechanismToFeedbackSensorRatio,
+        wrapMax->value() * m_mechanismToFeedbackSensorRatio);
+  } else {
+    sparkCfg.closedLoop.PositionWrappingEnabled(false);
   }
-  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetContinuousWrapping().has_value() &&
-                                              absoluteFeedback);
 
   ApplyExternalEncoder(config, useExternalEncoder);
 

@@ -109,7 +109,10 @@ public class DeviceCreator {
     if (device > 0 && device % (idsPerBus * kThriftyBuses) == 0) {
       System.err.println("Warning: used every Thrifty device ID on every bus, reusing them");
     }
-    return new Nova(device / idsPerBus % kThriftyBuses, device % idsPerBus);
+    return new Nova(
+        device / idsPerBus % kThriftyBuses,
+        device % idsPerBus,
+        com.thrifty.core.Motor.MotorType.NEO);
   }
 
   /**

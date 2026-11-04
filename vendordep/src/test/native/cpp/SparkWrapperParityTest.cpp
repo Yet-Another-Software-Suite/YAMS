@@ -568,19 +568,25 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.QuadratureAndDetachedEncoders"
   }
 }
 
-TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ContinuousWrappingOnlyForAbsoluteFeedback",
+TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ContinuousWrappingRangeInFeedbackRotations",
                  "[SparkParity]") {
-  SECTION("Motor encoder feedback wraps the setpoint instead") {
+  auto wrapping = [&](rev::spark::SparkMax& spark) {
+    return spark.configAccessor.closedLoop.GetPositionWrappingEnabled() ? 1.0 : 0.0;
+  };
+  SECTION("Motor encoder feedback wraps over the mechanism range in motor rotations") {
     auto spark = MakeSparkMax();
     auto cfg = BaseConfig(10.0);
     cfg.WithFeedback(1.0, 0.0, 0.0).WithContinuousWrapping(-0.5_tr, 0.5_tr);
     {
       SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
-      // The motor's encoder turns 10 times per mechanism rotation, so SPARK wrapping (every
-      // sensor rotation) would be wrong.
-      CheckDevice(0.0, [&] {
-        return spark->configAccessor.closedLoop.GetPositionWrappingEnabled() ? 1.0 : 0.0;
-      }, "position wrapping enabled");
+      // The motor's encoder turns 10 times per mechanism rotation.
+      CheckDevice(1.0, [&] { return wrapping(*spark); }, "position wrapping enabled");
+      CheckDevice(-5.0, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMinInput();
+      }, "wrapping min input");
+      CheckDevice(5.0, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMaxInput();
+      }, "wrapping max input");
       smc.SetPosition(0.9_tr);
       // Nearest equivalent of 0.9 rotations from 0 is -0.1 rotations = -1 motor rotation.
       CheckDevice(-1.0, [&] { return spark->GetClosedLoopController().GetSetpoint().Get(); },
@@ -588,7 +594,7 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ContinuousWrappingOnlyForAbsol
     }
     ResetSpark(*spark);
   }
-  SECTION("Absolute encoder feedback wraps on the SPARK") {
+  SECTION("Absolute encoder feedback wraps over the mechanism range in encoder rotations") {
     auto spark = MakeSparkMax();
     auto cfg = BaseConfig();
     cfg.WithFeedback(1.0, 0.0, 0.0)
@@ -596,9 +602,47 @@ TEST_CASE_METHOD(SparkParityFixture, "SparkParity.ContinuousWrappingOnlyForAbsol
         .WithContinuousWrapping(-0.5_tr, 0.5_tr);
     {
       SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
-      CheckDevice(1.0, [&] {
-        return spark->configAccessor.closedLoop.GetPositionWrappingEnabled() ? 1.0 : 0.0;
-      }, "position wrapping enabled");
+      CheckDevice(1.0, [&] { return wrapping(*spark); }, "position wrapping enabled");
+      CheckDevice(-0.5, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMinInput();
+      }, "wrapping min input");
+      CheckDevice(0.5, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMaxInput();
+      }, "wrapping max input");
+    }
+    ResetSpark(*spark);
+  }
+  SECTION("Absolute encoder set but not used wraps over the range in motor rotations") {
+    auto spark = MakeSparkMax();
+    auto cfg = BaseConfig(10.0);
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(&spark->GetAbsoluteEncoder())
+        .WithUseExternalFeedbackEncoder(false)
+        .WithContinuousWrapping(-0.5_tr, 0.5_tr);
+    {
+      SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
+      CheckDevice(1.0, [&] { return wrapping(*spark); }, "position wrapping enabled");
+      CheckDevice(-5.0, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMinInput();
+      }, "wrapping min input");
+      CheckDevice(5.0, [&] {
+        return spark->configAccessor.closedLoop.GetPositionWrappingMaxInput();
+      }, "wrapping max input");
+    }
+    ResetSpark(*spark);
+  }
+  SECTION("No continuous wrapping turns the SPARK's wrapping off") {
+    auto spark = MakeSparkMax();
+    // Turn wrapping on first, so the test sees YAMS turn it off.
+    rev::spark::SparkMaxConfig wrapped;
+    wrapped.closedLoop.PositionWrappingEnabled(true);
+    spark->Configure(wrapped, rev::ResetMode::kNoResetSafeParameters,
+                     rev::PersistMode::kNoPersistParameters);
+    auto cfg = BaseConfig(10.0);
+    cfg.WithFeedback(1.0, 0.0, 0.0);
+    {
+      SparkWrapper smc{spark.get(), wpi::math::DCMotor::NEO(1), &cfg};
+      CheckDevice(0.0, [&] { return wrapping(*spark); }, "position wrapping enabled");
     }
     ResetSpark(*spark);
   }
