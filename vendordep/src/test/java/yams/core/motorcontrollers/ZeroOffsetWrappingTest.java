@@ -25,22 +25,22 @@ import yams.helpers.MockHardwareExtension;
 
 /**
  * Tests {@link SmartMotorControllerConfig#withExternalEncoderZeroOffset} together with
- * {@link SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}: the zero offset moves
- * the encoder's zero, and the discontinuity point moves with it.
+ * {@link SmartMotorControllerConfig#withContinuousWrapping}, the range the encoder reads: the zero
+ * offset moves the encoder's zero, and the range moves with it.
  *
  * <p>For every absolute external encoder on every motor controller ({@link AbsoluteEncoderCases})
- * and for both discontinuity points, the encoder is configured with a zero offset of 90° and the
+ * and for both wrapping ranges, the encoder is configured with a zero offset of 90° and the
  * mechanism goes to two angles. The encoder reports angles from one rotation below its
- * discontinuity point up to it, measured from where the mechanism is at zero: [-180°, 180°) for
+ * wrapping maximum up to it, measured from where the mechanism is at zero: [-180°, 180°) for
  * 0.5 rotations and [0°, 360°) for 1 rotation.
  *
- * <p>If the discontinuity point stayed where it is without a zero offset, the offset would shift
+ * <p>If the range stayed where it is without a zero offset, the offset would shift
  * that range by 90° instead, to [-270°, 90°) and [-90°, 270°). One angle of each case is outside
- * the shifted range, so it is only reported as itself when the discontinuity point has moved with
+ * the shifted range, so it is only reported as itself when the range has moved with
  * the zero: 120° for 0.5 rotations, which would otherwise read -240°, and 300° for 1 rotation, which
  * would otherwise read -60°.
  */
-public class ZeroOffsetDiscontinuityPointTest {
+public class ZeroOffsetWrappingTest {
   private static final Angle kTolerance = Degrees.of(5);
   private static final Angle kZeroOffset = Degrees.of(90);
 
@@ -55,12 +55,12 @@ public class ZeroOffsetDiscontinuityPointTest {
     Preferences.removeAll();
   }
 
-  /** An encoder, a discontinuity point, and an angle to go to. */
-  private record Case(Encoder encoder, Angle discontinuityPoint, Angle setpoint) {
+  /** An encoder, the continuous wrapping's maximum, and an angle to go to. */
+  private record Case(Encoder encoder, Angle wrappingMax, Angle setpoint) {
     String name() {
       return encoder
-          + " discontinuity point "
-          + discontinuityPoint.in(Rotations)
+          + " wrapping maximum "
+          + wrappingMax.in(Rotations)
           + " rotations at "
           + setpoint.in(Degrees)
           + " degrees";
@@ -75,13 +75,13 @@ public class ZeroOffsetDiscontinuityPointTest {
   private static Stream<Case> createCases() {
     final List<Case> cases = new ArrayList<>();
     for (Encoder encoder : Encoder.values()) {
-      // 120 degrees is only in [-180, 180) when the discontinuity point moved with the zero offset.
+      // 120 degrees is only in [-180, 180) when the range moved with the zero offset.
       // A Nova closing its loop on an absolute encoder reads it over [0, 1) rotations only.
       if (encoder != Encoder.NOVA_ABSOLUTE && encoder != Encoder.NOVA_CAN) {
         cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(120)));
         cases.add(new Case(encoder, Rotations.of(0.5), Degrees.of(-120)));
       }
-      // 300 degrees is only in [0, 360) when the discontinuity point moved with the zero offset.
+      // 300 degrees is only in [0, 360) when the range moved with the zero offset.
       cases.add(new Case(encoder, Rotations.of(1), Degrees.of(300)));
       cases.add(new Case(encoder, Rotations.of(1), Degrees.of(30)));
     }
@@ -90,16 +90,16 @@ public class ZeroOffsetDiscontinuityPointTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("createCases")
-  void discontinuityPointMovesWithTheZeroOffset(Case testCase) {
+  void wrappingRangeMovesWithTheZeroOffset(Case testCase) {
     final String name = testCase.name();
     final SmartMotorController smc =
         AbsoluteEncoderCases.create(
             testCase.encoder(),
-            AbsoluteEncoderCases.config("ZeroOffsetDiscontinuityPointTest " + name, Controller.PID),
+            AbsoluteEncoderCases.config("ZeroOffsetWrappingTest " + name, Controller.PID),
             config ->
                 config
                     .withExternalEncoderZeroOffset(kZeroOffset)
-                    .withExternalEncoderDiscontinuityPoint(testCase.discontinuityPoint()));
+                    .withContinuousWrapping(testCase.wrappingMax().minus(Rotations.of(1)), testCase.wrappingMax()));
     try {
       AbsoluteEncoderCases.runTo(smc, testCase.encoder(), testCase.setpoint(), Seconds.of(2.5));
 

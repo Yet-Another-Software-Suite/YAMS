@@ -16,28 +16,24 @@
  * MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
  * </ul>
  *
- * <h2>Absolute encoder discontinuity</h2>
+ * <h2>Absolute encoder range</h2>
  *
- * <p>When a {@code SparkAbsoluteEncoder} (REV Through Bore Encoder) is used as the feedback device,
- * a <em>discontinuity point</em> <strong>must</strong> be configured so the SPARK firmware knows
- * where the sensor wraps around. Set this via
- * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}:
+ * <p>An absolute encoder, such as a REV Through Bore Encoder on a {@code SparkAbsoluteEncoder},
+ * reads [0, 1) rotations. With
+ * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withContinuousWrapping}, it reads the
+ * wrapping range instead, with the encoder on the mechanism:
  *
  * <ul>
- * <li>{@code 0.5} sensor range {@code [-0.5, 0.5)}: useful when the mechanism travels through
- * zero and must not have a wrap at the midpoint of travel.
- * <li>{@code 1.0} sensor range {@code [0, 1)}: useful when the mechanism only moves in the
- * positive direction and zero is never crossed.
+ * <li>{@code [-0.5, 0.5)}: when the mechanism travels through zero.
+ * <li>{@code [0, 1)}: when zero is never crossed.
  * </ul>
- *
- * Omitting this setting when an absolute encoder is attached will produce a configuration warning
- * and may cause erratic position readings near the wrap boundary.
  *
  * <h2>Construction</h2>
  *
  * <pre>{@code
  * SmartMotorControllerConfig config = new SmartMotorControllerConfig()
- *     .withExternalEncoderDiscontinuityPoint(0.5);
+ *     .withClosedLoopController(4, 0, 0)
+ *     .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
  * SmartMotorController motor = new SparkWrapper(
  *     new SparkMax(5, MotorType.kBrushless), DCMotor.getNEO(1), config);
  * }</pre>

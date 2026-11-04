@@ -46,7 +46,6 @@ public class CoralIntake extends SubsystemBase {
         .withExternalEncoder(wristMotor.getAbsoluteEncoder())
         .withUseExternalFeedbackEncoder(true)
         .withExternalEncoderInverted(true)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(1))
         .withContinuousWrapping(Rotations.of(0), Rotations.of(1))
         .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(kWristCurrentLimit)

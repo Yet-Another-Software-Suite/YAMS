@@ -16,6 +16,7 @@ import static yams.core.motorcontrollers.ClosedLoopCases.averageVoltage;
 import static yams.core.motorcontrollers.ClosedLoopCases.baseConfig;
 import static yams.core.motorcontrollers.ClosedLoopCases.close;
 import static yams.core.motorcontrollers.ClosedLoopCases.create;
+import static yams.core.motorcontrollers.ClosedLoopCases.createForVelocity;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -98,7 +99,7 @@ public class FeedforwardTest {
   void staticGainWithVelocityControl(Controller controller) {
     final double kS = 0.5;
     final SmartMotorController smc =
-        create(
+        createForVelocity(
             controller,
             config("kS velocity", controller).withFeedforward(new SimpleMotorFeedforward(kS, 0, 0)));
     try {
@@ -136,7 +137,7 @@ public class FeedforwardTest {
     final double kV = 1;
     final double velocity = 1;
     final SmartMotorController smc =
-        create(
+        createForVelocity(
             controller,
             config("kV velocity", controller).withFeedforward(new SimpleMotorFeedforward(0, kV, 0)));
     try {
@@ -204,7 +205,7 @@ public class FeedforwardTest {
     final double kV = 5;
     final double velocity = 0.1;
     final SmartMotorController smc =
-        create(
+        createForVelocity(
             controller,
             config("linear kV", controller)
                 .withMechanismCircumference(Meters.of(0.2))

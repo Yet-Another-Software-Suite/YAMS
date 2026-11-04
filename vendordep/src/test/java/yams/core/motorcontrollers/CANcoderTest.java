@@ -57,18 +57,19 @@ public class CANcoderTest {
     talon.close();
   }
 
-  /** The discontinuity point the CANcoder holds, in rotations. */
-  private static double cancoderDiscontinuityPoint(CANcoder cancoder) {
+  /** The AbsoluteSensorDiscontinuityPoint the CANcoder holds, in rotations. */
+  private static double cancoderAbsoluteSensorDiscontinuityPoint(CANcoder cancoder) {
     final CANcoderConfiguration config = new CANcoderConfiguration();
     DeviceCreator.refreshConfig(() -> cancoder.getConfigurator().refresh(config, 1.0));
     return config.MagnetSensor.AbsoluteSensorDiscontinuityPoint;
   }
 
   /**
-   * Test 1: Verify that a valid discontinuity point of 0.5 rotations is accepted without exception.
+   * Test 1: Continuous wrapping over [-0.5, 0.5) rotations gives the CANcoder an
+   * AbsoluteSensorDiscontinuityPoint of 0.5 rotations.
    */
   @Test
-  void testDiscontinuityPointApplied() {
+  void testWrappingCenteredOnZeroApplied() {
     TalonFX talon = DeviceCreator.createTalonFX();
     CANcoder cancoder = DeviceCreator.createCANcoderFor(talon);
     SmartMotorControllerConfig config =
@@ -77,22 +78,24 @@ public class CANcoderTest {
             .withTelemetry("TalonFX(80) CANcoder DP0.5", TelemetryVerbosity.LOW)
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
             .withExternalEncoder(cancoder)
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
 
     TalonFXWrapper[] result = new TalonFXWrapper[1];
     assertDoesNotThrow(
         () -> result[0] = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config));
     if (result[0] != null) {
-      assertEquals(0.5, cancoderDiscontinuityPoint(cancoder), 1e-9);
+      assertEquals(0.5, cancoderAbsoluteSensorDiscontinuityPoint(cancoder), 1e-9);
       closeWrapper(result[0], talon);
     }
   }
 
   /**
-   * Test 2: Verify that a valid discontinuity point of 1.0 rotations is accepted without exception.
+   * Test 2: Continuous wrapping over [0, 1) rotations gives the CANcoder an
+   * AbsoluteSensorDiscontinuityPoint of 1 rotation.
    */
   @Test
-  void testDiscontinuityPoint1_0Accepted() {
+  void testWrappingFromZeroApplied() {
     TalonFX talon = DeviceCreator.createTalonFX();
     CANcoder cancoder = DeviceCreator.createCANcoderFor(talon);
     SmartMotorControllerConfig config =
@@ -101,29 +104,39 @@ public class CANcoderTest {
             .withTelemetry("TalonFX(81) CANcoder DP1.0", TelemetryVerbosity.LOW)
             .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
             .withExternalEncoder(cancoder)
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(0), Rotations.of(1));
 
     TalonFXWrapper[] result = new TalonFXWrapper[1];
     assertDoesNotThrow(
         () -> result[0] = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config));
     if (result[0] != null) {
-      assertEquals(1, cancoderDiscontinuityPoint(cancoder), 1e-9);
+      assertEquals(1, cancoderAbsoluteSensorDiscontinuityPoint(cancoder), 1e-9);
       closeWrapper(result[0], talon);
     }
   }
 
   /**
-   * Test 3: Verify that an invalid discontinuity point (not 0.5 or 1.0) throws at config-build
-   * time. No TalonFX/subsystem is created because the exception fires on
-   * withExternalEncoderDiscontinuityPoint.
+   * Test 3: A CANcoder reads a range from [-1, 0) to [0, 1) rotations, so wrapping past 1 rotation
+   * is rejected.
    */
   @Test
-  void testInvalidDiscontinuityPointThrows() {
+  void testWrappingTheCANcoderCannotReadThrows() {
+    TalonFX talon = DeviceCreator.createTalonFX();
+    CANcoder cancoder = DeviceCreator.createCANcoderFor(talon);
+    SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withSubsystem(new SmartMotorControllerTestSubsystem())
+            .withTelemetry("TalonFX(82) CANcoder wrapping", TelemetryVerbosity.LOW)
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+            .withExternalEncoder(cancoder)
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(0.5), Rotations.of(1.5));
     assertThrows(
         SmartMotorControllerConfigurationException.class,
-        () ->
-            new SmartMotorControllerConfig()
-                .withExternalEncoderDiscontinuityPoint(Rotations.of(0.3)));
+        () -> new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config));
+    talon.close();
+    cancoder.close();
   }
 
   /** Test 4: Verify that a zero offset of 45 degrees is accepted without exception. */
@@ -148,11 +161,11 @@ public class CANcoderTest {
   }
 
   /**
-   * Test 5: Verify that constructing a TalonFXWrapper with a CANcoder but no discontinuity point
+   * Test 5: Verify that constructing a TalonFXWrapper with a CANcoder but no continuous wrapping
    * does NOT throw TalonFX handles this differently from SparkAbsoluteEncoder.
    */
   @Test
-  void testCANcoderConfiguredWithoutDiscontinuityPoint() {
+  void testCANcoderConfiguredWithoutWrapping() {
     TalonFX talon = DeviceCreator.createTalonFX();
     CANcoder cancoder = DeviceCreator.createCANcoderFor(talon);
     SmartMotorControllerConfig config =

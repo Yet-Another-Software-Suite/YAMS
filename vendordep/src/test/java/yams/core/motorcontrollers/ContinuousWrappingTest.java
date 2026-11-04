@@ -411,15 +411,14 @@ public class ContinuousWrappingTest {
    * Nova reads and wraps over itself.
    */
   private static SmartMotorControllerConfig novaWrapping(SmartMotorControllerConfig cfg) {
-    return cfg.withExternalEncoderDiscontinuityPoint(Rotations.of(1)).withContinuousWrapping(Rotations.of(0), Rotations.of(1));
+    return cfg.withContinuousWrapping(Rotations.of(0), Rotations.of(1));
   }
 
   /** Close the loop on an encoder mounted on the mechanism, 1:1. */
   private static SmartMotorControllerConfig withEncoder(
       SmartMotorControllerConfig cfg, Object encoder) {
     return cfg.withExternalEncoder(encoder)
-        .withUseExternalFeedbackEncoder(true)
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+        .withUseExternalFeedbackEncoder(true);
   }
 
   private static void closeSmc(SmartMotorController smc) {

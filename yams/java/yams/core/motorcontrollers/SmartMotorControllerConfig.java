@@ -255,10 +255,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private Optional<Angle> zeroOffset = Optional.empty();
   /**
-   * External absolute encoder discontinuity point.
-   */
-  private Optional<Angle> externalEncoderDiscontinuityPoint = Optional.empty();
-  /**
    * Temperature cutoff for the {@link SmartMotorController} to prevent
    running if above. */
   private Optional<Temperature> temperatureCutoff = Optional.empty();
@@ -376,7 +372,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.verbosity = cfg.verbosity;
     this.specifiedTelemetryConfig = cfg.specifiedTelemetryConfig;
     this.zeroOffset = cfg.zeroOffset;
-    this.externalEncoderDiscontinuityPoint = cfg.externalEncoderDiscontinuityPoint;
     this.temperatureCutoff = cfg.temperatureCutoff;
     this.encoderInverted = cfg.encoderInverted;
     this.motorInverted = cfg.motorInverted;
@@ -652,25 +647,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot set zero offset.", "withMechanismCircumference(Distance)");
     }
     return withExternalEncoderZeroOffset(convertToMechanism(distance));
-  }
-
-  /**
-   * Set the external encoder absolute position to wrap around a defined discontinuity point.
-   *
-   * @param discontinuityPoint Discontinuity point of the external encoder, when provided 0.5rot the
-   *                           external encoder will read between [-0.5, 0.5]; when provided 1rot
-   *                           the external encoder will read between [0, 1].
-   * @return {@link SmartMotorControllerConfig} for chaining.
-   * @throws SmartMotorControllerConfigurationException if the discontinuity point is not equivalent
-   *                                                    to 0.5 or 1 rotations.
-   * @implNote Only works for External Absolute Encoders.
-   */
-  public T withExternalEncoderDiscontinuityPoint(Angle discontinuityPoint) {
-    if (!discontinuityPoint.isEquivalent(Rotations.of(1)) && !discontinuityPoint.isEquivalent(Rotations.of(0.5))) {
-      throw new SmartMotorControllerConfigurationException("Cannot set external encoder discontinuity point", "Discontinuity point must be 0.5 or 1 rotations", "withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)");
-    }
-    externalEncoderDiscontinuityPoint = Optional.of(discontinuityPoint);
-    return self();
   }
 
   /**
@@ -2343,7 +2319,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<Angle> getContinuousWrapping() {
     if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the discontinuity point.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the continuous wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
           Rotations) + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     basicOptions.remove(BasicOptions.ContinuousWrapping);
@@ -2360,7 +2336,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<Angle> getContinuousWrappingMin() {
     if (maxContinuousWrappingAngle.isPresent() && minContinuousWrappingAngle.isPresent() && !minContinuousWrappingAngle.get().equals(Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the discontinuity point.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the continuous wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxContinuousWrappingAngle.get().in(Rotations) - 1).in(
           Rotations) + "),Rotations.of(" + maxContinuousWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     return minContinuousWrappingAngle;
@@ -2508,16 +2484,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Get the external encoder discontinuity point.
-   *
-   * @return External encoder discontinuity point.
-   */
-  public Optional<Angle> getExternalEncoderDiscontinuityPoint() {
-    externalEncoderOptions.remove(ExternalEncoderOptions.DiscontinuityPoint);
-    return externalEncoderDiscontinuityPoint;
-  }
-
-  /**
    * Setup live tuning for the {@link SmartMotorController}
    */
   public void setupLiveTuning()
@@ -2599,8 +2565,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private enum ExternalEncoderOptions {
     /** External encoder offset. */
     ZeroOffset,
-    /** External encoder zero centered. */
-    DiscontinuityPoint,
     /** Use the encoder as a feedback device. */
     UseExternalFeedbackEncoder,
     /** External gearing. */

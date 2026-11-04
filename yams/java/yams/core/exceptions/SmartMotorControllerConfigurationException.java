@@ -16,8 +16,8 @@ package yams.core.exceptions;
  * is configured the two options are mutually exclusive
  * <li>Mechanism circumference undefined when a conversion method (e.g., {@code withZeroOffset()},
  * {@code withSoftLimits()}, or linear unit conversions) requires it fix with
- * {@code withMechanismCircumference(Distance)} <li>External encoder discontinuity point outside the
- * allowed values (must be {@code Rotations.of(0.5)} or {@code Rotations.of(1)}) <li>Continuous
+ * {@code withMechanismCircumference(Distance)} <li>Continuous wrapping range an absolute external
+ * encoder cannot read, or an absolute encoder geared to the mechanism <li>Continuous
  * wrapping requested while soft limits are also set, or while a distance-based (linear) mechanism
  * circumference is configured <li>Continuous wrapping or closed-loop tolerance requested without a
  * PID controller ({@code withClosedLoopController()}) <li>Distance-based tolerance setter called on

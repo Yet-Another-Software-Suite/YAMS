@@ -59,12 +59,13 @@ public class SparkAbsoluteEncoderTest {
   }
 
   @Test
-  void testRangeOffset0With0_5DiscontinuityPoint() {
+  void testRangeOffset0WithWrappingCenteredOnZero() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
         baseConfig()
             .withExternalEncoder(sparkMax.getAbsoluteEncoder())
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
     assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
     // REVLib's range offset is the middle of the range the encoder reports: [-0.5, 0.5) rotations.
     assertRangeOffset(sparkMax, 0);
@@ -72,12 +73,13 @@ public class SparkAbsoluteEncoderTest {
   }
 
   @Test
-  void testRangeOffset0_5With1_0DiscontinuityPoint() {
+  void testRangeOffset0_5WithWrappingFromZero() {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
         baseConfig()
             .withExternalEncoder(sparkMax.getAbsoluteEncoder())
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(1));
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(0), Rotations.of(1));
     assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
     // REVLib's range offset is the middle of the range the encoder reports: [0, 1) rotations.
     assertRangeOffset(sparkMax, 0.5);
@@ -85,10 +87,14 @@ public class SparkAbsoluteEncoderTest {
   }
 
   @Test
-  void testExceptionWhenDiscontinuityPointWithoutEncoder() {
+  void testExceptionWhenWrappingARangeTheEncoderCannotRead() {
+    // The range offset moves the encoder's range from [-1, 0) to [0, 1) rotations.
     SparkMax sparkMax = DeviceCreator.createSparkMax();
     SmartMotorControllerConfig config =
-        baseConfig().withExternalEncoderDiscontinuityPoint(Rotations.of(0.5));
+        baseConfig()
+            .withExternalEncoder(sparkMax.getAbsoluteEncoder())
+            .withClosedLoopController(4, 0, 0)
+            .withContinuousWrapping(Rotations.of(0.5), Rotations.of(1.5));
     assertThrows(
         SmartMotorControllerConfigurationException.class,
         () -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));

@@ -92,11 +92,11 @@ public class NovaConfigTest {
             .withExponentialProfile(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(20))));
   }
 
-  /** The closed loop tolerance is the allowable error of the Nova's slots, in mechanism rotations. */
+  /** The closed loop tolerance is the allowable error of the Nova's slots with a PID, in mechanism rotations. */
   @Test
   void toleranceIsTheSlotsAllowableError() throws InterruptedException {
     final Nova nova = DeviceCreator.createNova();
-    new NovaWrapper(nova, DCMotor.getNEO(1), config("tolerance").withClosedLoopTolerance(Degrees.of(9)));
+    new NovaWrapper(nova, DCMotor.getNEO(1), config("tolerance").withClosedLoopController(4, 0, 0, ClosedLoopControllerSlot.SLOT_1).withClosedLoopTolerance(Degrees.of(9)));
     assertEventually(() -> Math.abs(nova.status().Pid0.getAllowableError() - 0.025) < 1e-6, "slot 0 allowable error");
     assertEventually(() -> Math.abs(nova.status().Pid1.getAllowableError() - 0.025) < 1e-6, "slot 1 allowable error");
   }

@@ -67,11 +67,11 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.StartingPositionTest"'},
     # Every absolute encoder under every closed loop controller: these create many simulated Talons,
     # which Phoenix runs in real time, so each runs in its own JVM.
-    {"group": "discontinuity-points",
-     "test-filter": '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'},
+    {"group": "absolute-encoder-ranges",
+     "test-filter": '--tests "yams.core.motorcontrollers.AbsoluteEncoderRangeTest"'},
     {"group": "zero-offsets",
      "test-filter": '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
-                    ' --tests "yams.core.motorcontrollers.ZeroOffsetDiscontinuityPointTest"'},
+                    ' --tests "yams.core.motorcontrollers.ZeroOffsetWrappingTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
     # vendor's device is given, feedforwards, exponential profiles and the simulation period. Add new
     # motor controller test classes here.
@@ -104,7 +104,8 @@ JAVA_GROUPS = [
     # The units of the gains each motor controller is given: per rotation for an arm, per meter for
     # an elevator, on the motor controller and on the SystemCore.
     {"group": "closed-loop-gain-units",
-     "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'},
+     "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'
+                    ' --tests "yams.core.motorcontrollers.NovaConfigTest"'},
     # Everything else: swerve config tests, the battery and motor simulation unit tests, and the
     # standalone math test. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.

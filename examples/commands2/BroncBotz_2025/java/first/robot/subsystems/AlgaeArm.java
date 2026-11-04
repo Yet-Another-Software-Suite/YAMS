@@ -59,9 +59,10 @@ public class AlgaeArm extends SubsystemBase {
         .withUseExternalFeedbackEncoder(false)
         .withExternalEncoderInverted(true)
         .withExternalEncoderZeroOffset(kAbsoluteEncoderOffset)
-        // The SPARK only wraps at 0.5 or 1 rotation, so the encoder reads [-180, 180) degrees. The
-        // original read [-115.2, 244.8); the arm only uses -78 to 90 degrees, so this is equivalent.
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
+        // The encoder reads the continuous wrapping range, [-180, 180) degrees. The original read
+        // [-115.2, 244.8); the arm only uses -78 to 90 degrees, so this is equivalent, and wrapping
+        // never takes the arm the other way round.
+        .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
         .withSimStartingPosition(kStartingAngle)
         .withMomentOfInertia(kLength, kMass)
         .withTelemetry("AlgaeArmMotor", TelemetryVerbosity.HIGH);

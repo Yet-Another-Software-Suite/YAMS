@@ -337,7 +337,9 @@ public abstract class SmartMotorController {
   public void startClosedLoopController() {
     if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP && !m_closedLoopControllerRunning) {
       m_pid.ifPresent(PIDController::reset);
-      m_lastClosedLoopMechanismPosition = Optional.empty();
+      // The motion profile starts from this position, so continuous wrapping keeps the angles the
+      // loop measures next to it, rather than a whole wrapping range away from it.
+      m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
       m_trapState = getTrapezoidalProfileState();
       m_expoState = getExponentialProfileState();
       m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));

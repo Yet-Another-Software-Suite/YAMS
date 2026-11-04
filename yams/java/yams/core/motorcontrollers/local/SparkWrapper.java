@@ -96,19 +96,16 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 /**
  * Spark wrapper for REV Spark Motor controllers.
  *
- * <p><b>External encoder discontinuity point support (SparkAbsoluteEncoder):</b>
+ * <p><b>Absolute encoder range:</b> with continuous wrapping, an absolute external encoder reads
+ * the wrapping range, from one rotation below its maximum up to it, so it must be on the mechanism.
  *
  * <ul>
- * <li>{@code 0.5} rotations sensor range is [-0.5, 0.5), {@code rangeOffset(0)}
- * <li>{@code 1.0} rotations sensor range is [0, 1), {@code rangeOffset(0.5)}
+ * <li>{@link com.revrobotics.spark.SparkAbsoluteEncoder}: the SPARK's range offset, for a wrapping
+ * maximum from 0 to 1 rotation, such as [-0.5, 0.5) or [0, 1).
+ * <li>{@link com.revrobotics.spark.DetachedEncoder}: zero centered or not, for [-0.5, 0.5) or [0, 1).
  * </ul>
  *
- * REVLib's {@code zeroCentered} is deprecated for removal in 2027, so the SPARK's absolute encoder
- * is given a range offset. An absolute encoder read over CAN has no range offset, and is still given
- * {@code dutyCycleZeroCentered}.
- *
- * <p>A discontinuity point <b>must</b> be configured via {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint}
- * whenever a {@link com.revrobotics.spark.SparkAbsoluteEncoder} is used as the external encoder.
+ * Without continuous wrapping, an absolute encoder reads [0, 1).
  *
  * <h2>Example</h2>
  *
@@ -118,8 +115,8 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  *     .withMotorInverted(false)
  *     .withStatorCurrentLimit(Amps.of(40))
  *     .withClosedLoopController(0.2,0,0)
- *     .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5)); // required for
- * SparkAbsoluteEncoder SmartMotorController motor = new SparkWrapper( new SparkMax(3,
+ *     .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+ * SmartMotorController motor = new SparkWrapper( new SparkMax(3,
  * MotorType.kBrushless), DCMotor.getNEO(1), config); Arm arm = new Arm(new
  * ArmConfig(motor).withLength(Meters.of(0.6)));
  * }</pre>
@@ -161,11 +158,6 @@ public class SparkWrapper extends SmartMotorController {
   /** Zero offset of the detached encoder, in its rotations. */
   private double m_detachedEncoderZeroOffset = 0;
   /**
-   * Discontinuity point of the external absolute encoder: it reports angles from one rotation below
-   * it up to it, so [-0.5, 0.5) rotations for 0.5 rotations, or [0, 1) for the default of 1 rotation.
-   */
-  private Angle m_absoluteEncoderDiscontinuityPoint = Rotations.of(1);
-  /**
    * Simulated angle of the detached encoder's shaft, not wrapped into the range it reports. REVLib
    * does not simulate detached encoders, so the detached encoder follows the mechanism simulation.
    */
@@ -191,11 +183,6 @@ public class SparkWrapper extends SmartMotorController {
   private ClosedLoopSlot m_closedLoopSlot = ClosedLoopSlot.kSlot0;
   /** Acceleration filter. */
   private DerivativeTimeFilter m_accelerationFilter = new DerivativeTimeFilter(Milliseconds.of(20));
-  /**
-   * Alert shown when external encoder gearing is set alongside an external encoder discontinuity
-   * point.
-   */
-  private Alert m_externalEncoderGearingDiscontinuityAlert;
   /** How far behind the measured velocity is, from the encoder's filtering, read when the config is applied. */
   private Optional<Time> m_velocityMeasurementDelay = Optional.empty();
   /** How often the SPARK sends the measured velocity over CAN, read when the config is applied. */
@@ -262,8 +249,6 @@ public class SparkWrapper extends SmartMotorController {
     m_sparkPidController = m_spark.getClosedLoopController();
     this.m_config = config;
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
-    m_externalEncoderGearingDiscontinuityAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ExternalEncoderGearingDiscontinuity"),
-        getName() + (" external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; " + "the discontinuity point will NOT be moved by the gearing, wrapping will occur " + "non-uniformly"), Level.HIGH);
     m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Level.HIGH);
     m_feedforwardNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedforwardNotApplied"), getName() + " feedforward gain was not applied.", Level.HIGH);
     m_sparkRelativeEncoder = controller.getEncoder();
@@ -371,9 +356,10 @@ public class SparkWrapper extends SmartMotorController {
       absoluteRotations = m_detachedEncoder.map(detachedEncoder -> RobotBase.isSimulation() ? m_detachedEncoderSimAngle.in(Rotations) : detachedEncoder.getAngle().get());
     }
     // REVLib does not wrap a simulated absolute encoder, and does not simulate detached encoders:
-    // report their simulated angles in the range the encoder reports, below its discontinuity point.
+    // report their simulated angles in the range the encoder reports, the continuous wrapping's or
+    // [0, 1) rotations.
     return absoluteRotations.map(rotations -> Rotations.of(RobotBase.isSimulation()
-                                                           ? MathUtil.inputModulus(rotations, m_absoluteEncoderDiscontinuityPoint.in(Rotations) - 1, m_absoluteEncoderDiscontinuityPoint.in(Rotations))
+                                                           ? MathUtil.inputModulus(rotations, m_config.getContinuousWrappingMin().orElse(Rotations.zero()).in(Rotations), m_config.getContinuousWrapping().orElse(Rotations.of(1)).in(Rotations))
                                                            : rotations));
   }
 
@@ -749,8 +735,8 @@ public class SparkWrapper extends SmartMotorController {
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if a supply current limit is configured.
-   * @throws SmartMotorControllerConfigurationException if an external encoder discontinuity point
-   *                                                    is configured without an external encoder.
+   * @throws SmartMotorControllerConfigurationException if continuous wrapping is configured over a
+   *                                                    range the absolute encoder cannot read.
    * @throws SmartMotorControllerConfigurationException if an external encoder zero offset is
    *                                                    configured without an external encoder.
    * @throws SmartMotorControllerConfigurationException if an external encoder inversion is
@@ -790,7 +776,6 @@ public class SparkWrapper extends SmartMotorController {
     m_config = config;
     config.resetValidationCheck();
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
-    m_externalEncoderGearingDiscontinuityAlert.set(false);
     var mechToRotorRatio = config.getGearing().getMechanismToRotorRatio();
     m_mechanismToFeedbackSensorRatio = config.getUseExternalFeedback() && config.getExternalEncoder().isPresent()
                                        ? config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()
@@ -957,7 +942,6 @@ public class SparkWrapper extends SmartMotorController {
     if (config.getExternalEncoder().isPresent()) {
       var mechToEncoder = config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio();
       Object externalEncoder = config.getExternalEncoder().get();
-      m_absoluteEncoderDiscontinuityPoint = config.getExternalEncoderDiscontinuityPoint().orElse(Rotations.of(1));
       if (externalEncoder instanceof SparkAbsoluteEncoder) {
         m_sparkAbsoluteEncoder = Optional.of((SparkAbsoluteEncoder) externalEncoder);
         var absEncoder = ((SparkAbsoluteEncoder) externalEncoder);
@@ -973,13 +957,14 @@ public class SparkWrapper extends SmartMotorController {
           m_sparkBaseConfig.absoluteEncoder.zeroOffset(config.getExternalEncoderZeroOffset().get().times(mechToEncoder).in(Rotations));
         }
 
-        if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-          if (config.getExternalEncoderGearing().isPresent()) {
-            m_externalEncoderGearingDiscontinuityAlert.set(true);
+        // The absolute encoder reads the continuous wrapping range. REVLib's range offset is the
+        // middle of it, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5 for [0, 1).
+        if (config.getContinuousWrapping().isPresent()) {
+          final double rangeOffset = config.getContinuousWrapping().get().in(Rotations) - 0.5;
+          if (rangeOffset < -0.5 || rangeOffset > 0.5) {
+            throw new SmartMotorControllerConfigurationException("SPARK absolute encoder reads a range from [-1, 0) to [0, 1) rotations", "Continuous wrapping could not be applied to the absolute encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))");
           }
-          // REVLib's range offset is the middle of the range the encoder reports: 0 for [-0.5, 0.5)
-          // rotations, 0.5 for [0, 1).
-          m_sparkBaseConfig.absoluteEncoder.rangeOffset(m_absoluteEncoderDiscontinuityPoint.in(Rotations) - 0.5);
+          m_sparkBaseConfig.absoluteEncoder.rangeOffset(rangeOffset);
         }
 
         if (RobotBase.isSimulation()) {
@@ -1002,9 +987,6 @@ public class SparkWrapper extends SmartMotorController {
         m_sparkQuadratureEncoder = Optional.of((RelativeEncoder) externalEncoder);
         if (config.getExternalEncoderZeroOffset().isPresent()) {
           throw new SmartMotorControllerConfigurationException("Zero offset is only available for absolute encoders", "Zero offset could not be applied to the quadrature encoder", ".withExternalEncoderZeroOffset");
-        }
-        if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-          throw new SmartMotorControllerConfigurationException("Discontinuity point is only available for absolute encoders", "Discontinuity point could not be applied to the quadrature encoder", ".withExternalEncoderDiscontinuityPoint");
         }
         config.getExternalEncoderInverted().ifPresent(inverted -> {
           if (m_sparkBaseConfig instanceof SparkMaxConfig sparkMaxConfig) {
@@ -1037,11 +1019,13 @@ public class SparkWrapper extends SmartMotorController {
         config.getExternalEncoderInverted().ifPresent(detachedEncoderConfig::inverted);
         m_detachedEncoderZeroOffset = config.getExternalEncoderZeroOffset().map(offset -> MathUtil.inputModulus(offset.times(mechToEncoder).in(Rotations), 0, 1)).orElse(0.0);
         detachedEncoderConfig.dutyCycleOffset(m_detachedEncoderZeroOffset);
-        // The discontinuity point is 0.5 or 1 rotation; a zero-centered angle wraps at half a rotation.
-        if (config.getExternalEncoderDiscontinuityPoint().isPresent() && config.getExternalEncoderGearing().isPresent()) {
-          m_externalEncoderGearingDiscontinuityAlert.set(true);
+        // The detached encoder reads the continuous wrapping range: [0, 1), or [-0.5, 0.5) zero
+        // centered.
+        final boolean zeroCentered = config.getContinuousWrappingMin().map(min -> min.isNear(Rotations.of(-0.5), Rotations.of(1e-9))).orElse(false);
+        if (config.getContinuousWrappingMin().isPresent() && !zeroCentered && !config.getContinuousWrappingMin().get().isNear(Rotations.zero(), Rotations.of(1e-9))) {
+          throw new SmartMotorControllerConfigurationException("SPARK detached encoder reads [-0.5, 0.5) or [0, 1) rotations", "Continuous wrapping could not be applied to the detached encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5)) or withContinuousWrapping(Rotations.of(0), Rotations.of(1))");
         }
-        detachedEncoderConfig.dutyCycleZeroCentered(m_absoluteEncoderDiscontinuityPoint.isNear(Rotations.of(0.5), Rotations.of(1e-9)));
+        detachedEncoderConfig.dutyCycleZeroCentered(zeroCentered);
         detachedEncoder.configure(detachedEncoderConfig, ResetMode.kNoResetSafeParameters);
 
         if (useExternalEncoder) {
@@ -1061,9 +1045,6 @@ public class SparkWrapper extends SmartMotorController {
       }
 
     } else {
-      if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-        throw new SmartMotorControllerConfigurationException("External encoder zero center is only available for external encoders", "External encoder zero center could not be applied", ".withExternalEncoderZeroCenter");
-      }
       if (config.getExternalEncoderZeroOffset().isPresent()) {
         throw new SmartMotorControllerConfigurationException("Zero offset is only available for external encoders", "Zero offset could not be applied", ".withExternalEncoderZeroOffset");
       }
@@ -1927,9 +1908,4 @@ public class SparkWrapper extends SmartMotorController {
     return Pair.of(Optional.empty(), Optional.of(List.of(DoubleTelemetryField.SupplyCurrent, DoubleTelemetryField.SupplyCurrentLimit)));
   }
 
-  @Override
-  public void close() {
-    super.close();
-    m_externalEncoderGearingDiscontinuityAlert.close();
-  }
 }

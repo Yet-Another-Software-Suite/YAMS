@@ -27,12 +27,10 @@
  * YAMS settings into the appropriate {@code TalonFXConfiguration} or
  * {@code TalonFXSConfiguration} objects before pushing them to the device.
  *
- * <h2>CANcoder discontinuity</h2>
- * <p>When a CANcoder is fused as the remote sensor, specifying a discontinuity point via
- * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withExternalEncoderDiscontinuityPoint} is
- * <strong>optional</strong>. If omitted, the CTRE default sensor range ({@code [0, 1)}) is used.
- * Unlike the REV absolute encoder, the Phoenix 6 firmware handles the wrap transparently in most
- * configurations.
+ * <h2>CANcoder range</h2>
+ * <p>With {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withContinuousWrapping}, a
+ * CANcoder or CANdi PWM encoder on the mechanism reads the wrapping range, from [-1, 0) to [0, 1)
+ * rotations. Without it, the encoder keeps its own range.
  *
  * <h2>Construction</h2>
  * <pre>{@code

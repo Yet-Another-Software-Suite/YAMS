@@ -126,12 +126,6 @@ public class NovaWrapper extends SmartMotorController {
   private Optional<FeedbackSensorType> m_dataPortEncoder = Optional.empty();
   /** CAN encoder used as the external encoder. */
   private Optional<CanEncoder> m_canEncoder = Optional.empty();
-  /**
-   * Discontinuity point of the external absolute encoder: it reports angles from one rotation below
-   * it up to it, so [-0.5, 0.5) rotations for 0.5 rotations, or [0, 1) for the default of 1
-   * rotation.
-   */
-  private Angle m_absoluteEncoderDiscontinuityPoint = Rotations.of(1);
   /** Acceleration filter. */
   private final DerivativeTimeFilter m_accelerationFilter =
       new DerivativeTimeFilter(Milliseconds.of(20));
@@ -266,15 +260,19 @@ public class NovaWrapper extends SmartMotorController {
     final double rotations;
     if (m_canEncoder.isPresent()) {
       rotations = m_canEncoder.get().status().getPositionAbs();
+    } else if (m_externalEncoderSim.isPresent()) {
+      // ThriftyLib's Nova simulation does not move its data port encoders with the mechanism.
+      rotations = m_externalEncoderSim.get().getPosition();
     } else if (absolute) {
       rotations = m_nova.status().getAbsPosition();
     } else {
       rotations = m_nova.status().getQuadPosition();
     }
-    // An absolute encoder reports angles within one rotation, below its discontinuity point.
+    // An absolute encoder reports angles in the continuous wrapping range, or [0, 1) rotations.
     return Optional.of(Rotations.of(absolute
-            ? MathUtil.inputModulus(rotations, m_absoluteEncoderDiscontinuityPoint.in(Rotations) -1,
-                  m_absoluteEncoderDiscontinuityPoint.in(Rotations))
+            ? MathUtil.inputModulus(rotations,
+                  m_config.getContinuousWrappingMin().orElse(Rotations.zero()).in(Rotations),
+                  m_config.getContinuousWrapping().orElse(Rotations.of(1)).in(Rotations))
             : rotations));
   }
 
@@ -289,6 +287,10 @@ public class NovaWrapper extends SmartMotorController {
     }
     if (m_canEncoder.isPresent()) {
       return Optional.of(RotationsPerSecond.of(m_canEncoder.get().status().getVelocity()));
+    }
+    if (m_externalEncoderSim.isPresent()) {
+      // ThriftyLib's Nova simulation does not move its data port encoders with the mechanism.
+      return Optional.of(RotationsPerSecond.of(m_externalEncoderSim.get().getVelocity()));
     }
     // The absolute encoder's velocity reads 0 until NovaConfig.absoluteFramePeriod enables its
     // frame.
@@ -493,8 +495,8 @@ public class NovaWrapper extends SmartMotorController {
    *
    * @throws SmartMotorControllerConfigurationException if different open and closed loop ramp
    *                                                    rates are configured.
-   * @throws SmartMotorControllerConfigurationException if a zero offset or discontinuity point is
-   *                                                    configured for a quadrature encoder.
+   * @throws SmartMotorControllerConfigurationException if a zero offset is configured for a
+   *                                                    quadrature encoder.
    * @throws SmartMotorControllerConfigurationException if an external encoder option is configured
    *                                                    without an external encoder.
    * @throws SmartMotorControllerConfigurationException if a vendor control request is configured.
@@ -537,8 +539,6 @@ public class NovaWrapper extends SmartMotorController {
     final boolean useExternalFeedback = config.getUseExternalFeedback();
     m_dataPortEncoder = Optional.empty();
     m_canEncoder = Optional.empty();
-    m_absoluteEncoderDiscontinuityPoint =
-        config.getExternalEncoderDiscontinuityPoint().orElse(Rotations.of(1));
     m_feedbackSensor = FeedbackSensorType.INTERNAL;
     m_mechanismToFeedbackSensorRatio =
         useExternalFeedback && config.getExternalEncoder().isPresent()
@@ -777,12 +777,6 @@ public class NovaWrapper extends SmartMotorController {
               "Zero offset could not be applied to the quadrature encoder",
               ".withExternalEncoderZeroOffset");
         }
-        if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-          throw new SmartMotorControllerConfigurationException(
-              "Discontinuity point is only available for absolute encoders",
-              "Discontinuity point could not be applied to the quadrature encoder",
-              ".withExternalEncoderDiscontinuityPoint");
-        }
         config.getExternalEncoderInverted().ifPresent(inverted
             -> novaConfig.add(NovaConfig.quadratureDirection(
                 inverted ? Direction.COUNTER_CLOCKWISE : Direction.CLOCKWISE)));
@@ -813,22 +807,8 @@ public class NovaWrapper extends SmartMotorController {
               NovaConfig.canEncoderMode(CanEncoderMode.ABSOLUTE),
               NovaConfig.canEncoderSource(CanEncoderSource.DIRECT));
         }
-        // The Nova reads an absolute encoder over [0, 1) rotations.
-        if (m_closedLoopOnNova && m_feedbackSensor != FeedbackSensorType.QUAD
-            && !m_absoluteEncoderDiscontinuityPoint.isNear(Rotations.of(1), Rotations.of(1e-9))) {
-          throw new SmartMotorControllerConfigurationException(
-              "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
-              "External encoder discontinuity point could not be applied",
-              ".withExternalEncoderDiscontinuityPoint(Rotations.of(1))");
-        }
       }
     } else {
-      if (config.getExternalEncoderDiscontinuityPoint().isPresent()) {
-        throw new SmartMotorControllerConfigurationException(
-            "External encoder discontinuity point is only available for external encoders",
-            "External encoder discontinuity point could not be applied",
-            ".withExternalEncoderDiscontinuityPoint");
-      }
       if (config.getExternalEncoderZeroOffset().isPresent()) {
         throw new SmartMotorControllerConfigurationException(
             "Zero offset is only available for external encoders",
