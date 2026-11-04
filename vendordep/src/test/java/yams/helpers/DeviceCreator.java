@@ -18,6 +18,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.encoder.SplineEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -84,6 +85,13 @@ public class DeviceCreator {
       System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
+  }
+
+  /** A301s take CAN IDs 1 to 62 on a bus of their own, and are closed by the test that creates them. */
+  private static final AtomicInteger a301Id = new AtomicInteger(0);
+
+  public static A301 createA301() {
+    return new A301(CANPorts.fromBusId(2), a301Id.getAndIncrement() % MAX_DETACHED_ID + 1);
   }
 
   // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the
@@ -247,19 +255,28 @@ public class DeviceCreator {
    * @param velocity Whether the mechanism is controlled by velocity.
    * @return The config.
    */
-  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(C cfg, boolean velocity) {
+  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(
+      C cfg, boolean velocity) {
     boolean feedforward = false;
     for (ClosedLoopControllerSlot slot : ClosedLoopControllerSlot.values()) {
-      feedforward |= cfg.getArmFeedforward(slot).isPresent() || cfg.getElevatorFeedforward(slot).isPresent() || cfg.getSimpleFeedforward(slot).isPresent();
+      feedforward |=
+          cfg.getArmFeedforward(slot).isPresent()
+              || cfg.getElevatorFeedforward(slot).isPresent()
+              || cfg.getSimpleFeedforward(slot).isPresent();
     }
-    if (!feedforward || cfg.getTrapezoidProfile().isPresent() || cfg.getExponentialProfile().isPresent() || cfg.getLQRClosedLoopController().isPresent()) {
+    if (!feedforward
+        || cfg.getTrapezoidProfile().isPresent()
+        || cfg.getExponentialProfile().isPresent()
+        || cfg.getLQRClosedLoopController().isPresent()) {
       return cfg;
     }
     final boolean linear = cfg.getLinearClosedLoopControllerUse();
     if (velocity && linear) {
-      cfg.withTrapezoidalProfile(MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
+      cfg.withTrapezoidalProfile(
+          MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
     } else if (velocity) {
-      cfg.withTrapezoidalProfile(DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
+      cfg.withTrapezoidalProfile(
+          DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
     } else if (linear) {
       cfg.withTrapezoidalProfile(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
     } else {

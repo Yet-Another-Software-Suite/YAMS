@@ -73,8 +73,8 @@ JAVA_GROUPS = [
      "test-filter": '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
                     ' --tests "yams.core.motorcontrollers.ZeroOffsetWrappingTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
-    # vendor's device is given, feedforwards, exponential profiles and the simulation period. Add new
-    # motor controller test classes here.
+    # vendor's device is given, feedforwards, exponential profiles, the simulation period and the
+    # A301. Add new motor controller test classes here.
     {"group": "motor-controllers",
      "test-filter": '--tests "yams.core.motorcontrollers.ArmFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"'
@@ -82,7 +82,8 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.SimulationPeriodTest"'
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'
-                    ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'},
+                    ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'
+                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'},
     # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
     # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
     # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
@@ -128,7 +129,7 @@ CPP_GROUPS = [
     # Motor controller unit tests: the parity and regression tests of each vendor's wrapper. Add new
     # motor controller tags here and to the exclusions of the other group.
     {"group": "motor-controllers",
-     "catch-filter": "[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[TalonApi]"},
+     "catch-filter": "[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[A301Parity],[TalonApi]"},
     # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in real time,
     # so they can time out on a busy runner: they run on their own.
     {"group": "talon-parity", "catch-filter": "[TalonParity]"},
@@ -137,7 +138,7 @@ CPP_GROUPS = [
     {"group": "other",
      "catch-filter": "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]"
                      "~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
-                     "~[NovaParity]~[TalonApi]~[TalonParity]"},
+                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]"},
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
