@@ -582,10 +582,10 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // Position wrapping. The SPARK's wrapping range is in rotations of its feedback sensor, so scale
   // the mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
   // gearing turns several times per mechanism rotation.
-  // Wrap only over a full range: both the minimum and the maximum.
-  const auto wrapMin = config.GetContinuousWrappingMin();
-  const auto wrapMax = config.GetContinuousWrapping();
-  if (wrapMin && wrapMax) {
+  // Wrap only when the wrapping is continuous, over a full range: both the minimum and the maximum.
+  const auto wrapMin = config.GetWrappingMin();
+  const auto wrapMax = config.GetWrappingMax();
+  if (config.IsWrappingContinuous() && wrapMin && wrapMax) {
     sparkCfg.closedLoop.PositionWrappingEnabled(true).PositionWrappingInputRange(
         wrapMin->value() * m_mechanismToFeedbackSensorRatio,
         wrapMax->value() * m_mechanismToFeedbackSensorRatio);
@@ -733,8 +733,8 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
   const double mechToEncoder = MechanismToExternalEncoderRatio();
   const auto startingPosition = config.GetStartingPosition();
   const auto zeroOffset = config.GetExternalEncoderZeroOffset();
-  const auto wrappingMin = config.GetContinuousWrappingMin();
-  const auto wrappingMax = config.GetContinuousWrapping();
+  const auto wrappingMin = config.GetWrappingMin();
+  const auto wrappingMax = config.GetWrappingMax();
   const auto inverted = config.GetExternalEncoderInverted();
   // Zero offsets are in [0, 1) rotations of the encoder.
   const double zeroOffsetRotations =
@@ -928,7 +928,7 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
       Profile::State{GetMechanismPosition(), GetMechanismVelocity()});
   // Wrap the goal against the profile, which is continuous even where the sensor wraps.
   const wpi::units::turn_t goal =
-      m_config->GetContinuousWrapping()
+      m_config->IsWrappingContinuous()
           ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, state.position)
           : *m_setpointPosition;
   // The profile runs in mechanism rotations, like MAXMotion.
@@ -1011,8 +1011,8 @@ std::optional<wpi::units::turn_t> SparkWrapper::GetExternalEncoderSensorPosition
   // rotations.
   if (wpi::RobotBase::IsSimulation()) {
     absoluteRotations = wpi::math::InputModulus(
-        *absoluteRotations, m_config->GetContinuousWrappingMin().value_or(0_tr).value(),
-        m_config->GetContinuousWrapping().value_or(1_tr).value());
+        *absoluteRotations, m_config->GetWrappingMin().value_or(0_tr).value(),
+        m_config->GetWrappingMax().value_or(1_tr).value());
   }
   return wpi::units::turn_t{*absoluteRotations};
 }

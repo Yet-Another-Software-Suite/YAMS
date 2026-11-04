@@ -563,7 +563,8 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   ApplyExternalEncoder(config);
 
   // Continuous wrapping. Set either way: the configuration starts from the device's previous one.
-  m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.GetContinuousWrapping().has_value();
+  m_talonConfig.ClosedLoopGeneral.ContinuousWrap =
+      config.GetWrappingMax().has_value() && config.IsWrappingContinuous();
 
   if (config.GetEncoderInverted())
     throw ConfigException("Integrated encoder phase cannot be set", "Cannot configure TalonFX!",
@@ -600,11 +601,11 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
     // The external encoder sets the position; the starting position is not applied.
     if (startingPosition) m_startingPositionExternalEncoderAlert->Set(true);
 
-    // A CANcoder or CANdi reads the continuous wrapping range: its AbsoluteSensorDiscontinuityPoint,
+    // A CANcoder or CANdi reads the wrapping range: its AbsoluteSensorDiscontinuityPoint,
     // the wrapping maximum, is from 0 to 1 rotation.
     const bool absoluteEncoder = std::any_cast<hardware::CANcoder*>(&*encoder) ||
                                  std::any_cast<hardware::CANdi*>(&*encoder);
-    if (auto max = config.GetContinuousWrapping();
+    if (auto max = config.GetWrappingMax();
         absoluteEncoder && max && (*max < 0_tr || *max > 1_tr))
       throw exceptions::SmartMotorControllerConfigurationException(
           "CANcoder and CANdi read a range from [-1, 0) to [0, 1) rotations",
@@ -627,8 +628,8 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
         cancoderConfig.MagnetSensor.MagnetOffset = *offset;
         m_talonConfig.Feedback.FeedbackRotorOffset = 0_tr;
       }
-      // The CANcoder reads the continuous wrapping range.
-      if (auto max = config.GetContinuousWrapping(); max)
+      // The CANcoder reads the wrapping range.
+      if (auto max = config.GetWrappingMax(); max)
         cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *max;
       configurator.Apply(cancoderConfig);
     } else if (auto* pp = std::any_cast<hardware::CANdi*>(&*encoder); pp && *pp) {
@@ -651,8 +652,8 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
           pwm.AbsoluteSensorOffset = *offset;
           m_talonConfig.Feedback.FeedbackRotorOffset = 0_tr;
         }
-        // The CANdi reads the continuous wrapping range.
-        if (auto max = config.GetContinuousWrapping(); max) pwm.AbsoluteSensorDiscontinuityPoint = *max;
+        // The CANdi reads the wrapping range.
+        if (auto max = config.GetWrappingMax(); max) pwm.AbsoluteSensorDiscontinuityPoint = *max;
       };
       if (UseCANdiPWM1()) {
         configurePWM(candiConfig.PWM1);
@@ -831,12 +832,12 @@ void TalonFXWrapper::SimIterate() {
   }
   if (m_candi) {
     // Phoenix does not wrap a simulated CANdi's PWM position: report it in the range the CANdi
-    // reads, the continuous wrapping's. The CANdi adds its zero offset to the raw position.
+    // reads, the wrapping's. The CANdi adds its zero offset to the raw position.
     wpi::units::turn_t candiPosition = sensorPosition;
-    if (auto max = m_config->GetContinuousWrapping(); max)
+    if (auto max = m_config->GetWrappingMax(); max)
       candiPosition = wpi::units::turn_t{wpi::math::InputModulus(
                           (sensorPosition + zeroOffset).value(),
-                          m_config->GetContinuousWrappingMin()->value(), max->value())} -
+                          m_config->GetWrappingMin()->value(), max->value())} -
                       zeroOffset;
     auto& candiSim = m_candi->GetSimState();
     candiSim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());

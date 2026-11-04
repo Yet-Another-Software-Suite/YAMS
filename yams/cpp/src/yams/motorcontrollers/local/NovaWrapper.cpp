@@ -299,8 +299,16 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
   // Continuous wrapping, on the Nova: an absolute encoder's reading wraps over [0, 1) rotations,
   // so only that range, with an absolute encoder on the mechanism closing the loop.
-  if (config.GetContinuousWrapping() && m_closedLoopOnNova &&
-      (std::abs(config.GetContinuousWrappingMin()->value()) > 1e-9 ||
+  const bool absoluteFeedback = m_feedbackSensor == FeedbackSensorType::ABS ||
+                                m_feedbackSensor == FeedbackSensorType::CAN_ENCODER;
+  // The Nova reads an absolute encoder closing its loop over [0, 1) rotations.
+  if (config.GetWrappingMax() && m_closedLoopOnNova && absoluteFeedback &&
+      std::abs(config.GetWrappingMin()->value()) > 1e-9)
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
+        "Wrapping could not be applied", "WithWrapping(0_tr, 1_tr)");
+  if (config.IsWrappingContinuous() && m_closedLoopOnNova &&
+      (std::abs(config.GetWrappingMin()->value()) > 1e-9 ||
                    (m_feedbackSensor != FeedbackSensorType::ABS &&
                     m_feedbackSensor != FeedbackSensorType::CAN_ENCODER) ||
                    m_mechanismToFeedbackSensorRatio != 1.0))
@@ -311,10 +319,9 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         "WithContinuousWrapping(0_tr, 1_tr) with an absolute encoder and "
         "WithUseExternalFeedbackEncoder(true)");
   // A Nova wraps an absolute encoder closing its loop by default, so it is told either way.
-  if (m_feedbackSensor == FeedbackSensorType::ABS ||
-      m_feedbackSensor == FeedbackSensorType::CAN_ENCODER)
-    novaConfig.Add(thrifty::NovaConfig::AbsWrapping(config.GetContinuousWrapping().has_value() &&
-                                                    m_closedLoopOnNova));
+  if (absoluteFeedback)
+    novaConfig.Add(
+        thrifty::NovaConfig::AbsWrapping(config.IsWrappingContinuous() && m_closedLoopOnNova));
 
   // Each closed loop slot's PID gains, tolerance, motion profile and feedforward, on the Nova's two
   // slots when it runs the closed loop. Its sensor-to-mechanism ratio puts them in mechanism
@@ -590,8 +597,8 @@ std::optional<wpi::units::turn_t> NovaWrapper::GetExternalEncoderSensorPosition(
   // An absolute encoder reports angles in the continuous wrapping range, or [0, 1) rotations.
   if (absolute)
     rotations = wpi::math::InputModulus(rotations,
-                                        m_config->GetContinuousWrappingMin().value_or(0_tr).value(),
-                                        m_config->GetContinuousWrapping().value_or(1_tr).value());
+                                        m_config->GetWrappingMin().value_or(0_tr).value(),
+                                        m_config->GetWrappingMax().value_or(1_tr).value());
   return wpi::units::turn_t{rotations};
 }
 

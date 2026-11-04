@@ -5,11 +5,13 @@ package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import org.junit.jupiter.api.AfterEach;
@@ -88,6 +90,30 @@ public class CANcoderTest {
       assertEquals(0.5, cancoderAbsoluteSensorDiscontinuityPoint(cancoder), 1e-9);
       closeWrapper(result[0], talon);
     }
+  }
+
+  /**
+   * Wrapping over [-0.5, 0.5) rotations gives the CANcoder an AbsoluteSensorDiscontinuityPoint of
+   * 0.5 rotations, and the Talon's closed loop does not wrap.
+   */
+  @Test
+  void testWrappingAppliedWithoutContinuousWrap() {
+    TalonFX talon = DeviceCreator.createTalonFX();
+    CANcoder cancoder = DeviceCreator.createCANcoderFor(talon);
+    SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withSubsystem(new SmartMotorControllerTestSubsystem())
+            .withTelemetry("TalonFX(84) CANcoder wrapping", TelemetryVerbosity.LOW)
+            .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+            .withExternalEncoder(cancoder)
+            .withClosedLoopController(4, 0, 0)
+            .withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    final TalonFXWrapper wrapper = new TalonFXWrapper(talon, DCMotor.getKrakenX60(1), config);
+    assertEquals(0.5, cancoderAbsoluteSensorDiscontinuityPoint(cancoder), 1e-9);
+    final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
+    DeviceCreator.refreshConfig(() -> talon.getConfigurator().refresh(talonConfig, 1.0));
+    assertFalse(talonConfig.ClosedLoopGeneral.ContinuousWrap, "the Talon does not wrap");
+    closeWrapper(wrapper, talon);
   }
 
   /**

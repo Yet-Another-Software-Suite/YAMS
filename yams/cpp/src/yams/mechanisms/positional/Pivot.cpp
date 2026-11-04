@@ -139,7 +139,7 @@ void Pivot::SimIterate() {
     // hard stops: its hard limits are the range it wraps over.
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
     const wpi::units::turn_t simulatedPosition = ss->GetMechanismPosition();
-    const bool hasHardStops = !m_smc->GetConfig().GetContinuousWrapping().has_value();
+    const bool hasHardStops = !m_smc->GetConfig().IsWrappingContinuous();
     if (hasHardStops && m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
         simulatedPosition < *m_pivotConfig->GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMinAngle());

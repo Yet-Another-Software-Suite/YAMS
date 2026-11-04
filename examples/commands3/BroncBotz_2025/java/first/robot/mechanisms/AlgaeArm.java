@@ -59,10 +59,10 @@ public class AlgaeArm implements Mechanism {
         .withUseExternalFeedbackEncoder(false)
         .withExternalEncoderInverted(true)
         .withExternalEncoderZeroOffset(kAbsoluteEncoderOffset)
-        // The encoder reads the continuous wrapping range, [-180, 180) degrees. The original read
-        // [-115.2, 244.8); the arm only uses -78 to 90 degrees, so this is equivalent, and wrapping
-        // never takes the arm the other way round.
-        .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+        // The encoder reads the wrapping range, [-180, 180) degrees. The original read
+        // [-115.2, 244.8); the arm only uses -78 to 90 degrees, so this is equivalent. The closed
+        // loop does not wrap, so it never takes the arm the other way round.
+        .withWrapping(Rotations.of(-0.5), Rotations.of(0.5))
         .withSimStartingPosition(kStartingAngle)
         .withMomentOfInertia(kLength, kMass)
         .withTelemetry("AlgaeArmMotor", TelemetryVerbosity.HIGH);

@@ -444,7 +444,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(
     wpi::units::turn_t lower, wpi::units::turn_t upper) {
-  if (m_continuousWrappingMax)
+  if (m_wrappingMax && m_wrappingContinuous)
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
         "WithContinuousWrapping() should be removed");
@@ -499,6 +499,14 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedbackSynchronizat
   return *this;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithWrapping(wpi::units::turn_t min,
+                                                                  wpi::units::turn_t max) {
+  m_wrappingMin = min;
+  m_wrappingMax = max;
+  m_wrappingContinuous = false;
+  return *this;
+}
+
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     wpi::units::turn_t min, wpi::units::turn_t max) {
   if (m_mechLowerLimit || m_mechUpperLimit)
@@ -513,8 +521,9 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     throw exceptions::SmartMotorControllerConfigurationException(
         "No closed loop controller used", "Cannot set continuous wrapping!",
         "WithFeedback() or WithLQR()");
-  m_continuousWrappingMin = min;
-  m_continuousWrappingMax = max;
+  m_wrappingMin = min;
+  m_wrappingMax = max;
+  m_wrappingContinuous = true;
   return *this;
 }
 
@@ -875,30 +884,38 @@ std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementUpp
   return ConvertFromMechanism(*m_mechUpperLimit);
 }
 
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
-  if (m_continuousWrappingMax && m_continuousWrappingMin &&
-      std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetWrappingMax() const {
+  if (m_wrappingMax && m_wrappingMin &&
+      std::abs((m_wrappingMax->value() - 1.0) - m_wrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
-        "Bounds are not correct!", "Cannot get the continuous wrapping point.",
+        "Bounds are not correct!", "Cannot get the wrapping.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
   m_basicOptions.erase(BasicOptions::ContinuousWrapping);
-  return m_continuousWrappingMax;
+  return m_wrappingMax;
 }
 
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMin() const {
-  if (m_continuousWrappingMax && m_continuousWrappingMin &&
-      std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetWrappingMin() const {
+  if (m_wrappingMax && m_wrappingMin &&
+      std::abs((m_wrappingMax->value() - 1.0) - m_wrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
-        "Bounds are not correct!", "Cannot get the continuous wrapping point.",
+        "Bounds are not correct!", "Cannot get the wrapping.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
-  return m_continuousWrappingMin;
+  return m_wrappingMin;
+}
+
+bool SmartMotorControllerConfig::IsWrappingContinuous() const {
+  if (m_wrappingContinuous && m_wrappingMax && (m_mechUpperLimit || m_mechLowerLimit))
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Soft limits set with continuous wrapping", "Cannot use continuous wrapping",
+        "WithMechanismLimits() should be removed, or WithWrapping() used instead");
+  return m_wrappingContinuous;
 }
 
 wpi::units::turn_t SmartMotorControllerConfig::GetContinuousWrappingSetpoint(
     wpi::units::turn_t setpoint, wpi::units::turn_t current) const {
-  auto max = GetContinuousWrapping();
-  auto min = GetContinuousWrappingMin();
-  if (!max || !min) return setpoint;
+  auto max = GetWrappingMax();
+  auto min = GetWrappingMin();
+  if (!m_wrappingContinuous || !max || !min) return setpoint;
   const double halfRange = (max->value() - min->value()) / 2.0;
   const double currentRotations = current.value();
   return wpi::units::turn_t{

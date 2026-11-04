@@ -267,11 +267,11 @@ public class NovaWrapper extends SmartMotorController {
     } else {
       rotations = m_nova.status().getQuadPosition();
     }
-    // An absolute encoder reports angles in the continuous wrapping range, or [0, 1) rotations.
+    // An absolute encoder reports angles in the wrapping range, or [0, 1) rotations.
     return Optional.of(Rotations.of(absolute
             ? MathUtil.inputModulus(rotations,
-                  m_config.getContinuousWrappingMin().orElse(Rotations.zero()).in(Rotations),
-                  m_config.getContinuousWrapping().orElse(Rotations.of(1)).in(Rotations))
+                  m_config.getWrappingMin().orElse(Rotations.zero()).in(Rotations),
+                  m_config.getWrappingMax().orElse(Rotations.of(1)).in(Rotations))
             : rotations));
   }
 
@@ -823,8 +823,18 @@ public class NovaWrapper extends SmartMotorController {
     }
     // Continuous wrapping, on the Nova: an absolute encoder's reading wraps over [0, 1) rotations,
     // so only that range, with an absolute encoder on the mechanism closing the loop.
-    if (config.getContinuousWrapping().isPresent() && m_closedLoopOnNova
-        && (!config.getContinuousWrappingMin().orElseThrow().isNear(
+    final boolean absoluteFeedback =
+        m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER;
+    // The Nova reads an absolute encoder closing its loop over [0, 1) rotations.
+    if (config.getWrappingMax().isPresent() && m_closedLoopOnNova && absoluteFeedback
+        && !config.getWrappingMin().orElseThrow().isNear(Rotations.zero(), Rotations.of(1e-9))) {
+      throw new SmartMotorControllerConfigurationException(
+          "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
+          "Wrapping could not be applied",
+          "withWrapping(Rotations.of(0), Rotations.of(1))");
+    }
+    if (config.isWrappingContinuous() && m_closedLoopOnNova
+        && (!config.getWrappingMin().orElseThrow().isNear(
                 Rotations.zero(), Rotations.of(1e-9))
             || (m_feedbackSensor != FeedbackSensorType.ABS
                 && m_feedbackSensor != FeedbackSensorType.CAN_ENCODER)
@@ -837,8 +847,8 @@ public class NovaWrapper extends SmartMotorController {
               + "withUseExternalFeedbackEncoder(true)");
     }
     // A Nova wraps an absolute encoder closing its loop by default, so it is told either way.
-    if (m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER) {
-      novaConfig.add(NovaConfig.absWrapping(config.getContinuousWrapping().isPresent() && m_closedLoopOnNova));
+    if (absoluteFeedback) {
+      novaConfig.add(NovaConfig.absWrapping(config.isWrappingContinuous() && m_closedLoopOnNova));
     }
 
     m_nova.configure(novaConfig);

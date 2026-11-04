@@ -86,6 +86,24 @@ public class SparkAbsoluteEncoderTest {
     sparkMax.close();
   }
 
+  /** Wrapping gives the encoder its range, and the SPARK's closed loop does not wrap. */
+  @Test
+  void testWrappingSetsTheRangeOffsetWithoutPositionWrapping() throws InterruptedException {
+    SparkMax sparkMax = DeviceCreator.createSparkMax();
+    SmartMotorControllerConfig config =
+        baseConfig()
+            .withExternalEncoder(sparkMax.getAbsoluteEncoder())
+            .withClosedLoopController(4, 0, 0)
+            .withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    assertDoesNotThrow(() -> new SparkWrapper(sparkMax, DCMotor.getNEO(1), config));
+    assertRangeOffset(sparkMax, 0);
+    assertTrue(
+        AbsoluteEncoderCases.eventually(
+            () -> !sparkMax.configAccessor.closedLoop.getPositionWrappingEnabled()),
+        "position wrapping is off");
+    sparkMax.close();
+  }
+
   @Test
   void testExceptionWhenWrappingARangeTheEncoderCannotRead() {
     // The range offset moves the encoder's range from [-1, 0) to [0, 1) rotations.

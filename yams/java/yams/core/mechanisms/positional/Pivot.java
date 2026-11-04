@@ -212,7 +212,7 @@ public class Pivot extends SmartPositionalMechanism {
       // encoder can lag. A pivot that wraps continuously, such as a turret on a slip ring, has no
       // hard stops: its hard limits are the range it wraps over.
       Angle simulatedPosition = m_smc.getSimSupplier().get().getMechanismPosition();
-      boolean hasHardStops = m_smc.getConfig().getContinuousWrapping().isEmpty();
+      boolean hasHardStops = !m_smc.getConfig().isWrappingContinuous();
       if (hasHardStops && m_config.getLowerHardLimit().isPresent() && m_dcmotorSim.get().getAngularVelocity() < 0 && simulatedPosition.lt(m_config.getLowerHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());
         m_dcmotorSim.get().setAngularVelocity(0);

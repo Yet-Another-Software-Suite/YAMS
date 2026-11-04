@@ -249,6 +249,24 @@ TEST_CASE("SMCParity.ContinuousWrappingSetpoint", "[SMCParity]") {
   CHECK(cfg.GetContinuousWrappingSetpoint(0.1_tr, 3.0_tr).value() == Catch::Approx(3.1));
 }
 
+TEST_CASE("SMCParity.WrappingIsNotContinuous", "[SMCParity]") {
+  // Wrapping gives an absolute encoder its range without the closed loop wrapping, so it never takes
+  // the mechanism the other way round, and it can have soft limits.
+  SmartMotorControllerConfig cfg;
+  cfg.WithFeedback(1.0, 0.0, 0.0)
+      .WithMechanismLimits(-0.25_tr, 0.25_tr)
+      .WithWrapping(-0.5_tr, 0.5_tr);
+  CHECK(cfg.GetWrappingMin()->value() == Catch::Approx(-0.5));
+  CHECK(cfg.GetWrappingMax()->value() == Catch::Approx(0.5));
+  CHECK_FALSE(cfg.IsWrappingContinuous());
+  CHECK(cfg.GetContinuousWrappingSetpoint(0.4_tr, -0.4_tr).value() == Catch::Approx(0.4));
+  PIDFake smc{&cfg};
+  smc.CreatePID();
+  smc.ConfigurePID();
+  REQUIRE(smc.PID().has_value());
+  CHECK_FALSE(smc.PID()->IsContinuousInputEnabled());
+}
+
 // ---- Item 12: zero power is optional -------------------------------------------------------
 
 TEST_CASE("SMCParity.ZeroPowerIsOptional", "[SMCParity]") {

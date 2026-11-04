@@ -359,7 +359,7 @@ public class SparkWrapper extends SmartMotorController {
     // report their simulated angles in the range the encoder reports, the continuous wrapping's or
     // [0, 1) rotations.
     return absoluteRotations.map(rotations -> Rotations.of(RobotBase.isSimulation()
-                                                           ? MathUtil.inputModulus(rotations, m_config.getContinuousWrappingMin().orElse(Rotations.zero()).in(Rotations), m_config.getContinuousWrapping().orElse(Rotations.of(1)).in(Rotations))
+                                                           ? MathUtil.inputModulus(rotations, m_config.getWrappingMin().orElse(Rotations.zero()).in(Rotations), m_config.getWrappingMax().orElse(Rotations.of(1)).in(Rotations))
                                                            : rotations));
   }
 
@@ -477,7 +477,7 @@ public class SparkWrapper extends SmartMotorController {
     }
     final TrapezoidProfile.State state = m_simMaxMotionState.orElseGet(() -> new TrapezoidProfile.State(getMechanismPosition().in(Rotations), getMechanismVelocity().in(RotationsPerSecond)));
     // Wrap the goal against the profile, which is continuous even where the sensor wraps.
-    final Angle goal = m_config.getContinuousWrapping().isPresent()
+    final Angle goal = m_config.isWrappingContinuous()
                        ? m_config.getContinuousWrappingSetpoint(setpointPosition.get(), Rotations.of(state.position))
                        : setpointPosition.get();
     // The profile runs in mechanism rotations, like MAXMotion; a linear profile's constraints are in
@@ -921,11 +921,10 @@ public class SparkWrapper extends SmartMotorController {
     if (config.getStartingPosition().isPresent()) {
       m_sparkRelativeEncoder.setPosition(config.getStartingPosition().get().times(mechToRotorRatio).in(Rotations));
     }
-    // PID Wrapping
-    // Wrap only over a full range: both the minimum and the maximum.
-    final Optional<Angle> wrappingMin = config.getContinuousWrappingMin();
-    final Optional<Angle> wrappingMax = config.getContinuousWrapping();
-    if (wrappingMin.isPresent() && wrappingMax.isPresent()) {
+    // PID Wrapping, when the wrapping is continuous.
+    final Optional<Angle> wrappingMin = config.getWrappingMin();
+    final Optional<Angle> wrappingMax = config.getWrappingMax();
+    if (config.isWrappingContinuous() && wrappingMin.isPresent() && wrappingMax.isPresent()) {
       // The SPARK's wrapping range is in rotations of its feedback sensor, so scale the mechanism's
       // range by the sensor rotations per mechanism rotation: the motor's encoder behind gearing
       // turns several times per mechanism rotation.
@@ -957,12 +956,12 @@ public class SparkWrapper extends SmartMotorController {
           m_sparkBaseConfig.absoluteEncoder.zeroOffset(config.getExternalEncoderZeroOffset().get().times(mechToEncoder).in(Rotations));
         }
 
-        // The absolute encoder reads the continuous wrapping range: one rotation, offset by
-        // REVLib's range offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5)
-        // rotations, 0.5 for [0, 1).
-        if (config.getContinuousWrapping().isPresent()) {
-          final double min = config.getContinuousWrappingMin().orElseThrow().in(Rotations);
-          final double max = config.getContinuousWrapping().get().in(Rotations);
+        // The absolute encoder reads the wrapping range: one rotation, offset by REVLib's range
+        // offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5 for
+        // [0, 1).
+        if (config.getWrappingMax().isPresent()) {
+          final double min = config.getWrappingMin().orElseThrow().in(Rotations);
+          final double max = config.getWrappingMax().get().in(Rotations);
           final double rangeOffset = (min + max) / 2;
           if (Math.abs(max - min - 1) > 1e-9 || rangeOffset < -0.5 || rangeOffset > 0.5) {
             throw new SmartMotorControllerConfigurationException("SPARK absolute encoder reads one rotation, from [-1, 0) to [0, 1) rotations", "Continuous wrapping could not be applied to the absolute encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))");
@@ -1022,10 +1021,9 @@ public class SparkWrapper extends SmartMotorController {
         config.getExternalEncoderInverted().ifPresent(detachedEncoderConfig::inverted);
         m_detachedEncoderZeroOffset = config.getExternalEncoderZeroOffset().map(offset -> MathUtil.inputModulus(offset.times(mechToEncoder).in(Rotations), 0, 1)).orElse(0.0);
         detachedEncoderConfig.dutyCycleOffset(m_detachedEncoderZeroOffset);
-        // The detached encoder reads the continuous wrapping range: [0, 1), or [-0.5, 0.5) zero
-        // centered.
-        final boolean zeroCentered = config.getContinuousWrappingMin().map(min -> min.isNear(Rotations.of(-0.5), Rotations.of(1e-9))).orElse(false);
-        if (config.getContinuousWrappingMin().isPresent() && !zeroCentered && !config.getContinuousWrappingMin().get().isNear(Rotations.zero(), Rotations.of(1e-9))) {
+        // The detached encoder reads the wrapping range: [0, 1), or [-0.5, 0.5) zero centered.
+        final boolean zeroCentered = config.getWrappingMin().map(min -> min.isNear(Rotations.of(-0.5), Rotations.of(1e-9))).orElse(false);
+        if (config.getWrappingMin().isPresent() && !zeroCentered && !config.getWrappingMin().get().isNear(Rotations.zero(), Rotations.of(1e-9))) {
           throw new SmartMotorControllerConfigurationException("SPARK detached encoder reads [-0.5, 0.5) or [0, 1) rotations", "Continuous wrapping could not be applied to the detached encoder", "withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5)) or withContinuousWrapping(Rotations.of(0), Rotations.of(1))");
         }
         detachedEncoderConfig.dutyCycleZeroCentered(zeroCentered);

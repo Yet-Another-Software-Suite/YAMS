@@ -5,6 +5,8 @@ package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
@@ -58,6 +60,7 @@ import org.wpilib.preferences.Preferences;
 import org.wpilib.units.measure.Angle;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
+import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.LQRConfig;
@@ -140,6 +143,47 @@ public class ContinuousWrappingTest {
         0.25,
         config.getContinuousWrappingSetpoint(Rotations.of(0.25), Rotations.of(0.0)).in(Rotations),
         1e-9);
+  }
+
+  /**
+   * Wrapping gives an absolute encoder its range without the closed loop controller wrapping, so
+   * it never takes the mechanism the other way round, and it can have soft limits.
+   */
+  @Test
+  void wrappingIsNotContinuous() {
+    final SmartMotorControllerConfig config =
+        new yams.commands2.config.SmartMotorControllerConfig()
+            .withClosedLoopController(8, 0, 0)
+            .withSoftLimits(Degrees.of(-90), Degrees.of(90))
+            .withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    assertEquals(-0.5, config.getWrappingMin().orElseThrow().in(Rotations), 1e-9);
+    assertEquals(0.5, config.getWrappingMax().orElseThrow().in(Rotations), 1e-9);
+    assertFalse(config.isWrappingContinuous());
+    assertFalse(
+        config.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+    // The setpoint is not moved to the nearest equivalent.
+    assertEquals(
+        0.45,
+        config.getContinuousWrappingSetpoint(Rotations.of(0.45), Rotations.of(-0.45)).in(Rotations),
+        1e-9);
+
+    // Continuous wrapping wraps the closed loop controller too; wrapping again stops it.
+    final SmartMotorControllerConfig continuous = wrappingConfig();
+    assertTrue(continuous.isWrappingContinuous());
+    assertTrue(
+        continuous.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+    continuous.withWrapping(Rotations.of(-0.5), Rotations.of(0.5));
+    assertFalse(
+        continuous.getPID(ClosedLoopControllerSlot.SLOT_0).orElseThrow().isContinuousInputEnabled());
+
+    // Soft limits and continuous wrapping, in either order, are rejected.
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> wrappingConfig().withSoftLimits(Degrees.of(-90), Degrees.of(90)));
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> new yams.commands2.config.SmartMotorControllerConfig()
+            .withClosedLoopController(8, 0, 0)
+            .withSoftLimits(Degrees.of(-90), Degrees.of(90))
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5)));
   }
 
   @Test
