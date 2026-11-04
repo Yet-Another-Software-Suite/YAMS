@@ -192,6 +192,9 @@ inline std::vector<MotorTestParam> AllMotorParams() {
   for (auto hw : {HardwareType::SparkMax, HardwareType::SparkFlex, HardwareType::TalonFXS,
                   HardwareType::TalonFX, HardwareType::Nova}) {
     for (auto prof : {ProfileType::None, ProfileType::Trapezoid, ProfileType::Exponential}) {
+      // A Nova applies the mechanisms' feedforward only with a motion profile, so it has no case
+      // without one; its trapezoidal profile case runs its closed loop on the Nova.
+      if (hw == HardwareType::Nova && prof == ProfileType::None) continue;
       std::string hwName;
       switch (hw) {
         case HardwareType::SparkMax:

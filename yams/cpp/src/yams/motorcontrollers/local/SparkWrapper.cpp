@@ -579,19 +579,17 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   if (auto start = config.GetStartingPosition(); start)
     m_relEncoder->SetPosition(start->value() * mechToRotorRatio);
 
-  // Position wrapping. The SPARK's wrapping range is in rotations of its feedback sensor, so scale
-  // the mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
+  // Position wrapping. The input range is the wrapping range, but the SPARK wraps only when the
+  // wrapping is continuous. The SPARK's range is in rotations of its feedback sensor, so scale the
+  // mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
   // gearing turns several times per mechanism rotation.
-  // Wrap only when the wrapping is continuous, over a full range: both the minimum and the maximum.
-  const auto wrapMin = config.GetWrappingMin();
-  const auto wrapMax = config.GetWrappingMax();
-  if (config.IsWrappingContinuous() && wrapMin && wrapMax) {
-    sparkCfg.closedLoop.PositionWrappingEnabled(true).PositionWrappingInputRange(
-        wrapMin->value() * m_mechanismToFeedbackSensorRatio,
-        wrapMax->value() * m_mechanismToFeedbackSensorRatio);
-  } else {
-    sparkCfg.closedLoop.PositionWrappingEnabled(false);
-  }
+  if (config.GetWrappingMax() && config.GetWrappingMin())
+    sparkCfg.closedLoop.PositionWrappingInputRange(
+        config.GetWrappingMin()->value() * m_mechanismToFeedbackSensorRatio,
+        config.GetWrappingMax()->value() * m_mechanismToFeedbackSensorRatio);
+  // Set either way: the SPARK keeps its previous configuration.
+  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetWrappingMax().has_value() &&
+                                              config.IsWrappingContinuous());
 
   ApplyExternalEncoder(config, useExternalEncoder);
 

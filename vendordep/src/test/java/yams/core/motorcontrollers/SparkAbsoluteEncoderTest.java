@@ -86,7 +86,10 @@ public class SparkAbsoluteEncoderTest {
     sparkMax.close();
   }
 
-  /** Wrapping gives the encoder its range, and the SPARK's closed loop does not wrap. */
+  /**
+   * Wrapping gives the encoder its range and the SPARK's closed loop its input range, but the
+   * SPARK's closed loop does not wrap.
+   */
   @Test
   void testWrappingSetsTheRangeOffsetWithoutPositionWrapping() throws InterruptedException {
     SparkMax sparkMax = DeviceCreator.createSparkMax();
@@ -101,6 +104,11 @@ public class SparkAbsoluteEncoderTest {
         AbsoluteEncoderCases.eventually(
             () -> !sparkMax.configAccessor.closedLoop.getPositionWrappingEnabled()),
         "position wrapping is off");
+    assertTrue(
+        AbsoluteEncoderCases.eventually(
+            () -> Math.abs(sparkMax.configAccessor.closedLoop.getPositionWrappingMinInput() + 0.5) < 1e-6
+                && Math.abs(sparkMax.configAccessor.closedLoop.getPositionWrappingMaxInput() - 0.5) < 1e-6),
+        "position wrapping input range is the wrapping range");
     sparkMax.close();
   }
 

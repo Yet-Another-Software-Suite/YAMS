@@ -921,20 +921,16 @@ public class SparkWrapper extends SmartMotorController {
     if (config.getStartingPosition().isPresent()) {
       m_sparkRelativeEncoder.setPosition(config.getStartingPosition().get().times(mechToRotorRatio).in(Rotations));
     }
-    // PID Wrapping, when the wrapping is continuous.
-    final Optional<Angle> wrappingMin = config.getWrappingMin();
-    final Optional<Angle> wrappingMax = config.getWrappingMax();
-    if (config.isWrappingContinuous() && wrappingMin.isPresent() && wrappingMax.isPresent()) {
-      // The SPARK's wrapping range is in rotations of its feedback sensor, so scale the mechanism's
-      // range by the sensor rotations per mechanism rotation: the motor's encoder behind gearing
-      // turns several times per mechanism rotation.
-      m_sparkBaseConfig.closedLoop.positionWrappingEnabled(true)
-                                  .positionWrappingInputRange(wrappingMin.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations),
-                                                              wrappingMax.get().times(m_mechanismToFeedbackSensorRatio).in(Rotations));
-    } else {
-      // Set either way: the SPARK keeps its previous configuration.
-      m_sparkBaseConfig.closedLoop.positionWrappingEnabled(false);
+    // PID Wrapping. The input range is the wrapping range, but the SPARK wraps only when the wrapping
+    // is continuous. The SPARK's range is in rotations of its feedback sensor, so scale the
+    // mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
+    // gearing turns several times per mechanism rotation.
+    if (config.getWrappingMax().isPresent() && config.getWrappingMin().isPresent()) {
+      m_sparkBaseConfig.closedLoop.positionWrappingInputRange(config.getWrappingMin().get().times(m_mechanismToFeedbackSensorRatio).in(Rotations),
+                                                              config.getWrappingMax().get().times(m_mechanismToFeedbackSensorRatio).in(Rotations));
     }
+    // Set either way: the SPARK keeps its previous configuration.
+    m_sparkBaseConfig.closedLoop.positionWrappingEnabled(config.getWrappingMax().isPresent() && config.isWrappingContinuous());
 
     // Setup external encoder.
     boolean useExternalEncoder = config.getUseExternalFeedback();

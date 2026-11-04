@@ -125,8 +125,10 @@ public class NovaSimSupplier implements SimSupplier {
       // The request's feedforward, and the PID slot's F times the target.
       double feedforward = controlRequest.getFF() + (slot1 ? status.Pid1.getF() : status.Pid0.getF()) * controlRequest.getTarget();
       // With continuous wrapping, a position target is the equivalent nearest the mechanism, one
-      // mechanism rotation apart.
-      final double positionTarget = status.getAbsWrapping()
+      // mechanism rotation apart. The Nova wraps only an absolute encoder closing its loop.
+      final boolean absoluteFeedback = status.getFeedbackSensor() == Motor.FeedbackSensorType.ABS
+                                       || status.getFeedbackSensor() == Motor.FeedbackSensorType.CAN_ENCODER;
+      final double positionTarget = status.getAbsWrapping() && absoluteFeedback
                                     ? position + MathUtil.inputModulus(controlRequest.getTarget() - position, -0.5, 0.5)
                                     : controlRequest.getTarget();
       double error;
@@ -138,10 +140,15 @@ public class NovaSimSupplier implements SimSupplier {
         final double kA = slot1 ? status.Mp1.getKA() : status.Mp0.getKA();
         final double kG = slot1 ? status.Mp1.getKG() : status.Mp0.getKG();
         final MPGravityType gravityType = slot1 ? status.Mp1.getGravType() : status.Mp0.getGravType();
-        final TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(slot1 ? status.Mp1.getMaxVel() : status.Mp0.getMaxVel(),
-                                                                                               slot1 ? status.Mp1.getMaxAccel() : status.Mp0.getMaxAccel()));
+        final double maxVelocity = slot1 ? status.Mp1.getMaxVel() : status.Mp0.getMaxVel();
+        final double maxAcceleration = slot1 ? status.Mp1.getMaxAccel() : status.Mp0.getMaxAccel();
         final TrapezoidProfile.State state = profileState.orElseGet(() -> new TrapezoidProfile.State(position, velocity));
-        final TrapezoidProfile.State next = profile.calculate(periodSeconds, state, new TrapezoidProfile.State(positionTarget, 0));
+        // A profile without a positive velocity and acceleration, such as before the Nova reports the
+        // motion profile it was sent, holds where it is.
+        final TrapezoidProfile.State next = maxVelocity > 0 && maxAcceleration > 0
+                                            ? new TrapezoidProfile(new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration))
+                                                  .calculate(periodSeconds, state, new TrapezoidProfile.State(positionTarget, 0))
+                                            : new TrapezoidProfile.State(state.position, 0);
         profileState = Optional.of(next);
         // kG is the gravity with the mechanism at 0, horizontal for an arm.
         feedforward += kS * Math.signum(next.velocity) + kV * next.velocity + kA * (next.velocity - state.velocity) / periodSeconds

@@ -62,9 +62,12 @@ void NovaSimSupplier::UpdateSim() {
     double feedforward = m_request->GetFeedForward() +
                          (slot1 ? status.Pid1.GetF() : status.Pid0.GetF()) * m_request->GetTarget();
     // With continuous wrapping, a position target is the equivalent nearest the mechanism, one
-    // mechanism rotation apart.
+    // mechanism rotation apart. The Nova wraps only an absolute encoder closing its loop.
+    const auto feedbackSensor = status.GetFeedbackSensor();
+    const bool absoluteFeedback = feedbackSensor == thrifty::Motor::FeedbackSensorType::ABS ||
+                                  feedbackSensor == thrifty::Motor::FeedbackSensorType::CAN_ENCODER;
     const double positionTarget =
-        status.GetAbsWrapping()
+        status.GetAbsWrapping() && absoluteFeedback
             ? position + wpi::math::InputModulus(m_request->GetTarget() - position, -0.5, 0.5)
             : m_request->GetTarget();
     double error = 0.0;
@@ -80,16 +83,20 @@ void NovaSimSupplier::UpdateSim() {
       const double kG = slot1 ? status.Mp1.GetKG() : status.Mp0.GetKG();
       const auto gravityType = slot1 ? status.Mp1.GetGravType() : status.Mp0.GetGravType();
       using Profile = wpi::math::TrapezoidProfile<wpi::units::turns>;
-      Profile profile{Profile::Constraints{
-          wpi::units::turns_per_second_t{slot1 ? status.Mp1.GetMaxVel() : status.Mp0.GetMaxVel()},
-          wpi::units::turns_per_second_squared_t{slot1 ? status.Mp1.GetMaxAccel()
-                                                       : status.Mp0.GetMaxAccel()}}};
+      const double maxVelocity = slot1 ? status.Mp1.GetMaxVel() : status.Mp0.GetMaxVel();
+      const double maxAcceleration = slot1 ? status.Mp1.GetMaxAccel() : status.Mp0.GetMaxAccel();
       const Profile::State state = m_profileState.value_or(
           Profile::State{wpi::units::turn_t{position}, wpi::units::turns_per_second_t{velocity}});
+      // A profile without a positive velocity and acceleration, such as before the Nova reports the
+      // motion profile it was sent, holds where it is.
       const Profile::State next =
-          profile.Calculate(wpi::units::second_t{m_periodSeconds}, state,
-                            Profile::State{wpi::units::turn_t{positionTarget},
-                                           wpi::units::turns_per_second_t{0.0}});
+          maxVelocity > 0.0 && maxAcceleration > 0.0
+              ? Profile{Profile::Constraints{wpi::units::turns_per_second_t{maxVelocity},
+                                             wpi::units::turns_per_second_squared_t{maxAcceleration}}}
+                    .Calculate(wpi::units::second_t{m_periodSeconds}, state,
+                               Profile::State{wpi::units::turn_t{positionTarget},
+                                              wpi::units::turns_per_second_t{0.0}})
+              : Profile::State{state.position, wpi::units::turns_per_second_t{0.0}};
       m_profileState = next;
       // kG is the gravity with the mechanism at 0, horizontal for an arm.
       feedforward += kS * Sign(next.velocity.value()) + kV * next.velocity.value() +
