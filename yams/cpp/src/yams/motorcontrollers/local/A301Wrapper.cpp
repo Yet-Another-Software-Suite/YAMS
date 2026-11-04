@@ -188,7 +188,9 @@ bool A301Wrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
       std::make_unique<wpi::Notifier>([this] { IterateClosedLoopController(); });
   if (auto name = config.GetTelemetryName(); name) m_closedLoopControllerThread->SetName(*name);
   const bool closedLoop = config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
-  if (!closedLoop && config.GetClosedLoopControlPeriod())
+  // Read the period even in closed loop mode, where the base class applies it, so it is validated.
+  const auto closedLoopControlPeriod = config.GetClosedLoopControlPeriod();
+  if (!closedLoop && closedLoopControlPeriod)
     throw std::invalid_argument(
         "[Error] Closed loop control period is only supported in closed loop mode.");
 
