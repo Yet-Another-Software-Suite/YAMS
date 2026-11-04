@@ -53,6 +53,12 @@ inline std::atomic<int> gCanIdCounter{0};
 
 inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kTalonTestCanIdStart - 1)) + 1; }
 
+// CAN IDs of A301s, on a bus of their own. They have their own counter so adding A301s does not
+// move the other devices onto IDs whose simulated state an earlier device left behind.
+inline std::atomic<int> gA301CanIdCounter{0};
+
+inline int NextA301CanId() { return (gA301CanIdCounter.fetch_add(1) % 62) + 1; }
+
 // CAN IDs for hardware kept alive for the whole test binary (e.g. shared swerve hardware).
 // Never wraps; running out of reserved IDs is a test setup bug.
 inline std::atomic<int> gReservedCanIdCounter{kReservedCanIdStart};
@@ -153,7 +159,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   // the lifetime of the bundle (the wrapper stores a SmartMotorControllerConfig*).
   bundle.cfg = std::move(cfg);
 
-  int canId = NextCanId();
+  int canId = param.hardware == HardwareType::A301 ? NextA301CanId() : NextCanId();
 
   switch (param.hardware) {
     case HardwareType::SparkMax: {
