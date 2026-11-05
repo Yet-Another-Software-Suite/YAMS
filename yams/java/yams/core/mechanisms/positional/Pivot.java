@@ -241,6 +241,8 @@ public class Pivot extends SmartPositionalMechanism {
   public void visualizationUpdate() {
     m_mechanismLigament.setAngle(getAngle().in(Degrees));
     m_setpointLigament.setAngle(m_smc.getMechanismPositionSetpoint().orElse(getAngle()).in(Degrees));
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

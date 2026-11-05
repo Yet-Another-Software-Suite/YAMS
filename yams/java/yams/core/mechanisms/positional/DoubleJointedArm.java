@@ -346,6 +346,8 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     m_lowerLigament.setAngle(lowerArmAngle.in(Degrees));
     m_upperLigament.setAngle(upperArmAngle.in(Degrees));
     m_upperRoot.setPosition(jointPos.getX(), jointPos.getY());
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

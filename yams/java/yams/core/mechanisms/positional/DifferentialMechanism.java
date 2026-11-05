@@ -260,6 +260,8 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
 
     m_twistRoot.setPosition(twistRoot.getX(), twistRoot.getY());
     m_twistLigament.setAngle(twistAngle.in(Degrees));
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

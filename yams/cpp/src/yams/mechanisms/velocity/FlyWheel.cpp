@@ -65,8 +65,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
     m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, len, 0_deg, 6, m_flyWheelConfig->GetSimColor());
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -89,6 +88,8 @@ void FlyWheel::VisualizationUpdate() {
   }
 
   m_mechanismLigament->SetAngle(wpi::units::degree_t{m_smc->GetMechanismPosition()});
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string FlyWheel::GetName() const { return m_name; }

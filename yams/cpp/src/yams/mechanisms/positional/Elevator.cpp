@@ -153,8 +153,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         "Setpoint", startHValue, angle, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -183,6 +182,8 @@ void Elevator::VisualizationUpdate() {
           m_smc->GetConfig().ConvertFromMechanism(setpoint.value()).value());
     }
   }
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string Elevator::GetName() const { return m_name; }
