@@ -279,6 +279,7 @@ TEST_CASE("SMCParity.ZeroPowerIsOptional", "[SMCParity]") {
 // ---- Item 17: velocity trapezoidal profiles --------------------------------------------------
 
 TEST_CASE("SMCParity.VelocityTrapezoidProfileTakesAccelerationAndJerk", "[SMCParity]") {
+  EnabledRobot robot;
   SECTION("angular") {
     SmartMotorControllerConfig cfg;
     cfg.WithVelocityTrapezoidProfile(2_tr_per_s_sq,
@@ -331,6 +332,7 @@ TEST_CASE("SMCParity.VelocityProfileJerkTuningDefault", "[SMCParity]") {
 // ---- Missing API: feedforward force ----------------------------------------------------------
 
 TEST_CASE("SMCParity.VelocityFeedforwardForceAddedInLoop", "[SMCParity]") {
+  EnabledRobot robot;
   SmartMotorControllerConfig cfg;
   cfg.WithMechanismCircumference(0.1_m).WithMotorGearing(1.0);
   FakeSmartMotorController smc{&cfg};
