@@ -12,7 +12,7 @@ changed file is classified by the first rule it matches:
 - Any other file under yams/java, yams/cpp or vendordep runs every group of its language, or of
   both. This includes the motor controllers, which every test uses, test helpers and build files.
   A file nothing else matches can affect anything, so it runs everything.
-- This workflow and this script run every group.
+- This workflow, this script and test_summary.py run every group.
 - Files elsewhere, such as the docs, the other workflows and the examples (which have their own
   workflow), run nothing.
 
@@ -151,7 +151,8 @@ CPP_SOURCE = "yams/cpp/"
 CPP_TESTS = "vendordep/src/test/native/cpp/"
 
 # Changed files that run every group.
-CI = [".github/workflows/ci.yml", ".github/scripts/select_test_groups.py"]
+CI = [".github/workflows/ci.yml", ".github/scripts/select_test_groups.py",
+      ".github/scripts/test_summary.py"]
 
 # Changed files that affect no unit test.
 NO_TESTS = ["*.md", "docs/*", "examples/*", "vendordep/README.md"]

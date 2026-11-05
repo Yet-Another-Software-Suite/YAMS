@@ -18,6 +18,10 @@ tasks.whenTaskAdded { task ->
         if (project.hasProperty('catchFilter')) {
             task.args project.property('catchFilter')
         }
+        // Print to the console as before, and write a JUnit report, which CI summarizes.
+        def junitReport = project.layout.buildDirectory.file("test-results/catch2/${task.name}.xml").get().asFile
+        task.args '--reporter', 'console', '--reporter', "JUnit::out=${junitReport}"
+        task.doFirst { junitReport.parentFile.mkdirs() }
         if (task.name.contains(wpi.platforms.desktop.toString().capitalize()) && task.name.contains('Debug')) {
             catchTests.dependsOn task
         }
