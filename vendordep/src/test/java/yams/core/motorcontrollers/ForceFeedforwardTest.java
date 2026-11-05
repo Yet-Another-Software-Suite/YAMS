@@ -15,6 +15,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -35,6 +36,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -146,7 +148,14 @@ public class ForceFeedforwardTest {
                 DeviceCreator.withNovaProfile(((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
                     .withSubsystem(new SmartMotorControllerTestSubsystem())
                     .withTelemetry(
-                        "ForceFeedforwardTest Nova(" + offset + ")", TelemetryVerbosity.LOW), true))));
+                        "ForceFeedforwardTest Nova(" + offset + ")", TelemetryVerbosity.LOW), true))),
+        Arguments.of(
+            new A301Wrapper(
+                DeviceCreator.createA301(),
+                DeviceCreator.withoutCurrentLimits(((yams.commands2.config.SmartMotorControllerConfig) cfg.clone())
+                    .withSubsystem(new SmartMotorControllerTestSubsystem())
+                    .withTelemetry(
+                        "ForceFeedforwardTest A301(" + offset + ")", TelemetryVerbosity.LOW)))));
   }
 
   private static void closeSmc(SmartMotorController smc) {
@@ -170,6 +179,8 @@ public class ForceFeedforwardTest {
       ((TalonFX) motorController).close();
     } else if (motorController instanceof Nova) {
       ((Nova) motorController).close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 

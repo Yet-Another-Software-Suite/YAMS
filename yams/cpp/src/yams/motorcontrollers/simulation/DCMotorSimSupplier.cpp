@@ -3,6 +3,7 @@
 
 #include "yams/motorcontrollers/simulation/DCMotorSimSupplier.hpp"
 
+#include <wpi/driverstation/RobotState.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -28,6 +29,11 @@ void DCMotorSimSupplier::UpdateSim() {
   }
   if (!m_simUpdated) {
     StarveInput();
+    if (!wpi::RobotState::IsEnabled()) {
+      // A disabled robot's motors get no power, so the mechanism coasts or falls.
+      m_lastInputVoltage = wpi::units::volt_t{0};
+      m_sim.SetInputVoltage(m_lastInputVoltage);
+    }
     m_sim.Update(m_period);
     FeedUpdateSim();
   }

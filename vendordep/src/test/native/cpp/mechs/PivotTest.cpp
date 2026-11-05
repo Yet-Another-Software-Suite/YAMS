@@ -45,7 +45,6 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
           1.0_V,
@@ -56,6 +55,7 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithStartingPosition(0.0_deg)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
+  ForHardware(cfg, hardware, 40.0_A);
 
   switch (profile) {
     case ProfileType::Trapezoid:
@@ -296,6 +296,13 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       {"SparkMax with an exponential profile following a SparkFlex",
        {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlexExpo"},
        {HardwareType::SparkMax, ProfileType::Exponential, "LooseFollowerSparkMaxExpo"}},
+      // An A301's closed loop always runs on the SystemCore, as a leader or a follower.
+      {"A301 following a SparkMax",
+       {HardwareType::SparkMax, ProfileType::None, "LooseLeaderSparkMaxA301"},
+       {HardwareType::A301, ProfileType::None, "LooseFollowerA301"}},
+      {"SparkMax following an A301",
+       {HardwareType::A301, ProfileType::None, "LooseLeaderA301"},
+       {HardwareType::SparkMax, ProfileType::None, "LooseFollowerSparkMaxA301"}},
   };
   for (const auto& pair : pairs) {
     DYNAMIC_SECTION(pair.name) {

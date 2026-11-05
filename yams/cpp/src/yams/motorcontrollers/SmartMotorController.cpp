@@ -15,6 +15,7 @@
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/driverstation/DriverStation.hpp>
+#include <wpi/driverstation/RobotState.hpp>
 #include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/util/MathUtil.hpp>
 #include <wpi/nt/NetworkTableInstance.hpp>
@@ -91,19 +92,7 @@ math::LQRController* SmartMotorController::GetLQRController() { return m_lqr ? &
 void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
       m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
-    if (m_pid) m_pid->Reset();
-    // The motion profile starts from this position, so continuous wrapping keeps the angles the
-    // loop measures next to it, rather than a whole wrapping range away from it.
-    m_lastClosedLoopMechanismPosition = GetMechanismPosition();
-    ResetProfileStates();
-    if (m_lqr) {
-      if (m_config->GetLinearClosedLoopControllerUse()) {
-        m_lqr->Reset(GetMeasurementPosition(), GetMeasurementVelocity());
-      } else {
-        m_lqr->Reset(wpi::units::radian_t{GetMechanismPosition()},
-                     wpi::units::radians_per_second_t{GetMechanismVelocity()});
-      }
-    }
+    ResetClosedLoopControllerState();
     m_closedLoopControllerThread->Stop();
     wpi::units::second_t period = m_config->GetClosedLoopControlPeriod().value_or(20_ms);
     m_closedLoopControllerThread->StartPeriodic(period);
@@ -112,10 +101,34 @@ void SmartMotorController::StartClosedLoopController() {
   for (auto* f : m_looseFollowers) f->StartClosedLoopController();
 }
 
+void SmartMotorController::ResetClosedLoopControllerState() {
+  if (m_pid) m_pid->Reset();
+  // The motion profile starts from this position, so continuous wrapping keeps the angles the
+  // loop measures next to it, rather than a whole wrapping range away from it.
+  m_lastClosedLoopMechanismPosition = GetMechanismPosition();
+  ResetProfileStates();
+  if (m_lqr) {
+    if (m_config->GetLinearClosedLoopControllerUse()) {
+      m_lqr->Reset(GetMeasurementPosition(), GetMeasurementVelocity());
+    } else {
+      m_lqr->Reset(wpi::units::radian_t{GetMechanismPosition()},
+                   wpi::units::radians_per_second_t{GetMechanismVelocity()});
+    }
+  }
+}
+
 void SmartMotorController::IterateClosedLoopController() {
   // Synchronize before the running check, like the Java implementation.
   SynchronizeRelativeEncoder();
   if (!m_closedLoopControllerRunning) return;
+
+  if (!wpi::RobotState::IsEnabled()) {
+    // A disabled robot's motors get no power, so the mechanism can move, such as an arm falling.
+    // Follow it, so the loop starts from where it is once the robot is enabled, rather than from
+    // where it was.
+    ResetClosedLoopControllerState();
+    return;
+  }
 
   const SmartMotorControllerConfig& cfg = *m_config;
   const bool linear = cfg.GetLinearClosedLoopControllerUse();
@@ -396,6 +409,9 @@ void SmartMotorController::IterateClosedLoopController() {
           wpi::units::turn_t{nextTrap.position}, wpi::units::turns_per_second_t{nextTrap.velocity}};
     }
   }
+  // Without a setpoint there is no profile step, so the profile follows the mechanism, and the
+  // next setpoint is profiled from where it is.
+  if (!m_setpointPosition && !m_setpointVelocity) ResetProfileStates();
 
   // Feedforward force supplied to SetVelocity(velocity, force).
   if (m_setpointVelocity && m_setpointFeedforwardForce) {

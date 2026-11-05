@@ -35,14 +35,14 @@ using namespace mechanisms::velocity;
 
 // ---- Config helpers ---------------------------------------------------------
 
-static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, TestSubsystem* subsys,
+static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, HardwareType hardware,
+                                                       TestSubsystem* subsys,
                                                        const std::string& name) {
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(100.0, 0.0, 0.0)
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(SmartMotorControllerConfig::MotorMode::COAST)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
           0.0_V,
@@ -51,6 +51,8 @@ static SmartMotorControllerConfig MakeShooterSMCConfig(ProfileType profile, Test
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
+  // A shooter's A301 has the 3:1 launcher gearbox.
+  ForHardware(cfg, hardware, 40.0_A, 3.0);
 
   // ShooterTest also tests case 3: PID gains zeroed cover this by repeating
   // with the given profile.
@@ -158,7 +160,7 @@ struct ShooterTestFixture {
 TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCDutyCycle", "[ShooterTest]") {
   for (auto& param : AllMotorParams()) {
     DYNAMIC_SECTION(param.name) {
-      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto cfg = MakeShooterSMCConfig(param.profile, param.hardware, nullptr, param.name);
       auto bundle = MakeBundle(param, cfg);
       bundle.smc->SetupSimulation();
       bundle.subsystem->m_testRunning = true;
@@ -172,7 +174,7 @@ TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCDutyCycle", "[ShooterTest]"
 TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCVelocityPID", "[ShooterTest]") {
   for (auto& param : AllMotorParams()) {
     DYNAMIC_SECTION(param.name) {
-      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto cfg = MakeShooterSMCConfig(param.profile, param.hardware, nullptr, param.name);
       auto bundle = MakeBundle(param, cfg);
       bundle.smc->SetupSimulation();
       bundle.subsystem->m_testRunning = true;
@@ -186,7 +188,7 @@ TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SMCVelocityPID", "[ShooterTest
 TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterDutyCycle", "[ShooterTest]") {
   for (auto& param : AllMotorParams()) {
     DYNAMIC_SECTION(param.name) {
-      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto cfg = MakeShooterSMCConfig(param.profile, param.hardware, nullptr, param.name);
       auto bundle = MakeBundle(param, cfg);
       bundle.smc->SetupSimulation();
       bundle.subsystem->m_testRunning = true;
@@ -208,7 +210,7 @@ TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SimIterateKeepsSharedBatteryVo
                  "[ShooterTest]") {
   using motorcontrollers::simulation::BatterySim;
   auto param = AllMotorParams().front();
-  auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+  auto cfg = MakeShooterSMCConfig(param.profile, param.hardware, nullptr, param.name);
   auto bundle = MakeBundle(param, cfg);
   bundle.smc->SetupSimulation();
   auto shooter = CreateShooter(bundle.smc, bundle.subsystem.get());
@@ -234,7 +236,7 @@ TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.SimIterateKeepsSharedBatteryVo
 TEST_CASE_METHOD(ShooterTestFixture, "ShooterTest.ShooterVelocityPID", "[ShooterTest]") {
   for (auto& param : AllMotorParams()) {
     DYNAMIC_SECTION(param.name) {
-      auto cfg = MakeShooterSMCConfig(param.profile, nullptr, param.name);
+      auto cfg = MakeShooterSMCConfig(param.profile, param.hardware, nullptr, param.name);
       auto bundle = MakeBundle(param, cfg);
       bundle.smc->SetupSimulation();
       bundle.subsystem->m_testRunning = true;

@@ -14,6 +14,7 @@ import static org.wpilib.units.Units.Volts;
 
 import java.util.UUID;
 import java.util.function.Supplier;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.math.filter.LinearFilter;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.simulation.RoboRioSim;
@@ -103,6 +104,10 @@ public class ArmSimSupplier implements SimSupplier {
     }
     if (!simUpdated) {
       starveInput();
+      if (!DriverStationBackend.isEnabled()) {
+        // A disabled robot's motors get no power, so the mechanism coasts or falls.
+        sim.setInputVoltage(0);
+      }
       sim.update(simPeriod.in(Seconds));
       try {
         // Thread.sleep(1);

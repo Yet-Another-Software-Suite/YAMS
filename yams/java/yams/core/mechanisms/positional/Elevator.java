@@ -174,6 +174,8 @@ public class Elevator extends SmartPositionalMechanism {
     if (getMotor().getMechanismPositionSetpoint().isPresent()) {
       m_setpointLigament.setLength(m_smc.getConfig().convertFromMechanism(getMotor().getMechanismPositionSetpoint().get()).in(Meters));
     }
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

@@ -21,6 +21,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -47,6 +48,7 @@ import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -125,6 +127,10 @@ public class LooselyCoupledFollowerTest {
     return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false));
   }
 
+  private static SmartMotorController a301(SmartMotorControllerConfig cfg) {
+    return new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(cfg));
+  }
+
   private static Arguments pair(
       String name,
       Function<SmartMotorControllerConfig, SmartMotorController> leader,
@@ -142,7 +148,10 @@ public class LooselyCoupledFollowerTest {
         pair("Nova following a SPARK MAX", LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::nova, cfg -> cfg),
         pair("SPARK MAX with an exponential profile following a TalonFX", LooselyCoupledFollowerTest::talonFX, LooselyCoupledFollowerTest::sparkMax,
             LooselyCoupledFollowerTest::exponentialProfile),
-        pair("SPARK MAX with an LQR following a Nova", LooselyCoupledFollowerTest::nova, LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::lqr));
+        pair("SPARK MAX with an LQR following a Nova", LooselyCoupledFollowerTest::nova, LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::lqr),
+        // An A301's closed loop always runs on the SystemCore, as a leader or a follower.
+        pair("A301 following a SPARK MAX", LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::a301, cfg -> cfg),
+        pair("SPARK MAX following an A301", LooselyCoupledFollowerTest::a301, LooselyCoupledFollowerTest::sparkMax, cfg -> cfg));
   }
 
   /** A pivot on the motor controller, simulated and pumped by its test subsystem. */
@@ -222,7 +231,8 @@ public class LooselyCoupledFollowerTest {
         Arguments.of("SPARK Flex", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::sparkFlex),
         Arguments.of("TalonFX", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::talonFX),
         Arguments.of("TalonFXS", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::talonFXS),
-        Arguments.of("Nova", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::nova));
+        Arguments.of("Nova", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::nova),
+        Arguments.of("A301", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::a301));
   }
 
   /** A follower switches closed loop slot when its leader does, whatever the leader's motor controller. */
@@ -264,6 +274,8 @@ public class LooselyCoupledFollowerTest {
       talon.close();
     } else if (motor instanceof Nova nova) {
       nova.close();
+    } else if (motor instanceof A301 a301) {
+      a301.close();
     }
   }
 

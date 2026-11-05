@@ -154,6 +154,12 @@ class SmartMechanism {
 
   /** Optional 2D visualisation window published to SmartDashboard. */
   std::optional<wpi::Mechanism2d> m_mechanismWindow;
+
+  /**
+   * Publish the Mechanism2d window, when there is one, at Mechanisms/<name>/mechanism. Telemetry
+   * logs the window as it is now, so publish it again after each change to show it.
+   */
+  void PublishMechanismWindow();
 };
 
 }  // namespace yams::mechanisms

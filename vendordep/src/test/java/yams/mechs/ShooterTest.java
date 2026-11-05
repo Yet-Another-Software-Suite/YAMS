@@ -16,6 +16,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -44,6 +45,7 @@ import yams.core.mechanisms.config.FlyWheelConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -175,6 +177,17 @@ public class ShooterTest {
                           .withTelemetry(
                               "Nova(" + (50 + offset) + "[" + i + "]) NEO",
                               TelemetryVerbosity.HIGH)))));
+      // A shooter's A301 has the 3:1 launcher gearbox.
+      smcList.add(
+          Arguments.of(
+              setupTestSubsystem(
+                  new A301Wrapper(
+                      DeviceCreator.createA301(),
+                      DeviceCreator.forA301(((yams.commands2.config.SmartMotorControllerConfig) smcConfig.clone())
+                              .withSubsystem(new SmartMotorControllerTestSubsystem())
+                              .withTelemetry(
+                                  "A301(" + (60 + offset) + "[" + i + "])",
+                                  TelemetryVerbosity.HIGH), 3)))));
     }
 
     return smcList.stream();
@@ -209,6 +222,8 @@ public class ShooterTest {
       ((TalonFX) motorController).close();
     } else if (motorController instanceof Nova) {
       ((Nova) motorController).close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 

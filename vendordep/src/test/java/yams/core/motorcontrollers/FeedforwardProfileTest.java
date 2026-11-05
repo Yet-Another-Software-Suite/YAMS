@@ -4,6 +4,7 @@
 package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
@@ -16,7 +17,6 @@ import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static yams.core.motorcontrollers.ClosedLoopCases.close;
 import static yams.core.motorcontrollers.ClosedLoopCases.create;
 import static yams.core.motorcontrollers.ClosedLoopCases.kPeriod;
-import static yams.core.motorcontrollers.ClosedLoopCases.kRatio;
 
 import java.util.function.DoubleSupplier;
 import java.util.stream.Stream;
@@ -73,13 +73,13 @@ public class FeedforwardProfileTest {
   }
 
   /** Volts per mechanism radian per second squared: J R / (G Kt). */
-  private static double voltsPerRadianPerSecondSquared(DCMotor motor, double moi) {
-    return moi * motor.R / (kRatio * motor.Kt);
+  private static double voltsPerRadianPerSecondSquared(Controller controller, double moi) {
+    return moi * controller.motor().R / (controller.ratio() * controller.motor().Kt);
   }
 
   /** Volts per mechanism radian per second: G / Kv. */
-  private static double voltsPerRadianPerSecond(DCMotor motor) {
-    return kRatio / motor.Kv;
+  private static double voltsPerRadianPerSecond(Controller controller) {
+    return controller.ratio() / controller.motor().Kv;
   }
 
   private static yams.commands2.config.SmartMotorControllerConfig baseConfig(String name) {
@@ -163,8 +163,8 @@ public class FeedforwardProfileTest {
   @MethodSource("controllersAndSlots")
   void rotaryFollowsProfile(Controller controller, ClosedLoopControllerSlot selected) {
     final double moi = 0.1;
-    final double kV = 2 * Math.PI * voltsPerRadianPerSecond(controller.motor());
-    final double kA = 2 * Math.PI * voltsPerRadianPerSecondSquared(controller.motor(), moi);
+    final double kV = 2 * Math.PI * voltsPerRadianPerSecond(controller);
+    final double kA = 2 * Math.PI * voltsPerRadianPerSecondSquared(controller, moi);
     final double kP = 10;
     final double maxVelocity = 1;
     final double maxAcceleration = 4;
@@ -205,10 +205,10 @@ public class FeedforwardProfileTest {
     final double moi = 0.1;
     final double length = 0.5;
     final double perRadianPerSecondSquared =
-        voltsPerRadianPerSecondSquared(controller.motor(), moi);
+        voltsPerRadianPerSecondSquared(controller, moi);
     // SingleJointedArmSim's gravity is 3 g cos(angle) / (2 length) radians per second squared.
     final double kG = perRadianPerSecondSquared * 3 * kGravity / (2 * length);
-    final double kV = 2 * Math.PI * voltsPerRadianPerSecond(controller.motor());
+    final double kV = 2 * Math.PI * voltsPerRadianPerSecond(controller);
     final double kA = 2 * Math.PI * perRadianPerSecondSquared;
     final double kP = 10;
     final double maxVelocity = 0.5;
@@ -232,7 +232,7 @@ public class FeedforwardProfileTest {
       final SingleJointedArmSim sim =
           new SingleJointedArmSim(
               controller.motor(),
-              kRatio,
+              controller.ratio(),
               moi,
               length,
               Degrees.of(-180).in(Radians),
@@ -260,12 +260,16 @@ public class FeedforwardProfileTest {
   @ParameterizedTest(name = "{0} {1}")
   @MethodSource("controllersAndSlots")
   void elevatorFollowsProfile(Controller controller, ClosedLoopControllerSlot selected) {
+    // Lifting 10 kg at 0.4 m/s takes 39 W, more than the A301's motor's 28 W peak.
+    assumeFalse(
+        controller.name().equals("A301"),
+        "The A301 cannot lift the elevator at its profile's velocity");
     final double mass = 10;
     final double drumRadius = 0.02;
     final DCMotor motor = controller.motor();
     // ElevatorSim: a = G Kt V / (R r m) - G^2 Kt v / (R r^2 m Kv) - g.
-    final double kA = motor.R * drumRadius * mass / (kRatio * motor.Kt);
-    final double kV = kRatio / (drumRadius * motor.Kv);
+    final double kA = motor.R * drumRadius * mass / (controller.ratio() * motor.Kt);
+    final double kV = controller.ratio() / (drumRadius * motor.Kv);
     final double kG = kA * kGravity;
     final double kP = 40;
     final double maxVelocity = 0.4;
@@ -287,7 +291,7 @@ public class FeedforwardProfileTest {
     final SmartMotorController smc = create(controller, cfg);
     try {
       final ElevatorSim sim =
-          new ElevatorSim(motor, kRatio, mass, drumRadius, 0, 2, true, start, 0.0, 0.0);
+          new ElevatorSim(motor, controller.ratio(), mass, drumRadius, 0, 2, true, start, 0.0, 0.0);
       smc.setSimSupplier(new ElevatorSimSupplier(sim, smc));
       smc.setupSimulation();
       assertFollowsProfile(

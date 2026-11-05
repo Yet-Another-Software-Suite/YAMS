@@ -119,8 +119,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
           wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -163,6 +162,8 @@ void Pivot::VisualizationUpdate() {
   if (m_setpointLigament) {
     m_setpointLigament->SetAngle(m_smc->GetMechanismPositionSetpoint().value_or(GetAngle()));
   }
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string Pivot::GetName() const { return m_name; }

@@ -195,6 +195,8 @@ public class FlyWheel extends SmartVelocityMechanism {
     } else {
       mechanismLigament.setAngle(m_smc.getMechanismPosition().in(Degrees));
     }
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

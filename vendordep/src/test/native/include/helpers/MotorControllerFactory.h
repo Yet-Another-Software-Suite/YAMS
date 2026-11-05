@@ -6,6 +6,7 @@
 // Factory helpers used by all mechanism tests to create SmartMotorController
 // instances for each (HardwareType × ProfileType) combination.
 
+#include <first/A301.h>
 #include <rev/SparkFlex.h>
 #include <rev/SparkMax.h>
 #include <thrifty/nova/Nova.h>
@@ -25,6 +26,8 @@
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+#include "yams/motorcontrollers/YMotors.hpp"
+#include "yams/motorcontrollers/local/A301Wrapper.hpp"
 #include "yams/motorcontrollers/local/NovaWrapper.hpp"
 #include "yams/motorcontrollers/local/SparkWrapper.hpp"
 #include "yams/motorcontrollers/remote/TalonFXSWrapper.hpp"
@@ -50,6 +53,12 @@ inline std::atomic<int> gCanIdCounter{0};
 
 inline int NextCanId() { return (gCanIdCounter.fetch_add(1) % (kTalonTestCanIdStart - 1)) + 1; }
 
+// CAN IDs of A301s, on a bus of their own. They have their own counter so adding A301s does not
+// move the other devices onto IDs whose simulated state an earlier device left behind.
+inline std::atomic<int> gA301CanIdCounter{0};
+
+inline int NextA301CanId() { return (gA301CanIdCounter.fetch_add(1) % 62) + 1; }
+
 // CAN IDs for hardware kept alive for the whole test binary (e.g. shared swerve hardware).
 // Never wraps; running out of reserved IDs is a test setup bug.
 inline std::atomic<int> gReservedCanIdCounter{kReservedCanIdStart};
@@ -60,7 +69,7 @@ inline int NextReservedCanId() {
   return id;
 }
 
-enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX, Nova };
+enum class HardwareType { SparkMax, SparkFlex, TalonFXS, TalonFX, Nova, A301 };
 enum class ProfileType { None, Trapezoid, Exponential };
 
 struct MotorTestParam {
@@ -77,6 +86,7 @@ struct HardwareBundle {
   std::unique_ptr<ctre::phoenix6::hardware::TalonFXS> talonFXS;
   std::unique_ptr<ctre::phoenix6::hardware::TalonFX> talonFX;
   std::unique_ptr<thrifty::Nova> nova;
+  std::unique_ptr<first::a301::A301> a301;
 
   // Config must outlive the wrapper; stored here so its address stays stable.
   SmartMotorControllerConfig cfg;
@@ -101,6 +111,24 @@ inline SmartMotorControllerConfig MakeBaseConfig(ProfileType profile, double kP,
   return cfg;
 }
 
+// The A301's 64:1 gearbox, for arms and general use. Its gearboxes are 135:1, 64:1, 36:1, 27:1,
+// 13.5:1 and 3:1.
+inline constexpr double kA301Gearbox = 64.0;
+
+// Give a mechanism's config what its hardware takes: a stator current limit, which an A301 does
+// not have, or for an A301 an A301 gearbox, since its motor is too small to move the tests'
+// mechanisms through the gearing the other motors get. Call it before setting an exponential
+// profile, which is worked out from the gearing.
+inline void ForHardware(SmartMotorControllerConfig& cfg, HardwareType hardware,
+                        wpi::units::ampere_t currentLimit, double a301Gearbox = kA301Gearbox) {
+  if (hardware == HardwareType::A301) {
+    cfg.WithMotorGearing(
+        gearing::MechanismGearing{gearing::GearBox::FromReductionStages({a301Gearbox})});
+  } else {
+    cfg.WithStatorCurrentLimit(currentLimit);
+  }
+}
+
 // Return the canonical DCMotor model for a given hardware type.
 inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
   switch (hw) {
@@ -114,6 +142,8 @@ inline wpi::math::DCMotor MotorForHardware(HardwareType hw) {
       return wpi::math::DCMotor::KrakenX60(1);
     case HardwareType::Nova:
       return wpi::math::DCMotor::NEO(1);
+    case HardwareType::A301:
+      return YMotors::A301();
   }
   return wpi::math::DCMotor::NEO(1);
 }
@@ -129,7 +159,7 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
   // the lifetime of the bundle (the wrapper stores a SmartMotorControllerConfig*).
   bundle.cfg = std::move(cfg);
 
-  int canId = NextCanId();
+  int canId = param.hardware == HardwareType::A301 ? NextA301CanId() : NextCanId();
 
   switch (param.hardware) {
     case HardwareType::SparkMax: {
@@ -168,6 +198,12 @@ inline HardwareBundle MakeBundle(const MotorTestParam& param, SmartMotorControll
                                           &bundle.cfg);
       break;
     }
+    case HardwareType::A301: {
+      // A301s are on a bus of their own.
+      bundle.a301 = std::make_unique<first::a301::A301>(wpi::CANPort::CAN_S2, canId);
+      bundle.smc = new local::A301Wrapper(bundle.a301.get(), &bundle.cfg);
+      break;
+    }
   }
 
   bundle.subsystem->SetSMC(bundle.smc);
@@ -190,7 +226,7 @@ inline void CloseBundle(HardwareBundle& b) {
 inline std::vector<MotorTestParam> AllMotorParams() {
   std::vector<MotorTestParam> params;
   for (auto hw : {HardwareType::SparkMax, HardwareType::SparkFlex, HardwareType::TalonFXS,
-                  HardwareType::TalonFX, HardwareType::Nova}) {
+                  HardwareType::TalonFX, HardwareType::Nova, HardwareType::A301}) {
     for (auto prof : {ProfileType::None, ProfileType::Trapezoid, ProfileType::Exponential}) {
       // A Nova applies the mechanisms' feedforward only with a motion profile, so it has no case
       // without one; its trapezoidal profile case runs its closed loop on the Nova.
@@ -211,6 +247,9 @@ inline std::vector<MotorTestParam> AllMotorParams() {
           break;
         case HardwareType::Nova:
           hwName = "Nova";
+          break;
+        case HardwareType::A301:
+          hwName = "A301";
           break;
       }
       std::string profName;

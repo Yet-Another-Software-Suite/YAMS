@@ -18,6 +18,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.encoder.SplineEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -27,6 +28,8 @@ import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
@@ -84,6 +87,59 @@ public class DeviceCreator {
       System.err.println("Warning: used maximum device IDs, resetting to 0");
     }
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
+  }
+
+  /** Next A301 CAN ID. Like SPARKs, simulated A301s take any ID, so none is reused in a run. */
+  private static final AtomicInteger a301Id = new AtomicInteger(1);
+
+  /** Create an A301, on a bus no other device uses. */
+  public static A301 createA301() {
+    return new A301(CANPorts.fromBusId(2), a301Id.getAndIncrement());
+  }
+
+  /**
+   * Motor rotations per output shaft rotation of the A301's 64:1 gearbox, for arms and general use.
+   * The A301's gearboxes are 135:1, 64:1, 36:1, 27:1, 13.5:1 and 3:1.
+   */
+  public static final double kA301Gearbox = 64;
+
+  /**
+   * Clear the current limits of a config shared with the other motor controllers, which an A301
+   * does not have.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C withoutCurrentLimits(C cfg) {
+    cfg.withStatorCurrentLimit(null);
+    cfg.withSupplyCurrentLimit(null);
+    return cfg;
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301 on its 64:1 gearbox: see
+   * {@link #forA301(SmartMotorControllerConfig, double)}.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg) {
+    return forA301(cfg, kA301Gearbox);
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301: without current limits,
+   * and geared through an A301 gearbox, since its motor is too small to move the tests' mechanisms
+   * through the gearing they give the other motors.
+   *
+   * @param cfg Config to change.
+   * @param gearbox Motor rotations per output shaft rotation of the A301's gearbox.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg, double gearbox) {
+    withoutCurrentLimits(cfg);
+    cfg.withGearing(new MechanismGearing(GearBox.fromReductionStages(gearbox)));
+    return cfg;
   }
 
   // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the
@@ -247,19 +303,28 @@ public class DeviceCreator {
    * @param velocity Whether the mechanism is controlled by velocity.
    * @return The config.
    */
-  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(C cfg, boolean velocity) {
+  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(
+      C cfg, boolean velocity) {
     boolean feedforward = false;
     for (ClosedLoopControllerSlot slot : ClosedLoopControllerSlot.values()) {
-      feedforward |= cfg.getArmFeedforward(slot).isPresent() || cfg.getElevatorFeedforward(slot).isPresent() || cfg.getSimpleFeedforward(slot).isPresent();
+      feedforward |=
+          cfg.getArmFeedforward(slot).isPresent()
+              || cfg.getElevatorFeedforward(slot).isPresent()
+              || cfg.getSimpleFeedforward(slot).isPresent();
     }
-    if (!feedforward || cfg.getTrapezoidProfile().isPresent() || cfg.getExponentialProfile().isPresent() || cfg.getLQRClosedLoopController().isPresent()) {
+    if (!feedforward
+        || cfg.getTrapezoidProfile().isPresent()
+        || cfg.getExponentialProfile().isPresent()
+        || cfg.getLQRClosedLoopController().isPresent()) {
       return cfg;
     }
     final boolean linear = cfg.getLinearClosedLoopControllerUse();
     if (velocity && linear) {
-      cfg.withTrapezoidalProfile(MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
+      cfg.withTrapezoidalProfile(
+          MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
     } else if (velocity) {
-      cfg.withTrapezoidalProfile(DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
+      cfg.withTrapezoidalProfile(
+          DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
     } else if (linear) {
       cfg.withTrapezoidalProfile(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
     } else {

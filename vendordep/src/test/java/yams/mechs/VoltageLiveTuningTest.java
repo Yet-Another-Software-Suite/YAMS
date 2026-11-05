@@ -16,6 +16,7 @@ import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -43,6 +44,7 @@ import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -113,6 +115,10 @@ public class VoltageLiveTuningTest {
     return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false));
   }
 
+  private static SmartMotorController a301(SmartMotorControllerConfig cfg) {
+    return new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(cfg));
+  }
+
   private static Arguments pair(
       String name,
       Function<SmartMotorControllerConfig, SmartMotorController> leader,
@@ -129,7 +135,10 @@ public class VoltageLiveTuningTest {
         pair("TalonFX leading a SPARK MAX", VoltageLiveTuningTest::talonFX, cfg -> cfg, VoltageLiveTuningTest::sparkMax),
         // The leader's closed loop runs on the SystemCore, and so does the Nova follower's.
         pair("SPARK MAX with an exponential profile leading a Nova", VoltageLiveTuningTest::sparkMax, VoltageLiveTuningTest::exponentialProfile,
-            VoltageLiveTuningTest::nova));
+            VoltageLiveTuningTest::nova),
+        // An A301's closed loop always runs on the SystemCore, as a leader or a follower.
+        pair("SPARK Flex leading an A301", VoltageLiveTuningTest::sparkFlex, cfg -> cfg, VoltageLiveTuningTest::a301),
+        pair("A301 leading a SPARK MAX", VoltageLiveTuningTest::a301, cfg -> cfg, VoltageLiveTuningTest::sparkMax));
   }
 
   /** A pivot on the motor controller, simulated and pumped by its test subsystem. */
@@ -280,6 +289,8 @@ public class VoltageLiveTuningTest {
       talon.close();
     } else if (motor instanceof Nova nova) {
       nova.close();
+    } else if (motor instanceof A301 a301) {
+      a301.close();
     }
   }
 

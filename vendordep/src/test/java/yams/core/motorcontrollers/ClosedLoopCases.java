@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.A301;
 import com.thrifty.nova.Nova;
 import java.util.function.BiFunction;
 import java.util.function.DoubleConsumer;
@@ -26,6 +27,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -48,6 +50,12 @@ final class ClosedLoopCases {
 
   static final MechanismGearing kGearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
 
+  /**
+   * Motor rotations per mechanism rotation of an A301: its 64:1 gearbox. Its motor is too small to
+   * move the tests' mechanisms through 12:1.
+   */
+  static final double kA301Ratio = DeviceCreator.kA301Gearbox;
+
   /** Period of the robot loop and of the simulation, in seconds. */
   static final double kPeriod = 0.020;
 
@@ -56,6 +64,7 @@ final class ClosedLoopCases {
    *
    * @param name Name of the motor controller.
    * @param motor Motor it drives.
+   * @param ratio Motor rotations per mechanism rotation.
    * @param slots Number of closed loop slots it has.
    * @param realTime Whether its simulation runs in real time. Phoenix simulates a Talon on its own
    *     clock, which does not stop with WPILib's simulated time.
@@ -64,12 +73,18 @@ final class ClosedLoopCases {
   record Controller(
       String name,
       DCMotor motor,
+      double ratio,
       int slots,
       boolean realTime,
       BiFunction<DCMotor, SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
       return name;
+    }
+
+    /** Gearing from the motor to the mechanism. */
+    MechanismGearing gearing() {
+      return new MechanismGearing(GearBox.fromReductionStages(ratio));
     }
 
     /** Whether this is a SPARK. */
@@ -87,33 +102,45 @@ final class ClosedLoopCases {
     new Controller(
         "SparkMax",
         DCMotor.getNEO(1),
+        kRatio,
         4,
         false,
         (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkMax(), motor, cfg)),
     new Controller(
         "SparkFlex",
         DCMotor.getNeoVortex(1),
+        kRatio,
         4,
         false,
         (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkFlex(), motor, cfg)),
     new Controller(
         "TalonFX",
         DCMotor.getKrakenX60(1),
+        kRatio,
         3,
         true,
         (motor, cfg) -> new TalonFXWrapper(DeviceCreator.createTalonFX(), motor, cfg)),
     new Controller(
         "TalonFXS",
         DCMotor.getNEO(1),
+        kRatio,
         3,
         true,
         (motor, cfg) -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), motor, cfg)),
     new Controller(
         "Nova",
         DCMotor.getNEO(1),
+        kRatio,
         2,
         false,
         (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, DeviceCreator.withNovaProfile(cfg, false))),
+    new Controller(
+        "A301",
+        YMotors.getA301(1),
+        kA301Ratio,
+        4,
+        false,
+        (motor, cfg) -> new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(cfg))),
   };
 
   /** Every motor controller. */
@@ -138,8 +165,10 @@ final class ClosedLoopCases {
         .withTelemetry(name, TelemetryVerbosity.LOW);
   }
 
+  /** Create the motor controller, with its gearing. */
   static SmartMotorController create(Controller controller, SmartMotorControllerConfig cfg) {
-    final SmartMotorController smc = controller.create().apply(controller.motor(), cfg);
+    final SmartMotorController smc =
+        controller.create().apply(controller.motor(), cfg.withGearing(controller.gearing()));
     ((SmartMotorControllerTestSubsystem)
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .setSMC(smc);
@@ -174,6 +203,8 @@ final class ClosedLoopCases {
       talonFX.close();
     } else if (motorController instanceof Nova nova) {
       nova.close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 
