@@ -336,16 +336,7 @@ public abstract class SmartMotorController {
    */
   public void startClosedLoopController() {
     if (m_closedLoopControllerThread != null && m_config.getMotorControllerMode() == ControlMode.CLOSED_LOOP && !m_closedLoopControllerRunning) {
-      m_pid.ifPresent(PIDController::reset);
-      // The motion profile starts from this position, so continuous wrapping keeps the angles the
-      // loop measures next to it, rather than a whole wrapping range away from it.
-      m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
-      m_trapState = getTrapezoidalProfileState();
-      m_expoState = getExponentialProfileState();
-      m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
-      if (m_config.getLinearClosedLoopControllerUse()) {
-        m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
-      }
+      resetClosedLoopControllerState();
       m_closedLoopControllerThread.stop();
       m_closedLoopControllerThread.startPeriodic(m_config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds));
       m_closedLoopControllerThread.setName(getName()+" Closed Loop Controller");
@@ -356,6 +347,27 @@ public abstract class SmartMotorController {
         follower.startClosedLoopController();
       }
     });
+  }
+
+  /**
+   * Start the closed loop controller's PID, motion profile and LQR from where the mechanism is now.
+   *
+   * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is in use
+   *                                                    and the mechanism circumference is not
+   *                                                    configured.
+   */
+  private void resetClosedLoopControllerState() {
+    m_pid.ifPresent(PIDController::reset);
+    // The motion profile starts from this position, so continuous wrapping keeps the angles the
+    // loop measures next to it, rather than a whole wrapping range away from it.
+    m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
+    // A velocity profile starts from the measured velocity in the closed loop iteration.
+    m_trapState = m_config.getVelocityTrapezoidalProfileInUse() ? Optional.empty() : getTrapezoidalProfileState();
+    m_expoState = getExponentialProfileState();
+    m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
+    if (m_config.getLinearClosedLoopControllerUse()) {
+      m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
+    }
   }
 
   /**
@@ -382,9 +394,18 @@ public abstract class SmartMotorController {
     Optional<SimpleMotorFeedforward> simpleMotorFeedforward = m_config.getSimpleFeedforward(m_slot);
     Optional<Temperature> temperatureCutoff = m_config.getTemperatureCutoff();
     Optional<Voltage> maximumVoltage = m_config.getClosedLoopControllerMaximumVoltage();
+    boolean velocityProfileConfigured = m_config.getVelocityTrapezoidalProfileInUse();
     synchronizeRelativeEncoder();
 
     if (!m_closedLoopControllerRunning) {
+      return;
+    }
+
+    if (!DriverStationBackend.isEnabled()) {
+      // A disabled robot's motors get no power, so the mechanism can move, such as an arm falling.
+      // Follow it, so the loop starts from where it is once the robot is enabled, rather than
+      // from where it was.
+      resetClosedLoopControllerState();
       return;
     }
 
@@ -567,12 +588,15 @@ public abstract class SmartMotorController {
       }
     });
 
-    // Set the current states in the class.
+    // Set the current states in the class. Without a setpoint there is no profile step, so the
+    // profile follows the mechanism, and the next setpoint is profiled from where it is.
     if (m_expoProfile.isPresent()) {
-      m_expoState = Optional.of(nextExpoState.get());
+      m_expoState = setpointPosition.isPresent() ? Optional.of(nextExpoState.get()) : getExponentialProfileState();
     }
     if (m_trapezoidProfile.isPresent()) {
-      m_trapState = Optional.of(nextTrapState.get());
+      m_trapState = setpointPosition.isPresent() || velocityTrapezoidalProfile.get()
+                    ? Optional.of(nextTrapState.get())
+                    : velocityProfileConfigured ? Optional.empty() : getTrapezoidalProfileState();
     }
 
     // Apply the feedforward Force supplied to setVelocity(..., Force), e.g. from a PathPlanner

@@ -912,6 +912,9 @@ class SmartMotorController {
  private:
   /** Reset the motion profile states to the current mechanism (or measurement) state. */
   void ResetProfileStates();
+
+  /** Start the closed loop controller's PID, motion profile and LQR from where the mechanism is now. */
+  void ResetClosedLoopControllerState();
 };
 
 }  // namespace yams::motorcontrollers

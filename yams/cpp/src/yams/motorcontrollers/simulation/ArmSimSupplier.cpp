@@ -3,6 +3,7 @@
 
 #include "yams/motorcontrollers/simulation/ArmSimSupplier.hpp"
 
+#include <wpi/driverstation/RobotState.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 
 #include "yams/motorcontrollers/SmartMotorController.hpp"
@@ -29,6 +30,11 @@ void ArmSimSupplier::UpdateSim() {
   }
   if (!m_simUpdated) {
     StarveInput();
+    if (!wpi::RobotState::IsEnabled()) {
+      // A disabled robot's motors get no power, even with no new command to the motor controller.
+      m_lastInputVoltage = wpi::units::volt_t{0};
+      m_sim.SetInputVoltage(m_lastInputVoltage);
+    }
     m_sim.Update(m_period);
     FeedUpdateSim();
   }
@@ -58,8 +64,9 @@ wpi::units::volt_t ArmSimSupplier::GetMechanismStatorVoltage() { return m_lastIn
 
 void ArmSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
   FeedInput();
-  m_lastInputVoltage = volts;
-  m_sim.SetInputVoltage(volts);
+  // A disabled robot's motors get no power, so the mechanism coasts or falls.
+  m_lastInputVoltage = wpi::RobotState::IsEnabled() ? volts : wpi::units::volt_t{0};
+  m_sim.SetInputVoltage(m_lastInputVoltage);
 }
 
 wpi::units::turn_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
