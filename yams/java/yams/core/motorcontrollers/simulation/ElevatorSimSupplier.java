@@ -113,7 +113,7 @@ public class ElevatorSimSupplier implements SimSupplier {
     if (!simUpdated) {
       starveInput();
       if (!DriverStationBackend.isEnabled()) {
-        // A disabled robot's motors get no power, even with no new command to the motor controller.
+        // A disabled robot's motors get no power, so the mechanism coasts or falls.
         sim.setInputVoltage(0);
       }
       sim.update(simPeriod.in(Seconds));
@@ -154,8 +154,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorDutyCycle(double dutyCycle) {
     feedInput();
-    // A disabled robot's motors get no power, so the mechanism coasts or falls.
-    sim.setInputVoltage(DriverStationBackend.isEnabled() ? dutyCycle * getMechanismSupplyVoltage().in(Volts) : 0);
+    sim.setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
   }
 
   @Override
@@ -173,8 +172,7 @@ public class ElevatorSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorVoltage(Voltage volts) {
     feedInput();
-    // A disabled robot's motors get no power, so the mechanism coasts or falls.
-    sim.setInputVoltage(DriverStationBackend.isEnabled() ? volts.in(Volts) : 0);
+    sim.setInputVoltage(volts.in(Volts));
   }
 
   /**

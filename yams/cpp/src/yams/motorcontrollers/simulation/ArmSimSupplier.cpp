@@ -31,7 +31,7 @@ void ArmSimSupplier::UpdateSim() {
   if (!m_simUpdated) {
     StarveInput();
     if (!wpi::RobotState::IsEnabled()) {
-      // A disabled robot's motors get no power, even with no new command to the motor controller.
+      // A disabled robot's motors get no power, so the mechanism coasts or falls.
       m_lastInputVoltage = wpi::units::volt_t{0};
       m_sim.SetInputVoltage(m_lastInputVoltage);
     }
@@ -64,9 +64,8 @@ wpi::units::volt_t ArmSimSupplier::GetMechanismStatorVoltage() { return m_lastIn
 
 void ArmSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
   FeedInput();
-  // A disabled robot's motors get no power, so the mechanism coasts or falls.
-  m_lastInputVoltage = wpi::RobotState::IsEnabled() ? volts : wpi::units::volt_t{0};
-  m_sim.SetInputVoltage(m_lastInputVoltage);
+  m_lastInputVoltage = volts;
+  m_sim.SetInputVoltage(volts);
 }
 
 wpi::units::turn_t ArmSimSupplier::GetMechanismPosition() { return m_sim.GetAngle(); }
