@@ -25,6 +25,8 @@ var searchData=
   ['year_5ft_22',['year_t',['../namespaceyams_1_1units.html#a1837887c9b4d902d02b1def7b6e2602d',1,'yams::units']]],
   ['yearunit_23',['YearUnit',['../namespaceyams_1_1units.html#a0bae2bb673560e408cd10d0ece74289e',1,'yams::units']]],
   ['yet_20another_20mechanism_20system_24',['YAMS Yet Another Mechanism System',['../index.html',1,'']]],
-  ['yunits_2ehpp_25',['YUnits.hpp',['../YUnits_8hpp.html',1,'']]],
-  ['yz_26',['YZ',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512',1,'yams::mechanisms::config::MechanismPositionConfig']]]
+  ['ymotors_25',['YMotors',['../structyams_1_1motorcontrollers_1_1YMotors.html',1,'yams::motorcontrollers']]],
+  ['ymotors_2ehpp_26',['YMotors.hpp',['../YMotors_8hpp.html',1,'']]],
+  ['yunits_2ehpp_27',['YUnits.hpp',['../YUnits_8hpp.html',1,'']]],
+  ['yz_28',['YZ',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325affa4ba973372c3650fd0881abeca6512',1,'yams::mechanisms::config::MechanismPositionConfig']]]
 ];

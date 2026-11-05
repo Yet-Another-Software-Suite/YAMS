@@ -4,7 +4,7 @@ var searchData=
   ['leagueunit_1',['LeagueUnit',['../namespaceyams_1_1units.html#af44111459bc467b4b35abb6eb5f2216d',1,'yams::units']]],
   ['loadlooselycoupledfollowers_2',['LoadLooselyCoupledFollowers',['../classyams_1_1motorcontrollers_1_1SmartMotorController.html#a0012f24c492856a9d9f45464eb27cf5d',1,'yams::motorcontrollers::SmartMotorController']]],
   ['lockpose_3',['LockPose',['../classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a85932ea4a331c7be3bee633e0558f673',1,'yams::mechanisms::swerve::SwerveDrive']]],
-  ['logging_20only_20no_20nt4_20with_20a_20custom_20field_20selection_4',['Logging-only (no NT4) with a custom field selection',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md20',1,'']]],
+  ['logging_20only_20no_20nt4_20with_20a_20custom_20field_20selection_4',['Logging-only (no NT4) with a custom field selection',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md21',1,'']]],
   ['loop_5',['loop',['../structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86',1,'yams::math::LQRConfig::LoopBundle']]],
   ['loop1_6',['Loop1',['../classyams_1_1math_1_1LQRConfig.html#ac3f330d10b5cd491a9a5ff332f4e08c0',1,'yams::math::LQRConfig']]],
   ['loop2_7',['Loop2',['../classyams_1_1math_1_1LQRConfig.html#a40fe7bb38385c73e3b37d1a96734f92d',1,'yams::math::LQRConfig']]],

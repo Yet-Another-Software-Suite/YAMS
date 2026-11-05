@@ -285,31 +285,30 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>  std::optional&lt;wpi::util::Alert&gt; m_rioControllerAlert;</div>
 <div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>  std::optional&lt;wpi::util::Alert&gt; m_startingPositionExternalEncoderAlert;</div>
 <div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>  std::optional&lt;wpi::util::Alert&gt; m_zeroOffsetNoExternalEncoderAlert;</div>
-<div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>  std::optional&lt;wpi::util::Alert&gt; m_discontinuityPointNoExternalEncoderAlert;</div>
-<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span> </div>
-<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>  <span class="keyword">static</span> <a class="code hl_enumeration" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a5824bb1070aa6c7842b38f019ecb014f">MotorArrangement</a> ArrangementForMotor(ctre::phoenix6::hardware::TalonFXS* talon,</div>
-<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>                                              <span class="keyword">const</span> wpi::math::DCMotor&amp; motor);</div>
-<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>  std::string AlertId(<span class="keyword">const</span> std::string&amp; alertType) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>  <span class="keywordtype">void</span> EnsureRequest(<span class="keyword">const</span> std::function&lt;ctre::phoenix::StatusCode()&gt;&amp; request);</div>
-<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Group&gt;</div>
-<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>  ctre::phoenix::StatusCode ApplyGroup(<span class="keyword">const</span> Group&amp; group);</div>
-<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>  <span class="keywordtype">void</span> SetFOC(<span class="keywordtype">bool</span> foc);</div>
-<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>  <span class="keywordtype">double</span> PositionGainUnitsPerRotation() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>  <span class="keywordtype">double</span> VelocityGainUnitsPerRotation() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>  <span class="keywordtype">double</span> AccelerationGainUnitsPerRotation() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>  <span class="keywordtype">void</span> WriteSlotPID(<a class="code hl_typedef" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a67cd474ba064657e33251bafee4256e5">ClosedLoopControllerSlot</a> slot, <span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD);</div>
-<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>  <span class="keywordtype">void</span> WriteSlotGains(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>  <span class="keywordtype">void</span> WriteMotionMagic(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>  <span class="keywordtype">void</span> WriteSensorRatios(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>  <span class="keywordtype">void</span> ApplyExternalEncoder(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
-<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
-<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>  <span class="keywordtype">void</span> ApplyFollowers(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>  <span class="keywordtype">void</span> ApplyVendorControlRequest(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>};</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span> </div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>  <span class="keyword">static</span> <a class="code hl_enumeration" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a5824bb1070aa6c7842b38f019ecb014f">MotorArrangement</a> ArrangementForMotor(ctre::phoenix6::hardware::TalonFXS* talon,</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>                                              <span class="keyword">const</span> wpi::math::DCMotor&amp; motor);</div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>  std::string AlertId(<span class="keyword">const</span> std::string&amp; alertType) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>  <span class="keywordtype">void</span> EnsureRequest(<span class="keyword">const</span> std::function&lt;ctre::phoenix::StatusCode()&gt;&amp; request);</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Group&gt;</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>  ctre::phoenix::StatusCode ApplyGroup(<span class="keyword">const</span> Group&amp; group);</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>  <span class="keywordtype">void</span> SetFOC(<span class="keywordtype">bool</span> foc);</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>  <span class="keywordtype">double</span> PositionGainUnitsPerRotation() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>  <span class="keywordtype">double</span> VelocityGainUnitsPerRotation() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>  <span class="keywordtype">double</span> AccelerationGainUnitsPerRotation() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>  <span class="keywordtype">void</span> WriteSlotPID(<a class="code hl_typedef" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html#a67cd474ba064657e33251bafee4256e5">ClosedLoopControllerSlot</a> slot, <span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD);</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>  <span class="keywordtype">void</span> WriteSlotGains(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>  <span class="keywordtype">void</span> WriteMotionMagic(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>  <span class="keywordtype">void</span> WriteSensorRatios(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>  <span class="keywordtype">void</span> ApplyExternalEncoder(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>  <span class="keywordtype">void</span> ApplyFollowers(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>  <span class="keywordtype">void</span> ApplyVendorControlRequest(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>};</div>
 </div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span> </div>
-<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>}  <span class="comment">// namespace yams::motorcontrollers::remote</span></div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span> </div>
+<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>}  <span class="comment">// namespace yams::motorcontrollers::remote</span></div>
 </div>
 <div class="ttc" id="a_smart_motor_controller_8hpp_html"><div class="ttname"><a href="_smart_motor_controller_8hpp.html">SmartMotorController.hpp</a></div></div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1_mechanism_gearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1_mechanism_gearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>

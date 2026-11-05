@@ -58,6 +58,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#getThriftyPulsar(int)" tabindex="0">getThriftyPulsar(int)</a></li>
+<li><a href="#getA301(int)" tabindex="0">getA301(int)</a></li>
 </ol>
 </li>
 </ol>
@@ -81,8 +82,8 @@ loadScripts(document, 'script');</script>
 (see <a href="SmartMotorController.html#isMotor(org.wpilib.math.system.DCMotor,org.wpilib.math.system.DCMotor)"><code>SmartMotorController.isMotor(DCMotor, DCMotor)</code></a>), so use them rather than building
 your own from the same specs.
 
-<p>This class will be deleted once WPILib has a <code>DCMotor</code> of the Thrifty Pulsar. Use
-WPILib's then.</div>
+<p>This class will be deleted once WPILib has a <code>DCMotor</code> of the Thrifty Pulsar and the
+FIRST A301. Use WPILib's then.</div>
 </div>
 </section>
 <section class="summary">
@@ -99,8 +100,14 @@ WPILib's then.</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.wpilib.math.system.DCMotor</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getThriftyPulsar(int)" class="member-name-link">getThriftyPulsar</a><wbr>(int&nbsp;numMotors)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getA301(int)" class="member-name-link">getA301</a><wbr>(int&nbsp;numMotors)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">The motor inside the FIRST A301, before its gearbox, at 12 V: 13,500 RPM free, and 0.078 N-m
+stalled, twice the 5.27 N-m at peak power of FIRST's 135:1 gearbox.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.wpilib.math.system.DCMotor</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getThriftyPulsar(int)" class="member-name-link">getThriftyPulsar</a><wbr>(int&nbsp;numMotors)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">The Thrifty Pulsar 775, from Thrifty's specs: 12 V, 3.1 N-m and 189 A stalled, and 2.7 A at 7500
 RPM free.</div>
 </div>
@@ -136,6 +143,26 @@ RPM free. A Talon FXS drives it as a NEO.
 <dd><code>numMotors</code> - How many Pulsars are in the gearbox.</dd>
 <dt>Returns:</dt>
 <dd>The Thrifty Pulsar's <code>DCMotor</code>.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getA301(int)">
+<h3>getA301</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">org.wpilib.math.system.DCMotor</span>&nbsp;<span class="element-name">getA301</span><wbr><span class="parameters">(int&nbsp;numMotors)</span></div>
+<div class="block">The motor inside the FIRST A301, before its gearbox, at 12 V: 13,500 RPM free, and 0.078 N-m
+stalled, twice the 5.27 N-m at peak power of FIRST's 135:1 gearbox. FIRST does not give its
+currents, and the A301 is similar to a NEO 550, so it has the NEO 550's: 100 A stalled and
+1.4 A free.
+
+<p>Every A301 has this motor. Its gearbox is part of the gearing given to the <a href="local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local"><code>A301Wrapper</code></a>'s config.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>numMotors</code> - How many A301 motors are in the gearbox.</dd>
+<dt>Returns:</dt>
+<dd>The FIRST A301's motor <code>DCMotor</code>.</dd>
 </dl>
 </div>
 </section>

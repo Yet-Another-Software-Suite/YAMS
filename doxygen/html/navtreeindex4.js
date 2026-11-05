@@ -1,5 +1,13 @@
 var NAVTREEINDEX4 =
 {
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0c9b3fbaa1f1df78fdc859c8fd60b247":[1,0,0,3,2,0,1,17],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0c9b3fbaa1f1df78fdc859c8fd60b247":[2,0,0,3,2,0,1,17],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0da5100d9274855c046ed537fe9340bd":[1,0,0,3,2,0,1,35],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0da5100d9274855c046ed537fe9340bd":[2,0,0,3,2,0,1,35],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0e3443c644157b49a7c240b14a20d21a":[1,0,0,3,2,0,1,14],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a0e3443c644157b49a7c240b14a20d21a":[2,0,0,3,2,0,1,14],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a19aac24695ab219c85bd9e1d35461481":[1,0,0,3,2,0,1,0],
+"classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a19aac24695ab219c85bd9e1d35461481":[2,0,0,3,2,0,1,0],
 "classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a1dcbb3825a711ebf7df17d9c85d7e235":[1,0,0,3,2,0,1,45],
 "classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a1dcbb3825a711ebf7df17d9c85d7e235":[2,0,0,3,2,0,1,45],
 "classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html#a25c4fd3115e549e0e9dc7dbfaa1e1352":[1,0,0,3,2,0,1,31],
@@ -241,13 +249,5 @@ var NAVTREEINDEX4 =
 "classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html#af30b058f1c23aecedc0748be7a3b4abe":[1,0,0,3,3,1,6],
 "classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html#af30b058f1c23aecedc0748be7a3b4abe":[2,0,0,3,3,1,6],
 "classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html#af94cfa7a354881f7f0db3af0b318baf4":[1,0,0,3,3,1,4],
-"classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html#af94cfa7a354881f7f0db3af0b318baf4":[2,0,0,3,3,1,4],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html":[1,0,0,4,3],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html":[2,0,0,4,3],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a0032b02148c2738dcc9e5953aae4d2d8":[1,0,0,4,3,13],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a0032b02148c2738dcc9e5953aae4d2d8":[2,0,0,4,3,13],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a0c2f342d5fccd8dd96714ba95c40c7c3":[1,0,0,4,3,2],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a0c2f342d5fccd8dd96714ba95c40c7c3":[2,0,0,4,3,2],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a24aaa23172787b444ce46dfcf11096ad":[1,0,0,4,3,1],
-"classyams_1_1motorcontrollers_1_1SimSupplier.html#a24aaa23172787b444ce46dfcf11096ad":[2,0,0,4,3,1]
+"classyams_1_1mechanisms_1_1velocity_1_1SmartVelocityMechanism.html#af94cfa7a354881f7f0db3af0b318baf4":[2,0,0,3,3,1,4]
 };

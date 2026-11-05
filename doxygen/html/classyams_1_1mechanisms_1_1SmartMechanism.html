@@ -155,6 +155,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a912f3d90aeda0e678eeab6d1357a6536" id="r_a912f3d90aeda0e678eeab6d1357a6536"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::meter_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a912f3d90aeda0e678eeab6d1357a6536">GetMeasurementSetpoint</a> ()</td></tr>
 <tr class="memitem:ae50d3baa07e23ddbeb5089c5d30d84fd" id="r_ae50d3baa07e23ddbeb5089c5d30d84fd"><td class="memItemLeft" align="right" valign="top">wpi::Mechanism2d *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae50d3baa07e23ddbeb5089c5d30d84fd">GetMechanismWindow</a> ()</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a90c30c651e22e2bcc36b93453055802d" id="r_a90c30c651e22e2bcc36b93453055802d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90c30c651e22e2bcc36b93453055802d">PublishMechanismWindow</a> ()</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:abe244df028476d8c088389f2f5ffb597" id="r_abe244df028476d8c088389f2f5ffb597"><td class="memItemLeft" align="right" valign="top">wpi::cmd::SubsystemBase *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe244df028476d8c088389f2f5ffb597">m_subsystem</a> {nullptr}</td></tr>
@@ -344,6 +348,32 @@ Protected Attributes</h2></td></tr>
 <p>Get the mechanism's pose relative to the robot, worked out from its motor's position and where it is mounted, as set in its MechanismPositionConfig. Publish it as a component of an AdvantageScope robot model, whose part is modeled at the mechanism's zero position about its mount. </p>
 
 <p>Implemented in <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Arm.html#aff15accc8b55dcb0ab0b198521cd9e78">yams::mechanisms::positional::Arm</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Elevator.html#a1f968e1324bb9d0c804b91be952835b3">yams::mechanisms::positional::Elevator</a>, <a class="el" href="classyams_1_1mechanisms_1_1positional_1_1Pivot.html#a42d77f48ade429b039cad4f0a517f45b">yams::mechanisms::positional::Pivot</a>, and <a class="el" href="classyams_1_1mechanisms_1_1velocity_1_1FlyWheel.html#a942265a95cdc54d8ef58e2e6c134a9bb">yams::mechanisms::velocity::FlyWheel</a>.</p>
+
+</div>
+</div>
+<a id="a90c30c651e22e2bcc36b93453055802d" name="a90c30c651e22e2bcc36b93453055802d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90c30c651e22e2bcc36b93453055802d">&#9670;&#160;</a></span>PublishMechanismWindow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::mechanisms::SmartMechanism::PublishMechanismWindow </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Publish the Mechanism2d window, when there is one, at Mechanisms/&lt;name&gt;/mechanism. Telemetry logs the window as it is now, so publish it again after each change to show it. </p>
 
 </div>
 </div>

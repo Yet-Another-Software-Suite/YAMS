@@ -17,7 +17,7 @@ var searchData=
   ['trapezoidalprofilemaxacceleration_14',['TrapezoidalProfileMaxAcceleration',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba0228bbdf83d9a3a529d0f83bf01f2534',1,'yams::telemetry']]],
   ['trapezoidalprofilemaxjerk_15',['TrapezoidalProfileMaxJerk',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf700cf3fac9d95cc1f2758278e2c651b',1,'yams::telemetry']]],
   ['trapezoidalprofilemaxvelocity_16',['TrapezoidalProfileMaxVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaba787f9e89a498fd4d5d34f876609764',1,'yams::telemetry']]],
-  ['trigger_20based_20override_17',['Trigger-based override',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md17',1,'']]],
+  ['trigger_20based_20override_17',['Trigger-based override',['../classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html#autotoc_md18',1,'']]],
   ['tunablealliancerelative_18',['TunableAllianceRelative',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80a8354fa4db54ec21016d5d75bf4177a6a',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
   ['tunableclosedloopcontrollerslot_19',['TunableClosedLoopControllerSlot',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba31748088e3ecff44b15790a9a51d09a7',1,'yams::telemetry']]],
   ['tunabledeadband_20',['TunableDeadband',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a6835f78c1068a979878cffb4ce55528d',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],

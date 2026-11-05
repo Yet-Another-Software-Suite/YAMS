@@ -70,6 +70,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#setupSimulation()" tabindex="0">setupSimulation()</a></li>
+<li><a href="#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" tabindex="0">setSimSupplier(SimSupplier)</a></li>
 <li><a href="#seedRelativeEncoder()" tabindex="0">seedRelativeEncoder()</a></li>
 <li><a href="#synchronizeRelativeEncoder()" tabindex="0">synchronizeRelativeEncoder()</a></li>
 <li><a href="#simIterate()" tabindex="0">simIterate()</a></li>
@@ -159,9 +160,13 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></span></div>
 <div class="block">Nova wrapper for The Thrifty Bot's Thrifty Nova motor controller, using ThriftyLib 2027.
 
-<p>The closed loop controller runs on the SystemCore and commands the Nova with voltage, like the
-profiled controllers of the other wrappers. ThriftyLib's simulation ignores the Nova's onboard
-PID gains, so running the loop on the SystemCore keeps simulation and the robot the same.
+<p>The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
+gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
+kV, kA and kG and a constant or cosine gravity. The Nova applies a feedforward only with a motion
+profile, so a feedforward needs a trapezoidal profile. An LQR, an exponential profile and
+a velocity trapezoidal profile run on the SystemCore instead, and command the Nova with voltage.
+The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
+closed loop, so in simulation a <a href="../simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation"><code>NovaSimSupplier</code></a> runs it.
 
 <p><b>External encoders</b>, given to
 <a href="../SmartMotorControllerConfig.html#withExternalEncoder(java.lang.Object)"><code>SmartMotorControllerConfig.withExternalEncoder(Object)</code></a>:
@@ -555,57 +560,62 @@ scaled to the mechanism rotations.</div>
 <a href="../SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStatorCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setStatorCurrentLimit</a><wbr>(org.wpilib.units.measure.Current&nbsp;currentLimit)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier</a><wbr>(<a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the <a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a> Mechanism.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setStatorCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setStatorCurrentLimit</a><wbr>(org.wpilib.units.measure.Current&nbsp;currentLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the stator current limit for the device.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSupplyCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit</a><wbr>(org.wpilib.units.measure.Current&nbsp;currentLimit)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSupplyCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit</a><wbr>(org.wpilib.units.measure.Current&nbsp;currentLimit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the supply current limit.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setupSimulation()" class="member-name-link">setupSimulation</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup the simulation for the wrapper.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;angularVelocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;angularVelocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
 <a href="../SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;angularVelocity,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;angularVelocity,
  org.wpilib.units.measure.Force&nbsp;feedforwardForce)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
 <a href="../SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <code>Force</code> applied on top, e.g.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the Mechanism <code>LinearVelocity</code> using the PID and feedforward from
 <a href="../SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setVoltage</a><wbr>(org.wpilib.units.measure.Voltage&nbsp;voltage)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setVoltage</a><wbr>(org.wpilib.units.measure.Voltage&nbsp;voltage)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the voltage output of the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">setZeroPower</a><wbr>(<a href="../enums/MotorMode.html" title="enum class in yams.core.motorcontrollers.enums">MotorMode</a>&nbsp;mode)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">setZeroPower</a><wbr>(<a href="../enums/MotorMode.html" title="enum class in yams.core.motorcontrollers.enums">MotorMode</a>&nbsp;mode)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the motor zero power mode from COAST or BRAKE.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Simulation iteration.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check if the relative encoder is out of sync with absolute encoder within defined tolerances.</div>
 </div>
 </div>
@@ -613,7 +623,7 @@ scaled to the mechanism rotations.</div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-yams.core.motorcontrollers.SmartMotorController">Methods inherited from class&nbsp;<a href="../SmartMotorController.html#method-summary" title="class in yams.core.motorcontrollers">SmartMotorController</a></h3>
-<code><a href="../SmartMotorController.html#addCloseHook(java.lang.Runnable)" title="addCloseHook(Runnable)">addCloseHook</a>, <a href="../SmartMotorController.html#applyTuningValues()" title="applyTuningValues()">applyTuningValues</a>, <a href="../SmartMotorController.html#buildAlertId(java.lang.String,int,java.lang.String)" title="buildAlertId(String, int, String)">buildAlertId</a>, <a href="../SmartMotorController.html#checkConfigSafety()" title="checkConfigSafety()">checkConfigSafety</a>, <a href="../SmartMotorController.html#close()" title="close()">close</a>, <a href="../SmartMotorController.html#create(java.lang.Object,org.wpilib.math.system.DCMotor,yams.core.motorcontrollers.SmartMotorControllerConfig)" title="create(Object, DCMotor, SmartMotorControllerConfig)">create</a>, <a href="../SmartMotorController.html#getClosedLoopControllerPeriod()" title="getClosedLoopControllerPeriod()">getClosedLoopControllerPeriod</a>, <a href="../SmartMotorController.html#getClosedLoopControllerSlot()" title="getClosedLoopControllerSlot()">getClosedLoopControllerSlot</a>, <a href="../SmartMotorController.html#getExponentialProfileState()" title="getExponentialProfileState()">getExponentialProfileState</a>, <a href="../SmartMotorController.html#getLooselyCoupledFollowers()" title="getLooselyCoupledFollowers()">getLooselyCoupledFollowers</a>, <a href="../SmartMotorController.html#getMeasurementPositionSetpoint()" title="getMeasurementPositionSetpoint()">getMeasurementPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismPositionSetpoint()" title="getMechanismPositionSetpoint()">getMechanismPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismSetpointVelocity()" title="getMechanismSetpointVelocity()">getMechanismSetpointVelocity</a>, <a href="../SmartMotorController.html#getName()" title="getName()">getName</a>, <a href="../SmartMotorController.html#getSetpointFeedforwardForce()" title="getSetpointFeedforwardForce()">getSetpointFeedforwardForce</a>, <a href="../SmartMotorController.html#getSimSupplier()" title="getSimSupplier()">getSimSupplier</a>, <a href="../SmartMotorController.html#getTrapezoidalProfileState()" title="getTrapezoidalProfileState()">getTrapezoidalProfileState</a>, <a href="../SmartMotorController.html#getVelocityMeasurementDelay()" title="getVelocityMeasurementDelay()">getVelocityMeasurementDelay</a>, <a href="../SmartMotorController.html#isClosedLoopControllerStopped()" title="isClosedLoopControllerStopped()">isClosedLoopControllerStopped</a>, <a href="../SmartMotorController.html#isMotor(org.wpilib.math.system.DCMotor,org.wpilib.math.system.DCMotor)" title="isMotor(DCMotor, DCMotor)">isMotor</a>, <a href="../SmartMotorController.html#iterateClosedLoopController()" title="iterateClosedLoopController()">iterateClosedLoopController</a>, <a href="../SmartMotorController.html#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" title="setSimSupplier(SimSupplier)">setSimSupplier</a>, <a href="../SmartMotorController.html#setupLiveTuning()" title="setupLiveTuning()">setupLiveTuning</a>, <a href="../SmartMotorController.html#setupTelemetry()" title="setupTelemetry()">setupTelemetry</a>, <a href="../SmartMotorController.html#setupTelemetry(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" title="setupTelemetry(NetworkTable, NetworkTable)">setupTelemetry</a>, <a href="../SmartMotorController.html#setVelocity(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Force)" title="setVelocity(LinearVelocity, Force)">setVelocity</a>, <a href="../SmartMotorController.html#startClosedLoopController()" title="startClosedLoopController()">startClosedLoopController</a>, <a href="../SmartMotorController.html#stopClosedLoopController()" title="stopClosedLoopController()">stopClosedLoopController</a>, <a href="../SmartMotorController.html#stopLiveTuning()" title="stopLiveTuning()">stopLiveTuning</a>, <a href="../SmartMotorController.html#toString()" title="toString()">toString</a>, <a href="../SmartMotorController.html#tuningEnabled()" title="tuningEnabled()">tuningEnabled</a>, <a href="../SmartMotorController.html#updateTelemetry()" title="updateTelemetry()">updateTelemetry</a></code></div>
+<code><a href="../SmartMotorController.html#addCloseHook(java.lang.Runnable)" title="addCloseHook(Runnable)">addCloseHook</a>, <a href="../SmartMotorController.html#applyTuningValues()" title="applyTuningValues()">applyTuningValues</a>, <a href="../SmartMotorController.html#buildAlertId(java.lang.String,int,java.lang.String)" title="buildAlertId(String, int, String)">buildAlertId</a>, <a href="../SmartMotorController.html#checkConfigSafety()" title="checkConfigSafety()">checkConfigSafety</a>, <a href="../SmartMotorController.html#close()" title="close()">close</a>, <a href="../SmartMotorController.html#create(java.lang.Object,org.wpilib.math.system.DCMotor,yams.core.motorcontrollers.SmartMotorControllerConfig)" title="create(Object, DCMotor, SmartMotorControllerConfig)">create</a>, <a href="../SmartMotorController.html#getClosedLoopControllerPeriod()" title="getClosedLoopControllerPeriod()">getClosedLoopControllerPeriod</a>, <a href="../SmartMotorController.html#getClosedLoopControllerSlot()" title="getClosedLoopControllerSlot()">getClosedLoopControllerSlot</a>, <a href="../SmartMotorController.html#getExponentialProfileState()" title="getExponentialProfileState()">getExponentialProfileState</a>, <a href="../SmartMotorController.html#getLooselyCoupledFollowers()" title="getLooselyCoupledFollowers()">getLooselyCoupledFollowers</a>, <a href="../SmartMotorController.html#getMeasurementPositionSetpoint()" title="getMeasurementPositionSetpoint()">getMeasurementPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismPositionSetpoint()" title="getMechanismPositionSetpoint()">getMechanismPositionSetpoint</a>, <a href="../SmartMotorController.html#getMechanismSetpointVelocity()" title="getMechanismSetpointVelocity()">getMechanismSetpointVelocity</a>, <a href="../SmartMotorController.html#getName()" title="getName()">getName</a>, <a href="../SmartMotorController.html#getSetpointFeedforwardForce()" title="getSetpointFeedforwardForce()">getSetpointFeedforwardForce</a>, <a href="../SmartMotorController.html#getSimSupplier()" title="getSimSupplier()">getSimSupplier</a>, <a href="../SmartMotorController.html#getTrapezoidalProfileState()" title="getTrapezoidalProfileState()">getTrapezoidalProfileState</a>, <a href="../SmartMotorController.html#getVelocityMeasurementDelay()" title="getVelocityMeasurementDelay()">getVelocityMeasurementDelay</a>, <a href="../SmartMotorController.html#isClosedLoopControllerStopped()" title="isClosedLoopControllerStopped()">isClosedLoopControllerStopped</a>, <a href="../SmartMotorController.html#isMotor(org.wpilib.math.system.DCMotor,org.wpilib.math.system.DCMotor)" title="isMotor(DCMotor, DCMotor)">isMotor</a>, <a href="../SmartMotorController.html#iterateClosedLoopController()" title="iterateClosedLoopController()">iterateClosedLoopController</a>, <a href="../SmartMotorController.html#setupLiveTuning()" title="setupLiveTuning()">setupLiveTuning</a>, <a href="../SmartMotorController.html#setupTelemetry()" title="setupTelemetry()">setupTelemetry</a>, <a href="../SmartMotorController.html#setupTelemetry(org.wpilib.networktables.NetworkTable,org.wpilib.networktables.NetworkTable)" title="setupTelemetry(NetworkTable, NetworkTable)">setupTelemetry</a>, <a href="../SmartMotorController.html#setVelocity(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Force)" title="setVelocity(LinearVelocity, Force)">setVelocity</a>, <a href="../SmartMotorController.html#startClosedLoopController()" title="startClosedLoopController()">startClosedLoopController</a>, <a href="../SmartMotorController.html#stopClosedLoopController()" title="stopClosedLoopController()">stopClosedLoopController</a>, <a href="../SmartMotorController.html#stopLiveTuning()" title="stopLiveTuning()">stopLiveTuning</a>, <a href="../SmartMotorController.html#toString()" title="toString()">toString</a>, <a href="../SmartMotorController.html#tuningEnabled()" title="tuningEnabled()">tuningEnabled</a>, <a href="../SmartMotorController.html#updateTelemetry()" title="updateTelemetry()">updateTelemetry</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">Methods inherited from class&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#method-summary" title="class or interface in java.lang" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="class or interface in java.lang" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="class or interface in java.lang" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="class or interface in java.lang" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="class or interface in java.lang" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="class or interface in java.lang" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="class or interface in java.lang" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="class or interface in java.lang" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="class or interface in java.lang" class="external-link">wait</a></code></div>
@@ -648,8 +658,7 @@ scaled to the mechanism rotations.</div>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the vendor config is not a
                                                    <code>NovaConfig.Config</code>.</dd>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if
-                                                   <a href="#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)"><code>applyConfig(SmartMotorControllerConfig)</code></a>
-                                                   rejects the config.</dd>
+                                                   <a href="#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)"><code>applyConfig(SmartMotorControllerConfig)</code></a> rejects the config.</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if <a href="#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)"><code>applyConfig(SmartMotorControllerConfig)</code></a> rejects
                                  the config.</dd>
 </dl>
@@ -674,6 +683,24 @@ scaled to the mechanism rotations.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../SmartMotorController.html#setupSimulation()">setupSimulation</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setSimSupplier(yams.core.motorcontrollers.SimSupplier)">
+<h3>setSimSupplier</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSimSupplier</span><wbr><span class="parameters">(<a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</span></div>
+<div class="block">Set the <a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a> Mechanism.
+
+<p>The mechanism is driven by a <a href="../simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation"><code>NovaSimSupplier</code></a>, which runs the Nova's closed loop,
+and the external encoder's shaft by a <code>MotorSim</code> of the mechanism.</div>
+<dl class="notes">
+<dt>Overrides:</dt>
+<dd><code><a href="../SmartMotorController.html#setSimSupplier(yams.core.motorcontrollers.SimSupplier)">setSimSupplier</a></code>&nbsp;in class&nbsp;<code><a href="../SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></dd>
+<dt>Parameters:</dt>
+<dd><code>mechanismSupplier</code> - Mechanism sim supplier.</dd>
 </dl>
 </div>
 </section>
@@ -886,7 +913,6 @@ scaled to the mechanism rotations.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVelocity</span><wbr><span class="parameters">(org.wpilib.units.measure.AngularVelocity&nbsp;angularVelocity,
  org.wpilib.units.measure.Force&nbsp;feedforwardForce)</span></div>
-<div class="block"><span class="description-from-type-label">Description copied from class:&nbsp;<code><a href="../SmartMotorController.html#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)">SmartMotorController</a></code></span></div>
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
 <a href="../SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <code>Force</code> applied on top, e.g.
 from a PathPlanner set-point generator. Applied whether the motor controller's native
@@ -898,6 +924,9 @@ closed-loop velocity control or an LQR/software motion profile loop is driving t
 <dd><code>angularVelocity</code> - Mechanism <code>AngularVelocity</code> to target.</dd>
 <dd><code>feedforwardForce</code> - Additional feedforward <code>Force</code> applied to the mechanism, or
                         <code>null</code> for none.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if a feedforward force is given and the
+                                                   mechanism circumference is not configured.</dd>
 </dl>
 </div>
 </section>
@@ -918,8 +947,8 @@ closed-loop velocity control or an LQR/software motion profile loop is driving t
 <dt>Throws:</dt>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if different open and closed loop ramp
                                                    rates are configured.</dd>
-<dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if a zero offset or discontinuity point is
-                                                   configured for a quadrature encoder.</dd>
+<dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if a zero offset is configured for a
+                                                   quadrature encoder.</dd>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if an external encoder option is configured
                                                    without an external encoder.</dd>
 <dd><code><a href="../../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if a vendor control request is configured.</dd>

@@ -55,7 +55,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#" tabindex="0">Description</a>
 <ol class="toc-list">
 <li><a href="#core-type-heading" tabindex="0">Core type</a></li>
-<li><a href="#absolute-encoder-discontinuity-heading" tabindex="0">Absolute encoder discontinuity</a></li>
+<li><a href="#absolute-encoder-range-heading" tabindex="0">Absolute encoder range</a></li>
 <li><a href="#construction-heading" tabindex="0">Construction</a></li>
 </ol>
 </li>
@@ -85,27 +85,23 @@ and sends periodic duty-cycle or voltage commands to the hardware.
 MAX (NEO, NEO 550) and SPARK FLEX (NEO Vortex).
 </ul>
 
-<h2 id="absolute-encoder-discontinuity-heading">Absolute encoder discontinuity</h2>
+<h2 id="absolute-encoder-range-heading">Absolute encoder range</h2>
 
-<p>When a <code>SparkAbsoluteEncoder</code> (REV Through Bore Encoder) is used as the feedback device,
-a <em>discontinuity point</em> <strong>must</strong> be configured so the SPARK firmware knows
-where the sensor wraps around. Set this via
-<a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(Angle)</code></a>:
+<p>An absolute encoder, such as a REV Through Bore Encoder on a <code>SparkAbsoluteEncoder</code>,
+reads [0, 1) rotations. With
+<a href="../SmartMotorControllerConfig.html#withContinuousWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withContinuousWrapping(Angle, Angle)</code></a>, it reads the
+wrapping range instead, with the encoder on the mechanism:
 
 <ul>
-<li><code>0.5</code> sensor range <code>[-0.5, 0.5)</code>: useful when the mechanism travels through
-zero and must not have a wrap at the midpoint of travel.
-<li><code>1.0</code> sensor range <code>[0, 1)</code>: useful when the mechanism only moves in the
-positive direction and zero is never crossed.
+<li><code>[-0.5, 0.5)</code>: when the mechanism travels through zero.
+<li><code>[0, 1)</code>: when zero is never crossed.
 </ul>
-
-Omitting this setting when an absolute encoder is attached will produce a configuration warning
-and may cause erratic position readings near the wrap boundary.
 
 <h2 id="construction-heading">Construction</h2>
 
 <pre><code>SmartMotorControllerConfig config = new SmartMotorControllerConfig()
-    .withExternalEncoderDiscontinuityPoint(0.5);
+    .withClosedLoopController(4, 0, 0)
+    .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5));
 SmartMotorController motor = new SparkWrapper(
     new SparkMax(5, MotorType.kBrushless), DCMotor.getNEO(1), config);
 </code></pre></div>
@@ -153,12 +149,16 @@ mode and zero power mode.</div>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">A301 wrapper for the FIRST A301 smart motor, using REVLib 2027.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Nova wrapper for The Thrifty Bot's Thrifty Nova motor controller, using ThriftyLib 2027.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab2">
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Spark wrapper for REV Spark Motor controllers.</div>
 </div>
 </div>

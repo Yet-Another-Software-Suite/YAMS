@@ -217,8 +217,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5a2c08d35428c9a4eaf2a84f6bfba4fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16df7124b96b6222a070a42b65add41f" id="r_a16df7124b96b6222a070a42b65add41f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a16df7124b96b6222a070a42b65add41f">WithExternalEncoderGearing</a> (double reductionRatio)</td></tr>
 <tr class="separator:a16df7124b96b6222a070a42b65add41f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a940792bf647eea01beb36e206e284c" id="r_a8a940792bf647eea01beb36e206e284c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a940792bf647eea01beb36e206e284c">WithExternalEncoderDiscontinuityPoint</a> (wpi::units::turn_t discontinuityPoint)</td></tr>
-<tr class="separator:a8a940792bf647eea01beb36e206e284c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a400291d204a35b481749a6cc20168659" id="r_a400291d204a35b481749a6cc20168659"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a400291d204a35b481749a6cc20168659">WithWrapping</a> (wpi::units::turn_t min, wpi::units::turn_t max)</td></tr>
+<tr class="separator:a400291d204a35b481749a6cc20168659"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20e3932c7936a3fec5f62e325a12517d" id="r_a20e3932c7936a3fec5f62e325a12517d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20e3932c7936a3fec5f62e325a12517d">WithContinuousWrapping</a> (wpi::units::turn_t min, wpi::units::turn_t max)</td></tr>
 <tr class="separator:a20e3932c7936a3fec5f62e325a12517d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06a2b48cc33bc36a2e289b30a12baf30" id="r_a06a2b48cc33bc36a2e289b30a12baf30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a06a2b48cc33bc36a2e289b30a12baf30">WithTelemetry</a> (const std::string &amp;name, <a class="el" href="#a3f238a96c96348553cc916ab4525620c">TelemetryVerbosity</a> verbosity=<a class="el" href="#a3f238a96c96348553cc916ab4525620cab89de3b4b81c4facfac906edf29aec8c">TelemetryVerbosity::HIGH</a>)</td></tr>
@@ -311,10 +311,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2af61c4117e7474e5a5268fd0bd88deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac069598930cac489b2f4be9882f85867" id="r_ac069598930cac489b2f4be9882f85867"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::meter_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac069598930cac489b2f4be9882f85867">GetMeasurementUpperLimit</a> () const</td></tr>
 <tr class="separator:ac069598930cac489b2f4be9882f85867"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b7c8522129f9336d96f04eec73c647a" id="r_a1b7c8522129f9336d96f04eec73c647a"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1b7c8522129f9336d96f04eec73c647a">GetContinuousWrapping</a> () const</td></tr>
-<tr class="separator:a1b7c8522129f9336d96f04eec73c647a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef38f0f00ce42adce6899a868f0bffe5" id="r_aef38f0f00ce42adce6899a868f0bffe5"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef38f0f00ce42adce6899a868f0bffe5">GetContinuousWrappingMin</a> () const</td></tr>
-<tr class="separator:aef38f0f00ce42adce6899a868f0bffe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7718bc3776e902564a58022ea4a14e9c" id="r_a7718bc3776e902564a58022ea4a14e9c"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7718bc3776e902564a58022ea4a14e9c">GetWrappingMax</a> () const</td></tr>
+<tr class="separator:a7718bc3776e902564a58022ea4a14e9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01e259dce2f5b7251bddf98ba909bdf6" id="r_a01e259dce2f5b7251bddf98ba909bdf6"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01e259dce2f5b7251bddf98ba909bdf6">GetWrappingMin</a> () const</td></tr>
+<tr class="separator:a01e259dce2f5b7251bddf98ba909bdf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5de3a304e3435ec489c4262c5750c9b" id="r_af5de3a304e3435ec489c4262c5750c9b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5de3a304e3435ec489c4262c5750c9b">IsWrappingContinuous</a> () const</td></tr>
+<tr class="separator:af5de3a304e3435ec489c4262c5750c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ba040ff3785f1b27d55241e544b50b6" id="r_a0ba040ff3785f1b27d55241e544b50b6"><td class="memItemLeft" align="right" valign="top">wpi::units::turn_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ba040ff3785f1b27d55241e544b50b6">GetContinuousWrappingSetpoint</a> (wpi::units::turn_t setpoint, wpi::units::turn_t current) const</td></tr>
 <tr class="separator:a0ba040ff3785f1b27d55241e544b50b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51609e6ec2188213ef2f1fff493b45cd" id="r_a51609e6ec2188213ef2f1fff493b45cd"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::ampere_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a51609e6ec2188213ef2f1fff493b45cd">GetStatorCurrentLimit</a> () const</td></tr>
@@ -391,8 +393,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae93585a7b581294d293b9392ca5b72b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5a5e9f651b19744453f796313321f4a" id="r_ae5a5e9f651b19744453f796313321f4a"><td class="memItemLeft" align="right" valign="top">const std::optional&lt; <a class="el" href="classyams_1_1gearing_1_1_mechanism_gearing.html">gearing::MechanismGearing</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5a5e9f651b19744453f796313321f4a">GetExternalEncoderGearing</a> () const</td></tr>
 <tr class="separator:ae5a5e9f651b19744453f796313321f4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3601b5cbf70556ad5e61f88c1bca3d1e" id="r_a3601b5cbf70556ad5e61f88c1bca3d1e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3601b5cbf70556ad5e61f88c1bca3d1e">GetExternalEncoderDiscontinuityPoint</a> () const</td></tr>
-<tr class="separator:a3601b5cbf70556ad5e61f88c1bca3d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8dd8bfa9c08ce38c233fc3028cab8482" id="r_a8dd8bfa9c08ce38c233fc3028cab8482"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dd8bfa9c08ce38c233fc3028cab8482">HasTrapezoidProfile</a> () const</td></tr>
 <tr class="separator:a8dd8bfa9c08ce38c233fc3028cab8482"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ba0e69233cfaa13acd7bf89b0b9fad3" id="r_a4ba0e69233cfaa13acd7bf89b0b9fad3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ba0e69233cfaa13acd7bf89b0b9fad3">HasExponentialProfile</a> () const</td></tr>
@@ -955,42 +955,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1b7c8522129f9336d96f04eec73c647a" name="a1b7c8522129f9336d96f04eec73c647a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b7c8522129f9336d96f04eec73c647a">&#9670;&#160;</a></span>GetContinuousWrapping()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorControllerConfig::GetContinuousWrapping </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>Optional upper continuous wrapping bound (turns). Erases ContinuousWrapping tracking. </dd></dl>
-
-</div>
-</div>
-<a id="aef38f0f00ce42adce6899a868f0bffe5" name="aef38f0f00ce42adce6899a868f0bffe5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef38f0f00ce42adce6899a868f0bffe5">&#9670;&#160;</a></span>GetContinuousWrappingMin()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorControllerConfig::GetContinuousWrappingMin </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>Optional lower continuous wrapping bound (turns). </dd></dl>
-
-</div>
-</div>
 <a id="a0ba040ff3785f1b27d55241e544b50b6" name="a0ba040ff3785f1b27d55241e544b50b6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0ba040ff3785f1b27d55241e544b50b6">&#9670;&#160;</a></span>GetContinuousWrappingSetpoint()</h2>
 
@@ -1017,7 +981,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The equivalent setpoint nearest <code>current</code>, or <code>setpoint</code> unchanged when continuous wrapping is not configured. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The equivalent setpoint nearest <code>current</code>, or <code>setpoint</code> unchanged when the wrapping is not continuous. </dd></dl>
 
 </div>
 </div>
@@ -1169,24 +1133,6 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>Optional external encoder direct conversion factor override. </dd></dl>
-
-</div>
-</div>
-<a id="a3601b5cbf70556ad5e61f88c1bca3d1e" name="a3601b5cbf70556ad5e61f88c1bca3d1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3601b5cbf70556ad5e61f88c1bca3d1e">&#9670;&#160;</a></span>GetExternalEncoderDiscontinuityPoint()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorControllerConfig::GetExternalEncoderDiscontinuityPoint </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>Optional external encoder discontinuity point (turns). </dd></dl>
 
 </div>
 </div>
@@ -2098,6 +2044,42 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a7718bc3776e902564a58022ea4a14e9c" name="a7718bc3776e902564a58022ea4a14e9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7718bc3776e902564a58022ea4a14e9c">&#9670;&#160;</a></span>GetWrappingMax()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorControllerConfig::GetWrappingMax </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Optional top of the wrapping range (turns). Erases ContinuousWrapping tracking. </dd></dl>
+
+</div>
+</div>
+<a id="a01e259dce2f5b7251bddf98ba909bdf6" name="a01e259dce2f5b7251bddf98ba909bdf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01e259dce2f5b7251bddf98ba909bdf6">&#9670;&#160;</a></span>GetWrappingMin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; wpi::units::turn_t &gt; yams::motorcontrollers::SmartMotorControllerConfig::GetWrappingMin </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Optional bottom of the wrapping range (turns). </dd></dl>
+
+</div>
+</div>
 <a id="a770f88984c277598356f13b84a6d9aa7" name="a770f88984c277598356f13b84a6d9aa7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a770f88984c277598356f13b84a6d9aa7">&#9670;&#160;</a></span>GetZeroPower()</h2>
 
@@ -2185,6 +2167,24 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>true if a trapezoidal motion profile is configured. </dd></dl>
+
+</div>
+</div>
+<a id="af5de3a304e3435ec489c4262c5750c9b" name="af5de3a304e3435ec489c4262c5750c9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5de3a304e3435ec489c4262c5750c9b">&#9670;&#160;</a></span>IsWrappingContinuous()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::SmartMotorControllerConfig::IsWrappingContinuous </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Whether the closed loop controller wraps continuously over the wrapping range, taking the shortest path to a setpoint, as <a class="el" href="#a20e3932c7936a3fec5f62e325a12517d">WithContinuousWrapping()</a> sets. Throws SmartMotorControllerConfigurationException if soft limits are also configured. </dd></dl>
 
 </div>
 </div>
@@ -2435,7 +2435,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Enable continuous position wrapping for the closed-loop controller.</p>
+<p>Enable continuous position wrapping for the closed-loop controller: the wrapping range, as <a class="el" href="#a400291d204a35b481749a6cc20168659">WithWrapping()</a>, and the closed loop controller wraps over it, taking the shortest path to a setpoint.</p>
 <p>Throws SmartMotorControllerConfigurationException if soft limits or a linear closed-loop controller are already configured, or if no PID or LQR controller is configured.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -2666,7 +2666,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Attach an external (absolute) encoder hardware object to this configuration.</p>
 <p>The encoder object is stored as std::any and unpacked inside the motor-controller wrapper (e.g. SparkWrapper expects a <code>rev::spark::SparkAbsoluteEncoder*</code>; TalonFXWrapper / TalonFXSWrapper accept a <code>ctre::phoenix6::hardware::CANcoder*</code> or <code>ctre::phoenix6::hardware::CANdi*</code>).</p>
-<dl class="section note"><dt>Note</dt><dd>When passing a CANdi, the TalonFX(S) configuration must also have <code>Feedback.FeedbackSensorSource</code> (TalonFX) or <code>ExternalFeedback.ExternalFeedbackSensorSource</code> (TalonFXS) pre-set to one of <code>SyncCANdiPWM1</code>, <code>RemoteCANdiPWM1</code>, <code>SyncCANdiPWM2</code>, or <code>RemoteCANdiPWM2</code> via a vendor config so that ApplyConfig() knows which PWM channel to configure. Without this, offset, inversion, and discontinuity-point settings will not be applied to either channel.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>When passing a CANdi, the TalonFX(S) configuration must also have <code>Feedback.FeedbackSensorSource</code> (TalonFX) or <code>ExternalFeedback.ExternalFeedbackSensorSource</code> (TalonFXS) pre-set to one of <code>SyncCANdiPWM1</code>, <code>RemoteCANdiPWM1</code>, <code>SyncCANdiPWM2</code>, or <code>RemoteCANdiPWM2</code> via a vendor config so that ApplyConfig() knows which PWM channel to configure. Without this, offset, inversion, and continuous wrapping settings will not be applied to either channel.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">encoder</td><td>External encoder hardware object pointer. </td></tr>
@@ -2696,32 +2696,6 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">factor</td><td>Conversion factor (raw encoder units → mechanism turns). </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
-
-</div>
-</div>
-<a id="a8a940792bf647eea01beb36e206e284c" name="a8a940792bf647eea01beb36e206e284c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a940792bf647eea01beb36e206e284c">&#9670;&#160;</a></span>WithExternalEncoderDiscontinuityPoint()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp; yams::motorcontrollers::SmartMotorControllerConfig::WithExternalEncoderDiscontinuityPoint </td>
-          <td>(</td>
-          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>discontinuityPoint</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Set the discontinuity point for absolute encoder wrapping.</p>
-<p>Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]). Throws SmartMotorControllerConfigurationException otherwise.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">discontinuityPoint</td><td>Wrap-around point (0.5 or 1 turns). </td></tr>
   </table>
   </dd>
 </dl>
@@ -4373,6 +4347,36 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">diameter</td><td>Wheel diameter. </td></tr>
     <tr><td class="paramname">mass</td><td>Mass of the wheel, including anything that spins with it. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="a400291d204a35b481749a6cc20168659" name="a400291d204a35b481749a6cc20168659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a400291d204a35b481749a6cc20168659">&#9670;&#160;</a></span>WithWrapping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp; yams::motorcontrollers::SmartMotorControllerConfig::WithWrapping </td>
+          <td>(</td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>min</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">wpi::units::turn_t</td>          <td class="paramname"><span class="paramname"><em>max</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the wrapping range: an absolute external encoder reads angles in it, from <code>min</code> up to <code>max</code>. The closed loop controller does not wrap, so it never takes the mechanism the other way round; use <a class="el" href="#a20e3932c7936a3fec5f62e325a12517d">WithContinuousWrapping()</a> for that.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">min</td><td>Bottom of the wrapping range (turns). </td></tr>
+    <tr><td class="paramname">max</td><td>Top of the wrapping range (turns), one rotation above <code>min</code>. </td></tr>
   </table>
   </dd>
 </dl>

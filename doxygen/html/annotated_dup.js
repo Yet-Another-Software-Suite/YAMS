@@ -60,10 +60,12 @@ var annotated_dup =
           [ "BatterySim", "classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html", null ],
           [ "DCMotorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier" ],
           [ "ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier" ],
+          [ "NovaSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier" ],
           [ "Sensor", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor" ],
           [ "SensorData", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData" ]
         ] ],
         [ "local", "namespaceyams_1_1motorcontrollers_1_1local.html", [
+          [ "A301Wrapper", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper" ],
           [ "NovaWrapper", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper" ],
           [ "SparkWrapper", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper" ]
         ] ],
@@ -74,7 +76,8 @@ var annotated_dup =
         [ "SimSupplier", "classyams_1_1motorcontrollers_1_1SimSupplier.html", "classyams_1_1motorcontrollers_1_1SimSupplier" ],
         [ "SmartMotorController", "classyams_1_1motorcontrollers_1_1SmartMotorController.html", "classyams_1_1motorcontrollers_1_1SmartMotorController" ],
         [ "SmartMotorControllerCommandRegistry", "classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html", null ],
-        [ "SmartMotorControllerConfig", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig" ]
+        [ "SmartMotorControllerConfig", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig" ],
+        [ "YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ]
       ] ],
       [ "telemetry", "namespaceyams_1_1telemetry.html", [
         [ "MechanismTelemetry", "classyams_1_1telemetry_1_1MechanismTelemetry.html", "classyams_1_1telemetry_1_1MechanismTelemetry" ],

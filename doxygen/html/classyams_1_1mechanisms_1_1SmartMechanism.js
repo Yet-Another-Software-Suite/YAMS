@@ -8,6 +8,7 @@ var classyams_1_1mechanisms_1_1SmartMechanism =
     [ "GetMotorController", "classyams_1_1mechanisms_1_1SmartMechanism.html#a63cf29bb8f9a6936edeca726943555dc", null ],
     [ "GetName", "classyams_1_1mechanisms_1_1SmartMechanism.html#aca3adfd26b306043dfbf0b9a626b4e26", null ],
     [ "GetPose3d", "classyams_1_1mechanisms_1_1SmartMechanism.html#aaf7cff5cd9269098247104b56ecdafd4", null ],
+    [ "PublishMechanismWindow", "classyams_1_1mechanisms_1_1SmartMechanism.html#a90c30c651e22e2bcc36b93453055802d", null ],
     [ "Set", "classyams_1_1mechanisms_1_1SmartMechanism.html#a82bace42409275bcbb506abd97fc94c6", null ],
     [ "Set", "classyams_1_1mechanisms_1_1SmartMechanism.html#a29dcb9f01b64a050c309617ae1eba460", null ],
     [ "SetDutyCycleSetpoint", "classyams_1_1mechanisms_1_1SmartMechanism.html#a179c2270f4d5cab5e1e9106a42496d01", null ],

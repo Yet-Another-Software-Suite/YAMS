@@ -89,7 +89,7 @@ var classyams_1_1motorcontrollers_1_1SmartMotorController =
     [ "SetOpenLoopRampRate", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#a353f9c59d4f634ffb0090a31ee3d960e", null ],
     [ "SetPosition", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#af75e7cc02f51d4daa112890d63e9daf4", null ],
     [ "SetPosition", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#ab05a55c9474139798933c3869dbf69ae", null ],
-    [ "SetSimSupplier", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#ae04f85a3cae8a14d52ba9ba39831279b", null ],
+    [ "SetSimSupplier", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#a2cc995feac576477865f4cf46757c0fd", null ],
     [ "SetStatorCurrentLimit", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#abe3ef7bc0097b697ac9b31426fe6213b", null ],
     [ "SetSupplyCurrentLimit", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#a51e95eab9250a3bb451c21d11ea6fa56", null ],
     [ "SetupLiveTuning", "classyams_1_1motorcontrollers_1_1SmartMotorController.html#adce1cb175899f8cb71e01e445fd3a021", null ],

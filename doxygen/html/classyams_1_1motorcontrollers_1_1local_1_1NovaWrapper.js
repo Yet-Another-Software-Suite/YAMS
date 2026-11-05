@@ -60,6 +60,7 @@ var classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper =
     [ "SetOpenLoopRampRate", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#a4a68b1a330780a756256e7a05c08531f", null ],
     [ "SetPosition", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#ae18c338b4ccce76144f304b461683e4b", null ],
     [ "SetPosition", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#af8e4917afc2e41f5fff2d2c74d73afc5", null ],
+    [ "SetSimSupplier", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#ac1499b735948e0163eeabeb5705202db", null ],
     [ "SetStatorCurrentLimit", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#ab68d4a9cd67a420f4cd72acf6e07a8eb", null ],
     [ "SetSupplyCurrentLimit", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#a3c6468e807ddb3dd341766197b25075b", null ],
     [ "SetupSimulation", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html#ac74f2214f07c4278f5bafc8e99d0da1b", null ],

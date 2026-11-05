@@ -56,7 +56,7 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#core-types-heading" tabindex="0">Core types</a></li>
 <li><a href="#phoenix-6-api-heading" tabindex="0">Phoenix 6 API</a></li>
-<li><a href="#cancoder-discontinuity-heading" tabindex="0">CANcoder discontinuity</a></li>
+<li><a href="#cancoder-range-heading" tabindex="0">CANcoder range</a></li>
 <li><a href="#construction-heading" tabindex="0">Construction</a></li>
 </ol>
 </li>
@@ -97,12 +97,10 @@ API</a>. Configuration is applied via YAMS' own
 YAMS settings into the appropriate <code>TalonFXConfiguration</code> or
 <code>TalonFXSConfiguration</code> objects before pushing them to the device.
 
-<h2 id="cancoder-discontinuity-heading">CANcoder discontinuity</h2>
-<p>When a CANcoder is fused as the remote sensor, specifying a discontinuity point via
-<a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(Angle)</code></a> is
-<strong>optional</strong>. If omitted, the CTRE default sensor range (<code>[0, 1)</code>) is used.
-Unlike the REV absolute encoder, the Phoenix 6 firmware handles the wrap transparently in most
-configurations.
+<h2 id="cancoder-range-heading">CANcoder range</h2>
+<p>With <a href="../SmartMotorControllerConfig.html#withContinuousWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withContinuousWrapping(Angle, Angle)</code></a>, a
+CANcoder or CANdi PWM encoder on the mechanism reads the wrapping range, from [-1, 0) to [0, 1)
+rotations. Without it, the encoder keeps its own range.
 
 <h2 id="construction-heading">Construction</h2>
 <pre><code>// TalonFX (Kraken X60) on CAN ID 2

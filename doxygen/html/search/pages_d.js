@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['preset_20via_20smartmotorcontrollerconfig_0',['Quick preset via SmartMotorControllerConfig',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md18',1,'']]]
+  ['preset_20via_20smartmotorcontrollerconfig_0',['Quick preset via SmartMotorControllerConfig',['../classyams_1_1telemetry_1_1SmartMotorControllerTelemetryConfig.html#autotoc_md19',1,'']]]
 ];

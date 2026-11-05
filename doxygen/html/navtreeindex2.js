@@ -1,5 +1,13 @@
 var NAVTREEINDEX2 =
 {
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a717bc6f795d298d425efcf3af47c47d0":[1,0,0,3,0,4,0],
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a717bc6f795d298d425efcf3af47c47d0":[2,0,0,3,0,4,0],
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a8e53debfff1fd0e841763bae017d547b":[1,0,0,3,0,4,4],
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#a8e53debfff1fd0e841763bae017d547b":[2,0,0,3,0,4,4],
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#ad9078abeeb111a01d48c321f154585d2":[1,0,0,3,0,4,8],
+"classyams_1_1mechanisms_1_1config_1_1PivotConfig.html#ad9078abeeb111a01d48c321f154585d2":[2,0,0,3,0,4,8],
+"classyams_1_1mechanisms_1_1config_1_1SimSensorConfig.html":[1,0,0,3,0,5],
+"classyams_1_1mechanisms_1_1config_1_1SimSensorConfig.html":[2,0,0,3,0,5],
 "classyams_1_1mechanisms_1_1config_1_1SimSensorConfig.html#a005bbc31321127631d0e30b1581f1f21":[1,0,0,3,0,5,9],
 "classyams_1_1mechanisms_1_1config_1_1SimSensorConfig.html#a005bbc31321127631d0e30b1581f1f21":[2,0,0,3,0,5,9],
 "classyams_1_1mechanisms_1_1config_1_1SimSensorConfig.html#a00eb399f3c0bc4814f9ae51fdd8dd653":[1,0,0,3,0,5,2],
@@ -241,13 +249,5 @@ var NAVTREEINDEX2 =
 "classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a62c984c6c71ca62572830724bfc09f5c":[1,0,0,3,1,3,0],
 "classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a62c984c6c71ca62572830724bfc09f5c":[2,0,0,3,1,3,0],
 "classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a6566782a8c09c930775976d54a7c15cf":[1,0,0,3,1,3,2],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a6566782a8c09c930775976d54a7c15cf":[2,0,0,3,1,3,2],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a68bb9cf2ca53859d2b101433b519b40a":[1,0,0,3,1,3,7],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a68bb9cf2ca53859d2b101433b519b40a":[2,0,0,3,1,3,7],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a799377f8370775fc8f2ce573a5488270":[1,0,0,3,1,3,5],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a799377f8370775fc8f2ce573a5488270":[2,0,0,3,1,3,5],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#ab000fe8092bd2ec07dd2bc3c28625858":[1,0,0,3,1,3,8],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#ab000fe8092bd2ec07dd2bc3c28625858":[2,0,0,3,1,3,8],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#ab9bfbe9863dba0c2adba3599d72df940":[1,0,0,3,1,3,1],
-"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#ab9bfbe9863dba0c2adba3599d72df940":[2,0,0,3,1,3,1]
+"classyams_1_1mechanisms_1_1positional_1_1SmartPositionalMechanism.html#a6566782a8c09c930775976d54a7c15cf":[2,0,0,3,1,3,2]
 };

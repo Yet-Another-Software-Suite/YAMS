@@ -7,5 +7,6 @@ var namespaceyams_1_1motorcontrollers =
     [ "SmartMotorController", "classyams_1_1motorcontrollers_1_1SmartMotorController.html", "classyams_1_1motorcontrollers_1_1SmartMotorController" ],
     [ "SmartMotorControllerCommandRegistry", "classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html", null ],
     [ "SmartMotorControllerConfig", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig" ],
+    [ "YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ],
     [ "meters_per_second_cubed_t", "namespaceyams_1_1motorcontrollers.html#a209cf39dc796536876c8b2352095f908", null ]
 ];

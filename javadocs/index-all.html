@@ -53,11 +53,19 @@ loadScripts(document, 'script');</script>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<a href="#I:Y">Y</a>&nbsp;<a href="#I:Z">Z</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a>
 <h2 class="title" id="I:A">A</h2>
 <dl class="index">
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html" class="type-name-link" title="class in yams.core.motorcontrollers.local">A301Wrapper</a> - Class in <a href="yams/core/motorcontrollers/local/package-summary.html">yams.core.motorcontrollers.local</a></dt>
+<dd>
+<div class="block">A301 wrapper for the FIRST A301 smart motor, using REVLib 2027.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#%3Cinit%3E(com.revrobotics.spark.A301,yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">A301Wrapper(A301, SmartMotorControllerConfig)</a> - Constructor for class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Construct the A301 Wrapper for the generic <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
 <dt><a href="yams/core/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html#AbsoluteEncoder" class="member-name-link">AbsoluteEncoder</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveModuleTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveModuleTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Absolute encoder angle, without offsets applied, in degrees.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/local/package-summary.html#absolute-encoder-discontinuity-heading" class="search-tag-link">Absolute encoder discontinuity</a> - Section in package yams.core.motorcontrollers.local</dt>
+<dt><a href="yams/core/motorcontrollers/local/package-summary.html#absolute-encoder-range-heading" class="search-tag-link">Absolute encoder range</a> - Section in package yams.core.motorcontrollers.local</dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html#ActiveClosedLoopControllerSlot" class="member-name-link">ActiveClosedLoopControllerSlot</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a></dt>
 <dd>
@@ -126,6 +134,10 @@ with the given timestamp of the vision measurement.</div>
 <dt><a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html#applyConfig()" class="member-name-link">applyConfig()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/DifferentialMechanismConfig.html" title="class in yams.core.mechanisms.config">DifferentialMechanismConfig</a></dt>
 <dd>
 <div class="block">Apply config changes from this class to the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyConfig(SmartMotorControllerConfig)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Apply the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyConfig(SmartMotorControllerConfig)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -375,7 +387,7 @@ controller and the <a href="yams/commands3/swerve/SwerveInputStream.html#withAim
 <dd>
 <div class="block">Calculate the voltage based on the currents used by the robot.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/remote/package-summary.html#cancoder-discontinuity-heading" class="search-tag-link">CANcoder discontinuity</a> - Section in package yams.core.motorcontrollers.remote</dt>
+<dt><a href="yams/core/motorcontrollers/remote/package-summary.html#cancoder-range-heading" class="search-tag-link">CANcoder range</a> - Section in package yams.core.motorcontrollers.remote</dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/units/YUnits.html#Chain" class="member-name-link">Chain</a> - Static variable in class yams.core.units.<a href="yams/core/units/YUnits.html" title="class in yams.core.units">YUnits</a></dt>
 <dd>
@@ -442,8 +454,6 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 <dd>
 <div class="block">Stop publishing this stream's telemetry, canceling and removing the <code>Live Tuning</code> command.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
@@ -1191,6 +1201,8 @@ such as the Live Tuning command.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#example-heading" class="search-tag-link">Example</a> - Section in class yams.core.motorcontrollers.SmartMotorControllerConfig</dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#example-heading" class="search-tag-link">Example</a> - Section in class yams.core.motorcontrollers.local.A301Wrapper</dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#example-heading" class="search-tag-link">Example</a> - Section in class yams.core.motorcontrollers.local.NovaWrapper</dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#example-heading" class="search-tag-link">Example</a> - Section in class yams.core.motorcontrollers.local.SparkWrapper</dt>
@@ -1296,6 +1308,8 @@ such as the Live Tuning command.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#feedInput()" class="member-name-link">feedInput()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#feedInput()" class="member-name-link">feedInput()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in interface yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Feed the update sim watch</div>
@@ -1305,6 +1319,8 @@ such as the Live Tuning command.</div>
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#feedUpdateSim()" class="member-name-link">feedUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#FieldRelativeChassisSpeeds" class="member-name-link">FieldRelativeChassisSpeeds</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
 <dd>
@@ -1480,6 +1496,11 @@ configuration is supported.</div>
 <dd>
 <div class="block">Get the value.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/YMotors.html#getA301(int)" class="member-name-link">getA301(int)</a> - Static method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/YMotors.html" title="class in yams.core.motorcontrollers">YMotors</a></dt>
+<dd>
+<div class="block">The motor inside the FIRST A301, before its gearbox, at 12 V: 13,500 RPM free, and 0.078 N-m
+stalled, twice the 5.27 N-m at peak power of FIRST's 135:1 gearbox.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveModuleConfig.html#getAbsoluteEncoderAngle()" class="member-name-link">getAbsoluteEncoderAngle()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
 <div class="block">Get the absolute encoder angle for the azimuth <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
@@ -1650,6 +1671,8 @@ components of a robot model.</div>
 <dd>
 <div class="block">Get the <a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveModuleConfig</code></a> for the module.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getConfig()" class="member-name-link">getConfig()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1671,18 +1694,14 @@ components of a robot model.</div>
 <div class="block">Get the pose of each moving stage of a continuous elevator, for publishing to AdvantageScope as
 components of a robot model.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrapping()" class="member-name-link">getContinuousWrapping()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the continuous wrapping point for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
-</dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrappingMin()" class="member-name-link">getContinuousWrappingMin()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the continuous wrapping point for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> encoder.</div>
-</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getContinuousWrappingSetpoint(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">getContinuousWrappingSetpoint(Angle, Angle)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the position setpoint to command with continuous wrapping: the angle equivalent to
 <code>setpoint</code>, a whole number of wrapping ranges away, that is nearest <code>current</code>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getControlRequest()" class="member-name-link">getControlRequest()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Get the closed loop request being run.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveModuleConfig.html#getCosineCompensationScalar(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">getCosineCompensationScalar(Rotation2d)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>
@@ -1737,6 +1756,8 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get the telemetry NetworkTable.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getDCMotor()" class="member-name-link">getDCMotor()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getDCMotor()" class="member-name-link">getDCMotor()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getDCMotor()" class="member-name-link">getDCMotor()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1802,6 +1823,8 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get the drive <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1810,6 +1833,10 @@ current azimuth angle.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Get the duty cycle applied to the motor.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getDutyCycle()" class="member-name-link">getDutyCycle()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the duty cycle output of the motor controller.</div>
@@ -1838,10 +1865,6 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get the external encoder.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderDiscontinuityPoint()" class="member-name-link">getExternalEncoderDiscontinuityPoint()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Get the external encoder discontinuity point.</div>
-</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getExternalEncoderGearing()" class="member-name-link">getExternalEncoderGearing()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Get the external encoder gearing, default is 1:1 on a MAXPlanetary.</div>
@@ -1850,6 +1873,8 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get whether or not the external encoder is inverted.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -1862,6 +1887,11 @@ current azimuth angle.</div>
 <dd>
 <div class="block">Get the mechanism <code>Angle</code> from the external (absolute) encoder, scaled by the configured
 external encoder <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the mechanism <code>AngularVelocity</code> from the external (absolute) encoder, scaled by the
+configured external encoder <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -2115,6 +2145,11 @@ stages carry the carriage to the top.</div>
 <dd>
 <div class="block">Get the maximum voltage of the <code>LinearSystemLoop</code>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
@@ -2139,6 +2174,11 @@ with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" ti
 <dd>
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
 with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMeasurementPosition()" class="member-name-link">getMeasurementPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -2173,6 +2213,11 @@ with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" ti
 <dd>
 <div class="block">Get the <a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms"><code>SmartMechanism</code></a>'s setpoint as a <code>Distance</code> if it exists: the mechanism
 setpoint converted with the mechanism circumference.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
+with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -2227,6 +2272,8 @@ with the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" ti
 <dd>
 <div class="block">Mechanism the drive's commands require.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2256,6 +2303,8 @@ necessary by taking the derivative of the velocity.</div>
 <dd>
 <div class="block">Lower limit of the mechanism.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2276,6 +2325,8 @@ necessary by taking the derivative of the velocity.</div>
 <dd>
 <div class="block">Get the mechanism position.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getMechanismPosition()" class="member-name-link">getMechanismPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the mechanism <code>Angle</code> taking the configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> from
@@ -2336,6 +2387,8 @@ necessary by taking the derivative of the velocity.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismStatorVoltage()" class="member-name-link">getMechanismStatorVoltage()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getMechanismStatorVoltage()" class="member-name-link">getMechanismStatorVoltage()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in interface yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Gets the supply voltage for the motor controller.</div>
@@ -2346,6 +2399,8 @@ necessary by taking the derivative of the velocity.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getMechanismSupplyVoltage()" class="member-name-link">getMechanismSupplyVoltage()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/gearing/MechanismGearing.html#getMechanismToRotorRatio()" class="member-name-link">getMechanismToRotorRatio()</a> - Method in class yams.core.gearing.<a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing">MechanismGearing</a></dt>
 <dd>
 <div class="block">Get the mechanism rotation to sensor rotation ratio for the mechanism.</div>
@@ -2353,6 +2408,11 @@ necessary by taking the derivative of the velocity.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getMechanismUpperLimit()" class="member-name-link">getMechanismUpperLimit()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Upper limit of the mechanism.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the Mechanism <code>AngularVelocity</code> taking the configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> into
+the measurement applied via the <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -2374,6 +2434,8 @@ necessary by taking the derivative of the velocity.</div>
 <dd>
 <div class="block">Get the mechanism velocity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getMechanismVelocity()" class="member-name-link">getMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the Mechanism <code>AngularVelocity</code> taking the configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> into
@@ -2456,6 +2518,8 @@ stages start at the bottom.</div>
 <dd>
 <div class="block">Get the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMotorController()" class="member-name-link">getMotorController()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMotorController()" class="member-name-link">getMotorController()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getMotorController()" class="member-name-link">getMotorController()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2467,6 +2531,11 @@ stages start at the bottom.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getMotorController()" class="member-name-link">getMotorController()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the Motor Controller Object passed into the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getMotorControllerConfig()" class="member-name-link">getMotorControllerConfig()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the motor controller object config generated by <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> based off the
+<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getMotorControllerConfig()" class="member-name-link">getMotorControllerConfig()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -2679,6 +2748,8 @@ an elevator.</div>
 <dd>
 <div class="block">Get the <code>LinearQuadraticRegulator</code>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2692,6 +2763,8 @@ an elevator.</div>
 <div class="block">Get the mechanism <code>Angle</code> from the relative encoder in the motor, scaled by the configured
 <a href="yams/core/gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2778,6 +2851,10 @@ pivot, at an angle.</div>
 <dd>
 <div class="block">Get the rotor acceleration.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getRotorAcceleration()" class="member-name-link">getRotorAcceleration()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2798,6 +2875,8 @@ pivot, at an angle.</div>
 <dd>
 <div class="block">Get the rotor position.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getRotorPosition()" class="member-name-link">getRotorPosition()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
@@ -2807,6 +2886,8 @@ scaled to the mechanism rotations.</div>
 <dd>
 <div class="block">Get the sensor to the mechanism ratio for the motor to the mechanism.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2827,6 +2908,8 @@ scaled to the mechanism rotations.</div>
 <dd>
 <div class="block">Get the rotor velocity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getRotorVelocity()" class="member-name-link">getRotorVelocity()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Gets the angular velocity of the motor.</div>
@@ -2939,6 +3022,8 @@ speed.</div>
 <dd>
 <div class="block">Enable or disable state optimization.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -2956,6 +3041,8 @@ speed.</div>
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getStatorCurrent()" class="member-name-link">getStatorCurrent()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -3005,6 +3092,10 @@ speed.</div>
 <dd>
 <div class="block">Subsystem the drive's commands require.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Get the supply current of the motor controller.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -3024,6 +3115,8 @@ speed.</div>
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#getSupplyCurrent()" class="member-name-link">getSupplyCurrent()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -3125,6 +3218,8 @@ speed.</div>
 <dd>
 <div class="block">Get the telemetry verbosity for the <a href="yams/core/mechanisms/swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getTemperature()" class="member-name-link">getTemperature()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getTemperature()" class="member-name-link">getTemperature()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getTemperature()" class="member-name-link">getTemperature()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -3232,6 +3327,8 @@ RPM free.</div>
 <dd>
 <div class="block">Get how far the shared gear can turn before the pair of encoder readings repeats.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -3253,6 +3350,8 @@ RPM free.</div>
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#getUpdatedSim()" class="member-name-link">getUpdatedSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#getUpdatedSim()" class="member-name-link">getUpdatedSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#getUpdatedSim()" class="member-name-link">getUpdatedSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/positional/DoubleJointedArm.html#getUpperAngle()" class="member-name-link">getUpperAngle()</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/DoubleJointedArm.html" title="class in yams.core.mechanisms.positional">DoubleJointedArm</a></dt>
 <dd>
@@ -3328,6 +3427,8 @@ options.</div>
 <dd>
 <div class="block">Get Telemetry verbosity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#getVoltage()" class="member-name-link">getVoltage()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#getVoltage()" class="member-name-link">getVoltage()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#getVoltage()" class="member-name-link">getVoltage()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -3353,6 +3454,14 @@ robot length if set, or twice the given length.</div>
 <dd>
 <div class="block">Returns the y dimension of the window in the Mechanism2d for visualization, either the max
 robot height if set, or twice the given length.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getWrappingMax()" class="member-name-link">getWrappingMax()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the top of the wrapping range, where an absolute encoder wraps.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getWrappingMin()" class="member-name-link">getWrappingMin()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Get the bottom of the wrapping range.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#getZeroPower()" class="member-name-link">getZeroPower()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -3571,6 +3680,8 @@ stopped, as a duty cycle or voltage command does.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#isInputFed()" class="member-name-link">isInputFed()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/positional/Arm.html#isLte(org.wpilib.units.measure.Angle)" class="member-name-link">isLte(Angle)</a> - Method in class yams.core.mechanisms.positional.<a href="yams/core/mechanisms/positional/Arm.html" title="class in yams.core.mechanisms.positional">Arm</a></dt>
 <dd>
 <div class="block">Less than or equal to angle</div>
@@ -3642,6 +3753,11 @@ stopped, as a duty cycle or voltage command does.</div>
 <dt><a href="yams/core/mechanisms/config/FlyWheelConfig.html#isUsingSpeedometerSimulation()" class="member-name-link">isUsingSpeedometerSimulation()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/FlyWheelConfig.html" title="class in yams.core.mechanisms.config">FlyWheelConfig</a></dt>
 <dd>
 <div class="block">Check if the shooter is using the speedometer simulation.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#isWrappingContinuous()" class="member-name-link">isWrappingContinuous()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Whether the closed loop controller wraps continuously over the wrapping range, taking the
+shortest path to a setpoint, as <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withContinuousWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withContinuousWrapping(Angle, Angle)</code></a> sets.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#iterateClosedLoopController()" class="member-name-link">iterateClosedLoopController()</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
@@ -4314,6 +4430,14 @@ supplied.</div>
 <dd>
 <div class="block">Constructs exception for failure to provide stages.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" class="type-name-link" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a> - Class in <a href="yams/core/motorcontrollers/simulation/package-summary.html">yams.core.motorcontrollers.simulation</a></dt>
+<dd>
+<div class="block">A simulated Thrifty Nova driving a mechanism's <a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#%3Cinit%3E(yams.core.motorcontrollers.SimSupplier,com.thrifty.nova.Nova,org.wpilib.units.measure.Time)" class="member-name-link">NovaSimSupplier(SimSupplier, Nova, Time)</a> - Constructor for class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Create a simulated Nova.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html" class="type-name-link" title="class in yams.core.motorcontrollers.local">NovaWrapper</a> - Class in <a href="yams/core/motorcontrollers/local/package-summary.html">yams.core.motorcontrollers.local</a></dt>
 <dd>
 <div class="block">Nova wrapper for The Thrifty Bot's Thrifty Nova motor controller, using ThriftyLib 2027.</div>
@@ -4891,6 +5015,8 @@ the new loop starts where the old one was, so the output doesn't jump.</div>
 <dd>
 <div class="block">Seed the azimuth encoder with the absolute encoder angle.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5110,6 +5236,10 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Turn every module to the given angle without driving, as for tuning the azimuth motors.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the closed loop ramp rate.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Set the closed loop ramp rate.</div>
@@ -5124,6 +5254,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the closed loop ramp rate.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setClosedLoopSlot(yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setClosedLoopSlot(yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setClosedLoopSlot(yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot(SmartMotorController.ClosedLoopControllerSlot)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5143,6 +5275,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/math/ExponentialProfilePIDController.html#setConstraints(org.wpilib.math.trajectory.ExponentialProfile.Constraints)" class="member-name-link">setConstraints(ExponentialProfile.Constraints)</a> - Method in class yams.core.math.<a href="yams/core/math/ExponentialProfilePIDController.html" title="class in yams.core.math">ExponentialProfilePIDController</a></dt>
 <dd>
 <div class="block">Sets the constraints for the <code>ExponentialProfile</code>.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#setControlRequest(com.thrifty.core.MotorControlRequest)" class="member-name-link">setControlRequest(MotorControlRequest)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Run a closed loop control request, as the Nova does when it is sent one.</div>
 </dd>
 <dt><a href="yams/core/math/ExponentialProfilePIDController.html#setD(double)" class="member-name-link">setD(double)</a> - Method in class yams.core.math.<a href="yams/core/math/ExponentialProfilePIDController.html" title="class in yams.core.math">ExponentialProfilePIDController</a></dt>
 <dd>
@@ -5168,6 +5304,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set default values.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setDutyCycle(double)" class="member-name-link">setDutyCycle(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setDutyCycle(double)" class="member-name-link">setDutyCycle(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setDutyCycle(double)" class="member-name-link">setDutyCycle(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5184,6 +5322,10 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the dutycycle of the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the phase of the encoder attached to the brushless motor.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Set the phase of the encoder attached to the brushless motor.</div>
@@ -5198,6 +5340,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the phase of the encoder attached to the brushless motor.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5209,6 +5353,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition(Angle)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the encoder position</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setEncoderPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setEncoderPosition(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the encoder position.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setEncoderPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setEncoderPosition(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5230,6 +5378,10 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the encoder position.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setEncoderVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the encoder velocity</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setEncoderVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Set the encoder velocity</div>
@@ -5245,6 +5397,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setEncoderVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the encoder velocity</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setEncoderVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the encoder velocity.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setEncoderVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5266,6 +5422,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the encoder velocity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile(OptionalDouble, OptionalDouble, Optional)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile(OptionalDouble, OptionalDouble, Optional)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile(OptionalDouble, OptionalDouble, Optional)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5280,6 +5438,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the exponential profile fields.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setFeedback(double,double,double)" class="member-name-link">setFeedback(double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setFeedback(double,double,double)" class="member-name-link">setFeedback(double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setFeedback(double,double,double)" class="member-name-link">setFeedback(double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5294,6 +5454,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the closed loop feedback controller PID.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward(double, double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward(double, double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward(double, double, double, double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5332,6 +5494,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Sets the Integral coefficient of the PID controller gain.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKa(double)" class="member-name-link">setKa(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKa(double)" class="member-name-link">setKa(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKa(double)" class="member-name-link">setKa(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5346,6 +5510,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Acceleration feedforward element.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKd(double)" class="member-name-link">setKd(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKd(double)" class="member-name-link">setKd(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKd(double)" class="member-name-link">setKd(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5360,6 +5526,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set kD for the feedback controller PID.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKg(double)" class="member-name-link">setKg(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKg(double)" class="member-name-link">setKg(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKg(double)" class="member-name-link">setKg(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5374,6 +5542,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">kSin feedforward element.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKi(double)" class="member-name-link">setKi(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKi(double)" class="member-name-link">setKi(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKi(double)" class="member-name-link">setKi(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5388,6 +5558,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set kI for the feedback controller PID.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKp(double)" class="member-name-link">setKp(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKp(double)" class="member-name-link">setKp(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKp(double)" class="member-name-link">setKp(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5402,6 +5574,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set kP for the feedback controller PID.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKs(double)" class="member-name-link">setKs(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKs(double)" class="member-name-link">setKs(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKs(double)" class="member-name-link">setKs(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5416,6 +5590,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Static feedforward element.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setKv(double)" class="member-name-link">setKv(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setKv(double)" class="member-name-link">setKv(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setKv(double)" class="member-name-link">setKv(double)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5446,6 +5622,10 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the chassis linear velocity a full translation axis maps to.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMeasurementLowerLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the measurement lower limit, only works if mechanism circumference is defined.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMeasurementLowerLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Set the measurement lower limit, only works if mechanism circumference is defined.</div>
@@ -5469,6 +5649,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/mechanisms/SmartMechanism.html#setMeasurementPositionSetpoint(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementPositionSetpoint(Distance)</a> - Method in class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Sets the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> to the given distance.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMeasurementUpperLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the measurement upper limit, only works if mechanism circumference is defined.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMeasurementUpperLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5498,6 +5682,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the FlyWheel to the given speed.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismCircumference(org.wpilib.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismCircumference(org.wpilib.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMechanismCircumference(org.wpilib.units.measure.Distance)" class="member-name-link">setMechanismCircumference(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5510,6 +5696,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Update the mechanism circumference used for linear position/velocity conversions.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5521,6 +5709,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing(MechanismGearing)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Update the mechanism gearing used for position/velocity conversions.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismLimits(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLimits(Angle, Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the Mechanism limits for the motor controller.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismLimits(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLimits(Angle, Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5542,6 +5734,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the Mechanism limits for the motor controller.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5553,6 +5747,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled(boolean)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Enable or disable the mechanism/measurement limits in the motor controller.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismLowerLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the mechanism lower limit.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismLowerLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5586,6 +5784,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the Mechanism position</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#setMechanismPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismPosition(Angle)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/SmartMechanism.html#setMechanismPositionSetpoint(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismPositionSetpoint(Angle)</a> - Method in class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Sets the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> to the given angle.</div>
@@ -5600,6 +5800,10 @@ tuning the azimuth motor.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismStatorDutyCycle(double)" class="member-name-link">setMechanismStatorDutyCycle(double)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#setMechanismStatorDutyCycle(double)" class="member-name-link">setMechanismStatorDutyCycle(double)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Set the dutycyle of the mechanism stator.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SimSupplier.html#setMechanismStatorVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in interface yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Set mechanism voltage, mostly used for SysId testing.</div>
@@ -5610,6 +5814,14 @@ tuning the azimuth motor.</div>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#setMechanismStatorVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#setMechanismStatorVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setMechanismStatorVoltage(Voltage)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>
+<div class="block">Set mechanism voltage, mostly used for SysId testing.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMechanismUpperLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the mechanism upper limit.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMechanismUpperLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
 <div class="block">Set the mechanism upper limit.</div>
@@ -5642,10 +5854,14 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the Mechanism velocity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#setMechanismVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/mechanisms/SmartMechanism.html#setMechanismVelocitySetpoint(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMechanismVelocitySetpoint(AngularVelocity)</a> - Method in class yams.core.mechanisms.<a href="yams/core/mechanisms/SmartMechanism.html" title="class in yams.core.mechanisms">SmartMechanism</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> to the given speed.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(AngularAcceleration)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(AngularAcceleration)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(AngularAcceleration)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5657,6 +5873,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.AngularAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(AngularAcceleration)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the maximum acceleration for the trapezoidal profile for the feedback controller.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.LinearAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(LinearAcceleration)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the maximum acceleration of the trapezoidal profile for the feedback controller.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotionProfileMaxAcceleration(org.wpilib.units.measure.LinearAcceleration)" class="member-name-link">setMotionProfileMaxAcceleration(LinearAcceleration)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5678,6 +5898,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the maximum acceleration of the trapezoidal profile for the feedback controller.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotionProfileMaxJerk(org.wpilib.units.measure.Velocity)" class="member-name-link">setMotionProfileMaxJerk(Velocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotionProfileMaxJerk(org.wpilib.units.measure.Velocity)" class="member-name-link">setMotionProfileMaxJerk(Velocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMotionProfileMaxJerk(org.wpilib.units.measure.Velocity)" class="member-name-link">setMotionProfileMaxJerk(Velocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5690,6 +5912,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the maximum jerk for the trapezoidal profile for the feedback controller.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5701,6 +5925,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setMotionProfileMaxVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the maximum velocity for the trapezoidal profile for the feedback controller.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setMotionProfileMaxVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the maximum velocity of the trapezoidal profile for the feedback controller.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotionProfileMaxVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setMotionProfileMaxVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5722,6 +5950,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the maximum velocity of the trapezoidal profile for the feedback controller.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setMotorInverted(boolean)" class="member-name-link">setMotorInverted(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setMotorInverted(boolean)" class="member-name-link">setMotorInverted(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setMotorInverted(boolean)" class="member-name-link">setMotorInverted(boolean)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5749,6 +5979,10 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#setOmegaCubeEnabled(boolean)" class="member-name-link">setOmegaCubeEnabled(boolean)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Enable or disable cubing the angular velocity axis.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setOpenLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setOpenLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the open loop ramp rate.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setOpenLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setOpenLoopRampRate(Time)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5810,6 +6044,8 @@ tuning the azimuth motor.</div>
 <dd>
 <div class="block">Set the position of the DoubleJointedArm to be at pose in meters.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setPosition(Angle)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -5836,6 +6072,11 @@ tuning the azimuth motor.</div>
 <dt><a href="yams/commands3/mechanisms/DifferentialMechanism.html#setPosition(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">setPosition(Angle, Angle)</a> - Method in class yams.commands3.mechanisms.<a href="yams/commands3/mechanisms/DifferentialMechanism.html" title="class in yams.commands3.mechanisms">DifferentialMechanism</a></dt>
 <dd>
 <div class="block">Set the position of the differential mechanism.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setPosition(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the Mechanism <code>Distance</code> using the PID and feedforward from
+<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setPosition(Distance)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -5883,9 +6124,17 @@ applied per module, e.g.</div>
 <dd>
 <div class="block">Set the auto-align rotational PID controller.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier(SimSupplier)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>
+<div class="block">Set the <a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a> Mechanism.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" class="member-name-link">setSimSupplier(SimSupplier)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the <a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a> Mechanism.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setStatorCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setStatorCurrentLimit(Current)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the stator current limit for the device.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setStatorCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setStatorCurrentLimit(Current)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -5898,6 +6147,10 @@ applied per module, e.g.</div>
 <dt><a href="yams/core/motorcontrollers/SmartMotorController.html#setStatorCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setStatorCurrentLimit(Current)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></dt>
 <dd>
 <div class="block">Set the stator current limit for the device.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setSupplyCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit(Current)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the supply current limit.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setSupplyCurrentLimit(org.wpilib.units.measure.Current)" class="member-name-link">setSupplyCurrentLimit(Current)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -6055,6 +6308,8 @@ loop, and registers cleanup so the registration is removed when the controller i
 <dd>
 <div class="block">Setup network tables.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setupSimulation()" class="member-name-link">setupSimulation()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setupSimulation()" class="member-name-link">setupSimulation()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setupSimulation()" class="member-name-link">setupSimulation()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -6108,6 +6363,8 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <dd>
 <div class="block">Setup Telemetry Pub/Sub fields.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setVelocity(AngularVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -6127,8 +6384,13 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
 <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
-<dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity(AngularVelocity, Force)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity(AngularVelocity, Force)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity(AngularVelocity, Force)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>
+<div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
+<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <code>Force</code> applied on top, e.g.</div>
+</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)" class="member-name-link">setVelocity(AngularVelocity, Force)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
 <dd>
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
@@ -6148,6 +6410,11 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <dd>
 <div class="block">Set the Mechanism <code>AngularVelocity</code> using the PID and feedforward from
 <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>, with an additional feedforward <code>Force</code> applied on top, e.g.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>
+<div class="block">Set the Mechanism <code>LinearVelocity</code> using the PID and feedforward from
+<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setVelocity(LinearVelocity)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>
@@ -6199,6 +6466,8 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <dd>
 <div class="block">Set the voltage of the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setVoltage(Voltage)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setVoltage(Voltage)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setVoltage(org.wpilib.units.measure.Voltage)" class="member-name-link">setVoltage(Voltage)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -6215,6 +6484,8 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <dd>
 <div class="block">Set the voltage of the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#setZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">setZeroPower(MotorMode)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#setZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">setZeroPower(MotorMode)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#setZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">setZeroPower(MotorMode)</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -6250,6 +6521,8 @@ default built from <a href="yams/core/mechanisms/config/SwerveModuleConfig.html#
 <div class="block">Update the simulation of the module.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/velocity/FlyWheel.html#simIterate()" class="member-name-link">simIterate()</a> - Method in class yams.core.mechanisms.velocity.<a href="yams/core/mechanisms/velocity/FlyWheel.html" title="class in yams.core.mechanisms.velocity">FlyWheel</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#simIterate()" class="member-name-link">simIterate()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#simIterate()" class="member-name-link">simIterate()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
@@ -6461,6 +6734,8 @@ this <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#starveInput()" class="member-name-link">starveInput()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#starveInput()" class="member-name-link">starveInput()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/SimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in interface yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a></dt>
 <dd>
 <div class="block">Starve the update sim watch.</div>
@@ -6470,6 +6745,8 @@ this <a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#starveUpdateSim()" class="member-name-link">starveUpdateSim()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/telemetry/SwerveModuleTelemetry.StructTelemetryField.html#State" class="member-name-link">State</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveModuleTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveModuleTelemetry.StructTelemetryField</a></dt>
 <dd>
@@ -6789,6 +7066,8 @@ of the azimuth.</div>
 <dd>
 <div class="block">Create a module state with the azimuth's angular velocity.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/A301Wrapper.html#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/A301Wrapper.html" title="class in yams.core.motorcontrollers.local">A301Wrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/local/SparkWrapper.html#synchronizeRelativeEncoder()" class="member-name-link">synchronizeRelativeEncoder()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/SparkWrapper.html" title="class in yams.core.motorcontrollers.local">SparkWrapper</a></dt>
@@ -7066,6 +7345,8 @@ instead of the closed loop controller while on.</div>
 <dt><a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/DCMotorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">DCMotorSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/ElevatorSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">ElevatorSimSupplier</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html#updateSimState()" class="member-name-link">updateSimState()</a> - Method in class yams.core.motorcontrollers.simulation.<a href="yams/core/motorcontrollers/simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation">NovaSimSupplier</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.html#updateTelemetry()" class="member-name-link">updateTelemetry()</a> - Method in class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.html" title="class in yams.commands2.telemetry">SwerveInputStreamTelemetry</a></dt>
 <dd>
@@ -7615,7 +7896,9 @@ configured), outputs are in Volts.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withContinuousWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">withContinuousWrapping(Angle, Angle)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
-<div class="block">Set continuous wrapping for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
+<div class="block">Set continuous wrapping for the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>: the wrapping range, as
+<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withWrapping(Angle, Angle)</code></a>, and the closed loop controller wraps over it, taking the
+shortest path to a setpoint.</div>
 </dd>
 <dt><a href="yams/core/math/LQRConfig.html#withControlEffort(org.wpilib.units.measure.Voltage)" class="member-name-link">withControlEffort(Voltage)</a> - Method in class yams.core.math.<a href="yams/core/math/LQRConfig.html" title="class in yams.core.math">LQRConfig</a></dt>
 <dd>
@@ -7843,10 +8126,6 @@ configured), outputs are in Volts.</div>
 <dd>
 <div class="block">Set the external encoder which is attached to the motor type sent used by
 <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
-</dd>
-<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(org.wpilib.units.measure.Angle)" class="member-name-link">withExternalEncoderDiscontinuityPoint(Angle)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
-<dd>
-<div class="block">Set the external encoder absolute position to wrap around a defined discontinuity point.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withExternalEncoderGearing(double)" class="member-name-link">withExternalEncoderGearing(double)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
@@ -8722,6 +9001,11 @@ drive motor <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html"
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withWheelRadius(org.wpilib.units.measure.Distance)" class="member-name-link">withWheelRadius(Distance)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>
 <div class="block">Set the wheel radius for the mechanism.</div>
+</dd>
+<dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withWrapping(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">withWrapping(Angle, Angle)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
+<dd>
+<div class="block">Set the wrapping range of the <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>: an absolute external encoder reads
+angles in it, from <code>bottom</code> up to <code>top</code>.</div>
 </dd>
 <dt><a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html#withZeroPower(yams.core.motorcontrollers.enums.MotorMode)" class="member-name-link">withZeroPower(MotorMode)</a> - Method in class yams.core.motorcontrollers.<a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a></dt>
 <dd>

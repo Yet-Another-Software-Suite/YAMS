@@ -34,7 +34,8 @@ var hierarchy =
     [ "yams::motorcontrollers::SimSupplier", "classyams_1_1motorcontrollers_1_1SimSupplier.html", [
       [ "yams::motorcontrollers::simulation::ArmSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html", null ],
       [ "yams::motorcontrollers::simulation::DCMotorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html", null ],
-      [ "yams::motorcontrollers::simulation::ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", null ]
+      [ "yams::motorcontrollers::simulation::ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", null ],
+      [ "yams::motorcontrollers::simulation::NovaSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier.html", null ]
     ] ],
     [ "yams::math::SmartMath", "classyams_1_1math_1_1SmartMath.html", null ],
     [ "yams::mechanisms::SmartMechanism", "classyams_1_1mechanisms_1_1SmartMechanism.html", [
@@ -48,6 +49,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "yams::motorcontrollers::SmartMotorController", "classyams_1_1motorcontrollers_1_1SmartMotorController.html", [
+      [ "yams::motorcontrollers::local::A301Wrapper", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper.html", null ],
       [ "yams::motorcontrollers::local::NovaWrapper", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html", null ],
       [ "yams::motorcontrollers::local::SparkWrapper", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html", null ],
       [ "yams::motorcontrollers::remote::TalonFXSWrapper", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html", null ],
@@ -74,5 +76,6 @@ var hierarchy =
     [ "wpi::math::SwerveModuleVelocity", null, [
       [ "yams::mechanisms::swerve::SwerveModuleVelocityWithAzimuth", "structyams_1_1mechanisms_1_1swerve_1_1SwerveModuleVelocityWithAzimuth.html", null ]
     ] ],
-    [ "yams::telemetry::UnsupportedTelemetryFields", "structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html", null ]
+    [ "yams::telemetry::UnsupportedTelemetryFields", "structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html", null ],
+    [ "yams::motorcontrollers::YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ]
 ];

@@ -168,17 +168,10 @@ loadScripts(document, 'script');</script>
 <span class="extends-implements">extends <a href="../SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></span></div>
 <div class="block">TalonFX wrapper for a CTRE TalonFX motor controller.
 
-<p><b>External encoder discontinuity point support (CANcoder):</b>
-
-<ul>
-<li><code>0.5</code> rotations maps to <code>AbsoluteSensorDiscontinuityPoint = 0.5</code>, sensor
-range is [-0.5, 0.5)
-<li><code>1.0</code> rotations maps to <code>AbsoluteSensorDiscontinuityPoint = 1.0</code>, sensor
-range is [0, 1)
-</ul>
-
-Configuring a discontinuity point is optional for CANcoder; when omitted the CANcoder default is
-used. Set via <a href="../SmartMotorControllerConfig.html#withExternalEncoderDiscontinuityPoint(org.wpilib.units.measure.Angle)"><code>SmartMotorControllerConfig.withExternalEncoderDiscontinuityPoint(Angle)</code></a>.
+<p><b>Absolute encoder range (CANcoder, CANdi PWM):</b> with continuous wrapping, the encoder reads
+the wrapping range, such as [-0.5, 0.5) or [0, 1): its <code>AbsoluteSensorDiscontinuityPoint</code> is
+the wrapping maximum, from 0 to 1 rotation. Without continuous wrapping, the encoder keeps its
+own range.
 
 <h2 id="example-heading">Example</h2>
 

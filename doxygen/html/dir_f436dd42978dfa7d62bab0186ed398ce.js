@@ -6,5 +6,6 @@ var dir_f436dd42978dfa7d62bab0186ed398ce =
     [ "SimSupplier.hpp", "SimSupplier_8hpp.html", "SimSupplier_8hpp" ],
     [ "SmartMotorController.hpp", "SmartMotorController_8hpp.html", "SmartMotorController_8hpp" ],
     [ "SmartMotorControllerCommandRegistry.hpp", "SmartMotorControllerCommandRegistry_8hpp.html", "SmartMotorControllerCommandRegistry_8hpp" ],
-    [ "SmartMotorControllerConfig.hpp", "SmartMotorControllerConfig_8hpp.html", "SmartMotorControllerConfig_8hpp" ]
+    [ "SmartMotorControllerConfig.hpp", "SmartMotorControllerConfig_8hpp.html", "SmartMotorControllerConfig_8hpp" ],
+    [ "YMotors.hpp", "YMotors_8hpp.html", "YMotors_8hpp" ]
 ];
