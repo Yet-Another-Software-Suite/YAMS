@@ -12,6 +12,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -28,6 +29,7 @@
 #include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/local/A301Wrapper.hpp"
+#include "yams/motorcontrollers/simulation/BatterySim.hpp"
 
 namespace yams::test {
 
@@ -170,6 +172,36 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.MotorCountModelsEveryA301OnTheMe
   auto other = MakeA301();
   auto otherCfg = BaseConfig();
   CHECK_THROWS_AS((A301Wrapper{other.get(), 0, &otherCfg}), std::invalid_argument);
+}
+
+TEST_CASE_METHOD(A301ParityFixture, "A301Parity.FollowerCurrentIsInTheLeadersMotorModel",
+                 "[A301Parity]") {
+  using motorcontrollers::simulation::BatterySim;
+  // A motor controller's battery key is its SmartMotorController address.
+  const auto key = [](motorcontrollers::SmartMotorController& smc) {
+    return static_cast<const void*>(&smc);
+  };
+  // The leader models both A301s, so the battery does not count the follower's current again.
+  auto followerA301 = MakeA301();
+  auto followerCfg = BaseConfig();
+  A301Wrapper follower{followerA301.get(), &followerCfg};
+  auto leaderA301 = MakeA301();
+  auto leaderCfg = BaseConfig();
+  leaderCfg.WithLooselyCoupledFollowers({&follower});
+  std::optional<A301Wrapper> leader;
+  leader.emplace(leaderA301.get(), 2, &leaderCfg);
+
+  BatterySim::Reset();
+  const auto leaderOnly =
+      BatterySim::CalculateVoltage(key(*leader), wpi::units::ampere_t{60});
+  CHECK(BatterySim::CalculateVoltage(key(follower), wpi::units::ampere_t{60})
+            .value() == Catch::Approx(leaderOnly.value()));
+  CHECK_FALSE(BatterySim::HasCurrent(key(follower)));
+
+  // Without the leader, the follower's current counts again.
+  leader.reset();
+  BatterySim::CalculateVoltage(key(follower), wpi::units::ampere_t{60});
+  CHECK(BatterySim::HasCurrent(key(follower)));
 }
 
 }  // namespace yams::test

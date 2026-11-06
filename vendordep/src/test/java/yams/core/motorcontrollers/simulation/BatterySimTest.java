@@ -590,4 +590,21 @@ public class BatterySimTest {
     Preferences.removeAll();
     TestWithScheduler.schedulerClear();
   }
+
+  @Test
+  void looselyCoupledFollowerCurrentIsNotCounted() {
+    BatterySim.reset();
+    final UUID leader = UUID.randomUUID();
+    final UUID follower = UUID.randomUUID();
+    final double leaderOnly = BatterySim.calculateVoltage(leader, 100);
+
+    BatterySim.setLooselyCoupledFollower(follower, true);
+    assertEquals(leaderOnly, BatterySim.calculateVoltage(follower, 100), 1e-9);
+
+    BatterySim.setLooselyCoupledFollower(follower, false);
+    assertTrue(BatterySim.calculateVoltage(follower, 100) < leaderOnly - 0.1);
+
+    BatterySim.removeCurrent(leader);
+    BatterySim.removeCurrent(follower);
+  }
 }

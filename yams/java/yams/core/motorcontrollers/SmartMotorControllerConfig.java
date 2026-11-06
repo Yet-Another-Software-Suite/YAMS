@@ -1050,6 +1050,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Applies loosely coupled follower motors to the {@link SmartMotorController}.
    *
+   * <p>In simulation, the leader's motor model is the whole mechanism's, so give it every motor,
+   * such as {@code DCMotor.getNEO(2)} for a SPARK and one follower, or an {@link
+   * yams.core.motorcontrollers.local.A301Wrapper} motor count of 2. The followers' current is not
+   * counted towards the {@link yams.core.motorcontrollers.simulation.BatterySim} load.
+   *
    * @param followers {@link SmartMotorController}s to configure as followers.
    * @return {@link SmartMotorControllerConfig} for chaining
    * @implNote ONLY the position and velocity requests will be forwarded.

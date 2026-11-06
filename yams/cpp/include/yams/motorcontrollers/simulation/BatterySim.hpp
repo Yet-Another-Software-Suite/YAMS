@@ -6,6 +6,7 @@
 #include <map>
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <wpi/units/current.hpp>
 #include <wpi/units/impedance.hpp>
 #include <wpi/units/voltage.hpp>
@@ -122,6 +123,16 @@ class BatterySim {
   static void RemoveCurrent(const void* id);
 
   /**
+   * Set whether a consumer is a loosely coupled follower. A follower's current is not counted
+   * towards the battery load, since its leader's motor model includes every motor on the
+   * mechanism. The leader marks its followers when its config is applied.
+   *
+   * @param id       Key the follower's current is registered under (the SmartMotorController).
+   * @param follower Whether it is a loosely coupled follower.
+   */
+  static void SetLooselyCoupledFollower(const void* id, bool follower);
+
+  /**
    * Clear every tracked current draw and reset discharge simulation to a fresh, fully-charged,
    * disabled state.
    */
@@ -145,6 +156,8 @@ class BatterySim {
   /** Guards every member below, and BatteryVoltage and BatteryResistance. */
   static std::mutex m_mutex;
   static std::unordered_map<const void*, double> m_currents;
+  /** Loosely coupled followers, whose current is not counted. */
+  static std::unordered_set<const void*> m_looselyCoupledFollowers;
   static bool m_dischargeEnabled;
   static double m_batteryCapacityAmpHours;
   static double m_ampHoursUsed;

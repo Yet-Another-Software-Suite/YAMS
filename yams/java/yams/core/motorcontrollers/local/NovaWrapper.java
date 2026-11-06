@@ -589,7 +589,7 @@ public class NovaWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
-    m_looseFollowers = config.getLooselyCoupledFollowers();
+    setLooselyCoupledFollowers(config.getLooselyCoupledFollowers());
     m_expoProfile = config.getExponentialProfile().map(ExponentialProfile::new);
     m_trapezoidProfile = config.getTrapezoidProfile().map(TrapezoidProfile::new);
     final boolean closedLoopMode = config.getMotorControllerMode() == ControlMode.CLOSED_LOOP;

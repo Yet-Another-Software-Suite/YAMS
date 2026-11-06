@@ -914,6 +914,10 @@ class SmartMotorControllerConfig {
    * configurations are not transferred.  Typically used when follower motors have
    * independent gains (e.g. inverted orientation) or a different controller brand.
    *
+   * In simulation, the leader's motor model is the whole mechanism's, so give it every motor, such
+   * as DCMotor::NEO(2) for a SPARK and one follower, or an A301Wrapper motor count of 2. The
+   * followers' current is not counted towards the BatterySim load.
+   *
    * @param followers SmartMotorController instances to mirror setpoints.
    * @return *this for chaining.
    */

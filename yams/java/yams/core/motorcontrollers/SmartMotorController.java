@@ -1411,6 +1411,26 @@ public abstract class SmartMotorController {
     return m_config.getTelemetryName().map(name -> prefix + "_" + alertType + "_" + name).orElseGet(() -> prefix + "_" + UUID.randomUUID() + "_" + alertType);
   }
 
+  /**
+   * Set the loosely coupled followers. The leader's motor model includes every motor on the
+   * mechanism, so a follower's current is not counted towards the {@link BatterySim} load again.
+   *
+   * @param followers Loosely coupled followers from the config.
+   */
+  protected void setLooselyCoupledFollowers(Optional<SmartMotorController[]> followers) {
+    m_looseFollowers.ifPresent(old -> {
+      for (var f : old) {
+        BatterySim.setLooselyCoupledFollower(f.m_batterySimUUID, false);
+      }
+    });
+    m_looseFollowers = followers;
+    m_looseFollowers.ifPresent(current -> {
+      for (var f : current) {
+        BatterySim.setLooselyCoupledFollower(f.m_batterySimUUID, true);
+      }
+    });
+  }
+
   /** Close the SMC for unit testing. */
   public void close() {
     if (m_closedLoopControllerThread != null) {
@@ -1420,6 +1440,8 @@ public abstract class SmartMotorController {
     }
     m_systemCoreClosedLoopAlert.ifPresent(Alert::close);
     BatterySim.removeCurrent(m_batterySimUUID);
+    // Without this leader, its followers' current counts again.
+    setLooselyCoupledFollowers(Optional.empty());
     telemetry.close();
     m_closeHooks.forEach(Runnable::run);
     m_closeHooks.clear();

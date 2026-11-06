@@ -819,7 +819,7 @@ public class TalonFXWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_startingPositionExternalEncoderAlert.set(false);
     m_zeroOffsetNoExternalEncoderAlert.set(false);
-    this.m_looseFollowers = config.getLooselyCoupledFollowers();
+    setLooselyCoupledFollowers(config.getLooselyCoupledFollowers());
     m_lqr = config.getLQRClosedLoopController();
 
     // Sim periodic

@@ -18,6 +18,7 @@ wpi::units::ohm_t BatterySim::BatteryResistance = wpi::units::ohm_t{0.020};
 
 std::mutex BatterySim::m_mutex{};
 std::unordered_map<const void*, double> BatterySim::m_currents{};
+std::unordered_set<const void*> BatterySim::m_looselyCoupledFollowers{};
 bool BatterySim::m_dischargeEnabled = false;
 double BatterySim::m_batteryCapacityAmpHours = 18.0;
 double BatterySim::m_ampHoursUsed = 0.0;
@@ -97,6 +98,17 @@ void BatterySim::ResetDischarge() {
 void BatterySim::RemoveCurrent(const void* id) {
   std::lock_guard lock{m_mutex};
   m_currents.erase(id);
+  m_looselyCoupledFollowers.erase(id);
+}
+
+void BatterySim::SetLooselyCoupledFollower(const void* id, bool follower) {
+  std::lock_guard lock{m_mutex};
+  if (follower) {
+    m_looselyCoupledFollowers.insert(id);
+    m_currents.erase(id);
+  } else {
+    m_looselyCoupledFollowers.erase(id);
+  }
 }
 
 void BatterySim::Reset() {
@@ -136,7 +148,9 @@ void BatterySim::UpdateDischarge(double totalCurrentAmps) {
 
 wpi::units::volt_t BatterySim::CalculateVoltage(const void* id, wpi::units::ampere_t current) {
   std::lock_guard lock{m_mutex};
-  m_currents[id] = current.value();
+  if (m_looselyCoupledFollowers.count(id) == 0) {
+    m_currents[id] = current.value();
+  }
 
   std::vector<wpi::units::ampere_t> currentDraws;
   currentDraws.reserve(m_currents.size());

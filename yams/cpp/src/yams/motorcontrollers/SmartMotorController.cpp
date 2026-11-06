@@ -608,6 +608,7 @@ void SmartMotorController::Close() {
   m_closed = true;
   m_telemetry.Close();
   simulation::BatterySim::RemoveCurrent(BatterySimKey());
+  MarkLooselyCoupledFollowers(false);
   auto hooks = std::move(m_closeHooks);
   m_closeHooks.clear();
   for (auto& hook : hooks) hook();
@@ -624,7 +625,19 @@ SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier
 // ---- Loosely coupled followers ----------------------------------------------
 
 void SmartMotorController::LoadLooselyCoupledFollowers() {
+  // The leader's motor model includes every motor on the mechanism, so a follower's current is not
+  // counted towards the battery load again.
+  MarkLooselyCoupledFollowers(false);
   m_looseFollowers = m_config->GetLooselyCoupledFollowers();
+  MarkLooselyCoupledFollowers(true);
+}
+
+void SmartMotorController::MarkLooselyCoupledFollowers(bool follower) {
+  // A follower's battery key is its own address, so a follower destroyed before its leader is never
+  // dereferenced.
+  for (auto* f : m_looseFollowers) {
+    simulation::BatterySim::SetLooselyCoupledFollower(static_cast<const void*>(f), follower);
+  }
 }
 
 void SmartMotorController::ConfigureSoftwarePID(const SmartMotorControllerConfig& config) {

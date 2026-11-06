@@ -27,6 +27,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.local.A301Wrapper;
+import yams.core.motorcontrollers.simulation.BatterySim;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
 import yams.helpers.MockHardwareExtension;
@@ -169,5 +170,22 @@ public class A301WrapperTest {
 
     assertThrows(
         IllegalArgumentException.class, () -> new A301Wrapper(createA301(), 0, config("noMotors")));
+  }
+
+  @Test
+  void followerCurrentIsInTheLeadersMotorModel() {
+    // The leader models both A301s, so the battery does not count the follower's current again.
+    final A301Wrapper follower = new A301Wrapper(createA301(), config("follower"));
+    final A301Wrapper leader = new A301Wrapper(
+        createA301(), 2, config("leader").withLooselyCoupledFollowers(follower));
+    BatterySim.reset();
+    final double leaderOnly = BatterySim.calculateVoltage(leader.m_batterySimUUID, 60);
+    assertEquals(leaderOnly, BatterySim.calculateVoltage(follower.m_batterySimUUID, 60), 1e-9);
+
+    // Without the leader, the follower's current counts again.
+    leader.close();
+    BatterySim.removeCurrent(leader.m_batterySimUUID);
+    assertTrue(BatterySim.calculateVoltage(follower.m_batterySimUUID, 60) < 12);
+    follower.close();
   }
 }
