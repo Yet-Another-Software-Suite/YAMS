@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
 import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Pounds;
 import static org.wpilib.units.Units.Seconds;
@@ -17,7 +18,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +30,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.wpilib.command2.CommandScheduler;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.RoboRioSim;
+import org.wpilib.util.Pair;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.mechanisms.Pivot;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
@@ -57,7 +64,10 @@ import yams.helpers.TestWithScheduler;
  *   <li>The pivot is given the output the vendor simulation applies.
  *   <li>The vendor simulation limits the current, so a lower stator current limit applies less
  *       output and moves the pivot less.
- *   <li>The vendor's closed loop, on the motor controller, reaches the setpoint.
+ *   <li>A PID, a feedforward and an exponential profile each take the pivot to the setpoint, with
+ *       no follower, a tightly coupled follower or a loosely coupled follower, and the vendor
+ *       simulation's duty cycle, voltage, current and velocity react while they do, the loosely
+ *       coupled follower's too.
  * </ul>
  */
 public class VendorSimulationTest {
@@ -155,6 +165,8 @@ public class VendorSimulationTest {
     SmartMotorControllerTestSubsystem subsys = subsystem(smc);
     SmartMotorControllerCommandRegistry.removeCommands(subsys);
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
+    // The subsystem closes the motor controller it pumps, so give it one if no test did.
+    subsys.setSMC(smc);
     subsys.close();
     smc.close();
     DeviceCreator.silence(smc);
@@ -265,20 +277,140 @@ public class VendorSimulationTest {
         + degrees[1] + "°, and a 120 A limit " + degrees[0] + "°");
   }
 
+  /** A vendor simulated motor controller, and a motor controller device of its vendor to follow it. */
+  private record Vendor(
+      String name,
+      BiFunction<SmartMotorControllerConfig, Integer, SmartMotorController> create,
+      Supplier<Object> device,
+      DCMotor motor) {}
+
+  private static final List<Vendor> VENDORS = List.of(
+      new Vendor("SPARK MAX", (cfg, motors) -> new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(motors), cfg),
+          DeviceCreator::createSparkMax, DCMotor.getNEO(1)),
+      new Vendor("SPARK Flex", (cfg, motors) -> new SparkWrapper(DeviceCreator.createSparkFlex(), DCMotor.getNeoVortex(motors), cfg),
+          DeviceCreator::createSparkFlex, DCMotor.getNeoVortex(1)),
+      new Vendor("TalonFX", (cfg, motors) -> new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(motors), cfg),
+          DeviceCreator::createTalonFX, DCMotor.getKrakenX60(1)),
+      new Vendor("TalonFXS", (cfg, motors) -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(motors), cfg),
+          DeviceCreator::createTalonFXS, DCMotor.getNEO(1)));
+
+  /** How the closed loop gets to the setpoint. */
+  private enum Control { PID, FEEDFORWARD, EXPONENTIAL_PROFILE }
+
+  /** The motors following the vendor simulated motor controller. */
+  private enum Followers { NONE, TIGHTLY_COUPLED, LOOSELY_COUPLED }
+
+  private static Stream<Arguments> controlsAndFollowers() {
+    List<Arguments> cases = new ArrayList<>();
+    for (Vendor vendor : VENDORS) {
+      for (Control control : Control.values()) {
+        for (Followers followers : Followers.values()) {
+          cases.add(Arguments.of(vendor.name() + ", " + control + ", " + followers + " followers", vendor, control, followers));
+        }
+      }
+    }
+    return cases.stream();
+  }
+
+  /** A closed loop config for the control, with no current limit worth reaching. */
+  private static SmartMotorControllerConfig controlConfig(String label, Control control, DCMotor motor) {
+    SmartMotorControllerConfig cfg = config(label, ControlMode.OPEN_LOOP, 80);
+    cfg.withControlMode(ControlMode.CLOSED_LOOP);
+    switch (control) {
+      case PID -> cfg.withClosedLoopController(40, 0, 0);
+      case FEEDFORWARD -> {
+        // Volts per pivot rotation per second, from the motor's free speed through the gearing.
+        double freeRotationsPerSecond = motor.freeSpeed / (2 * Math.PI) / GEARING.getMechanismToRotorRatio();
+        cfg.withClosedLoopController(0, 0, 0)
+            .withFeedforward(new SimpleMotorFeedforward(0, motor.nominalVoltage / freeRotationsPerSecond, 0))
+            .withTrapezoidalProfile(DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180));
+      }
+      case EXPONENTIAL_PROFILE -> cfg.withClosedLoopController(40, 0, 0)
+          .withExponentialProfile(Volts.of(12), DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90));
+    }
+    return cfg;
+  }
+
+  /** The largest magnitudes of a motor controller's vendor simulated values during a run. */
+  private static final class Reacted {
+    double dutyCycle;
+    double volts;
+    double statorAmps;
+    double degreesPerSecond;
+
+    void sample(SmartMotorController smc) {
+      dutyCycle = Math.max(dutyCycle, Math.abs(smc.getDutyCycle()));
+      volts = Math.max(volts, Math.abs(smc.getVoltage().in(Volts)));
+      statorAmps = Math.max(statorAmps, Math.abs(smc.getStatorCurrent().in(Amps)));
+      degreesPerSecond = Math.max(degreesPerSecond, Math.abs(smc.getMechanismVelocity().in(DegreesPerSecond)));
+    }
+
+    void assertReacted(String name) {
+      assertTrue(dutyCycle > 0.02, name + ": duty cycle never above " + dutyCycle);
+      assertTrue(volts > 0.2, name + ": voltage never above " + volts + " V");
+      assertTrue(statorAmps > 0.1, name + ": stator current never above " + statorAmps + " A");
+      assertTrue(degreesPerSecond > 5, name + ": velocity never above " + degreesPerSecond + "°/s");
+    }
+  }
+
+  private static void closeDevice(Object device) {
+    if (device instanceof SparkMax spark) {
+      spark.close();
+    } else if (device instanceof SparkFlex spark) {
+      spark.close();
+    } else if (device instanceof TalonFX talon) {
+      talon.close();
+    } else if (device instanceof TalonFXS talon) {
+      talon.close();
+    }
+  }
+
   @ParameterizedTest(name = "{0}")
-  @MethodSource("vendorSimulated")
-  void vendorClosedLoopReachesTheSetpoint(
-      String name, Function<SmartMotorControllerConfig, SmartMotorController> create) throws InterruptedException {
-    SmartMotorController smc = create.apply(config("ClosedLoop(" + name + ")", ControlMode.CLOSED_LOOP, 40));
+  @MethodSource("controlsAndFollowers")
+  void vendorControlReachesTheSetpoint(String name, Vendor vendor, Control control, Followers followers)
+      throws InterruptedException {
+    Object tightFollower = null;
+    SmartMotorController looseFollower = null;
+    SmartMotorControllerConfig cfg = controlConfig("Control(" + name + ")", control, vendor.motor());
+    int motors = 1;
+    if (followers == Followers.TIGHTLY_COUPLED) {
+      tightFollower = vendor.device().get();
+      cfg.withFollowers(Pair.of(tightFollower, false));
+      motors = 2;
+    } else if (followers == Followers.LOOSELY_COUPLED) {
+      looseFollower = vendor.create().apply(controlConfig("Follower(" + name + ")", control, vendor.motor()), 1);
+      cfg.withLooselyCoupledFollowers(looseFollower);
+    }
+    SmartMotorController smc = vendor.create().apply(cfg, motors);
     s_realTime = smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper;
     try {
       SmartMotorControllerTestSubsystem subsys = pivot(smc);
+      Reacted leader = new Reacted();
+      Reacted follower = new Reacted();
+      SmartMotorController loose = looseFollower;
       TestWithScheduler.schedule(subsys.setPositionSetpoint(Degrees.of(SETPOINT_DEGREES)));
-      TestWithScheduler.cycle(Seconds.of(3), paced(() -> {}));
-      assertEquals(SETPOINT_DEGREES, mechanism(smc).getMechanismPosition().in(Degrees), 2, name + ": pivot");
-      assertEquals(SETPOINT_DEGREES, smc.getMechanismPosition().in(Degrees), 2, name + ": encoder");
+      TestWithScheduler.cycle(Seconds.of(3), paced(() -> {
+        leader.sample(smc);
+        if (loose != null) {
+          follower.sample(loose);
+        }
+      }));
+
+      double tolerance = control == Control.FEEDFORWARD ? 10 : 3;
+      assertEquals(SETPOINT_DEGREES, mechanism(smc).getMechanismPosition().in(Degrees), tolerance, name + ": pivot");
+      assertEquals(SETPOINT_DEGREES, smc.getMechanismPosition().in(Degrees), tolerance, name + ": encoder");
+      leader.assertReacted(name + " leader");
+      if (loose != null) {
+        follower.assertReacted(name + " loosely coupled follower");
+        assertEquals(SETPOINT_DEGREES, loose.getMechanismPosition().in(Degrees), tolerance,
+            name + ": loosely coupled follower's encoder");
+      }
     } finally {
       close(smc);
+      if (looseFollower != null) {
+        close(looseFollower);
+      }
+      closeDevice(tightFollower);
     }
   }
 
