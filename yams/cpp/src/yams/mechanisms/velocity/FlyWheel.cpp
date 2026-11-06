@@ -44,7 +44,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
 
   if (wpi::RobotBase::IsSimulation()) {
     // Create the DCMotorSim using LinearSystemId, then wire up the DCMotorSimSupplier.
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -52,7 +52,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, *m_smc));
 
     // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.

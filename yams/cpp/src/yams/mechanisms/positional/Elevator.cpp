@@ -96,7 +96,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
           "SMC.WithMechanismCircumference(wpi::units::meter_t)");
     }
 
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -112,7 +112,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
         m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
         std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
         *m_elevatorSim, *m_smc));
 
     // Build Mechanism2d window.

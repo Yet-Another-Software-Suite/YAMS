@@ -26,6 +26,7 @@
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
+#include "yams/motorcontrollers/simulation/FollowerSimSupplier.hpp"
 
 namespace yams::motorcontrollers {
 
@@ -622,6 +623,43 @@ void SmartMotorController::SetSimSupplier(std::shared_ptr<SimSupplier> supplier)
 SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier.get(); }
 
 // ---- Loosely coupled followers ----------------------------------------------
+
+wpi::math::DCMotor SmartMotorController::GetMechanismDCMotor() {
+  wpi::math::DCMotor motor = GetDCMotor();
+  if (m_looseFollowers.empty()) return motor;
+  const auto ratioOf = [](SmartMotorController& smc) {
+    return smc.GetConfig()
+        .GetMotorGearing()
+        .value_or(gearing::MechanismGearing::kOne)
+        .GetMechanismToRotorRatio();
+  };
+  const double ratio = ratioOf(*this);
+  auto stallTorque = motor.stallTorque;
+  auto stallCurrent = motor.stallCurrent;
+  auto freeCurrent = motor.freeCurrent;
+  for (auto* follower : m_looseFollowers) {
+    const auto followerMotor = follower->GetMechanismDCMotor();
+    // The follower's torque at the mechanism, given at this motor's rotor.
+    stallTorque += followerMotor.stallTorque * (ratioOf(*follower) / ratio);
+    stallCurrent += followerMotor.stallCurrent;
+    freeCurrent += followerMotor.freeCurrent;
+  }
+  return wpi::math::DCMotor{motor.nominalVoltage, stallTorque, stallCurrent, freeCurrent,
+                            motor.freeSpeed, 1};
+}
+
+void SmartMotorController::SetMechanismSimSupplier(std::shared_ptr<SimSupplier> supplier) {
+  SetSimSupplier(std::move(supplier));
+  // A motor controller with its own mechanism is not simulated by a leader.
+  simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), false);
+  for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(*this, false);
+}
+
+void SmartMotorController::FollowSimulationOf(SmartMotorController& leader, bool inverted) {
+  SetSimSupplier(std::make_shared<simulation::FollowerSimSupplier>(leader, *this, inverted));
+  simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), true);
+  for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(leader, false);
+}
 
 void SmartMotorController::LoadLooselyCoupledFollowers() {
   m_looseFollowers = m_config->GetLooselyCoupledFollowers();

@@ -4,6 +4,7 @@
 #include "yams/motorcontrollers/local/A301Wrapper.hpp"
 
 #include <algorithm>
+#include <any>
 #include <cmath>
 #include <cstdint>
 #include <memory>
@@ -68,31 +69,16 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
   }
 }
 
-/**
- * Check how many A301s drive the mechanism.
- *
- * @param motorCount How many A301s drive the mechanism.
- * @return The motor count.
- * @throws std::invalid_argument if it is less than 1.
- */
-int CheckMotorCount(int motorCount) {
-  if (motorCount < 1) {
-    throw std::invalid_argument("A301Wrapper motor count must be at least 1, but was " +
-                                std::to_string(motorCount));
-  }
-  return motorCount;
-}
-
 }  // namespace
 
 // ---- Construction -----------------------------------------------------------
 
 A301Wrapper::A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* cfg)
-    : A301Wrapper(a301, 1, cfg) {}
-
-A301Wrapper::A301Wrapper(first::a301::A301* a301, int motorCount, SmartMotorControllerConfig* cfg)
-    : SmartMotorController(), m_a301(a301), m_motor(YMotors::A301(CheckMotorCount(motorCount))) {
+    : SmartMotorController(), m_a301(a301) {
   m_config = cfg;
+  // The simulation is made before the config is applied, so it needs every A301 now.
+  m_motorCount = 1 + static_cast<int>(m_config->GetFollowers().size());
+  m_motor = YMotors::A301(m_motorCount);
   m_config->WithSimMotor(m_motor);
   m_systemCoreClosedLoopAlert.emplace(
       "YAMS", AlertId("ClosedLoop"),
@@ -112,6 +98,14 @@ A301Wrapper::A301Wrapper(first::a301::A301* a301, int motorCount, SmartMotorCont
 }
 
 A301Wrapper::~A301Wrapper() {
+  // The followers simulate themselves again, and a follower stops being sent its leader's output.
+  for (auto& [follower, inverted] : m_a301Followers) follower->StopFollowing();
+  m_a301Followers.clear();
+  if (m_leader) {
+    auto& followers = m_leader->m_a301Followers;
+    std::erase_if(followers, [this](const auto& follower) { return follower.first == this; });
+    m_leader = nullptr;
+  }
   Close();
   if (m_systemCoreClosedLoopAlert) m_systemCoreClosedLoopAlert->Set(false);
 }
@@ -275,20 +269,65 @@ bool A301Wrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     SeedRelativeEncoder();
   }
 
-  if (!config.GetFollowers().empty())
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "A301 cannot be followed by another motor controller", "Followers could not be applied",
-        "WithLooselyCoupledFollowers instead of WithFollowers");
+  ApplyFollowers(config);
   LoadLooselyCoupledFollowers();
 
   config.ValidateBasicOptions();
   config.ValidateExternalEncoderOptions();
 
-  if (closedLoop) {
+  if (m_leader) {
+    // A follower is commanded by the A301 it follows.
+    StopClosedLoopController();
+  } else if (closedLoop) {
     m_systemCoreClosedLoopAlert->Set(true);
     StartClosedLoopController();
   }
   return true;
+}
+
+void A301Wrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
+  std::vector<std::pair<A301Wrapper*, bool>> followers;
+  for (const auto& [follower, inverted] : config.GetFollowers()) {
+    A301Wrapper* a301Follower = nullptr;
+    if (const auto* wrapper = std::any_cast<A301Wrapper*>(&follower)) {
+      a301Follower = *wrapper;
+    } else if (const auto* smc = std::any_cast<SmartMotorController*>(&follower)) {
+      a301Follower = dynamic_cast<A301Wrapper*>(*smc);
+    }
+    if (a301Follower == nullptr)
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "A301 can only be followed by another A301Wrapper", "Followers could not be applied",
+          "WithFollowers({{&followerA301Wrapper, inverted}}) for each A301");
+    if (a301Follower == this || (a301Follower->m_leader && a301Follower->m_leader != this))
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "A301 cannot follow itself or two A301s", "Followers could not be applied",
+          "WithFollowers with each other A301 once, on one A301");
+    followers.emplace_back(a301Follower, inverted);
+  }
+  for (auto& [follower, inverted] : m_a301Followers) follower->StopFollowing();
+  m_a301Followers = std::move(followers);
+  for (auto& [follower, inverted] : m_a301Followers) follower->Follow(*this, inverted);
+  const int motorCount = 1 + static_cast<int>(m_a301Followers.size());
+  if (motorCount != m_motorCount) {
+    m_motorCount = motorCount;
+    m_motor = YMotors::A301(m_motorCount);
+    // The simulated motor has every A301.
+    if (wpi::RobotBase::IsSimulation() && !m_leader) CreateMotorSim();
+  }
+}
+
+void A301Wrapper::Follow(A301Wrapper& leader, bool inverted) {
+  StopClosedLoopController();
+  if (m_systemCoreClosedLoopAlert) m_systemCoreClosedLoopAlert->Set(false);
+  m_leader = &leader;
+  if (wpi::RobotBase::IsSimulation()) FollowSimulationOf(leader, inverted);
+}
+
+void A301Wrapper::StopFollowing() {
+  m_leader = nullptr;
+  simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), false);
+  if (m_motorSim)
+    SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
 }
 
 // ---- Simulation -------------------------------------------------------------
@@ -308,6 +347,8 @@ void A301Wrapper::SimIterate() {
     m_simSupplier->StarveUpdateSim();
     simulation::BatterySim::CalculateVoltage(BatterySimKey(), m_simSupplier->GetSupplyCurrent());
   }
+  // The followers read this A301's simulation, so they are iterated with it.
+  for (auto& [follower, inverted] : m_a301Followers) follower->SimIterate();
 }
 
 // ---- Encoder sync -----------------------------------------------------------
@@ -352,6 +393,7 @@ void A301Wrapper::SetDutyCycle(double dc) {
     m_simDutyCycle = std::clamp(dc, -1.0, 1.0);
     m_simSupplier->SetMechanismStatorDutyCycle(m_simDutyCycle);
   }
+  for (auto& [follower, inverted] : m_a301Followers) follower->SetDutyCycle(inverted ? -dc : dc);
   if (dc == 0.0) {
     for (auto* f : m_looseFollowers) f->SetDutyCycle(dc);
   }
@@ -369,6 +411,8 @@ void A301Wrapper::SetVoltage(wpi::units::volt_t voltage) {
     m_simDutyCycle = std::clamp(voltage.value() / supplyVoltage.value(), -1.0, 1.0);
     m_simSupplier->SetMechanismStatorVoltage(supplyVoltage * m_simDutyCycle);
   }
+  for (auto& [follower, inverted] : m_a301Followers)
+    follower->SetVoltage(inverted ? -voltage : voltage);
 }
 
 wpi::units::volt_t A301Wrapper::GetVoltage() {

@@ -157,19 +157,4 @@ TEST_CASE_METHOD(A301ParityFixture, "A301Parity.MotorIsTheA301s", "[A301Parity]"
   CHECK(smc.GetDCMotor().freeSpeed.value() == Catch::Approx(motor.freeSpeed.value()));
 }
 
-TEST_CASE_METHOD(A301ParityFixture, "A301Parity.MotorCountModelsEveryA301OnTheMechanism",
-                 "[A301Parity]") {
-  // Three A301s on one mechanism have three times the torque, at the same free speed.
-  const auto one = motorcontrollers::YMotors::A301();
-  auto a301 = MakeA301();
-  auto cfg = BaseConfig();
-  A301Wrapper smc{a301.get(), 3, &cfg};
-  CHECK(smc.GetDCMotor().stallTorque.value() == Catch::Approx(3.0 * one.stallTorque.value()));
-  CHECK(smc.GetDCMotor().freeSpeed.value() == Catch::Approx(one.freeSpeed.value()));
-
-  auto other = MakeA301();
-  auto otherCfg = BaseConfig();
-  CHECK_THROWS_AS((A301Wrapper{other.get(), 0, &otherCfg}), std::invalid_argument);
-}
-
 }  // namespace yams::test

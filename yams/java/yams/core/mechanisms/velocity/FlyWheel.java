@@ -59,7 +59,7 @@ public class FlyWheel extends SmartVelocityMechanism {
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig<?> smcCfg = smc.getConfig();
-    DCMotor dcMotor = m_smc.getDCMotor();
+    DCMotor dcMotor = m_smc.getMechanismDCMotor();
     // Seed the relative encoder
     if (m_smc.getConfig().getExternalEncoder().isPresent()) {
       m_smc.seedRelativeEncoder();
@@ -72,7 +72,7 @@ public class FlyWheel extends SmartVelocityMechanism {
     if (RobotBase.isSimulation()) {
       m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor, smcCfg.getMOI(), smcCfg.getGearing().getMechanismToRotorRatio()), dcMotor));
 
-      m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), m_smc));
+      m_smc.setMechanismSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), m_smc));
       Distance ShooterLength = config.getDiameter().orElse(Inches.of(36));
       m_mechanismWindow = new Mechanism2d(ShooterLength.in(Meters) * 2, ShooterLength.in(Meters) * 2);
       mechanismRoot = m_mechanismWindow.getRoot(getName() + "Root", ShooterLength.in(Meters), ShooterLength.in(Meters));

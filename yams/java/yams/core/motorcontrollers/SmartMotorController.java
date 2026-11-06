@@ -53,6 +53,7 @@ import yams.core.math.LQRController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.motorcontrollers.simulation.BatterySim;
+import yams.core.motorcontrollers.simulation.FollowerSimSupplier;
 import yams.core.telemetry.SmartMotorControllerTelemetry.BooleanTelemetryField;
 import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
 import yams.core.telemetry.SmartMotorControllerTelemetry;
@@ -1409,6 +1410,70 @@ public abstract class SmartMotorController {
   protected String buildAlertId(String motorControllerType, int deviceId, String alertType) {
     String prefix = motorControllerType + "(" + deviceId + ")";
     return m_config.getTelemetryName().map(name -> prefix + "_" + alertType + "_" + name).orElseGet(() -> prefix + "_" + UUID.randomUUID() + "_" + alertType);
+  }
+
+  /**
+   * Get the motors of the mechanism this motor controller drives: its own {@link #getDCMotor()} and
+   * its loosely coupled followers'. A mechanism simulates every motor with it. A follower's torque
+   * is given at this motor's rotor, from the gearing of each, and the free speed is this motor's.
+   *
+   * @return {@link DCMotor} of every motor on the mechanism.
+   */
+  public DCMotor getMechanismDCMotor() {
+    final DCMotor motor = getDCMotor();
+    if (m_looseFollowers.isEmpty() || m_looseFollowers.get().length == 0) {
+      return motor;
+    }
+    final double ratio = m_config.getGearing().getMechanismToRotorRatio();
+    double stallTorque = motor.stallTorque;
+    double stallCurrent = motor.stallCurrent;
+    double freeCurrent = motor.freeCurrent;
+    for (var follower : m_looseFollowers.get()) {
+      final DCMotor followerMotor = follower.getMechanismDCMotor();
+      // The follower's torque at the mechanism, given at this motor's rotor.
+      stallTorque += followerMotor.stallTorque
+          * follower.getConfig().getGearing().getMechanismToRotorRatio() / ratio;
+      stallCurrent += followerMotor.stallCurrent;
+      freeCurrent += followerMotor.freeCurrent;
+    }
+    return new DCMotor(
+        motor.nominalVoltage, stallTorque, stallCurrent, freeCurrent, motor.freeSpeed, 1);
+  }
+
+  /**
+   * Set the simulation of the mechanism this motor controller drives, made with {@link
+   * #getMechanismDCMotor()}. Each loosely coupled follower reads it, so its encoder follows the
+   * mechanism, and its current is not counted again by {@link BatterySim}.
+   *
+   * @param mechanismSupplier Simulation of the mechanism.
+   */
+  public void setMechanismSimSupplier(SimSupplier mechanismSupplier) {
+    setSimSupplier(mechanismSupplier);
+    // A motor controller with its own mechanism is not simulated by a leader.
+    BatterySim.setSimulatedByLeader(m_batterySimUUID, false);
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.followSimulationOf(this, false);
+      }
+    });
+  }
+
+  /**
+   * Read the simulation of a leader whose motor model has this motor, instead of simulating it.
+   * Its current is in the leader's, so {@link BatterySim} does not count it again. Its own loosely
+   * coupled followers read the leader's simulation too.
+   *
+   * @param leader Motor controller whose simulation has this motor.
+   * @param inverted Whether this motor is inverted from the leader.
+   */
+  protected void followSimulationOf(SmartMotorController leader, boolean inverted) {
+    setSimSupplier(new FollowerSimSupplier(leader, this, inverted));
+    BatterySim.setSimulatedByLeader(m_batterySimUUID, true);
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        follower.followSimulationOf(leader, false);
+      }
+    });
   }
 
   /** Close the SMC for unit testing. */

@@ -184,12 +184,12 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
       }
 
       // Setup Sim
-      m_lowerArmSim = Optional.of(new SingleJointedArmSim(m_lowerSMC.getDCMotor(), m_lowerSMC.getConfig().getGearing().getMechanismToRotorRatio(), lowerSMCConfig.getMOI(), lowerConfig.getLength().get().in(Meters), lowerConfig.getLowerHardLimit()
+      m_lowerArmSim = Optional.of(new SingleJointedArmSim(m_lowerSMC.getMechanismDCMotor(), m_lowerSMC.getConfig().getGearing().getMechanismToRotorRatio(), lowerSMCConfig.getMOI(), lowerConfig.getLength().get().in(Meters), lowerConfig.getLowerHardLimit()
           .get().in(Radians), lowerConfig.getUpperHardLimit().get().in(Radians), true, lowerSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
-      m_lowerSMC.setSimSupplier(new ArmSimSupplier(m_lowerArmSim.get(), m_lowerSMC));
-      m_upperArmSim = Optional.of(new SingleJointedArmSim(m_upperSMC.getDCMotor(), m_upperSMC.getConfig().getGearing().getMechanismToRotorRatio(), upperSMCConfig.getMOI(), m_upperArmLength.in(Meters), upperConfig.getLowerHardLimit().get().in(
+      m_lowerSMC.setMechanismSimSupplier(new ArmSimSupplier(m_lowerArmSim.get(), m_lowerSMC));
+      m_upperArmSim = Optional.of(new SingleJointedArmSim(m_upperSMC.getMechanismDCMotor(), m_upperSMC.getConfig().getGearing().getMechanismToRotorRatio(), upperSMCConfig.getMOI(), m_upperArmLength.in(Meters), upperConfig.getLowerHardLimit().get().in(
           Radians), upperConfig.getUpperHardLimit().get().in(Radians), true, upperSMCConfig.getStartingPosition().get().in(Radians), 0.002 / 4096.0, 0.0)); // Add noise with a std-dev of 1 tick
-      m_upperSMC.setSimSupplier(new ArmSimSupplier(m_upperArmSim.get(), m_upperSMC));
+      m_upperSMC.setMechanismSimSupplier(new ArmSimSupplier(m_upperArmSim.get(), m_upperSMC));
 
       var lowerStartingAngle = lowerSMCConfig.getStartingPosition().get();
       var upperStartingAngle = upperSMCConfig.getStartingPosition().get();

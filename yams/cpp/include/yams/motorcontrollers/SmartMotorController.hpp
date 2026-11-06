@@ -335,6 +335,24 @@ class SmartMotorController {
    */
   virtual wpi::math::DCMotor GetDCMotor() = 0;
 
+  /**
+   * Get the motors of the mechanism this motor controller drives: its own GetDCMotor() and its
+   * loosely coupled followers'. A mechanism simulates every motor with it. A follower's torque is
+   * given at this motor's rotor, from the gearing of each, and the free speed is this motor's.
+   *
+   * @return DCMotor of every motor on the mechanism.
+   */
+  wpi::math::DCMotor GetMechanismDCMotor();
+
+  /**
+   * Set the simulation of the mechanism this motor controller drives, made with
+   * GetMechanismDCMotor(). Each loosely coupled follower reads it, so its encoder follows the
+   * mechanism, and its current is not counted again by BatterySim.
+   *
+   * @param supplier Simulation of the mechanism.
+   */
+  void SetMechanismSimSupplier(std::shared_ptr<SimSupplier> supplier);
+
   // ---- Configuration setters (live tuning) --------------------------------
 
   /**
@@ -825,6 +843,17 @@ class SmartMotorController {
    * Call this at the end of each concrete ApplyConfig() implementation.
    */
   void LoadLooselyCoupledFollowers();
+
+  /**
+   * Read the simulation of a leader whose motor model has this motor, instead of simulating it. Its
+   * current is in the leader's, so BatterySim does not count it again. Its own loosely coupled
+   * followers read the leader's simulation too.
+   *
+   * @param leader   Motor controller whose simulation has this motor. Must outlive this one's use
+   *                 of it.
+   * @param inverted Whether this motor is inverted from the leader.
+   */
+  void FollowSimulationOf(SmartMotorController& leader, bool inverted);
 
   /**
    * Configure the software PID controller (m_pid) from @p config: continuous input over the

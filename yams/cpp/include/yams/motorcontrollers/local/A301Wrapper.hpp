@@ -20,17 +20,21 @@ namespace yams::motorcontrollers::local {
  * SmartMotorController implementation for the FIRST A301 smart motor, using REVLib 2027.
  *
  * The A301 has no closed loop gains, so the closed loop controller runs on the SystemCore and
- * commands the A301 with voltage. It also has no current limits, ramp rates, voltage compensation
- * or follower mode, and configuring them throws a SmartMotorControllerConfigurationException.
+ * commands the A301 with voltage. It also has no current limits, ramp rates or voltage
+ * compensation, and configuring them throws a SmartMotorControllerConfigurationException.
  *
  * The gearing given to WithMotorGearing is from the A301's rotor to the mechanism: usually the
  * gearbox attached to the A301, and any gearing after it. Each A301 has one motor,
  * YMotors::A301().
  *
- * Several A301s on one mechanism: give the main A301's wrapper how many A301s drive the mechanism
- * with A301Wrapper(a301, motorCount, config), so the simulation and the mechanism's model have all
- * of their motors. Wrap each of the other A301s in its own A301Wrapper and give them to
- * WithLooselyCoupledFollowers, since the A301 has no follower mode.
+ * Followers: the A301 has no follower mode, so the wrapper follows in software. Wrap each other
+ * A301 on the mechanism in its own A301Wrapper and give them to the main A301's WithFollowers, as
+ * (A301Wrapper*, inverted) pairs. Only an A301Wrapper can follow an A301. The main A301 sends each
+ * follower its voltage or duty cycle, and its GetDCMotor() and simulation have every A301, so a
+ * follower does not simulate itself or draw current from BatterySim: it reads the main A301's
+ * simulation, and the main A301's SimIterate() iterates it. Create each follower before the main
+ * A301, and destroy it after. WithLooselyCoupledFollowers still works as on any motor controller,
+ * for motors with their own load.
  *
  * REVLib does not simulate the A301, so in simulation the wrapper drives a DCMotorSim.
  *
@@ -69,24 +73,12 @@ class A301Wrapper : public SmartMotorController {
   using SmartMotorController::SetVelocity;
 
   /**
-   * Construct an A301Wrapper around a FIRST A301, for a mechanism driven by this one A301.
+   * Construct an A301Wrapper around a FIRST A301.
    *
    * @param a301   Pointer to the A301 hardware object (must outlive this wrapper).
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
   A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* config);
-
-  /**
-   * Construct an A301Wrapper around the main A301 of a mechanism driven by several A301s. Wrap each
-   * of the others in its own A301Wrapper and give them to WithLooselyCoupledFollowers.
-   *
-   * @param a301       Pointer to the main A301 hardware object (must outlive this wrapper).
-   * @param motorCount How many A301s drive the mechanism, including this one. The simulation and
-   *                   GetDCMotor model all of them.
-   * @param config     Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
-   * @throws std::invalid_argument if the motor count is less than 1.
-   */
-  A301Wrapper(first::a301::A301* a301, int motorCount, SmartMotorControllerConfig* config);
   ~A301Wrapper();
 
   // ---- Configuration ------------------------------------------------------
@@ -293,8 +285,14 @@ class A301Wrapper : public SmartMotorController {
 
  private:
   first::a301::A301* m_a301{nullptr};
-  /** Motors of the A301s on the mechanism. */
+  /** Motors of this A301 and the A301s following it. */
   wpi::math::DCMotor m_motor{YMotors::A301()};
+  /** How many A301s m_motor has: this one and its followers. */
+  int m_motorCount{1};
+  /** A301s following this one, with whether each is inverted from it. */
+  std::vector<std::pair<A301Wrapper*, bool>> m_a301Followers;
+  /** A301 this one follows, or nullptr. */
+  A301Wrapper* m_leader{nullptr};
   std::optional<wpi::sim::DCMotorSim> m_motorSim;
   /** Whether the A301's absolute encoder is the external encoder. */
   bool m_useAbsoluteEncoder{false};
@@ -322,6 +320,17 @@ class A301Wrapper : public SmartMotorController {
   void ApplyFeedback(double kP, double kI, double kD);
   /** Create the simulated motor and its sim supplier from the config. */
   void CreateMotorSim();
+  /**
+   * Apply the A301s following this one. Only an A301Wrapper can follow an A301.
+   *
+   * @throws SmartMotorControllerConfigurationException if a follower is not an A301Wrapper, is this
+   *         A301, or already follows another A301.
+   */
+  void ApplyFollowers(const SmartMotorControllerConfig& config);
+  /** Follow another A301, reading its simulation instead of simulating this one. */
+  void Follow(A301Wrapper& leader, bool inverted);
+  /** Stop following another A301, and simulate this one again. */
+  void StopFollowing();
   /** Angle of the absolute encoder's shaft, if it is the external encoder. */
   std::optional<wpi::units::turn_t> GetExternalEncoderSensorPosition();
 };
