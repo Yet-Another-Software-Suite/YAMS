@@ -77,9 +77,15 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  *
  * <p>The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
  * gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
- * kV, kA and kG and a constant or cosine gravity. The Nova applies a feedforward only with a motion
- * profile, so a feedforward needs a trapezoidal profile. An LQR, an exponential profile and
- * a velocity trapezoidal profile run on the SystemCore instead, and command the Nova with voltage.
+ * kV, kA and kG and a constant or cosine gravity. Continuous wrapping runs on the Nova over any
+ * range: the Nova wraps an absolute encoder on the mechanism closing its loop itself, and for its
+ * motor's or a quadrature encoder, such as a swerve azimuth seeded from a CANcoder, each target is
+ * sent as the equivalent nearest the mechanism. A closed loop the Nova can't run runs on the
+ * SystemCore instead, and commands the Nova with voltage: an LQR, an exponential profile, a
+ * velocity trapezoidal profile, an absolute encoder closing the loop read over a range other than
+ * [0, 1) without continuous wrapping, and continuous wrapping of an absolute encoder geared to the
+ * mechanism. The Nova applies its motion profile slot's kS, kV, kA and kG with or without a
+ * motion profile.
  * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
  * closed loop, so in simulation a {@link NovaSimSupplier} runs it.
  *
@@ -412,8 +418,8 @@ public class NovaWrapper extends SmartMotorController {
     setpointPosition = Optional.ofNullable(angle);
     if (m_closedLoopOnNova && angle != null) {
       // In mechanism rotations of the Nova's feedback sensor. The Nova keeps the mechanism within
-      // its soft limits, and wraps continuously, itself.
-      final double target = angle.in(Rotations);
+      // its soft limits itself.
+      final double target = novaPositionTarget(angle);
       final MotorControlRequest request =
           (m_trapezoidProfile.isPresent() ? MotorControl.motionProfile(target)
                                           : MotorControl.voltagePosition(target))
@@ -490,6 +496,71 @@ public class NovaWrapper extends SmartMotorController {
   }
 
   /**
+   * Whether the Nova can run the closed loop. It can't run an LQR, an exponential profile or a
+   * velocity trapezoidal profile. And it reads an absolute encoder closing its loop over [0, 1)
+   * rotations, so not another range without continuous wrapping, nor continuous wrapping of an
+   * absolute encoder geared to the mechanism. The SystemCore runs those instead, as it can any
+   * closed loop.
+   *
+   * @param config The config being applied. {@link #m_lqr}, {@link #m_expoProfile} and
+   *               {@link #m_trapezoidProfile} are already set from it.
+   * @return Whether the Nova runs the closed loop.
+   */
+  private boolean novaCanRunClosedLoop(SmartMotorControllerConfig<?> config) {
+    final Optional<Angle> wrappingMax = config.getWrappingMax();
+    final boolean continuousWrapping = config.isWrappingContinuous();
+    if (m_lqr.isPresent() || m_expoProfile.isPresent()
+        || (m_trapezoidProfile.isPresent() && config.getVelocityTrapezoidalProfileInUse())) {
+      return false;
+    }
+    if (wrappingMax.isEmpty()) {
+      return true;
+    }
+    final boolean fromZero =
+        config.getWrappingMin().orElseThrow().isNear(Rotations.zero(), Rotations.of(1e-9));
+    final var externalEncoder = config.getExternalEncoder();
+    final boolean absoluteFeedback = config.getUseExternalFeedback() && externalEncoder.isPresent()
+        && (externalEncoder.get() == FeedbackSensorType.ABS || externalEncoder.get() instanceof CanEncoder);
+    if (!continuousWrapping) {
+      // Without continuous wrapping, the Nova's [0, 1) reading must be the range, or the mechanism
+      // would cross the Nova's wrapping point inside it.
+      return !absoluteFeedback || fromZero;
+    }
+    // Continuous wrapping takes the short way whatever the range. The Nova wraps an absolute
+    // encoder on the mechanism itself, sent each target in [0, 1). It can't wrap its motor's or a
+    // quadrature encoder, so each target is sent as the equivalent nearest the mechanism instead.
+    // An absolute encoder geared to the mechanism wraps once per encoder rotation, inside the
+    // mechanism's range, so only the SystemCore can wrap it.
+    final double mechanismToAbsoluteEncoderRatio = config.getExternalEncoderGearing()
+        .orElse(MechanismGearing.kOne)
+        .getMechanismToRotorRatio();
+    return !absoluteFeedback || mechanismToAbsoluteEncoderRatio == 1;
+  }
+
+  /**
+   * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
+   * continuous wrapping, an absolute encoder closing the loop is wrapped by the Nova itself, which
+   * reads it over [0, 1), so the target is sent in that frame. The Nova can't wrap its motor's or a
+   * quadrature encoder, so the target is sent as the equivalent nearest the mechanism, from the
+   * config's wrapping range.
+   *
+   * @param angle Mechanism angle setpoint.
+   * @return The Nova's position target, in rotations.
+   */
+  private double novaPositionTarget(Angle angle) {
+    if (!m_config.isWrappingContinuous()) {
+      return angle.in(Rotations);
+    }
+    if (m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER) {
+      return MathUtil.inputModulus(angle.in(Rotations), 0, 1);
+    }
+    final Angle position = m_feedbackSensor == FeedbackSensorType.QUAD
+                           ? getExternalEncoderMechanismPosition().orElseGet(this::getRelativeMechanismPosition)
+                           : getRelativeMechanismPosition();
+    return m_config.getContinuousWrappingSetpoint(angle, position).in(Rotations);
+  }
+
+  /**
    * {@inheritDoc}
    *
    * @throws SmartMotorControllerConfigurationException if different open and closed loop ramp
@@ -519,13 +590,12 @@ public class NovaWrapper extends SmartMotorController {
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
     m_looseFollowers = config.getLooselyCoupledFollowers();
-    // An LQR, an exponential profile and a velocity trapezoidal profile run on the SystemCore;
-    // every other closed loop runs on the Nova.
     m_expoProfile = config.getExponentialProfile().map(ExponentialProfile::new);
     m_trapezoidProfile = config.getTrapezoidProfile().map(TrapezoidProfile::new);
     final boolean closedLoopMode = config.getMotorControllerMode() == ControlMode.CLOSED_LOOP;
-    m_closedLoopOnNova = closedLoopMode && m_lqr.isEmpty() && m_expoProfile.isEmpty()
-        && !(m_trapezoidProfile.isPresent() && config.getVelocityTrapezoidalProfileInUse());
+    // Checked in open loop too, as it reads the options the config validation tracks.
+    final boolean novaCanRunClosedLoop = novaCanRunClosedLoop(config);
+    m_closedLoopOnNova = closedLoopMode && novaCanRunClosedLoop;
     m_novaSlot = m_slot == ClosedLoopControllerSlot.SLOT_1 ? Motor.Slot.SLOT1 : Motor.Slot.SLOT0;
     // Gains of a linear mechanism are per meter; the Nova's are per mechanism rotation.
     m_rotationsPerGainUnit = m_closedLoopOnNova && config.getLinearClosedLoopControllerUse()
@@ -612,13 +682,6 @@ public class NovaWrapper extends SmartMotorController {
           }
           continue;
         }
-        if (feedforward && m_trapezoidProfile.isEmpty()) {
-          throw new SmartMotorControllerConfigurationException(
-              "Thrifty Nova applies a feedforward only with a motion profile",
-              "Feedforward could not be applied without a motion profile",
-              "withTrapezoidalProfile");
-        }
-
         final boolean slot0 = closedLoopControlSlot == ClosedLoopControllerSlot.SLOT_0;
         if (pid.isPresent()) {
           final double kP = pid.get().getP() / m_rotationsPerGainUnit;
@@ -632,14 +695,13 @@ public class NovaWrapper extends SmartMotorController {
                                       : NovaConfig.Pid1.allowableError(tolerance.in(Rotations))));
         }
 
-        // The motion profile, and its feedforward, which needs one.
-        if (config.getTrapezoidProfile().isEmpty()) {
-          continue;
-        }
+        // The motion profile slot: its constraints for the motion profile, and kS, kV, kA and kG,
+        // which the Nova applies with or without one.
+        final boolean profile = config.getTrapezoidProfile().isPresent();
         final double maxVelocity =
-            config.getTrapezoidProfile().get().maxVelocity * m_rotationsPerGainUnit;
+            profile ? config.getTrapezoidProfile().get().maxVelocity * m_rotationsPerGainUnit : 0;
         final double maxAcceleration =
-            config.getTrapezoidProfile().get().maxAcceleration * m_rotationsPerGainUnit;
+            profile ? config.getTrapezoidProfile().get().maxAcceleration * m_rotationsPerGainUnit : 0;
         double kS = 0;
         double kV = 0;
         double kA = 0;
@@ -662,6 +724,10 @@ public class NovaWrapper extends SmartMotorController {
           kS = simpleFeedforward.get().getKs();
           kV = simpleFeedforward.get().getKv();
           kA = simpleFeedforward.get().getKa();
+        }
+        // Without a profile or a feedforward, the slot has nothing to send.
+        if (!profile && kS == 0 && kV == 0 && kA == 0 && kG == 0) {
+          continue;
         }
         novaConfig.add(slot0
                 ? NovaConfig.mp0(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType)
@@ -821,31 +887,10 @@ public class NovaWrapper extends SmartMotorController {
               config.getMechanismLowerLimit().get().in(Rotations)),
           NovaConfig.softLimitEnable(closedLoopMode));
     }
-    // Continuous wrapping, on the Nova: an absolute encoder's reading wraps over [0, 1) rotations,
-    // so only that range, with an absolute encoder on the mechanism closing the loop.
+    // Continuous wrapping, on the Nova, of the absolute encoder closing its loop over [0, 1)
+    // rotations; novaCanRunClosedLoop runs any other wrapping on the SystemCore.
     final boolean absoluteFeedback =
         m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER;
-    // The Nova reads an absolute encoder closing its loop over [0, 1) rotations.
-    if (config.getWrappingMax().isPresent() && m_closedLoopOnNova && absoluteFeedback
-        && !config.getWrappingMin().orElseThrow().isNear(Rotations.zero(), Rotations.of(1e-9))) {
-      throw new SmartMotorControllerConfigurationException(
-          "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
-          "Wrapping could not be applied",
-          "withWrapping(Rotations.of(0), Rotations.of(1))");
-    }
-    if (config.isWrappingContinuous() && m_closedLoopOnNova
-        && (!config.getWrappingMin().orElseThrow().isNear(
-                Rotations.zero(), Rotations.of(1e-9))
-            || (m_feedbackSensor != FeedbackSensorType.ABS
-                && m_feedbackSensor != FeedbackSensorType.CAN_ENCODER)
-            || m_mechanismToFeedbackSensorRatio != 1)) {
-      throw new SmartMotorControllerConfigurationException(
-          "Thrifty Nova wraps continuously only over [0, 1) rotations of an absolute encoder on "
-              + "the mechanism closing the loop",
-          "Continuous wrapping could not be applied",
-          "withContinuousWrapping(Rotations.of(0), Rotations.of(1)) with an absolute encoder and "
-              + "withUseExternalFeedbackEncoder(true)");
-    }
     // A Nova wraps an absolute encoder closing its loop by default, so it is told either way.
     if (absoluteFeedback) {
       novaConfig.add(NovaConfig.absWrapping(config.isWrappingContinuous() && m_closedLoopOnNova));

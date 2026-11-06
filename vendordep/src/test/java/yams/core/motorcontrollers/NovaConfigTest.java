@@ -7,6 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wpilib.units.Units.Milliseconds;
+import org.wpilib.simulation.DriverStationSim;
+import static org.wpilib.units.Units.Pounds;
+import static org.wpilib.units.Units.Inches;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Celsius;
 import static org.wpilib.units.Units.Degrees;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.wpilib.math.controller.ArmFeedforward;
+import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.preferences.Preferences;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
@@ -70,14 +75,48 @@ public class NovaConfigTest {
     assertTrue(AbsoluteEncoderCases.eventually(condition), what);
   }
 
+  /** The closed loop runs on the SystemCore, at its 20 ms period, rather than on the Nova at 1 ms. */
+  private static void assertOnSystemCore(NovaWrapper smc, String what) {
+    assertEquals(20, smc.getClosedLoopControllerPeriod().in(Milliseconds), 1e-9, what + " runs on the SystemCore");
+  }
+
+  private static void assertOnNova(NovaWrapper smc, String what) {
+    assertEquals(1, smc.getClosedLoopControllerPeriod().in(Milliseconds), 1e-9, what + " runs on the Nova");
+  }
+
+  /** Without a motion profile, the Nova runs the loop and applies its motion profile slot's kS, kV, kA and kG. */
   @Test
-  void feedforwardNeedsAMotionProfile() {
-    final var exception = assertThrows(SmartMotorControllerConfigurationException.class,
-        () -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config("feedforward").withFeedforward(new ArmFeedforward(0, 0.2, 0, 0))));
-    assertTrue(exception.getMessage().contains("motion profile"), exception.getMessage());
-    assertDoesNotThrow(() -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-        config("feedforward with profile").withFeedforward(new ArmFeedforward(0, 0.2, 0, 0))
-            .withTrapezoidalProfile(RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2))));
+  void feedforwardWithoutAMotionProfile() throws InterruptedException {
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("velocity kS and kV").withFeedforward(new SimpleMotorFeedforward(0.1, 1, 0))), "a velocity loop's kS and kV");
+    final Nova armNova = DeviceCreator.createNova();
+    assertOnNova(new NovaWrapper(armNova, DCMotor.getNEO(1),
+        config("arm kG").withFeedforward(new ArmFeedforward(0.1, 0.2, 0, 0))), "an arm's kS and kG");
+    assertEventually(() -> Math.abs(armNova.status().Mp0.getKG() - 0.2) < 1e-6, "kG on the Nova");
+    assertEventually(() -> Math.abs(armNova.status().Mp0.getKS() - 0.1) < 1e-6, "kS on the Nova");
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("feedforward with profile").withFeedforward(new ArmFeedforward(0.1, 0.2, 1, 0.1))
+            .withTrapezoidalProfile(RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2))), "a profiled feedforward");
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config("PID only")), "a PID");
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("kA").withFeedforward(new SimpleMotorFeedforward(0, 1, 0.1))), "a feedforward with kA");
+  }
+
+  /** A velocity loop with only kV, and no motion profile, reaches its velocity on the Nova in simulation. */
+  @Test
+  void velocityKvReachesTheVelocity() {
+    final NovaWrapper smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("velocity kV in simulation").withClosedLoopController(0.1, 0, 0)
+            .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / (DCMotor.getNEO(1).freeSpeed / (2 * Math.PI) / kGearRatio), 0))
+            .withMomentOfInertia(Inches.of(4), Pounds.of(1)));
+    assertOnNova(smc, "a velocity loop's kV");
+    DriverStationSim.setEnabled(true);
+    DriverStationSim.notifyNewData();
+    smc.setVelocity(RotationsPerSecond.of(3));
+    for (int i = 0; i < 150; i++) {
+      smc.simIterate();
+    }
+    assertEquals(3, smc.getMechanismVelocity().in(RotationsPerSecond), 0.15, "3 rotations per second");
   }
 
   @Test
@@ -137,20 +176,48 @@ public class NovaConfigTest {
     assertEventually(() -> !wrapping.status().getSoftLimitEnable(), "no soft limits");
   }
 
-  /** The Nova wraps an absolute encoder's reading over [0, 1) rotations, and nothing else. */
+  /**
+   * Continuous wrapping runs on the Nova over any range: it wraps an absolute encoder on the mechanism itself, and for
+   * its motor's encoder each target is the equivalent nearest the mechanism. Only an absolute encoder read over a range
+   * other than [0, 1) without continuous wrapping, or continuously wrapped through gearing, runs on the SystemCore.
+   */
   @Test
-  void wrappingNeedsZeroToOneOfAnAbsoluteEncoder() {
-    assertThrows(SmartMotorControllerConfigurationException.class,
-        () -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-            config("wrapping -0.5 to 0.5").withExternalEncoder(DeviceCreator.createCanEncoder()).withUseExternalFeedbackEncoder(true)
-                .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))));
-    assertThrows(SmartMotorControllerConfigurationException.class,
-        () -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-            config("wrapping on the motor's encoder").withContinuousWrapping(Rotations.of(0), Rotations.of(1))));
-    // An exponential profile runs on the SystemCore, which wraps any range.
-    assertDoesNotThrow(() -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-        config("wrapping on the SystemCore").withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
-            .withExponentialProfile(Volts.of(12), RotationsPerSecond.of(10), RotationsPerSecondPerSecond.of(20))));
+  void wrappingRunsOnTheNovaWhereItCan() throws InterruptedException {
+    final Nova halfNova = DeviceCreator.createNova();
+    assertOnNova(new NovaWrapper(halfNova, DCMotor.getNEO(1),
+        config("wrapping -0.5 to 0.5").withExternalEncoder(DeviceCreator.createCanEncoder()).withUseExternalFeedbackEncoder(true)
+            .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))), "wrapping an absolute encoder -0.5 to 0.5");
+    assertEventually(() -> halfNova.status().getAbsWrapping(), "the Nova wraps");
+    // A swerve azimuth on a Nova, wrapping its motor's encoder seeded from a CANcoder, with a feedforward of 0.
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("wrapping the motor's encoder").withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+            .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))), "wrapping the motor's encoder");
+    assertOnSystemCore(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("reading -0.5 to 0.5").withExternalEncoder(DeviceCreator.createCanEncoder()).withUseExternalFeedbackEncoder(true)
+            .withWrapping(Rotations.of(-0.5), Rotations.of(0.5))), "an absolute encoder read over -0.5 to 0.5");
+    assertOnSystemCore(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("geared wrapping").withExternalEncoder(DeviceCreator.createCanEncoder()).withUseExternalFeedbackEncoder(true)
+            .withExternalEncoderGearing(new MechanismGearing(GearBox.fromReductionStages(2)))
+            .withContinuousWrapping(Rotations.of(0), Rotations.of(1))), "wrapping an absolute encoder geared to the mechanism");
+  }
+
+  /**
+   * On its motor's encoder, the Nova is sent the target nearest the mechanism, so in simulation it takes the short way:
+   * from 3.2 rotations to 3.25 for a target of 0.25, rather than turning back to 0.25.
+   */
+  @Test
+  void motorEncoderWrappingTakesTheShortWay() {
+    final NovaWrapper smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("nearest target").withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+            .withMomentOfInertia(Inches.of(12), Pounds.of(1)));
+    DriverStationSim.setEnabled(true);
+    DriverStationSim.notifyNewData();
+    smc.setEncoderPosition(Rotations.of(3.2));
+    smc.setPosition(Rotations.of(0.25));
+    for (int i = 0; i < 150; i++) {
+      smc.simIterate();
+    }
+    assertEquals(3.25, smc.getRelativeMechanismPosition().in(Rotations), 0.02, "the short way, to 3.25 rotations");
   }
 
   @Test

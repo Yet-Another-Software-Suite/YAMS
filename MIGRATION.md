@@ -422,6 +422,29 @@ and `withContinuousWrapping` on a swerve azimuth or turret that can turn all the
   closed loop on the SystemCore, such as one at 0 with [0, 1) wrapping.
 - A simulated CANdi reports its PWM position in the wrapping range, as a real CANdi does.
 
+## Updating from v2026.11.05
+
+### Changes in how things behave
+
+- **A Thrifty Nova wraps continuously over any range, on the Nova.** An absolute encoder on the
+  mechanism closing its loop can wrap over any one rotation range, such as [-0.5, 0.5); the Nova
+  wraps it and is sent each target in [0, 1). The Nova's motor encoder, or a quadrature encoder,
+  can wrap too, such as a swerve azimuth seeded from a CANcoder: each target is sent as the
+  equivalent nearest the mechanism, so the Nova takes the short way. A Nova azimuth with a CANcoder
+  now works like a SPARK MAX with one.
+- **A Thrifty Nova takes a feedforward without a motion profile.** The Nova runs the loop and
+  applies its motion profile slot's kS, kV, kA and kG, which YAMS sends with or without a profile,
+  so a Nova swerve drive motor or flywheel keeps its feedforward on the Nova. A velocity
+  trapezoidal profile added only to keep a Nova's feedforward on the SystemCore can be removed.
+- **A Thrifty Nova's closed loop runs on the SystemCore when the Nova can't run it**, instead of
+  throwing a `SmartMotorControllerConfigurationException`, as every Nova did before v2026.11.05:
+  - an absolute encoder closing the loop read over a range other than [0, 1) without continuous
+    wrapping;
+  - continuous wrapping of an absolute encoder geared to the mechanism.
+
+  `getClosedLoopControllerPeriod()` says where the loop runs: 1 ms on the Nova, or the closed loop
+  control period on the SystemCore.
+
 ## Why this split
 
 Separating state/physics (`yams.core`) from command-framework bindings (`yams.commands2`,
