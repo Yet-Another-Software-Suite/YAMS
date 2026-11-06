@@ -364,12 +364,6 @@ class SmartMotorController {
    */
   double GetMechanismDutyCycle(double dutyCycle);
 
-  /**
-   * Iterate the simulations of the loosely coupled followers reading this motor controller's
-   * mechanism's, and theirs. A mechanism calls it right after it steps its simulation.
-   */
-  void SimIterateLooselyCoupledFollowers();
-
   // ---- Configuration setters (live tuning) --------------------------------
 
   /**
@@ -856,6 +850,19 @@ class SmartMotorController {
   std::vector<SmartMotorController*> m_looseFollowers;
 
   /**
+   * Whether this motor controller reads a leader's simulation, such as a mechanism's, which the
+   * leader iterates right after it steps. Its own SimIterate() then does nothing, so it is not
+   * iterated twice in a loop.
+   */
+  bool m_iteratedByLeader{false};
+
+  /**
+   * Whether this motor controller's simulation is its mechanism's, set with
+   * SetMechanismSimSupplier, which has its loosely coupled followers' motors.
+   */
+  bool m_simulatesMechanism{false};
+
+  /**
    * Populate m_looseFollowers from the current m_config.
    * Call this at the end of each concrete ApplyConfig() implementation.
    */
@@ -875,21 +882,16 @@ class SmartMotorController {
   /** Weigh a duty cycle this motor controller applies with its loosely coupled followers' own. */
   double WithFollowersDutyCycle(double dutyCycle);
 
-  /**
-   * Whether this motor controller's SimIterate() should do nothing. A follower reading a leader's
-   * simulation is iterated by its leader, right after the simulation steps; its own calls do
-   * nothing, so it is not iterated twice in a loop.
-   */
-  bool SkipFollowerSimIterate() const;
-
   /** Iterate the simulation of a follower reading this motor controller's. */
   void SimIterateAsFollower(SmartMotorController& follower);
 
-  /** Whether a leader is iterating this follower's simulation. */
-  bool m_iteratedByLeader{false};
+  /**
+   * Iterate the simulations of the loosely coupled followers reading this motor controller's
+   * mechanism's. Each wrapper's SimIterate() calls it last, which a mechanism calls right after it
+   * steps, and each follower's iterates its own followers.
+   */
+  void SimIterateLooselyCoupledFollowers();
 
-  /** Whether this motor controller's simulation is its mechanism's, set with SetMechanismSimSupplier. */
-  bool m_simulatesMechanism{false};
 
   /**
    * Configure the software PID controller (m_pid) from @p config: continuous input over the

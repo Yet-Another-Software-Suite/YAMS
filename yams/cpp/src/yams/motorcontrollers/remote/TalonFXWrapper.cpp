@@ -796,7 +796,7 @@ void TalonFXWrapper::SetupSimulation() {
 }
 
 void TalonFXWrapper::SimIterate() {
-  if (SkipFollowerSimIterate()) return;
+  if (m_iteratedByLeader) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier) return;
 
   auto& sim = m_talon->GetSimState();
@@ -813,6 +813,7 @@ void TalonFXWrapper::SimIterate() {
   sim.SetRotorAcceleration(
       wpi::units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
 
+  SimIterateLooselyCoupledFollowers();
   if (!m_cancoder && !m_candi) return;
   // The external encoder turns with the mechanism through its gearing; its reading includes the
   // zero offset.

@@ -164,8 +164,6 @@ void Elevator::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
-    // Its loosely coupled followers read the simulation just stepped.
-    m_smc->SimIterateLooselyCoupledFollowers();
     ss->StarveUpdateSim();
     VisualizationUpdate();
   }

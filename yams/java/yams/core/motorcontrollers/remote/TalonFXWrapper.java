@@ -380,7 +380,7 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
-    if (skipFollowerSimIterate()) {
+    if (m_iteratedByLeader) {
       return;
     }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
@@ -437,9 +437,8 @@ public class TalonFXWrapper extends SmartMotorController {
           candiSim.setPwm2Velocity(m_simSupplier.get().getMechanismVelocity().times(m_config.getExternalEncoderGearing().orElse(MechanismGearing.kOne).getMechanismToRotorRatio()));
         }
       }
-      // TODO: Uncomment after the 2026 season
-      //      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});
     }
+    simIterateLooselyCoupledFollowers();
   }
 
   @Override

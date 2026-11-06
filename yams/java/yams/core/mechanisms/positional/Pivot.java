@@ -206,8 +206,6 @@ public class Pivot extends SmartPositionalMechanism {
     if (m_dcmotorSim.isPresent() && m_smc.getSimSupplier().isPresent()) {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
-      // Its loosely coupled followers read the simulation just stepped.
-      m_smc.simIterateLooselyCoupledFollowers();
       m_smc.getSimSupplier().get().starveUpdateSim();
       // The DCMotorSim has no hard stops, so a pivot that reaches one is put back on it and stopped,
       // as a real hard stop stops it. A hard stop stops the pivot where it really is, which the

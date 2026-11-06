@@ -247,7 +247,7 @@ public class A301Wrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
-    if (skipFollowerSimIterate()) {
+    if (m_iteratedByLeader) {
       return;
     }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
@@ -261,6 +261,7 @@ public class A301Wrapper extends SmartMotorController {
     for (var follower : m_a301Followers) {
       simIterateAsFollower(follower.getFirst());
     }
+    simIterateLooselyCoupledFollowers();
   }
 
   @Override

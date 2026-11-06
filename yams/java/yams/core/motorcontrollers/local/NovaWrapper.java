@@ -327,7 +327,7 @@ public class NovaWrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
-    if (skipFollowerSimIterate()) {
+    if (m_iteratedByLeader) {
       return;
     }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
@@ -338,9 +338,8 @@ public class NovaWrapper extends SmartMotorController {
       }
       m_nova.simulationPeriodic();
       m_canEncoder.ifPresent(CanEncoder::simulationPeriodic);
-      // TODO: Uncomment after the 2026 season
-      //      m_looseFollowers.ifPresent(smcs -> {for(var f : smcs){f.simIterate();}});
     }
+    simIterateLooselyCoupledFollowers();
   }
 
   @Override

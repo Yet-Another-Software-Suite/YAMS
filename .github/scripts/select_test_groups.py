@@ -44,6 +44,10 @@ JAVA_GROUPS = [
     # controller's loosely coupled followers, so it has every motor's torque and the battery counts
     # each motor's current once.
     {"group": "follower-simulation", "test-filter": '--tests "yams.mechs.FollowerSimulationTest"'},
+    # The motor controllers with a vendor simulation, REV's SparkSim and Phoenix's, simulated through
+    # it: their encoders, applied output, current limits and closed loops. Phoenix runs a Talon's
+    # simulation in real time.
+    {"group": "vendor-simulation", "test-filter": '--tests "yams.mechs.VendorSimulationTest"'},
     # A pivot driven into its hard stops, and a Talon set to a position, on every motor controller:
     # simulated Talons, which Phoenix runs in real time.
     {"group": "hard-stops", "test-filter": '--tests "yams.mechs.HardStopTest"'},
@@ -149,7 +153,8 @@ CPP_GROUPS = [
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "loose-followers", "follower-simulation", "live-tuning", "swerve-drive",
+                         "loose-followers", "follower-simulation", "vendor-simulation",
+                         "live-tuning", "swerve-drive",
                          "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "follower-simulation",

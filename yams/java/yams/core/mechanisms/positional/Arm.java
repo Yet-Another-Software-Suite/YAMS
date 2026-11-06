@@ -131,8 +131,6 @@ public class Arm extends SmartPositionalMechanism {
     if (m_sim.isPresent() && m_smc.getSimSupplier().isPresent()) {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
-      // Its loosely coupled followers read the simulation just stepped.
-      m_smc.simIterateLooselyCoupledFollowers();
       m_smc.getSimSupplier().get().starveUpdateSim();
       if (m_config.getLowerHardLimit().isPresent() && m_sim.get().getVelocity() < 0 && m_smc.getMechanismPosition().lt(m_config.getLowerHardLimit().get())) {
         m_smc.setEncoderPosition(m_config.getLowerHardLimit().get());

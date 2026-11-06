@@ -161,6 +161,19 @@ public abstract class SmartMotorController {
   /** Loosely coupled followers. */
   protected Optional<SmartMotorController[]> m_looseFollowers = Optional.empty();
 
+  /**
+   * Whether this motor controller reads a leader's simulation, such as a mechanism's, which the
+   * leader iterates right after it steps. Its own {@link #simIterate()} then does nothing, so it is
+   * not iterated twice in a loop.
+   */
+  protected boolean m_iteratedByLeader = false;
+
+  /**
+   * Whether this motor controller's simulation is its mechanism's, set with {@link
+   * #setMechanismSimSupplier(SimSupplier)}, which has its loosely coupled followers' motors.
+   */
+  private boolean m_simulatesMechanism = false;
+
   /** Running status of the closed loop controller. */
   private boolean m_closedLoopControllerRunning = false;
 
@@ -232,23 +245,7 @@ public abstract class SmartMotorController {
   public void setSimSupplier(SimSupplier mechanismSupplier) {
     m_simSupplier = Optional.of(mechanismSupplier);
     m_simulatesMechanism = false;
-  }
-
-  /** Whether a leader is iterating this follower's simulation, which only it does while it reads one. */
-  private boolean m_iteratedByLeader = false;
-
-  /**
-   * Whether this motor controller's {@link #simIterate()} should do nothing. A follower reading a
-   * leader's simulation is iterated by its leader, right after the simulation steps, so its vendor
-   * simulation sees the same loop as the leader's. Its own calls do nothing, so it is not iterated
-   * twice in a loop.
-   *
-   * @return Whether this motor controller reads a leader's simulation, and its leader is not
-   *     iterating it.
-   */
-  protected boolean skipFollowerSimIterate() {
-    return !m_iteratedByLeader && m_simSupplier.isPresent()
-        && m_simSupplier.get() instanceof FollowerSimSupplier;
+    m_iteratedByLeader = false;
   }
 
   /**
@@ -257,34 +254,28 @@ public abstract class SmartMotorController {
    * @param follower Follower reading this motor controller's simulation.
    */
   protected void simIterateAsFollower(SmartMotorController follower) {
-    follower.m_iteratedByLeader = true;
+    follower.m_iteratedByLeader = false;
     try {
       follower.simIterate();
     } finally {
-      follower.m_iteratedByLeader = false;
+      follower.m_iteratedByLeader = true;
     }
   }
 
   /**
    * Iterate the simulations of the loosely coupled followers reading this motor controller's
-   * mechanism's, and theirs. A mechanism calls it right after it steps its simulation.
+   * mechanism's. Each wrapper's {@link #simIterate()} calls it last, which a mechanism calls right
+   * after it steps, and each follower's iterates its own followers.
    */
-  public void simIterateLooselyCoupledFollowers() {
+  protected void simIterateLooselyCoupledFollowers() {
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {
-        if (follower.m_simSupplier.isPresent() && follower.m_simSupplier.get() instanceof FollowerSimSupplier) {
+        if (follower.m_iteratedByLeader) {
           simIterateAsFollower(follower);
-          follower.simIterateLooselyCoupledFollowers();
         }
       }
     });
   }
-
-  /**
-   * Whether this motor controller's simulation is its mechanism's, set with {@link
-   * #setMechanismSimSupplier(SimSupplier)}, which has its loosely coupled followers' motors.
-   */
-  private boolean m_simulatesMechanism = false;
 
   /**
    * Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
@@ -1558,6 +1549,7 @@ public abstract class SmartMotorController {
    */
   protected void followSimulationOf(SmartMotorController leader, boolean inverted) {
     setSimSupplier(new FollowerSimSupplier(leader, this, inverted));
+    m_iteratedByLeader = true;
     BatterySim.setSimulatedByLeader(m_batterySimUUID, true);
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {

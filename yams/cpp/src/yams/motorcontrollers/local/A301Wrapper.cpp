@@ -340,7 +340,7 @@ void A301Wrapper::SetupSimulation() {
 }
 
 void A301Wrapper::SimIterate() {
-  if (SkipFollowerSimIterate()) return;
+  if (m_iteratedByLeader) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier) return;
   // Step the physics only if the mechanism has not already stepped them this loop.
   if (!m_simSupplier->GetUpdatedSim()) {
@@ -350,6 +350,7 @@ void A301Wrapper::SimIterate() {
   }
   // The followers read this A301's simulation, so they are iterated with it.
   for (auto& [follower, inverted] : m_a301Followers) SimIterateAsFollower(*follower);
+  SimIterateLooselyCoupledFollowers();
 }
 
 // ---- Encoder sync -----------------------------------------------------------

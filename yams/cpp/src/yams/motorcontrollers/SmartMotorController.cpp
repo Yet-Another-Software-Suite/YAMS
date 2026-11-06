@@ -619,6 +619,7 @@ void SmartMotorController::Close() {
 void SmartMotorController::SetSimSupplier(std::shared_ptr<SimSupplier> supplier) {
   m_simSupplier = std::move(supplier);
   m_simulatesMechanism = false;
+  m_iteratedByLeader = false;
 }
 
 SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier.get(); }
@@ -661,28 +662,20 @@ double SmartMotorController::GetMechanismDutyCycle(double dutyCycle) {
   return m_simulatesMechanism ? WithFollowersDutyCycle(dutyCycle) : dutyCycle;
 }
 
-bool SmartMotorController::SkipFollowerSimIterate() const {
-  return !m_iteratedByLeader &&
-         dynamic_cast<simulation::FollowerSimSupplier*>(m_simSupplier.get()) != nullptr;
-}
-
 void SmartMotorController::SimIterateAsFollower(SmartMotorController& follower) {
-  follower.m_iteratedByLeader = true;
+  follower.m_iteratedByLeader = false;
   try {
     follower.SimIterate();
   } catch (...) {
-    follower.m_iteratedByLeader = false;
+    follower.m_iteratedByLeader = true;
     throw;
   }
-  follower.m_iteratedByLeader = false;
+  follower.m_iteratedByLeader = true;
 }
 
 void SmartMotorController::SimIterateLooselyCoupledFollowers() {
   for (auto* follower : m_looseFollowers) {
-    if (dynamic_cast<simulation::FollowerSimSupplier*>(follower->m_simSupplier.get()) == nullptr)
-      continue;
-    SimIterateAsFollower(*follower);
-    follower->SimIterateLooselyCoupledFollowers();
+    if (follower->m_iteratedByLeader) SimIterateAsFollower(*follower);
   }
 }
 
@@ -709,6 +702,7 @@ double SmartMotorController::WithFollowersDutyCycle(double dutyCycle) {
 
 void SmartMotorController::FollowSimulationOf(SmartMotorController& leader, bool inverted) {
   SetSimSupplier(std::make_shared<simulation::FollowerSimSupplier>(leader, *this, inverted));
+  m_iteratedByLeader = true;
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), true);
   for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(leader, false);
 }
