@@ -486,10 +486,12 @@ double NovaWrapper::NovaPositionTarget(wpi::units::turn_t angle) {
   if (m_feedbackSensor == FeedbackSensorType::ABS ||
       m_feedbackSensor == FeedbackSensorType::CAN_ENCODER)
     return wpi::math::InputModulus(angle.value(), 0.0, 1.0);
-  double position = GetRelativeMechanismPosition().value();
+  // The Nova can't wrap its motor's or a quadrature encoder: the equivalent nearest the mechanism,
+  // from the config's wrapping range.
+  wpi::units::turn_t position = GetRelativeMechanismPosition();
   if (m_feedbackSensor == FeedbackSensorType::QUAD)
-    if (auto external = GetExternalEncoderMechanismPosition()) position = external->value();
-  return position + wpi::math::InputModulus(angle.value() - position, -0.5, 0.5);
+    if (auto external = GetExternalEncoderMechanismPosition()) position = *external;
+  return m_config->GetContinuousWrappingSetpoint(angle, position).value();
 }
 
 void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,

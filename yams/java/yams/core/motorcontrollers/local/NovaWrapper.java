@@ -539,9 +539,10 @@ public class NovaWrapper extends SmartMotorController {
 
   /**
    * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
-   * continuous wrapping, the Nova wraps an absolute encoder over [0, 1) itself, so the target is
-   * sent in [0, 1). Its motor's and a quadrature encoder count on past a rotation, so the target is
-   * sent as the equivalent nearest the mechanism, the short way round.
+   * continuous wrapping, an absolute encoder closing the loop is wrapped by the Nova itself, which
+   * reads it over [0, 1), so the target is sent in that frame. The Nova can't wrap its motor's or a
+   * quadrature encoder, so the target is sent as the equivalent nearest the mechanism, from the
+   * config's wrapping range.
    *
    * @param angle Mechanism angle setpoint.
    * @return The Nova's position target, in rotations.
@@ -550,14 +551,13 @@ public class NovaWrapper extends SmartMotorController {
     if (!m_config.isWrappingContinuous()) {
       return angle.in(Rotations);
     }
-    // The Nova wraps an absolute encoder closing its loop itself.
     if (m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER) {
       return MathUtil.inputModulus(angle.in(Rotations), 0, 1);
     }
-    final double position = (m_feedbackSensor == FeedbackSensorType.QUAD
-                             ? getExternalEncoderMechanismPosition().orElseGet(this::getRelativeMechanismPosition)
-                             : getRelativeMechanismPosition()).in(Rotations);
-    return position + MathUtil.inputModulus(angle.in(Rotations) - position, -0.5, 0.5);
+    final Angle position = m_feedbackSensor == FeedbackSensorType.QUAD
+                           ? getExternalEncoderMechanismPosition().orElseGet(this::getRelativeMechanismPosition)
+                           : getRelativeMechanismPosition();
+    return m_config.getContinuousWrappingSetpoint(angle, position).in(Rotations);
   }
 
   /**

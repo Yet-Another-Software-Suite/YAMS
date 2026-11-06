@@ -350,9 +350,10 @@ class NovaWrapper : public SmartMotorController {
   bool NovaCanRunClosedLoop(const SmartMotorControllerConfig& config) const;
   /**
    * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
-   * continuous wrapping, the Nova wraps an absolute encoder over [0, 1) itself, so the target is
-   * sent in [0, 1). Its motor's and a quadrature encoder count on past a rotation, so the target is
-   * sent as the equivalent nearest the mechanism, the short way round.
+   * continuous wrapping, an absolute encoder closing the loop is wrapped by the Nova itself, which
+   * reads it over [0, 1), so the target is sent in that frame. The Nova can't wrap its motor's or a
+   * quadrature encoder, so the target is sent as the equivalent nearest the mechanism, from the
+   * config's wrapping range.
    */
   double NovaPositionTarget(wpi::units::turn_t angle);
   /** Angle of the external encoder's shaft, if any. */
