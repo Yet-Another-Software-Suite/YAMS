@@ -162,9 +162,15 @@ loadScripts(document, 'script');</script>
 
 <p>The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
 gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
-kV, kA and kG and a constant or cosine gravity. The Nova applies a feedforward only with a motion
-profile, so a feedforward needs a trapezoidal profile. An LQR, an exponential profile and
-a velocity trapezoidal profile run on the SystemCore instead, and command the Nova with voltage.
+kV, kA and kG and a constant or cosine gravity. Continuous wrapping runs on the Nova over any
+range: the Nova wraps an absolute encoder on the mechanism closing its loop itself, and for its
+motor's or a quadrature encoder, such as a swerve azimuth seeded from a CANcoder, each target is
+sent as the equivalent nearest the mechanism. A closed loop the Nova can't run runs on the
+SystemCore instead, and commands the Nova with voltage: an LQR, an exponential profile, a
+velocity trapezoidal profile, an absolute encoder closing the loop read over a range other than
+[0, 1) without continuous wrapping, and continuous wrapping of an absolute encoder geared to the
+mechanism. The Nova applies its motion profile slot's kS, kV, kA and kG with or without a
+motion profile.
 The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
 closed loop, so in simulation a <a href="../simulation/NovaSimSupplier.html" title="class in yams.core.motorcontrollers.simulation"><code>NovaSimSupplier</code></a> runs it.
 

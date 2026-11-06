@@ -110,8 +110,9 @@ loadScripts(document, 'script');</script>
 implements <a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a></span></div>
 <div class="block">A simulated Thrifty Nova driving a mechanism's <a href="../SimSupplier.html" title="interface in yams.core.motorcontrollers"><code>SimSupplier</code></a>. ThriftyLib's simulation
 ignores the Nova's closed loop, so this runs it as the Nova would, with the gains read back from
-the Nova: the voltage position and velocity loops with the PID slot's gains and its F times the
-target, and the motion profile with its slot's kS, kV, kA and kG. It keeps within the Nova's soft
+the Nova: the voltage position and velocity loops with the PID slot's gains, its F times the
+target and the motion profile slot's kS and kG (and kV times a velocity target), and the motion
+profile with its slot's kS, kV, kA and kG. It keeps within the Nova's soft
 limits, and, with its absolute wrapping on, takes a position the short way, one mechanism rotation
 apart. Targets and gains are in mechanism rotations, as on a Nova with its
 sensor-to-mechanism ratio set, and the integral and derivative gains are per second, as the

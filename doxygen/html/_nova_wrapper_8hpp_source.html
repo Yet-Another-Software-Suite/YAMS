@@ -234,12 +234,14 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>  <span class="keywordtype">void</span> CreateMotorSim();</div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>  <span class="keywordtype">void</span> ApplyExternalEncoder(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config,</div>
 <div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>                            thrifty::NovaConfigBatch&amp; novaConfig);</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>};</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  <span class="keywordtype">bool</span> NovaCanRunClosedLoop(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  <span class="keywordtype">double</span> NovaPositionTarget(wpi::units::turn_t angle);</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>};</div>
 </div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>}  <span class="comment">// namespace yams::motorcontrollers::local</span></div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>}  <span class="comment">// namespace yams::motorcontrollers::local</span></div>
 <div class="ttc" id="a_derivative_time_filter_8hpp_html"><div class="ttname"><a href="_derivative_time_filter_8hpp.html">DerivativeTimeFilter.hpp</a></div></div>
 <div class="ttc" id="a_nova_sim_supplier_8hpp_html"><div class="ttname"><a href="_nova_sim_supplier_8hpp.html">NovaSimSupplier.hpp</a></div></div>
 <div class="ttc" id="a_smart_motor_controller_8hpp_html"><div class="ttname"><a href="_smart_motor_controller_8hpp.html">SmartMotorController.hpp</a></div></div>
