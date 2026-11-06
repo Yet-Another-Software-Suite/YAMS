@@ -68,12 +68,30 @@ void UpdateConfigFeedforward(SmartMotorControllerConfig& config, Slot slot, F&& 
   }
 }
 
+/**
+ * Check how many A301s drive the mechanism.
+ *
+ * @param motorCount How many A301s drive the mechanism.
+ * @return The motor count.
+ * @throws std::invalid_argument if it is less than 1.
+ */
+int CheckMotorCount(int motorCount) {
+  if (motorCount < 1) {
+    throw std::invalid_argument("A301Wrapper motor count must be at least 1, but was " +
+                                std::to_string(motorCount));
+  }
+  return motorCount;
+}
+
 }  // namespace
 
 // ---- Construction -----------------------------------------------------------
 
 A301Wrapper::A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* cfg)
-    : SmartMotorController(), m_a301(a301) {
+    : A301Wrapper(a301, 1, cfg) {}
+
+A301Wrapper::A301Wrapper(first::a301::A301* a301, int motorCount, SmartMotorControllerConfig* cfg)
+    : SmartMotorController(), m_a301(a301), m_motor(YMotors::A301(CheckMotorCount(motorCount))) {
   m_config = cfg;
   m_config->WithSimMotor(m_motor);
   m_systemCoreClosedLoopAlert.emplace(

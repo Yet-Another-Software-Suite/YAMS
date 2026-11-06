@@ -24,7 +24,13 @@ namespace yams::motorcontrollers::local {
  * or follower mode, and configuring them throws a SmartMotorControllerConfigurationException.
  *
  * The gearing given to WithMotorGearing is from the A301's rotor to the mechanism: usually the
- * gearbox attached to the A301, and any gearing after it. The A301 has one motor, YMotors::A301().
+ * gearbox attached to the A301, and any gearing after it. Each A301 has one motor,
+ * YMotors::A301().
+ *
+ * Several A301s on one mechanism: give the main A301's wrapper how many A301s drive the mechanism
+ * with A301Wrapper(a301, motorCount, config), so the simulation and the mechanism's model have all
+ * of their motors. Wrap each of the other A301s in its own A301Wrapper and give them to
+ * WithLooselyCoupledFollowers, since the A301 has no follower mode.
  *
  * REVLib does not simulate the A301, so in simulation the wrapper drives a DCMotorSim.
  *
@@ -63,12 +69,24 @@ class A301Wrapper : public SmartMotorController {
   using SmartMotorController::SetVelocity;
 
   /**
-   * Construct an A301Wrapper around a FIRST A301.
+   * Construct an A301Wrapper around a FIRST A301, for a mechanism driven by this one A301.
    *
    * @param a301   Pointer to the A301 hardware object (must outlive this wrapper).
    * @param config Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
    */
   A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* config);
+
+  /**
+   * Construct an A301Wrapper around the main A301 of a mechanism driven by several A301s. Wrap each
+   * of the others in its own A301Wrapper and give them to WithLooselyCoupledFollowers.
+   *
+   * @param a301       Pointer to the main A301 hardware object (must outlive this wrapper).
+   * @param motorCount How many A301s drive the mechanism, including this one. The simulation and
+   *                   GetDCMotor model all of them.
+   * @param config     Pointer to the SmartMotorControllerConfig (must outlive this wrapper).
+   * @throws std::invalid_argument if the motor count is less than 1.
+   */
+  A301Wrapper(first::a301::A301* a301, int motorCount, SmartMotorControllerConfig* config);
   ~A301Wrapper();
 
   // ---- Configuration ------------------------------------------------------
@@ -275,7 +293,7 @@ class A301Wrapper : public SmartMotorController {
 
  private:
   first::a301::A301* m_a301{nullptr};
-  /** Motor of the A301. */
+  /** Motors of the A301s on the mechanism. */
   wpi::math::DCMotor m_motor{YMotors::A301()};
   std::optional<wpi::sim::DCMotorSim> m_motorSim;
   /** Whether the A301's absolute encoder is the external encoder. */

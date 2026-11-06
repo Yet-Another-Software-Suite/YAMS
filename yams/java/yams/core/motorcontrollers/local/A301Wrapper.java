@@ -67,8 +67,15 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * SmartMotorControllerConfigurationException}.
  *
  * <p>The gearing given to {@link SmartMotorControllerConfig#withGearing} is from the A301's rotor
- * to the mechanism: usually the gearbox attached to the A301, and any gearing after it. The A301
+ * to the mechanism: usually the gearbox attached to the A301, and any gearing after it. Each A301
  * has one motor, {@link YMotors#getA301(int)}.
+ *
+ * <p><b>Several A301s on one mechanism</b>: give the main A301's wrapper how many A301s drive the
+ * mechanism with {@link #A301Wrapper(A301, int, SmartMotorControllerConfig)}, so the simulation and
+ * the mechanism's model have all of their motors. Wrap each of the other A301s in its own {@link
+ * A301Wrapper} and give them to {@link
+ * SmartMotorControllerConfig#withLooselyCoupledFollowers(SmartMotorController...)}, since the A301
+ * has no follower mode.
  *
  * <p>REVLib does not simulate the A301, so in simulation the wrapper drives a {@link DCMotorSim}.
  *
@@ -97,8 +104,8 @@ public class A301Wrapper extends SmartMotorController {
   /** FIRST A301 smart motor. */
   private final A301 m_a301;
 
-  /** Motor of the {@link A301}. */
-  private final DCMotor m_motor = YMotors.getA301(1);
+  /** Motors of the A301s on the mechanism. */
+  private final DCMotor m_motor;
 
   /** Sim for the A301. */
   private Optional<DCMotorSim> m_dcMotorSim = Optional.empty();
@@ -118,7 +125,8 @@ public class A301Wrapper extends SmartMotorController {
   private volatile double m_simDutyCycle = 0;
 
   /**
-   * Construct the A301 Wrapper for the generic {@link SmartMotorController}.
+   * Construct the A301 Wrapper for the generic {@link SmartMotorController}, for a mechanism driven
+   * by this one A301.
    *
    * @param controller {@link A301} to use.
    * @param config {@link SmartMotorControllerConfig} to apply to the {@link A301}.
@@ -128,7 +136,31 @@ public class A301Wrapper extends SmartMotorController {
    *     the config.
    */
   public A301Wrapper(A301 controller, SmartMotorControllerConfig<?> config) {
+    this(controller, 1, config);
+  }
+
+  /**
+   * Construct the A301 Wrapper for the generic {@link SmartMotorController}, for a mechanism driven
+   * by several A301s. This is the main A301; wrap each of the others in its own {@link A301Wrapper}
+   * and give them to {@link
+   * SmartMotorControllerConfig#withLooselyCoupledFollowers(SmartMotorController...)}.
+   *
+   * @param controller Main {@link A301} of the mechanism.
+   * @param motorCount How many A301s drive the mechanism, including this one. The simulation and
+   *     {@link #getDCMotor()} model all of them.
+   * @param config {@link SmartMotorControllerConfig} to apply to the {@link A301}.
+   * @throws IllegalArgumentException if the motor count is less than 1, or if {@link
+   *     #applyConfig(SmartMotorControllerConfig)} rejects the config.
+   * @throws SmartMotorControllerConfigurationException if {@link
+   *     #applyConfig(SmartMotorControllerConfig)} rejects the config.
+   */
+  public A301Wrapper(A301 controller, int motorCount, SmartMotorControllerConfig<?> config) {
+    if (motorCount < 1) {
+      throw new IllegalArgumentException(
+          "A301Wrapper motor count must be at least 1, but was " + motorCount);
+    }
     m_a301 = controller;
+    m_motor = YMotors.getA301(motorCount);
     m_config = config;
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS",
         buildAlertId("A301", m_a301.getDeviceId(), "ClosedLoop"),

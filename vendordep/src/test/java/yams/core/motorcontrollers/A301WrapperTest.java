@@ -157,4 +157,17 @@ public class A301WrapperTest {
     assertEquals(motor.freeSpeed, smc.getDCMotor().freeSpeed, 1e-9);
     smc.close();
   }
+
+  @Test
+  void motorCountModelsEveryA301OnTheMechanism() {
+    // Three A301s on one mechanism have three times the torque, at the same free speed.
+    final DCMotor one = YMotors.getA301(1);
+    final A301Wrapper smc = new A301Wrapper(createA301(), 3, config("motorCount"));
+    assertEquals(3 * one.stallTorque, smc.getDCMotor().stallTorque, 1e-9);
+    assertEquals(one.freeSpeed, smc.getDCMotor().freeSpeed, 1e-9);
+    smc.close();
+
+    assertThrows(
+        IllegalArgumentException.class, () -> new A301Wrapper(createA301(), 0, config("noMotors")));
+  }
 }
