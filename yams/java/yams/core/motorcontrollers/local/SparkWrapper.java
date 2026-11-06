@@ -792,7 +792,7 @@ public class SparkWrapper extends SmartMotorController {
     }
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
-    setLooselyCoupledFollowers(config.getLooselyCoupledFollowers());
+    m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle motion profile
     m_config.getExponentialProfile().ifPresent(expProfile -> {

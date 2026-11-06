@@ -827,14 +827,6 @@ class SmartMotorController {
   void LoadLooselyCoupledFollowers();
 
   /**
-   * Mark or unmark the loosely coupled followers in BatterySim, whose current the leader's motor
-   * model includes.
-   *
-   * @param follower Whether they are this leader's followers.
-   */
-  void MarkLooselyCoupledFollowers(bool follower);
-
-  /**
    * Configure the software PID controller (m_pid) from @p config: continuous input over the
    * continuous wrapping range and the closed-loop tolerance.  Call in ApplyConfig() right after
    * m_pid is (re)created; consumes the ClosedLoopTolerance and ContinuousWrapping options.

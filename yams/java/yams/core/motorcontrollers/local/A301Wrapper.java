@@ -410,7 +410,7 @@ public class A301Wrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
-    setLooselyCoupledFollowers(config.getLooselyCoupledFollowers());
+    m_looseFollowers = config.getLooselyCoupledFollowers();
 
     if (config.getVendorConfig().isPresent()) {
       throw new SmartMotorControllerConfigurationException("A301 has no vendor config",

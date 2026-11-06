@@ -9,7 +9,6 @@ import static org.wpilib.units.Units.Ohms;
 import static org.wpilib.units.Units.Volts;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
 import org.wpilib.system.Timer;
@@ -27,12 +26,6 @@ import org.wpilib.units.measure.Voltage;
 public class BatterySim {
   /** Hashmap holding all currents used by the robot. */
   private static HashMap<UUID, Double> currents = new HashMap<>();
-
-  /**
-   * Simulations of loosely coupled followers, whose current is not counted, since their leader's
-   * motor model includes them.
-   */
-  private static HashSet<UUID> looselyCoupledFollowers = new HashSet<>();
   /** Battery voltage. */
   private static Voltage batteryVoltage = Volts.of(12);
   /** Battery resistance. */
@@ -193,24 +186,6 @@ public class BatterySim {
    */
   public static synchronized void removeCurrent(UUID id) {
     currents.remove(id);
-    looselyCoupledFollowers.remove(id);
-  }
-
-  /**
-   * Set whether a simulation is of a loosely coupled follower. A follower's current is not counted
-   * towards the battery load, since its leader's motor model includes every motor on the
-   * mechanism. The leader marks its followers when its config is applied.
-   *
-   * @param id {@link UUID} of the follower's simulation.
-   * @param follower Whether it is a loosely coupled follower.
-   */
-  public static synchronized void setLooselyCoupledFollower(UUID id, boolean follower) {
-    if (follower) {
-      looselyCoupledFollowers.add(id);
-      currents.remove(id);
-    } else {
-      looselyCoupledFollowers.remove(id);
-    }
   }
 
   /**
@@ -263,9 +238,7 @@ public class BatterySim {
    * @return Voltage of the robot.
    */
   public static synchronized double calculateVoltage(UUID id, double current) {
-    if (!looselyCoupledFollowers.contains(id)) {
-      currents.put(id, current);
-    }
+    currents.put(id, current);
     double[] currentDraws = currents.values().stream().mapToDouble(Double::doubleValue).toArray();
 
     double openCircuitVoltage = batteryVoltage.in(Volts);
