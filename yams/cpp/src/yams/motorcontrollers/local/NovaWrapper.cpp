@@ -190,18 +190,13 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
             ") does not support the custom control requests!",
         "Cannot use given control request", "WithVendorControlRequest()");
 
-  // An LQR, an exponential profile and a velocity trapezoidal profile run on the SystemCore; every
-  // other closed loop runs on the Nova.
   LoadClosedLoopController(config);
   if (m_lqr && config.GetClosedLoopTolerance())
     throw std::invalid_argument("[Error] Closed loop tolerance is not supported in LQR mode.");
   ConfigureSoftwarePID(config);
   const bool closedLoop = config.GetMotorControllerMode() == ControlMode::CLOSED_LOOP;
   const bool trapezoidProfile = config.HasTrapezoidProfile();
-  const bool exponentialProfile =
-      config.HasExponentialProfile() || config.HasLinearExponentialProfile();
-  const bool velocityProfile = trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse();
-  m_closedLoopOnNova = closedLoop && !m_lqr && !exponentialProfile && !velocityProfile;
+  m_closedLoopOnNova = closedLoop && NovaCanRunClosedLoop(config);
   m_novaSlot = m_slot == Slot::SLOT_1 ? thrifty::MotorControl::Slot::SLOT1
                                       : thrifty::MotorControl::Slot::SLOT0;
   config.GetMotorGearing();
@@ -297,27 +292,10 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
                                                    config.GetMechanismLowerLimit()->value()),
                    thrifty::NovaConfig::SoftLimitEnable(closedLoop));
   }
-  // Continuous wrapping, on the Nova: an absolute encoder's reading wraps over [0, 1) rotations,
-  // so only that range, with an absolute encoder on the mechanism closing the loop.
+  // Continuous wrapping, on the Nova, of the absolute encoder closing its loop over [0, 1)
+  // rotations; NovaCanRunClosedLoop runs any other wrapping on the SystemCore.
   const bool absoluteFeedback = m_feedbackSensor == FeedbackSensorType::ABS ||
                                 m_feedbackSensor == FeedbackSensorType::CAN_ENCODER;
-  // The Nova reads an absolute encoder closing its loop over [0, 1) rotations.
-  if (config.GetWrappingMax() && m_closedLoopOnNova && absoluteFeedback &&
-      std::abs(config.GetWrappingMin()->value()) > 1e-9)
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "Thrifty Nova reads an absolute encoder closing its loop over [0, 1) rotations",
-        "Wrapping could not be applied", "WithWrapping(0_tr, 1_tr)");
-  if (config.IsWrappingContinuous() && m_closedLoopOnNova &&
-      (std::abs(config.GetWrappingMin()->value()) > 1e-9 ||
-                   (m_feedbackSensor != FeedbackSensorType::ABS &&
-                    m_feedbackSensor != FeedbackSensorType::CAN_ENCODER) ||
-                   m_mechanismToFeedbackSensorRatio != 1.0))
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "Thrifty Nova wraps continuously only over [0, 1) rotations of an absolute encoder on the "
-        "mechanism closing the loop",
-        "Continuous wrapping could not be applied",
-        "WithContinuousWrapping(0_tr, 1_tr) with an absolute encoder and "
-        "WithUseExternalFeedbackEncoder(true)");
   // A Nova wraps an absolute encoder closing its loop by default, so it is told either way.
   if (absoluteFeedback)
     novaConfig.Add(
@@ -352,10 +330,6 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
               "Closed loop slot could not be configured", "SLOT_0 or SLOT_1");
         continue;
       }
-      if (feedforward && !trapezoidProfile)
-        throw exceptions::SmartMotorControllerConfigurationException(
-            "Thrifty Nova applies a feedforward only with a motion profile",
-            "Feedforward could not be applied without a motion profile", "WithTrapezoidProfile");
       const bool slot0 = slot == Slot::SLOT_0;
       if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
         const double kP = gains.kP / m_rotationsPerGainUnit;
@@ -475,6 +449,56 @@ void NovaWrapper::SetSimSupplier(std::shared_ptr<SimSupplier> supplier) {
     novaSim->SetControlRequest(*m_novaSim->GetControlRequest());
   m_novaSim = novaSim;
   SmartMotorController::SetSimSupplier(std::move(novaSim));
+}
+
+bool NovaWrapper::NovaCanRunClosedLoop(const SmartMotorControllerConfig& config) const {
+  const auto wrappingMax = config.GetWrappingMax();
+  const bool continuousWrapping = config.IsWrappingContinuous();
+  const bool trapezoidProfile = config.HasTrapezoidProfile();
+  if (m_lqr || config.HasExponentialProfile() || config.HasLinearExponentialProfile() ||
+      (trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse()))
+    return false;
+  // A feedforward with every gain 0 does nothing, so it needs no profile.
+  const auto nonZero = [](const auto& ff, double kG) {
+    return ff.GetKs().value() != 0.0 || ff.GetKv().value() != 0.0 || ff.GetKa().value() != 0.0 ||
+           kG != 0.0;
+  };
+  for (auto slot : {Slot::SLOT_0, Slot::SLOT_1, Slot::SLOT_2, Slot::SLOT_3}) {
+    const auto gains = config.GetSlotGains(slot);
+    const bool feedforward = (gains.armFF && nonZero(*gains.armFF, gains.armFF->GetKg().value())) ||
+                             (gains.elevatorFF &&
+                              nonZero(*gains.elevatorFF, gains.elevatorFF->GetKg().value())) ||
+                             (gains.simpleFF && nonZero(*gains.simpleFF, 0.0));
+    if (!trapezoidProfile && feedforward) return false;
+  }
+  if (!wrappingMax) return true;
+  const bool fromZero = std::abs(config.GetWrappingMin()->value()) <= 1e-9;
+  bool absoluteFeedback = false;
+  if (auto enc = config.GetExternalEncoder(); enc && config.GetUseExternalFeedback()) {
+    auto* sensor = std::any_cast<FeedbackSensorType>(&*enc);
+    auto* canEncoder = std::any_cast<thrifty::CanEncoder*>(&*enc);
+    absoluteFeedback = (sensor && *sensor == FeedbackSensorType::ABS) || (canEncoder && *canEncoder);
+  }
+  // Without continuous wrapping, the Nova's [0, 1) reading must be the range, or the mechanism would
+  // cross the Nova's wrapping point inside it.
+  if (!continuousWrapping) return !absoluteFeedback || fromZero;
+  // Continuous wrapping takes the short way whatever the range. The Nova wraps an absolute encoder
+  // on the mechanism itself, sent each target in [0, 1). It can't wrap its motor's or a quadrature
+  // encoder, so each target is sent as the equivalent nearest the mechanism instead. An absolute
+  // encoder geared to the mechanism wraps once per encoder rotation, inside the mechanism's range,
+  // so only the SystemCore can wrap it.
+  return !absoluteFeedback || MechanismToExternalEncoderRatio() == 1.0;
+}
+
+double NovaWrapper::NovaPositionTarget(wpi::units::turn_t angle) {
+  if (!m_config->IsWrappingContinuous()) return angle.value();
+  if (m_feedbackSensor == FeedbackSensorType::ABS ||
+      m_feedbackSensor == FeedbackSensorType::CAN_ENCODER)
+    return wpi::math::InputModulus(angle.value(), 0.0, 1.0);
+  double position = GetRelativeMechanismPosition().value();
+  if (m_feedbackSensor == FeedbackSensorType::QUAD)
+    if (auto external = GetExternalEncoderMechanismPosition()) position = external->value();
+  return position + wpi::math::InputModulus(angle.value() - position, -0.5, 0.5);
 }
 
 void NovaWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config,
@@ -661,8 +685,8 @@ void NovaWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointPosition = angle;
   if (m_closedLoopOnNova) {
     // In mechanism rotations of the Nova's feedback sensor. The Nova keeps the mechanism within its
-    // soft limits, and wraps continuously, itself.
-    const double target = angle.value();
+    // soft limits itself.
+    const double target = NovaPositionTarget(angle);
     const auto request = (m_config->HasTrapezoidProfile() ? thrifty::MotorControl::MotionProfile(target)
                                                           : thrifty::MotorControl::VoltagePosition(target))
                              .WithSlot(m_novaSlot);

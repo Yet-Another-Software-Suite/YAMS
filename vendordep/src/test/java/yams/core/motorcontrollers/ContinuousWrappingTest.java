@@ -338,8 +338,9 @@ public class ContinuousWrappingTest {
                           : cfg);
                 }));
         // A Nova running the closed loop wraps only over [0, 1) rotations of an absolute encoder on
-        // the mechanism; the SystemCore wraps any range on any sensor.
-        if (attachedEncoder || systemCore(controller)) {
+        // the mechanism; the SystemCore runs any other wrapping, on any sensor, such as its motor's
+        // encoder.
+        {
           cases.add(
               new Case(
                   "Nova" + suffix,

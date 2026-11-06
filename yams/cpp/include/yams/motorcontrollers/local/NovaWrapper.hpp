@@ -340,6 +340,22 @@ class NovaWrapper : public SmartMotorController {
    */
   void ApplyExternalEncoder(const SmartMotorControllerConfig& config,
                             thrifty::NovaConfigBatch& novaConfig);
+  /**
+   * Whether the Nova can run the closed loop. It can't run an LQR, an exponential profile or a
+   * velocity trapezoidal profile. It applies a feedforward only in its position motion profile, so
+   * not a feedforward without a trapezoidal profile, such as a velocity loop's kV. And it reads an
+   * absolute encoder closing its loop over [0, 1) rotations, so not another range without continuous
+   * wrapping, nor continuous wrapping of an absolute encoder geared to the mechanism. The SystemCore
+   * runs those instead, as it can any closed loop.
+   */
+  bool NovaCanRunClosedLoop(const SmartMotorControllerConfig& config) const;
+  /**
+   * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
+   * continuous wrapping, the Nova wraps an absolute encoder over [0, 1) itself, so the target is
+   * sent in [0, 1). Its motor's and a quadrature encoder count on past a rotation, so the target is
+   * sent as the equivalent nearest the mechanism, the short way round.
+   */
+  double NovaPositionTarget(wpi::units::turn_t angle);
   /** Angle of the external encoder's shaft, if any. */
   std::optional<wpi::units::turn_t> GetExternalEncoderSensorPosition();
   /** Velocity of the external encoder's shaft, if any. */
