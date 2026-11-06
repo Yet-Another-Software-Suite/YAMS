@@ -339,7 +339,7 @@ public class NovaWrapper extends SmartMotorController {
       m_nova.simulationPeriodic();
       m_canEncoder.ifPresent(CanEncoder::simulationPeriodic);
     }
-    simIterateLooselyCoupledFollowers();
+    super.simIterate();
   }
 
   @Override

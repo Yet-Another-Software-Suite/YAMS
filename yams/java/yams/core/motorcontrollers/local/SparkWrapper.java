@@ -445,7 +445,7 @@ public class SparkWrapper extends SmartMotorController {
         }
       });
     }
-    simIterateLooselyCoupledFollowers();
+    super.simIterate();
   }
 
   /**

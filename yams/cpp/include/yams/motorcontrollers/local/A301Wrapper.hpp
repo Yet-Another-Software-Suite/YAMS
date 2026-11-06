@@ -320,15 +320,6 @@ class A301Wrapper : public SmartMotorController {
   void ApplyFeedback(double kP, double kI, double kD);
   /** Create the simulated motor and its sim supplier from the config. */
   void CreateMotorSim();
-  /**
-   * Apply the A301s following this one. Only an A301Wrapper can follow an A301.
-   *
-   * @throws SmartMotorControllerConfigurationException if a follower is not an A301Wrapper, is this
-   *         A301, or already follows another A301.
-   */
-  void ApplyFollowers(const SmartMotorControllerConfig& config);
-  /** Follow another A301, reading its simulation instead of simulating this one. */
-  void Follow(A301Wrapper& leader, bool inverted);
   /** Stop following another A301, and simulate this one again. */
   void StopFollowing();
   /** Angle of the absolute encoder's shaft, if it is the external encoder. */

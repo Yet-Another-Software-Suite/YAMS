@@ -249,35 +249,6 @@ public abstract class SmartMotorController {
   }
 
   /**
-   * Iterate the simulation of a follower reading this motor controller's.
-   *
-   * @param follower Follower reading this motor controller's simulation.
-   */
-  protected void simIterateAsFollower(SmartMotorController follower) {
-    follower.m_iteratedByLeader = false;
-    try {
-      follower.simIterate();
-    } finally {
-      follower.m_iteratedByLeader = true;
-    }
-  }
-
-  /**
-   * Iterate the simulations of the loosely coupled followers reading this motor controller's
-   * mechanism's. Each wrapper's {@link #simIterate()} calls it last, which a mechanism calls right
-   * after it steps, and each follower's iterates its own followers.
-   */
-  protected void simIterateLooselyCoupledFollowers() {
-    m_looseFollowers.ifPresent(followers -> {
-      for (var follower : followers) {
-        if (follower.m_iteratedByLeader) {
-          simIterateAsFollower(follower);
-        }
-      }
-    });
-  }
-
-  /**
    * Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
    * simulation has its loosely coupled followers' motors too, and each motor controller applies its
    * own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its
@@ -287,7 +258,7 @@ public abstract class SmartMotorController {
    * @return Duty cycle of every motor in its simulation.
    */
   public double getMechanismDutyCycle(double dutyCycle) {
-    return m_simulatesMechanism ? withFollowersDutyCycle(dutyCycle) : dutyCycle;
+    return m_simulatesMechanism ? calculateSimDutyCycle(dutyCycle) : dutyCycle;
   }
 
   /**
@@ -296,7 +267,7 @@ public abstract class SmartMotorController {
    * @param dutyCycle Duty cycle this motor controller applies.
    * @return Duty cycle of every motor in {@link #getMechanismDCMotor()}.
    */
-  private double withFollowersDutyCycle(double dutyCycle) {
+  private double calculateSimDutyCycle(double dutyCycle) {
     if (m_looseFollowers.isEmpty() || m_looseFollowers.get().length == 0) {
       return dutyCycle;
     }
@@ -307,7 +278,7 @@ public abstract class SmartMotorController {
       // A motor's torque for a voltage, at this motor's rotor.
       final double weight = follower.getMechanismDCMotor().stallTorque
           * follower.getConfig().getGearing().getMechanismToRotorRatio() / ratio;
-      weighted += follower.withFollowersDutyCycle(follower.getDutyCycle()) * weight;
+      weighted += follower.calculateSimDutyCycle(follower.getDutyCycle()) * weight;
       totalWeight += weight;
     }
     return weighted / totalWeight;
@@ -724,8 +695,23 @@ public abstract class SmartMotorController {
    */
   public abstract void synchronizeRelativeEncoder();
 
-  /** Simulation iteration. */
-  public abstract void simIterate();
+  /**
+   * Simulation iteration. Each motor controller's simIterate() calls this last, with {@code
+   * super.simIterate()}: it iterates the loosely coupled followers reading this motor controller's
+   * mechanism's simulation, which a mechanism steps right before. Each follower's iterates its own.
+   */
+  public void simIterate() {
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        if (follower.m_iteratedByLeader) {
+          // Its own simIterate() does nothing while it reads this simulation, unless this does it.
+          follower.m_iteratedByLeader = false;
+          follower.simIterate();
+          follower.m_iteratedByLeader = true;
+        }
+      }
+    });
+  }
 
   /**
    * Set the motor zero power mode from COAST or BRAKE.
@@ -1534,7 +1520,7 @@ public abstract class SmartMotorController {
     BatterySim.setSimulatedByLeader(m_batterySimUUID, false);
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {
-        follower.followSimulationOf(this, false);
+        follower.follow(this, false);
       }
     });
   }
@@ -1547,13 +1533,13 @@ public abstract class SmartMotorController {
    * @param leader Motor controller whose simulation has this motor.
    * @param inverted Whether this motor is inverted from the leader.
    */
-  protected void followSimulationOf(SmartMotorController leader, boolean inverted) {
+  protected void follow(SmartMotorController leader, boolean inverted) {
     setSimSupplier(new FollowerSimSupplier(leader, this, inverted));
     m_iteratedByLeader = true;
     BatterySim.setSimulatedByLeader(m_batterySimUUID, true);
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {
-        follower.followSimulationOf(leader, false);
+        follower.follow(leader, false);
       }
     });
   }

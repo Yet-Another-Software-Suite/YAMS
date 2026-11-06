@@ -594,7 +594,7 @@ void NovaWrapper::SimIterate() {
   }
   m_nova->SimulationPeriodic();
   if (m_canEncoder) m_canEncoder->SimulationPeriodic();
-  SimIterateLooselyCoupledFollowers();
+  SmartMotorController::SimIterate();
 }
 
 // ---- Encoder sync -----------------------------------------------------------

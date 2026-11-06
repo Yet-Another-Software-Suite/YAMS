@@ -269,23 +269,7 @@ bool A301Wrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     SeedRelativeEncoder();
   }
 
-  ApplyFollowers(config);
-  LoadLooselyCoupledFollowers();
-
-  config.ValidateBasicOptions();
-  config.ValidateExternalEncoderOptions();
-
-  if (m_leader) {
-    // A follower is commanded by the A301 it follows.
-    StopClosedLoopController();
-  } else if (closedLoop) {
-    m_systemCoreClosedLoopAlert->Set(true);
-    StartClosedLoopController();
-  }
-  return true;
-}
-
-void A301Wrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
+  // The A301 has no follower mode, so only another A301Wrapper can follow it, in software.
   std::vector<std::pair<A301Wrapper*, bool>> followers;
   for (const auto& [follower, inverted] : config.GetFollowers()) {
     A301Wrapper* a301Follower = nullptr;
@@ -306,7 +290,13 @@ void A301Wrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
   }
   for (auto& [follower, inverted] : m_a301Followers) follower->StopFollowing();
   m_a301Followers = std::move(followers);
-  for (auto& [follower, inverted] : m_a301Followers) follower->Follow(*this, inverted);
+  for (auto& [follower, inverted] : m_a301Followers) {
+    // It follows this A301: its closed loop is stopped, and it reads this A301's simulation.
+    follower->StopClosedLoopController();
+    if (follower->m_systemCoreClosedLoopAlert) follower->m_systemCoreClosedLoopAlert->Set(false);
+    follower->m_leader = this;
+    if (wpi::RobotBase::IsSimulation()) follower->Follow(*this, inverted);
+  }
   const int motorCount = 1 + static_cast<int>(m_a301Followers.size());
   if (motorCount != m_motorCount) {
     m_motorCount = motorCount;
@@ -314,13 +304,19 @@ void A301Wrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
     // The simulated motor has every A301.
     if (wpi::RobotBase::IsSimulation() && !m_leader) CreateMotorSim();
   }
-}
+  LoadLooselyCoupledFollowers();
 
-void A301Wrapper::Follow(A301Wrapper& leader, bool inverted) {
-  StopClosedLoopController();
-  if (m_systemCoreClosedLoopAlert) m_systemCoreClosedLoopAlert->Set(false);
-  m_leader = &leader;
-  if (wpi::RobotBase::IsSimulation()) FollowSimulationOf(leader, inverted);
+  config.ValidateBasicOptions();
+  config.ValidateExternalEncoderOptions();
+
+  if (m_leader) {
+    // A follower is commanded by the A301 it follows.
+    StopClosedLoopController();
+  } else if (closedLoop) {
+    m_systemCoreClosedLoopAlert->Set(true);
+    StartClosedLoopController();
+  }
+  return true;
 }
 
 void A301Wrapper::StopFollowing() {
@@ -349,8 +345,13 @@ void A301Wrapper::SimIterate() {
     simulation::BatterySim::CalculateVoltage(BatterySimKey(), m_simSupplier->GetSupplyCurrent());
   }
   // The followers read this A301's simulation, so they are iterated with it.
-  for (auto& [follower, inverted] : m_a301Followers) SimIterateAsFollower(*follower);
-  SimIterateLooselyCoupledFollowers();
+  for (auto& [follower, inverted] : m_a301Followers) {
+    // Its own SimIterate() does nothing while it reads this simulation, unless this does it.
+    follower->m_iteratedByLeader = false;
+    follower->SimIterate();
+    follower->m_iteratedByLeader = true;
+  }
+  SmartMotorController::SimIterate();
 }
 
 // ---- Encoder sync -----------------------------------------------------------

@@ -69,8 +69,13 @@ class SmartMotorController {
   /** Initialize the DCMotorSim used for simulation. */
   virtual void SetupSimulation() = 0;
 
-  /** Advance the motor simulation by one loop iteration. */
-  virtual void SimIterate() = 0;
+  /**
+   * Advance the motor simulation by one loop iteration. Each motor controller's SimIterate() calls
+   * this last, with SmartMotorController::SimIterate(): it iterates the loosely coupled followers
+   * reading this motor controller's mechanism's simulation, which a mechanism steps right before.
+   * Each follower's iterates its own.
+   */
+  virtual void SimIterate();
 
   /**
    * Attach a SimSupplier that provides physics-model position and velocity for
@@ -877,20 +882,11 @@ class SmartMotorController {
    *                 of it.
    * @param inverted Whether this motor is inverted from the leader.
    */
-  void FollowSimulationOf(SmartMotorController& leader, bool inverted);
+  void Follow(SmartMotorController& leader, bool inverted);
 
   /** Weigh a duty cycle this motor controller applies with its loosely coupled followers' own. */
-  double WithFollowersDutyCycle(double dutyCycle);
+  double CalculateSimDutyCycle(double dutyCycle);
 
-  /** Iterate the simulation of a follower reading this motor controller's. */
-  void SimIterateAsFollower(SmartMotorController& follower);
-
-  /**
-   * Iterate the simulations of the loosely coupled followers reading this motor controller's
-   * mechanism's. Each wrapper's SimIterate() calls it last, which a mechanism calls right after it
-   * steps, and each follower's iterates its own followers.
-   */
-  void SimIterateLooselyCoupledFollowers();
 
 
   /**

@@ -438,7 +438,7 @@ public class TalonFXWrapper extends SmartMotorController {
         }
       }
     }
-    simIterateLooselyCoupledFollowers();
+    super.simIterate();
   }
 
   @Override

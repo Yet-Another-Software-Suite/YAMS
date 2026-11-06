@@ -655,31 +655,24 @@ void SmartMotorController::SetMechanismSimSupplier(std::shared_ptr<SimSupplier> 
   m_simulatesMechanism = true;
   // A motor controller with its own mechanism is not simulated by a leader.
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), false);
-  for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(*this, false);
+  for (auto* follower : m_looseFollowers) follower->Follow(*this, false);
 }
 
 double SmartMotorController::GetMechanismDutyCycle(double dutyCycle) {
-  return m_simulatesMechanism ? WithFollowersDutyCycle(dutyCycle) : dutyCycle;
+  return m_simulatesMechanism ? CalculateSimDutyCycle(dutyCycle) : dutyCycle;
 }
 
-void SmartMotorController::SimIterateAsFollower(SmartMotorController& follower) {
-  follower.m_iteratedByLeader = false;
-  try {
-    follower.SimIterate();
-  } catch (...) {
-    follower.m_iteratedByLeader = true;
-    throw;
-  }
-  follower.m_iteratedByLeader = true;
-}
-
-void SmartMotorController::SimIterateLooselyCoupledFollowers() {
+void SmartMotorController::SimIterate() {
   for (auto* follower : m_looseFollowers) {
-    if (follower->m_iteratedByLeader) SimIterateAsFollower(*follower);
+    if (!follower->m_iteratedByLeader) continue;
+    // Its own SimIterate() does nothing while it reads this simulation, unless this does it.
+    follower->m_iteratedByLeader = false;
+    follower->SimIterate();
+    follower->m_iteratedByLeader = true;
   }
 }
 
-double SmartMotorController::WithFollowersDutyCycle(double dutyCycle) {
+double SmartMotorController::CalculateSimDutyCycle(double dutyCycle) {
   if (m_looseFollowers.empty()) return dutyCycle;
   const auto ratioOf = [](SmartMotorController& smc) {
     return smc.GetConfig()
@@ -694,17 +687,17 @@ double SmartMotorController::WithFollowersDutyCycle(double dutyCycle) {
     // A motor's torque for a voltage, at this motor's rotor.
     const double weight =
         follower->GetMechanismDCMotor().stallTorque.value() * ratioOf(*follower) / ratio;
-    weighted += follower->WithFollowersDutyCycle(follower->GetDutyCycle()) * weight;
+    weighted += follower->CalculateSimDutyCycle(follower->GetDutyCycle()) * weight;
     totalWeight += weight;
   }
   return weighted / totalWeight;
 }
 
-void SmartMotorController::FollowSimulationOf(SmartMotorController& leader, bool inverted) {
+void SmartMotorController::Follow(SmartMotorController& leader, bool inverted) {
   SetSimSupplier(std::make_shared<simulation::FollowerSimSupplier>(leader, *this, inverted));
   m_iteratedByLeader = true;
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), true);
-  for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(leader, false);
+  for (auto* follower : m_looseFollowers) follower->Follow(leader, false);
 }
 
 void SmartMotorController::LoadLooselyCoupledFollowers() {

@@ -915,7 +915,7 @@ void SparkWrapper::SimIterate() {
     m_detachedEncoderSimAngle =
         wpi::units::turn_t{m_simSupplier->GetMechanismPosition().value() * mechToEncoder};
   }
-  SimIterateLooselyCoupledFollowers();
+  SmartMotorController::SimIterate();
 }
 
 void SparkWrapper::IterateSimulatedMaxMotionPosition() {

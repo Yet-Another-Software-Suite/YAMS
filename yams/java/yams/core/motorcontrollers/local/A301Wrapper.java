@@ -259,9 +259,12 @@ public class A301Wrapper extends SmartMotorController {
     }
     // The followers read this A301's simulation, so they are iterated with it.
     for (var follower : m_a301Followers) {
-      simIterateAsFollower(follower.getFirst());
+      // Its own simIterate() does nothing while it reads this simulation, unless this does it.
+      follower.getFirst().m_iteratedByLeader = false;
+      follower.getFirst().simIterate();
+      follower.getFirst().m_iteratedByLeader = true;
     }
-    simIterateLooselyCoupledFollowers();
+    super.simIterate();
   }
 
   @Override
@@ -400,6 +403,8 @@ public class A301Wrapper extends SmartMotorController {
    *     controller.
    * @throws IllegalArgumentException if the external encoder is not this {@link A301}.
    * @throws IllegalArgumentException if relative encoder inversion is configured.
+   * @throws SmartMotorControllerConfigurationException if a follower is not an {@link
+   *     A301Wrapper}, is this A301, or already follows another A301.
    */
   @Override
   public boolean applyConfig(SmartMotorControllerConfig<?> config) {
@@ -535,7 +540,48 @@ public class A301Wrapper extends SmartMotorController {
       seedRelativeEncoder();
     }
 
-    applyFollowers(config);
+    // The A301 has no follower mode, so only another A301Wrapper can follow it, in software.
+    final List<Pair<A301Wrapper, Boolean>> followers = new ArrayList<>();
+    for (Pair<Object, Boolean> follower : config.getFollowers().map(List::of).orElse(List.of())) {
+      if (!(follower.getFirst() instanceof A301Wrapper a301Follower)) {
+        throw new SmartMotorControllerConfigurationException(
+            "A301 can only be followed by another A301Wrapper", "Followers could not be applied",
+            ".withFollowers(Pair.of(new A301Wrapper(a301, config), inverted)) for each A301");
+      }
+      if (a301Follower == this
+          || a301Follower.m_leader.filter(leader -> leader != this).isPresent()) {
+        throw new SmartMotorControllerConfigurationException(
+            "A301 cannot follow itself or two A301s", "Followers could not be applied",
+            ".withFollowers with each other A301 once, on one A301");
+      }
+      followers.add(Pair.of(a301Follower, follower.getSecond()));
+    }
+    for (var follower : m_a301Followers) {
+      follower.getFirst().stopFollowing();
+    }
+    m_a301Followers = List.copyOf(followers);
+    for (var follower : m_a301Followers) {
+      // It follows this A301: its closed loop is stopped, and it reads this A301's simulation.
+      final A301Wrapper a301Follower = follower.getFirst();
+      a301Follower.stopClosedLoopController();
+      a301Follower.m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
+      a301Follower.m_leader = Optional.of(this);
+      if (RobotBase.isSimulation()) {
+        a301Follower.follow(this, follower.getSecond());
+      }
+    }
+    if (m_a301Followers.size() + 1 != m_motorCount) {
+      m_motorCount = m_a301Followers.size() + 1;
+      m_motor = YMotors.getA301(m_motorCount);
+      if (RobotBase.isSimulation() && m_leader.isEmpty()) {
+        // The simulated motor has every A301.
+        var plant = Models.singleJointedArmFromPhysicalConstants(
+            m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio());
+        m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
+        setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+      }
+    }
+  
 
     if (m_leader.isPresent()) {
       // A follower is commanded by the A301 it follows.
@@ -613,65 +659,6 @@ public class A301Wrapper extends SmartMotorController {
     });
     for (var follower : m_a301Followers) {
       follower.getFirst().setVoltage(follower.getSecond() ? voltage.times(-1) : voltage);
-    }
-  }
-
-  /**
-   * Apply the A301s following this one. Only an {@link A301Wrapper} can follow an A301.
-   *
-   * @param config Config with the followers.
-   * @throws SmartMotorControllerConfigurationException if a follower is not an {@link A301Wrapper},
-   *     is this A301, or already follows another A301.
-   */
-  private void applyFollowers(SmartMotorControllerConfig<?> config) {
-    final List<Pair<A301Wrapper, Boolean>> followers = new ArrayList<>();
-    for (Pair<Object, Boolean> follower : config.getFollowers().map(List::of).orElse(List.of())) {
-      if (!(follower.getFirst() instanceof A301Wrapper a301Follower)) {
-        throw new SmartMotorControllerConfigurationException(
-            "A301 can only be followed by another A301Wrapper", "Followers could not be applied",
-            ".withFollowers(Pair.of(new A301Wrapper(a301, config), inverted)) for each A301");
-      }
-      if (a301Follower == this
-          || a301Follower.m_leader.filter(leader -> leader != this).isPresent()) {
-        throw new SmartMotorControllerConfigurationException(
-            "A301 cannot follow itself or two A301s", "Followers could not be applied",
-            ".withFollowers with each other A301 once, on one A301");
-      }
-      followers.add(Pair.of(a301Follower, follower.getSecond()));
-    }
-    for (var follower : m_a301Followers) {
-      follower.getFirst().stopFollowing();
-    }
-    m_a301Followers = List.copyOf(followers);
-    for (var follower : m_a301Followers) {
-      follower.getFirst().follow(this, follower.getSecond());
-    }
-    if (m_a301Followers.size() + 1 != m_motorCount) {
-      m_motorCount = m_a301Followers.size() + 1;
-      m_motor = YMotors.getA301(m_motorCount);
-      if (RobotBase.isSimulation() && m_leader.isEmpty()) {
-        // The simulated motor has every A301.
-        var plant = Models.singleJointedArmFromPhysicalConstants(
-            m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio());
-        m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
-        setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
-      }
-    }
-  }
-
-  /**
-   * Follow another A301. Its simulation has this A301, so this one reads it instead of simulating
-   * itself, and draws no current from {@link BatterySim}.
-   *
-   * @param leader A301 to follow.
-   * @param inverted Whether this A301 is inverted from it.
-   */
-  private void follow(A301Wrapper leader, boolean inverted) {
-    stopClosedLoopController();
-    m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
-    m_leader = Optional.of(leader);
-    if (RobotBase.isSimulation()) {
-      followSimulationOf(leader, inverted);
     }
   }
 
