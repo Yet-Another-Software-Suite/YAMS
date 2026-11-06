@@ -353,6 +353,23 @@ class SmartMotorController {
    */
   void SetMechanismSimSupplier(std::shared_ptr<SimSupplier> supplier);
 
+  /**
+   * Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
+   * simulation has its loosely coupled followers' motors too, and each motor controller applies its
+   * own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its
+   * share of GetMechanismDCMotor()'s torque. Otherwise it is the given duty cycle.
+   *
+   * @param dutyCycle Duty cycle this motor controller applies.
+   * @return Duty cycle of every motor in its simulation.
+   */
+  double GetMechanismDutyCycle(double dutyCycle);
+
+  /**
+   * Iterate the simulations of the loosely coupled followers reading this motor controller's
+   * mechanism's, and theirs. A mechanism calls it right after it steps its simulation.
+   */
+  void SimIterateLooselyCoupledFollowers();
+
   // ---- Configuration setters (live tuning) --------------------------------
 
   /**
@@ -854,6 +871,25 @@ class SmartMotorController {
    * @param inverted Whether this motor is inverted from the leader.
    */
   void FollowSimulationOf(SmartMotorController& leader, bool inverted);
+
+  /** Weigh a duty cycle this motor controller applies with its loosely coupled followers' own. */
+  double WithFollowersDutyCycle(double dutyCycle);
+
+  /**
+   * Whether this motor controller's SimIterate() should do nothing. A follower reading a leader's
+   * simulation is iterated by its leader, right after the simulation steps; its own calls do
+   * nothing, so it is not iterated twice in a loop.
+   */
+  bool SkipFollowerSimIterate() const;
+
+  /** Iterate the simulation of a follower reading this motor controller's. */
+  void SimIterateAsFollower(SmartMotorController& follower);
+
+  /** Whether a leader is iterating this follower's simulation. */
+  bool m_iteratedByLeader{false};
+
+  /** Whether this motor controller's simulation is its mechanism's, set with SetMechanismSimSupplier. */
+  bool m_simulatesMechanism{false};
 
   /**
    * Configure the software PID controller (m_pid) from @p config: continuous input over the

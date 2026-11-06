@@ -134,6 +134,8 @@ void Arm::SimIterate() {
     auto* ss = m_smc->GetSimSupplier();
     ss->UpdateSim();
     m_smc->SimIterate();
+    // Its loosely coupled followers read the simulation just stepped.
+    m_smc->SimIterateLooselyCoupledFollowers();
     ss->StarveUpdateSim();
 
     if (m_armConfig->GetMinAngle() && m_armSim->GetVelocity().value() < 0.0 &&

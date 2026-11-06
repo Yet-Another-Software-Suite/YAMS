@@ -231,6 +231,95 @@ public abstract class SmartMotorController {
    */
   public void setSimSupplier(SimSupplier mechanismSupplier) {
     m_simSupplier = Optional.of(mechanismSupplier);
+    m_simulatesMechanism = false;
+  }
+
+  /** Whether a leader is iterating this follower's simulation, which only it does while it reads one. */
+  private boolean m_iteratedByLeader = false;
+
+  /**
+   * Whether this motor controller's {@link #simIterate()} should do nothing. A follower reading a
+   * leader's simulation is iterated by its leader, right after the simulation steps, so its vendor
+   * simulation sees the same loop as the leader's. Its own calls do nothing, so it is not iterated
+   * twice in a loop.
+   *
+   * @return Whether this motor controller reads a leader's simulation, and its leader is not
+   *     iterating it.
+   */
+  protected boolean skipFollowerSimIterate() {
+    return !m_iteratedByLeader && m_simSupplier.isPresent()
+        && m_simSupplier.get() instanceof FollowerSimSupplier;
+  }
+
+  /**
+   * Iterate the simulation of a follower reading this motor controller's.
+   *
+   * @param follower Follower reading this motor controller's simulation.
+   */
+  protected void simIterateAsFollower(SmartMotorController follower) {
+    follower.m_iteratedByLeader = true;
+    try {
+      follower.simIterate();
+    } finally {
+      follower.m_iteratedByLeader = false;
+    }
+  }
+
+  /**
+   * Iterate the simulations of the loosely coupled followers reading this motor controller's
+   * mechanism's, and theirs. A mechanism calls it right after it steps its simulation.
+   */
+  public void simIterateLooselyCoupledFollowers() {
+    m_looseFollowers.ifPresent(followers -> {
+      for (var follower : followers) {
+        if (follower.m_simSupplier.isPresent() && follower.m_simSupplier.get() instanceof FollowerSimSupplier) {
+          simIterateAsFollower(follower);
+          follower.simIterateLooselyCoupledFollowers();
+        }
+      }
+    });
+  }
+
+  /**
+   * Whether this motor controller's simulation is its mechanism's, set with {@link
+   * #setMechanismSimSupplier(SimSupplier)}, which has its loosely coupled followers' motors.
+   */
+  private boolean m_simulatesMechanism = false;
+
+  /**
+   * Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
+   * simulation has its loosely coupled followers' motors too, and each motor controller applies its
+   * own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its
+   * share of {@link #getMechanismDCMotor()}'s torque. Otherwise it is the given duty cycle.
+   *
+   * @param dutyCycle Duty cycle this motor controller applies.
+   * @return Duty cycle of every motor in its simulation.
+   */
+  public double getMechanismDutyCycle(double dutyCycle) {
+    return m_simulatesMechanism ? withFollowersDutyCycle(dutyCycle) : dutyCycle;
+  }
+
+  /**
+   * Weigh a duty cycle this motor controller applies with its loosely coupled followers' own.
+   *
+   * @param dutyCycle Duty cycle this motor controller applies.
+   * @return Duty cycle of every motor in {@link #getMechanismDCMotor()}.
+   */
+  private double withFollowersDutyCycle(double dutyCycle) {
+    if (m_looseFollowers.isEmpty() || m_looseFollowers.get().length == 0) {
+      return dutyCycle;
+    }
+    final double ratio = m_config.getGearing().getMechanismToRotorRatio();
+    double totalWeight = getDCMotor().stallTorque;
+    double weighted = dutyCycle * totalWeight;
+    for (var follower : m_looseFollowers.get()) {
+      // A motor's torque for a voltage, at this motor's rotor.
+      final double weight = follower.getMechanismDCMotor().stallTorque
+          * follower.getConfig().getGearing().getMechanismToRotorRatio() / ratio;
+      weighted += follower.withFollowersDutyCycle(follower.getDutyCycle()) * weight;
+      totalWeight += weight;
+    }
+    return weighted / totalWeight;
   }
 
   /**
@@ -1449,6 +1538,7 @@ public abstract class SmartMotorController {
    */
   public void setMechanismSimSupplier(SimSupplier mechanismSupplier) {
     setSimSupplier(mechanismSupplier);
+    m_simulatesMechanism = true;
     // A motor controller with its own mechanism is not simulated by a leader.
     BatterySim.setSimulatedByLeader(m_batterySimUUID, false);
     m_looseFollowers.ifPresent(followers -> {

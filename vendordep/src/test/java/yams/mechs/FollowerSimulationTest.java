@@ -81,10 +81,7 @@ public class FollowerSimulationTest {
     return (SmartMotorControllerConfig) unlimitedConfig(label).withStatorCurrentLimit(Amps.of(40));
   }
 
-  /**
-   * A closed loop config without a current limit. A SPARK limits the current of the motors in its
-   * own DCMotor, so a limit would differ between one SPARK with four NEOs and two with two.
-   */
+  /** A closed loop config without a current limit. */
   private static SmartMotorControllerConfig unlimitedConfig(String label) {
     SmartMotorControllerTestSubsystem subsys = new SmartMotorControllerTestSubsystem();
     subsys.setName(label + "[" + offset + "]");
@@ -349,11 +346,17 @@ public class FollowerSimulationTest {
 
   /**
    * Drive the pivot at a voltage. In open loop, no closed loop Notifier runs on the SystemCore, so
-   * every run steps the same.
+   * every run steps the same. A leader does not send its voltage to its loosely coupled followers,
+   * so each is given it too, as robot code would.
    *
    * @return The pivot's angle in degrees every 100 ms for 2 s, then the battery voltage.
    */
-  private static double[] runAtVoltage(SmartMotorController leader) throws InterruptedException {
+  private static double[] runAtVoltage(SmartMotorController leader, SmartMotorController... looseFollowers)
+      throws InterruptedException {
+    // The followers first, as the leader gives the pivot its voltage when it is commanded.
+    for (var follower : looseFollowers) {
+      follower.setVoltage(Volts.of(3));
+    }
     leader.setVoltage(Volts.of(3));
     double[] trace = new double[21];
     int[] loops = {0};
@@ -394,13 +397,15 @@ public class FollowerSimulationTest {
   }
 
   /**
-   * Two SPARK MAXes, each with a SPARK MAX follower on its gearbox, the second a loosely coupled
-   * follower of the first, simulate as one SPARK MAX with four NEOs.
+   * Two SPARK MAXes, each with a SPARK MAX follower on its gearbox and a 40 A limit, the second a
+   * loosely coupled follower of the first, simulate as one SPARK MAX with four NEOs and an 80 A
+   * limit. Each SPARK's simulation limits its own motors' current, and the pivot applies each one's
+   * output.
    */
   @Test
   void looseFollowerWithItsOwnFollowerSimulatesEveryMotorOfSparks() throws InterruptedException {
     SmartMotorController reference =
-        new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(4), ((SmartMotorControllerConfig) unlimitedConfig("FourNeos").withStatorCurrentLimit(Amps.of(1000))));
+        new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(4), (SmartMotorControllerConfig) unlimitedConfig("FourNeos").withStatorCurrentLimit(Amps.of(80)));
     double[] expected;
     try {
       expected = runToSetpoint(pivot(reference), reference);
@@ -412,9 +417,9 @@ public class FollowerSimulationTest {
     SparkMax leaderGearboxFollower = DeviceCreator.createSparkMax();
     SparkMax looseGearboxFollower = DeviceCreator.createSparkMax();
     SmartMotorController loose = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(2),
-        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LooseTwoNeos").withStatorCurrentLimit(Amps.of(1000))).withFollowers(Pair.of(looseGearboxFollower, false)));
+        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LooseTwoNeos").withStatorCurrentLimit(Amps.of(40))).withFollowers(Pair.of(looseGearboxFollower, false)));
     SmartMotorController leader = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(2),
-        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LeaderTwoNeos").withStatorCurrentLimit(Amps.of(1000)))
+        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LeaderTwoNeos").withStatorCurrentLimit(Amps.of(40)))
             .withFollowers(Pair.of(leaderGearboxFollower, false))
             .withLooselyCoupledFollowers(loose));
     try {
@@ -485,7 +490,7 @@ public class FollowerSimulationTest {
       assertTrue(looseGearboxFollower.getSimSupplier().orElseThrow() instanceof FollowerSimSupplier);
       assertTrue(leaderGearboxFollower.getSimSupplier().orElseThrow() instanceof FollowerSimSupplier);
       pump(loose);
-      double[] actual = runAtVoltage(leader);
+      double[] actual = runAtVoltage(leader, loose);
       assertSameRun(expected, actual, "A301");
 
       // Each A301 draws a quarter of the current, and the battery counts it once, in the pivot's.

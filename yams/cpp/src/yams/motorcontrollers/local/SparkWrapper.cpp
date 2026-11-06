@@ -875,6 +875,7 @@ void SparkWrapper::SetupSimulation() {
 }
 
 void SparkWrapper::SimIterate() {
+  if (SkipFollowerSimIterate()) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
   IterateSimulatedMaxMotionPosition();
   IterateSimulatedArmGravity();

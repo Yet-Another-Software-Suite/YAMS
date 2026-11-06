@@ -155,6 +155,8 @@ public class Elevator extends SmartPositionalMechanism {
     if (m_sim.isPresent() && m_smc.getSimSupplier().isPresent()) {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_smc.simIterateLooselyCoupledFollowers();
       m_smc.getSimSupplier().get().starveUpdateSim();
       visualizationUpdate();
     }

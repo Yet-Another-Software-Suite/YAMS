@@ -380,6 +380,9 @@ public class TalonFXWrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
+    if (skipFollowerSimIterate()) {
+      return;
+    }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
       var talonFXSim = m_talonfx.getSimState();
 

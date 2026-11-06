@@ -618,6 +618,7 @@ void SmartMotorController::Close() {
 
 void SmartMotorController::SetSimSupplier(std::shared_ptr<SimSupplier> supplier) {
   m_simSupplier = std::move(supplier);
+  m_simulatesMechanism = false;
 }
 
 SimSupplier* SmartMotorController::GetSimSupplier() const { return m_simSupplier.get(); }
@@ -650,9 +651,60 @@ wpi::math::DCMotor SmartMotorController::GetMechanismDCMotor() {
 
 void SmartMotorController::SetMechanismSimSupplier(std::shared_ptr<SimSupplier> supplier) {
   SetSimSupplier(std::move(supplier));
+  m_simulatesMechanism = true;
   // A motor controller with its own mechanism is not simulated by a leader.
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), false);
   for (auto* follower : m_looseFollowers) follower->FollowSimulationOf(*this, false);
+}
+
+double SmartMotorController::GetMechanismDutyCycle(double dutyCycle) {
+  return m_simulatesMechanism ? WithFollowersDutyCycle(dutyCycle) : dutyCycle;
+}
+
+bool SmartMotorController::SkipFollowerSimIterate() const {
+  return !m_iteratedByLeader &&
+         dynamic_cast<simulation::FollowerSimSupplier*>(m_simSupplier.get()) != nullptr;
+}
+
+void SmartMotorController::SimIterateAsFollower(SmartMotorController& follower) {
+  follower.m_iteratedByLeader = true;
+  try {
+    follower.SimIterate();
+  } catch (...) {
+    follower.m_iteratedByLeader = false;
+    throw;
+  }
+  follower.m_iteratedByLeader = false;
+}
+
+void SmartMotorController::SimIterateLooselyCoupledFollowers() {
+  for (auto* follower : m_looseFollowers) {
+    if (dynamic_cast<simulation::FollowerSimSupplier*>(follower->m_simSupplier.get()) == nullptr)
+      continue;
+    SimIterateAsFollower(*follower);
+    follower->SimIterateLooselyCoupledFollowers();
+  }
+}
+
+double SmartMotorController::WithFollowersDutyCycle(double dutyCycle) {
+  if (m_looseFollowers.empty()) return dutyCycle;
+  const auto ratioOf = [](SmartMotorController& smc) {
+    return smc.GetConfig()
+        .GetMotorGearing()
+        .value_or(gearing::MechanismGearing::kOne)
+        .GetMechanismToRotorRatio();
+  };
+  const double ratio = ratioOf(*this);
+  double totalWeight = GetDCMotor().stallTorque.value();
+  double weighted = dutyCycle * totalWeight;
+  for (auto* follower : m_looseFollowers) {
+    // A motor's torque for a voltage, at this motor's rotor.
+    const double weight =
+        follower->GetMechanismDCMotor().stallTorque.value() * ratioOf(*follower) / ratio;
+    weighted += follower->WithFollowersDutyCycle(follower->GetDutyCycle()) * weight;
+    totalWeight += weight;
+  }
+  return weighted / totalWeight;
 }
 
 void SmartMotorController::FollowSimulationOf(SmartMotorController& leader, bool inverted) {

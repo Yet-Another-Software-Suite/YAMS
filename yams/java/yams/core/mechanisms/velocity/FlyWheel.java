@@ -170,6 +170,8 @@ public class FlyWheel extends SmartVelocityMechanism {
     if (m_dcmotorSim.isPresent() && m_smc.getSimSupplier().isPresent()) {
       m_smc.getSimSupplier().get().updateSimState();
       m_smc.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_smc.simIterateLooselyCoupledFollowers();
       m_smc.getSimSupplier().get().starveUpdateSim();
 
       visualizationUpdate();

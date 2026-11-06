@@ -796,6 +796,7 @@ void TalonFXWrapper::SetupSimulation() {
 }
 
 void TalonFXWrapper::SimIterate() {
+  if (SkipFollowerSimIterate()) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier) return;
 
   auto& sim = m_talon->GetSimState();

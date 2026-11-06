@@ -404,6 +404,9 @@ public class SparkWrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
+    if (skipFollowerSimIterate()) {
+      return;
+    }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
       iterateSimulatedMaxMotionPosition();
       iterateSimulatedArmGravity();

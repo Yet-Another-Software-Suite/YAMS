@@ -247,6 +247,9 @@ public class A301Wrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
+    if (skipFollowerSimIterate()) {
+      return;
+    }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
       if (!m_simSupplier.get().getUpdatedSim()) {
         m_simSupplier.get().updateSimState();
@@ -256,7 +259,7 @@ public class A301Wrapper extends SmartMotorController {
     }
     // The followers read this A301's simulation, so they are iterated with it.
     for (var follower : m_a301Followers) {
-      follower.getFirst().simIterate();
+      simIterateAsFollower(follower.getFirst());
     }
   }
 

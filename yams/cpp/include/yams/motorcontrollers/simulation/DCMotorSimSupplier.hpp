@@ -75,12 +75,16 @@ class DCMotorSimSupplier : public SimSupplier {
  private:
   wpi::sim::DCMotorSim& m_sim;
   std::function<double()> m_dutyCycleSupplier;
+  /** The duty cycle of every motor in the simulation, from the motor controller's. */
+  std::function<double(double)> m_mechanismDutyCycle;
   gearing::MechanismGearing m_gearing;
   wpi::units::second_t m_period;
   const void* m_batteryKey;
   wpi::math::LinearFilter<double> m_supplyCurrentFilter;
   /** Supply current, filtered once per simulation step, so reading it does not step the filter. */
   wpi::units::ampere_t m_supplyCurrent{0};
+  /** Stator current of the last step, read before it, which uses up the input voltage. */
+  wpi::units::ampere_t m_statorCurrent{0};
   bool m_inputFed{false};
   bool m_simUpdated{false};
   wpi::units::volt_t m_lastInputVoltage{0};

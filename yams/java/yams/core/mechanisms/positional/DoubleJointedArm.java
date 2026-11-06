@@ -325,9 +325,13 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     if (m_lowerArmSim.isPresent() && m_lowerSMC.getSimSupplier().isPresent() && m_upperArmSim.isPresent() && m_upperSMC.getSimSupplier().isPresent()) {
       m_lowerSMC.getSimSupplier().get().updateSimState();
       m_lowerSMC.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_lowerSMC.simIterateLooselyCoupledFollowers();
       m_lowerSMC.getSimSupplier().get().starveUpdateSim();
       m_upperSMC.getSimSupplier().get().updateSimState();
       m_upperSMC.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_upperSMC.simIterateLooselyCoupledFollowers();
       m_upperSMC.getSimSupplier().get().starveUpdateSim();
       visualizationUpdate();
     }

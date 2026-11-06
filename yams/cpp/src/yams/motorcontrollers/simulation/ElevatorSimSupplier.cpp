@@ -13,7 +13,9 @@ namespace yams::motorcontrollers::simulation {
 
 ElevatorSimSupplier::ElevatorSimSupplier(wpi::sim::ElevatorSim& sim, SmartMotorController& smc)
     : m_sim(sim),
-      m_dutyCycleSupplier([&smc] { return smc.GetDutyCycle(); }),
+      // A mechanism's motors apply each motor controller's own output.
+      m_dutyCycleSupplier([&smc] { return smc.GetMechanismDutyCycle(smc.GetDutyCycle()); }),
+      m_mechanismDutyCycle([&smc](double dutyCycle) { return smc.GetMechanismDutyCycle(dutyCycle); }),
       m_gearing(smc.GetConfig().GetMotorGearing().value_or(gearing::MechanismGearing::kOne)),
       m_period(smc.GetConfig().GetSimulationPeriod()),
       m_batteryKey(&smc),
@@ -37,8 +39,9 @@ void ElevatorSimSupplier::UpdateSim() {
       m_sim.SetInputVoltage(m_lastInputVoltage);
     }
     // Read before the step, which uses up the input voltage the current is drawn with.
+    m_statorCurrent = m_sim.GetCurrentDraw();
     m_supplyCurrent = wpi::units::ampere_t{
-        m_supplyCurrentFilter.Calculate(m_dutyCycleSupplier() * m_sim.GetCurrentDraw().value())};
+        m_supplyCurrentFilter.Calculate(m_dutyCycleSupplier() * m_statorCurrent.value())};
     m_sim.Update(m_period);
     FeedUpdateSim();
   }
@@ -68,6 +71,9 @@ wpi::units::volt_t ElevatorSimSupplier::GetMechanismStatorVoltage() { return m_l
 
 void ElevatorSimSupplier::SetMechanismStatorVoltage(wpi::units::volt_t volts) {
   FeedInput();
+  // A mechanism's motors apply each motor controller's own output.
+  const double supplyVolts = GetMechanismSupplyVoltage().value();
+  if (supplyVolts != 0) volts = supplyVolts * wpi::units::volt_t{m_mechanismDutyCycle(volts.value() / supplyVolts)};
   m_lastInputVoltage = volts;
   m_sim.SetInputVoltage(volts);
 }
@@ -108,7 +114,7 @@ void ElevatorSimSupplier::SetRotorVelocity(wpi::units::turns_per_second_t veloci
   SetMechanismVelocity(velocity / m_gearing.GetMechanismToRotorRatio());
 }
 
-wpi::units::ampere_t ElevatorSimSupplier::GetStatorCurrent() { return m_sim.GetCurrentDraw(); }
+wpi::units::ampere_t ElevatorSimSupplier::GetStatorCurrent() { return m_statorCurrent; }
 
 wpi::units::ampere_t ElevatorSimSupplier::GetSupplyCurrent() {
   // For a BLDC driven by a switching converter, power is conserved across the duty-cycle

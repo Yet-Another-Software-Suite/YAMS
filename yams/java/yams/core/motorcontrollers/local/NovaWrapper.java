@@ -327,6 +327,9 @@ public class NovaWrapper extends SmartMotorController {
 
   @Override
   public void simIterate() {
+    if (skipFollowerSimIterate()) {
+      return;
+    }
     if (RobotBase.isSimulation() && m_simSupplier.isPresent()) {
       if (!m_simSupplier.get().getUpdatedSim()) {
         m_simSupplier.get().updateSimState();

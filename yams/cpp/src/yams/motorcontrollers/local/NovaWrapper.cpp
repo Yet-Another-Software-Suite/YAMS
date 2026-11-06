@@ -584,6 +584,7 @@ void NovaWrapper::SetupSimulation() {
 }
 
 void NovaWrapper::SimIterate() {
+  if (SkipFollowerSimIterate()) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier) return;
   // Step the physics only if the mechanism has not already stepped them this loop.
   if (!m_simSupplier->GetUpdatedSim()) {

@@ -238,9 +238,13 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
     if (m_leftSim.isPresent() && m_leftSMC.getSimSupplier().isPresent() && m_rightSim.isPresent() && m_rightSMC.getSimSupplier().isPresent()) {
       m_leftSMC.getSimSupplier().get().updateSimState();
       m_leftSMC.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_leftSMC.simIterateLooselyCoupledFollowers();
       m_leftSMC.getSimSupplier().get().starveUpdateSim();
       m_rightSMC.getSimSupplier().get().updateSimState();
       m_rightSMC.simIterate();
+      // Its loosely coupled followers read the simulation just stepped.
+      m_rightSMC.simIterateLooselyCoupledFollowers();
       m_rightSMC.getSimSupplier().get().starveUpdateSim();
       visualizationUpdate();
     }
