@@ -348,14 +348,14 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
     CheckNova(0.5, [&] { return nova->Status().Mp0.GetKA(); }, "kA");
   }
   SECTION("A feedforward without a motion profile") {
-    // The Nova runs the loop and is sent kV times the velocity target with each request.
+    // The Nova runs the loop and applies its motion profile slot's kS, kV, kA and kG.
     auto nova = MakeNova();
     auto cfg = BaseConfig();
     cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.0));
     NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
     CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
 
-    // It applies its slot's kS and kG with or without a motion profile.
+    // With kS too.
     auto staticNova = MakeNova();
     auto staticCfg = BaseConfig();
     staticCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
@@ -363,13 +363,14 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
     CHECK(withStatic.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
     CheckNova(0.1, [&] { return staticNova->Status().Mp0.GetKS(); }, "kS on the Nova");
 
-    // kA needs the motion profile's acceleration.
+    // And its kA.
     auto accelerationNova = MakeNova();
     auto accelerationCfg = BaseConfig();
     accelerationCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.1));
-    CHECK_THROWS_AS(
-        (NovaWrapper{accelerationNova.get(), wpi::math::DCMotor::NEO(1), &accelerationCfg}),
-        ConfigException);
+    NovaWrapper withAcceleration{accelerationNova.get(), wpi::math::DCMotor::NEO(1),
+                                 &accelerationCfg};
+    CHECK(withAcceleration.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+    CheckNova(0.1, [&] { return accelerationNova->Status().Mp0.GetKA(); }, "kA on the Nova");
 
     auto profiledNova = MakeNova();
     auto profiledCfg = BaseConfig();

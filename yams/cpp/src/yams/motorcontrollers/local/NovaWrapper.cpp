@@ -332,15 +332,6 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
               "Closed loop slot could not be configured", "SLOT_0 or SLOT_1");
         continue;
       }
-      // Without a motion profile, the Nova applies its slot's kS and kG, and is sent kV times the
-      // velocity target with each velocity request. kA needs the motion profile's acceleration.
-      if (!trapezoidProfile && ((gains.armFF && gains.armFF->GetKa().value() != 0.0) ||
-                                (gains.elevatorFF && gains.elevatorFF->GetKa().value() != 0.0) ||
-                                (gains.simpleFF && gains.simpleFF->GetKa().value() != 0.0)))
-        throw exceptions::SmartMotorControllerConfigurationException(
-            "Thrifty Nova applies kA only with a motion profile",
-            "Feedforward could not be applied without a motion profile",
-            "WithTrapezoidProfile, or a feedforward without kA");
       const bool slot0 = slot == Slot::SLOT_0;
       if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
         const double kP = gains.kP / m_rotationsPerGainUnit;
@@ -358,9 +349,8 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
                                : thrifty::NovaConfig::Pid1::AllowableError(tolerance->value()));
       }
 
-      // The motion profile slot: its constraints, kV and kA for the motion profile, and kS and kG,
-      // which the Nova applies with or without one. Without a motion profile, kV goes with each
-      // velocity request instead.
+      // The motion profile slot: its constraints for the motion profile, and kS, kV, kA and kG,
+      // which the Nova applies with or without one.
       double kS = 0.0, kV = 0.0, kA = 0.0, kG = 0.0;
       auto gravityType = thrifty::Motor::MPGravityType::CONSTANT;
       if (auto ff = config.GetArmFeedforward(slot)) {
@@ -382,7 +372,8 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         kV = ff->GetKv().value();
         kA = ff->GetKa().value();
       }
-      if (!trapezoidProfile) kV = 0.0;
+      // Without a profile or a feedforward, the slot has nothing to send.
+      if (!trapezoidProfile && kS == 0.0 && kV == 0.0 && kA == 0.0 && kG == 0.0) continue;
       novaConfig.Add(
           slot0 ? thrifty::NovaConfig::mp0(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType)
                 : thrifty::NovaConfig::mp1(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType));
@@ -700,28 +691,13 @@ void NovaWrapper::SetPosition(wpi::units::meter_t distance) {
   SetPosition(m_config->ConvertToMechanism(distance));
 }
 
-double NovaWrapper::VelocityFeedforwardVolts(double mechanismRotationsPerSecond) const {
-  double kV = 0.0;
-  if (auto ff = m_config->GetArmFeedforward(m_slot)) {
-    // ArmFeedforward gains are per radian; the Nova's are per rotation.
-    kV = wpi::units::unit_t<TurnKv>{ff->GetKv()}.value();
-  } else if (auto ff = m_config->GetElevatorFeedforward(m_slot)) {
-    // An elevator's kV is per meter per second.
-    kV = ff->GetKv().value() / m_config->ConvertToMechanism(wpi::units::meter_t{1.0}).value();
-  } else if (auto ff = m_config->GetSimpleFeedforward(m_slot)) {
-    kV = ff->GetKv().value();
-  }
-  return kV * mechanismRotationsPerSecond;
-}
-
 void NovaWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
   if (m_closedLoopOnNova) {
-    const auto request = thrifty::MotorControl::VoltageVelocity(velocity.value())
-                             .WithFeedForward(VelocityFeedforwardVolts(velocity.value()))
-                             .WithSlot(m_novaSlot);
+    const auto request =
+        thrifty::MotorControl::VoltageVelocity(velocity.value()).WithSlot(m_novaSlot);
     m_nova->Control(request);
     if (m_novaSim) m_novaSim->SetControlRequest(request);
   }
@@ -735,8 +711,7 @@ void NovaWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
   m_setpointFeedforwardForce = feedforwardForce;
   if (m_closedLoopOnNova) {
     const auto request = thrifty::MotorControl::VoltageVelocity(velocity.value())
-                             .WithFeedForward(VelocityFeedforwardVolts(velocity.value()) +
-                                              m_config->ConvertToVoltage(m_motor, feedforwardForce).value())
+                             .WithFeedForward(m_config->ConvertToVoltage(m_motor, feedforwardForce).value())
                              .WithSlot(m_novaSlot);
     m_nova->Control(request);
     if (m_novaSim) m_novaSim->SetControlRequest(request);

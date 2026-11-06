@@ -70,7 +70,8 @@ void NovaSimSupplier::UpdateSim() {
         status.GetAbsWrapping() && absoluteFeedback
             ? position + wpi::math::InputModulus(m_request->GetTarget() - position, -0.5, 0.5)
             : m_request->GetTarget();
-    // The motion profile slot's kS and kG, which the Nova applies with or without a motion profile.
+    // The motion profile slot's kS, kV and kG, which the Nova applies with or without a motion
+    // profile.
     const double slotKs = slot1 ? status.Mp1.GetKS() : status.Mp0.GetKS();
     const double slotKg =
         (slot1 ? status.Mp1.GetKG() : status.Mp0.GetKG()) *
@@ -83,7 +84,9 @@ void NovaSimSupplier::UpdateSim() {
     // type.
     if (m_request->GetControlType() == thrifty::MotorControl::VoltageVelocity(0).GetControlType()) {
       error = m_request->GetTarget() - velocity;
-      feedforward += slotKs * Sign(m_request->GetTarget()) + slotKg;
+      feedforward += slotKs * Sign(m_request->GetTarget()) +
+                     (slot1 ? status.Mp1.GetKV() : status.Mp0.GetKV()) * m_request->GetTarget() +
+                     slotKg;
     } else if (m_request->GetControlType() ==
                thrifty::MotorControl::MotionProfile(0).GetControlType()) {
       const double kS = slot1 ? status.Mp1.GetKS() : status.Mp0.GetKS();

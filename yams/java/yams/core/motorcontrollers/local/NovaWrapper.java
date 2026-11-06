@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.wpilib.framework.RobotBase;
-import org.wpilib.math.controller.SimpleMotorFeedforward;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.Models;
 import org.wpilib.math.trajectory.ExponentialProfile;
@@ -85,10 +84,8 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * SystemCore instead, and commands the Nova with voltage: an LQR, an exponential profile, a
  * velocity trapezoidal profile, an absolute encoder closing the loop read over a range other than
  * [0, 1) without continuous wrapping, and continuous wrapping of an absolute encoder geared to the
- * mechanism. The Nova applies its slot's kS and kG with or without a motion profile. Without a
- * trapezoidal profile, it is sent kV times the velocity target with each velocity request, and kA,
- * which needs the motion profile's acceleration, throws a
- * {@link SmartMotorControllerConfigurationException}.
+ * mechanism. The Nova applies its motion profile slot's kS, kV, kA and kG with or without a
+ * motion profile.
  * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
  * closed loop, so in simulation a {@link NovaSimSupplier} runs it.
  *
@@ -480,10 +477,9 @@ public class NovaWrapper extends SmartMotorController {
           setpointFeedforwardForce
               .map(force -> m_config.convertToVoltage(getDCMotor(), force).in(Volts))
               .orElse(0.0);
-      final double velocity = angularVelocity.in(RotationsPerSecond);
       final MotorControlRequest request =
-          MotorControl.voltageVelocity(velocity)
-              .withFeedForward(velocityFeedforwardVolts(velocity) + forceVolts)
+          MotorControl.voltageVelocity(angularVelocity.in(RotationsPerSecond))
+              .withFeedForward(forceVolts)
               .withSlot(m_novaSlot);
       m_nova.control(request);
       m_novaSim.ifPresent(novaSim -> novaSim.setControlRequest(request));
@@ -497,27 +493,6 @@ public class NovaWrapper extends SmartMotorController {
         }
       }
     });
-  }
-
-  /**
-   * The closed loop slot's kV times a velocity target, sent to the Nova with each velocity request:
-   * the Nova applies kV only in its motion profile, which is for position.
-   *
-   * @param mechanismRotationsPerSecond Velocity target, in mechanism rotations per second.
-   * @return The kV feedforward, in volts.
-   */
-  private double velocityFeedforwardVolts(double mechanismRotationsPerSecond) {
-    final double kV;
-    if (m_config.getArmFeedforward(m_slot).isPresent()) {
-      kV = m_config.getArmFeedforward(m_slot).get().getKv();
-    } else if (m_config.getElevatorFeedforward(m_slot).isPresent()) {
-      // An elevator's kV is per meter per second.
-      kV = m_config.getElevatorFeedforward(m_slot).get().getKv()
-          / m_config.convertToMechanism(Meters.of(1)).in(Rotations);
-    } else {
-      kV = m_config.getSimpleFeedforward(m_slot).map(SimpleMotorFeedforward::getKv).orElse(0.0);
-    }
-    return kV * mechanismRotationsPerSecond;
   }
 
   /**
@@ -563,17 +538,6 @@ public class NovaWrapper extends SmartMotorController {
   }
 
   /**
-   * Whether the Nova wraps continuously itself: over the [0, 1) its absolute encoder on the
-   * mechanism, closing its loop, reads.
-   *
-   * @return Whether the Nova wraps continuously.
-   */
-  private boolean novaWrapsContinuously() {
-    return m_config.isWrappingContinuous()
-        && (m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER);
-  }
-
-  /**
    * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
    * continuous wrapping, the Nova wraps an absolute encoder over [0, 1) itself, so the target is
    * sent in [0, 1). Its motor's and a quadrature encoder count on past a rotation, so the target is
@@ -586,7 +550,8 @@ public class NovaWrapper extends SmartMotorController {
     if (!m_config.isWrappingContinuous()) {
       return angle.in(Rotations);
     }
-    if (novaWrapsContinuously()) {
+    // The Nova wraps an absolute encoder closing its loop itself.
+    if (m_feedbackSensor == FeedbackSensorType.ABS || m_feedbackSensor == FeedbackSensorType.CAN_ENCODER) {
       return MathUtil.inputModulus(angle.in(Rotations), 0, 1);
     }
     final double position = (m_feedbackSensor == FeedbackSensorType.QUAD
@@ -717,21 +682,6 @@ public class NovaWrapper extends SmartMotorController {
           }
           continue;
         }
-        // Without a motion profile, the Nova applies its slot's kS and kG, and is sent kV times
-        // the velocity target with each velocity request. kA needs the motion profile's
-        // acceleration.
-        if (m_trapezoidProfile.isEmpty()) {
-          final boolean acceleration =
-              armFeedforward.filter(ff -> ff.getKa() != 0).isPresent()
-              || elevatorFeedforward.filter(ff -> ff.getKa() != 0).isPresent()
-              || simpleFeedforward.filter(ff -> ff.getKa() != 0).isPresent();
-          if (acceleration) {
-            throw new SmartMotorControllerConfigurationException(
-                "Thrifty Nova applies kA only with a motion profile",
-                "Feedforward could not be applied without a motion profile",
-                "withTrapezoidalProfile, or a feedforward without kA");
-          }
-        }
         final boolean slot0 = closedLoopControlSlot == ClosedLoopControllerSlot.SLOT_0;
         if (pid.isPresent()) {
           final double kP = pid.get().getP() / m_rotationsPerGainUnit;
@@ -745,9 +695,8 @@ public class NovaWrapper extends SmartMotorController {
                                       : NovaConfig.Pid1.allowableError(tolerance.in(Rotations))));
         }
 
-        // The motion profile slot: its constraints, kV and kA for the motion profile, and kS and
-        // kG, which the Nova applies with or without one. Without a motion profile, kV goes with
-        // each velocity request instead.
+        // The motion profile slot: its constraints for the motion profile, and kS, kV, kA and kG,
+        // which the Nova applies with or without one.
         final boolean profile = config.getTrapezoidProfile().isPresent();
         final double maxVelocity =
             profile ? config.getTrapezoidProfile().get().maxVelocity * m_rotationsPerGainUnit : 0;
@@ -776,8 +725,9 @@ public class NovaWrapper extends SmartMotorController {
           kV = simpleFeedforward.get().getKv();
           kA = simpleFeedforward.get().getKa();
         }
-        if (!profile) {
-          kV = 0;
+        // Without a profile or a feedforward, the slot has nothing to send.
+        if (!profile && kS == 0 && kV == 0 && kA == 0 && kG == 0) {
+          continue;
         }
         novaConfig.add(slot0
                 ? NovaConfig.mp0(maxVelocity, maxAcceleration, kV, kA, kS, kG, gravityType)

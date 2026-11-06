@@ -432,12 +432,10 @@ and `withContinuousWrapping` on a swerve azimuth or turret that can turn all the
   can wrap too, such as a swerve azimuth seeded from a CANcoder: each target is sent as the
   equivalent nearest the mechanism, so the Nova takes the short way. A Nova azimuth with a CANcoder
   now works like a SPARK MAX with one.
-- **A Thrifty Nova takes a feedforward without a motion profile.** The Nova runs the loop: it
-  applies its slot's kS and kG, and is sent kV times the velocity target with each velocity
-  request, so a Nova swerve drive motor or flywheel keeps its feedforward on the Nova. kA needs the
-  motion profile's acceleration, so without a trapezoidal profile a nonzero kA throws a
-  `SmartMotorControllerConfigurationException`. A velocity trapezoidal profile added only to keep a
-  Nova's feedforward on the SystemCore can be removed.
+- **A Thrifty Nova takes a feedforward without a motion profile.** The Nova runs the loop and
+  applies its motion profile slot's kS, kV, kA and kG, which YAMS sends with or without a profile,
+  so a Nova swerve drive motor or flywheel keeps its feedforward on the Nova. A velocity
+  trapezoidal profile added only to keep a Nova's feedforward on the SystemCore can be removed.
 - **A Thrifty Nova's closed loop runs on the SystemCore when the Nova can't run it**, instead of
   throwing a `SmartMotorControllerConfigurationException`, as every Nova did before v2026.11.05:
   - an absolute encoder closing the loop read over a range other than [0, 1) without continuous

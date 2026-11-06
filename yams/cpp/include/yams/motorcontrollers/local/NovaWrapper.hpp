@@ -355,11 +355,6 @@ class NovaWrapper : public SmartMotorController {
    * sent as the equivalent nearest the mechanism, the short way round.
    */
   double NovaPositionTarget(wpi::units::turn_t angle);
-  /**
-   * The closed loop slot's kV times a velocity target, in volts, sent to the Nova with each velocity
-   * request: the Nova applies a feedforward of its own only in its motion profile, for position.
-   */
-  double VelocityFeedforwardVolts(double mechanismRotationsPerSecond) const;
   /** Angle of the external encoder's shaft, if any. */
   std::optional<wpi::units::turn_t> GetExternalEncoderSensorPosition();
   /** Velocity of the external encoder's shaft, if any. */
