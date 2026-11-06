@@ -79,6 +79,8 @@ class DCMotorSimSupplier : public SimSupplier {
   wpi::units::second_t m_period;
   const void* m_batteryKey;
   wpi::math::LinearFilter<double> m_supplyCurrentFilter;
+  /** Supply current, filtered once per simulation step, so reading it does not step the filter. */
+  wpi::units::ampere_t m_supplyCurrent{0};
   bool m_inputFed{false};
   bool m_simUpdated{false};
   wpi::units::volt_t m_lastInputVoltage{0};

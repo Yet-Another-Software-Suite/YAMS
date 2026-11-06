@@ -145,4 +145,36 @@ TEST_CASE_METHOD(FollowerSimulationFixture,
   CHECK(BatteryCounts(follower));
 }
 
+TEST_CASE_METHOD(FollowerSimulationFixture,
+                 "FollowerSimulation.LooseFollowerWithItsOwnFollowerIsInTheMechanismMotor",
+                 "[FollowerSimulation]") {
+  // Two A301s, each followed by another A301, the second a loosely coupled follower of the first:
+  // the mechanism has four A301s.
+  auto looseFollowerA301 = MakeA301();
+  auto looseFollowerCfg = OpenLoopConfig();
+  A301Wrapper looseFollower{looseFollowerA301.get(), &looseFollowerCfg};
+  auto looseA301 = MakeA301();
+  auto looseCfg = OpenLoopConfig();
+  looseCfg.WithFollowers({{std::any{&looseFollower}, false}});
+  A301Wrapper loose{looseA301.get(), &looseCfg};
+  auto leaderFollowerA301 = MakeA301();
+  auto leaderFollowerCfg = OpenLoopConfig();
+  A301Wrapper leaderFollower{leaderFollowerA301.get(), &leaderFollowerCfg};
+  auto leaderA301 = MakeA301();
+  auto leaderCfg = OpenLoopConfig();
+  leaderCfg.WithFollowers({{std::any{&leaderFollower}, false}}).WithLooselyCoupledFollowers({&loose});
+  A301Wrapper leader{leaderA301.get(), &leaderCfg};
+
+  const auto four = motorcontrollers::YMotors::A301(4);
+  const auto mechanism = leader.GetMechanismDCMotor();
+  CHECK(mechanism.stallTorque.value() == Catch::Approx(four.stallTorque.value()));
+  CHECK(mechanism.stallCurrent.value() == Catch::Approx(four.stallCurrent.value()));
+  CHECK(mechanism.freeCurrent.value() == Catch::Approx(four.freeCurrent.value()));
+  CHECK(mechanism.R.value() == Catch::Approx(four.R.value()));
+  CHECK(mechanism.Kv.value() == Catch::Approx(four.Kv.value()));
+  // The tight followers' current is in their leaders' already.
+  CHECK_FALSE(BatteryCounts(leaderFollower));
+  CHECK_FALSE(BatteryCounts(looseFollower));
+}
+
 }  // namespace yams::test

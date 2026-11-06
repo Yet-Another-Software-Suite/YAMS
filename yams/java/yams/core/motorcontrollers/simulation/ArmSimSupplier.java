@@ -71,6 +71,11 @@ public class ArmSimSupplier implements SimSupplier {
   private final Supplier<Double>     motorDutyCycleSupplier;
   private final DerivativeTimeFilter accel;
   private final LinearFilter         supplyCurrentFilter;
+  /**
+   * Supply current, filtered once per simulation step. Reading it does not step the filter, so
+   * every reader of a step, such as the battery, telemetry and followers, sees the same value.
+   */
+  private double supplyCurrentAmps = 0;
   private final SingleJointedArmSim  sim;
   private final MechanismGearing     mechGearing;
   private final Time                 simPeriod;
@@ -108,6 +113,8 @@ public class ArmSimSupplier implements SimSupplier {
         // A disabled robot's motors get no power, so the mechanism coasts or falls.
         sim.setInputVoltage(0);
       }
+      // Read before the step, which uses up the input voltage the current is drawn with.
+      supplyCurrentAmps = supplyCurrentFilter.calculate(motorDutyCycleSupplier.get() * sim.getCurrentDraw());
       sim.update(simPeriod.in(Seconds));
       try {
         // Thread.sleep(1);
@@ -211,8 +218,8 @@ public class ArmSimSupplier implements SimSupplier {
     // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
     // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
     // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
-    double dutyCycle = motorDutyCycleSupplier.get();
-    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
+    // It is filtered once per step, in updateSimState().
+    return Amps.of(supplyCurrentAmps);
   }
 
   @Override

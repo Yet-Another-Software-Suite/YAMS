@@ -78,13 +78,20 @@ public class FollowerSimulationTest {
 
   /** A closed loop config, with a subsystem named apart for the command registry. */
   private static SmartMotorControllerConfig config(String label) {
+    return (SmartMotorControllerConfig) unlimitedConfig(label).withStatorCurrentLimit(Amps.of(40));
+  }
+
+  /**
+   * A closed loop config without a current limit. A SPARK limits the current of the motors in its
+   * own DCMotor, so a limit would differ between one SPARK with four NEOs and two with two.
+   */
+  private static SmartMotorControllerConfig unlimitedConfig(String label) {
     SmartMotorControllerTestSubsystem subsys = new SmartMotorControllerTestSubsystem();
     subsys.setName(label + "[" + offset + "]");
     return (SmartMotorControllerConfig) new SmartMotorControllerConfig()
         .withClosedLoopController(40, 0, 0)
         .withGearing(GEARING)
         .withZeroPower(MotorMode.BRAKE)
-        .withStatorCurrentLimit(Amps.of(40))
         .withMotorInverted(false)
         .withControlMode(ControlMode.CLOSED_LOOP)
         .withMomentOfInertia(Inches.of(4), Pounds.of(1))
@@ -158,6 +165,8 @@ public class FollowerSimulationTest {
   }
 
   private static void close(SmartMotorController smc) {
+    // A command still running would command the closed motor controller.
+    CommandScheduler.getInstance().cancelAll();
     SmartMotorControllerTestSubsystem subsys = subsystem(smc);
     SmartMotorControllerCommandRegistry.removeCommands(subsys);
     CommandScheduler.getInstance().unregisterSubsystem(subsys);
@@ -311,6 +320,187 @@ public class FollowerSimulationTest {
     } finally {
       close(leader);
       close(follower);
+    }
+  }
+
+  /**
+   * Run the pivot to the setpoint.
+   *
+   * @return The pivot's angle in degrees every 100 ms for 2 s, then the battery voltage.
+   */
+  private static double[] runToSetpoint(SmartMotorControllerTestSubsystem subsys, SmartMotorController leader)
+      throws InterruptedException {
+    TestWithScheduler.schedule(subsys.setPositionSetpoint(Degrees.of(SETPOINT_DEGREES)));
+    double[] trace = new double[21];
+    // One cycle, as each restarts the robot's clock: the angle after every 100 ms of 20 ms loops.
+    int[] loops = {0};
+    TestWithScheduler.cycle(Seconds.of(2), () -> {
+      loops[0]++;
+      if (loops[0] % 5 == 0 && loops[0] / 5 <= 20) {
+        trace[loops[0] / 5 - 1] = simulatedDegrees(leader);
+      }
+      // The battery while the pivot accelerates, when the motors draw the most.
+      if (loops[0] == 5) {
+        trace[20] = RoboRioSim.getVInVoltage();
+      }
+    });
+    return trace;
+  }
+
+  /**
+   * Drive the pivot at a voltage. In open loop, no closed loop Notifier runs on the SystemCore, so
+   * every run steps the same.
+   *
+   * @return The pivot's angle in degrees every 100 ms for 2 s, then the battery voltage.
+   */
+  private static double[] runAtVoltage(SmartMotorController leader) throws InterruptedException {
+    leader.setVoltage(Volts.of(3));
+    double[] trace = new double[21];
+    int[] loops = {0};
+    TestWithScheduler.cycle(Seconds.of(2), () -> {
+      loops[0]++;
+      if (loops[0] % 5 == 0 && loops[0] / 5 <= 20) {
+        trace[loops[0] / 5 - 1] = simulatedDegrees(leader);
+      }
+      // The battery while the pivot accelerates, when the motors draw the most.
+      if (loops[0] == 5) {
+        trace[20] = RoboRioSim.getVInVoltage();
+      }
+    });
+    return trace;
+  }
+
+  /** A full battery: BatterySim's draws cleared, and the robot's input voltage back to 12 V. */
+  private static void resetBattery() {
+    BatterySim.reset();
+    RoboRioSim.setVInVoltage(12.0);
+  }
+
+  /** Pump a loosely coupled follower's simIterate and telemetry, as robot code does. */
+  private static void pump(SmartMotorController follower) {
+    SmartMotorControllerTestSubsystem subsys = subsystem(follower);
+    subsys.setSMC(follower);
+    subsys.testRunning = true;
+  }
+
+  private static void assertSameRun(double[] expected, double[] actual, String name) {
+    assertTrue(Math.abs(expected[19]) > 10, name + ": reference pivot did not move");
+    for (int i = 0; i < 20; i++) {
+      assertEquals(expected[i], actual[i], 1, name + ": pivot angle at " + (i + 1) * 100 + " ms");
+    }
+    // The battery sags with every motor's current, counted once.
+    assertTrue(expected[20] < 11.99, name + ": reference battery did not sag, at " + expected[20] + " V");
+    assertEquals(expected[20], actual[20], 0.005, name + ": battery voltage while accelerating");
+  }
+
+  /**
+   * Two SPARK MAXes, each with a SPARK MAX follower on its gearbox, the second a loosely coupled
+   * follower of the first, simulate as one SPARK MAX with four NEOs.
+   */
+  @Test
+  void looseFollowerWithItsOwnFollowerSimulatesEveryMotorOfSparks() throws InterruptedException {
+    SmartMotorController reference =
+        new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(4), ((SmartMotorControllerConfig) unlimitedConfig("FourNeos").withStatorCurrentLimit(Amps.of(1000))));
+    double[] expected;
+    try {
+      expected = runToSetpoint(pivot(reference), reference);
+    } finally {
+      close(reference);
+    }
+    resetBattery();
+
+    SparkMax leaderGearboxFollower = DeviceCreator.createSparkMax();
+    SparkMax looseGearboxFollower = DeviceCreator.createSparkMax();
+    SmartMotorController loose = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(2),
+        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LooseTwoNeos").withStatorCurrentLimit(Amps.of(1000))).withFollowers(Pair.of(looseGearboxFollower, false)));
+    SmartMotorController leader = new SparkWrapper(DeviceCreator.createSparkMax(), DCMotor.getNEO(2),
+        (SmartMotorControllerConfig) ((SmartMotorControllerConfig) unlimitedConfig("LeaderTwoNeos").withStatorCurrentLimit(Amps.of(1000)))
+            .withFollowers(Pair.of(leaderGearboxFollower, false))
+            .withLooselyCoupledFollowers(loose));
+    try {
+      DCMotor four = DCMotor.getNEO(4);
+      assertEquals(four.stallTorque, leader.getMechanismDCMotor().stallTorque, 1e-9);
+      assertEquals(four.stallCurrent, leader.getMechanismDCMotor().stallCurrent, 1e-9);
+      assertEquals(four.freeCurrent, leader.getMechanismDCMotor().freeCurrent, 1e-9);
+
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      pump(loose);
+      double[] actual = runToSetpoint(leaderSubsys, leader);
+      assertSameRun(expected, actual, "SPARK MAX");
+
+      // The loose follower and its gearbox follower are half of the motors, and half of the current,
+      // which the battery counts once, in the pivot's.
+      var mechanism = leader.getSimSupplier().orElseThrow();
+      assertEquals(mechanism.getStatorCurrent().in(Amps) / 2,
+          loose.getSimSupplier().orElseThrow().getStatorCurrent().in(Amps), 1e-9);
+      assertFalse(batteryCounts(loose));
+      assertEquals(simulatedDegrees(leader), loose.getMechanismPosition().in(Degrees), 1);
+    } finally {
+      close(leader);
+      close(loose);
+      leaderGearboxFollower.close();
+      looseGearboxFollower.close();
+    }
+  }
+
+  /**
+   * Two A301s, each followed by another A301, the second a loosely coupled follower of the first,
+   * simulate as one A301 followed by three.
+   */
+  @Test
+  void looseFollowerWithItsOwnFollowerSimulatesEveryMotorOfA301s() throws InterruptedException {
+    A301Wrapper[] referenceFollowers = {
+      a301(a301Config("RefFollower1")), a301(a301Config("RefFollower2")),
+      a301(a301Config("RefFollower3"))};
+    A301Wrapper reference = a301((SmartMotorControllerConfig) a301Config("FourA301s").withFollowers(
+        Pair.of(referenceFollowers[0], false), Pair.of(referenceFollowers[1], false),
+        Pair.of(referenceFollowers[2], false)));
+    double[] expected;
+    try {
+      assertEquals(YMotors.getA301(4).stallTorque, reference.getMechanismDCMotor().stallTorque, 1e-9);
+      pivot(reference);
+      expected = runAtVoltage(reference);
+    } finally {
+      close(reference);
+      for (var follower : referenceFollowers) {
+        close(follower);
+      }
+    }
+    resetBattery();
+
+    A301Wrapper looseGearboxFollower = a301(a301Config("LooseFollowerA301"));
+    A301Wrapper loose = a301((SmartMotorControllerConfig) a301Config("LooseTwoA301s")
+        .withFollowers(Pair.of(looseGearboxFollower, false)));
+    A301Wrapper leaderGearboxFollower = a301(a301Config("LeaderFollowerA301"));
+    A301Wrapper leader = a301((SmartMotorControllerConfig) a301Config("LeaderTwoA301s")
+        .withFollowers(Pair.of(leaderGearboxFollower, false))
+        .withLooselyCoupledFollowers(loose));
+    try {
+      assertEquals(YMotors.getA301(4).stallTorque, leader.getMechanismDCMotor().stallTorque, 1e-9);
+      assertEquals(YMotors.getA301(4).stallCurrent, leader.getMechanismDCMotor().stallCurrent, 1e-9);
+
+      pivot(leader);
+      // Every A301 reads the pivot's simulation: the loose follower's own follower through it.
+      assertTrue(loose.getSimSupplier().orElseThrow() instanceof FollowerSimSupplier);
+      assertTrue(looseGearboxFollower.getSimSupplier().orElseThrow() instanceof FollowerSimSupplier);
+      assertTrue(leaderGearboxFollower.getSimSupplier().orElseThrow() instanceof FollowerSimSupplier);
+      pump(loose);
+      double[] actual = runAtVoltage(leader);
+      assertSameRun(expected, actual, "A301");
+
+      // Each A301 draws a quarter of the current, and the battery counts it once, in the pivot's.
+      var mechanism = leader.getSimSupplier().orElseThrow();
+      for (A301Wrapper follower : new A301Wrapper[] {leaderGearboxFollower, looseGearboxFollower}) {
+        assertEquals(mechanism.getStatorCurrent().in(Amps) / 4, follower.getStatorCurrent().in(Amps), 1e-9);
+        assertFalse(batteryCounts(follower));
+      }
+      assertFalse(batteryCounts(loose));
+      assertEquals(simulatedDegrees(leader), looseGearboxFollower.getMechanismPosition().in(Degrees), 1e-6);
+    } finally {
+      close(leader);
+      close(leaderGearboxFollower);
+      close(loose);
+      close(looseGearboxFollower);
     }
   }
 

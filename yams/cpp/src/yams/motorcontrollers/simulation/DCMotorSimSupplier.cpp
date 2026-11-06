@@ -34,6 +34,9 @@ void DCMotorSimSupplier::UpdateSim() {
       m_lastInputVoltage = wpi::units::volt_t{0};
       m_sim.SetInputVoltage(m_lastInputVoltage);
     }
+    // Read before the step, which uses up the input voltage the current is drawn with.
+    m_supplyCurrent = wpi::units::ampere_t{
+        m_supplyCurrentFilter.Calculate(m_dutyCycleSupplier() * m_sim.GetCurrentDraw().value())};
     m_sim.Update(m_period);
     FeedUpdateSim();
   }
@@ -106,9 +109,8 @@ wpi::units::ampere_t DCMotorSimSupplier::GetStatorCurrent() { return m_sim.GetCu
 wpi::units::ampere_t DCMotorSimSupplier::GetSupplyCurrent() {
   // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
   // transformation, so supplyCurrent = dutyCycle * statorCurrent.
-  double dutyCycle = m_dutyCycleSupplier();
-  return wpi::units::ampere_t{
-      m_supplyCurrentFilter.Calculate(dutyCycle * m_sim.GetCurrentDraw().value())};
+  // It is filtered once per step, in UpdateSim().
+  return m_supplyCurrent;
 }
 
 }  // namespace yams::motorcontrollers::simulation
