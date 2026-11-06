@@ -84,17 +84,44 @@ public class NovaConfigTest {
     assertEquals(1, smc.getClosedLoopControllerPeriod().in(Milliseconds), 1e-9, what + " runs on the Nova");
   }
 
-  /** The Nova applies a feedforward only in its motion profile, so without one the SystemCore runs it. */
+  /**
+   * Without a motion profile, the Nova runs the loop: it applies its slot's kS and kG, and is sent kV times the velocity
+   * target with each request. kA needs the motion profile's acceleration, so without one it throws.
+   */
   @Test
-  void feedforwardWithoutAMotionProfileRunsOnTheSystemCore() {
-    assertOnSystemCore(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-        config("feedforward").withFeedforward(new ArmFeedforward(0, 0.2, 0, 0))), "a feedforward without a profile");
-    assertOnSystemCore(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-        config("velocity kV").withFeedforward(new SimpleMotorFeedforward(0, 1, 0))), "a velocity loop's kV");
+  void feedforwardWithoutAMotionProfile() throws InterruptedException {
     assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
-        config("feedforward with profile").withFeedforward(new ArmFeedforward(0, 0.2, 0, 0))
+        config("velocity kS and kV").withFeedforward(new SimpleMotorFeedforward(0.1, 1, 0))), "a velocity loop's kS and kV");
+    final Nova armNova = DeviceCreator.createNova();
+    assertOnNova(new NovaWrapper(armNova, DCMotor.getNEO(1),
+        config("arm kG").withFeedforward(new ArmFeedforward(0.1, 0.2, 0, 0))), "an arm's kS and kG");
+    assertEventually(() -> Math.abs(armNova.status().Mp0.getKG() - 0.2) < 1e-6, "kG on the Nova");
+    assertEventually(() -> Math.abs(armNova.status().Mp0.getKS() - 0.1) < 1e-6, "kS on the Nova");
+    assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("feedforward with profile").withFeedforward(new ArmFeedforward(0.1, 0.2, 1, 0.1))
             .withTrapezoidalProfile(RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2))), "a profiled feedforward");
     assertOnNova(new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config("PID only")), "a PID");
+    final var exception = assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+            config("kA").withFeedforward(new SimpleMotorFeedforward(0, 1, 0.1))));
+    assertTrue(exception.getMessage().contains("kA"), exception.getMessage());
+  }
+
+  /** A velocity loop with only kV, and no motion profile, reaches its velocity on the Nova in simulation. */
+  @Test
+  void velocityKvReachesTheVelocity() {
+    final NovaWrapper smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1),
+        config("velocity kV in simulation").withClosedLoopController(0.1, 0, 0)
+            .withFeedforward(new SimpleMotorFeedforward(0, 12.0 / (DCMotor.getNEO(1).freeSpeed / (2 * Math.PI) / kGearRatio), 0))
+            .withMomentOfInertia(Inches.of(4), Pounds.of(1)));
+    assertOnNova(smc, "a velocity loop's kV");
+    DriverStationSim.setEnabled(true);
+    DriverStationSim.notifyNewData();
+    smc.setVelocity(RotationsPerSecond.of(3));
+    for (int i = 0; i < 150; i++) {
+      smc.simIterate();
+    }
+    assertEquals(3, smc.getMechanismVelocity().in(RotationsPerSecond), 0.15, "3 rotations per second");
   }
 
   @Test

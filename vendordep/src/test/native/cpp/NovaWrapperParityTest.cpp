@@ -347,19 +347,34 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
     CheckNova(1.0, [&] { return nova->Status().Mp0.GetKV(); }, "kV");
     CheckNova(0.5, [&] { return nova->Status().Mp0.GetKA(); }, "kA");
   }
-  SECTION("A feedforward without a motion profile runs on the SystemCore") {
-    // The Nova applies a feedforward only in its motion profile, so a velocity loop's kV, for one,
-    // runs on the SystemCore, at its 20 ms period rather than the Nova's 1 ms.
+  SECTION("A feedforward without a motion profile") {
+    // The Nova runs the loop and is sent kV times the velocity target with each request.
     auto nova = MakeNova();
     auto cfg = BaseConfig();
     cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.0));
     NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
-    CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+    CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+
+    // It applies its slot's kS and kG with or without a motion profile.
+    auto staticNova = MakeNova();
+    auto staticCfg = BaseConfig();
+    staticCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
+    NovaWrapper withStatic{staticNova.get(), wpi::math::DCMotor::NEO(1), &staticCfg};
+    CHECK(withStatic.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+    CheckNova(0.1, [&] { return staticNova->Status().Mp0.GetKS(); }, "kS on the Nova");
+
+    // kA needs the motion profile's acceleration.
+    auto accelerationNova = MakeNova();
+    auto accelerationCfg = BaseConfig();
+    accelerationCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.1));
+    CHECK_THROWS_AS(
+        (NovaWrapper{accelerationNova.get(), wpi::math::DCMotor::NEO(1), &accelerationCfg}),
+        ConfigException);
 
     auto profiledNova = MakeNova();
     auto profiledCfg = BaseConfig();
     profiledCfg.WithFeedback(1.0, 0.0, 0.0)
-        .WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.0))
+        .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.1))
         .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
                               wpi::units::turns_per_second_squared_t{2.0});
     NovaWrapper profiled{profiledNova.get(), wpi::math::DCMotor::NEO(1), &profiledCfg};
@@ -428,10 +443,11 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
     // the Nova, sent the target nearest the mechanism.
     NovaWrapper motorEncoder{motorEncoderNova.get(), wpi::math::DCMotor::NEO(1), &motorEncoderCfg};
     CHECK(motorEncoder.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+    // In simulation, from 3.2 rotations to 3.25 for a target of 0.25, not back to 0.25.
     motorEncoder.SetEncoderPosition(wpi::units::turn_t{3.2});
     motorEncoder.SetPosition(wpi::units::turn_t{0.25});
-    CheckNova(3.25, [&] { return motorEncoderNova->Status().GetSetPoint(); },
-              "the target nearest the mechanism");
+    Step(motorEncoder, 150);
+    CHECK(motorEncoder.GetRelativeMechanismPosition().value() == Catch::Approx(3.25).margin(0.1));
 
     // The Nova wraps an absolute encoder over any range, sent each target in [0, 1).
     auto halfNova = MakeNova();
