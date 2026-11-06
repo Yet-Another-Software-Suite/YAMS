@@ -68,6 +68,17 @@ public class VendorSimulationTest {
   private static int offset = 0;
 
   private static SmartMotorControllerConfig config(String label, ControlMode mode, double currentLimitAmps) {
+    return config(label, mode, currentLimitAmps, 4, 1);
+  }
+
+  /**
+   * A config for a pivot with a moment of inertia of a mass at a radius.
+   *
+   * @param radiusInches Radius of the mass.
+   * @param massPounds Mass on the pivot.
+   */
+  private static SmartMotorControllerConfig config(
+      String label, ControlMode mode, double currentLimitAmps, double radiusInches, double massPounds) {
     SmartMotorControllerTestSubsystem subsys = new SmartMotorControllerTestSubsystem();
     subsys.setName(label + "[" + offset + "]");
     SmartMotorControllerConfig cfg = (SmartMotorControllerConfig) new SmartMotorControllerConfig()
@@ -76,7 +87,7 @@ public class VendorSimulationTest {
         .withStatorCurrentLimit(Amps.of(currentLimitAmps))
         .withMotorInverted(false)
         .withControlMode(mode)
-        .withMomentOfInertia(Inches.of(4), Pounds.of(1))
+        .withMomentOfInertia(Inches.of(radiusInches), Pounds.of(massPounds))
         .withStartingPosition(Degrees.of(0))
         .withSubsystem(subsys)
         .withTelemetry(label + "[" + offset + "]", TelemetryVerbosity.HIGH);
@@ -84,6 +95,26 @@ public class VendorSimulationTest {
       cfg.withClosedLoopController(40, 0, 0);
     }
     return cfg;
+  }
+
+  /**
+   * Phoenix runs a Talon's simulation and status signals in real time, while the tests step the
+   * robot's time faster, so a Talon's loops are paced at the real loop period.
+   */
+  private static boolean s_realTime = false;
+
+  /** Every loop of a cycle, paced at 20 ms of real time for a Talon. */
+  private static Runnable paced(Runnable everyLoop) {
+    return () -> {
+      if (s_realTime) {
+        try {
+          Thread.sleep(20);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+      }
+      everyLoop.run();
+    };
   }
 
   private static Stream<Arguments> vendorSimulated() {
@@ -147,7 +178,7 @@ public class VendorSimulationTest {
   private static double runAtVoltage(SmartMotorController smc, double volts, double seconds, Runnable everyLoop)
       throws InterruptedException {
     smc.setVoltage(Volts.of(volts));
-    TestWithScheduler.cycle(Seconds.of(seconds), everyLoop);
+    TestWithScheduler.cycle(Seconds.of(seconds), paced(everyLoop));
     return mechanism(smc).getMechanismPosition().in(Degrees);
   }
 
@@ -156,6 +187,7 @@ public class VendorSimulationTest {
   void vendorEncoderFollowsTheMechanism(
       String name, Function<SmartMotorControllerConfig, SmartMotorController> create) throws InterruptedException {
     SmartMotorController smc = create.apply(config("Encoder(" + name + ")", ControlMode.OPEN_LOOP, 40));
+    s_realTime = smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper;
     try {
       pivot(smc);
       double degrees = runAtVoltage(smc, 2, 0.5, () -> {});
@@ -175,14 +207,16 @@ public class VendorSimulationTest {
   void mechanismIsGivenTheVendorOutput(
       String name, Function<SmartMotorControllerConfig, SmartMotorController> create) throws InterruptedException {
     SmartMotorController smc = create.apply(config("Output(" + name + ")", ControlMode.OPEN_LOOP, 40));
+    s_realTime = smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper;
     try {
       pivot(smc);
       double[] largestError = {0};
       double[] largestDutyCycle = {0};
       int[] loops = {0};
       runAtVoltage(smc, 3, 0.5, () -> {
-        // After the vendor simulation has applied the command.
-        if (++loops[0] > 3) {
+        // After the vendor simulation has applied the command: a Talon's motor voltage reaches the
+        // pivot in its next simIterate(), so it is a loop behind while its output rises.
+        if (++loops[0] > 5) {
           double vendorVolts = smc.getDutyCycle() * RoboRioSim.getVInVoltage();
           double mechanismVolts = mechanism(smc).getMechanismStatorVoltage().in(Volts);
           largestError[0] = Math.max(largestError[0], Math.abs(vendorVolts - mechanismVolts));
@@ -206,10 +240,12 @@ public class VendorSimulationTest {
     double[] limitsAmps = {120, 10};
     for (int i = 0; i < 2; i++) {
       SmartMotorController smc =
-          create.apply(config("Limit" + (int) limitsAmps[i] + "(" + name + ")", ControlMode.OPEN_LOOP, limitsAmps[i]));
+          // A heavy pivot, so the motor is still slow, and drawing a high current, at 100 ms.
+          create.apply(config("Limit" + (int) limitsAmps[i] + "(" + name + ")", ControlMode.OPEN_LOOP, limitsAmps[i], 36, 30));
+      s_realTime = smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper;
       try {
         pivot(smc);
-        // From a standstill at 12 V, a motor draws far more than 10 A.
+        // From a standstill at 12 V, a motor draws far more than 10 A, until it is near its free speed.
         int[] loops = {0};
         int sample = i;
         degrees[i] = runAtVoltage(smc, 12, 0.2, () -> {
@@ -234,10 +270,11 @@ public class VendorSimulationTest {
   void vendorClosedLoopReachesTheSetpoint(
       String name, Function<SmartMotorControllerConfig, SmartMotorController> create) throws InterruptedException {
     SmartMotorController smc = create.apply(config("ClosedLoop(" + name + ")", ControlMode.CLOSED_LOOP, 40));
+    s_realTime = smc instanceof TalonFXWrapper || smc instanceof TalonFXSWrapper;
     try {
       SmartMotorControllerTestSubsystem subsys = pivot(smc);
       TestWithScheduler.schedule(subsys.setPositionSetpoint(Degrees.of(SETPOINT_DEGREES)));
-      TestWithScheduler.cycle(Seconds.of(3));
+      TestWithScheduler.cycle(Seconds.of(3), paced(() -> {}));
       assertEquals(SETPOINT_DEGREES, mechanism(smc).getMechanismPosition().in(Degrees), 2, name + ": pivot");
       assertEquals(SETPOINT_DEGREES, smc.getMechanismPosition().in(Degrees), 2, name + ": encoder");
     } finally {
