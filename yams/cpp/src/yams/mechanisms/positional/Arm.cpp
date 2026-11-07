@@ -83,13 +83,13 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     wpi::units::radian_t startAngle =
         m_smc->GetConfig().GetStartingPosition().value_or(wpi::units::turn_t{0});
 
-    m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
+    m_armSim.emplace(m_smc->GetMechanismDCMotor(), gearing.GetMechanismToRotorRatio(),
                      m_smc->GetConfig().GetMOI(), m_armConfig->GetArmLength().value(),
                      wpi::units::radian_t{m_armConfig->GetMinAngle().value()},
                      wpi::units::radian_t{m_armConfig->GetMaxAngle().value()}, true, startAngle,
                      std::array<double, 2>{0, 0.002 / 4096.0});
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
         *m_armSim, *m_smc));
 
     // Build Mechanism2d window.

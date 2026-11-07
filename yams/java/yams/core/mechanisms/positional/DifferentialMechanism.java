@@ -151,10 +151,10 @@ public class DifferentialMechanism extends SmartPositionalMechanism {
       m_tiltRoot = new Translation2d(m_armLength.in(Meters), 0);
 
       // Setup Sim
-      m_leftSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_leftSMC.getDCMotor(), m_config.getMOI(), m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_leftSMC.getDCMotor()));
-      m_rightSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_rightSMC.getDCMotor(), m_config.getMOI(), m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_rightSMC.getDCMotor()));
-      m_leftSMC.setSimSupplier(new DCMotorSimSupplier(m_leftSim.get(), m_leftSMC));
-      m_rightSMC.setSimSupplier(new DCMotorSimSupplier(m_rightSim.get(), m_rightSMC));
+      m_leftSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_leftSMC.getMechanismDCMotor(), m_config.getMOI(), m_leftSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_leftSMC.getMechanismDCMotor()));
+      m_rightSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_rightSMC.getMechanismDCMotor(), m_config.getMOI(), m_rightSMC.getConfig().getGearing().getMechanismToRotorRatio()), m_rightSMC.getMechanismDCMotor()));
+      m_leftSMC.setMechanismSimSupplier(new DCMotorSimSupplier(m_leftSim.get(), m_leftSMC));
+      m_rightSMC.setMechanismSimSupplier(new DCMotorSimSupplier(m_rightSim.get(), m_rightSMC));
 
       m_mechanismWindow = new Mechanism2d(mechPosCfg.getWindowXDimension(m_armLength).plus(Inches.of(4)).in(Meters), mechPosCfg.getWindowYDimension(m_armLength.plus(Inches.of(4))).in(Meters));
       m_mechanismRoot = m_mechanismWindow.getRoot("Root", m_tiltRoot.getX(), m_tiltRoot.getY());
