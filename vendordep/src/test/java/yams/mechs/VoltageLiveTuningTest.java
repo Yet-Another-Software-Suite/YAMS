@@ -177,8 +177,9 @@ public class VoltageLiveTuningTest {
     SmartMotorController leader = createLeader.apply(
         (SmartMotorControllerConfig) leaderConfig.apply(config(leaderName)).withLooselyCoupledFollowers(follower));
     try {
-      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       pivot(follower);
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
 
       // Hold both pivots at 0°, which also sets up the telemetry and registers Live Tuning.
       TestWithScheduler.schedule(leaderSubsys.setPositionSetpoint(Degrees.of(0)));
@@ -238,8 +239,9 @@ public class VoltageLiveTuningTest {
     SmartMotorController leader = createLeader.apply(
         (SmartMotorControllerConfig) leaderConfig.apply(config(leaderName)).withLooselyCoupledFollowers(follower));
     try {
-      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       pivot(follower);
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
 
       TestWithScheduler.schedule(leaderSubsys.setPositionSetpoint(Degrees.of(0)));
       TestWithScheduler.cycle(Seconds.of(0.5));

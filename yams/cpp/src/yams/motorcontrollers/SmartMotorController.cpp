@@ -640,6 +640,8 @@ wpi::math::DCMotor SmartMotorController::GetMechanismDCMotor() {
   auto stallCurrent = motor.stallCurrent;
   auto freeCurrent = motor.freeCurrent;
   for (auto* follower : m_looseFollowers) {
+    // It drives its own mechanism, not this one.
+    if (follower->m_simulatesMechanism) continue;
     const auto followerMotor = follower->GetMechanismDCMotor();
     // The follower's torque at the mechanism, given at this motor's rotor.
     stallTorque += followerMotor.stallTorque * (ratioOf(*follower) / ratio);
@@ -655,7 +657,10 @@ void SmartMotorController::SetMechanismSimSupplier(std::shared_ptr<SimSupplier> 
   m_simulatesMechanism = true;
   // A motor controller with its own mechanism is not simulated by a leader.
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), false);
-  for (auto* follower : m_looseFollowers) follower->Follow(*this, false);
+  for (auto* follower : m_looseFollowers) {
+    // A follower with its own mechanism keeps simulating it.
+    if (!follower->m_simulatesMechanism) follower->Follow(*this, false);
+  }
 }
 
 double SmartMotorController::GetMechanismDutyCycle(double dutyCycle) {
@@ -684,6 +689,8 @@ double SmartMotorController::CalculateSimDutyCycle(double dutyCycle) {
   double totalWeight = GetDCMotor().stallTorque.value();
   double weighted = dutyCycle * totalWeight;
   for (auto* follower : m_looseFollowers) {
+    // It drives its own mechanism, not this one.
+    if (follower->m_simulatesMechanism) continue;
     // A motor's torque for a voltage, at this motor's rotor.
     const double weight =
         follower->GetMechanismDCMotor().stallTorque.value() * ratioOf(*follower) / ratio;
@@ -697,7 +704,9 @@ void SmartMotorController::Follow(SmartMotorController& leader, bool inverted) {
   SetSimSupplier(std::make_shared<simulation::FollowerSimSupplier>(leader, *this, inverted));
   m_iteratedByLeader = true;
   simulation::BatterySim::SetSimulatedByLeader(BatterySimKey(), true);
-  for (auto* follower : m_looseFollowers) follower->Follow(leader, false);
+  for (auto* follower : m_looseFollowers) {
+    if (!follower->m_simulatesMechanism) follower->Follow(leader, false);
+  }
 }
 
 void SmartMotorController::LoadLooselyCoupledFollowers() {

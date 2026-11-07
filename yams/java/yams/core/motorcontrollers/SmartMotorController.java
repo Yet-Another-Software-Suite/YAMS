@@ -275,6 +275,10 @@ public abstract class SmartMotorController {
     double totalWeight = getDCMotor().stallTorque;
     double weighted = dutyCycle * totalWeight;
     for (var follower : m_looseFollowers.get()) {
+      if (follower.m_simulatesMechanism) {
+        // It drives its own mechanism, not this one.
+        continue;
+      }
       // A motor's torque for a voltage, at this motor's rotor.
       final double weight = follower.getMechanismDCMotor().stallTorque
           * follower.getConfig().getGearing().getMechanismToRotorRatio() / ratio;
@@ -1480,8 +1484,9 @@ public abstract class SmartMotorController {
 
   /**
    * Get the motors of the mechanism this motor controller drives: its own {@link #getDCMotor()} and
-   * its loosely coupled followers'. A mechanism simulates every motor with it. A follower's torque
-   * is given at this motor's rotor, from the gearing of each, and the free speed is this motor's.
+   * its loosely coupled followers', except those already given a mechanism of their own. A
+   * mechanism simulates every motor with it. A follower's torque is given at this motor's rotor,
+   * from the gearing of each, and the free speed is this motor's.
    *
    * @return {@link DCMotor} of every motor on the mechanism.
    */
@@ -1495,6 +1500,10 @@ public abstract class SmartMotorController {
     double stallCurrent = motor.stallCurrent;
     double freeCurrent = motor.freeCurrent;
     for (var follower : m_looseFollowers.get()) {
+      if (follower.m_simulatesMechanism) {
+        // It drives its own mechanism, not this one.
+        continue;
+      }
       final DCMotor followerMotor = follower.getMechanismDCMotor();
       // The follower's torque at the mechanism, given at this motor's rotor.
       stallTorque += followerMotor.stallTorque
@@ -1509,7 +1518,8 @@ public abstract class SmartMotorController {
   /**
    * Set the simulation of the mechanism this motor controller drives, made with {@link
    * #getMechanismDCMotor()}. Each loosely coupled follower reads it, so its encoder follows the
-   * mechanism, and its current is not counted again by {@link BatterySim}.
+   * mechanism, and its current is not counted again by {@link BatterySim}. A follower that drives a
+   * mechanism of its own must be given it first, so it is left out of this one.
    *
    * @param mechanismSupplier Simulation of the mechanism.
    */
@@ -1520,7 +1530,10 @@ public abstract class SmartMotorController {
     BatterySim.setSimulatedByLeader(m_batterySimUUID, false);
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {
-        follower.follow(this, false);
+        // A follower with its own mechanism keeps simulating it.
+        if (!follower.m_simulatesMechanism) {
+          follower.follow(this, false);
+        }
       }
     });
   }
@@ -1539,7 +1552,9 @@ public abstract class SmartMotorController {
     BatterySim.setSimulatedByLeader(m_batterySimUUID, true);
     m_looseFollowers.ifPresent(followers -> {
       for (var follower : followers) {
-        follower.follow(leader, false);
+        if (!follower.m_simulatesMechanism) {
+          follower.follow(leader, false);
+        }
       }
     });
   }

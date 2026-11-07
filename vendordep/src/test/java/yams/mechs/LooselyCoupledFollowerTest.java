@@ -189,8 +189,9 @@ public class LooselyCoupledFollowerTest {
     SmartMotorController leader = createLeader.apply(
         (SmartMotorControllerConfig) config("Leader(" + name + ")[" + offset + "]").withLooselyCoupledFollowers(follower));
     try {
-      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       pivot(follower);
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
 
       // 1. The follower goes to the leader's setpoint.
       TestWithScheduler.schedule(leaderSubsys.setPositionSetpoint(Degrees.of(SETPOINT_DEGREES)));

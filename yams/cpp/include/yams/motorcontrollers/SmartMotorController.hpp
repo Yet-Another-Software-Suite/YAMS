@@ -342,8 +342,9 @@ class SmartMotorController {
 
   /**
    * Get the motors of the mechanism this motor controller drives: its own GetDCMotor() and its
-   * loosely coupled followers'. A mechanism simulates every motor with it. A follower's torque is
-   * given at this motor's rotor, from the gearing of each, and the free speed is this motor's.
+   * loosely coupled followers', except those already given a mechanism of their own. A mechanism
+   * simulates every motor with it. A follower's torque is given at this motor's rotor, from the
+   * gearing of each, and the free speed is this motor's.
    *
    * @return DCMotor of every motor on the mechanism.
    */
@@ -352,7 +353,8 @@ class SmartMotorController {
   /**
    * Set the simulation of the mechanism this motor controller drives, made with
    * GetMechanismDCMotor(). Each loosely coupled follower reads it, so its encoder follows the
-   * mechanism, and its current is not counted again by BatterySim.
+   * mechanism, and its current is not counted again by BatterySim. A follower that drives a
+   * mechanism of its own must be given it first, so it is left out of this one.
    *
    * @param supplier Simulation of the mechanism.
    */
