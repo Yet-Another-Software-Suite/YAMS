@@ -875,6 +875,7 @@ void SparkWrapper::SetupSimulation() {
 }
 
 void SparkWrapper::SimIterate() {
+  if (m_iteratedByLeader) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
   IterateSimulatedMaxMotionPosition();
   IterateSimulatedArmGravity();
@@ -914,6 +915,7 @@ void SparkWrapper::SimIterate() {
     m_detachedEncoderSimAngle =
         wpi::units::turn_t{m_simSupplier->GetMechanismPosition().value() * mechToEncoder};
   }
+  SmartMotorController::SimIterate();
 }
 
 void SparkWrapper::IterateSimulatedMaxMotionPosition() {

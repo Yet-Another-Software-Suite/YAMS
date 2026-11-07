@@ -75,7 +75,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     }
 
     // Create DCMotorSim and wire up DCMotorSimSupplier.
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -83,7 +83,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, *m_smc));
     // Start the simulated pivot where the motor controller starts, as the arm's and elevator's
     // simulations do. Otherwise it starts at 0, away from its encoder.

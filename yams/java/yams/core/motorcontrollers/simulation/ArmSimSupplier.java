@@ -69,8 +69,17 @@ public class ArmSimSupplier implements SimSupplier {
   private boolean                    inputFed   = false;
   private boolean                    simUpdated = false;
   private final Supplier<Double>     motorDutyCycleSupplier;
+  /** The duty cycle of every motor in the simulation, from this motor controller's. */
+  private final java.util.function.DoubleUnaryOperator mechanismDutyCycle;
   private final DerivativeTimeFilter accel;
   private final LinearFilter         supplyCurrentFilter;
+  /**
+   * Supply current, filtered once per simulation step. Reading it does not step the filter, so
+   * every reader of a step, such as the battery, telemetry and followers, sees the same value.
+   */
+  private double supplyCurrentAmps = 0;
+  /** Stator current of the last step, read before it, which uses up the input voltage. */
+  private double statorCurrentAmps = 0;
   private final SingleJointedArmSim  sim;
   private final MechanismGearing     mechGearing;
   private final Time                 simPeriod;
@@ -86,7 +95,9 @@ public class ArmSimSupplier implements SimSupplier {
   public ArmSimSupplier(SingleJointedArmSim simulation, SmartMotorController smartMotorController) {
     var config = smartMotorController.getConfig();
     sim = simulation;
-    motorDutyCycleSupplier = smartMotorController::getDutyCycle;
+    // A mechanism's motors apply each motor controller's own output.
+    motorDutyCycleSupplier = () -> smartMotorController.getMechanismDutyCycle(smartMotorController.getDutyCycle());
+    mechanismDutyCycle = smartMotorController::getMechanismDutyCycle;
     mechGearing = config.getGearing();
     simPeriod = config.getSimulationPeriod();
     motor = smartMotorController.getDCMotor();
@@ -108,6 +119,9 @@ public class ArmSimSupplier implements SimSupplier {
         // A disabled robot's motors get no power, so the mechanism coasts or falls.
         sim.setInputVoltage(0);
       }
+      // Read before the step, which uses up the input voltage the current is drawn with.
+      statorCurrentAmps = sim.getCurrentDraw();
+      supplyCurrentAmps = supplyCurrentFilter.calculate(motorDutyCycleSupplier.get() * statorCurrentAmps);
       sim.update(simPeriod.in(Seconds));
       try {
         // Thread.sleep(1);
@@ -150,7 +164,7 @@ public class ArmSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorDutyCycle(double dutyCycle) {
     feedInput();
-    sim.setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
+    sim.setInputVoltage(mechanismDutyCycle.applyAsDouble(dutyCycle) * getMechanismSupplyVoltage().in(Volts));
   }
 
   @Override
@@ -168,7 +182,9 @@ public class ArmSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorVoltage(Voltage volts) {
     feedInput();
-    sim.setInputVoltage(volts.in(Volts));
+    final double supplyVolts = getMechanismSupplyVoltage().in(Volts);
+    sim.setInputVoltage(supplyVolts == 0 ? volts.in(Volts)
+        : mechanismDutyCycle.applyAsDouble(volts.in(Volts) / supplyVolts) * supplyVolts);
   }
 
   @Override
@@ -203,7 +219,7 @@ public class ArmSimSupplier implements SimSupplier {
 
   @Override
   public Current getStatorCurrent() {
-    return Amps.of(sim.getCurrentDraw());
+    return Amps.of(statorCurrentAmps);
   }
 
   @Override
@@ -211,8 +227,8 @@ public class ArmSimSupplier implements SimSupplier {
     // For a BLDC driven by a switching converter, power is conserved across the duty-cycle
     // transformation: supplyVoltage * supplyCurrent = statorVoltage * statorCurrent, and
     // statorVoltage = dutyCycle * supplyVoltage, so supplyCurrent = dutyCycle * statorCurrent.
-    double dutyCycle = motorDutyCycleSupplier.get();
-    return Amps.of(supplyCurrentFilter.calculate(dutyCycle * sim.getCurrentDraw()));
+    // It is filtered once per step, in updateSimState().
+    return Amps.of(supplyCurrentAmps);
   }
 
   @Override

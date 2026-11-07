@@ -40,6 +40,14 @@ JAVA_GROUPS = [
     # (a Nova, a SPARK with an exponential profile and a SPARK with an LQR) following and stopping
     # with their leader. A TalonFX leads one, which Phoenix runs in real time.
     {"group": "loose-followers", "test-filter": '--tests "yams.mechs.LooselyCoupledFollowerTest"'},
+    # How followers are simulated: A301s following an A301, and a mechanism simulating its motor
+    # controller's loosely coupled followers, so it has every motor's torque and the battery counts
+    # each motor's current once.
+    {"group": "follower-simulation", "test-filter": '--tests "yams.mechs.FollowerSimulationTest"'},
+    # The motor controllers with a vendor simulation, REV's SparkSim and Phoenix's, simulated through
+    # it: their encoders, applied output, current limits and closed loops. Phoenix runs a Talon's
+    # simulation in real time.
+    {"group": "vendor-simulation", "test-filter": '--tests "yams.mechs.VendorSimulationTest"'},
     # A pivot driven into its hard stops, and a Talon set to a position, on every motor controller:
     # simulated Talons, which Phoenix runs in real time.
     {"group": "hard-stops", "test-filter": '--tests "yams.mechs.HardStopTest"'},
@@ -137,18 +145,24 @@ CPP_GROUPS = [
     # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in real time,
     # so they can time out on a busy runner: they run on their own.
     {"group": "talon-parity", "catch-filter": "[TalonParity]"},
+    # How followers are simulated: A301s following an A301, and a motor controller's loosely coupled
+    # followers in its mechanism's motor model.
+    {"group": "follower-simulation", "catch-filter": "[FollowerSimulation]"},
     # Everything else: the math tests. New tags run here unless they get their own group and are
     # excluded.
     {"group": "other",
      "catch-filter": "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]"
                      "~[SwerveInputStreamAimTest]~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
-                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]"},
+                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]~[FollowerSimulation]"},
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "loose-followers", "live-tuning", "swerve-drive", "other"}
+                         "loose-followers", "follower-simulation", "vendor-simulation",
+                         "live-tuning", "swerve-drive",
+                         "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
-CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
+CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "follower-simulation",
+                        "swerve-drive", "other"}
 
 JAVA_SOURCE = "yams/java/"
 JAVA_TESTS = "vendordep/src/test/java/"

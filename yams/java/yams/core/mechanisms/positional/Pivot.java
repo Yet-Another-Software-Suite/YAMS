@@ -68,7 +68,7 @@ public class Pivot extends SmartPositionalMechanism {
     m_config = config;
     m_smc = smc;
     SmartMotorControllerConfig<?> motorConfig = m_smc.getConfig();
-    DCMotor dcMotor = m_smc.getDCMotor();
+    DCMotor dcMotor = m_smc.getMechanismDCMotor();
     MechanismGearing gearing = m_smc.getConfig().getGearing();
     // Seed the relative encoder
     if (m_smc.getConfig().getExternalEncoder().isPresent()) {
@@ -93,7 +93,7 @@ public class Pivot extends SmartPositionalMechanism {
       }
       m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(dcMotor, smc.getConfig().getMOI(), smc.getConfig().getGearing().getMechanismToRotorRatio()), dcMotor));
 
-      m_smc.setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), smc));
+      m_smc.setMechanismSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), smc));
       // Start the simulated pivot where the motor controller starts, as the arm's and elevator's
       // simulations do. Otherwise it starts at 0, away from its encoder.
       m_smc.getSimSupplier().get().setMechanismPosition(smc.getConfig().getStartingPosition().get());

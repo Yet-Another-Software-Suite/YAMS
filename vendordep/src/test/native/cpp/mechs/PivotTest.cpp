@@ -316,8 +316,9 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       // The command registry needs the leader's and the follower's subsystems named apart.
       leader.subsystem->SetName(pair.leader.name);
       follower.subsystem->SetName(pair.follower.name);
-      auto* leaderPivot = CreatePivot(leader.smc, leader.subsystem.get());
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       auto* followerPivot = CreatePivot(follower.smc, follower.subsystem.get());
+      auto* leaderPivot = CreatePivot(leader.smc, leader.subsystem.get());
       leader.smc->SetupSimulation();
       follower.smc->SetupSimulation();
       leader.subsystem->m_testRunning = true;
