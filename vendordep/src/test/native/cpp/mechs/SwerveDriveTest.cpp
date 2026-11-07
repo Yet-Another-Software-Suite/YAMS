@@ -26,6 +26,7 @@
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <functional>
@@ -642,10 +643,21 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
   SchedulerHelper::RunForDuration(1.0_s);
 
   auto modules = m_drive->GetConfig().GetModules();
+  // Module optimization may reverse the wheel, so angles 180° apart are equivalent.
+  auto errorOf = [](SwerveModule* module) {
+    return std::remainder(module->GetState().angle.Degrees().value() - 60.0, 180.0);
+  };
+  // Phoenix simulates a Talon in real time, on its own thread, so how long the wheels take to turn
+  // varies: wait until they all have, for at most 3 s more.
+  for (int i = 0; i < 150 && !std::all_of(modules.begin(), modules.end(), [&](SwerveModule* module) {
+                         return std::abs(errorOf(module)) <= 10.0;
+                       });
+       ++i) {
+    SchedulerHelper::RunForDuration(0.02_s);
+  }
   for (size_t i = 0; i < 4; ++i) {
     double actual = modules[i]->GetState().angle.Degrees().value();
-    // Module optimization may reverse the wheel, so angles 180° apart are equivalent.
-    double error = std::remainder(actual - 60.0, 180.0);
+    double error = errorOf(modules[i]);
     INFO("module " << i << " is at " << actual << " degrees");
     CHECK(error == Catch::Approx(0.0).margin(10.0));
     CHECK(modules[i]->GetState().velocity.value() == Catch::Approx(0.0).margin(0.05));
@@ -1508,11 +1520,22 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWitho
     }
   };
   std::vector<SwerveModule*> modules{&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()};
+  // Phoenix simulates a Talon in real time, on its own thread, so the number of loops before every
+  // Talon applies a voltage varies: tune until they all do, for at most 3 s.
+  auto tuneUntil = [&](const std::function<bool(SwerveModule*)>& applied) {
+    for (int i = 0; i < 150 && !std::all_of(modules.begin(), modules.end(), applied); ++i) {
+      tuneFor(1);
+    }
+  };
 
   tuning->GetEntry("modules/drive/enabled").SetBoolean(true);
   tuning->GetEntry("modules/drive/voltage/setpoint").SetDouble(4);
   tuning->GetEntry("modules/drive/voltage/enabled").SetBoolean(true);
   tuneFor(30);
+  tuneUntil([](SwerveModule* module) {
+    return std::abs(module->GetDriveMotorController()->GetVoltage().value() - 4) <= 0.25 &&
+           module->GetState().velocity.value() > 0.5;
+  });
   for (auto* module : modules) {
     INFO(module->GetName());
     CHECK(module->GetDriveMotorController()->GetVoltage().value() == Catch::Approx(4).margin(0.25));
@@ -1525,6 +1548,9 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.VoltageTuningRunsWitho
   tuning->GetEntry("modules/azimuth/voltage/setpoint").SetDouble(1);
   tuning->GetEntry("modules/azimuth/voltage/enabled").SetBoolean(true);
   tuneFor(20);
+  tuneUntil([](SwerveModule* module) {
+    return std::abs(module->GetAzimuthMotorController()->GetVoltage().value() - 1) <= 0.25;
+  });
   for (auto* module : modules) {
     INFO(module->GetName());
     CHECK(module->GetAzimuthMotorController()->GetVoltage().value() ==
