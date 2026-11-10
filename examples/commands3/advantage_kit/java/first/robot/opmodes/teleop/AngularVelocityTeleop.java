@@ -4,14 +4,18 @@
 package first.robot.opmodes.teleop;
 
 import first.robot.Robot;
+import org.wpilib.opmode.OpMode;
+import org.wpilib.opmode.Teleop;
 import yams.commands3.swerve.SwerveInputStream;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
- * Teleop where the left stick translates and the X axis of the right stick sets the rotation rate. Created by
- * {@link Robot#teleopInit()}, since a LoggedRobot does not run WPILib opmodes.
+ * Teleop where the left stick translates and the X axis of the right stick sets the rotation rate.
+ *
+ * <p>Pick it on the driver station: LoggedOpModeRobot creates it when it is selected.
  */
-public class AngularVelocityTeleop {
+@Teleop(name = "Angular Velocity Drive")
+public class AngularVelocityTeleop implements OpMode {
   public AngularVelocityTeleop(Robot robot) {
     var controller = robot.xboxController;
     robot.drive.setInputStream(SwerveInputStream.of(

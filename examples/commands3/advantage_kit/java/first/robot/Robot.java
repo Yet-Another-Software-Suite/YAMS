@@ -17,10 +17,8 @@ import first.robot.mechanisms.ElevatorMechanism;
 import first.robot.mechanisms.IndexerMechanism;
 import first.robot.mechanisms.ShooterMechanism;
 import first.robot.mechanisms.SwerveMechanism;
-import first.robot.opmodes.teleop.AngularVelocityTeleop;
-import first.robot.opmodes.teleop.HeadingTeleop;
 import org.littletonrobotics.junction.LogFileUtil;
-import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.LoggedOpModeRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
@@ -39,23 +37,19 @@ import org.wpilib.units.measure.Distance;
 /**
  * AdvantageKit robot using Commands v3.
  *
- * <p>This extends AdvantageKit's {@link LoggedRobot} instead of
- * {@link org.wpilib.framework.OpModeRobot}. AdvantageKit 27.0.0-alpha-5 ships no OpModeRobot
- * variant, {@code OpModeRobot.startCompetition()} is final, and the Logger hooks that wrap every
- * loop ({@code Logger.periodicBeforeUser()/periodicAfterUser()}) are package-private, so an
- * OpModeRobot cannot drive the replay loop. LoggedRobot is an {@code IterativeRobotBase}, the
- * same base as TimedRobot, so this follows WPILib's hatchbotcmdv3 example: Commands v3 run on the
- * default {@link Scheduler} from robotPeriodic() and button bindings are created in the
- * constructor, where they are globally scoped (active in every mode, like the v2 port).
- * WPILib does not discover {@code @Teleop} opmodes on a LoggedRobot either, so the teleop classes in
- * {@code opmodes/teleop} are created from {@link #teleopInit()}; {@link #HEADING_TELEOP} picks which one.
- * Replay (including {@link #setUseTiming(boolean)}) keeps working unchanged.
+ * <p>This extends AdvantageKit's {@link LoggedOpModeRobot}, AdvantageKit's version of WPILib's
+ * {@link org.wpilib.framework.OpModeRobot} (new in AdvantageKit 27.0.0-alpha-7). It finds the
+ * {@code @Teleop} and {@code @Autonomous} opmodes in {@code opmodes/} the same way OpModeRobot does, and
+ * runs every loop inside the AdvantageKit logger, so replay (including
+ * {@link #setUseTiming(boolean)}) works. Commands v3 run on the default {@link Scheduler} from
+ * robotPeriodic(), and the button bindings are created in the constructor, where they are globally
+ * scoped (active in every mode, like the v2 port). The teleop opmodes only set up the drive.
  *
  * <p>Commands that use more than one mechanism ({@link #shoot}, {@link #scorePreloadAuto}) have no
  * requirements of their own and run each mechanism's command as a child, so a mechanism is only
  * owned while its child command runs and its default command resumes afterwards.
  */
-public class Robot extends LoggedRobot {
+public class Robot extends LoggedOpModeRobot {
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -70,9 +64,6 @@ public class Robot extends LoggedRobot {
   public static final Mode simMode     = Mode.SIM;
   /// Change to Mode.REPLAY to enable REPLAy.
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-
-  /** Use {@link HeadingTeleop} instead of {@link AngularVelocityTeleop} for teleop driving. */
-  private static final boolean HEADING_TELEOP = false;
 
   private final Scheduler scheduler = Scheduler.getDefault();
 
@@ -91,8 +82,6 @@ public class Robot extends LoggedRobot {
   private static final AngularVelocity SHOOTER_TOLERANCE = RPM.of(100);
   private static final Angle           ARM_TOLERANCE     = Degrees.of(3);
   private static final Distance        HEIGHT_TOLERANCE  = Meters.of(0.05);
-
-  private final Command autonomousCommand;
 
   public final CommandNiDsXboxController xboxController = new CommandNiDsXboxController(0);
 
@@ -132,7 +121,6 @@ public class Robot extends LoggedRobot {
     elevator.setDefaultCommand(elevator.setHeight(Meters.of(0)));
     shooter.setDefaultCommand(shooter.set(0));
     indexer.setDefaultCommand(indexer.idle());
-    autonomousCommand = scorePreloadAuto();
     configureBindings();
   }
 
@@ -169,11 +157,11 @@ public class Robot extends LoggedRobot {
   /**
    * Raise the arm and elevator to the scoring position, then shoot for two seconds. The arm and
    * elevator commands are forked so they keep holding the scoring position during the shot; they are
-   * canceled (and the default commands resume) when the routine ends.
+   * canceled (and the default commands resume) when the routine ends. The {@code ScorePreloadAuto} opmode runs it.
    *
    * @return {@link Command}
    */
-  private Command scorePreloadAuto()
+  public Command scorePreloadAuto()
   {
     return Command.noRequirements(coroutine -> {
       coroutine.fork(arm.setAngle(SCORE_ANGLE), elevator.setHeight(SCORE_HEIGHT));
@@ -208,63 +196,5 @@ public class Robot extends LoggedRobot {
     elevator.simulationPeriodic();
     shooter.simulationPeriodic();
     indexer.simulationPeriodic();
-  }
-
-  @Override
-  public void disabledInit() {
-  }
-
-  @Override
-  public void disabledPeriodic() {
-  }
-
-  @Override
-  public void disabledExit() {
-  }
-
-  @Override
-  public void autonomousInit() {
-    // Scheduled from the global scope, so it is canceled by hand when autonomous ends.
-    scheduler.schedule(autonomousCommand);
-  }
-
-  @Override
-  public void autonomousPeriodic() {
-  }
-
-  @Override
-  public void autonomousExit() {
-    scheduler.cancel(autonomousCommand);
-  }
-
-  @Override
-  public void teleopInit() {
-    // Sets the drive's input stream and default command.
-    if (HEADING_TELEOP) {
-      new HeadingTeleop(this);
-    } else {
-      new AngularVelocityTeleop(this);
-    }
-  }
-
-  @Override
-  public void teleopPeriodic() {
-  }
-
-  @Override
-  public void teleopExit() {
-  }
-
-  @Override
-  public void utilityInit() {
-    scheduler.cancelAll();
-  }
-
-  @Override
-  public void utilityPeriodic() {
-  }
-
-  @Override
-  public void utilityExit() {
   }
 }
