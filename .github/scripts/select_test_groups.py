@@ -82,7 +82,8 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.ZeroOffsetWrappingTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
     # vendor's device is given, feedforwards, exponential profiles, the simulation period and the
-    # A301. Add new motor controller test classes here.
+    # A301, the TalonFXS motor arrangement, and a vendor config over the device's saved settings. Add
+    # new motor controller test classes here.
     {"group": "motor-controllers",
      "test-filter": '--tests "yams.core.motorcontrollers.ArmFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"'
@@ -91,7 +92,9 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'
-                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'},
+                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'
+                    ' --tests "yams.core.motorcontrollers.TalonFXSMotorArrangementTest"'
+                    ' --tests "yams.core.motorcontrollers.VendorConfigTest"'},
     # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
     # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
     # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
@@ -132,8 +135,9 @@ CPP_GROUPS = [
     {"group": "elevator", "catch-filter": "[ElevatorTest]"},
     {"group": "pivot", "catch-filter": "[PivotTest]"},
     {"group": "shooter", "catch-filter": "[ShooterTest]"},
-    # The four module swerve drive, and the SwerveInputStream telemetry that runs on it.
-    {"group": "swerve-drive", "catch-filter": "[SwerveDriveTest],[SwerveInputStreamTelemetryTest]"},
+    # The four module swerve drive, and the SwerveInputStream aiming and telemetry that run on it.
+    {"group": "swerve-drive",
+     "catch-filter": "[SwerveDriveTest],[SwerveInputStreamAimTest],[SwerveInputStreamTelemetryTest]"},
     # Motor controller unit tests: the parity and regression tests of each vendor's wrapper. Add new
     # motor controller tags here and to the exclusions of the other group.
     {"group": "motor-controllers",
@@ -148,7 +152,7 @@ CPP_GROUPS = [
     # excluded.
     {"group": "other",
      "catch-filter": "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]"
-                     "~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
+                     "~[SwerveInputStreamAimTest]~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
                      "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]~[FollowerSimulation]"},
 ]
 
