@@ -4,14 +4,16 @@
 /**
  * Motor-controller configuration objects that are not specific to a mechanism type.
  *
- * <p>{@link yams.core.motorcontrollers.config.ADRCConfig} is the ADRC counterpart of a PID
- * controller configuration. It is passed to
+ * <p>{@link yams.core.motorcontrollers.config.ADRCConfig} is the active disturbance rejection
+ * counterpart of a PID controller configuration. It is passed to
  * {@link yams.core.motorcontrollers.SmartMotorControllerConfig#withADRCController(ADRCConfig)} and
- * the motor controller runs the ADRC on its closed-loop thread, so mechanisms need no extra code.
+ * the motor controller runs the controller on its closed-loop thread, so mechanisms need no extra
+ * code.
  *
- * <p>Team-editable tuning lives in {@code src/main/deploy/adrc/<name>.json}, one file per
- * controller. The Java object carries the defaults, validation, and physical derivation; the JSON
- * carries the numbers a team tunes.
+ * <p>Like the other YAMS config classes, {@link yams.core.motorcontrollers.config.ADRCConfig} is a
+ * plain builder: teams set the values they tune with its {@code withX(...)} methods, usually from
+ * their {@code Constants} class, while the object itself carries the defaults, validation, and
+ * physical derivation.
  *
  * <p>ADRC was <b>written by FRC Team 8331</b>.
  *

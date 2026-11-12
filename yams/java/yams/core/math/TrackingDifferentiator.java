@@ -4,42 +4,117 @@
 package yams.core.math;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 /**
- * Tracking differentiator (TD).
+ * Tracking differentiator.
  *
- * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ * <p><b>Written by FRC Team 8331</b>, who contributed active disturbance rejection control to YAMS.
  *
  * <p>A tracking differentiator turns a raw reference into a smooth reference {@code y} together
  * with its first and second derivatives {@code yd} and {@code ydd}. Feeding the smoothed reference
- * to a controller avoids the large derivative spikes that a step input would otherwise produce.
+ * to a controller avoids the large output spikes that a step setpoint would otherwise produce:
+ * the controller follows a trajectory the mechanism can actually track instead of demanding an
+ * instantaneous change.
  *
- * <p>Several discrete implementations are supported:
+ * <p>Mechanisms rarely construct this class directly; they configure one through
+ * {@link yams.core.motorcontrollers.config.ADRCConfig#withTrackingDifferentiator(Method, double...)}
+ * and the controller applies it to every setpoint.
+ *
+ * <h2>The methods</h2>
+ *
+ * <p>Five discrete implementations are supported, selected with {@link Method}. Each takes a
+ * small list of {@code double} parameters; any parameter may be omitted by passing a shorter
+ * array (or {@code null}), and the default documented below is used instead.
+ *
+ * <h3>{@link Method#EULER} — exponential smoothing</h3>
+ *
+ * <p>The mildest option: a first-order low-pass filter on the reference. One parameter:
  *
  * <ul>
- * <li>{@code euler}: first-order exponential smoothing.
- * <li>{@code tod}: time-optimal discrete differentiator.
- * <li>{@code ld}: linear differentiator.
- * <li>{@code red}: nonlinear (reduced) differentiator.
- * <li>{@code intd}: integral differentiator.
+ * <li>{@code alpha} in [0, 1], default 0.9 — smoothing factor. Higher smooths more and follows
+ * slower; lower tracks the raw reference more closely.
  * </ul>
  *
- * <p>The method and its parameters are passed by name so existing ADRC tuning strings can be used
- * directly. Unknown methods and invalid parameters throw {@link IllegalArgumentException}.
+ * <p>Use when the reference needs only gentle rounding, for example a shooter wheel toggling
+ * between two steady speeds.
+ *
+ * <h3>{@link Method#TOD} — time-optimal tracking</h3>
+ *
+ * <p>Follows the reference as fast as a bounded-acceleration model allows. One parameter:
+ *
+ * <ul>
+ * <li>{@code r} greater than 0, default 1.0 — acceleration bound; higher tracks faster.
+ * </ul>
+ *
+ * <p>The fastest tracking available here, at the price of abrupt output changes at the switching
+ * points. Use when the reference must be caught quickly and the mechanism can take it.
+ *
+ * <h3>{@link Method#LD} — linear differentiator</h3>
+ *
+ * <p>A linear second-order filter with critically damped-style poles. One parameter:
+ *
+ * <ul>
+ * <li>{@code lambda} greater than 0, default 1.0 — time constant of the filter. The sample
+ * period must stay below {@code 2 * lambda} or the filter is unstable.
+ * </ul>
+ *
+ * <p>Smooth and predictable; a good default for position loops such as arms and elevators.
+ *
+ * <h3>{@link Method#RED} — nonlinear reduced differentiator</h3>
+ *
+ * <p>A second-order nonlinear filter that converges in finite time. Two parameters:
+ *
+ * <ul>
+ * <li>{@code lambda1} greater than 0, default 1.0 — gain on the position error term.
+ * <li>{@code lambda2} greater than 0, default 1.0 — gain on the sign term.
+ * </ul>
+ *
+ * <p>Tracks large errors aggressively while rejecting measurement noise between samples; a
+ * common choice when the reference jumps but the sensor is noisy.
+ *
+ * <h3>{@link Method#INTD} — integral differentiator</h3>
+ *
+ * <p>A smooth nonlinear filter that integrates the error over a sliding window. Four parameters:
+ *
+ * <ul>
+ * <li>{@code alpha} in [0, 1), default 0.5 — weight of the accumulated error.
+ * <li>{@code beta} greater than 0, default 1.0 — scales the accumulated error.
+ * <li>{@code gamma} greater than 0, default 1.0 — width of the transition region.
+ * <li>{@code r} greater than 0, default 1.0 — speed of the fast dynamics.
+ * </ul>
+ *
+ * <p>The most configurable option; useful when the methods above trade smoothness against speed
+ * unfavorably.
+ *
+ * <p>Invalid parameters throw {@link IllegalArgumentException}.
  *
  * <h2>Example</h2>
  *
  * <pre>{@code
- * TrackingDifferentiator td = new TrackingDifferentiator("euler", 0.02, new double[] {0.9});
+ * TrackingDifferentiator td =
+ *     new TrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.02, new double[] {0.9});
  * td.update(setpoint);
  * double smoothSetpoint = td.getY();
  * double setpointVelocity = td.getYd();
  * }</pre>
  */
 public class TrackingDifferentiator {
-  /** Identifier of the differentiation method. */
-  private final String method;
+  /** Differentiation method. */
+  public enum Method {
+    /** First-order exponential smoothing; parameter {@code alpha} in [0, 1], default 0.9. */
+    EULER,
+    /** Time-optimal discrete differentiator; parameter {@code r} greater than 0, default 1.0. */
+    TOD,
+    /** Linear differentiator; parameter {@code lambda} greater than 0, default 1.0. */
+    LD,
+    /** Nonlinear reduced differentiator; parameters {@code lambda1}, {@code lambda2}, default 1.0 each. */
+    RED,
+    /** Integral differentiator; parameters {@code alpha}, {@code beta}, {@code gamma}, {@code r}, defaults 0.5, 1.0, 1.0, 1.0. */
+    INTD
+  }
+
+  /** Differentiation method. */
+  private final Method method;
   /** Sample time in seconds. */
   private double       dt;
   /** Method parameters. */
@@ -65,22 +140,21 @@ public class TrackingDifferentiator {
   /**
    * Create a tracking differentiator.
    *
-   * @param method Differentiation method: {@code euler}, {@code tod}, {@code ld}, {@code red}, or
-   *               {@code intd}.
+   * @param method Differentiation method.
    * @param dt     Sample time in seconds.
    * @param params Method parameters. May be {@code null} to use the method defaults.
-   * @throws IllegalArgumentException if the method or sample time is invalid, or if the parameters
-   *                                  do not validate.
+   * @throws IllegalArgumentException if the method is {@code null}, the sample time is invalid, or
+   *                                  the parameters do not validate.
    */
-  public TrackingDifferentiator(String method, double dt, double[] params) {
-    if (method == null || method.isBlank()) {
-      throw new IllegalArgumentException("TD method must not be null or blank");
+  public TrackingDifferentiator(Method method, double dt, double[] params) {
+    if (method == null) {
+      throw new IllegalArgumentException("TD method must not be null");
     }
     if (!Double.isFinite(dt) || dt <= 0.0) {
       throw new IllegalArgumentException("Sample time dt must be finite and positive");
     }
 
-    this.method = method.toLowerCase(Locale.ROOT);
+    this.method = method;
     this.dt = dt;
     this.params = params != null ? params.clone() : null;
 
@@ -134,21 +208,21 @@ public class TrackingDifferentiator {
    */
   private void validateParams(double dt) {
     switch (method) {
-      case "euler": {
+      case EULER: {
         double alpha = param(0, 0.9);
         if (!Double.isFinite(alpha) || alpha < 0.0 || alpha > 1.0) {
           throw new IllegalArgumentException("alpha must be in [0, 1] for EULER");
         }
         break;
       }
-      case "tod": {
+      case TOD: {
         double r = param(0, 1.0);
         if (!Double.isFinite(r) || r <= 0.0) {
           throw new IllegalArgumentException("r must be positive for TOD");
         }
         break;
       }
-      case "ld": {
+      case LD: {
         double lambda = param(0, 1.0);
         if (!Double.isFinite(lambda) || lambda <= 0.0) {
           throw new IllegalArgumentException("lambda must be positive for LD");
@@ -158,7 +232,7 @@ public class TrackingDifferentiator {
         }
         break;
       }
-      case "red": {
+      case RED: {
         double lambda1 = param(0, 1.0);
         double lambda2 = param(1, 1.0);
         if (!Double.isFinite(lambda1) || !Double.isFinite(lambda2) || lambda1 <= 0.0 || lambda2 <= 0.0) {
@@ -166,7 +240,7 @@ public class TrackingDifferentiator {
         }
         break;
       }
-      case "intd": {
+      case INTD: {
         double alpha = param(0, 0.5);
         double beta = param(1, 1.0);
         double gamma = param(2, 1.0);
@@ -179,8 +253,6 @@ public class TrackingDifferentiator {
         }
         break;
       }
-      default:
-        throw new IllegalArgumentException("Unknown TD method: " + method);
     }
   }
 
@@ -190,17 +262,6 @@ public class TrackingDifferentiator {
    * @param initialValue Initial value of the filtered reference.
    */
   private void initializeState(double initialValue) {
-    switch (method) {
-      case "euler":
-      case "tod":
-      case "ld":
-      case "red":
-      case "intd":
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown TD method: " + method);
-    }
-
     prevY = initialValue;
     prevYd = 0.0;
     v1 = initialValue;
@@ -217,23 +278,21 @@ public class TrackingDifferentiator {
    */
   public void update(double ref) {
     switch (method) {
-      case "euler":
+      case EULER:
         updateEuler(ref);
         break;
-      case "tod":
+      case TOD:
         updateTod(ref);
         break;
-      case "ld":
+      case LD:
         updateLd(ref);
         break;
-      case "red":
+      case RED:
         updateRed(ref);
         break;
-      case "intd":
+      case INTD:
         updateIntd(ref);
         break;
-      default:
-        throw new IllegalArgumentException("Unknown TD method: " + method);
     }
   }
 
@@ -391,11 +450,11 @@ public class TrackingDifferentiator {
   }
 
   /**
-   * Get the differentiation method name.
+   * Get the differentiation method.
    *
-   * @return Lower-case method name.
+   * @return Differentiation method.
    */
-  public String getMethod() {
+  public Method getMethod() {
     return method;
   }
 }

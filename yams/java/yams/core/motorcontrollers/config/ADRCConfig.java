@@ -4,75 +4,167 @@
 package yams.core.motorcontrollers.config;
 
 import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
-import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
+import org.wpilib.driverstation.internal.DriverStationBackend;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.system.Filesystem;
+import org.wpilib.units.VoltageUnit;
 import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
+import org.wpilib.units.measure.Voltage;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ADRCController;
+import yams.core.math.TrackingDifferentiator;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 
 /**
- * Active Disturbance Rejection Controller configuration.
+ * Configuration for an active disturbance rejection controller.
  *
- * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ * <p><b>Written by FRC Team 8331</b>, who contributed active disturbance rejection control to YAMS.
  *
- * <p>This is the ADRC equivalent of {@code withClosedLoopController(...)}: pass it to
+ * <p>An active disturbance rejection controller lumps everything the mechanism model does not
+ * capture — friction, back-EMF, game-piece loads, dropped battery voltage, unmodeled dynamics —
+ * into a single "total disturbance" and estimates it live with an extended state observer. The
+ * estimate is then cancelled out of the control law, so the closed loop behaves like a clean chain
+ * of integrators that settles in the time you ask for, without hand-tuning gains. There is no
+ * proportional, integral, or derivative gain to tune: you describe the plant (order and input
+ * gain) and the response you want (settling time), and the controller derives its own gains.
+ *
+ * <p>This is the drop-in equivalent of {@code withClosedLoopController(...)}: pass it to
  * {@link SmartMotorControllerConfig#withADRCController(ADRCConfig)} and the motor controller runs
- * the ADRC on its own closed-loop thread. Mechanisms need no extra code; they keep calling
- * {@code setVelocity(...)} and {@code setPosition(...)} same as with a PID.
+ * the active disturbance rejection controller on its own closed-loop thread. Mechanisms need no
+ * extra code; they keep calling {@code setVelocity(...)} and {@code setPosition(...)} exactly as
+ * they would with a {@code PIDController}.
  *
- * <h2>Java defaults and team-editable JSON</h2>
+ * <h2>Getting started</h2>
  *
- * <p>The Java object holds the defaults, validation, and {@code b0} derivation. Anything a team
- * would tune lives in {@code src/main/deploy/adrc/<name>.json}:
+ * <p>Like every other YAMS config class, this is a plain builder: teams set the values they tune
+ * with the {@code withX(...)} methods, usually from their {@code Constants} class. A complete
+ * velocity-loop configuration for a shooter wheel looks like this:
  *
  * <pre>{@code
- * {
- *   "systemOrder": 1,
- *   "settlingTime": 0.2,
- *   "bandwidthScale": 1.0,
- *   "b0": 58.91814489109694,
- *   "minVoltage": -12.0,
- *   "maxVoltage": 12.0,
- *   "slewRateLimit": 0.0,
- *   "inputDelay": 0.0,
- *   "cascaded": false,
- *   "tdMethod": "none",
- *   "tdParams": []
- * }
+ * new ADRCConfig("Shooter")
+ *     .withSystemOrder(SystemOrder.FIRST)
+ *     .withSettlingTime(Seconds.of(0.2))
+ *     .withVoltageLimits(Volts.of(-12), Volts.of(12))
  * }</pre>
  *
- * <p>Values set in Java with the {@code withX(...)} methods win over the file; the file wins over
- * the defaults. A missing or malformed file is reported to the Driver Station and the defaults are
- * used, except for {@code systemOrder}, which has no default: {@link #buildController} throws until
- * it is set in the file or in Java.
+ * <p>Anything left unset falls back to the defaults documented on the {@code withX(...)} method,
+ * except for {@code systemOrder}, which has no default: {@link #buildController} throws until it
+ * is set.
+ *
+ * <h2>Choosing the system order</h2>
+ *
+ * <p>The system order is the number of integrators between the motor voltage and the quantity the
+ * closed loop commands and measures. Pick the lowest order that describes your loop; the observer
+ * adds one more state on top of the plant order, so higher orders are more sensitive to sensor
+ * noise.
+ *
+ * <ul>
+ * <li>{@link SystemOrder#FIRST} — you command and measure velocity: flywheels, shooter wheels,
+ * intake and conveyor rollers. A brushed or brushless DC motor's velocity responds to voltage
+ * directly, so most FRC speed loops are first order.
+ * <li>{@link SystemOrder#SECOND} — you command and measure position: arms, elevators, slides.
+ * Position is the integral of velocity, which adds one order.
+ * <li>{@link SystemOrder#THIRD} and {@link SystemOrder#FOURTH} — rare. Use when the measured
+ * quantity sits two or more integrations behind the voltage, for example a mechanism whose
+ * actuator itself has significant first-order lag. Most mechanisms never need these.
+ * </ul>
+ *
+ * <p>Velocity loops and position loops differ only in the order; every other option in this class
+ * works the same for both.
+ *
+ * <h2>Tuning the response</h2>
+ *
+ * <ul>
+ * <li>{@link #withSettlingTime(Time)} — how quickly the closed loop settles after a setpoint
+ * change. The default, 0.2 seconds, is a good starting point. Lower is faster and more aggressive
+ * but demands more voltage and stresses the mechanism; higher is gentler.
+ * <li>{@link #withBandwidthScale(double)} — scales both the closed-loop bandwidth and the
+ * observer bandwidth together. Above 1.0 is more aggressive, below 1.0 is more conservative.
+ * Leave it at the default of 1.0 until the settling time is dialed in.
+ * <li>{@link #withB0(double)} — the approximate input gain: how strongly one volt accelerates the
+ * measured quantity. It only sets the controller's operating point, so being off by 20 to 50
+ * percent usually still works. Leave it unset to derive it from the motor, gearing, and moment of
+ * inertia (see "What is never assumed" below); set it explicitly when the mechanism has no
+ * meaningful inertia, such as a mechanism driven against a hard stop.
+ * <li>{@link #withVoltageLimits(Voltage, Voltage)} — output saturation. Without it, the maximum
+ * output falls back to the motor config's closed-loop voltage limit, or the motor's nominal
+ * voltage with a warning.
+ * <li>{@link #withSlewRateLimit(Velocity)} — caps how fast the controller output can change, in
+ * volts per second. Useful to stop a violent step when the loop first enables. Zero (the default)
+ * disables the cap.
+ * <li>{@link #withInputDelay(Time)} — compensates a known delay between commanding the output and
+ * seeing its effect, such as a deliberately slowed sensor. Zero (the default) disables it.
+ * <li>{@link #withCascaded(boolean)} — runs the observer in cascaded form, which some higher-order
+ * plants track more accurately. Leave it disabled unless you have a reason.
+ * </ul>
+ *
+ * <h2>Smoothing the reference with a tracking differentiator</h2>
+ *
+ * <p>A step setpoint asks the controller for an instantaneous change, which spikes the output and
+ * excites unmodeled dynamics. A tracking differentiator replaces the raw reference with a
+ * smoothed reference plus its derivatives, so the controller follows a feasible trajectory
+ * instead. Enable one with {@link #withTrackingDifferentiator(TrackingDifferentiator.Method,
+ * double...)}, for example:
+ *
+ * <pre>{@code
+ * new ADRCConfig("Shooter")
+ *     .withSystemOrder(SystemOrder.FIRST)
+ *     .withTrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.9)
+ * }</pre>
+ *
+ * <p>Five methods are available, from gentle to aggressive; see {@link TrackingDifferentiator}
+ * for the full parameter reference. Each entry below lists its parameters in order:
+ *
+ * <ul>
+ * <li>{@link TrackingDifferentiator.Method#EULER} — first-order exponential smoothing. One
+ * parameter, {@code alpha} in [0, 1] (default 0.9): higher is smoother and slower. The mildest
+ * option; a good first choice for velocity loops.
+ * <li>{@link TrackingDifferentiator.Method#TOD} — time-optimal tracking. One parameter,
+ * {@code r} greater than 0 (default 1.0): higher tracks faster. Follows the reference as fast as
+ * the parameter allows, so expect abrupt output changes.
+ * <li>{@link TrackingDifferentiator.Method#LD} — linear differentiator. One parameter,
+ * {@code lambda} greater than 0 (default 1.0); the sample period must be below
+ * {@code 2 * lambda}. Smooth and predictable; a good default for position loops.
+ * <li>{@link TrackingDifferentiator.Method#RED} — nonlinear differentiator. Two parameters,
+ * {@code lambda1} and {@code lambda2}, both greater than 0 (default 1.0 each). Converges in
+ * finite time and rejects measurement noise between samples.
+ * <li>{@link TrackingDifferentiator.Method#INTD} — integral differentiator. Four parameters:
+ * {@code alpha} in [0, 1) (default 0.5), and {@code beta}, {@code gamma}, {@code r} greater than
+ * 0 (default 1.0 each). A smooth nonlinear option that integrates the error over a sliding
+ * window.
+ * </ul>
+ *
+ * <p>Parameters may be omitted entirely to use the method defaults, and the differentiator is off
+ * by default. If the reference only ever ramps (a joystick-driven setpoint, for example), a
+ * differentiator buys little; it earns its keep on step changes.
  *
  * <h2>What is never assumed</h2>
  *
  * <ul>
- * <li>{@code systemOrder} must come from the file or a Java call. There is no safe default, so
- * {@link #buildController} throws while it is unset.
- * <li>{@code b0} may be set in the file. Otherwise it is derived from the motor, gearing, and the
- * mechanism's moment of inertia, but only when the mechanism explicitly configured that inertia
- * with {@code withMomentOfInertia(...)} or {@code withWheelMomentOfInertia(...)}. The library's
- * placeholder inertia is never used.
- * <li>Output saturation comes from {@code withClosedLoopControllerMaximumVoltage(...)} or the
- * file. Falling back to the motor's nominal voltage is logged.
- * <li>The control period comes from {@code withClosedLoopControlPeriod(...)}, so ADRC and the loop
- * cannot disagree.
+ * <li>{@code systemOrder} must be set with {@link #withSystemOrder(SystemOrder)}. There is no safe
+ * default, so {@link #buildController} throws while it is unset.
+ * <li>{@code b0} may be set with {@link #withB0(double)}. Otherwise it is derived from the motor,
+ * gearing, and the mechanism's moment of inertia, but only when the mechanism explicitly
+ * configured that inertia with {@code withMomentOfInertia(...)} or
+ * {@code withWheelMomentOfInertia(...)}. The library's placeholder inertia is never used.
+ * <li>Output saturation comes from {@code withClosedLoopControllerMaximumVoltage(...)} or
+ * {@code withVoltageLimits(...)}. Falling back to the motor's nominal voltage is logged.
+ * <li>The control period comes from {@code withClosedLoopControlPeriod(...)}, so the controller
+ * and the loop cannot disagree.
  * </ul>
  *
  * @see SmartMotorControllerConfig#withADRCController(ADRCConfig)
  * @see ADRCController
+ * @see TrackingDifferentiator
  */
 public class ADRCConfig implements Cloneable {
   /** Default closed-loop settling time, seconds. */
@@ -83,54 +175,89 @@ public class ADRCConfig implements Cloneable {
   public static final double DEFAULT_SLEW_RATE_LIMIT = 0.0;
   /** Default input delay; zero disables it. */
   public static final double DEFAULT_INPUT_DELAY = 0.0;
-  /** Default tracking differentiator method. */
-  public static final String DEFAULT_TD_METHOD = "none";
-
-  /** Name of the JSON file, without the extension. */
-  private final String  name;
-  /** Plant order, or {@code null} when it has not been configured. */
-  private Integer       systemOrder;
-  /** Desired settling time, or {@code null} for the default. */
-  private Double        settlingTime;
-  /** Bandwidth scale, or {@code null} for the default. */
-  private Double        bandwidthScale;
-  /** Explicit input gain, or {@code null} to derive it. */
-  private Double        b0;
-  /** Explicit minimum output, or {@code null} for {@code -maxVoltage}. */
-  private Double        minVoltage;
-  /** Explicit maximum output, or {@code null} to use the motor config. */
-  private Double        maxVoltage;
-  /** Slew-rate limit, or {@code null} for the default. */
-  private Double        slewRateLimit;
-  /** Input delay, or {@code null} for the default. */
-  private Double        inputDelay;
-  /** Cascaded ESO flag, or {@code null} for the default. */
-  private Boolean       cascaded;
-  /** Tracking differentiator method, or {@code null} for the default. */
-  private String        tdMethod;
-  /** Tracking differentiator parameters. */
-  private double[]      tdParams;
 
   /**
-   * Create a configuration that reads {@code deploy/adrc/<name>.json}.
+   * Plant order for the active disturbance rejection controller.
    *
-   * @param name File name without the extension.
-   * @throws IllegalArgumentException if the name is blank or contains path separators.
+   * <p>The order is how many integrators sit between the motor voltage and the measured output:
+   * velocity loops on a DC motor are {@link #FIRST}, position loops are {@link #SECOND}. The class
+   * documentation of {@link ADRCConfig} walks through choosing a value.
    */
-  public ADRCConfig(String name) {
-    this(name, Filesystem.getDeployDirectory().toPath());
+  public enum SystemOrder {
+    /**
+     * First-order plant: the loop commands and measures velocity, e.g. a flywheel or shooter
+     * wheel. The common case for FRC mechanisms.
+     */
+    FIRST(1),
+    /**
+     * Second-order plant: the loop commands and measures position, e.g. an arm or elevator.
+     * Position is the integral of velocity, so the plant is one order higher.
+     */
+    SECOND(2),
+    /**
+     * Third-order plant: the measured quantity sits two integrations behind the voltage. Rare;
+     * see the class documentation for when this applies.
+     */
+    THIRD(3),
+    /**
+     * Fourth-order plant: three integrations between the voltage and the measurement. Rare; see
+     * the class documentation for when this applies.
+     */
+    FOURTH(4);
+
+    /** Plant order as an integer. */
+    private final int order;
+
+    SystemOrder(int order) {
+      this.order = order;
+    }
+
+    /**
+     * Get the plant order as an integer.
+     *
+     * @return Plant order, 1 through 4.
+     */
+    public int getOrder() {
+      return order;
+    }
   }
 
+  /** Display name used in error and warning messages. */
+  private final String                        name;
+  /** Plant order, or {@code null} when it has not been configured. */
+  private SystemOrder                         systemOrder;
+  /** Desired settling time, or {@code null} for the default. */
+  private Time                                settlingTime;
+  /** Bandwidth scale, or {@code null} for the default. */
+  private Double                              bandwidthScale;
+  /** Explicit input gain, or {@code null} to derive it. */
+  private Double                              b0;
+  /** Explicit minimum output, or {@code null} for {@code -maxVoltage}. */
+  private Voltage                             minVoltage;
+  /** Explicit maximum output, or {@code null} to use the motor config. */
+  private Voltage                             maxVoltage;
+  /** Slew-rate limit, or {@code null} for the default. */
+  private Velocity<VoltageUnit>               slewRateLimit;
+  /** Input delay, or {@code null} for the default. */
+  private Time                                inputDelay;
+  /** Cascaded extended-state-observer flag, or {@code null} for the default. */
+  private Boolean                             cascaded;
+  /** Tracking differentiator method, or {@code null} when disabled. */
+  private TrackingDifferentiator.Method       tdMethod;
+  /** Tracking differentiator parameters. */
+  private double[]                            tdParams;
+
   /**
-   * Create a configuration that reads {@code <deployDirectory>/adrc/<name>.json}.
+   * Create a named configuration.
    *
-   * <p>This overload exists for tests and tools that do not run under the robot deploy directory.
+   * <p>The name identifies this controller in error and warning messages, such as
+   * {@code ADRC "Shooter" has no system order}. It is not used to read any file.
    *
-   * @param name            File name without the extension.
-   * @param deployDirectory Directory that contains the {@code adrc} folder.
-   * @throws IllegalArgumentException if the name is blank or contains path separators.
+   * @param name Display name for this controller.
+   * @throws IllegalArgumentException if the name is blank or contains anything but letters, digits,
+   *                                  {@code '_'} and {@code '-'}.
    */
-  public ADRCConfig(String name, Path deployDirectory) {
+  public ADRCConfig(String name) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("ADRC config name must not be blank");
     }
@@ -138,7 +265,6 @@ public class ADRCConfig implements Cloneable {
       throw new IllegalArgumentException("ADRC config name may only contain letters, digits, '_' and '-': " + name);
     }
     this.name = name;
-    ADRCConfigLoader.load(this, deployDirectory);
   }
 
   /**
@@ -167,7 +293,7 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Get the JSON file name, without the extension.
+   * Get the display name.
    *
    * @return Config name.
    */
@@ -178,27 +304,25 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set the plant order.
    *
-   * @param systemOrder Plant order, 1 through 4.
+   * @param systemOrder Plant order.
    * @return This config for chaining.
-   * @throws IllegalArgumentException if the order is outside 1 through 4.
+   * @throws NullPointerException if the order is {@code null}.
    */
-  public ADRCConfig withSystemOrder(int systemOrder) {
-    if (systemOrder < 1 || systemOrder > 4) {
-      throw new IllegalArgumentException("systemOrder must be between 1 and 4, got: " + systemOrder);
-    }
-    this.systemOrder = systemOrder;
+  public ADRCConfig withSystemOrder(SystemOrder systemOrder) {
+    this.systemOrder = Objects.requireNonNull(systemOrder, "systemOrder must not be null");
     return this;
   }
 
   /**
    * Set the desired closed-loop settling time.
    *
-   * @param settlingTime Settling time in seconds.
+   * @param settlingTime Settling time.
    * @return This config for chaining.
+   * @throws NullPointerException     if the value is {@code null}.
    * @throws IllegalArgumentException if the value is not finite and positive.
    */
-  public ADRCConfig withSettlingTime(double settlingTime) {
-    requirePositiveFinite("settlingTime", settlingTime);
+  public ADRCConfig withSettlingTime(Time settlingTime) {
+    requirePositiveFinite("settlingTime", Objects.requireNonNull(settlingTime, "settlingTime must not be null").in(Seconds));
     this.settlingTime = settlingTime;
     return this;
   }
@@ -232,12 +356,13 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set symmetric output saturation.
    *
-   * @param maxVoltage Maximum output magnitude in volts.
+   * @param maxVoltage Maximum output magnitude.
    * @return This config for chaining.
+   * @throws NullPointerException     if the value is {@code null}.
    * @throws IllegalArgumentException if the value is not finite and positive.
    */
-  public ADRCConfig withMaxVoltage(double maxVoltage) {
-    requirePositiveFinite("maxVoltage", maxVoltage);
+  public ADRCConfig withMaxVoltage(Voltage maxVoltage) {
+    requirePositiveFinite("maxVoltage", Objects.requireNonNull(maxVoltage, "maxVoltage must not be null").in(Volts));
     this.maxVoltage = maxVoltage;
     return this;
   }
@@ -245,16 +370,19 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set asymmetric output saturation.
    *
-   * @param minVoltage Minimum output in volts.
-   * @param maxVoltage Maximum output in volts.
+   * @param minVoltage Minimum output.
+   * @param maxVoltage Maximum output.
    * @return This config for chaining.
+   * @throws NullPointerException     if a value is {@code null}.
    * @throws IllegalArgumentException if a value is not finite or {@code minVoltage >= maxVoltage}.
    */
-  public ADRCConfig withVoltageLimits(double minVoltage, double maxVoltage) {
-    requireFinite("minVoltage", minVoltage);
-    requirePositiveFinite("maxVoltage", maxVoltage);
-    if (minVoltage >= maxVoltage) {
-      throw new IllegalArgumentException("minVoltage must be below maxVoltage, got: " + minVoltage + " and " + maxVoltage);
+  public ADRCConfig withVoltageLimits(Voltage minVoltage, Voltage maxVoltage) {
+    double min = Objects.requireNonNull(minVoltage, "minVoltage must not be null").in(Volts);
+    double max = Objects.requireNonNull(maxVoltage, "maxVoltage must not be null").in(Volts);
+    requireFinite("minVoltage", min);
+    requirePositiveFinite("maxVoltage", max);
+    if (min >= max) {
+      throw new IllegalArgumentException("minVoltage must be below maxVoltage, got: " + min + " and " + max);
     }
     this.minVoltage = minVoltage;
     this.maxVoltage = maxVoltage;
@@ -266,10 +394,11 @@ public class ADRCConfig implements Cloneable {
    *
    * @param slewRateLimit Maximum output change per second; zero disables it.
    * @return This config for chaining.
+   * @throws NullPointerException     if the value is {@code null}.
    * @throws IllegalArgumentException if the value is not finite or is negative.
    */
-  public ADRCConfig withSlewRateLimit(double slewRateLimit) {
-    requireNonNegativeFinite("slewRateLimit", slewRateLimit);
+  public ADRCConfig withSlewRateLimit(Velocity<VoltageUnit> slewRateLimit) {
+    requireNonNegativeFinite("slewRateLimit", Objects.requireNonNull(slewRateLimit, "slewRateLimit must not be null").in(Volts.per(Second)));
     this.slewRateLimit = slewRateLimit;
     return this;
   }
@@ -277,20 +406,21 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set the input delay.
    *
-   * @param inputDelay Input delay in seconds; zero disables it.
+   * @param inputDelay Input delay; zero disables it.
    * @return This config for chaining.
+   * @throws NullPointerException     if the value is {@code null}.
    * @throws IllegalArgumentException if the value is not finite or is negative.
    */
-  public ADRCConfig withInputDelay(double inputDelay) {
-    requireNonNegativeFinite("inputDelay", inputDelay);
+  public ADRCConfig withInputDelay(Time inputDelay) {
+    requireNonNegativeFinite("inputDelay", Objects.requireNonNull(inputDelay, "inputDelay must not be null").in(Seconds));
     this.inputDelay = inputDelay;
     return this;
   }
 
   /**
-   * Select the cascaded ESO form.
+   * Select the cascaded extended-state-observer form.
    *
-   * @param cascaded Whether to run the cascaded ESO.
+   * @param cascaded Whether to run the cascaded observer.
    * @return This config for chaining.
    */
   public ADRCConfig withCascaded(boolean cascaded) {
@@ -301,19 +431,28 @@ public class ADRCConfig implements Cloneable {
   /**
    * Enable a tracking differentiator on the reference.
    *
-   * @param method TD method: {@code euler}, {@code tod}, {@code ld}, {@code red}, {@code intd}, or
-   *               {@code none}.
-   * @param params Method parameters; may be empty to use the method defaults.
+   * <p>The differentiator smooths the reference and supplies its derivatives, so a step setpoint
+   * no longer spikes the controller output. See the class documentation for a guide to the five
+   * methods and their parameters, and {@link TrackingDifferentiator} for the full reference.
+   *
+   * @param method Differentiation method.
+   * @param params Method parameters in order; may be empty to use the method defaults.
    * @return This config for chaining.
-   * @throws IllegalArgumentException if the method is not one of the supported names.
    */
-  public ADRCConfig withTrackingDifferentiator(String method, double... params) {
-    String normalized = method == null ? "" : method.toLowerCase(Locale.ROOT);
-    if (!normalized.equals("none") && !normalized.equals("euler") && !normalized.equals("tod") && !normalized.equals("ld") && !normalized.equals("red") && !normalized.equals("intd")) {
-      throw new IllegalArgumentException("Unknown TD method: " + method);
-    }
-    this.tdMethod = normalized;
+  public ADRCConfig withTrackingDifferentiator(TrackingDifferentiator.Method method, double... params) {
+    this.tdMethod = method;
     this.tdParams = params == null || params.length == 0 ? null : params.clone();
+    return this;
+  }
+
+  /**
+   * Disable the tracking differentiator on the reference.
+   *
+   * @return This config for chaining.
+   */
+  public ADRCConfig withoutTrackingDifferentiator() {
+    this.tdMethod = null;
+    this.tdParams = null;
     return this;
   }
 
@@ -322,17 +461,17 @@ public class ADRCConfig implements Cloneable {
    *
    * @return Plant order, or an empty optional when it has not been configured.
    */
-  public OptionalInt getSystemOrder() {
-    return systemOrder == null ? OptionalInt.empty() : OptionalInt.of(systemOrder);
+  public Optional<SystemOrder> getSystemOrder() {
+    return Optional.ofNullable(systemOrder);
   }
 
   /**
    * Get the effective settling time.
    *
-   * @return Settling time in seconds.
+   * @return Settling time.
    */
-  public double getSettlingTime() {
-    return settlingTime == null ? DEFAULT_SETTLING_TIME : settlingTime;
+  public Time getSettlingTime() {
+    return settlingTime == null ? Seconds.of(DEFAULT_SETTLING_TIME) : settlingTime;
   }
 
   /**
@@ -356,19 +495,19 @@ public class ADRCConfig implements Cloneable {
   /**
    * Get the explicitly configured minimum output, if any.
    *
-   * @return Minimum output in volts, or an empty optional for {@code -maxVoltage}.
+   * @return Minimum output, or an empty optional for {@code -maxVoltage}.
    */
-  public OptionalDouble getMinVoltage() {
-    return minVoltage == null ? OptionalDouble.empty() : OptionalDouble.of(minVoltage);
+  public Optional<Voltage> getMinVoltage() {
+    return Optional.ofNullable(minVoltage);
   }
 
   /**
    * Get the explicitly configured maximum output, if any.
    *
-   * @return Maximum output in volts, or an empty optional to use the motor config.
+   * @return Maximum output, or an empty optional to use the motor config.
    */
-  public OptionalDouble getMaxVoltage() {
-    return maxVoltage == null ? OptionalDouble.empty() : OptionalDouble.of(maxVoltage);
+  public Optional<Voltage> getMaxVoltage() {
+    return Optional.ofNullable(maxVoltage);
   }
 
   /**
@@ -376,35 +515,35 @@ public class ADRCConfig implements Cloneable {
    *
    * @return Slew-rate limit, or zero when disabled.
    */
-  public double getSlewRateLimit() {
-    return slewRateLimit == null ? DEFAULT_SLEW_RATE_LIMIT : slewRateLimit;
+  public Velocity<VoltageUnit> getSlewRateLimit() {
+    return Volts.per(Second).of(slewRateLimit == null ? DEFAULT_SLEW_RATE_LIMIT : slewRateLimit.in(Volts.per(Second)));
   }
 
   /**
    * Get the effective input delay.
    *
-   * @return Input delay in seconds, or zero when disabled.
+   * @return Input delay, or zero when disabled.
    */
-  public double getInputDelay() {
-    return inputDelay == null ? DEFAULT_INPUT_DELAY : inputDelay;
+  public Time getInputDelay() {
+    return inputDelay == null ? Seconds.of(DEFAULT_INPUT_DELAY) : inputDelay;
   }
 
   /**
-   * Whether the cascaded ESO form is enabled.
+   * Whether the cascaded extended-state-observer form is enabled.
    *
-   * @return {@code true} when the cascaded ESO is enabled.
+   * @return {@code true} when the cascaded observer is enabled.
    */
   public boolean isCascaded() {
     return cascaded != null && cascaded;
   }
 
   /**
-   * Get the effective tracking differentiator method.
+   * Get the configured tracking differentiator method.
    *
-   * @return TD method name, or {@code "none"}.
+   * @return Differentiation method, or {@code null} when the differentiator is disabled.
    */
-  public String getTdMethod() {
-    return tdMethod == null ? DEFAULT_TD_METHOD : tdMethod;
+  public TrackingDifferentiator.Method getTdMethod() {
+    return tdMethod;
   }
 
   /**
@@ -427,15 +566,16 @@ public class ADRCConfig implements Cloneable {
    *                                                    derived, or a limit is inconsistent.
    */
   public ADRCController buildController(DCMotor motor, SmartMotorControllerConfig<?> config, Time period) {
-    int order = requireSystemOrder();
+    int order = requireSystemOrder().getOrder();
     double resolvedMaxVoltage = resolveMaxVoltage(motor, config);
-    double resolvedMinVoltage = minVoltage == null ? -resolvedMaxVoltage : minVoltage;
+    double resolvedMinVoltage = minVoltage == null ? -resolvedMaxVoltage : minVoltage.in(Volts);
     if (resolvedMinVoltage >= resolvedMaxVoltage) {
-      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has minVoltage >= maxVoltage", "Cannot initialize the controller.", "withADRCController(new ADRCConfig(\"" + name + "\").withVoltageLimits(-12.0, 12.0))");
+      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has minVoltage >= maxVoltage", "Cannot initialize the controller.", "withADRCController(new ADRCConfig(\"" + name + "\").withVoltageLimits(Volts.of(-12), Volts.of(12)))");
     }
 
     ADRCController controller = new ADRCController(order);
-    controller.initialize(getSettlingTime(), getBandwidthScale(), resolveB0(motor, config), resolvedMinVoltage, resolvedMaxVoltage, period.in(Seconds), null, 0.0, 1.0, getSlewRateLimit(), getInputDelay(), getTdMethod(), getTdParams(), isCascaded());
+    controller.initialize(getSettlingTime().in(Seconds), getBandwidthScale(), resolveB0(motor, config), resolvedMinVoltage, resolvedMaxVoltage, period.in(Seconds), null, 0.0, 1.0,
+                          getSlewRateLimit().in(Volts.per(Second)), getInputDelay().in(Seconds), getTdMethod(), getTdParams(), isCascaded());
     return controller;
   }
 
@@ -453,7 +593,7 @@ public class ADRCConfig implements Cloneable {
       return b0;
     }
     if (!config.isMomentOfInertiaConfigured()) {
-      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has no b0 and cannot derive one", "No \"b0\" was set and the mechanism never configured its moment of inertia, so the library's placeholder inertia would be used. Inertia is different for every mechanism.", "withADRCController(new ADRCConfig(\"" + name + "\").withB0(...)) or call withMomentOfInertia(...) on the motor config");
+      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has no b0 and cannot derive one", "withB0(...) was never called and the mechanism never configured its moment of inertia, so the library's placeholder inertia would be used. Inertia is different for every mechanism.", "withADRCController(new ADRCConfig(\"" + name + "\").withB0(...)) or call withMomentOfInertia(...) on the motor config");
     }
     MechanismGearing gearing = config.getGearing();
     if (gearing == null) {
@@ -493,14 +633,23 @@ public class ADRCConfig implements Cloneable {
    */
   private double resolveMaxVoltage(DCMotor motor, SmartMotorControllerConfig<?> config) {
     if (maxVoltage != null) {
-      return maxVoltage;
+      return maxVoltage.in(Volts);
     }
     var configured = config.getClosedLoopControllerMaximumVoltage();
     if (configured.isPresent()) {
       return configured.get().in(Volts);
     }
-    ADRCConfigLoader.warn("ADRC \"" + name + "\" has no maxVoltage and the motor config has no closed-loop voltage limit; using the motor's nominal voltage (" + motor.nominalVoltage + " V).");
+    warn("ADRC \"" + name + "\" has no maxVoltage and the motor config has no closed-loop voltage limit; using the motor's nominal voltage (" + motor.nominalVoltage + " V).");
     return motor.nominalVoltage;
+  }
+
+  /**
+   * Report a config warning to the Driver Station and stderr.
+   *
+   * @param message Warning text.
+   */
+  private static void warn(String message) {
+    DriverStationBackend.reportWarning("[ADRC] " + message, false);
   }
 
   /**
@@ -509,127 +658,11 @@ public class ADRCConfig implements Cloneable {
    * @return Plant order.
    * @throws SmartMotorControllerConfigurationException if the order is missing.
    */
-  private int requireSystemOrder() {
+  private SystemOrder requireSystemOrder() {
     if (systemOrder == null) {
-      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has no system order", "No \"systemOrder\" was set in deploy/adrc/" + name + ".json and none was set in Java.", "withADRCController(new ADRCConfig(\"" + name + "\").withSystemOrder(1))");
+      throw new SmartMotorControllerConfigurationException("ADRC \"" + name + "\" has no system order", "withSystemOrder(...) was never called, and there is no safe default plant order.", "withADRCController(new ADRCConfig(\"" + name + "\").withSystemOrder(SystemOrder.FIRST))");
     }
     return systemOrder;
-  }
-
-  /**
-   * Merge the non-null JSON values onto this config.
-   *
-   * @param json Parsed file.
-   */
-  void applyJson(ADRCJsonConfig json) {
-    if (json.systemOrder() != null) {
-      if (json.systemOrder() >= 1 && json.systemOrder() <= 4) {
-        this.systemOrder = json.systemOrder();
-      } else {
-        ADRCConfigLoader.warn("ADRC \"" + name + "\": systemOrder must be between 1 and 4, got " + json.systemOrder() + ". Ignoring.");
-      }
-    }
-
-    applyPositive(json.settlingTime(), "settlingTime", value -> this.settlingTime = value);
-    applyPositive(json.bandwidthScale(), "bandwidthScale", value -> this.bandwidthScale = value);
-    applyNonZero(json.b0(), "b0", value -> this.b0 = value);
-    applyFinite(json.minVoltage(), "minVoltage", value -> this.minVoltage = value);
-    applyPositive(json.maxVoltage(), "maxVoltage", value -> this.maxVoltage = value);
-    applyNonNegative(json.slewRateLimit(), "slewRateLimit", value -> this.slewRateLimit = value);
-    applyNonNegative(json.inputDelay(), "inputDelay", value -> this.inputDelay = value);
-
-    if (json.cascaded() != null) {
-      this.cascaded = json.cascaded();
-    }
-    if (json.tdMethod() != null) {
-      String normalized = json.tdMethod().toLowerCase(Locale.ROOT);
-      if (normalized.equals("none") || normalized.equals("euler") || normalized.equals("tod") || normalized.equals("ld") || normalized.equals("red") || normalized.equals("intd")) {
-        this.tdMethod = normalized;
-      } else {
-        ADRCConfigLoader.warn("ADRC \"" + name + "\": unknown tdMethod \"" + json.tdMethod() + "\". Ignoring.");
-      }
-    }
-    if (json.tdParams() != null) {
-      this.tdParams = json.tdParams().clone();
-    }
-
-    if (minVoltage != null && maxVoltage != null && minVoltage >= maxVoltage) {
-      ADRCConfigLoader.warn("ADRC \"" + name + "\": minVoltage must be below maxVoltage, got " + minVoltage + " and " + maxVoltage + ". Ignoring both.");
-      this.minVoltage = null;
-      this.maxVoltage = null;
-    }
-  }
-
-  /**
-   * Apply a positive finite JSON value.
-   *
-   * @param value   JSON value.
-   * @param field   Field name for warnings.
-   * @param applier Setter.
-   */
-  private void applyPositive(Double value, String field, java.util.function.DoubleConsumer applier) {
-    if (value == null) {
-      return;
-    }
-    if (Double.isFinite(value) && value > 0) {
-      applier.accept(value);
-    } else {
-      ADRCConfigLoader.warn("ADRC \"" + name + "\": " + field + " must be finite and positive, got " + value + ". Ignoring.");
-    }
-  }
-
-  /**
-   * Apply a non-zero finite JSON value.
-   *
-   * @param value   JSON value.
-   * @param field   Field name for warnings.
-   * @param applier Setter.
-   */
-  private void applyNonZero(Double value, String field, java.util.function.DoubleConsumer applier) {
-    if (value == null) {
-      return;
-    }
-    if (Double.isFinite(value) && value != 0.0) {
-      applier.accept(value);
-    } else {
-      ADRCConfigLoader.warn("ADRC \"" + name + "\": " + field + " must be finite and non-zero, got " + value + ". Ignoring.");
-    }
-  }
-
-  /**
-   * Apply a finite JSON value.
-   *
-   * @param value   JSON value.
-   * @param field   Field name for warnings.
-   * @param applier Setter.
-   */
-  private void applyFinite(Double value, String field, java.util.function.DoubleConsumer applier) {
-    if (value == null) {
-      return;
-    }
-    if (Double.isFinite(value)) {
-      applier.accept(value);
-    } else {
-      ADRCConfigLoader.warn("ADRC \"" + name + "\": " + field + " must be finite, got " + value + ". Ignoring.");
-    }
-  }
-
-  /**
-   * Apply a non-negative finite JSON value.
-   *
-   * @param value   JSON value.
-   * @param field   Field name for warnings.
-   * @param applier Setter.
-   */
-  private void applyNonNegative(Double value, String field, java.util.function.DoubleConsumer applier) {
-    if (value == null) {
-      return;
-    }
-    if (Double.isFinite(value) && value >= 0) {
-      applier.accept(value);
-    } else {
-      ADRCConfigLoader.warn("ADRC \"" + name + "\": " + field + " must be finite and non-negative, got " + value + ". Ignoring.");
-    }
   }
 
   /**
@@ -693,7 +726,7 @@ public class ADRCConfig implements Cloneable {
         + ", slewRateLimit=" + getSlewRateLimit()
         + ", inputDelay=" + getInputDelay()
         + ", cascaded=" + isCascaded()
-        + ", tdMethod='" + getTdMethod() + '\''
+        + ", tdMethod=" + getTdMethod()
         + ", tdParams=" + Arrays.toString(tdParams)
         + '}';
   }

@@ -7,21 +7,29 @@ import java.util.Arrays;
 import org.ejml.simple.SimpleMatrix;
 
 /**
- * Active Disturbance Rejection Controller (ADRC).
+ * Active disturbance rejection controller.
  *
- * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ * <p><b>Written by FRC Team 8331</b>, who contributed active disturbance rejection control to YAMS.
  *
- * <p>An ADRC treats every unmodeled effect (friction, gravity, back-EMF, coupling, and external
- * loads) as a single "total disturbance" and estimates it online with an extended state observer
- * (ESO). The controller then cancels the estimate while driving the modeled part of the plant with
- * a bandwidth-parameterized control law. Because the disturbance estimate absorbs plant mismatch,
- * ADRC needs very little model knowledge: just the system order and an approximate input gain
- * {@code b0}.
+ * <p>An active disturbance rejection controller treats every unmodeled effect — friction,
+ * gravity, back-EMF, coupling, dropped battery voltage, external loads — as a single "total
+ * disturbance" and estimates it online with an extended state observer. The controller then
+ * cancels the estimate while driving the modeled part of the plant with a bandwidth-parameterized
+ * control law. Because the disturbance estimate absorbs plant mismatch, the controller needs very
+ * little model knowledge: just the system order and an approximate input gain {@code b0}.
  *
- * <p>The controller supports system orders 1 through 4. The ESO is one order higher than the plant,
- * with its final state holding the disturbance estimate. Gains are generated from a single
- * closed-loop bandwidth {@code wc}; the observer bandwidth is {@code 4 * wc}. The design settling
- * time and bandwidth scale are supplied through {@link #initialize}.
+ * <p>Most teams do not construct this class directly; they describe the controller with
+ * {@link yams.core.motorcontrollers.config.ADRCConfig} and the motor controller builds and runs
+ * it. This class is the engine underneath, useful for custom loops and for understanding what the
+ * configuration produces.
+ *
+ * <p>The controller supports plant orders 1 through 4: order 1 for velocity loops (a flywheel or
+ * shooter wheel), order 2 for position loops (an arm or elevator), and orders 3 and 4 for
+ * mechanisms whose measured output sits further integrations behind the input. The extended state
+ * observer is one order higher than the plant, with its final state holding the disturbance
+ * estimate. Gains are generated from a single closed-loop bandwidth {@code wc}; the observer
+ * bandwidth is {@code 4 * wc}. The design settling time and bandwidth scale are supplied through
+ * {@link #initialize}.
  *
  * <p>An optional {@link TrackingDifferentiator} can smooth the reference and provide its
  * derivatives. A first-order input delay and an output slew-rate limit are also supported. Both are
@@ -38,13 +46,13 @@ import org.ejml.simple.SimpleMatrix;
  *     b0,                                   // approximate input gain
  *     -12.0, 12.0,                          // output saturation, volts
  *     0.02,                                 // control period, seconds
- *     new double[] {0.0, 0.0},              // initial ESO state
+ *     new double[] {0.0, 0.0},              // initial observer state
  *     0.0,                                  // initial output
  *     1.0,                                  // b0 scale
  *     0.0,                                  // slew-rate limit, output units per second
  *     0.0,                                  // input delay, seconds
- *     "none", null,                         // tracking differentiator
- *     false);                               // cascaded ESO
+ *     null, null,                           // tracking differentiator
+ *     false);                               // cascaded observer
  *
  * // In periodic():
  * double volts = adrc.calculate(
@@ -118,7 +126,7 @@ public class ADRCController {
   private boolean     useCascaded;
 
   /**
-   * Create an ADRC.
+   * Create an active disturbance rejection controller.
    *
    * @param systemOrder Plant order, from 1 through 4.
    * @throws IllegalArgumentException if the order is outside that range.
@@ -144,20 +152,20 @@ public class ADRCController {
    * @param uMin          Minimum output.
    * @param uMax          Maximum output.
    * @param dt            Control period, seconds. Must be finite and positive.
-   * @param xhatInit      Initial ESO state, length {@code systemOrder + 1}. {@code null} starts at
-   *                      zero.
+   * @param xhatInit      Initial observer state, length {@code systemOrder + 1}. {@code null}
+   *                      starts at zero.
    * @param uInit         Initial output.
    * @param ke            Input-gain scale. The controller uses {@code b0 / ke}. Must be finite and
    *                      positive.
    * @param slewRateLimit Maximum output change per second. A non-positive or NaN value disables the
    *                      limit.
    * @param inputDelay    Input delay, seconds. Must be finite and non-negative.
-   * @param tdMethod      Tracking differentiator method, or {@code "none"} to disable it.
+   * @param tdMethod      Tracking differentiator method, or {@code null} to disable it.
    * @param tdParams      Tracking differentiator parameters. May be {@code null}.
-   * @param useCascaded   Whether to run the cascaded ESO form.
+   * @param useCascaded   Whether to run the cascaded observer form.
    * @throws IllegalArgumentException if any argument is invalid.
    */
-  public void initialize(double tSettle, double kob, double b0, double uMin, double uMax, double dt, double[] xhatInit, double uInit, double ke, double slewRateLimit, double inputDelay, String tdMethod, double[] tdParams, boolean useCascaded) {
+  public void initialize(double tSettle, double kob, double b0, double uMin, double uMax, double dt, double[] xhatInit, double uInit, double ke, double slewRateLimit, double inputDelay, TrackingDifferentiator.Method tdMethod, double[] tdParams, boolean useCascaded) {
     this.initialized = false;
     if (!Double.isFinite(tSettle) || tSettle <= 0 || !Double.isFinite(kob) || kob <= 0 || !Double.isFinite(dt) || dt <= 0 || !Double.isFinite(ke) || ke <= 0) {
       throw new IllegalArgumentException("tSettle, kob, dt, and ke must be finite and positive");
@@ -519,18 +527,18 @@ public class ADRCController {
   /**
    * Set or replace the tracking differentiator.
    *
-   * @param method Differentiation method, or {@code "none"} to disable it.
+   * @param method Differentiation method, or {@code null} to disable it.
    * @param params Method parameters. May be {@code null}.
    * @throws IllegalStateException    if the controller has not been initialized.
    * @throws IllegalArgumentException if the method or parameters are invalid.
    */
-  public void setTd(String method, double[] params) {
+  public void setTd(TrackingDifferentiator.Method method, double[] params) {
     if (dt <= 0.0) {
-      throw new IllegalStateException("Controller must be initialized before setting TD");
+      throw new IllegalStateException("Controller must be initialized before setting the tracking differentiator");
     }
 
     TrackingDifferentiator newTd = null;
-    if (method != null && !"none".equalsIgnoreCase(method)) {
+    if (method != null) {
       newTd = new TrackingDifferentiator(method, this.dt, params);
       newTd.reset(tdSeed());
     }
@@ -546,7 +554,7 @@ public class ADRCController {
    * state wins. At runtime an existing differentiator carries its output forward, which keeps a
    * live method change from looking like a step from zero.
    *
-   * @return Old TD output when running, else the measured-state estimate, else zero.
+   * @return Old differentiator output when running, else the measured-state estimate, else zero.
    */
   private double tdSeed() {
     if (initialized && td != null) {
@@ -556,7 +564,7 @@ public class ADRCController {
   }
 
   /**
-   * Reset the ESO state from a measured output.
+   * Reset the observer state from a measured output.
    *
    * <p>The measured state starts where the mechanism is, so enabling the controller does not look
    * like a step from zero. The remaining states, including the disturbance estimate, start at zero,
@@ -580,13 +588,14 @@ public class ADRCController {
   }
 
   /**
-   * Reset the ESO state and output history.
+   * Reset the observer state and output history.
    *
-   * <p>When the cascaded ESO is enabled, both observers start from the supplied state. The tracking
-   * differentiator, when enabled, starts at {@code xhatInit[0]} (or zero when {@code xhatInit} is
-   * {@code null}).
+   * <p>When the cascaded observer is enabled, both observers start from the supplied state. The
+   * tracking differentiator, when enabled, starts at {@code xhatInit[0]} (or zero when
+   * {@code xhatInit} is {@code null}).
    *
-   * @param xhatInit Initial ESO state, length {@code systemOrder + 1}. {@code null} starts at zero.
+   * @param xhatInit Initial observer state, length {@code systemOrder + 1}. {@code null} starts at
+   *                 zero.
    * @param uInit    Initial output.
    * @throws IllegalStateException    if the controller has not been initialized.
    * @throws IllegalArgumentException if {@code xhatInit} has the wrong length or {@code uInit} is
@@ -658,8 +667,8 @@ public class ADRCController {
   /**
    * Replace the input gain, keeping the current state estimate and output history.
    *
-   * <p>The ESO and the control law both use {@code b0}, so the gains are recomputed. The estimated
-   * disturbance carries over, so a live-tuned input gain does not make the output jump.
+   * <p>The observer and the control law both use {@code b0}, so the gains are recomputed. The
+   * estimated disturbance carries over, so a live-tuned input gain does not make the output jump.
    *
    * @param b0 New input gain, in the same units as the one the controller was initialized with.
    * @throws IllegalStateException    if the controller has not been initialized.
@@ -703,7 +712,7 @@ public class ADRCController {
   }
 
   /**
-   * Get the ESO observer bandwidth.
+   * Get the observer bandwidth.
    *
    * @return Observer bandwidth, radians per second.
    * @throws IllegalStateException if the controller has not been initialized.
@@ -768,12 +777,12 @@ public class ADRCController {
   }
 
   /**
-   * Get the ESO state estimate.
+   * Get the extended state observer's state estimate.
    *
    * <p>Entry {@code 0} is the estimated measured output, entries {@code 1..systemOrder-1} are the
    * remaining plant states, and the final entry is the total disturbance estimate.
    *
-   * @return Copy of the ESO state, length {@code systemOrder + 1}.
+   * @return Copy of the observer state, length {@code systemOrder + 1}.
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double[] getEstimatedStates() {
@@ -788,7 +797,7 @@ public class ADRCController {
   /**
    * Get the estimated total disturbance.
    *
-   * <p>This is the final ESO state, in the units of the plant's highest derivative per second.
+   * <p>This is the final observer state, in the units of the plant's highest derivative per second.
    * Divide by {@code b0} to view it as an equivalent control input.
    *
    * @return Estimated total disturbance.
@@ -820,9 +829,9 @@ public class ADRCController {
   }
 
   /**
-   * Get the ESO order.
+   * Get the observer order.
    *
-   * @return {@code systemOrder + 1}.
+   * @return {@code systemOrder + 1}: one state per plant order plus the disturbance estimate.
    */
   public int getControllerOrder() {
     return controllerOrder;
