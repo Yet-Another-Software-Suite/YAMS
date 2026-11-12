@@ -58,7 +58,7 @@ class DoubleFlyWheelLiveTuningTest {
     for (String wheel : new String[] {kLower, kUpper}) {
       set(wheel + "voltage/enabled", false);
       set(wheel + "voltage/setpoint", 0.0);
-      set(wheel + "closedloop/feedforward/kV", 0.1);
+      set(wheel + "closedloop/feedforward/kV", 0.125);
     }
   }
 
@@ -85,12 +85,12 @@ class DoubleFlyWheelLiveTuningTest {
     set(kCommand, true);
     step(3);
     assertTrue(nt.getEntry(kCommand).getBoolean(false), "Live Tuning is running");
-    // The feedforward starts low, so both settle a little short of their setpoints.
+    // Both wheels reach their own setpoints.
     final double lower = robot.robotContainer.doubleFlyWheel.getLowerSpeed().in(RPM);
     final double upper = robot.robotContainer.doubleFlyWheel.getUpperSpeed().in(RPM);
-    assertEquals(3000, lower, 750, "lower wheel speed");
-    assertEquals(1500, upper, 375, "upper wheel speed");
-    assertTrue(lower > upper + 750, "the wheels run at their own speeds: lower " + lower + ", upper " + upper);
+    assertEquals(3000, lower, 50, "lower wheel speed");
+    assertEquals(1500, upper, 50, "upper wheel speed");
+    assertTrue(lower > upper + 1000, "the wheels run at their own speeds: lower " + lower + ", upper " + upper);
   }
 
   @Test
@@ -100,14 +100,14 @@ class DoubleFlyWheelLiveTuningTest {
     set(kCommand, true);
     step(3);
     final double before = robot.robotContainer.doubleFlyWheel.getUpperSpeed().in(RPM);
-    // Only the upper wheel's kV goes up, to about what holds a NEO at speed.
-    set(kUpper + "closedloop/feedforward/kV", 0.127);
+    assertEquals(2000, before, 50, "upper wheel speed before tuning");
+    // Only the upper wheel's kV drops to 0, so its feedback alone holds it, well short of its setpoint.
+    set(kUpper + "closedloop/feedforward/kV", 0.0);
     step(3);
     final double lower = robot.robotContainer.doubleFlyWheel.getLowerSpeed().in(RPM);
     final double upper = robot.robotContainer.doubleFlyWheel.getUpperSpeed().in(RPM);
-    assertTrue(upper > before + 100, "the upper wheel gets closer with more kV: " + before + " to " + upper);
-    assertEquals(2000, upper, 100, "upper wheel speed with kV tuned");
-    assertTrue(upper > lower + 100, "the lower wheel's gains did not change: lower " + lower + ", upper " + upper);
+    assertTrue(upper < before - 200, "the upper wheel falls short without kV: " + before + " to " + upper);
+    assertEquals(2000, lower, 50, "the lower wheel's gains did not change: lower " + lower + ", upper " + upper);
   }
 
   @Test
