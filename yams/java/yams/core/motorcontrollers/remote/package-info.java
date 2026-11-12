@@ -7,7 +7,7 @@
  * <p>This package contains adapters for CTRE TalonFX-family motor controllers. Because the
  * Phoenix 6 firmware executes PID loops directly on the motor controller hardware, these
  * wrappers are classified as <em>remote</em>: setpoints are sent over CAN and the device
- * closes the loop autonomously at a high update rate without consuming roboRIO CPU cycles.
+ * closes the loop autonomously at a high update rate without consuming SystemCore CPU cycles.
  *
  * <h2>Core types</h2>
  * <ul>

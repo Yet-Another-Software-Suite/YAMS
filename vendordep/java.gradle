@@ -27,6 +27,11 @@ dependencies {
     implementation "org.wpilib.tunables:tunables-java:$wpilibVersion"
     implementation "org.wpilib.telemetry:telemetry-java:$wpilibVersion"
     implementation "org.ejml:ejml-simple:0.44.0"
+    // ADRCConfig reads deploy/adrc/<name>.json with Avaje Jsonb, which GradleRIO gives robot projects
+    // along with its generator. The generator writes ADRCJsonConfig's adapter into the YAMS jar.
+    implementation "io.avaje:avaje-jsonb:3.14"
+    annotationProcessor "io.avaje:avaje-jsonb-generator:3.14"
+    testAnnotationProcessor "io.avaje:avaje-jsonb-generator:3.14"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.19.2"
     implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"

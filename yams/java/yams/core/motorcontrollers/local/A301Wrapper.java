@@ -413,6 +413,7 @@ public class A301Wrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
+    applyADRCConfig(config);
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     if (config.getVendorConfig().isPresent()) {

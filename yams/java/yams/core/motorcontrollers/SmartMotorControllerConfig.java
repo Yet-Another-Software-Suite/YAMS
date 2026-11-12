@@ -62,6 +62,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.math.LQRController;
 import yams.core.mechanisms.positional.Elevator;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
+import yams.core.motorcontrollers.config.ADRCConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
 import yams.core.telemetry.SmartMotorControllerTelemetryConfig;
@@ -175,6 +176,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Controller for the {@link SmartMotorController}.
    */
   private Optional<LQRController> lqr = Optional.empty();
+  /**
+   * ADRC controllers for the {@link SmartMotorController}, one per slot.
+   */
+  private EnumMap<ClosedLoopControllerSlot, ADRCConfig> adrc = new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Controller for the {@link SmartMotorController}.
    */
@@ -312,6 +317,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private MomentOfInertia moi = KilogramSquareMeters.of(0.02);
   /**
+   * Whether {@link #moi} was set by the team rather than left at the placeholder. Kept separate
+   * from the validation set, which each wrapper resets before applying the config.
+   */
+  private boolean momentOfInertiaConfigured = false;
+  /**
    * Loosely coupled followers.
    */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
@@ -331,7 +341,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *           construct this.
    */
   protected SmartMotorControllerConfig() {
-    HAL.reportUsage(null, null);
+    HAL.reportUsage("SmartMotorController", "YAMS");
   }
 
   /**
@@ -356,6 +366,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.sim_armFeedforward = copyMap(cfg.sim_armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
     this.sim_lqr = cfg.sim_lqr.map(SmartMotorControllerConfig::copyLqr);
     this.lqr = cfg.lqr.map(SmartMotorControllerConfig::copyLqr);
+    this.adrc = copyMap(cfg.adrc, ADRCConfig::clone);
     this.exponentialProfile = cfg.exponentialProfile;
     this.trapezoidProfile = cfg.trapezoidProfile;
     this.sim_exponentialProfile = cfg.sim_exponentialProfile;
@@ -391,6 +402,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.wrappingContinuous = cfg.wrappingContinuous;
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
+    this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -709,7 +721,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     if (linearClosedLoopController) {
       throw new SmartMotorControllerConfigurationException("Distance based mechanism used with continuous wrapping", "Cannot set continuous wrapping", "withMechanismCircumference(Distance) should be removed");
     }
-    if (pid.isEmpty() && lqr.isEmpty()) {
+    if (pid.isEmpty() && lqr.isEmpty() && adrc.isEmpty()) {
       throw new SmartMotorControllerConfigurationException("No closed loop controller used", "Cannot set continuous wrapping!", "withClosedLoopController()");
     }
 
@@ -752,7 +764,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       for (var pidController : pid.values()) {
         pidController.setTolerance(getClosedLoopTolerance().orElse(tolerance).in(Rotations));
       }
-      if (pid.isEmpty()) {
+      if (pid.isEmpty() && adrc.isEmpty()) {
         throw new SmartMotorControllerConfigurationException("No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
       }
     }
@@ -781,7 +793,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       for (var pidController : pid.values()) {
         pidController.setTolerance(convertFromMechanism(getClosedLoopTolerance().orElse(toleranceAngle)).in(Meters));
       }
-      if (pid.isEmpty()) {
+      if (pid.isEmpty() && adrc.isEmpty()) {
         throw new SmartMotorControllerConfigurationException("No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
       }
     }
@@ -892,6 +904,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withMomentOfInertia(Inches.of(18), Pounds.of(8))");
     } else {
       moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+      momentOfInertiaConfigured = true;
+      basicOptions.remove(BasicOptions.MomentOfInertia);
     }
     return self();
   }
@@ -911,6 +925,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     }
     double radius = diameter.in(Meters) / 2.0;
     moi = KilogramSquareMeters.of(0.5 * mass.in(Kilograms) * radius * radius);
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
   }
 
@@ -923,7 +939,23 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withMomentOfInertia(MomentOfInertia MOI) {
     moi = MOI;
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
+  }
+
+  /**
+   * Whether the mechanism's moment of inertia was explicitly configured.
+   *
+   * <p>The {@link #getMOI()} value has a placeholder default so simulation can run without a
+   * model. Physical derivations, such as the ADRC input gain, must not use that placeholder: an
+   * inertia that was never configured describes no real mechanism.
+   *
+   * @return {@code true} when {@code withMomentOfInertia(...)} or
+   *         {@code withWheelMomentOfInertia(...)} was called.
+   */
+  public boolean isMomentOfInertiaConfigured() {
+    return momentOfInertiaConfigured;
   }
 
   /**
@@ -1330,6 +1362,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<ArmFeedforward> getArmFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.ArmFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_armFeedforward.containsKey(slot)) {
       return Optional.ofNullable(sim_armFeedforward.get(slot));
     }
@@ -1408,6 +1443,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<ElevatorFeedforward> getElevatorFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.ElevatorFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_elevatorFeedforward.containsKey(slot)) {
       return Optional.ofNullable(sim_elevatorFeedforward.get(slot));
     }
@@ -1482,6 +1520,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<SimpleMotorFeedforward> getSimpleFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.SimpleFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_simpleFeedforward.containsKey(slot)) {
       return Optional.of(sim_simpleFeedforward.get(slot));
     }
@@ -1652,6 +1693,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
     this.moi = moi;
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     var sysid = Models.singleJointedArmFromPhysicalConstants(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     // The arm model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the dynamics.
     // A(0,0) and B(0,0) are always 0, which would make kV and kA NaN/infinite.
@@ -1745,6 +1788,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(LQRController controller) {
     this.pid.clear();
+    this.adrc.clear();
     this.lqr = Optional.ofNullable(controller);
     return self();
   }
@@ -1767,6 +1811,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
     this.pid.put(slot, applyContinuousWrapping(new PIDController(kP, kI, kD)));
+    this.adrc.remove(slot);
     this.lqr = Optional.empty();
     return self();
   }
@@ -1798,6 +1843,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(PIDController controller, ClosedLoopControllerSlot slot) {
     this.pid.put(slot, applyContinuousWrapping(controller));
+    this.adrc.remove(slot);
     this.lqr = Optional.empty();
     return self();
   }
@@ -1812,6 +1858,82 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(PIDController controller) {
     return withClosedLoopController(controller, ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Set the ADRC as the closed loop controller for the {@link SmartMotorController}, in slot 0.
+   *
+   * <p>This is the drop-in replacement for {@link #withClosedLoopController(double, double, double)}:
+   * the mechanism keeps calling {@code setVelocity(...)} and {@code setPosition(...)}, and the motor
+   * controller runs the ADRC on its closed-loop thread.
+   *
+   * <p>ADRC estimates and cancels the disturbance that feedforward models, so this clears the PID,
+   * LQR, and feedforward for the slot. Mixing them would double-count the plant gain.
+   *
+   * @param controller ADRC configuration.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @see ADRCConfig
+   */
+  public T withADRCController(ADRCConfig controller) {
+    return withADRCController(controller, ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Set the ADRC as the closed loop controller for a slot.
+   *
+   * @param controller ADRC configuration, or {@code null} to clear the slot.
+   * @param slot       Closed loop controller slot.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public T withADRCController(ADRCConfig controller, ClosedLoopControllerSlot slot) {
+    if (controller == null) {
+      this.adrc.remove(slot);
+      return self();
+    }
+    this.adrc.put(slot, controller);
+    this.pid.remove(slot);
+    this.sim_pid.remove(slot);
+    this.lqr = Optional.empty();
+    this.sim_lqr = Optional.empty();
+    // ADRC's observer estimates the same disturbance feedforward models, so keeping both would
+    // double-count the plant gain. Clear every feedforward form for this slot.
+    this.simpleFeedforward.remove(slot);
+    this.sim_simpleFeedforward.remove(slot);
+    this.elevatorFeedforward.remove(slot);
+    this.sim_elevatorFeedforward.remove(slot);
+    this.armFeedforward.remove(slot);
+    this.sim_armFeedforward.remove(slot);
+    return self();
+  }
+
+  /**
+   * Get the ADRC configuration for a slot.
+   *
+   * @param slot Closed loop controller slot.
+   * @return {@link ADRCConfig} if one is configured for the slot.
+   */
+  public Optional<ADRCConfig> getADRCController(ClosedLoopControllerSlot slot) {
+    basicOptions.remove(BasicOptions.ADRC);
+    return Optional.ofNullable(adrc.get(slot));
+  }
+
+  /**
+   * Get the ADRC configuration for slot 0.
+   *
+   * @return {@link ADRCConfig} if one is configured for slot 0.
+   */
+  public Optional<ADRCConfig> getADRCController() {
+    return getADRCController(ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Whether an ADRC is configured for a slot.
+   *
+   * @param slot Closed loop controller slot.
+   * @return {@code true} when ADRC owns the slot.
+   */
+  private boolean isADRCConfigured(ClosedLoopControllerSlot slot) {
+    return adrc.containsKey(slot);
   }
 
   /**
@@ -2473,6 +2595,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public void resetValidationCheck() {
     basicOptions = EnumSet.allOf(BasicOptions.class);
+    // Inertia is optional: it only feeds the simulation and the ADRC's b0 derivation, which reads
+    // it through getMOI() after this reset. No wrapper has to fetch it to apply the config.
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     externalEncoderOptions = EnumSet.allOf(ExternalEncoderOptions.class);
   }
 
@@ -2573,7 +2698,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     UpperLimit,
     /** Closed loop controller lower limit. */
     LowerLimit,
-    //    MomentOfInertia,
+    /** Mechanism moment of inertia. */
+    MomentOfInertia,
     /** Motor zero power mode. */
     ZeroPower,
     /** Voltage compensation. */
@@ -2605,6 +2731,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     ElevatorFeedforward,
     /** PID controller. */
     PID,
+    /** ADRC controller. */
+    ADRC,
     /** Trapezoidal profile. */
     TrapezoidalProfile,
     /** Exponentially profiled closed loop controller. */

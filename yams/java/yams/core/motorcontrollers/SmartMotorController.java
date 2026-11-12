@@ -49,6 +49,7 @@ import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
+import yams.core.math.ADRCController;
 import yams.core.math.LQRController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
@@ -118,6 +119,9 @@ public abstract class SmartMotorController {
 
   /** LQR controller for the motor controller. */
   protected Optional<LQRController> m_lqr = Optional.empty();
+
+  /** ADRC controller for the motor controller, when the config selects one. */
+  protected Optional<ADRCController> m_adrc = Optional.empty();
 
   /** Setpoint position */
   protected Optional<Angle> setpointPosition = Optional.empty();
@@ -351,6 +355,48 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Whether the closed loop controller runs on the SystemCore instead of the motor controller.
+   * Both LQR and ADRC need the measured state each loop, so they run here.
+   *
+   * <p>Wrappers use this to leave their onboard closed loop controller alone: when it is
+   * {@code true}, the wrapper sends a plain voltage command and this class closes the loop.
+   *
+   * @return {@code true} when LQR or ADRC owns the closed loop.
+   */
+  protected boolean usesSystemCoreController() {
+    return m_lqr.isPresent() || m_adrc.isPresent();
+  }
+
+  /**
+   * Get the ADRC controller running the closed loop, if the config selected one.
+   *
+   * @return The {@link ADRCController}, or an empty optional when PID or LQR owns the loop.
+   */
+  public Optional<ADRCController> getADRCController() {
+    return m_adrc;
+  }
+
+  /**
+   * Build the ADRC controller for this motor's slot from the config, replacing any previous one.
+   *
+   * <p>The control period comes from {@code withClosedLoopControlPeriod(...)}, the same value
+   * {@link #iterateClosedLoopController()} runs at, so the controller's discrete model cannot drift
+   * from the loop that steps it.
+   *
+   * @param config Config being applied.
+   * @throws SmartMotorControllerConfigurationException if the ADRC config cannot build a controller.
+   */
+  protected void applyADRCConfig(SmartMotorControllerConfig<?> config) {
+    var adrcConfig = config.getADRCController(m_slot);
+    if (adrcConfig.isEmpty()) {
+      m_adrc = Optional.empty();
+      return;
+    }
+    Time period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    m_adrc = Optional.of(adrcConfig.get().buildController(getDCMotor(), config, period));
+  }
+
+  /**
    * Whether a closed loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
    * stopped, as a duty cycle or voltage command does. False when the closed loop controller runs on the motor
    * controller.
@@ -406,7 +452,8 @@ public abstract class SmartMotorController {
   }
 
   /**
-   * Start the closed loop controller's PID, motion profile and LQR from where the mechanism is now.
+   * Start the closed loop controller's PID, motion profile, LQR, and ADRC from where the mechanism
+   * is now.
    *
    * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is in use
    *                                                    and the mechanism circumference is not
@@ -424,6 +471,22 @@ public abstract class SmartMotorController {
     if (m_config.getLinearClosedLoopControllerUse()) {
       m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
     }
+    // ADRC's ESO is stepped with whichever measurement the loop commands. Seed it from the same
+    // quantity: velocity while the last command was a velocity, position otherwise.
+    m_adrc.ifPresent(adrc -> adrc.reset(getADRCResetMeasurement()));
+  }
+
+  /**
+   * Get the measurement to seed the ADRC's ESO with, in the same units the loop will step it with.
+   *
+   * @return Mechanism position, or mechanism velocity while running a velocity-only loop.
+   */
+  private double getADRCResetMeasurement() {
+    boolean linear = m_config.getLinearClosedLoopControllerUse();
+    if (setpointPosition.isEmpty() && setpointVelocity.isPresent()) {
+      return linear ? getMeasurementVelocity().in(MetersPerSecond) : getMechanismVelocity().in(RotationsPerSecond);
+    }
+    return linear ? getMeasurementPosition().in(Meters) : getMechanismPosition().in(Rotations);
   }
 
   /**
@@ -564,6 +627,7 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured), Rotations.of(finalSetpoint), RotationsPerSecond.of(finalVelocityProfile)).in(Volts));
         }
       });
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalMeasured, finalSetpoint)));
 
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -591,6 +655,7 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity), RotationsPerSecond.of(finalSetpoint)).in(Volts));
         }
       });
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalVelocity, finalSetpoint)));
     }
 
     armFeedforward.ifPresent(armFeedforwardPerRotation -> {

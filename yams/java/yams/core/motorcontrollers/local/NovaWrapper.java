@@ -504,14 +504,14 @@ public class NovaWrapper extends SmartMotorController {
    * absolute encoder geared to the mechanism. The SystemCore runs those instead, as it can any
    * closed loop.
    *
-   * @param config The config being applied. {@link #m_lqr}, {@link #m_expoProfile} and
-   *               {@link #m_trapezoidProfile} are already set from it.
+   * @param config The config being applied. {@link #m_lqr}, {@link #m_adrc}, {@link #m_expoProfile}
+   *               and {@link #m_trapezoidProfile} are already set from it.
    * @return Whether the Nova runs the closed loop.
    */
   private boolean novaCanRunClosedLoop(SmartMotorControllerConfig<?> config) {
     final Optional<Angle> wrappingMax = config.getWrappingMax();
     final boolean continuousWrapping = config.isWrappingContinuous();
-    if (m_lqr.isPresent() || m_expoProfile.isPresent()
+    if (usesSystemCoreController() || m_expoProfile.isPresent()
         || (m_trapezoidProfile.isPresent() && config.getVelocityTrapezoidalProfileInUse())) {
       return false;
     }
@@ -591,6 +591,7 @@ public class NovaWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(false));
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
+    applyADRCConfig(config);
     m_looseFollowers = config.getLooselyCoupledFollowers();
     m_expoProfile = config.getExponentialProfile().map(ExponentialProfile::new);
     m_trapezoidProfile = config.getTrapezoidProfile().map(TrapezoidProfile::new);

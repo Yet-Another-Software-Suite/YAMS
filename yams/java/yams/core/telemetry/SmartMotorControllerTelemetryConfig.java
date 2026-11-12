@@ -148,6 +148,15 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.kP).enable();
         doubleFields.get(DoubleTelemetryField.kI).enable();
         doubleFields.get(DoubleTelemetryField.kD).enable();
+        // Only kept for a motor controller configured with an ADRC, see getDoubleFields.
+        doubleFields.get(DoubleTelemetryField.ADRCDisturbance).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidth).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCObserverBandwidth).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCSystemOrder).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCB0).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCOutput).enable();
         // Only kept for a motor controller configured with an LQR, see getDoubleFields.
         doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).enable();
         doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).enable();
@@ -342,6 +351,28 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.LQRModelVelocity).setDefaultValue(LQRUnits.fromSI(type, false, model[1]));
         doubleFields.get(DoubleTelemetryField.LQREncoderPosition).setDefaultValue(LQRUnits.fromSI(type, true, encoder[0]));
       }
+    });
+    // An ADRC replaces kP, kI and kD with its own values. Without one, its fields never appear.
+    var adrc = smc.getADRCController();
+    if (adrc.isEmpty()) {
+      doubleFields.get(DoubleTelemetryField.ADRCDisturbance).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCBandwidth).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCObserverBandwidth).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCSystemOrder).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCB0).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).disable();
+      doubleFields.get(DoubleTelemetryField.ADRCOutput).disable();
+    }
+    adrc.ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.kP).disable();
+      doubleFields.get(DoubleTelemetryField.kI).disable();
+      doubleFields.get(DoubleTelemetryField.kD).disable();
+      // Seed the tuning topics with the controller's values, so the dashboard shows what is
+      // running instead of the enum defaults.
+      doubleFields.get(DoubleTelemetryField.ADRCB0).setDefaultValue(e.getB0());
+      doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).setDefaultValue(e.getSettlingTime());
+      doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).setDefaultValue(e.getBandwidthScale());
     });
     config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();

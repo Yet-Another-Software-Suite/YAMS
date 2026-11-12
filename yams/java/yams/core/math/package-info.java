@@ -58,5 +58,7 @@
  * @see yams.core.math.DerivativeTimeFilter
  * @see yams.core.math.SmartMath
  * @see yams.core.math.ExponentialProfilePIDController
+ * @see yams.core.math.ADRCController
+ * @see yams.core.math.TrackingDifferentiator
  */
 package yams.core.math;

@@ -28,6 +28,7 @@ import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.math.ADRCController;
 import yams.core.math.LQRConfig.LQRType;
 
 /**
@@ -170,6 +171,14 @@ public class SmartMotorControllerTelemetry {
         case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderMechanismPosition().orElse(Rotations.zero()).in(Rotations));
         case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderMechanismVelocity().orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
         case ActiveClosedLoopControllerSlot -> dt.set(smc.getClosedLoopControllerSlot().ordinal());
+        case ADRCDisturbance -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getEstimatedDisturbance()));
+        case ADRCBandwidth -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidth()));
+        case ADRCObserverBandwidth -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getObserverBandwidth()));
+        case ADRCSystemOrder -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSystemOrder()));
+        case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
+        case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime()));
+        case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
+        case ADRCOutput -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getLastOutput()));
       }
     }
   }
@@ -310,6 +319,9 @@ public class SmartMotorControllerTelemetry {
           case kP -> smartMotorController.setKp(dt.get());
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
+          case ADRCB0 -> retuneADRC(smartMotorController, adrc -> adrc.setB0(dt.get()));
+          case ADRCSettlingTime -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(dt.get(), adrc.getBandwidthScale()));
+          case ADRCBandwidthScale -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(adrc.getSettlingTime(), dt.get()));
           case kS -> smartMotorController.setKs(dt.get());
           case kV -> smartMotorController.setKv(dt.get());
           case kA -> smartMotorController.setKa(dt.get());
@@ -380,6 +392,23 @@ public class SmartMotorControllerTelemetry {
         }
       }
     }
+  }
+
+  /**
+   * Apply a live tuning change to the ADRC, reporting a rejected value instead of stopping the
+   * tuning loop. A value the ADRC cannot use leaves the controller as it was.
+   *
+   * @param smc    Motor controller being tuned.
+   * @param action Change to apply.
+   */
+  private void retuneADRC(SmartMotorController smc, java.util.function.Consumer<ADRCController> action) {
+    smc.getADRCController().ifPresent(adrc -> {
+      try {
+        action.accept(adrc);
+      } catch (RuntimeException e) {
+        DriverStationBackend.reportWarning("[WARNING] " + smc.getName() + " ADRC not retuned: " + e.getMessage(), false);
+      }
+    });
   }
 
   /**
@@ -523,6 +552,22 @@ public class SmartMotorControllerTelemetry {
     kI("closedloop/feedback/kI", 0, true, "none"),
     /** kD */
     kD("closedloop/feedback/kD", 0, true, "none"),
+    /** ADRC estimated total disturbance. */
+    ADRCDisturbance("closedloop/adrc/disturbance", 0, false, "none"),
+    /** ADRC closed-loop bandwidth, radians per second. */
+    ADRCBandwidth("closedloop/adrc/bandwidth", 0, false, "radians_per_second"),
+    /** ADRC ESO observer bandwidth, radians per second. */
+    ADRCObserverBandwidth("closedloop/adrc/observerBandwidth", 0, false, "radians_per_second"),
+    /** ADRC plant order. */
+    ADRCSystemOrder("closedloop/adrc/systemOrder", 0, false, "none"),
+    /** ADRC input gain, in mechanism units per volt per second squared. */
+    ADRCB0("closedloop/adrc/b0", 0, true, "none"),
+    /** ADRC desired closed-loop settling time. */
+    ADRCSettlingTime("closedloop/adrc/settlingTime", 0.2, true, "seconds"),
+    /** ADRC closed-loop bandwidth scale. */
+    ADRCBandwidthScale("closedloop/adrc/bandwidthScale", 1, true, "none"),
+    /** ADRC output voltage. */
+    ADRCOutput("closedloop/adrc/output", 0, false, "volts"),
     /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */
     LQRQelmsPosition("closedloop/lqr/qelms/position", 0, true, "tunable_position"),
     /** LQR velocity error tolerance (qelms), in RPM or meters per second. */
