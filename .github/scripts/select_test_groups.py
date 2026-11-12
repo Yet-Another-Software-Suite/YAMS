@@ -82,7 +82,7 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.ZeroOffsetWrappingTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
     # vendor's device is given, feedforwards, exponential profiles, the simulation period and the
-    # A301. Add new motor controller test classes here.
+    # A301 and the ADRC config. Add new motor controller test classes here.
     {"group": "motor-controllers",
      "test-filter": '--tests "yams.core.motorcontrollers.ArmFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"'
@@ -91,7 +91,8 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'
                     ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'
-                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'},
+                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'
+                    ' --tests "yams.core.motorcontrollers.ADRCConfigTest"'},
     # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
     # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
     # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
@@ -115,6 +116,13 @@ JAVA_GROUPS = [
     {"group": "closed-loop-gain-units",
      "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'
                     ' --tests "yams.core.motorcontrollers.NovaConfigTest"'},
+    # ADRC closing a flywheel's velocity, a pivot's and an arm's angle and an elevator's height on
+    # every motor controller, and each YAMS mechanism doing the same. Simulated Talons, which Phoenix
+    # runs in real time, so each runs on its own.
+    {"group": "adrc-closed-loop",
+     "test-filter": '--tests "yams.core.motorcontrollers.ADRCClosedLoopTest"'},
+    {"group": "adrc-mechanisms",
+     "test-filter": '--tests "yams.core.motorcontrollers.ADRCMechanismTest"'},
     # Everything else: swerve config tests, the battery and motor simulation unit tests, and the
     # standalone math test. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.
@@ -122,6 +130,7 @@ JAVA_GROUPS = [
      "test-filter": '--tests "yams.core.mechanisms.*"'
                     ' --tests "yams.core.motorcontrollers.simulation.*"'
                     ' --tests "yams.ChineseRemainderTheoremTest"'
+                    ' --tests "yams.core.math.ADRCControllerTest"'
                     ' --tests "yams.commands2.mechanisms.RunToSupplierTest"'},
 ]
 
@@ -154,7 +163,7 @@ CPP_GROUPS = [
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
                          "loose-followers", "follower-simulation", "vendor-simulation",
-                         "live-tuning", "swerve-drive",
+                         "live-tuning", "swerve-drive", "adrc-mechanisms",
                          "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "follower-simulation",

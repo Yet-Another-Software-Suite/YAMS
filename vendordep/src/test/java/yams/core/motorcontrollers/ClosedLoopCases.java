@@ -223,13 +223,31 @@ final class ClosedLoopCases {
       double seconds,
       Runnable command,
       DoubleConsumer afterLoop) {
+    run(controller, smc::simIterate, seconds, command, afterLoop);
+  }
+
+  /**
+   * Run the simulation, commanding the setpoint each loop as a robot does.
+   *
+   * @param controller Motor controller under test.
+   * @param simIterate Steps the simulation: the motor controller's, or its mechanism's.
+   * @param seconds How long to run.
+   * @param command Commands the setpoint; run before the first loop and in every loop.
+   * @param afterLoop Given the time since the first command, in seconds, after each loop.
+   */
+  static void run(
+      Controller controller,
+      Runnable simIterate,
+      double seconds,
+      Runnable command,
+      DoubleConsumer afterLoop) {
     final double[] time = {0};
     try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
       command.run();
       final long startNanos = System.nanoTime();
       scheduler.addPeriodic(
           () -> {
-            smc.simIterate();
+            simIterate.run();
             time[0] += kPeriod;
             command.run();
             afterLoop.accept(time[0]);

@@ -627,7 +627,9 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured), Rotations.of(finalSetpoint), RotationsPerSecond.of(finalVelocityProfile)).in(Volts));
         }
       });
-      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalMeasured, finalSetpoint)));
+      // The observer is told the voltage the motor controller applied, not the one it asked for, so
+      // a current limit or a low battery is not mistaken for a disturbance.
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalMeasured, finalSetpoint, getVoltage().in(Volts))));
 
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -655,7 +657,7 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity), RotationsPerSecond.of(finalSetpoint)).in(Volts));
         }
       });
-      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalVelocity, finalSetpoint)));
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalVelocity, finalSetpoint, getVoltage().in(Volts))));
     }
 
     armFeedforward.ifPresent(armFeedforwardPerRotation -> {

@@ -295,6 +295,33 @@ public class ADRCController {
   }
 
   /**
+   * Run one control step, telling the observer what the actuator really applied last step.
+   *
+   * <p>A motor controller does not always apply what it is asked for: a current limit, a low battery
+   * or its own saturation can apply less. The observer works out the disturbance from the output it
+   * believes moved the plant, so if it is told the output it asked for while the motor got less, it
+   * mistakes the shortfall for a disturbance, winds up, and can settle into a limit cycle. Giving it
+   * the applied output keeps its estimate true to what moved the mechanism.
+   *
+   * @param measurement   Measured output.
+   * @param setpoint      Reference.
+   * @param appliedOutput Output the actuator applied since the last step, such as the motor
+   *                      controller's measured voltage. A non-finite value is ignored.
+   * @return Controller output.
+   * @throws IllegalStateException if the controller has not been initialized.
+   */
+  public double calculate(double measurement, double setpoint, double appliedOutput) {
+    if (!initialized) {
+      throw new IllegalStateException("Controller must be initialized before use");
+    }
+    if (Double.isFinite(appliedOutput)) {
+      uHistory[0] = appliedOutput;
+      uPrev = appliedOutput;
+    }
+    return step(setpoint, measurement, null);
+  }
+
+  /**
    * Update the second ESO used by the cascaded form.
    *
    * @param u Delayed output.
