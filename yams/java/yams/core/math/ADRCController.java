@@ -9,6 +9,8 @@ import org.ejml.simple.SimpleMatrix;
 /**
  * Active Disturbance Rejection Controller (ADRC).
  *
+ * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ *
  * <p>An ADRC treats every unmodeled effect (friction, gravity, back-EMF, coupling, and external
  * loads) as a single "total disturbance" and estimates it online with an extended state observer
  * (ESO). The controller then cancels the estimate while driving the modeled part of the plant with

@@ -13,6 +13,8 @@
  * controller. The Java object carries the defaults, validation, and physical derivation; the JSON
  * carries the numbers a team tunes.
  *
+ * <p>ADRC was <b>written by FRC Team 8331</b>.
+ *
  * @see yams.core.motorcontrollers.config.ADRCConfig
  * @see yams.core.math.ADRCController
  */

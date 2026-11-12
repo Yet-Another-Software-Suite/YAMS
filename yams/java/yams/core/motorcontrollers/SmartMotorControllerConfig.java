@@ -1870,6 +1870,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * <p>ADRC estimates and cancels the disturbance that feedforward models, so this clears the PID,
    * LQR, and feedforward for the slot. Mixing them would double-count the plant gain.
    *
+   * <p><b>ADRC was written by FRC Team 8331</b>, who contributed it to YAMS.
+   *
    * @param controller ADRC configuration.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @see ADRCConfig
@@ -1880,6 +1882,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Set the ADRC as the closed loop controller for a slot.
+   *
+   * <p><b>ADRC was written by FRC Team 8331</b>, who contributed it to YAMS.
    *
    * @param controller ADRC configuration, or {@code null} to clear the slot.
    * @param slot       Closed loop controller slot.

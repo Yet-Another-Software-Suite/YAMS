@@ -9,30 +9,33 @@ import java.util.Locale;
 /**
  * Tracking differentiator (TD).
  *
- * A tracking differentiator turns a raw reference into a smooth reference {@code y} together
+ * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ *
+ * <p>A tracking differentiator turns a raw reference into a smooth reference {@code y} together
  * with its first and second derivatives {@code yd} and {@code ydd}. Feeding the smoothed reference
  * to a controller avoids the large derivative spikes that a step input would otherwise produce.
  *
- * Several discrete implementations are supported:
+ * <p>Several discrete implementations are supported:
  *
- * 
- * euler - first-order exponential smoothing
- * tod - time-optimal discrete differentiator
- * ld - linear differentiator
- * red - nonlinear (reduced) differentiator
- * intd - integral differentiator
- * 
+ * <ul>
+ * <li>{@code euler}: first-order exponential smoothing.
+ * <li>{@code tod}: time-optimal discrete differentiator.
+ * <li>{@code ld}: linear differentiator.
+ * <li>{@code red}: nonlinear (reduced) differentiator.
+ * <li>{@code intd}: integral differentiator.
+ * </ul>
  *
- * The method and its parameters are passed by name so existing ADRC tuning strings can be used
+ * <p>The method and its parameters are passed by name so existing ADRC tuning strings can be used
  * directly. Unknown methods and invalid parameters throw {@link IllegalArgumentException}.
  *
- * Example
- * {@code
- * TrackingDifferentiator td = new TrackingDifferentiator("euler", 0.02, 0.9);
+ * <h2>Example</h2>
+ *
+ * <pre>{@code
+ * TrackingDifferentiator td = new TrackingDifferentiator("euler", 0.02, new double[] {0.9});
  * td.update(setpoint);
  * double smoothSetpoint = td.getY();
  * double setpointVelocity = td.getYd();
- * }
+ * }</pre>
  */
 public class TrackingDifferentiator {
   /** Identifier of the differentiation method. */

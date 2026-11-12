@@ -23,6 +23,8 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
 /**
  * Active Disturbance Rejection Controller configuration.
  *
+ * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
+ *
  * <p>This is the ADRC equivalent of {@code withClosedLoopController(...)}: pass it to
  * {@link SmartMotorControllerConfig#withADRCController(ADRCConfig)} and the motor controller runs
  * the ADRC on its own closed-loop thread. Mechanisms need no extra code; they keep calling

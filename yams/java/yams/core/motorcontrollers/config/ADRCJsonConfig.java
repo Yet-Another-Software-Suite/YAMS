@@ -3,16 +3,17 @@
 
 package yams.core.motorcontrollers.config;
 
-import io.avaje.jsonb.Json;
-
 /**
  * On-disk representation of an {@link ADRCConfig}.
+ *
+ * <p><b>Written by FRC Team 8331</b>, who contributed ADRC to YAMS.
  *
  * <p>Every field is nullable so a file can omit anything it does not want to override. The loader
  * merges the non-null values onto the Java defaults in {@link ADRCConfig}; it never invents a
  * physical value such as {@code b0} or a voltage limit.
  *
- * <p>This type is package-private: teams edit the JSON, not this record.
+ * <p>{@link ADRCConfigLoader} reads each key's value. This type is package-private: teams edit the
+ * JSON, not this record.
  *
  * @param systemOrder    Plant order, 1 through 4.
  * @param settlingTime   Desired closed-loop settling time, seconds.
@@ -26,7 +27,6 @@ import io.avaje.jsonb.Json;
  * @param tdMethod       Tracking differentiator method, or {@code "none"}.
  * @param tdParams       Tracking differentiator parameters.
  */
-@Json
 record ADRCJsonConfig(
     Integer systemOrder,
     Double settlingTime,
