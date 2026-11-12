@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <p><b>Written by FRC Team 8331</b>, who contributed active disturbance rejection control to YAMS.
  *
  * <p>An active disturbance rejection controller lumps everything the mechanism model does not
- * capture — friction, back-EMF, game-piece loads, dropped battery voltage, unmodeled dynamics —
+ * capture (friction, back-EMF, game-piece loads, dropped battery voltage, unmodeled dynamics)
  * into a single "total disturbance" and estimates it live with an extended state observer. The
  * estimate is then cancelled out of the control law, so the closed loop behaves like a clean chain
  * of integrators that settles in the time you ask for, without hand-tuning gains. There is no
@@ -68,12 +68,12 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * noise.
  *
  * <ul>
- * <li>{@link SystemOrder#FIRST} — you command and measure velocity: flywheels, shooter wheels,
- * intake and conveyor rollers. A brushed or brushless DC motor's velocity responds to voltage
+ * <li>{@link SystemOrder#FIRST}: you command and measure velocity (flywheels, shooter wheels,
+ * intake and conveyor rollers). A brushed or brushless DC motor's velocity responds to voltage
  * directly, so most FRC speed loops are first order.
- * <li>{@link SystemOrder#SECOND} — you command and measure position: arms, elevators, slides.
+ * <li>{@link SystemOrder#SECOND}: you command and measure position (arms, elevators, slides).
  * Position is the integral of velocity, which adds one order.
- * <li>{@link SystemOrder#THIRD} and {@link SystemOrder#FOURTH} — rare. Use when the measured
+ * <li>{@link SystemOrder#THIRD} and {@link SystemOrder#FOURTH}: rare. Use when the measured
  * quantity sits two or more integrations behind the voltage, for example a mechanism whose
  * actuator itself has significant first-order lag. Most mechanisms never need these.
  * </ul>
@@ -84,26 +84,26 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <h2>Tuning the response</h2>
  *
  * <ul>
- * <li>{@link #withSettlingTime(Time)} — how quickly the closed loop settles after a setpoint
+ * <li>{@link #withSettlingTime(Time)} sets how quickly the closed loop settles after a setpoint
  * change. The default, 0.2 seconds, is a good starting point. Lower is faster and more aggressive
  * but demands more voltage and stresses the mechanism; higher is gentler.
- * <li>{@link #withBandwidthScale(double)} — scales both the closed-loop bandwidth and the
+ * <li>{@link #withBandwidthScale(double)} scales both the closed-loop bandwidth and the
  * observer bandwidth together. Above 1.0 is more aggressive, below 1.0 is more conservative.
  * Leave it at the default of 1.0 until the settling time is dialed in.
- * <li>{@link #withB0(double)} — the approximate input gain: how strongly one volt accelerates the
- * measured quantity. It only sets the controller's operating point, so being off by 20 to 50
- * percent usually still works. Leave it unset to derive it from the motor, gearing, and moment of
- * inertia (see "What is never assumed" below); set it explicitly when the mechanism has no
- * meaningful inertia, such as a mechanism driven against a hard stop.
- * <li>{@link #withVoltageLimits(Voltage, Voltage)} — output saturation. Without it, the maximum
- * output falls back to the motor config's closed-loop voltage limit, or the motor's nominal
- * voltage with a warning.
- * <li>{@link #withSlewRateLimit(Velocity)} — caps how fast the controller output can change, in
+ * <li>{@link #withB0(double)} sets the approximate input gain, meaning how strongly one volt
+ * accelerates the measured quantity. It only sets the controller's operating point, so being off
+ * by 20 to 50 percent usually still works. Leave it unset to derive it from the motor, gearing,
+ * and moment of inertia (see "What is never assumed" below); set it explicitly when the mechanism
+ * has no meaningful inertia, such as a mechanism driven against a hard stop.
+ * <li>{@link #withVoltageLimits(Voltage, Voltage)} sets the output saturation. Without it, the
+ * maximum output falls back to the motor config's closed-loop voltage limit, or the motor's
+ * nominal voltage with a warning.
+ * <li>{@link #withSlewRateLimit(Velocity)} caps how fast the controller output can change, in
  * volts per second. Useful to stop a violent step when the loop first enables. Zero (the default)
  * disables the cap.
- * <li>{@link #withInputDelay(Time)} — compensates a known delay between commanding the output and
+ * <li>{@link #withInputDelay(Time)} compensates a known delay between commanding the output and
  * seeing its effect, such as a deliberately slowed sensor. Zero (the default) disables it.
- * <li>{@link #withCascaded(boolean)} — runs the observer in cascaded form, which some higher-order
+ * <li>{@link #withCascaded(boolean)} runs the observer in cascaded form, which some higher-order
  * plants track more accurately. Leave it disabled unless you have a reason.
  * </ul>
  *
@@ -125,19 +125,19 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * for the full parameter reference. Each entry below lists its parameters in order:
  *
  * <ul>
- * <li>{@link TrackingDifferentiator.Method#EULER} — first-order exponential smoothing. One
+ * <li>{@link TrackingDifferentiator.Method#EULER}, first-order exponential smoothing. One
  * parameter, {@code alpha} in [0, 1] (default 0.9): higher is smoother and slower. The mildest
  * option; a good first choice for velocity loops.
- * <li>{@link TrackingDifferentiator.Method#TOD} — time-optimal tracking. One parameter,
+ * <li>{@link TrackingDifferentiator.Method#TOD}, time-optimal tracking. One parameter,
  * {@code r} greater than 0 (default 1.0): higher tracks faster. Follows the reference as fast as
  * the parameter allows, so expect abrupt output changes.
- * <li>{@link TrackingDifferentiator.Method#LD} — linear differentiator. One parameter,
+ * <li>{@link TrackingDifferentiator.Method#LD}, the linear differentiator. One parameter,
  * {@code lambda} greater than 0 (default 1.0); the sample period must be below
  * {@code 2 * lambda}. Smooth and predictable; a good default for position loops.
- * <li>{@link TrackingDifferentiator.Method#RED} — nonlinear differentiator. Two parameters,
+ * <li>{@link TrackingDifferentiator.Method#RED}, the nonlinear differentiator. Two parameters,
  * {@code lambda1} and {@code lambda2}, both greater than 0 (default 1.0 each). Converges in
  * finite time and rejects measurement noise between samples.
- * <li>{@link TrackingDifferentiator.Method#INTD} — integral differentiator. Four parameters:
+ * <li>{@link TrackingDifferentiator.Method#INTD}, the integral differentiator. Four parameters:
  * {@code alpha} in [0, 1) (default 0.5), and {@code beta}, {@code gamma}, {@code r} greater than
  * 0 (default 1.0 each). A smooth nonlinear option that integrates the error over a sliding
  * window.

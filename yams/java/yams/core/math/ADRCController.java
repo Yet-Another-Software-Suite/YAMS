@@ -11,8 +11,8 @@ import org.ejml.simple.SimpleMatrix;
  *
  * <p><b>Written by FRC Team 8331</b>, who contributed active disturbance rejection control to YAMS.
  *
- * <p>An active disturbance rejection controller treats every unmodeled effect — friction,
- * gravity, back-EMF, coupling, dropped battery voltage, external loads — as a single "total
+ * <p>An active disturbance rejection controller treats every unmodeled effect (friction,
+ * gravity, back-EMF, coupling, dropped battery voltage, external loads) as a single "total
  * disturbance" and estimates it online with an extended state observer. The controller then
  * cancels the estimate while driving the modeled part of the plant with a bandwidth-parameterized
  * control law. Because the disturbance estimate absorbs plant mismatch, the controller needs very

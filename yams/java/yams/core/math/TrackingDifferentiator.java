@@ -26,61 +26,61 @@ import java.util.Arrays;
  * small list of {@code double} parameters; any parameter may be omitted by passing a shorter
  * array (or {@code null}), and the default documented below is used instead.
  *
- * <h3>{@link Method#EULER} — exponential smoothing</h3>
+ * <h3>{@link Method#EULER}: exponential smoothing</h3>
  *
  * <p>The mildest option: a first-order low-pass filter on the reference. One parameter:
  *
  * <ul>
- * <li>{@code alpha} in [0, 1], default 0.9 — smoothing factor. Higher smooths more and follows
+ * <li>{@code alpha} in [0, 1], default 0.9, the smoothing factor. Higher smooths more and follows
  * slower; lower tracks the raw reference more closely.
  * </ul>
  *
  * <p>Use when the reference needs only gentle rounding, for example a shooter wheel toggling
  * between two steady speeds.
  *
- * <h3>{@link Method#TOD} — time-optimal tracking</h3>
+ * <h3>{@link Method#TOD}: time-optimal tracking</h3>
  *
  * <p>Follows the reference as fast as a bounded-acceleration model allows. One parameter:
  *
  * <ul>
- * <li>{@code r} greater than 0, default 1.0 — acceleration bound; higher tracks faster.
+ * <li>{@code r} greater than 0, default 1.0, the acceleration bound; higher tracks faster.
  * </ul>
  *
  * <p>The fastest tracking available here, at the price of abrupt output changes at the switching
  * points. Use when the reference must be caught quickly and the mechanism can take it.
  *
- * <h3>{@link Method#LD} — linear differentiator</h3>
+ * <h3>{@link Method#LD}: linear differentiator</h3>
  *
  * <p>A linear second-order filter with critically damped-style poles. One parameter:
  *
  * <ul>
- * <li>{@code lambda} greater than 0, default 1.0 — time constant of the filter. The sample
+ * <li>{@code lambda} greater than 0, default 1.0, the time constant of the filter. The sample
  * period must stay below {@code 2 * lambda} or the filter is unstable.
  * </ul>
  *
  * <p>Smooth and predictable; a good default for position loops such as arms and elevators.
  *
- * <h3>{@link Method#RED} — nonlinear reduced differentiator</h3>
+ * <h3>{@link Method#RED}: nonlinear reduced differentiator</h3>
  *
  * <p>A second-order nonlinear filter that converges in finite time. Two parameters:
  *
  * <ul>
- * <li>{@code lambda1} greater than 0, default 1.0 — gain on the position error term.
- * <li>{@code lambda2} greater than 0, default 1.0 — gain on the sign term.
+ * <li>{@code lambda1} greater than 0, default 1.0, the gain on the position error term.
+ * <li>{@code lambda2} greater than 0, default 1.0, the gain on the sign term.
  * </ul>
  *
  * <p>Tracks large errors aggressively while rejecting measurement noise between samples; a
  * common choice when the reference jumps but the sensor is noisy.
  *
- * <h3>{@link Method#INTD} — integral differentiator</h3>
+ * <h3>{@link Method#INTD}: integral differentiator</h3>
  *
  * <p>A smooth nonlinear filter that integrates the error over a sliding window. Four parameters:
  *
  * <ul>
- * <li>{@code alpha} in [0, 1), default 0.5 — weight of the accumulated error.
- * <li>{@code beta} greater than 0, default 1.0 — scales the accumulated error.
- * <li>{@code gamma} greater than 0, default 1.0 — width of the transition region.
- * <li>{@code r} greater than 0, default 1.0 — speed of the fast dynamics.
+ * <li>{@code alpha} in [0, 1), default 0.5, the weight of the accumulated error.
+ * <li>{@code beta} greater than 0, default 1.0, scales the accumulated error.
+ * <li>{@code gamma} greater than 0, default 1.0, the width of the transition region.
+ * <li>{@code r} greater than 0, default 1.0, the speed of the fast dynamics.
  * </ul>
  *
  * <p>The most configurable option; useful when the methods above trade smoothness against speed
