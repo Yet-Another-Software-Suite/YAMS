@@ -19,10 +19,10 @@ public class DoubleFlyWheelTeleop implements OpMode {
    * @param robot The robot instance to control.
    */
   public DoubleFlyWheelTeleop(Robot robot) {
-    // Hold the right bumper to spin both wheels up for a shot.
-    robot.operatorController.rightBumper().whileTrue(robot.doubleFlyWheel.spinUp(SHOT_LOWER_SPEED, SHOT_UPPER_SPEED));
-    // Press Start to live tune both wheels from code, the same command the YAMS Live Tuner starts. Press it again to
+    // Hold A to spin both wheels up for a shot.
+    robot.operatorController.a().whileTrue(robot.doubleFlyWheel.spinUp(SHOT_LOWER_SPEED, SHOT_UPPER_SPEED));
+    // Press B to live tune both wheels from code, the same command the YAMS Live Tuner starts. Press it again to
     // stop.
-    robot.operatorController.start().toggleOnTrue(robot.doubleFlyWheel.liveTune());
+    robot.operatorController.b().toggleOnTrue(robot.doubleFlyWheel.liveTune());
   }
 }

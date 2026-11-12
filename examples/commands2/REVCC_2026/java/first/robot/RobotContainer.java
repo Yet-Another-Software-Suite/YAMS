@@ -73,21 +73,17 @@ public class RobotContainer
    */
   private void configureBindings()
   {
-    // Left Stick Button -> Set swerve to X
-    m_driverController.leftStick().whileTrue(m_robotDrive.setXCommand());
+    // X Button -> Set swerve to X
+    m_driverController.x().whileTrue(m_robotDrive.setXCommand());
 
-    // Start Button -> Zero swerve heading
-    m_driverController.start().onTrue(m_robotDrive.zeroHeadingCommand());
+    // B Button -> Zero swerve heading
+    m_driverController.b().onTrue(m_robotDrive.zeroHeadingCommand());
 
-    // Right Trigger -> Run fuel intake
-    m_driverController
-        .rightTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(FuelCommands.intake(m_intake, m_conveyor));
+    // A Button -> Run fuel intake
+    m_driverController.a().whileTrue(FuelCommands.intake(m_intake, m_conveyor));
 
-    // Left Trigger -> Run fuel intake in reverse
-    m_driverController
-        .leftTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(FuelCommands.extake(m_intake, m_conveyor));
+    // POV Down -> Run fuel intake in reverse
+    m_driverController.getHID().povDown().whileTrue(FuelCommands.extake(m_intake, m_conveyor));
 
     // Y Button -> Run intake and run the shooter flywheel and feeder
     m_driverController.y().toggleOnTrue(FuelCommands.shoot(m_shooter, m_feeder).alongWith(FuelCommands.intake(m_intake, m_conveyor)));

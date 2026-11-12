@@ -19,7 +19,7 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
   - The S-curve auto is the `@Autonomous` opmode `opmodes/auto/ExampleAuto`. It starts `Autos.exampleAuto` when the robot is enabled.
 - **Coroutines.**
   - `DriveMechanism` holds the active `SwerveInputStream` (`setInputStream`/`getInputStream`) and `driveInputStream()` drives from it in a `while (true)` loop. `getSwerveDrive()` exposes the YAMS `SwerveDrive` so the opmodes can build the stream, and `driveFieldRelative(...)` drives from any field-relative `Supplier<ChassisVelocities>`.
-  - Holding the left stick button runs `lockWheels()`, which holds the wheels in an X, and pressing Start runs `zeroHeading()`. They are bound like v2's `setXCommand` and `zeroHeadingCommand`.
+  - Holding X runs `lockWheels()`, which holds the wheels in an X, and pressing B runs `zeroHeading()`. They are bound like v2's `setXCommand` and `zeroHeadingCommand`.
   - `FuelCommands` builds `Command.noRequirements(...)` coroutines that compose the mechanism commands. `intake`, `extake` and `feed` `awaitAll` the two mechanism commands. In v3 nested commands are effectively proxied, so each mechanism is only owned while its own command runs and its default command takes over afterwards.
   - `shoot` forks `shooter.spinUp()`, calls `coroutine.waitUntil(isFlywheelSpinning)`, then awaits `feeder.feed()`. The feeder is only claimed once the flywheel is at speed.
   - The Y toggle uses `FuelCommands.shootAndIntake`, a no-requirements coroutine that awaits `shoot` and `intake` together. It replaces v2's `alongWith`.
@@ -97,11 +97,11 @@ This is the Commands v3 version of [`examples/commands2/REVCC_2026`](../../comma
 
 ### Commands, bindings and constants
 
-- The bindings are unchanged:
-  - Left stick: X lock.
-  - Start: zero heading.
-  - Right trigger: intake.
-  - Left trigger: extake.
+- The bindings moved to the face buttons, so the simulator's keyboard (Z, X, C, V for A, B, X, Y, and the numpad for the POV) can drive them without a controller:
+  - X: X lock.
+  - B: zero heading.
+  - A: intake.
+  - POV down: extake.
   - Y: toggles shoot along with intake.
   - Drive default: field-relative drive with a 0.1 deadband.
   - New: `HeadingTeleop` uses the right stick to point the robot instead of turning it.

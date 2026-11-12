@@ -71,9 +71,9 @@ Every motor is a SPARK MAX wrapped in a YAMS `SparkWrapper` and driven open loop
 
 ### Commands, bindings and constants
 
-- The bindings are unchanged:
-  - Left bumper: Intake.
-  - Right bumper: LaunchSequence.
+- The bindings moved from the bumpers to the face buttons, so the simulator's keyboard (Z, X, C, V for A, B, X, Y, and the numpad for the POV) can drive them without a controller:
+  - X: Intake.
+  - Y: LaunchSequence.
   - A: Eject.
   - POV up/down: ClimbUp/ClimbDown.
   - Drive default (teleop): arcade drive with 0.7 / 0.8 scaling.

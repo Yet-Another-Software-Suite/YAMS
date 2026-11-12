@@ -23,7 +23,7 @@ public class LQRTeleop implements OpMode {
     // A raises the arm level, B stows it.
     robot.operatorController.a().onTrue(robot.arm.setAngle(Degrees.of(0)));
     robot.operatorController.b().onTrue(robot.arm.setAngle(Degrees.of(-20)));
-    // Hold the right bumper to spin the flywheel up.
-    robot.operatorController.rightBumper().whileTrue(robot.flyWheel.spinUp(RPM.of(3000)));
+    // Hold X to spin the flywheel up.
+    robot.operatorController.x().whileTrue(robot.flyWheel.spinUp(RPM.of(3000)));
   }
 }

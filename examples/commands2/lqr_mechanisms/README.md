@@ -35,7 +35,7 @@ In the tuner, the Settings card shows these as an **LQR** group. The tuner shows
 
 - Operator controller, A: raise the arm level.
 - Operator controller, B: stow the arm.
-- Operator controller, right bumper: spin the flywheel up to 3000 RPM.
+- Operator controller, X: spin the flywheel up to 3000 RPM.
 
 ## Tests
 

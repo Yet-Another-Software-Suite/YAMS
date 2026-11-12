@@ -25,21 +25,17 @@ final class TeleopBindings
   {
     CommandNiDsXboxController controller = robot.driverController;
 
-    // Left Stick Button -> Set swerve to X
-    controller.leftStick().whileTrue(robot.drive.lockWheels());
+    // X Button -> Set swerve to X
+    controller.x().whileTrue(robot.drive.lockWheels());
 
-    // Start Button -> Zero swerve heading
-    controller.start().onTrue(robot.drive.zeroHeading());
+    // B Button -> Zero swerve heading
+    controller.b().onTrue(robot.drive.zeroHeading());
 
-    // Right Trigger -> Run fuel intake
-    controller
-        .rightTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(FuelCommands.intake(robot.intake, robot.conveyor));
+    // A Button -> Run fuel intake
+    controller.a().whileTrue(FuelCommands.intake(robot.intake, robot.conveyor));
 
-    // Left Trigger -> Run fuel intake in reverse
-    controller
-        .leftTrigger(OIConstants.kTriggerButtonThreshold)
-        .whileTrue(FuelCommands.extake(robot.intake, robot.conveyor));
+    // POV Down -> Run fuel intake in reverse
+    controller.getHID().povDown().whileTrue(FuelCommands.extake(robot.intake, robot.conveyor));
 
     // Y Button -> Run intake and run the shooter flywheel and feeder
     controller.y().toggleOnTrue(

@@ -50,10 +50,11 @@ public class RobotContainer
     xboxController.a().whileTrue(arm.setAngle(Degrees.of(20)));
     xboxController.b().whileTrue(elevator.setHeight(Meters.of(1)));
     xboxController.x().whileTrue(shooter.setVelocity(RPM.of(3000)));
-    xboxController.leftBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
+    // Drive to these poses while POV left or right is held, then return to the teleop drive.
+    xboxController.getHID().povLeft().whileTrue(drive.driveToPose(new Pose2d(Meters.of(3),
                                                                     Meters.of(3),
                                                                     Rotation2d.fromDegrees(30))));
-    xboxController.rightBumper().whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
+    xboxController.getHID().povRight().whileTrue(drive.driveToPose(new Pose2d(Meters.of(5),
                                                                     Meters.of(6),
                                                                     Rotation2d.fromDegrees(70))));
 

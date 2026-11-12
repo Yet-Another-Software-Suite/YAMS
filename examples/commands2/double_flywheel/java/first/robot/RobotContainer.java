@@ -20,10 +20,10 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // Hold the right bumper to spin both wheels up for a shot.
-    operatorController.rightBumper().whileTrue(doubleFlyWheel.spinUp(SHOT_LOWER_SPEED, SHOT_UPPER_SPEED));
-    // Press Start to live tune both wheels from code, the same command the YAMS Live Tuner starts. Press it again to
+    // Hold A to spin both wheels up for a shot.
+    operatorController.a().whileTrue(doubleFlyWheel.spinUp(SHOT_LOWER_SPEED, SHOT_UPPER_SPEED));
+    // Press B to live tune both wheels from code, the same command the YAMS Live Tuner starts. Press it again to
     // stop.
-    operatorController.start().toggleOnTrue(doubleFlyWheel.liveTune());
+    operatorController.b().toggleOnTrue(doubleFlyWheel.liveTune());
   }
 }

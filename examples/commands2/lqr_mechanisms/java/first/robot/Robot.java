@@ -26,8 +26,8 @@ public class Robot extends TimedRobot {
     // A raises the arm level, B stows it.
     operatorController.a().onTrue(arm.setAngle(Degrees.of(0)));
     operatorController.b().onTrue(arm.setAngle(Degrees.of(-20)));
-    // Hold the right bumper to spin the flywheel up.
-    operatorController.rightBumper().whileTrue(flyWheel.spinUp(RPM.of(3000)));
+    // Hold X to spin the flywheel up.
+    operatorController.x().whileTrue(flyWheel.spinUp(RPM.of(3000)));
   }
 
   @Override

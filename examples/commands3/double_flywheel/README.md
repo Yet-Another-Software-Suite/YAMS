@@ -12,5 +12,5 @@ mechanism's idle command).
 ## Tests
 
 - `DoubleFlyWheelLiveTuningTest` is the same Live Tuning test as the commands v2 example's.
-- `DoubleFlyWheelShotTest` holds the right bumper in the `Double FlyWheel Teleop` opmode and checks that both wheels
+- `DoubleFlyWheelShotTest` holds A in the `Double FlyWheel Teleop` opmode and checks that both wheels
   reach their shot speeds, within the ready tolerance, in a second, then coast down when it is let go.

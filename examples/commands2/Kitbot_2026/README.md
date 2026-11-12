@@ -45,9 +45,9 @@ A port of the FIRST 2026 KitBot code to WPILib 2027 and YAMS.
 ### Commands, bindings and constants
 
 - The SmartDashboard tuning values were removed because YAMS live tuning replaces them. The roller voltages are read straight from `Constants.FuelConstants`; tune them live with YAMS, then copy the values back into the constants.
-- The bindings are unchanged:
-  - Left bumper: intake.
-  - Right bumper: spin up for 1 s, then launch.
+- The bindings moved from the bumpers to the face buttons, so the simulator's keyboard (Z, X, C, V for A, B, X, Y) can drive them without a controller:
+  - X: intake.
+  - Y: spin up for 1 s, then launch.
   - A: eject.
   - Drive default: arcade drive with 0.7 / 0.8 scaling.
 - The auto keeps the original steps: drive at 0.5 for 0.25 s, stop, spin up 1 s, launch 9 s, stop.

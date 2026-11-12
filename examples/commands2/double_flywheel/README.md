@@ -43,8 +43,8 @@ done.
 
 ## Controls
 
-- Operator controller, right bumper: spin up for a shot (3000 RPM lower, 2000 RPM upper).
-- Operator controller, Start: start or stop the Live Tuning command from code.
+- Operator controller, A: spin up for a shot (3000 RPM lower, 2000 RPM upper).
+- Operator controller, B: start or stop the Live Tuning command from code.
 - Default: both wheels coast.
 
 ## Tests
@@ -58,5 +58,5 @@ that:
 - a voltage drives only its wheel;
 - stopping Live Tuning turns off every wheel's voltage.
 
-`DoubleFlyWheelShotTest` holds the right bumper in Teleop and checks that both wheels reach their shot speeds, within
+`DoubleFlyWheelShotTest` holds A in Teleop and checks that both wheels reach their shot speeds, within
 the ready tolerance, in a second, then coast down when it is let go.

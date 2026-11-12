@@ -20,7 +20,7 @@ import org.wpilib.simulation.SimHooks;
 import org.wpilib.units.measure.AngularVelocity;
 
 /**
- * Holds the right bumper in the "Double FlyWheel Teleop" opmode: both wheels reach their shot speeds, within the ready
+ * Holds A in the "Double FlyWheel Teleop" opmode: both wheels reach their shot speeds, within the ready
  * tolerance, in a second, and coast down when it is let go.
  */
 class DoubleFlyWheelShotTest {
@@ -63,7 +63,7 @@ class DoubleFlyWheelShotTest {
 
   @Test
   void bothWheelsReachTheirShotSpeeds() {
-    operator.setRightBumperButton(true);
+    operator.setAButton(true);
     operator.notifyNewData();
     step(1);
     assertNear(SHOT_LOWER_SPEED, robot.doubleFlyWheel.getLowerSpeed(), "lower wheel");
@@ -75,7 +75,7 @@ class DoubleFlyWheelShotTest {
     assertNear(SHOT_UPPER_SPEED, robot.doubleFlyWheel.getUpperSpeed(), "upper wheel");
 
     // Let go: both wheels coast down.
-    operator.setRightBumperButton(false);
+    operator.setAButton(false);
     operator.notifyNewData();
     step(1);
     assertTrue(robot.doubleFlyWheel.getLowerSpeed().lt(SHOT_LOWER_SPEED.div(2)),

@@ -21,9 +21,9 @@ public class DefaultTeleop implements OpMode {
     var controller = robot.driverController;
 
     // While the left bumper is held, intake Fuel
-    controller.leftBumper().whileTrue(FuelCommands.intake(robot.intakeLauncher, robot.indexer));
+    controller.x().whileTrue(FuelCommands.intake(robot.intakeLauncher, robot.indexer));
     // While the right bumper is held, spin up, then launch fuel. When the button is released, stop.
-    controller.rightBumper().whileTrue(FuelCommands.launchSequence(robot.intakeLauncher, robot.indexer));
+    controller.y().whileTrue(FuelCommands.launchSequence(robot.intakeLauncher, robot.indexer));
     // While the A button is held, eject fuel back out the intake
     controller.a().whileTrue(FuelCommands.eject(robot.intakeLauncher, robot.indexer));
     // The D-pad triggers live on the generic HID in 2027.

@@ -66,11 +66,11 @@ A port of the REV Robotics 2026 ION FRC StarterBot to WPILib 2027 and YAMS.
 
 ### Commands, bindings and constants
 
-- The bindings are unchanged:
-  - Left stick: X lock.
-  - Start: zero heading.
-  - Right trigger: intake.
-  - Left trigger: extake.
+- The bindings moved to the face buttons, so the simulator's keyboard (Z, X, C, V for A, B, X, Y, and the numpad for the POV) can drive them without a controller:
+  - X: X lock.
+  - B: zero heading.
+  - A: intake.
+  - POV down: extake.
   - Y: toggles shoot along with intake.
   - Drive default: field-relative drive with a 0.1 deadband.
 - `FuelCommands` keeps the original setpoints: intake ±0.6, conveyor ±0.7, flywheel 5000 RPM, feeder 0.95.

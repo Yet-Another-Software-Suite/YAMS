@@ -20,12 +20,12 @@ public class KitBotTeleop implements OpMode {
    * @param robot The robot instance to control.
    */
   public KitBotTeleop(Robot robot) {
-    // While the left bumper on operator controller is held, intake Fuel
-    robot.operatorController.leftBumper()
+    // While X on the operator controller is held, intake Fuel
+    robot.operatorController.x()
         .whileTrue(robot.fuel.intake());
-    // While the right bumper on the operator controller is held, spin up for 1
-    // second, then launch fuel. When the button is released, stop.
-    robot.operatorController.rightBumper()
+    // While Y on the operator controller is held, spin up for 1 second, then
+    // launch fuel. When the button is released, stop.
+    robot.operatorController.y()
         .whileTrue(robot.fuel.spinUpAndLaunch());
     // While the A button is held on the operator controller, eject fuel back out
     // the intake

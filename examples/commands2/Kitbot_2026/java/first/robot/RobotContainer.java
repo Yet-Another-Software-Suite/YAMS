@@ -64,12 +64,12 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    // While the left bumper on operator controller is held, intake Fuel
-    operatorController.leftBumper()
+    // While X on the operator controller is held, intake Fuel
+    operatorController.x()
         .whileTrue(fuel.intakeCommand());
-    // While the right bumper on the operator controller is held, spin up for 1
-    // second, then launch fuel. When the button is released, stop.
-    operatorController.rightBumper()
+    // While Y on the operator controller is held, spin up for 1 second, then
+    // launch fuel. When the button is released, stop.
+    operatorController.y()
         .whileTrue(fuel.spinUpCommand().withTimeout(SPIN_UP_SECONDS)
             .andThen(fuel.launchCommand())
             .finallyDo(() -> fuel.stop()));
