@@ -169,12 +169,14 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.SetpointPosition).enable();
         doubleFields.get(DoubleTelemetryField.SetpointVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementPosition).enable();
+        doubleFields.get(DoubleTelemetryField.MeasurementCircumference).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.MechanismPosition).enable();
         doubleFields.get(DoubleTelemetryField.MechanismVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MechanismAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.RotorPosition).enable();
+        doubleFields.get(DoubleTelemetryField.RotorGearRatio).enable();
         doubleFields.get(DoubleTelemetryField.RotorVelocity).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).enable();
@@ -249,6 +251,7 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.MeasurementLowerLimit).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementPosition).disable();
+      doubleFields.get(DoubleTelemetryField.MeasurementCircumference).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementVelocity).disable();
     } else {
       config.getMechanismUpperLimit().ifPresent(upperLimit -> doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit).setDefaultValue(config.convertFromMechanism(upperLimit).in(Meters)));
@@ -574,6 +577,17 @@ public class SmartMotorControllerTelemetryConfig {
   }
 
   /**
+   * Enables logging the mechanism's circumference if it has one, so a log can convert a rotor
+   * reading to meters.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withMeasurementCircumference() {
+    doubleFields.get(DoubleTelemetryField.MeasurementCircumference).enable();
+    return this;
+  }
+
+  /**
    * Enables the linear velocity logging if available.
    *
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
@@ -610,6 +624,17 @@ public class SmartMotorControllerTelemetryConfig {
    */
   public SmartMotorControllerTelemetryConfig withRotorPosition() {
     doubleFields.get(DoubleTelemetryField.RotorPosition).enable();
+    return this;
+  }
+
+  /**
+   * Enables logging the gear ratio, rotor rotations per mechanism rotation, so a log can convert a
+   * rotor reading to the mechanism's.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withRotorGearRatio() {
+    doubleFields.get(DoubleTelemetryField.RotorGearRatio).enable();
     return this;
   }
 

@@ -121,6 +121,30 @@ TEST_CASE("SMCRegression.SetupTelemetryPublishesImmediately", "[SMCRegression]")
   smc.Close();
 }
 
+TEST_CASE("SMCRegression.TelemetryLogsTheGearRatio", "[SMCRegression]") {
+  // rotor/gearRatio is logged at LOW, so a log can turn a rotor reading into the mechanism's.
+  auto name = UniqueName("GearRatio");
+  SmartMotorControllerConfig cfg;
+  cfg.WithMotorGearing(60.0).WithTelemetry(name, Verbosity::LOW);
+  FakeSmartMotorController smc{&cfg};
+  smc.SetupTelemetry(DataRoot(), TuningRoot());
+  smc.UpdateTelemetry();
+  CHECK(DataRoot()->GetSubTable(name)->GetEntry("rotor/gearRatio").GetDouble(-1.0) == Catch::Approx(60.0));
+  smc.Close();
+}
+
+TEST_CASE("SMCRegression.TelemetryLogsTheCircumference", "[SMCRegression]") {
+  // measurement/circumference is logged for a linear mechanism, so a log can turn a rotor reading into meters.
+  auto name = UniqueName("Circumference");
+  SmartMotorControllerConfig cfg;
+  cfg.WithMotorGearing(12.0).WithMechanismCircumference(0.15_m).WithTelemetry(name, Verbosity::LOW);
+  FakeSmartMotorController smc{&cfg};
+  smc.SetupTelemetry(DataRoot(), TuningRoot());
+  smc.UpdateTelemetry();
+  CHECK(DataRoot()->GetSubTable(name)->GetEntry("measurement/circumference").GetDouble(-1.0) == Catch::Approx(0.15));
+  smc.Close();
+}
+
 // ---- Item 4: Close() releases the Live Tuning registration --------------------------------
 
 TEST_CASE("SMCRegression.CloseRemovesLiveTuningCommand", "[SMCRegression]") {
