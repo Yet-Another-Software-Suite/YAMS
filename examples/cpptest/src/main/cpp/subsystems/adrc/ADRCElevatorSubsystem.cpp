@@ -26,13 +26,12 @@ ADRCElevatorSubsystem::ADRCElevatorSubsystem() {
   // 3:1 then 4:1, 12 motor rotations per sprocket rotation.
   const MechanismGearing gearing{GearBox::FromReductionStages({3.0, 4.0})};
   const auto motor = wpi::math::DCMotor::NEO(1);
+  // A 22 tooth sprocket on 1/4 in pitch chain moves the carriage 5.5 in per rotation.
+  const wpi::units::meter_t circumference = 0.25_in * 22;
 
   ADRCConfig adrc;
-  // First order on position, not SystemOrder::ELEVATOR: back-EMF sets the elevator's speed.
-  adrc.WithSystemOrder(ADRCConfig::SystemOrder::FIRST)
-      .WithSettlingTime(0.5_s)
-      // Sprocket rotations per second per volt: the motor's free speed per volt, through the gearing.
-      .WithB0(motor, gearing);
+  // First order on position, with b0 its speed per volt from the motor, gearing and sprocket.
+  adrc.WithSystemOrder(ADRCConfig::SystemOrder::ELEVATOR).WithSettlingTime(0.5_s);
 
   m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()
@@ -41,8 +40,9 @@ ADRCElevatorSubsystem::ADRCElevatorSubsystem() {
       // The ADRC takes the place of kP, kI, kD and the feedforward. The motor config keeps its own copy.
       .WithADRCController(adrc)
       .WithMotorGearing(gearing)
-      // A 22 tooth sprocket on 1/4 in pitch chain moves the carriage 5.5 in per rotation.
-      .WithMechanismCircumference(0.25_in, 22)
+      .WithMechanismCircumference(circumference)
+      // The closed loop, and the ADRC, work in meters, as SystemOrder::ELEVATOR needs.
+      .WithLinearClosedLoopController(true)
       .WithMeasurementLimits(0_m, 1.5_m)
       .WithStartingPosition(0_m)
       .WithZeroPower(Cfg::MotorMode::BRAKE)

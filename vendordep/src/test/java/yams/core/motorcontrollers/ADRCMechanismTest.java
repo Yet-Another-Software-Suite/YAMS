@@ -167,9 +167,10 @@ public class ADRCMechanismTest {
     final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("elevator " + controller)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
+            .withLinearClosedLoopController(true)
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            // A first order ADRC on the position, with the mechanism's speed per volt as b0.
-            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(controller.motor(), controller.gearing()));
+            // An elevator: first order on its position, in meters, with its speed per volt as b0.
+            .withADRCController(adrc(SystemOrder.ELEVATOR, 0.5));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(0.1)));
     final SmartMotorController smc = ClosedLoopCases.create(controller, cfg);
     try {

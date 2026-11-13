@@ -184,17 +184,12 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.ElevatorHoldsItsHeightAg
       continue;
     }
     DYNAMIC_SECTION(param.name) {
-      // A back-EMF limited elevator: a first order ADRC on the position, with the mechanism's speed per volt as b0.
-      constexpr double kDrumRadius = 0.02;
-      auto adrc = Adrc(math::ADRCConfig::SystemOrder::FIRST, 0.5_s);
-      adrc.WithB0(MotorForHardware(param.hardware),
-                  param.hardware == HardwareType::A301
-                      ? gearing::MechanismGearing{gearing::GearBox::FromReductionStages({kA301Gearbox})}
-                      : gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})});
+      // An elevator: first order on its position, in meters, with its speed per volt as b0.
       auto cfg = BaseConfig(param, "Elevator");
-      cfg.WithMechanismCircumference(wpi::units::meter_t{2 * std::numbers::pi * kDrumRadius})
+      cfg.WithMechanismCircumference(wpi::units::meter_t{2 * std::numbers::pi * 0.02})
+          .WithLinearClosedLoopController(true)
           .WithStartingPosition(0.1_m)
-          .WithADRCController(adrc);
+          .WithADRCController(Adrc(math::ADRCConfig::SystemOrder::ELEVATOR, 0.5_s));
       auto bundle = MakeBundle(param, cfg);
       REQUIRE(bundle.smc->GetADRCController() != nullptr);
       auto* elevatorCfg = new ElevatorConfig;

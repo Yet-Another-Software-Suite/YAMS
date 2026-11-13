@@ -20,8 +20,6 @@
 #include <wpi/units/voltage.hpp>
 
 #include "yams/exceptions.hpp"
-#include "yams/gearing/GearBox.hpp"
-#include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/ADRCConfig.hpp"
 #include "yams/math/ADRCController.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
@@ -116,12 +114,25 @@ TEST_CASE("ADRCConfig.DerivesB0FromTheMotorGearingAndInertia", "[ADRCConfig]") {
   CHECK(config.ResolveB0(motor, smc) == 7.0);
 }
 
-TEST_CASE("ADRCConfig.B0FromTheMotorAndGearingIsTheMechanismsSpeedPerVolt", "[ADRCConfig]") {
+TEST_CASE("ADRCConfig.AnElevatorIsFirstOrderWithItsSpeedPerVoltInMetersAsB0", "[ADRCConfig]") {
   const auto motor = wpi::math::DCMotor::NEO(1);
+  STATIC_CHECK(ADRCConfig::GetOrder(ADRCConfig::SystemOrder::ELEVATOR) == 1);
+  STATIC_CHECK(ADRCConfig::IsSpeedPerVolt(ADRCConfig::SystemOrder::ELEVATOR));
+  STATIC_CHECK_FALSE(ADRCConfig::IsSpeedPerVolt(ADRCConfig::SystemOrder::FIRST));
   ADRCConfig config;
-  config.WithB0(motor, gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})});
-  // The motor's free speed per volt, in mechanism rotations per second, through a 12:1 reduction.
-  CHECK(*config.GetB0() == Catch::Approx(motor.Kv.value() / (2 * std::numbers::pi * 12)));
+  config.WithSystemOrder(ADRCConfig::SystemOrder::ELEVATOR);
+  // An elevator's closed loop must be linear.
+  auto rotations = SmcConfig();
+  rotations.WithMechanismCircumference(0.15_m);
+  CHECK_THROWS_AS(config.ResolveB0(motor, rotations), exceptions::SmartMotorControllerConfigurationException);
+  // The motor's free speed per volt through a 12:1 reduction and a 0.15 m circumference, with no inertia.
+  auto linear = SmcConfig();
+  linear.WithMechanismCircumference(0.15_m).WithLinearClosedLoopController(true);
+  CHECK(config.ResolveB0(motor, linear) == Catch::Approx(motor.Kv.value() / (2 * std::numbers::pi * 12) * 0.15));
+  // A b0 that is set wins, and still needs a linear closed loop.
+  config.WithB0(3);
+  CHECK(config.ResolveB0(motor, linear) == 3);
+  CHECK_THROWS_AS(config.ResolveB0(motor, SmcConfig()), exceptions::SmartMotorControllerConfigurationException);
 }
 
 TEST_CASE("ADRCConfig.ALinearClosedLoopDerivesB0InMeters", "[ADRCConfig]") {

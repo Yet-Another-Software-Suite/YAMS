@@ -7,7 +7,7 @@ each in its own subsystem. **The ADRC was written by FRC Team 8331**, who contri
 | Subsystem | Motor | Mechanism | ADRC |
 | --- | --- | --- | --- |
 | `ADRCArmSubsystem` | NEO on a 60:1 reduction (CAN 20) | 3 kg, 0.5 m arm, from -20° (stowed) to 100° | `ARM` (second order) on position, 0.6 s settling time, `b0` derived from the inertia |
-| `ADRCElevatorSubsystem` | NEO on a 12:1 reduction (CAN 21) | 16 lb carriage on a 22 tooth, 1/4 in pitch sprocket, 0 to 1.5 m | `FIRST` on position, 0.5 s settling time, `b0` the speed per volt |
+| `ADRCElevatorSubsystem` | NEO on a 12:1 reduction (CAN 21) | 16 lb carriage on a 22 tooth, 1/4 in pitch sprocket, 0 to 1.5 m | `ELEVATOR`: first order on position, 0.5 s settling time, `b0` its speed per volt |
 | `ADRCShooterSubsystem` | NEO, direct drive (CAN 22) | 4 in, 1 lb wheel | `FLYWHEEL` (first order) on velocity, 0.15 s settling time, `b0` derived from the inertia |
 
 ## Setting up an ADRC
@@ -31,9 +31,11 @@ setpoints as they do with a PID, and the motor controller runs the ADRC on the S
 
 - **No kG, kS or kV.** The ADRC's observer estimates gravity, friction, back-EMF and anything that bumps the mechanism
   as one disturbance and cancels it.
-- **The elevator is first order.** An elevator's speed is set by its back-EMF, so its position is treated as a first
-  order plant with its speed per volt as `b0`: `withB0(motor, gearing)` works it out. Use `SystemOrder.FIRST` for it, not
-  `SystemOrder.ELEVATOR`.
+- **The elevator is `SystemOrder.ELEVATOR`.** An elevator's speed is set by its back-EMF, so its position is treated
+  as a first order plant with its speed per volt as `b0`, which is derived from the motor, gearing and sprocket.
+- **The elevator's closed loop is linear.** `withLinearClosedLoopController(true)` runs the closed loop, and the ADRC,
+  in meters, so `b0` is in meters per second per volt. `SystemOrder.ELEVATOR` needs it: without it, the motor
+  controller refuses the config.
 - **The shooter's settling time is short,** so the observer keeps up with the back-EMF it estimates. A short settling
   time also makes it recover quickly after each shot.
 

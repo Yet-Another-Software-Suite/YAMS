@@ -195,13 +195,13 @@ public class ADRCClosedLoopTest {
   }
 
   /**
-   * An elevator under gravity, with no kG, closed in drum rotations.
+   * An elevator under gravity, with no kG, closed in meters.
    *
    * <p>An elevator's back-EMF, not its inertia, sets how fast it moves: it reaches the speed its
    * voltage gives it within a few milliseconds, far quicker than a 50 Hz loop can act on. So a
    * second order ADRC with the inertia's {@code b0} has an observer too slow for the disturbance,
-   * and a first order ADRC on its position, with the mechanism's speed per volt as {@code b0}, fits
-   * it.
+   * and {@code SystemOrder.ELEVATOR}, a first order ADRC on its position with its speed per volt as
+   * {@code b0}, fits it.
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("controllers")
@@ -215,9 +215,11 @@ public class ADRCClosedLoopTest {
     final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("elevator " + controller)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
+            .withLinearClosedLoopController(true)
             .withMomentOfInertia(KilogramSquareMeters.of(mass * drumRadius * drumRadius))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(controller.motor(), controller.gearing()));
+            // An elevator: first order on its position, in meters, with its speed per volt as b0.
+            .withADRCController(adrc(SystemOrder.ELEVATOR, 0.5));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(start)));
     final SmartMotorController smc = ClosedLoopCases.create(controller, cfg);
     try {

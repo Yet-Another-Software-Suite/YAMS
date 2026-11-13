@@ -68,9 +68,11 @@ ADRCConfig::~ADRCConfig() = default;
 
 ADRCConfig& ADRCConfig::WithSystemOrder(SystemOrder order) {
   std::scoped_lock lock{m_mutex};
-  if (m_builtPeriod && GetOrder(order) != GetOrder(*m_systemOrder)) {
-    throw std::logic_error(std::format("{} already runs a controller of order {}; a new order needs a new ADRCConfig",
-                                       m_owner, GetOrder(*m_systemOrder)));
+  if (m_builtPeriod &&
+      (GetOrder(order) != GetOrder(*m_systemOrder) || IsSpeedPerVolt(order) != IsSpeedPerVolt(*m_systemOrder))) {
+    throw std::logic_error(std::format(
+        "{} already runs a controller of order {}{}; a new order needs a new ADRCConfig", m_owner,
+        GetOrder(*m_systemOrder), IsSpeedPerVolt(*m_systemOrder) ? " for an elevator" : ""));
   }
   m_systemOrder = order;
   return *this;
@@ -107,11 +109,6 @@ ADRCConfig& ADRCConfig::WithB0(double b0) {
   m_b0 = b0;
   RebuildGains();
   return *this;
-}
-
-ADRCConfig& ADRCConfig::WithB0(const wpi::math::DCMotor& motor, const gearing::MechanismGearing& gearing) {
-  // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism.
-  return WithB0(motor.Kv.value() / (2.0 * std::numbers::pi * gearing.GetMechanismToRotorRatio()));
 }
 
 ADRCConfig& ADRCConfig::WithInputDelay(wpi::units::second_t inputDelay) {
@@ -182,10 +179,34 @@ std::vector<double> ADRCConfig::GetTdParams() const {
 double ADRCConfig::ResolveB0(const wpi::math::DCMotor& motor,
                              const motorcontrollers::SmartMotorControllerConfig& config) const {
   std::string owner;
+  std::optional<double> b0;
+  bool elevator = false;
   {
     std::scoped_lock lock{m_mutex};
-    if (m_b0) return *m_b0;
+    b0 = m_b0;
     owner = m_owner;
+    elevator = m_systemOrder && IsSpeedPerVolt(*m_systemOrder);
+  }
+  if (elevator && !config.GetLinearClosedLoopControllerUse()) {
+    throw exceptions::SmartMotorControllerConfigurationException(
+        owner + " is an elevator's ADRC, but the closed loop is not linear",
+        "SystemOrder::ELEVATOR runs in meters, with b0 in meters per second per volt, so the motor config needs a "
+        "linear closed loop and a mechanism circumference.",
+        "WithLinearClosedLoopController(true) and WithMechanismCircumference(...) on the motor config");
+  }
+  if (b0) return *b0;
+  if (elevator) {
+    const auto& gearing = config.GetMotorGearing();
+    const double rotorToMechanism = gearing ? gearing->GetMechanismToRotorRatio() : std::nan("");
+    if (!std::isfinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
+      throw exceptions::SmartMotorControllerConfigurationException(
+          std::format("{} cannot derive the elevator's b0 from gear ratio {}", owner, rotorToMechanism),
+          "The rotor-to-mechanism ratio must be finite and positive.", "WithMotorGearing(...) with a positive reduction");
+    }
+    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism, and each mechanism
+    // rotation moves the carriage one circumference.
+    return motor.Kv.value() / (2.0 * std::numbers::pi * rotorToMechanism) *
+           config.GetMechanismCircumference()->value();
   }
   if (!config.IsMomentOfInertiaConfigured()) {
     throw exceptions::SmartMotorControllerConfigurationException(

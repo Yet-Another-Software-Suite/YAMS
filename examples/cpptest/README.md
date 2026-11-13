@@ -105,8 +105,9 @@ and feedforward. The ADRC was written by FRC Team 8331. They are in `subsystems/
 - **ADRCArmSubsystem:** a NEO (SparkMax ID 30) on a 60:1 reduction moving a 3 kg, 0.5 m arm. A second order ADRC with
   a 0.6 s settling time; `b0` is derived from the arm's inertia, and gravity needs no kG.
 - **ADRCElevatorSubsystem:** a NEO (SparkMax ID 31) on a 12:1 reduction lifting a 16 lb carriage on a 22 tooth,
-  1/4 in pitch sprocket. A first order ADRC on the position with a 0.5 s settling time, and the motor's speed per volt
-  through the reduction as `b0`, since back-EMF sets an elevator's speed.
+  1/4 in pitch sprocket. `SystemOrder::ELEVATOR`, first order on the position, with a 0.5 s settling time, since
+  back-EMF sets an elevator's speed. Its closed loop is linear, in meters, as `SystemOrder::ELEVATOR` needs, and `b0`
+  is derived as its speed per volt in meters per second.
 - **ADRCShooterSubsystem:** a NEO (SparkMax ID 32) turning a 4 in, 1 lb wheel directly. A first order ADRC with a
   0.15 s settling time; `b0` is derived from the wheel's inertia. It coasts when nothing else uses it.
 - Commands: `SetAngle(degree_t)`, `SetHeight(meter_t)` and `SpinUp(degrees_per_second_t)`. `GetADRC()` returns each

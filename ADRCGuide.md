@@ -62,14 +62,14 @@ motor controller runs the ADRC.
 ### System order
 
 The order of the plant from the voltage to what you control, set with an
-`ADRCConfig.SystemOrder`: `FIRST` to `FOURTH`, with `FLYWHEEL` the same as `FIRST` and `ARM` and
-`ELEVATOR` the same as `SECOND`.
+`ADRCConfig.SystemOrder`: `FIRST` to `FOURTH`, with `FLYWHEEL` the same as `FIRST` and `ARM` the
+same as `SECOND`. `ELEVATOR` is first order too, with its speed per volt as `b0` (see below).
 
 | Mechanism | Setpoint | Order | `b0` |
 | --- | --- | --- | --- |
 | Flywheel, roller | Velocity | `FIRST` | Derived, or acceleration per volt |
 | Arm, pivot, turret | Position | `SECOND` | Derived, or acceleration per volt |
-| Elevator, or any mechanism whose speed is set by its back-EMF | Position | `FIRST` | Speed per volt: `withB0(motor, gearing)` |
+| Elevator, or any linear mechanism whose speed is set by its back-EMF | Position, linear | `ELEVATOR` | Derived speed per volt |
 
 There is no default system order. `buildController` throws until one is set.
 
@@ -95,19 +95,24 @@ without `withB0(...)`, building the controller throws.
 
 The derived `b0` ignores back-EMF, which the observer has to estimate as part of the disturbance.
 That suits flywheels and arms. An elevator's back-EMF, not its inertia, sets how fast it moves,
-so for an elevator use order 1 (`SystemOrder.FIRST`, not `ELEVATOR`) on its position, with its
-speed per volt as `b0`. `withB0(DCMotor, MechanismGearing)` works it out: the motor's free speed per
-volt through the gearing, `Kv / (2 * pi * G)` mechanism rotations per second per volt.
+so an elevator uses `SystemOrder.ELEVATOR`: first order on its position, with its speed per volt
+as `b0`.
+
+An elevator's closed loop is linear, in meters, so its `b0` is in meters per second per volt. It is
+derived from the motor, the gearing and the mechanism circumference, with no inertia: the motor's
+free speed per volt through the gearing, times the circumference, `Kv / (2 * pi * G) * C`.
+`SystemOrder.ELEVATOR` needs a linear closed loop: without one, building the controller throws,
+even with `withB0(...)` set. With an ADRC there is no `ElevatorFeedforward` to turn the linear
+closed loop on, so turn it on yourself:
 
 ```java
-config.withADRCController(new ADRCConfig()
-    .withSystemOrder(SystemOrder.FIRST)
-    .withSettlingTime(Seconds.of(0.5))
-    .withB0(DCMotor.getNEO(1), new MechanismGearing(GearBox.fromReductionStages(3, 4))));
+config.withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+    .withMechanismCircumference(Inches.of(0.25).times(22)) // 22T sprocket, #25 chain
+    .withLinearClosedLoopController(true)
+    .withADRCController(new ADRCConfig()
+        .withSystemOrder(SystemOrder.ELEVATOR)
+        .withSettlingTime(Seconds.of(0.5)));
 ```
-
-It is in mechanism rotations, so it fits a closed loop in rotations, as the elevator here uses, not
-a linear one.
 
 `b0` does not have to be exact: the observer absorbs a `b0` off by a factor of two. If the
 mechanism overshoots or oscillates, lower `b0`; if it is sluggish, raise it.
@@ -174,12 +179,12 @@ config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
           .withSystemOrder(SystemOrder.SECOND)
           .withSettlingTime(Seconds.of(0.6)));
 
-// Elevator under gravity, with no kG: order 1 on position, b0 is its speed per volt.
+// Elevator under gravity, with no kG: first order on position in meters, b0 its derived speed per volt.
 config.withMechanismCircumference(Meters.of(2 * Math.PI * 0.02))
+      .withLinearClosedLoopController(true)
       .withADRCController(new ADRCConfig()
-          .withSystemOrder(SystemOrder.FIRST)
-          .withSettlingTime(Seconds.of(0.5))
-          .withB0(motor, gearing));
+          .withSystemOrder(SystemOrder.ELEVATOR)
+          .withSettlingTime(Seconds.of(0.5)));
 elevator.setMeasurementPositionSetpoint(Meters.of(0.5));
 ```
 
@@ -257,11 +262,10 @@ them.
 | Method | What it does |
 | --- | --- |
 | `new ADRCConfig()` | A config for one motor controller. Its errors and alerts name that motor controller by its telemetry name. |
-| `withSystemOrder(SystemOrder)` | Plant order. Required. Once a controller is built, a different order throws `IllegalStateException`: the observer's size depends on it, so a new order needs a new `ADRCConfig`. |
+| `withSystemOrder(SystemOrder)` | Plant order. Required. Once a controller is built, a different order, or a change between `ELEVATOR` and `FIRST`, throws `IllegalStateException`: the observer's size and the kind of `b0` depend on it, so a new order needs a new `ADRCConfig`. |
 | `withSettlingTime(Time)` | Settling time. Default 0.2 s. Must be finite and positive. Works the gains out again. |
 | `withBandwidthScale(double)` | Bandwidth scale. Default 1. Must be finite and positive. Works the gains out again. |
 | `withB0(double)` | Input gain. Default: derived, see above. Must be finite and non-zero. Works the gains out again. |
-| `withB0(DCMotor, MechanismGearing)` | Input gain set to the mechanism's speed per volt, `Kv / (2 * pi * G)`, for a first order position loop that back-EMF limits, such as an elevator's. In mechanism rotations, for a closed loop in rotations. |
 | `withInputDelay(Time)` | Delay between the output and the plant responding, rounded to whole loops. 0, the default, turns it off. Must be finite and not negative. |
 | `withCascaded(boolean)` | Use the cascaded observer: a second ESO, fed the first one's estimate of the measurement, supplies the disturbance the control law cancels. Default off. |
 | `withTrackingDifferentiator(TrackingDifferentiator.Method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. Leave out `params` for the method's defaults. Off by default. Its parameters are checked when the controller is built, as some depend on the period. |
@@ -272,7 +276,7 @@ them.
 | `getTdMethod()` | `Optional<TrackingDifferentiator.Method>`. |
 | `getTdParams()` | `Optional<double[]>`: a copy of the tracking differentiator parameters, or empty for the defaults. |
 | `isCascaded()` | Whether the cascaded observer is on. |
-| `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one. Throws if it cannot be derived. |
+| `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one, a speed per volt for `ELEVATOR`. Throws if it cannot be derived, or if the order is `ELEVATOR` and the closed loop is not linear. |
 | `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController` that reads this config, giving the config the period and `b0` it needs. The controller saturates at the motor config's closed loop maximum voltage, with no slew-rate limit of its own. The motor controller calls this; you only need it to use the controller yourself. |
 | `reportRejected(Optional<String> reason)` | Raise the YAMS alert for a refused value, or clear it with an empty reason. Live tuning calls it. |
 | `clone()` | A deep copy: the settings, the values given when a controller was built, and the gains, with matrices of its own. Changing the copy leaves the original alone. The copy raises its own alerts. `SmartMotorControllerConfig.clone()` copies each slot's ADRC config this way. |
@@ -397,8 +401,10 @@ config.GetADRCController()->WithSettlingTime(800_ms);
   `ADRCConfig::BuildController(config, motor, motorConfig, period)`, or
   `ADRCController{config}` followed by `Initialize(b0, maxVoltage, period)`, or
   `Initialize(b0, minVoltage, maxVoltage, slewRateLimit, period)`.
-- **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`, and `WithB0` takes a
-  `wpi::math::DCMotor` and a `gearing::MechanismGearing`.
+- **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`.
+- **System orders.** `SystemOrder` is an `enum class`: `ADRCConfig::GetOrder(order)` gives its
+  order, 1 for `ELEVATOR`, and `ADRCConfig::IsSpeedPerVolt(order)` whether its `b0` is a speed per
+  volt.
 - **Units where the value has one.** `Calculate`, `Step`, `GetMinOutput`, `GetMaxOutput` and
   `GetLastOutput` use `volt_t`, `GetBandwidth` and `GetObserverBandwidth` use
   `radians_per_second_t`, and the slew-rate limit is a `yams::math::volts_per_second_t`. The

@@ -129,11 +129,23 @@ class ADRCConfigTest {
   }
 
   @Test
-  void b0FromTheMotorAndGearingIsTheMechanismsSpeedPerVolt() {
+  void anElevatorIsFirstOrderWithItsSpeedPerVoltInMetersAsB0() {
     final DCMotor motor = DCMotor.getNEO(1);
-    final ADRCConfig cfg = new ADRCConfig().withB0(motor, new MechanismGearing(GearBox.fromReductionStages(3, 4)));
-    assertEquals(motor.Kv / (2 * Math.PI * 12), cfg.getB0().orElseThrow(), 1e-12,
-        "the motor's free speed per volt, in mechanism rotations per second, through a 12:1 reduction");
+    assertEquals(1, SystemOrder.ELEVATOR.getOrder());
+    assertTrue(SystemOrder.ELEVATOR.isSpeedPerVolt());
+    assertFalse(SystemOrder.FIRST.isSpeedPerVolt());
+    final ADRCConfig cfg = new ADRCConfig().withSystemOrder(SystemOrder.ELEVATOR);
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> cfg.resolveB0(motor, smcConfig().withMechanismCircumference(Meters.of(0.15))),
+        "an elevator's closed loop must be linear");
+    final yams.commands2.config.SmartMotorControllerConfig linear =
+        smcConfig().withMechanismCircumference(Meters.of(0.15)).withLinearClosedLoopController(true);
+    assertEquals(motor.Kv / (2 * Math.PI * 12) * 0.15, cfg.resolveB0(motor, linear), 1e-12,
+        "the motor's free speed per volt through a 12:1 reduction and a 0.15 m circumference, with no inertia");
+    cfg.withB0(3);
+    assertEquals(3, cfg.resolveB0(motor, linear), "a b0 that is set wins");
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> cfg.resolveB0(motor, smcConfig()), "even with a b0 set, the closed loop must be linear");
   }
 
   @Test

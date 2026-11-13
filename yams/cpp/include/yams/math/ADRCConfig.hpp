@@ -17,10 +17,6 @@
 
 #include "yams/math/TrackingDifferentiator.hpp"
 
-namespace yams::gearing {
-class MechanismGearing;
-}  // namespace yams::gearing
-
 namespace yams::motorcontrollers {
 class SmartMotorControllerConfig;
 }  // namespace yams::motorcontrollers
@@ -89,25 +85,43 @@ class ADRCConfig {
  public:
   /**
    * Plant order: how many integrators sit between the motor voltage and the measured output. Velocity loops on a DC
-   * motor are FIRST, position loops SECOND. An elevator's position is FIRST too, with its speed per volt as b0.
+   * motor are FIRST, position loops SECOND, and an elevator's position is ELEVATOR, first order with its speed per volt
+   * as b0.
    */
   enum class SystemOrder {
     FIRST = 1,     ///< First order: the loop commands and measures velocity, such as a flywheel.
     FLYWHEEL = 1,  ///< A flywheel's velocity loop; the same as FIRST.
-    SECOND = 2,    ///< Second order: the loop commands and measures position, such as an arm.
+    SECOND = 2,    ///< Second order: the loop commands and measures position, such as an arm or turret.
     ARM = 2,       ///< An arm's position loop; the same as SECOND.
-    ELEVATOR = 2,  ///< An elevator's position loop; the same as SECOND.
     THIRD = 3,     ///< Third order: the measurement sits two integrations behind the voltage. Rare.
     FOURTH = 4,    ///< Fourth order: three integrations between the voltage and the measurement. Rare.
+    /**
+     * An elevator's position loop, in a linear closed loop. An elevator's speed is set by its motor's back-EMF more
+     * than by its inertia: each volt moves it at about the same speed. So its position is a first order plant, with its
+     * speed per volt as b0, in meters per second per volt, which ResolveB0 derives from the motor, gearing and mechanism
+     * circumference. The motor config must use a linear closed loop.
+     */
+    ELEVATOR = 101,
   };
 
   /**
    * Get a system order as an integer.
    *
    * @param order System order.
-   * @return Plant order, 1 through 4.
+   * @return Plant order, 1 through 4; 1 for ELEVATOR.
    */
-  static constexpr int GetOrder(SystemOrder order) { return static_cast<int>(order); }
+  static constexpr int GetOrder(SystemOrder order) {
+    return order == SystemOrder::ELEVATOR ? 1 : static_cast<int>(order);
+  }
+
+  /**
+   * Whether b0 is the mechanism's speed per volt, derived from the motor and gearing, rather than its acceleration per
+   * volt, derived from its inertia.
+   *
+   * @param order System order.
+   * @return True for ELEVATOR.
+   */
+  static constexpr bool IsSpeedPerVolt(SystemOrder order) { return order == SystemOrder::ELEVATOR; }
 
   /** Closed-loop settling time used when none is set. */
   static constexpr wpi::units::second_t kDefaultSettlingTime{0.2};
@@ -139,7 +153,8 @@ class ADRCConfig {
    *
    * @param order Plant order.
    * @return This config for chaining.
-   * @throws std::logic_error if a controller was built from this config with a different order.
+   * @throws std::logic_error if a controller was built from this config with a different order, or a different kind of
+   *         b0.
    */
   ADRCConfig& WithSystemOrder(SystemOrder order);
   /**
@@ -166,18 +181,6 @@ class ADRCConfig {
    * @throws std::invalid_argument if b0 is not finite or is zero.
    */
   ADRCConfig& WithB0(double b0);
-  /**
-   * Set the input gain to the mechanism's speed per volt: the motor's free speed per volt, through the gearing. This is
-   * the b0 of a FIRST order loop on position for a mechanism whose motor's back-EMF, more than its inertia, sets how fast
-   * it moves, such as an elevator. It is in mechanism rotations per second per volt, so it fits a closed loop in
-   * rotations, not a linear one.
-   *
-   * @param motor   Motor driving the mechanism, with every motor in its gearbox.
-   * @param gearing Gearing from the motor to the mechanism.
-   * @return This config for chaining.
-   * @throws std::invalid_argument if the speed per volt is not finite or is zero.
-   */
-  ADRCConfig& WithB0(const wpi::math::DCMotor& motor, const gearing::MechanismGearing& gearing);
   /**
    * Set the input delay, rounded to whole control periods. Defaults to kDefaultInputDelay, which turns it off.
    *
@@ -228,13 +231,15 @@ class ADRCConfig {
   std::vector<double> GetTdParams() const;
 
   /**
-   * Resolve the input gain the controller will use: the one set, or one derived from the motor, the gearing and the
-   * mechanism's moment of inertia, only when the mechanism set that inertia.
+   * Resolve the input gain the controller will use: the one set, or one derived in the loop's units. For an ELEVATOR it
+   * is the speed per volt, from the motor, gearing and mechanism circumference. Otherwise it is the acceleration per
+   * volt, from the motor, the gearing and the mechanism's moment of inertia, only when the mechanism set that inertia.
    *
    * @param motor  Motor model.
    * @param config Motor config with the gearing, inertia and circumference.
    * @return Input gain in mechanism units per second squared per volt.
-   * @throws exceptions::SmartMotorControllerConfigurationException if b0 is not set and cannot be derived.
+   * @throws exceptions::SmartMotorControllerConfigurationException if the order is ELEVATOR and the closed loop is not
+   *         linear, or b0 is not set and cannot be derived.
    */
   double ResolveB0(const wpi::math::DCMotor& motor, const motorcontrollers::SmartMotorControllerConfig& config) const;
 

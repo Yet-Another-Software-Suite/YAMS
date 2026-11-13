@@ -65,8 +65,11 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <li>{@link SystemOrder#FIRST}: you command and measure velocity (flywheels, shooter wheels,
  * intake and conveyor rollers). A brushed or brushless DC motor's velocity responds to voltage
  * directly, so most FRC speed loops are first order.
- * <li>{@link SystemOrder#SECOND}: you command and measure position (arms, elevators, slides).
+ * <li>{@link SystemOrder#SECOND}: you command and measure position (arms, pivots, turrets).
  * Position is the integral of velocity, which adds one order.
+ * <li>{@link SystemOrder#ELEVATOR}: an elevator's position, in a linear closed loop. An elevator's
+ * speed is set by its motor's back-EMF more than by its inertia, so its position is first order,
+ * with its speed per volt as {@code b0}, which is derived from the motor and gearing.
  * <li>{@link SystemOrder#THIRD} and {@link SystemOrder#FOURTH}: rare. Use when the measured
  * quantity sits two or more integrations behind the voltage, for example a mechanism whose
  * actuator itself has significant first-order lag. Most mechanisms never need these.
@@ -177,42 +180,52 @@ public class ADRCConfig implements Cloneable {
    * Plant order for the active disturbance rejection controller.
    *
    * <p>The order is how many integrators sit between the motor voltage and the measured output:
-   * velocity loops on a DC motor are {@link #FIRST}, position loops are {@link #SECOND}. The class
-   * documentation of {@link ADRCConfig} walks through choosing a value.
+   * velocity loops on a DC motor are {@link #FIRST}, position loops are {@link #SECOND}, and an
+   * elevator's position is {@link #ELEVATOR}, first order with a speed per volt as {@code b0}. The
+   * class documentation of {@link ADRCConfig} walks through choosing a value.
    */
   public enum SystemOrder {
     /**
      * First-order plant: the loop commands and measures velocity, e.g. a flywheel or shooter
      * wheel. The common case for FRC mechanisms.
      */
-    FIRST(1),
+    FIRST(1, false),
     /** A flywheel's velocity loop; the same as {@link #FIRST}. */
-    FLYWHEEL(1),
+    FLYWHEEL(1, false),
     /**
-     * Second-order plant: the loop commands and measures position, e.g. an arm or elevator.
-     * Position is the integral of velocity, so the plant is one order higher.
+     * Second-order plant: the loop commands and measures position, e.g. an arm or turret. Position
+     * is the integral of velocity, so the plant is one order higher.
      */
-    SECOND(2),
+    SECOND(2, false),
     /** An arm's position loop; the same as {@link #SECOND}. */
-    ARM(2),
-    /** An elevator's position loop; the same as {@link #SECOND}. */
-    ELEVATOR(2),
+    ARM(2, false),
+    /**
+     * An elevator's position loop, in a linear closed loop. An elevator's speed is set by its
+     * motor's back-EMF more than by its inertia: each volt moves it at about the same speed. So its
+     * position is a first order plant, with its speed per volt as {@code b0}, in meters per second
+     * per volt, which {@link ADRCConfig#resolveB0} derives from the motor, gearing and mechanism
+     * circumference. The motor config must use a linear closed loop.
+     */
+    ELEVATOR(1, true),
     /**
      * Third-order plant: the measured quantity sits two integrations behind the voltage. Rare;
      * see the class documentation for when this applies.
      */
-    THIRD(3),
+    THIRD(3, false),
     /**
      * Fourth-order plant: three integrations between the voltage and the measurement. Rare; see
      * the class documentation for when this applies.
      */
-    FOURTH(4);
+    FOURTH(4, false);
 
     /** Plant order as an integer. */
     private final int order;
+    /** Whether {@code b0} is the mechanism's speed per volt, as for an elevator. */
+    private final boolean speedPerVolt;
 
-    SystemOrder(int order) {
+    SystemOrder(int order, boolean speedPerVolt) {
       this.order = order;
+      this.speedPerVolt = speedPerVolt;
     }
 
     /**
@@ -222,6 +235,16 @@ public class ADRCConfig implements Cloneable {
      */
     public int getOrder() {
       return order;
+    }
+
+    /**
+     * Whether {@code b0} is the mechanism's speed per volt, derived from the motor and gearing,
+     * rather than its acceleration per volt, derived from its inertia.
+     *
+     * @return {@code true} for {@link #ELEVATOR}.
+     */
+    public boolean isSpeedPerVolt() {
+      return speedPerVolt;
     }
   }
 
@@ -303,12 +326,15 @@ public class ADRCConfig implements Cloneable {
    *
    * @param systemOrder Plant order.
    * @return This config for chaining.
+   * @throws IllegalStateException if a controller was built from this config with a different
+   *                               order, or a different kind of {@code b0}.
    */
   public ADRCConfig withSystemOrder(SystemOrder systemOrder) {
     if (builtPeriod.isPresent()
-        && (systemOrder == null || systemOrder.getOrder() != this.systemOrder.orElseThrow().getOrder())) {
-      throw new IllegalStateException(owner + " already runs a controller of order "
-          + this.systemOrder.orElseThrow().getOrder() + "; a new order needs a new ADRCConfig");
+        && (systemOrder == null || systemOrder.getOrder() != this.systemOrder.orElseThrow().getOrder()
+            || systemOrder.isSpeedPerVolt() != this.systemOrder.orElseThrow().isSpeedPerVolt())) {
+      throw new IllegalStateException(owner + " already runs a " + this.systemOrder.orElseThrow()
+          + " controller; a new order needs a new ADRCConfig");
     }
     this.systemOrder = Optional.ofNullable(systemOrder);
     return this;
@@ -364,23 +390,6 @@ public class ADRCConfig implements Cloneable {
     this.b0 = OptionalDouble.of(b0);
     rebuildGains();
     return this;
-  }
-
-  /**
-   * Set the input gain to the mechanism's speed per volt: the motor's free speed per volt, through
-   * the gearing. This is the {@code b0} of a {@link SystemOrder#FIRST} loop on position for a
-   * mechanism whose motor's back-EMF, more than its inertia, sets how fast it moves, such as an
-   * elevator. It is in mechanism rotations per second per volt, so it fits a closed loop in
-   * rotations, not a linear one.
-   *
-   * @param motor   Motor driving the mechanism, with every motor in its gearbox.
-   * @param gearing Gearing from the motor to the mechanism.
-   * @return This config for chaining.
-   * @throws IllegalArgumentException if the speed per volt is not finite or is zero.
-   */
-  public ADRCConfig withB0(DCMotor motor, MechanismGearing gearing) {
-    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism.
-    return withB0(motor.Kv / (2.0 * Math.PI * gearing.getMechanismToRotorRatio()));
   }
 
   /**
@@ -550,17 +559,32 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Resolve the input gain, deriving it only when the mechanism explicitly configured its inertia.
+   * Resolve the input gain: the one set, or one derived in the loop's units. For an
+   * {@link SystemOrder#ELEVATOR} it is the speed per volt, from the motor, gearing and mechanism
+   * circumference. Otherwise it is the acceleration per volt, derived only when the mechanism
+   * explicitly configured its inertia.
    *
    * @param motor  Motor model.
    * @param config Motor config that carries gearing, inertia, and circumference.
-   * @return Input gain in mechanism units per volt per second squared.
-   * @throws SmartMotorControllerConfigurationException if {@code b0} is not set and cannot be
-   *                                                    derived safely.
+   * @return Input gain in the loop's units per volt per second to the plant's order.
+   * @throws SmartMotorControllerConfigurationException if the order is an elevator's and the closed
+   *                                                    loop is not linear, or {@code b0} is not
+   *                                                    set and cannot be derived safely.
    */
   public double resolveB0(DCMotor motor, SmartMotorControllerConfig<?> config) {
+    final boolean elevator = systemOrder.map(SystemOrder::isSpeedPerVolt).orElse(false);
+    if (elevator && !config.getLinearClosedLoopControllerUse()) {
+      throw new SmartMotorControllerConfigurationException(
+          owner + " is an elevator's ADRC, but the closed loop is not linear",
+          "SystemOrder.ELEVATOR runs in meters, with b0 in meters per second per volt, so the motor "
+              + "config needs a linear closed loop and a mechanism circumference.",
+          "withLinearClosedLoopController(true) and withMechanismCircumference(...) on the motor config");
+    }
     if (b0.isPresent()) {
       return b0.getAsDouble();
+    }
+    if (elevator) {
+      return speedPerVolt(motor, config);
     }
     if (!config.isMomentOfInertiaConfigured()) {
       throw new SmartMotorControllerConfigurationException(
@@ -609,6 +633,30 @@ public class ADRCConfig implements Cloneable {
       return b0RotationsPerSecondSquaredPerVolt * circumferenceMeters;
     }
     return b0RotationsPerSecondSquaredPerVolt;
+  }
+
+  /**
+   * The elevator's speed per volt: the motor's free speed per volt, through the gearing, times the
+   * mechanism circumference.
+   *
+   * @param motor  Motor model.
+   * @param config Motor config, with a linear closed loop, the gearing and the circumference.
+   * @return Meters per second per volt.
+   * @throws SmartMotorControllerConfigurationException if the gearing is missing or not positive.
+   */
+  private double speedPerVolt(DCMotor motor, SmartMotorControllerConfig<?> config) {
+    final MechanismGearing gearing = config.getGearing();
+    final double rotorToMechanism = gearing == null ? Double.NaN : gearing.getMechanismToRotorRatio();
+    if (!Double.isFinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
+      throw new SmartMotorControllerConfigurationException(
+          owner + " cannot derive the elevator's b0 from gear ratio " + rotorToMechanism,
+          "The rotor-to-mechanism ratio must be finite and positive.",
+          "withGearing(...) with a positive reduction");
+    }
+    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism,
+    // and each mechanism rotation moves the carriage one circumference.
+    return motor.Kv / (2.0 * Math.PI * rotorToMechanism)
+           * config.getMechanismCircumference().orElseThrow().in(Meters);
   }
 
   /**

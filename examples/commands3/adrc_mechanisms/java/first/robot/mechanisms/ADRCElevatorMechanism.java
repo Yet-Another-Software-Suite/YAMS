@@ -38,8 +38,9 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * reduction, lifting a 16 lb carriage on a 22 tooth, 1/4 in pitch sprocket. The ADRC was written by FRC Team 8331.
  *
  * <p>An elevator's speed is set by its motor's back-EMF more than by its inertia: each volt moves it at about the same
- * speed. So its position is treated as a first order plant, with that speed per volt as b0. The ADRC's observer
- * estimates gravity as part of the disturbance, so the elevator needs no kG.
+ * speed. So its position is treated as a first order plant, with that speed per volt as b0: SystemOrder.ELEVATOR
+ * derives it from the motor, gearing and sprocket, in meters per second per volt, for the linear closed loop. The ADRC's
+ * observer estimates gravity as part of the disturbance, so the elevator needs no kG.
  *
  * <p>With HIGH telemetry, the ADRC's settings are tunable live in place of kP, kI and kD, under
  * {@code /Tuning/ADRCElevator/ElevatorMotor/closedloop/adrc}.
@@ -58,16 +59,15 @@ public class ADRCElevatorMechanism implements Mechanism {
           .withControlMode(ControlMode.CLOSED_LOOP)
           // The ADRC takes the place of kP, kI, kD and the feedforward.
           .withADRCController(new ADRCConfig()
-              // First order on position, not SystemOrder.ELEVATOR: back-EMF sets the elevator's speed.
-              .withSystemOrder(SystemOrder.FIRST)
-              .withSettlingTime(Seconds.of(0.5))
-              // Sprocket rotations per second per volt: the motor's free speed per volt, through the gearing.
-              .withB0(MOTOR, GEARING)
-)
+              // First order on position, with b0 its speed per volt from the motor, gearing and sprocket.
+              .withSystemOrder(SystemOrder.ELEVATOR)
+              .withSettlingTime(Seconds.of(0.5)))
           // The output limit and ramp of every closed loop, the ADRC's too.
           .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)
           .withMechanismCircumference(CIRCUMFERENCE)
+          // The closed loop, and the ADRC, work in meters, as SystemOrder.ELEVATOR needs.
+          .withLinearClosedLoopController(true)
           .withSoftLimits(Meters.of(0), Meters.of(1.5))
           .withStartingPosition(Meters.of(0))
           .withZeroPower(MotorMode.BRAKE)

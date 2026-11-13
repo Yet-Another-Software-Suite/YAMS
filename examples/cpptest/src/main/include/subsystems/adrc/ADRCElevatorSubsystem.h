@@ -22,8 +22,9 @@
 // 8331.
 //
 // An elevator's speed is set by its motor's back-EMF more than by its inertia: each volt moves it at about the same
-// speed. So its position is treated as a first order plant, with that speed per volt as b0. The ADRC's observer
-// estimates gravity as part of the disturbance, so the elevator needs no kG.
+// speed. So its position is treated as a first order plant, with that speed per volt as b0: SystemOrder::ELEVATOR
+// derives it from the motor, gearing and sprocket, in meters per second per volt, for the linear closed loop. The ADRC's
+// observer estimates gravity as part of the disturbance, so the elevator needs no kG.
 //
 // With HIGH telemetry, the ADRC's settings are tunable live in place of kP, kI and kD, under
 // /Tuning/ADRCElevator/ElevatorMotor/closedloop/adrc.
