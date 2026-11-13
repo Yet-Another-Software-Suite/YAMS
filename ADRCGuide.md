@@ -175,6 +175,86 @@ The motor config limits and ramps the ADRC's output, as it does for every closed
 The observer is told the voltage the motor controller applied, so a limit or ramp that holds the
 output back is not taken for a disturbance.
 
+### Smoothing the setpoint: the tracking differentiator
+
+A tracking differentiator (TD) is a filter in front of the ADRC. Each loop it takes the raw
+setpoint and gives the ADRC a smooth one, `y`, which glides to the setpoint instead of jumping,
+and its rate of change, `yd`. The ADRC then follows `y` and uses `yd` as the setpoint's speed (for
+a position loop) or acceleration (for a velocity loop), so a step does not kick it and it does not
+lag a moving setpoint. It is off by default.
+
+```java
+new ADRCConfig()
+    .withSystemOrder(SystemOrder.ARM)
+    .withSettlingTime(Seconds.of(0.3))
+    // A linear TD with a 0.08 s time constant: a step is followed in about 0.46 s.
+    .withTrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.08)
+```
+
+```cpp
+adrc.WithTrackingDifferentiator(yams::math::TrackingDifferentiator::Method::LD, {0.08});
+```
+
+**When to use one.** A step setpoint on a mechanism that should not be slammed, when you do not
+use a motion profile. A motion profile on the motor config does the same job with real speed and
+acceleration limits; do not use both, since the TD only adds lag to a setpoint the profile has
+already smoothed. The TD is set when the controller is built: its method and parameters are not
+live tunable.
+
+**Units.** The TD works in the loop's units: mechanism rotations for an arm or pivot, meters for
+an elevator, and rotations per second for a flywheel. Parameters in "loop units" below change
+meaning with them; the ones in seconds do not.
+
+#### The methods and their parameters
+
+Parameters are passed in order, and any left off take the default. The defaults are slow for most
+mechanisms (`LD`'s is a 1 s time constant), so set them.
+
+| Method | Parameters (default) | How it moves to a new setpoint |
+| --- | --- | --- |
+| `LD`, linear | `lambda` (1), seconds, more than half the control period | A critically damped glide, with no overshoot. Reaches 98% in about 5.8 `lambda`, at a peak speed of about step / (e × `lambda`). |
+| `INTD`, saturating | `alpha` (0.5), from 0 to below 1; `beta` (1), loop units; `gamma` (1), loop units; `r` (1), per second | Far from the setpoint, it cruises at `r·beta/(1 - alpha)`. Within about `gamma/(1 - alpha)` of it, it lands like a linear TD with natural frequency `r·sqrt(beta/gamma)` and damping `0.5·sqrt(gamma/beta)`. |
+| `EULER`, exponential | `alpha` (0.9), from 0 to 1, per loop | A first order lag with a time constant of about one period / (1 - `alpha`). Its `yd` jumps on a step, to (1 - `alpha`) × step / period. |
+| `TOD`, time optimal | `r` (1), loop units per s² | Bang-bang: full acceleration `r` toward the setpoint, then full braking. |
+| `RED`, nonlinear | `lambda1` (1), sqrt(loop units) per s; `lambda2` (1), loop units per s² | A super-twisting filter: `lambda2` bounds how quickly `yd` changes, `lambda1` how hard the error pulls. |
+
+Every method also works out `ydd`, the second derivative, but the ADRC does not use it.
+
+#### Choosing and tuning one
+
+These are measured on the TD alone at the 20 ms default period, stepping an arm 90° (0.25
+rotations), an elevator 1 m and a flywheel 50 rotations per second. Each cell is the time to stay
+within 2% of the step, and the overshoot:
+
+| Method and parameters | Arm | Elevator | Flywheel | Notes |
+| --- | --- | --- | --- | --- |
+| `LD` 1 (default) | 5.8 s, 0% | 5.8 s, 0% | 5.8 s, 0% | Far too slow. |
+| `LD` 0.1 | 0.52 s, 0% | 0.52 s, 0% | 0.52 s, 0% | |
+| `LD` 0.05 | 0.22 s, 0% | 0.22 s, 0% | 0.22 s, 0% | |
+| `INTD` 0.5, 1, 1, 1 (default) | 8.1 s, 17% | 8.1 s, 16% | Not within 12 s | Overshoots, and crawls on big steps. |
+| `INTD` 0.5, 1, 4, 10 | 1.1 s, 0% | 1.1 s, 0% | 2.9 s, 0% | Cruises at 20 loop units/s. |
+| `INTD` 0.5, 1, 4, 20 | 0.52 s, 0% | 0.52 s, 0% | 1.4 s, 0% | Cruises at 40 loop units/s. |
+| `EULER` 0.9 (default) | 0.74 s, 0% | 0.74 s, 0% | 0.74 s, 0% | `yd` jumps to 1.25 rot/s on the arm's step. |
+| `TOD` 4 | Never holds 2%, 8% | 1.4 s, 8% | 6.2 s, 1% | `yd` chatters at rest. |
+| `RED` 3, 4 | 0.40 s, 13% | 0.76 s, 10% | 5.3 s, 8% | Overshoots; `yd` chatters at rest. |
+
+- **Start with `LD`.** One parameter, in seconds, that means the same thing on every mechanism,
+  and it never overshoots. Pick `lambda` so 5.8 × `lambda` is about the time a move should take,
+  then check that the peak speed, step / (e × `lambda`), is one the mechanism can reach: a
+  `lambda` of 0.08 s moves an arm 90° in about 0.46 s, at up to 1.15 rotations per second, which
+  a NEO on 60:1 (top speed about 1.5) can follow. Lengthen
+  it if the output saturates during a move; shorten it if the mechanism waits on the TD.
+- **Use `INTD` when step sizes vary a lot**, so big moves cruise at a speed the mechanism can hold
+  while small ones still land quickly. Leave `alpha` at 0.5, then set `beta` and `r` so the cruise
+  speed `r·beta/(1 - alpha)` is a little under the mechanism's top speed, and `gamma` to 4 ×
+  `beta` for no overshoot (critical damping). Raise `r` for a faster landing. A smaller `gamma`
+  lands faster but overshoots: at `gamma` = `beta`, by about 16%.
+- **Avoid `EULER` on a position loop.** It smooths `y`, but its `yd` kicks on every step, which is
+  what a TD is meant to prevent.
+- **Avoid `TOD` and `RED` at the default period.** Their sign switching makes `yd` chatter every
+  loop at rest, which the ADRC passes on to the motor, and a large `TOD` `r` never settles. They
+  need a much shorter period than 20 ms to work as intended.
+
 ## Tuning an ADRC
 
 An ADRC has few knobs, and the defaults get a mechanism moving. Tuning means picking the system
@@ -253,9 +333,9 @@ values last until the robot restarts: copy the ones you keep into the code.
 
 - **Bandwidth scale** scales both bandwidths together. The settling time does the same job in units
   you can reason about.
-- **Input delay**, the **cascaded observer** and the **tracking differentiator** are for unusual
-  plants. A motion profile on the motor config shapes setpoints better than a tracking
-  differentiator.
+- **Input delay** and the **cascaded observer** are for unusual plants.
+- **The tracking differentiator** only matters when step setpoints slam the mechanism and it has
+  no motion profile; see [Smoothing the setpoint](#smoothing-the-setpoint-the-tracking-differentiator).
 
 ## Examples
 
@@ -454,7 +534,7 @@ puts one in front of the ADRC; it can also be used on its own.
 
 ```java
 TrackingDifferentiator td =
-    new TrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.02, Optional.of(new double[] {0.2}));
+    new TrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.02, Optional.of(new double[] {0.08}));
 td.update(setpoint);
 double smoothSetpoint = td.getY();
 double setpointVelocity = td.getYd();
@@ -463,10 +543,13 @@ double setpointVelocity = td.getYd();
 | Method | Parameters (defaults) | Behavior |
 | --- | --- | --- |
 | `EULER` | `alpha` (0.9), from 0 to 1 | First order smoothing. Larger is smoother and slower. |
-| `TOD` | `r` (1), positive | Time optimal: reaches the setpoint as fast as a bounded acceleration `r` allows. |
-| `LD` | `lambda` (1), more than half the sample time | Linear, critically damped, with time constant `lambda`. |
-| `RED` | `lambda1`, `lambda2` (1, 1), positive | Nonlinear, fast to converge near the setpoint. |
-| `INTD` | `alpha` (0.5) from 0 to below 1, `beta`, `gamma`, `r` (1, 1, 1) positive | Integral form with a smooth saturation. |
+| `TOD` | `r` (1), positive, loop units per s² | Bang-bang with an acceleration bound `r`. |
+| `LD` | `lambda` (1), seconds, more than half the sample time | Linear, critically damped, with time constant `lambda`. |
+| `RED` | `lambda1`, `lambda2` (1, 1), positive | Super-twisting: `lambda2` bounds the change of `yd`, `lambda1` scales the pull of the error. |
+| `INTD` | `alpha` (0.5) from 0 to below 1, `beta` and `gamma` (1, 1) in loop units, `r` (1) per second | Saturating: cruises at `r·beta/(1 - alpha)`, then lands like `LD`. |
+
+See [Smoothing the setpoint](#smoothing-the-setpoint-the-tracking-differentiator) for what each
+parameter does and how to choose them.
 
 | Method | What it does |
 | --- | --- |

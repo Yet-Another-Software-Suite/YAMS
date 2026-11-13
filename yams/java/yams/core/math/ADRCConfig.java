@@ -122,29 +122,32 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <pre>{@code
  * new ADRCConfig()
  *     .withSystemOrder(SystemOrder.FIRST)
- *     .withTrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.9)
+ *     .withTrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.08)
  * }</pre>
  *
- * <p>Five methods are available, from gentle to aggressive; see {@link TrackingDifferentiator}
- * for the full parameter reference. Each entry below lists its parameters in order:
+ * <p>Five methods are available; see {@link TrackingDifferentiator} for the full parameter
+ * reference, and ADRCGuide.md for how to choose and tune one. Each entry below lists its
+ * parameters in order, in the loop's units (mechanism rotations, meters for a linear loop, or
+ * rotations per second for a velocity loop):
  *
  * <ul>
  * <li>{@link TrackingDifferentiator.Method#EULER}, first-order exponential smoothing. One
  * parameter, {@code alpha} in [0, 1] (default 0.9): higher is smoother and slower. The mildest
- * option; a good first choice for velocity loops.
+ * option, but its {@code yd} jumps on a step.
  * <li>{@link TrackingDifferentiator.Method#TOD}, time-optimal tracking. One parameter,
- * {@code r} greater than 0 (default 1.0): higher tracks faster. Follows the reference as fast as
- * the parameter allows, so expect abrupt output changes.
+ * {@code r} greater than 0 (default 1.0), the acceleration bound: higher tracks faster. Bang-bang,
+ * so {@code yd} chatters at rest at a 20 ms period.
  * <li>{@link TrackingDifferentiator.Method#LD}, the linear differentiator. One parameter,
- * {@code lambda} greater than 0 (default 1.0); the sample period must be below
- * {@code 2 * lambda}. Smooth and predictable; a good default for position loops.
+ * {@code lambda} greater than 0 (default 1.0), a time constant in seconds; the sample period must
+ * be below {@code 2 * lambda}. No overshoot, and a step is followed in about
+ * {@code 5.8 * lambda}. The best default.
  * <li>{@link TrackingDifferentiator.Method#RED}, the nonlinear differentiator. Two parameters,
- * {@code lambda1} and {@code lambda2}, both greater than 0 (default 1.0 each). Converges in
- * finite time and rejects measurement noise between samples.
+ * {@code lambda1} and {@code lambda2}, both greater than 0 (default 1.0 each). A super-twisting
+ * filter that converges in finite time, but overshoots and chatters at a 20 ms period.
  * <li>{@link TrackingDifferentiator.Method#INTD}, the integral differentiator. Four parameters:
  * {@code alpha} in [0, 1) (default 0.5), and {@code beta}, {@code gamma}, {@code r} greater than
- * 0 (default 1.0 each). A smooth nonlinear option that integrates the error over a sliding
- * window.
+ * 0 (default 1.0 each). Saturating: cruises at {@code r * beta / (1 - alpha)}, then lands like
+ * {@code LD}; {@code gamma = 4 * beta} gives no overshoot.
  * </ul>
  *
  * <p>Parameters may be omitted entirely to use the method defaults, and the differentiator is off

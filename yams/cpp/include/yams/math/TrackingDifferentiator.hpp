@@ -25,16 +25,24 @@ namespace yams::math {
  * Five methods are supported, selected with Method. Each takes a short list of parameters; a parameter left out uses
  * its default:
  *
- * - EULER, first order smoothing: alpha in [0, 1], default 0.9. Higher is smoother and slower.
- * - TOD, time optimal: r greater than 0, default 1. The acceleration bound; higher tracks faster.
- * - LD, linear: lambda greater than 0, default 1. The sample time must stay below 2 * lambda.
- * - RED, nonlinear reduced: lambda1 and lambda2 greater than 0, default 1 each.
- * - INTD, integral: alpha in [0, 1) default 0.5, then beta, gamma and r greater than 0, default 1 each.
+ * - EULER, first order smoothing: alpha in [0, 1], default 0.9. Higher is smoother and slower; the time constant is
+ *   about dt / (1 - alpha), and yd jumps on a step.
+ * - TOD, bang-bang: r greater than 0, default 1, the acceleration bound in the loop's units per second squared. yd
+ *   chatters at rest at a 20 ms period.
+ * - LD, linear: lambda greater than 0, default 1, a time constant in seconds; the sample time must stay below
+ *   2 * lambda. No overshoot; a step is followed to 98% in about 5.8 * lambda. The best default.
+ * - RED, super-twisting: lambda1 (how hard the error pulls) and lambda2 (the bound on how quickly yd changes), greater
+ *   than 0, default 1 each. Overshoots, and yd chatters at rest at a 20 ms period.
+ * - INTD, saturating: alpha in [0, 1) default 0.5, then beta and gamma in the loop's units and r per second, greater
+ *   than 0, default 1 each. Cruises at r * beta / (1 - alpha), then lands like LD with natural frequency
+ *   r * sqrt(beta / gamma) and damping 0.5 * sqrt(gamma / beta); gamma = 4 * beta is critically damped.
+ *
+ * ADRCGuide.md explains how to choose and tune each method.
  *
  * Invalid parameters throw std::invalid_argument.
  *
  * @code
- * yams::math::TrackingDifferentiator td{yams::math::TrackingDifferentiator::Method::EULER, 20_ms, {0.9}};
+ * yams::math::TrackingDifferentiator td{yams::math::TrackingDifferentiator::Method::LD, 20_ms, {0.08}};
  * td.Update(setpoint);
  * double smoothSetpoint = td.GetY();
  * double setpointVelocity = td.GetYd();
@@ -45,10 +53,10 @@ class TrackingDifferentiator {
   /** Differentiation method. */
   enum class Method {
     EULER,  ///< First order exponential smoothing; alpha in [0, 1], default 0.9.
-    TOD,    ///< Time optimal discrete differentiator; r greater than 0, default 1.
+    TOD,    ///< Bang-bang time optimal differentiator; r greater than 0, default 1.
     LD,     ///< Linear differentiator; lambda greater than 0, default 1.
-    RED,    ///< Nonlinear reduced differentiator; lambda1, lambda2, default 1 each.
-    INTD,   ///< Integral differentiator; alpha, beta, gamma, r, defaults 0.5, 1, 1, 1.
+    RED,    ///< Super-twisting differentiator; lambda1, lambda2, default 1 each.
+    INTD,   ///< Saturating differentiator; alpha, beta, gamma, r, defaults 0.5, 1, 1, 1.
   };
 
   /**

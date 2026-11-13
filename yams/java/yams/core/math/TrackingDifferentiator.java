@@ -36,56 +36,65 @@ import java.util.Optional;
  * slower; lower tracks the raw reference more closely.
  * </ul>
  *
- * <p>Use when the reference needs only gentle rounding, for example a shooter wheel toggling
- * between two steady speeds.
+ * <p>Its time constant is about {@code dt / (1 - alpha)}, so it changes with the sample time, and
+ * its {@code yd} jumps to {@code (1 - alpha) * step / dt} on a step. Use when the reference needs
+ * only gentle rounding.
  *
  * <h3>{@link Method#TOD}: time-optimal tracking</h3>
  *
- * <p>Follows the reference as fast as a bounded-acceleration model allows. One parameter:
+ * <p>Bang-bang: full acceleration toward the reference, then full braking. One parameter:
  *
  * <ul>
- * <li>{@code r} greater than 0, default 1.0, the acceleration bound; higher tracks faster.
+ * <li>{@code r} greater than 0, default 1.0, the acceleration bound in the loop's units per
+ * second squared; higher tracks faster.
  * </ul>
  *
- * <p>The fastest tracking available here, at the price of abrupt output changes at the switching
- * points. Use when the reference must be caught quickly and the mechanism can take it.
+ * <p>Its sign switching makes {@code yd} chatter by about {@code 2 * r * dt} at rest, and a large
+ * {@code r} never settles at a 20 ms period. Use it only with a short sample time.
  *
  * <h3>{@link Method#LD}: linear differentiator</h3>
  *
  * <p>A linear second-order filter with critically damped-style poles. One parameter:
  *
  * <ul>
- * <li>{@code lambda} greater than 0, default 1.0, the time constant of the filter. The sample
- * period must stay below {@code 2 * lambda} or the filter is unstable.
+ * <li>{@code lambda} greater than 0, default 1.0, the time constant of the filter in seconds. The
+ * sample period must stay below {@code 2 * lambda} or the filter is unstable.
  * </ul>
  *
- * <p>Smooth and predictable; a good default for position loops such as arms and elevators.
+ * <p>Smooth and predictable, with no overshoot: a step is followed to 98% in about
+ * {@code 5.8 * lambda}, at a peak rate of about {@code step / (e * lambda)}. The best default.
  *
  * <h3>{@link Method#RED}: nonlinear reduced differentiator</h3>
  *
- * <p>A second-order nonlinear filter that converges in finite time. Two parameters:
+ * <p>A super-twisting filter that converges in finite time. Two parameters:
  *
  * <ul>
- * <li>{@code lambda1} greater than 0, default 1.0, the gain on the position error term.
- * <li>{@code lambda2} greater than 0, default 1.0, the gain on the sign term.
+ * <li>{@code lambda1} greater than 0, default 1.0, the gain on the square root of the error; how
+ * hard the error pulls.
+ * <li>{@code lambda2} greater than 0, default 1.0, the gain on the sign of the error; the bound on
+ * how quickly {@code yd} changes, in the loop's units per second squared.
  * </ul>
  *
- * <p>Tracks large errors aggressively while rejecting measurement noise between samples; a
- * common choice when the reference jumps but the sensor is noisy.
+ * <p>It overshoots a step, and like {@link Method#TOD} its sign switching makes {@code yd} chatter
+ * at rest at a 20 ms period.
  *
  * <h3>{@link Method#INTD}: integral differentiator</h3>
  *
- * <p>A smooth nonlinear filter that integrates the error over a sliding window. Four parameters:
+ * <p>A saturating second-order filter, {@code ydd = -r^2 * beta / (1 - alpha) * tanh((1 - alpha)
+ * * (y - ref) / gamma) - r * yd}. Far from the reference it cruises at {@code r * beta / (1 -
+ * alpha)}; near it, it lands like {@link Method#LD} with natural frequency {@code r * sqrt(beta /
+ * gamma)} and damping {@code 0.5 * sqrt(gamma / beta)}. Four parameters:
  *
  * <ul>
- * <li>{@code alpha} in [0, 1), default 0.5, the weight of the accumulated error.
- * <li>{@code beta} greater than 0, default 1.0, scales the accumulated error.
- * <li>{@code gamma} greater than 0, default 1.0, the width of the transition region.
- * <li>{@code r} greater than 0, default 1.0, the speed of the fast dynamics.
+ * <li>{@code alpha} in [0, 1), default 0.5, widens the linear region and raises the cruise speed.
+ * <li>{@code beta} greater than 0, default 1.0, in the loop's units, sets the cruise speed.
+ * <li>{@code gamma} greater than 0, default 1.0, in the loop's units, the width of the linear
+ * region; {@code 4 * beta} gives critical damping, smaller overshoots.
+ * <li>{@code r} greater than 0, default 1.0, per second, the speed of the dynamics.
  * </ul>
  *
- * <p>The most configurable option; useful when the methods above trade smoothness against speed
- * unfavorably.
+ * <p>Useful when step sizes vary a lot: big moves cruise at a speed the mechanism can hold, small
+ * ones still land quickly. Its defaults overshoot.
  *
  * <p>Invalid parameters throw {@link IllegalArgumentException}.
  *
@@ -93,7 +102,7 @@ import java.util.Optional;
  *
  * <pre>{@code
  * TrackingDifferentiator td =
- *     new TrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.02, Optional.of(new double[] {0.9}));
+ *     new TrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.02, Optional.of(new double[] {0.08}));
  * td.update(setpoint);
  * double smoothSetpoint = td.getY();
  * double setpointVelocity = td.getYd();
