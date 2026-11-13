@@ -184,7 +184,8 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         dt.Set(smc.GetRotorVelocity().value());
         break;
       case DoubleTelemetryField::RotorGearRatio:
-        if (cfg.GetMotorGearing()) dt.Set(cfg.GetMotorGearing()->GetMechanismToRotorRatio());
+        // The ratio the wrappers convert with.
+        dt.Set(cfg.GetMotorGearing().value_or(gearing::MechanismGearing::kOne).GetMechanismToRotorRatio());
         break;
       case DoubleTelemetryField::ExternalEncoderPosition:
         dt.Set(smc.GetExternalEncoderMechanismPosition().value_or(wpi::units::turn_t{0}).value());
