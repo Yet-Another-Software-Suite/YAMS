@@ -47,6 +47,17 @@ public class ADRCMechanismTest {
   private static final double kSettleSeconds = 2.0;
   private static final double kHoldSeconds = 0.5;
 
+  /** How far an arm or pivot may be from its setpoint while holding, degrees. */
+  private static final double kHoldDegrees = 1;
+
+  /**
+   * How far an arm or pivot on a Talon may be from its setpoint while holding, on average, degrees.
+   * A Talon is simulated on CTRE's own real-time thread, which runs on when the CI runner stalls.
+   * The TalonFXS pivot held within 0.0 to 0.8 degrees on a desktop, but 1.4 and 2.9 on two CI runs
+   * of the same commit, so 1 degree was too tight there.
+   */
+  private static final double kRealTimeHoldDegrees = 4;
+
   @BeforeEach
   void startTest() {
     MockHardwareExtension.beforeAll();
@@ -124,7 +135,7 @@ public class ADRCMechanismTest {
       assertSettles(controller, arm,
           ()
               -> arm.setMechanismPositionSetpoint(Degrees.of(45)),
-          () -> arm.getAngle().in(Degrees), 45, 1);
+          () -> arm.getAngle().in(Degrees), 45, controller.realTime() ? kRealTimeHoldDegrees : kHoldDegrees);
     } finally {
       ClosedLoopCases.close(smc);
     }
@@ -145,7 +156,7 @@ public class ADRCMechanismTest {
       assertSettles(controller, pivot,
           ()
               -> pivot.setMechanismPositionSetpoint(Degrees.of(90)),
-          () -> pivot.getAngle().in(Degrees), 90, 1);
+          () -> pivot.getAngle().in(Degrees), 90, controller.realTime() ? kRealTimeHoldDegrees : kHoldDegrees);
     } finally {
       ClosedLoopCases.close(smc);
     }
