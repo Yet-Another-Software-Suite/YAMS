@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Milliseconds;
-import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -175,16 +174,6 @@ class ADRCConfigTest {
     assertEquals(2, controller.getSystemOrder());
     assertEquals(0.5, controller.getSettlingTime().in(Seconds));
     assertEquals(10, controller.getB0());
-    assertEquals(9, controller.getMaxOutput().in(Volts), "the motor config's closed loop voltage limit");
-    assertEquals(-9, controller.getMinOutput().in(Volts));
-    assertEquals(0, controller.getSlewRateLimit().in(Volts.per(Second)), "the motor controller ramps its output");
-    final ADRCController fallback =
-        new ADRCConfig()
-            .withSystemOrder(SystemOrder.FIRST)
-            .withB0(10)
-            .buildController(DCMotor.getNEO(1), smcConfig(), Milliseconds.of(20));
-    assertEquals(
-        DCMotor.getNEO(1).nominalVoltage, fallback.getMaxOutput().in(Volts), "the motor's nominal voltage");
   }
 
   @Test

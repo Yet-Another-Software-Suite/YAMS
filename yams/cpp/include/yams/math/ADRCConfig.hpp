@@ -25,10 +25,6 @@ namespace yams::math {
 
 class ADRCController;
 
-/** A rate of change of voltage, for a standalone ADRCController's output slew-rate limit. */
-using volts_per_second_t = wpi::units::unit_t<
-    wpi::units::compound_unit<wpi::units::volts, wpi::units::inverse<wpi::units::seconds>>>;
-
 /**
  * Observer and control gains worked out from an ADRCConfig. Never changed once made: the config replaces the whole
  * object, so a step never uses a mix of old and new gains.
@@ -245,8 +241,7 @@ class ADRCConfig {
 
   /**
    * Build an initialized controller that reads this config, giving the config the period and b0 it needs. The
-   * controller saturates at the motor config's closed loop maximum voltage, which the motor controller limits its
-   * output to as well, and has no slew-rate limit of its own: the motor controller ramps its output with
+   * controller does not limit or ramp its output: the motor controller does, with WithClosedLoopMaxVoltage and
    * WithClosedLoopRampRate. The motor controller calls this; you only need it to use the controller yourself.
    *
    * @param self   This config, shared with the controller, which reads it every step.
@@ -288,9 +283,6 @@ class ADRCConfig {
   StepValues GetStepValues() const;
   /** @return The gains, or null until a controller is built. */
   std::shared_ptr<const ADRCGains> GetGains() const;
-  /** Resolve the maximum output from the motor config, raising an alert for the nominal voltage fallback. */
-  wpi::units::volt_t ResolveMaxVoltage(const wpi::math::DCMotor& motor,
-                                       const motorcontrollers::SmartMotorControllerConfig& config);
   /** @return An alert id of this config's own. */
   std::string AlertId(const std::string& alert) const;
 
@@ -309,7 +301,6 @@ class ADRCConfig {
   std::optional<double> m_builtB0;
   std::shared_ptr<const ADRCGains> m_gains;
 
-  std::unique_ptr<wpi::util::Alert> m_nominalVoltageAlert;
   std::unique_ptr<wpi::util::Alert> m_rejectedAlert;
   int m_instance;
 };

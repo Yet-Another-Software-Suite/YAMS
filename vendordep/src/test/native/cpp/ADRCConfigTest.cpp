@@ -53,14 +53,9 @@ TEST_CASE("ADRCConfig.UnsetValuesAreEmptyAndBuildWithTheirDefaults", "[ADRCConfi
   CHECK(config.GetTdParams().empty());
 
   config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10);
-  auto smc = SmcConfig();
-  smc.WithClosedLoopMaxVoltage(10_V);
-  auto adrc = ADRCConfig::BuildController(Shared(config), wpi::math::DCMotor::NEO(1), smc, 20_ms);
+  auto adrc = ADRCConfig::BuildController(Shared(config), wpi::math::DCMotor::NEO(1), SmcConfig(), 20_ms);
   CHECK(adrc.GetSettlingTime() == ADRCConfig::kDefaultSettlingTime);
   CHECK(adrc.GetBandwidthScale() == ADRCConfig::kDefaultBandwidthScale);
-  CHECK(adrc.GetSlewRateLimit().value() == 0);
-  CHECK(adrc.GetMaxOutput().value() == 10);
-  CHECK(adrc.GetMinOutput().value() == -10);
 }
 
 TEST_CASE("ADRCConfig.KeepsEveryValueItIsGiven", "[ADRCConfig]") {
@@ -152,14 +147,6 @@ TEST_CASE("ADRCConfig.BuildingNeedsASystemOrder", "[ADRCConfig]") {
   config.WithB0(10);
   CHECK_THROWS_AS(ADRCConfig::BuildController(Shared(config), wpi::math::DCMotor::NEO(1), SmcConfig(), 20_ms),
                   exceptions::SmartMotorControllerConfigurationException);
-}
-
-TEST_CASE("ADRCConfig.WithoutALimitTheMotorsNominalVoltageIsUsed", "[ADRCConfig]") {
-  ADRCConfig config;
-  config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10);
-  const auto motor = wpi::math::DCMotor::NEO(1);
-  auto adrc = ADRCConfig::BuildController(Shared(config), motor, SmcConfig(), 20_ms);
-  CHECK(adrc.GetMaxOutput() == motor.nominalVoltage);
 }
 
 TEST_CASE("ADRCConfig.AnADRCReplacesTheSlotsPIDAndFeedforward", "[ADRCConfig]") {

@@ -250,22 +250,6 @@ double ADRCConfig::ResolveB0(const wpi::math::DCMotor& motor,
   return rotationsPerSecondSquaredPerVolt;
 }
 
-wpi::units::volt_t ADRCConfig::ResolveMaxVoltage(const wpi::math::DCMotor& motor,
-                                                 const motorcontrollers::SmartMotorControllerConfig& config) {
-  if (const auto configured = config.GetClosedLoopControllerMaximumVoltage()) return *configured;
-  std::scoped_lock lock{m_mutex};
-  if (!m_nominalVoltageAlert) {
-    m_nominalVoltageAlert = std::make_unique<wpi::util::Alert>(
-        "YAMS", AlertId("NominalVoltage"),
-        std::format("{}: the motor config has no closed loop voltage limit (WithClosedLoopMaxVoltage); "
-                    "using the motor's nominal voltage ({} V).",
-                    m_owner, motor.nominalVoltage.value()),
-        wpi::util::Alert::Level::MEDIUM);
-  }
-  m_nominalVoltageAlert->Set(true);
-  return motor.nominalVoltage;
-}
-
 ADRCController ADRCConfig::BuildController(const std::shared_ptr<ADRCConfig>& self, const wpi::math::DCMotor& motor,
                                            const motorcontrollers::SmartMotorControllerConfig& config,
                                            wpi::units::second_t period) {
@@ -281,7 +265,7 @@ ADRCController ADRCConfig::BuildController(const std::shared_ptr<ADRCConfig>& se
     }
   }
   ADRCController controller{self};
-  controller.Initialize(self->ResolveB0(motor, config), self->ResolveMaxVoltage(motor, config), period);
+  controller.Initialize(self->ResolveB0(motor, config), period);
   return controller;
 }
 

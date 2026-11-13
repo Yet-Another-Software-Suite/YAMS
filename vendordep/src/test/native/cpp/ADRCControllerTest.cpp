@@ -61,18 +61,18 @@ std::shared_ptr<ADRCConfig> Config(int order) {
   return config;
 }
 
-/** An initialized controller for a config, with b0 10 and a 12 V limit unless the config sets them. */
+/** An initialized controller for a config, with b0 10 unless the config sets one. */
 ADRCController Initialized(const std::shared_ptr<ADRCConfig>& config) {
   ADRCController adrc{config};
-  adrc.Initialize(10, 12_V, wpi::units::second_t{kDt});
+  adrc.Initialize(10, wpi::units::second_t{kDt});
   return adrc;
 }
 
-ADRCController Controller(int order, double settlingTime, double b0, double limit) {
+ADRCController Controller(int order, double settlingTime, double b0) {
   auto config = Config(order);
   config->WithSettlingTime(wpi::units::second_t{settlingTime});
   ADRCController adrc{config};
-  adrc.Initialize(b0, wpi::units::volt_t{limit}, wpi::units::second_t{kDt});
+  adrc.Initialize(b0, wpi::units::second_t{kDt});
   return adrc;
 }
 
@@ -89,13 +89,12 @@ double Run(ADRCController& adrc, Plant& plant, double setpoint, double seconds) 
   return worst;
 }
 
-constexpr double kInfinity = std::numeric_limits<double>::infinity();
 }  // namespace
 
 TEST_CASE("ADRCController.ReachesItsSetpointAgainstAnUnknownDisturbance", "[ADRCController]") {
   const int order = GENERATE(1, 2, 3, 4);
   CAPTURE(order);
-  auto adrc = Controller(order, 1.0, 10, kInfinity);
+  auto adrc = Controller(order, 1.0, 10);
   Plant plant{order, 10, -3, 0};
   CHECK(Run(adrc, plant, 1.0, 6) < 1e-3);
   // The observer's last state is the disturbance it found.
@@ -106,24 +105,13 @@ TEST_CASE("ADRCController.ReachesItsSetpointWithB0OffByAFactorOfTwo", "[ADRCCont
   const int order = GENERATE(1, 2);
   const double b0 = GENERATE(5.0, 20.0);
   CAPTURE(order, b0);
-  auto adrc = Controller(order, 1.0, b0, kInfinity);
+  auto adrc = Controller(order, 1.0, b0);
   Plant plant{order, 10, -3, 0};
   CHECK(Run(adrc, plant, 1.0, 6) < 1e-3);
 }
 
-TEST_CASE("ADRCController.OutputStaysWithinItsLimits", "[ADRCController]") {
-  auto adrc = Controller(1, 0.2, 10, 2);
-  Plant plant{1, 10, 0, 0};
-  for (int i = 0; i < 100; ++i) {
-    const double u = adrc.Calculate(plant.Output(), 100).value();
-    CHECK((u >= -2 && u <= 2));
-    plant.Step(u);
-  }
-  CHECK(adrc.GetLastOutput().value() == Catch::Approx(2));
-}
-
 TEST_CASE("ADRCController.SettlesWhenTheActuatorAppliesLessThanItIsAskedFor", "[ADRCController]") {
-  auto adrc = Controller(2, 0.5, 10, 12);
+  auto adrc = Controller(2, 0.5, 10);
   Plant plant{2, 10, -3, 0};
   constexpr double kActuatorLimit = 3;
   double applied = 0;
@@ -137,20 +125,8 @@ TEST_CASE("ADRCController.SettlesWhenTheActuatorAppliesLessThanItIsAskedFor", "[
   CHECK(worst < 1e-3);
 }
 
-TEST_CASE("ADRCController.SlewRateLimitsHowFastTheOutputChanges", "[ADRCController]") {
-  ADRCController adrc{Config(1)};
-  adrc.Initialize(10, -12_V, 12_V, volts_per_second_t{5}, wpi::units::second_t{kDt});
-  double last = 0;
-  for (int i = 0; i < 20; ++i) {
-    const double u = adrc.Calculate(0, 100).value();
-    CHECK(std::abs(u - last) <= 5.0 * kDt + 1e-12);
-    last = u;
-  }
-  CHECK(last == Catch::Approx(20 * 5.0 * kDt));
-}
-
 TEST_CASE("ADRCController.ResetStartsTheObserverAtTheMeasurement", "[ADRCController]") {
-  auto adrc = Controller(2, 0.5, 10, 12);
+  auto adrc = Controller(2, 0.5, 10);
   Plant plant{2, 10, -3, 0};
   Run(adrc, plant, 1.0, 2);
   adrc.Reset(0.25);
@@ -159,7 +135,7 @@ TEST_CASE("ADRCController.ResetStartsTheObserverAtTheMeasurement", "[ADRCControl
 }
 
 TEST_CASE("ADRCController.ChangingTheConfigRetunesAtOnceAndKeepsTheEstimatedDisturbance", "[ADRCController]") {
-  auto adrc = Controller(1, 0.5, 10, 12);
+  auto adrc = Controller(1, 0.5, 10);
   Plant plant{1, 10, -3, 0};
   Run(adrc, plant, 1.0, 3);
   const double disturbance = adrc.GetEstimatedDisturbance();
@@ -175,25 +151,19 @@ TEST_CASE("ADRCController.ChangingTheConfigRetunesAtOnceAndKeepsTheEstimatedDist
   CHECK(Run(adrc, plant, 1.0, 3) < 1e-3);
 }
 
-TEST_CASE("ADRCController.InitializeReadsTheConfigOverTheGivenB0AndKeepsTheGivenLimits", "[ADRCController]") {
+TEST_CASE("ADRCController.InitializeReadsTheConfigOverTheGivenB0", "[ADRCController]") {
   auto config = Config(1);
   config->WithSettlingTime(0.4_s).WithBandwidthScale(2).WithB0(5);
   ADRCController fromConfig{config};
-  fromConfig.Initialize(10, -6_V, 8_V, volts_per_second_t{3}, wpi::units::second_t{kDt});
+  fromConfig.Initialize(10, wpi::units::second_t{kDt});
   CHECK(fromConfig.GetSettlingTime().value() == 0.4);
   CHECK(fromConfig.GetBandwidthScale() == 2);
   CHECK(fromConfig.GetB0() == 5);
-  CHECK(fromConfig.GetMinOutput().value() == -6);
-  CHECK(fromConfig.GetMaxOutput().value() == 8);
-  CHECK(fromConfig.GetSlewRateLimit().value() == 3);
 
   auto fromDefaults = Initialized(Config(1));
   CHECK(fromDefaults.GetSettlingTime() == ADRCConfig::kDefaultSettlingTime);
   CHECK(fromDefaults.GetBandwidthScale() == ADRCConfig::kDefaultBandwidthScale);
   CHECK(fromDefaults.GetB0() == 10);
-  CHECK(fromDefaults.GetMinOutput().value() == -12);
-  CHECK(fromDefaults.GetMaxOutput().value() == 12);
-  CHECK(fromDefaults.GetSlewRateLimit().value() == 0);
 }
 
 TEST_CASE("ADRCController.InputDelayHoldsTheSetpointOnADelayedPlant", "[ADRCController]") {
@@ -235,7 +205,7 @@ TEST_CASE("ADRCController.CascadedObserverHoldsTheSetpoint", "[ADRCController]")
 }
 
 TEST_CASE("ADRCController.ACopyOfABuiltConfigTunesOnItsOwn", "[ADRCController]") {
-  auto adrc = Controller(2, 0.5, 10, 12);
+  auto adrc = Controller(2, 0.5, 10);
   ADRCConfig copy{*adrc.GetConfig()};
   CHECK(copy.GetSettlingTime() == adrc.GetConfig()->GetSettlingTime());
   CHECK_THROWS_AS(copy.WithSystemOrder(ADRCConfig::SystemOrder::FIRST), std::logic_error);
@@ -250,13 +220,9 @@ TEST_CASE("ADRCController.RejectsInvalidArguments", "[ADRCController]") {
   CHECK_FALSE(adrc.IsInitialized());
   CHECK_THROWS_AS(adrc.Calculate(0, 0), std::logic_error);
   CHECK_THROWS_AS(adrc.Reset(0), std::logic_error);
-  CHECK_THROWS_AS(adrc.Initialize(10, 12_V, 0_s), std::invalid_argument);
-  CHECK_THROWS_AS(adrc.Initialize(0, 12_V, wpi::units::second_t{kDt}), std::invalid_argument);
-  CHECK_THROWS_AS(adrc.Initialize(10, 8_V, 6_V, volts_per_second_t{0}, wpi::units::second_t{kDt}),
-                  std::invalid_argument);
-  CHECK_THROWS_AS(adrc.Initialize(10, -12_V, 12_V, volts_per_second_t{-1}, wpi::units::second_t{kDt}),
-                  std::invalid_argument);
-  adrc.Initialize(10, 12_V, wpi::units::second_t{kDt});
+  CHECK_THROWS_AS(adrc.Initialize(10, 0_s), std::invalid_argument);
+  CHECK_THROWS_AS(adrc.Initialize(0, wpi::units::second_t{kDt}), std::invalid_argument);
+  adrc.Initialize(10, wpi::units::second_t{kDt});
   CHECK(adrc.IsInitialized());
   CHECK_THROWS_AS(adrc.Reset(std::vector<double>(3, 0.0), 0_V), std::invalid_argument);
   CHECK_THROWS_AS(adrc.GetConfig()->WithSystemOrder(ADRCConfig::SystemOrder::SECOND), std::logic_error);

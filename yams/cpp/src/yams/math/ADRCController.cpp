@@ -101,26 +101,11 @@ ADRCController::ADRCController(std::shared_ptr<ADRCConfig> config) : m_config{st
   m_systemOrder = ADRCConfig::GetOrder(*order);
 }
 
-void ADRCController::Initialize(double b0, wpi::units::volt_t maxVoltage, wpi::units::second_t period) {
-  Initialize(b0, -maxVoltage, maxVoltage, volts_per_second_t{0.0}, period);
-}
-
-void ADRCController::Initialize(double b0, wpi::units::volt_t minVoltage, wpi::units::volt_t maxVoltage,
-                                volts_per_second_t slewRateLimit, wpi::units::second_t period) {
+void ADRCController::Initialize(double b0, wpi::units::second_t period) {
   m_initialized = false;
   const double seconds = period.value();
   if (!std::isfinite(seconds) || seconds <= 0) {
     throw std::invalid_argument("The control period must be finite and positive");
-  }
-  const double min = minVoltage.value();
-  const double max = maxVoltage.value();
-  if (std::isnan(min) || std::isnan(max) || min > max) {
-    throw std::invalid_argument(std::format(
-        "The output limits must not be NaN, and the minimum ({} V) must not be above the maximum ({} V)", min, max));
-  }
-  const double slew = slewRateLimit.value();
-  if (std::isnan(slew) || slew < 0) {
-    throw std::invalid_argument(std::format("The slew rate limit must not be negative, got {} V/s", slew));
   }
   const double delaySteps = m_config->GetInputDelay().value_or(ADRCConfig::kDefaultInputDelay).value() / seconds;
   if (delaySteps > std::numeric_limits<int>::max() - 1) {
@@ -131,9 +116,6 @@ void ADRCController::Initialize(double b0, wpi::units::volt_t minVoltage, wpi::u
     td.emplace(*method, period, m_config->GetTdParams());
   }
   m_config->SetBuiltValues(b0, period);
-  m_minOutput = min;
-  m_maxOutput = max;
-  m_slewRateLimit = slew;
 
   m_xhat = Eigen::VectorXd::Zero(m_systemOrder + 1);
   m_secondaryXhat = Eigen::VectorXd::Zero(m_systemOrder + 1);
@@ -172,13 +154,7 @@ wpi::units::volt_t ADRCController::Step(double reference, double output, const s
   for (int i = 0; i < m_systemOrder; ++i) {
     v += gains.k(i) * (ref[i] - m_xhat(i));
   }
-  double u = v / gains.b0;
-
-  if (m_slewRateLimit > 0.0) {
-    const double maxChange = m_slewRateLimit * values.period;
-    u = m_uPrev + std::clamp(u - m_uPrev, -maxChange, maxChange);
-  }
-  u = std::min(std::max(u, m_minOutput), m_maxOutput);
+  const double u = v / gains.b0;
 
   std::rotate(m_uHistory.rbegin(), m_uHistory.rbegin() + 1, m_uHistory.rend());
   m_uHistory[0] = u;
@@ -273,21 +249,6 @@ wpi::units::second_t ADRCController::GetSettlingTime() const {
 
 double ADRCController::GetBandwidthScale() const {
   return m_config->GetBandwidthScale().value_or(ADRCConfig::kDefaultBandwidthScale);
-}
-
-wpi::units::volt_t ADRCController::GetMinOutput() const {
-  RequireInitialized();
-  return wpi::units::volt_t{m_minOutput};
-}
-
-wpi::units::volt_t ADRCController::GetMaxOutput() const {
-  RequireInitialized();
-  return wpi::units::volt_t{m_maxOutput};
-}
-
-volts_per_second_t ADRCController::GetSlewRateLimit() const {
-  RequireInitialized();
-  return volts_per_second_t{m_slewRateLimit};
 }
 
 const TrackingDifferentiator* ADRCController::GetTrackingDifferentiator() const { return m_td ? &*m_td : nullptr; }

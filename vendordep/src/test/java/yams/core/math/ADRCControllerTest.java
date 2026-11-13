@@ -10,9 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
-import static org.wpilib.units.Units.Volts;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,16 +67,16 @@ class ADRCControllerTest {
     return new ADRCConfig().withSystemOrder(orders[order - 1]);
   }
 
-  /** An initialized controller for a config, with {@code b0} 10 and a 12 V limit unless it sets them. */
+  /** An initialized controller for a config, with {@code b0} 10 unless it sets one. */
   private static ADRCController initialized(ADRCConfig config) {
     final ADRCController adrc = new ADRCController(config);
-    adrc.initialize(10, Volts.of(12), Seconds.of(kDt));
+    adrc.initialize(10, Seconds.of(kDt));
     return adrc;
   }
 
-  private static ADRCController controller(int order, double settlingTime, double b0, double limit) {
+  private static ADRCController controller(int order, double settlingTime, double b0) {
     final ADRCController adrc = new ADRCController(config(order).withSettlingTime(Seconds.of(settlingTime)));
-    adrc.initialize(b0, Volts.of(limit), Seconds.of(kDt));
+    adrc.initialize(b0, Seconds.of(kDt));
     return adrc;
   }
 
@@ -100,7 +98,7 @@ class ADRCControllerTest {
   @ParameterizedTest(name = "order {0}")
   @ValueSource(ints = {1, 2, 3, 4})
   void reachesItsSetpointAgainstAnUnknownDisturbance(int order) {
-    final ADRCController adrc = controller(order, 1.0, 10, Double.POSITIVE_INFINITY);
+    final ADRCController adrc = controller(order, 1.0, 10);
     final Plant plant = new Plant(order, 10, -3, 0);
     final double worst = run(adrc, plant, 1.0, 6);
     assertTrue(worst < 1e-3, "order " + order + " should hold 1.0, but was " + worst + " from it");
@@ -112,22 +110,10 @@ class ADRCControllerTest {
   @ValueSource(ints = {1, 2})
   void reachesItsSetpointWithB0OffByAFactorOfTwo(int order) {
     for (double b0 : new double[] {5, 20}) {
-      final ADRCController adrc = controller(order, 1.0, b0, Double.POSITIVE_INFINITY);
+      final ADRCController adrc = controller(order, 1.0, b0);
       final double worst = run(adrc, new Plant(order, 10, -3, 0), 1.0, 6);
       assertTrue(worst < 1e-3, "b0 " + b0 + ": should hold 1.0, but was " + worst + " from it");
     }
-  }
-
-  @Test
-  void outputStaysWithinItsLimits() {
-    final ADRCController adrc = controller(1, 0.2, 10, 2);
-    final Plant plant = new Plant(1, 10, 0, 0);
-    for (int i = 0; i < 100; i++) {
-      final double u = adrc.calculate(plant.output(), 100);
-      assertTrue(u >= -2 && u <= 2, "output " + u + " should stay within [-2, 2]");
-      plant.step(u);
-    }
-    assertEquals(2, adrc.getLastOutput(), 1e-9);
   }
 
   /**
@@ -137,7 +123,7 @@ class ADRCControllerTest {
    */
   @Test
   void settlesWhenTheActuatorAppliesLessThanItIsAskedFor() {
-    final ADRCController adrc = controller(2, 0.5, 10, 12);
+    final ADRCController adrc = controller(2, 0.5, 10);
     final Plant plant = new Plant(2, 10, -3, 0);
     final double actuatorLimit = 3;
     double applied = 0;
@@ -154,21 +140,8 @@ class ADRCControllerTest {
   }
 
   @Test
-  void slewRateLimitsHowFastTheOutputChanges() {
-    final ADRCController adrc = new ADRCController(config(1));
-    adrc.initialize(10, Volts.of(-12), Volts.of(12), Volts.per(Second).of(5), Seconds.of(kDt));
-    double last = 0;
-    for (int i = 0; i < 20; i++) {
-      final double u = adrc.calculate(0, 100);
-      assertTrue(Math.abs(u - last) <= 5.0 * kDt + 1e-12, "changed by " + (u - last) + " in one step");
-      last = u;
-    }
-    assertEquals(20 * 5.0 * kDt, last, 1e-9);
-  }
-
-  @Test
   void resetStartsTheObserverAtTheMeasurement() {
-    final ADRCController adrc = controller(2, 0.5, 10, 12);
+    final ADRCController adrc = controller(2, 0.5, 10);
     run(adrc, new Plant(2, 10, -3, 0), 1.0, 2);
     adrc.reset(0.25);
     assertArrayEquals(new double[] {0.25, 0, 0}, adrc.getEstimatedStates(), 1e-12);
@@ -177,7 +150,7 @@ class ADRCControllerTest {
 
   @Test
   void changingTheConfigRetunesAtOnceAndKeepsTheEstimatedDisturbance() {
-    final ADRCController adrc = controller(1, 0.5, 10, 12);
+    final ADRCController adrc = controller(1, 0.5, 10);
     final Plant plant = new Plant(1, 10, -3, 0);
     run(adrc, plant, 1.0, 3);
     final double disturbance = adrc.getEstimatedDisturbance();
@@ -197,7 +170,7 @@ class ADRCControllerTest {
 
   @Test
   void aCopyOfABuiltConfigHasItsOwnGains() {
-    final ADRCController adrc = controller(2, 0.5, 10, 12);
+    final ADRCController adrc = controller(2, 0.5, 10);
     final ADRCConfig copy = adrc.getConfig().clone();
     final ADRCController.Gains gains = adrc.getConfig().getGains();
     final ADRCController.Gains copied = copy.getGains();
@@ -215,26 +188,20 @@ class ADRCControllerTest {
   }
 
   @Test
-  void initializeReadsTheConfigOverTheGivenB0AndKeepsTheGivenLimits() {
+  void initializeReadsTheConfigOverTheGivenB0() {
     final ADRCController fromConfig = new ADRCController(config(1)
         .withSettlingTime(Seconds.of(0.4))
         .withBandwidthScale(2)
         .withB0(5));
-    fromConfig.initialize(10, Volts.of(-6), Volts.of(8), Volts.per(Second).of(3), Seconds.of(kDt));
+    fromConfig.initialize(10, Seconds.of(kDt));
     assertEquals(0.4, fromConfig.getSettlingTime().in(Seconds));
     assertEquals(2, fromConfig.getBandwidthScale());
     assertEquals(5, fromConfig.getB0(), "the config's b0, not the given one");
-    assertEquals(-6, fromConfig.getMinOutput().in(Volts));
-    assertEquals(8, fromConfig.getMaxOutput().in(Volts));
-    assertEquals(3, fromConfig.getSlewRateLimit().in(Volts.per(Second)));
 
     final ADRCController fromDefaults = initialized(config(1));
     assertEquals(ADRCConfig.DEFAULT_SETTLING_TIME, fromDefaults.getSettlingTime());
     assertEquals(ADRCConfig.DEFAULT_BANDWIDTH_SCALE, fromDefaults.getBandwidthScale());
     assertEquals(10, fromDefaults.getB0(), "the given b0, as the config leaves it unset");
-    assertEquals(-12, fromDefaults.getMinOutput().in(Volts), "the negative of the given maximum");
-    assertEquals(12, fromDefaults.getMaxOutput().in(Volts));
-    assertEquals(0, fromDefaults.getSlewRateLimit().in(Volts.per(Second)), "no slew rate limit");
   }
 
   @Test
@@ -277,15 +244,9 @@ class ADRCControllerTest {
     assertFalse(adrc.isInitialized());
     assertThrows(IllegalStateException.class, () -> adrc.calculate(0, 0));
     assertThrows(IllegalStateException.class, () -> adrc.reset(0));
-    assertThrows(IllegalArgumentException.class, () -> adrc.initialize(10, Volts.of(12), Seconds.of(0)), "no period");
-    assertThrows(IllegalArgumentException.class, () -> adrc.initialize(0, Volts.of(12), Seconds.of(kDt)), "a zero b0");
-    assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(10, Volts.of(6), Volts.of(2), Volts.per(Second).zero(), Seconds.of(kDt)),
-        "a minimum above the maximum");
-    assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(10, Volts.of(-12), Volts.of(12), Volts.per(Second).of(-1), Seconds.of(kDt)),
-        "a negative slew rate limit");
-    adrc.initialize(10, Volts.of(12), Seconds.of(kDt));
+    assertThrows(IllegalArgumentException.class, () -> adrc.initialize(10, Seconds.of(0)), "no period");
+    assertThrows(IllegalArgumentException.class, () -> adrc.initialize(0, Seconds.of(kDt)), "a zero b0");
+    adrc.initialize(10, Seconds.of(kDt));
     assertTrue(adrc.isInitialized());
     assertThrows(IllegalArgumentException.class, () -> adrc.reset(new double[3], 0), "a state of the wrong length");
     assertThrows(IllegalStateException.class, () -> adrc.getConfig().withSystemOrder(SystemOrder.SECOND),

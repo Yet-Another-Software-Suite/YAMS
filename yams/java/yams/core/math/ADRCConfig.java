@@ -5,7 +5,6 @@ package yams.core.math;
 
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Seconds;
-import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -158,8 +157,8 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * configured that inertia with {@code withMomentOfInertia(...)} or
  * {@code withWheelMomentOfInertia(...)}. The library's placeholder inertia is never used.
  * <li>Output saturation comes from the motor config's
- * {@code withClosedLoopControllerMaximumVoltage(...)}. Without it, the controller saturates at the
- * motor's nominal voltage and raises an alert.
+ * {@code withClosedLoopControllerMaximumVoltage(...)}, which the motor controller applies to every
+ * closed loop. The controller itself does not limit its output.
  * <li>The control period comes from {@code withClosedLoopControlPeriod(...)}, so the controller
  * and the loop cannot disagree.
  * </ul>
@@ -266,8 +265,6 @@ public class ADRCConfig implements Cloneable {
   private Optional<TrackingDifferentiator.Method> tdMethod = Optional.empty();
   /** Tracking differentiator parameters; empty for the method defaults. */
   private Optional<double[]> tdParams = Optional.empty();
-  /** Alert raised when the maximum output falls back to the motor's nominal voltage. */
-  private Optional<Alert> nominalVoltageAlert = Optional.empty();
   /** Alert raised while this config holds a value its controller rejected. */
   private Optional<Alert> rejectedAlert = Optional.empty();
   /** Counts every config made, so each one's alerts get their own ids. */
@@ -532,19 +529,18 @@ public class ADRCConfig implements Cloneable {
    * without resetting the state estimate. The system order, input delay and tracking differentiator
    * only take effect when a controller is built, and a built config refuses a different order.
    *
-   * <p>The controller saturates at the motor config's closed loop maximum voltage, which the motor
-   * controller limits its output to as well, and has no slew-rate limit of its own: the motor
-   * controller ramps its output with {@code withClosedLoopRampRate(...)}.
+   * <p>The controller does not limit or ramp its output: the motor controller does, with
+   * {@code withClosedLoopControllerMaximumVoltage(...)} and {@code withClosedLoopRampRate(...)}.
    *
-   * @param motor  Motor model used for {@code b0} derivation and the nominal-voltage fallback.
+   * @param motor  Motor model used for {@code b0} derivation.
    * @param config Motor config that carries gearing, inertia, circumference, and the loop period.
    * @param period Closed-loop control period.
    * @return Initialized {@link ADRCController}.
    * @throws SmartMotorControllerConfigurationException if the order is missing or {@code b0} cannot
    *                                                    be derived.
    * @throws IllegalArgumentException                   if {@link ADRCController#initialize} rejects
-   *                                                    the derived {@code b0}, the motor config's
-   *                                                    limit or the tracking differentiator.
+   *                                                    the derived {@code b0} or the tracking
+   *                                                    differentiator.
    */
   public ADRCController buildController(
       DCMotor motor, SmartMotorControllerConfig<?> config, Time period) {
@@ -554,7 +550,7 @@ public class ADRCConfig implements Cloneable {
         "withSystemOrder(...) was never called, and there is no safe default plant order.",
         "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
     ADRCController controller = new ADRCController(this);
-    controller.initialize(resolveB0(motor, config), Volts.of(resolveMaxVoltage(motor, config)), period);
+    controller.initialize(resolveB0(motor, config), period);
     return controller;
   }
 
@@ -657,30 +653,6 @@ public class ADRCConfig implements Cloneable {
     // and each mechanism rotation moves the carriage one circumference.
     return motor.Kv / (2.0 * Math.PI * rotorToMechanism)
            * config.getMechanismCircumference().orElseThrow().in(Meters);
-  }
-
-  /**
-   * Resolve the maximum output voltage: the motor config's closed loop maximum voltage, or the
-   * motor's nominal voltage with an alert.
-   *
-   * @param motor  Motor model, used for the nominal-voltage fallback.
-   * @param config Motor config, which may carry a closed-loop voltage limit.
-   * @return Maximum output in volts.
-   */
-  private double resolveMaxVoltage(DCMotor motor, SmartMotorControllerConfig<?> config) {
-    var configured = config.getClosedLoopControllerMaximumVoltage();
-    if (configured.isPresent()) {
-      return configured.get().in(Volts);
-    }
-    if (nominalVoltageAlert.isEmpty()) {
-      nominalVoltageAlert = Optional.of(new Alert("YAMS", alertId("NominalVoltage"),
-          owner + ": the motor config has no closed loop voltage limit "
-              + "(withClosedLoopControllerMaximumVoltage); using the motor's nominal voltage ("
-              + motor.nominalVoltage + " V).",
-          Alert.Level.MEDIUM));
-    }
-    nominalVoltageAlert.get().set(true);
-    return motor.nominalVoltage;
   }
 
   /**

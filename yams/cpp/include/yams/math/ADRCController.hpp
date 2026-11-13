@@ -36,24 +36,26 @@ namespace yams::math {
  * bandwidth is 4 * wc.
  *
  * The controller keeps only its running state: the observer's estimate, its last outputs and the tracking
- * differentiator, and the output limits and slew-rate limit it is initialized with. Everything else it reads from its
+ * differentiator. Everything else it reads from its
  * ADRCConfig every step, including the observer and control gains,
  * which the config works out again whenever its settling time, bandwidth scale or b0 changes. The system order, input
  * delay and tracking differentiator are fixed when the controller is initialized.
  *
- * A motor controller running this controller limits and ramps its output itself, with
- * WithClosedLoopMaxVoltage and WithClosedLoopRampRate, and tells the observer the voltage it applied. The
- * limits given to Initialize are for a controller run on its own.
+ * The controller does not limit or ramp its output. A motor controller running it limits and ramps the output itself,
+ * with WithClosedLoopMaxVoltage and WithClosedLoopRampRate, and tells the observer the voltage it applied. Run on its
+ * own, clamp the output to what the actuator can apply, ramp it with WPILib's SlewRateLimiter if it needs one, and tell
+ * the observer what was applied with Calculate(measurement, setpoint, applied), so a clamped output is not mistaken for
+ * a disturbance.
  *
  * @code
  * auto config = std::make_shared<yams::math::ADRCConfig>();
  * config->WithSystemOrder(yams::math::ADRCConfig::SystemOrder::FIRST).WithSettlingTime(200_ms);
  * yams::math::ADRCController adrc{config};
- * // b0, which the config leaves unset, the output limit and the control period.
- * adrc.Initialize(b0, 12_V, 20_ms);
+ * // b0, which the config leaves unset, and the control period.
+ * adrc.Initialize(b0, 20_ms);
  *
- * // Every loop:
- * wpi::units::volt_t volts = adrc.Calculate(measurement, setpoint, appliedVoltage);
+ * // Every loop: clamp the output, and tell the observer what was applied last loop.
+ * wpi::units::volt_t volts = std::clamp(adrc.Calculate(measurement, setpoint, appliedVoltage), -12_V, 12_V);
  * @endcode
  */
 class ADRCController {
@@ -67,31 +69,15 @@ class ADRCController {
   explicit ADRCController(std::shared_ptr<ADRCConfig> config);
 
   /**
-   * Initialize the controller with symmetric output limits and no slew-rate limit, as a motor controller does: give its
-   * config the values it cannot hold itself, which also works out its gains, and start the observer and the output at
-   * zero.
-   *
-   * @param b0         Input gain used while the config leaves b0 unset, such as the one ADRCConfig::ResolveB0 derives.
-   *                   Must be finite and non-zero when used.
-   * @param maxVoltage Largest output; the smallest is its negative. Must not be negative.
-   * @param period     Control period. Must be finite and positive.
-   * @throws std::invalid_argument if a value is invalid, or the tracking differentiator cannot run at this period.
-   */
-  void Initialize(double b0, wpi::units::volt_t maxVoltage, wpi::units::second_t period);
-
-  /**
    * Initialize the controller: give its config the values it cannot hold itself, which also works out its gains, and
    * start the observer and the output at zero.
    *
-   * @param b0            Input gain used while the config leaves b0 unset. Must be finite and non-zero when used.
-   * @param minVoltage    Smallest output. Must not be above maxVoltage.
-   * @param maxVoltage    Largest output.
-   * @param slewRateLimit Largest output change per second; zero turns it off. Must not be negative.
-   * @param period        Control period. Must be finite and positive.
+   * @param b0     Input gain used while the config leaves b0 unset, such as the one ADRCConfig::ResolveB0 derives. Must
+   *               be finite and non-zero when used.
+   * @param period Control period. Must be finite and positive.
    * @throws std::invalid_argument if a value is invalid, or the tracking differentiator cannot run at this period.
    */
-  void Initialize(double b0, wpi::units::volt_t minVoltage, wpi::units::volt_t maxVoltage,
-                  volts_per_second_t slewRateLimit, wpi::units::second_t period);
+  void Initialize(double b0, wpi::units::second_t period);
 
   /**
    * Run one control step.
@@ -157,15 +143,6 @@ class ADRCController {
   wpi::units::second_t GetSettlingTime() const;
   /** @return The config's bandwidth scale, or its default. */
   double GetBandwidthScale() const;
-  /** @return The smallest output, given to Initialize. Throws until initialized. */
-  wpi::units::volt_t GetMinOutput() const;
-  /**
-   * @return The largest output, given to Initialize: for a motor controller, its closed loop maximum voltage. Throws
-   *         until initialized.
-   */
-  wpi::units::volt_t GetMaxOutput() const;
-  /** @return The slew-rate limit given to Initialize, zero when it is off. Throws until initialized. */
-  volts_per_second_t GetSlewRateLimit() const;
   /** @return The tracking differentiator, or null when it is off. */
   const TrackingDifferentiator* GetTrackingDifferentiator() const;
   /** @return The observer's state: the measurement, its derivatives, then the disturbance. Throws until initialized. */
@@ -220,9 +197,6 @@ class ADRCController {
   double m_uPrev{0.0};
   std::vector<double> m_uHistory;
   std::optional<TrackingDifferentiator> m_td;
-  double m_minOutput{0.0};
-  double m_maxOutput{0.0};
-  double m_slewRateLimit{0.0};
   bool m_initialized{false};
 };
 
