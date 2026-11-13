@@ -263,10 +263,22 @@ ADRCController ADRCConfig::BuildController(const std::shared_ptr<ADRCConfig>& se
   }
   SystemOrder order;
   std::string owner;
+  bool hasTd;
   {
     std::scoped_lock lock{self->m_mutex};
     order = *self->m_systemOrder;
     owner = self->m_owner;
+    hasTd = self->m_tdMethod.has_value();
+  }
+  // The profile getters mark the profile as used, so they are only asked when there is a tracking differentiator
+  // to refuse.
+  if (hasTd && (config.GetTrapezoidProfile() || config.GetLinearTrapezoidProfile() || config.GetExponentialProfile() ||
+                config.GetLinearExponentialProfile())) {
+    throw exceptions::SmartMotorControllerConfigurationException(
+        owner + " has a tracking differentiator and a motion profile",
+        "Both shape the setpoint, so the tracking differentiator would smooth a setpoint the motion profile already "
+        "shaped, and the mechanism would follow neither.",
+        "Remove WithTrackingDifferentiator(...) from the ADRC config, or the motion profile from the motor config");
   }
   const Plant plant = self->ChoosePlant(motor, config, order, owner);
   const double b0 = self->ResolveB0(motor, config);

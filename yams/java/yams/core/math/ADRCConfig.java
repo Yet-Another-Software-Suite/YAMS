@@ -483,6 +483,9 @@ public class ADRCConfig implements Cloneable {
    * no longer spikes the controller output. See the class documentation for a guide to the five
    * methods and their parameters, and {@link TrackingDifferentiator} for the full reference.
    *
+   * <p>A motion profile on the motor config also shapes the setpoint, so a config with both is
+   * refused when the controller is built.
+   *
    * @param method Differentiation method.
    * @param params Method parameters in order; leave them out to use the method defaults.
    * @return This config for chaining.
@@ -596,6 +599,9 @@ public class ADRCConfig implements Cloneable {
    * @return Initialized {@link ADRCController}.
    * @throws SmartMotorControllerConfigurationException if the order is missing or {@code b0} cannot
    *                                                    be derived.
+   * @throws SmartMotorControllerConfigurationException if the config has a tracking differentiator
+   *                                                    and the motor config has a motion profile:
+   *                                                    both shape the setpoint.
    * @throws IllegalArgumentException                   if {@link ADRCController#initialize} rejects
    *                                                    the derived {@code b0} or the tracking
    *                                                    differentiator.
@@ -607,6 +613,16 @@ public class ADRCConfig implements Cloneable {
         owner + " has no system order",
         "withSystemOrder(...) was never called, and there is no safe default plant order.",
         "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
+    // The profile getters mark the profile as used, so they are only asked when there is a tracking
+    // differentiator to refuse.
+    if (tdMethod.isPresent()
+        && (config.getTrapezoidProfile().isPresent() || config.getExponentialProfile().isPresent())) {
+      throw new SmartMotorControllerConfigurationException(
+          owner + " has a tracking differentiator and a motion profile",
+          "Both shape the setpoint, so the tracking differentiator would smooth a setpoint the motion "
+              + "profile already shaped, and the mechanism would follow neither.",
+          "Remove withTrackingDifferentiator(...) from the ADRC config, or the motion profile from the motor config");
+    }
     final Plant plant = choosePlant(motor, config);
     final double b0ForLoop = resolveB0(motor, config);
     // The controller sizes its observer from the order, so it is known before the controller is made.

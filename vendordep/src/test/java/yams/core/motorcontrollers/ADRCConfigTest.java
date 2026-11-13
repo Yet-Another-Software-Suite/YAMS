@@ -12,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Milliseconds;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -113,6 +115,25 @@ class ADRCConfigTest {
     // A refused value leaves the config as it was.
     assertEquals(0.3, cfg.getSettlingTime().orElseThrow().in(Seconds));
     assertTrue(cfg.getB0().isEmpty());
+  }
+
+  @Test
+  void aTrackingDifferentiatorAndAMotionProfileAreRefused() {
+    final DCMotor motor = DCMotor.getNEO(1);
+    final ADRCConfig cfg = new ADRCConfig().withSystemOrder(SystemOrder.FIRST).withB0(10)
+        .withTrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.08);
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> cfg.buildController(motor, smcConfig().withTrapezoidalProfile(
+            RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2)), Milliseconds.of(20)),
+        "a trapezoidal profile and a tracking differentiator both shape the setpoint");
+    assertThrows(SmartMotorControllerConfigurationException.class,
+        () -> cfg.buildController(motor, smcConfig().withExponentialProfile(Volts.of(12), motor,
+            KilogramSquareMeters.of(0.1)), Milliseconds.of(20)),
+        "an exponential profile and a tracking differentiator both shape the setpoint");
+    cfg.buildController(motor, smcConfig(), Milliseconds.of(20));
+    new ADRCConfig().withSystemOrder(SystemOrder.FIRST).withB0(10).buildController(motor,
+        smcConfig().withTrapezoidalProfile(RotationsPerSecond.of(1), RotationsPerSecondPerSecond.of(2)),
+        Milliseconds.of(20));
   }
 
   @Test

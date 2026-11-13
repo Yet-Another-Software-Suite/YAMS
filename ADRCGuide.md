@@ -197,9 +197,11 @@ adrc.WithTrackingDifferentiator(yams::math::TrackingDifferentiator::Method::LD, 
 
 **When to use one.** A step setpoint on a mechanism that should not be slammed, when you do not
 use a motion profile. A motion profile on the motor config does the same job with real speed and
-acceleration limits; do not use both, since the TD only adds lag to a setpoint the profile has
-already smoothed. The TD is set when the controller is built: its method and parameters are not
-live tunable.
+acceleration limits. YAMS refuses both at once: building the controller throws a
+`SmartMotorControllerConfigurationException` when the ADRC config has a TD and the motor config has
+a trapezoidal or exponential profile, since the TD would reshape a setpoint the profile already
+shaped. The TD is set when the controller is built: its method and parameters are not live
+tunable.
 
 **Units.** The TD works in the loop's units: mechanism rotations for an arm or pivot, meters for
 an elevator, and rotations per second for a flywheel. Parameters in "loop units" below change

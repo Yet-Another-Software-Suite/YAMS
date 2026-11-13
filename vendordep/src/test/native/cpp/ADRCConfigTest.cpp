@@ -80,6 +80,27 @@ TEST_CASE("ADRCConfig.KeepsEveryValueItIsGiven", "[ADRCConfig]") {
   CHECK(config.GetTdParams().empty());
 }
 
+TEST_CASE("ADRCConfig.RefusesATrackingDifferentiatorWithAMotionProfile", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10).WithTrackingDifferentiator(
+      TrackingDifferentiator::Method::LD, {0.08});
+  // Both shape the setpoint.
+  auto trapezoid = SmcConfig();
+  trapezoid.WithTrapezoidProfile(wpi::units::turns_per_second_t{1}, wpi::units::turns_per_second_squared_t{2});
+  CHECK_THROWS_AS(ADRCConfig::BuildController(Shared(config), motor, trapezoid, 20_ms),
+                  exceptions::SmartMotorControllerConfigurationException);
+  auto exponential = SmcConfig();
+  exponential.WithExponentialProfile(1.0, 0.1, 12_V);
+  CHECK_THROWS_AS(ADRCConfig::BuildController(Shared(config), motor, exponential, 20_ms),
+                  exceptions::SmartMotorControllerConfigurationException);
+  // Either one alone builds.
+  CHECK_NOTHROW(ADRCConfig::BuildController(Shared(config), motor, SmcConfig(), 20_ms));
+  ADRCConfig plain;
+  plain.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10);
+  CHECK_NOTHROW(ADRCConfig::BuildController(Shared(plain), motor, trapezoid, 20_ms));
+}
+
 TEST_CASE("ADRCConfig.RefusesValuesTheControllerCannotUse", "[ADRCConfig]") {
   ADRCConfig config;
   config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithSettlingTime(0.3_s);

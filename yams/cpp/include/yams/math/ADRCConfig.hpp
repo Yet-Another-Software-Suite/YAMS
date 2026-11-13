@@ -214,7 +214,8 @@ class ADRCConfig {
   ADRCConfig& WithCascaded(bool cascaded);
   /**
    * Smooth the reference with a tracking differentiator. Off by default. Its parameters are checked when the
-   * controller is built, as some depend on the period.
+   * controller is built, as some depend on the period. A motion profile on the motor config also shapes the setpoint,
+   * so a config with both is refused when the controller is built.
    *
    * @param method Differentiation method.
    * @param params Method parameters in order; empty for the method defaults.
