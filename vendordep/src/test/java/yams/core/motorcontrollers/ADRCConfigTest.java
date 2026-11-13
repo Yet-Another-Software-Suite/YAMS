@@ -61,9 +61,6 @@ class ADRCConfigTest {
     assertTrue(cfg.getSettlingTime().isEmpty());
     assertTrue(cfg.getBandwidthScale().isEmpty());
     assertTrue(cfg.getB0().isEmpty());
-    assertTrue(cfg.getMinVoltage().isEmpty());
-    assertTrue(cfg.getMaxVoltage().isEmpty());
-    assertTrue(cfg.getSlewRateLimit().isEmpty());
     assertTrue(cfg.getInputDelay().isEmpty());
     assertTrue(cfg.getTdMethod().isEmpty());
     assertTrue(cfg.getTdParams().isEmpty());
@@ -86,8 +83,6 @@ class ADRCConfigTest {
         .withSettlingTime(Seconds.of(0.4))
         .withBandwidthScale(1.5)
         .withB0(42)
-        .withVoltageLimits(Volts.of(-6), Volts.of(10))
-        .withSlewRateLimit(Volts.per(Second).of(24))
         .withInputDelay(Seconds.of(0.04))
         .withCascaded(true)
         .withTrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.5);
@@ -95,9 +90,6 @@ class ADRCConfigTest {
     assertEquals(0.4, cfg.getSettlingTime().orElseThrow().in(Seconds));
     assertEquals(1.5, cfg.getBandwidthScale().orElseThrow());
     assertEquals(42, cfg.getB0().orElseThrow());
-    assertEquals(-6, cfg.getMinVoltage().orElseThrow().in(Volts));
-    assertEquals(10, cfg.getMaxVoltage().orElseThrow().in(Volts));
-    assertEquals(24, cfg.getSlewRateLimit().orElseThrow().in(Volts.per(Second)));
     assertEquals(0.04, cfg.getInputDelay().orElseThrow().in(Seconds));
     assertTrue(cfg.isCascaded());
     assertEquals(TrackingDifferentiator.Method.LD, cfg.getTdMethod().orElseThrow());
@@ -112,25 +104,16 @@ class ADRCConfigTest {
   void refusesValuesTheControllerCannotUse() {
     final ADRCConfig cfg = new ADRCConfig()
         .withSystemOrder(SystemOrder.FIRST)
-        .withSettlingTime(Seconds.of(0.3))
-        .withMaxVoltage(Volts.of(12));
+        .withSettlingTime(Seconds.of(0.3));
     assertThrows(IllegalArgumentException.class, () -> cfg.withSettlingTime(Seconds.of(-1)));
     assertThrows(IllegalArgumentException.class, () -> cfg.withSettlingTime(Seconds.of(0)));
     assertThrows(IllegalArgumentException.class, () -> cfg.withBandwidthScale(0));
     assertThrows(IllegalArgumentException.class, () -> cfg.withB0(0));
     assertThrows(IllegalArgumentException.class, () -> cfg.withB0(Double.NaN));
-    assertThrows(IllegalArgumentException.class, () -> cfg.withVoltageLimits(Volts.of(6), Volts.of(4)), "limits that cross");
-    assertThrows(IllegalArgumentException.class, () -> cfg.withMaxVoltage(Volts.of(-1)), "a maximum below its own -max minimum");
-    assertThrows(IllegalArgumentException.class, () -> cfg.withSlewRateLimit(Volts.per(Second).of(-1)));
     assertThrows(IllegalArgumentException.class, () -> cfg.withInputDelay(Seconds.of(-1)));
     // A refused value leaves the config as it was.
     assertEquals(0.3, cfg.getSettlingTime().orElseThrow().in(Seconds));
-    assertEquals(12, cfg.getMaxVoltage().orElseThrow().in(Volts));
-    assertTrue(cfg.getMinVoltage().isEmpty());
     assertTrue(cfg.getB0().isEmpty());
-    // A maximum below a minimum that is set is refused too.
-    cfg.withVoltageLimits(Volts.of(-2), Volts.of(12));
-    assertThrows(IllegalArgumentException.class, () -> cfg.withMaxVoltage(Volts.of(-3)));
   }
 
   @Test
@@ -143,6 +126,14 @@ class ADRCConfigTest {
     assertEquals(expected,
         cfg.resolveB0(motor, smcConfig().withMomentOfInertia(KilogramSquareMeters.of(0.1))), 1e-9);
     assertEquals(7.0, cfg.withB0(7.0).resolveB0(motor, smcConfig()), "a b0 that is set wins");
+  }
+
+  @Test
+  void b0FromTheMotorAndGearingIsTheMechanismsSpeedPerVolt() {
+    final DCMotor motor = DCMotor.getNEO(1);
+    final ADRCConfig cfg = new ADRCConfig().withB0(motor, new MechanismGearing(GearBox.fromReductionStages(3, 4)));
+    assertEquals(motor.Kv / (2 * Math.PI * 12), cfg.getB0().orElseThrow(), 1e-12,
+        "the motor's free speed per volt, in mechanism rotations per second, through a 12:1 reduction");
   }
 
   @Test
@@ -172,15 +163,16 @@ class ADRCConfigTest {
     assertEquals(2, controller.getSystemOrder());
     assertEquals(0.5, controller.getSettlingTime().in(Seconds));
     assertEquals(10, controller.getB0());
-    assertEquals(9, controller.getMaxOutput(), "the motor config's closed loop voltage limit");
-    assertEquals(-9, controller.getMinOutput());
+    assertEquals(9, controller.getMaxOutput().in(Volts), "the motor config's closed loop voltage limit");
+    assertEquals(-9, controller.getMinOutput().in(Volts));
+    assertEquals(0, controller.getSlewRateLimit().in(Volts.per(Second)), "the motor controller ramps its output");
     final ADRCController fallback =
         new ADRCConfig()
             .withSystemOrder(SystemOrder.FIRST)
             .withB0(10)
             .buildController(DCMotor.getNEO(1), smcConfig(), Milliseconds.of(20));
     assertEquals(
-        DCMotor.getNEO(1).nominalVoltage, fallback.getMaxOutput(), "the motor's nominal voltage");
+        DCMotor.getNEO(1).nominalVoltage, fallback.getMaxOutput().in(Volts), "the motor's nominal voltage");
   }
 
   @Test

@@ -109,8 +109,6 @@ public class SmartMotorControllerTelemetry {
         doubleFields.get(DoubleTelemetryField.ADRCB0).disable();
         doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).disable();
         doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).disable();
-        doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).disable();
-        doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).disable();
         doubleFields.get(DoubleTelemetryField.ADRCOutput).disable();
       }
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
@@ -193,8 +191,6 @@ public class SmartMotorControllerTelemetry {
         case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
         case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime().in(Seconds)));
         case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
-        case ADRCMaxVoltage -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getMaxOutput()));
-        case ADRCSlewRateLimit -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSlewRateLimit()));
         case ADRCOutput -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getLastOutput()));
       }
     }
@@ -211,9 +207,7 @@ public class SmartMotorControllerTelemetry {
     adrcConfig
         .withB0(doubleFields.get(DoubleTelemetryField.ADRCB0).get())
         .withSettlingTime(Seconds.of(doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).get()))
-        .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get())
-        .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).get()))
-        .withSlewRateLimit(Volts.per(Second).of(doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).get()));
+        .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get());
   }
 
   /**
@@ -352,7 +346,7 @@ public class SmartMotorControllerTelemetry {
           case kP -> smartMotorController.setKp(dt.get());
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
-          case ADRCB0, ADRCSettlingTime, ADRCBandwidthScale, ADRCMaxVoltage, ADRCSlewRateLimit -> {
+          case ADRCB0, ADRCSettlingTime, ADRCBandwidthScale -> {
             // Kept in the ADRC's config, like a tuned PID. The ADRC reads its settings and gains from the config,
             // which works the gains out again as they change, so the ADRC runs them on its next step and keeps its
             // state estimate, so its output doesn't jump. A value the config refuses, such as a b0 of 0, leaves
@@ -599,10 +593,6 @@ public class SmartMotorControllerTelemetry {
     ADRCSettlingTime("closedloop/adrc/settlingTime", 0.2, true, "seconds"),
     /** ADRC closed-loop bandwidth scale. */
     ADRCBandwidthScale("closedloop/adrc/bandwidthScale", 1, true, "none"),
-    /** ADRC maximum output voltage; the minimum is its negative unless the ADRC config sets one. */
-    ADRCMaxVoltage("closedloop/adrc/maxVoltage", 12, true, "volts"),
-    /** ADRC output slew-rate limit, volts per second; 0 turns it off. */
-    ADRCSlewRateLimit("closedloop/adrc/slewRateLimit", 0, true, "volts_per_second"),
     /** ADRC output voltage. */
     ADRCOutput("closedloop/adrc/output", 0, false, "volts"),
     /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */

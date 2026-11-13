@@ -171,6 +171,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
   s.kI = kI;
   s.kD = kD;
   m_slotHasFeedback[SlotIndex(slot)] = true;
+  // A PID replaces the slot's ADRC.
+  m_adrc[SlotIndex(slot)].config.reset();
   return *this;
 }
 
@@ -289,6 +291,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
     wpi::units::kilogram_square_meter_t moi) {
   using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_moi = moi;
+  m_momentOfInertiaConfigured = true;
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
   auto sys = wpi::math::Models::FlywheelFromPhysicalConstants(motor, moi, gearing);
   // A is [1/s], B is [(rad/s²)/V] from the flywheel velocity model.
@@ -364,6 +367,25 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithLQR(const math::LQRConfig& lqrConfig,
                                                                 ClosedLoopControllerSlot slot) {
   m_slots[SlotIndex(slot)].lqr = lqrConfig;
+  // An LQR replaces the slot's ADRC.
+  m_adrc[SlotIndex(slot)].config.reset();
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithADRCController(const math::ADRCConfig& adrcConfig,
+                                                                           ClosedLoopControllerSlot slot) {
+  const int i = SlotIndex(slot);
+  m_adrc[i].config = std::make_shared<math::ADRCConfig>(adrcConfig);
+  // The ADRC's observer estimates the disturbance a feedforward models, so keeping both would count the plant twice.
+  // Clear the slot's PID, LQR and every feedforward, and their simulation overrides.
+  m_slots[i] = PIDGains{};
+  m_slotHasFeedback[i] = false;
+  m_simGains[i] = SimGainsOverride{};
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithoutADRCController(ClosedLoopControllerSlot slot) {
+  m_adrc[SlotIndex(slot)].config.reset();
   return *this;
 }
 
@@ -375,7 +397,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearClosedLoopCont
 
 bool SmartMotorControllerConfig::HasClosedLoopController() const {
   for (int i = 0; i < kNumSlots; ++i) {
-    if (m_slotHasFeedback[i] || m_slots[i].lqr) return true;
+    if (m_slotHasFeedback[i] || m_slots[i].lqr || m_adrc[i].config) return true;
   }
   return false;
 }
@@ -653,18 +675,21 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimulationPeriod(
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
     wpi::units::kilogram_square_meter_t moi) {
   m_moi = moi;
+  m_momentOfInertiaConfigured = true;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(wpi::units::meter_t length,
                                                                 wpi::units::kilogram_t mass) {
   m_moi = wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass);
+  m_momentOfInertiaConfigured = true;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithWheelMOI(wpi::units::meter_t diameter,
                                                                      wpi::units::kilogram_t mass) {
   wpi::units::meter_t radius = diameter / 2.0;
   m_moi = 0.5 * mass * radius * radius;
+  m_momentOfInertiaConfigured = true;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
@@ -819,12 +844,16 @@ SmartMotorControllerConfig::PIDGains SmartMotorControllerConfig::GetSlotGains(
       result.elevatorFF.reset();
     }
   }
+  if (m_adrc[SlotIndex(slot)].config) {
+    result = PIDGains{};
+  }
   return result;
 }
 
 std::optional<wpi::math::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].armFF)
     return m_simGains[SlotIndex(slot)].armFF;
   return m_slots[SlotIndex(slot)].armFF;
@@ -832,6 +861,7 @@ std::optional<wpi::math::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedf
 std::optional<wpi::math::ElevatorFeedforward> SmartMotorControllerConfig::GetElevatorFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].elevatorFF)
     return m_simGains[SlotIndex(slot)].elevatorFF;
   return m_slots[SlotIndex(slot)].elevatorFF;
@@ -839,6 +869,7 @@ std::optional<wpi::math::ElevatorFeedforward> SmartMotorControllerConfig::GetEle
 std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>>
 SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].simpleFF)
     return m_simGains[SlotIndex(slot)].simpleFF;
   return m_slots[SlotIndex(slot)].simpleFF;
@@ -846,9 +877,16 @@ SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) 
 std::optional<math::LQRConfig> SmartMotorControllerConfig::GetLQR(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].lqr)
     return m_simGains[SlotIndex(slot)].lqr;
   return m_slots[SlotIndex(slot)].lqr;
+}
+
+std::shared_ptr<math::ADRCConfig> SmartMotorControllerConfig::GetADRCController(
+    ClosedLoopControllerSlot slot) const {
+  m_basicOptions.erase(BasicOptions::SlotGains);
+  return m_adrc[SlotIndex(slot)].config;
 }
 
 double SmartMotorControllerConfig::GetKp(ClosedLoopControllerSlot slot) const {
@@ -1029,6 +1067,7 @@ wpi::units::second_t SmartMotorControllerConfig::GetSimulationPeriod() const {
   return m_simulationPeriod.value_or(20_ms);
 }
 wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
+bool SmartMotorControllerConfig::IsMomentOfInertiaConfigured() const { return m_momentOfInertiaConfigured; }
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
   m_basicOptions.erase(BasicOptions::StartingPosition);
   if (wpi::RobotBase::IsSimulation() && m_simStartingPosition.has_value())

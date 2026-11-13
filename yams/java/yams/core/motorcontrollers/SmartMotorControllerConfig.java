@@ -1195,7 +1195,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Set the closed loop ramp rate. The ramp rate is the minimum time it should take to go from 0
-   * power to full power in the motor controller while using PID.
+   * power to full power in the motor controller while using PID. A closed loop the SystemCore runs,
+   * such as an LQR or an ADRC, sends the motor controller a voltage, which it treats as open loop, so
+   * YAMS ramps that loop's output itself, by 12 V per ramp rate.
    *
    * @param rate time to go from 0 to full throttle.
    * @return {@link SmartMotorControllerConfig} for chaining.

@@ -20,8 +20,8 @@ new SmartMotorControllerConfig(this)
     .withControlMode(ControlMode.CLOSED_LOOP)
     .withADRCController(new ADRCConfig()
         .withSystemOrder(SystemOrder.ARM)
-        .withSettlingTime(Seconds.of(0.6))
-        .withMaxVoltage(Volts.of(12)))
+        .withSettlingTime(Seconds.of(0.6)))
+    .withClosedLoopControllerMaximumVoltage(Volts.of(12))
     .withGearing(new MechanismGearing(60))
     .withMomentOfInertia(Meters.of(0.5), Kilograms.of(3)); // b0 is derived from this
 ```
@@ -32,7 +32,7 @@ setpoints as they do with a PID, and the motor controller runs the ADRC on the S
 - **No kG, kS or kV.** The ADRC's observer estimates gravity, friction, back-EMF and anything that bumps the mechanism
   as one disturbance and cancels it.
 - **The elevator is first order.** An elevator's speed is set by its back-EMF, so its position is treated as a first
-  order plant with its speed per volt, `Kv / (2 pi G)`, as `b0`. Use `SystemOrder.FIRST` for it, not
+  order plant with its speed per volt as `b0`: `withB0(motor, gearing)` works it out. Use `SystemOrder.FIRST` for it, not
   `SystemOrder.ELEVATOR`.
 - **The shooter's settling time is short,** so the observer keeps up with the back-EMF it estimates. A short settling
   time also makes it recover quickly after each shot.
@@ -47,8 +47,9 @@ With HIGH telemetry, a motor controller with an ADRC publishes its settings in p
 | `b0` | How much one volt moves the plant's highest derivative |
 | `settlingTime` | How quickly the mechanism should reach its setpoint, seconds |
 | `bandwidthScale` | Multiplies the controller and observer bandwidths |
-| `maxVoltage` | Maximum output voltage |
-| `slewRateLimit` | Maximum change in the output, volts per second; 0 for none |
+
+The output limit and ramp are the motor config's, as for every closed loop: `withClosedLoopControllerMaximumVoltage`
+and `withClosedLoopRampRate`, which ramps an ADRC's output too.
 
 A change is stored in the motor controller's `ADRCConfig`, which the ADRC reads its settings and gains from, and the
 config works the gains out again, so the ADRC runs the change on its next loop. The estimated disturbance carries over,

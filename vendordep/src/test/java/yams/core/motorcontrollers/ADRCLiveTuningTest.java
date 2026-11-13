@@ -4,11 +4,10 @@
 package yams.core.motorcontrollers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.KilogramSquareMeters;
-import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
-import static org.wpilib.units.Units.Volts;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -59,14 +58,10 @@ public class ADRCLiveTuningTest {
 
   /** The ADRC's tuning, as the controller runs it. */
   private static void assertRunning(
-      ADRCController adrc, double b0, double settlingTime, double bandwidthScale, double maxVoltage,
-      double slewRateLimit, String name) {
+      ADRCController adrc, double b0, double settlingTime, double bandwidthScale, String name) {
     assertEquals(b0, adrc.getB0(), kTolerance, name + ": running b0");
     assertEquals(settlingTime, adrc.getSettlingTime().in(Seconds), kTolerance, name + ": running settling time");
     assertEquals(bandwidthScale, adrc.getBandwidthScale(), kTolerance, name + ": running bandwidth scale");
-    assertEquals(maxVoltage, adrc.getMaxOutput(), kTolerance, name + ": running max voltage");
-    assertEquals(-maxVoltage, adrc.getMinOutput(), kTolerance, name + ": running min voltage");
-    assertEquals(slewRateLimit, adrc.getSlewRateLimit(), kTolerance, name + ": running slew rate limit");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -81,8 +76,7 @@ public class ADRCLiveTuningTest {
             .withStartingPosition(Degrees.of(0))
             .withADRCController(new ADRCConfig()
                 .withSystemOrder(SystemOrder.SECOND)
-                .withSettlingTime(Seconds.of(0.6))
-                .withMaxVoltage(Volts.of(12))));
+                .withSettlingTime(Seconds.of(0.6))));
     try {
       final NetworkTable tuningTable = NetworkTableInstance.getDefault().getTable("ADRCLiveTuningTestTuning");
       smc.setupTelemetry(NetworkTableInstance.getDefault().getTable("ADRCLiveTuningTest"), tuningTable);
@@ -94,15 +88,14 @@ public class ADRCLiveTuningTest {
       assertShown(tuning, "closedloop/adrc/b0", derivedB0, name);
       assertShown(tuning, "closedloop/adrc/settlingTime", 0.6, name);
       assertShown(tuning, "closedloop/adrc/bandwidthScale", 1, name);
-      assertShown(tuning, "closedloop/adrc/maxVoltage", 12, name);
-      assertShown(tuning, "closedloop/adrc/slewRateLimit", 0, name);
+      // The output limit and ramp are the motor config's, tuned with every other closed loop's.
+      assertFalse(tuning.containsKey("closedloop/adrc/maxVoltage"), name + ": no ADRC maximum voltage");
+      assertFalse(tuning.containsKey("closedloop/adrc/slewRateLimit"), name + ": no ADRC slew rate limit");
 
       // Enter new values and apply them, holding the mechanism where it is.
       enter(tuning, "closedloop/adrc/b0", 0.8 * derivedB0);
       enter(tuning, "closedloop/adrc/settlingTime", 0.4);
       enter(tuning, "closedloop/adrc/bandwidthScale", 1.5);
-      enter(tuning, "closedloop/adrc/maxVoltage", 10);
-      enter(tuning, "closedloop/adrc/slewRateLimit", 30);
       enter(tuning, "closedloop/setpoint/position", 0);
       final double disturbance = adrc.getEstimatedDisturbance();
       smc.applyTuningValues();
@@ -112,23 +105,20 @@ public class ADRCLiveTuningTest {
       assertEquals(0.8 * derivedB0, adrcConfig.getB0().orElseThrow(), kTolerance, name + ": config b0");
       assertEquals(0.4, adrcConfig.getSettlingTime().orElseThrow().in(Seconds), kTolerance, name + ": config settling time");
       assertEquals(1.5, adrcConfig.getBandwidthScale().orElseThrow(), kTolerance, name + ": config bandwidth scale");
-      assertEquals(10, adrcConfig.getMaxVoltage().orElseThrow().in(Volts), kTolerance, name + ": config max voltage");
-      assertEquals(30, adrcConfig.getSlewRateLimit().orElseThrow().in(Volts.per(Second)), kTolerance,
-          name + ": config slew rate limit");
 
       // The ADRC runs them, keeping the disturbance it estimated.
-      assertRunning(adrc, 0.8 * derivedB0, 0.4, 1.5, 10, 30, name);
+      assertRunning(adrc, 0.8 * derivedB0, 0.4, 1.5, name);
       assertEquals(disturbance, adrc.getEstimatedDisturbance(), 1e-6, name + ": disturbance kept");
 
       // Applying the motor config again builds the ADRC from the tuned config.
       smc.applyConfig(smc.getConfig());
-      assertRunning(smc.getADRCController().orElseThrow(), 0.8 * derivedB0, 0.4, 1.5, 10, 30, name + " reapplied");
+      assertRunning(smc.getADRCController().orElseThrow(), 0.8 * derivedB0, 0.4, 1.5, name + " reapplied");
 
       // A value the ADRC can't use leaves it as it was.
       final ADRCController rebuilt = smc.getADRCController().orElseThrow();
       enter(tuning, "closedloop/adrc/settlingTime", -1);
       smc.applyTuningValues();
-      assertRunning(rebuilt, 0.8 * derivedB0, 0.4, 1.5, 10, 30, name + " rejected");
+      assertRunning(rebuilt, 0.8 * derivedB0, 0.4, 1.5, name + " rejected");
     } finally {
       ClosedLoopCases.close(smc);
     }

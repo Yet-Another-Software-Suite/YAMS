@@ -46,7 +46,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  */
 public class ADRCElevatorSubsystem extends SubsystemBase {
   /** 3:1 then 4:1, 12 motor rotations per sprocket rotation. */
-  private static final double REDUCTION = 12;
   private static final MechanismGearing GEARING = new MechanismGearing(GearBox.fromReductionStages(3, 4));
   private static final DCMotor MOTOR = DCMotor.getNEO(1);
   /** A 22 tooth sprocket on 1/4 in pitch chain moves the carriage 5.5 in per rotation. */
@@ -62,9 +61,11 @@ public class ADRCElevatorSubsystem extends SubsystemBase {
               // First order on position, not SystemOrder.ELEVATOR: back-EMF sets the elevator's speed.
               .withSystemOrder(SystemOrder.FIRST)
               .withSettlingTime(Seconds.of(0.5))
-              // Sprocket rotations per second per volt: the motor's free speed per volt, through the reduction.
-              .withB0(MOTOR.Kv / (2 * Math.PI * REDUCTION))
-              .withMaxVoltage(Volts.of(12)))
+              // Sprocket rotations per second per volt: the motor's free speed per volt, through the gearing.
+              .withB0(MOTOR, GEARING)
+)
+          // The output limit and ramp of every closed loop, the ADRC's too.
+          .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)
           .withMechanismCircumference(CIRCUMFERENCE)
           .withSoftLimits(Meters.of(0), Meters.of(1.5))

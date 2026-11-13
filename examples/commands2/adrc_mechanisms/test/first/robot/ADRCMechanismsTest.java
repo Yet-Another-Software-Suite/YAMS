@@ -75,7 +75,7 @@ class ADRCMechanismsTest {
       for (String gain : new String[] {"kP", "kI", "kD"}) {
         assertFalse(nt.getTopic(motor + "closedloop/feedback/" + gain).exists(), motor + " publishes no " + gain);
       }
-      for (String field : new String[] {"b0", "settlingTime", "bandwidthScale", "maxVoltage", "slewRateLimit"}) {
+      for (String field : new String[] {"b0", "settlingTime", "bandwidthScale"}) {
         assertTrue(nt.getTopic(motor + "closedloop/adrc/" + field).exists(), motor + " publishes adrc/" + field);
       }
     }

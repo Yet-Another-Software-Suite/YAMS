@@ -9,7 +9,7 @@ mechanism, a bumped arm) as one "total disturbance". An extended state observer 
 that disturbance every loop, and the control law cancels it. So an ADRC needs very little model:
 the plant's order and an approximate input gain `b0`. There is no kS, kV, kA or kG to tune.
 
-ADRC is Java only for now. The C++ port will follow.
+ADRC works the same in Java and C++. This guide uses Java; [C++](#c) lists what differs.
 
 ## Quick start
 
@@ -18,10 +18,10 @@ SmartMotorControllerConfig config = new SmartMotorControllerConfig(this)
     .withControlMode(ControlMode.CLOSED_LOOP)
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
     .withMomentOfInertia(Inches.of(18), Pounds.of(8)) // b0 is derived from this
+    .withClosedLoopControllerMaximumVoltage(Volts.of(12))
     .withADRCController(new ADRCConfig()
         .withSystemOrder(SystemOrder.SECOND)  // a position loop
-        .withSettlingTime(Seconds.of(0.6))
-        .withMaxVoltage(Volts.of(12)));
+        .withSettlingTime(Seconds.of(0.6)));
 ```
 
 `withADRCController` takes the place of `withClosedLoopController(kP, kI, kD)` and
@@ -93,16 +93,18 @@ without `withB0(...)`, building the controller throws.
 The derived `b0` ignores back-EMF, which the observer has to estimate as part of the disturbance.
 That suits flywheels and arms. An elevator's back-EMF, not its inertia, sets how fast it moves,
 so for an elevator use order 1 (`SystemOrder.FIRST`, not `ELEVATOR`) on its position, with its
-speed per volt as `b0`:
+speed per volt as `b0`. `withB0(DCMotor, MechanismGearing)` works it out: the motor's free speed per
+volt through the gearing, `Kv / (2 * pi * G)` mechanism rotations per second per volt.
 
 ```java
-DCMotor motor = DCMotor.getNEO(1);
-double gearing = 12; // motor rotations per drum rotation
 config.withADRCController(new ADRCConfig()
     .withSystemOrder(SystemOrder.FIRST)
     .withSettlingTime(Seconds.of(0.5))
-    .withB0(motor.Kv / (2 * Math.PI * gearing))); // drum rotations per second per volt
+    .withB0(DCMotor.getNEO(1), new MechanismGearing(GearBox.fromReductionStages(3, 4))));
 ```
+
+It is in mechanism rotations, so it fits a closed loop in rotations, as the elevator here uses, not
+a linear one.
 
 `b0` does not have to be exact: the observer absorbs a `b0` off by a factor of two. If the
 mechanism overshoots or oscillates, lower `b0`; if it is sluggish, raise it.
@@ -123,53 +125,58 @@ settling time: a Kraken X60 flywheel crawls to its setpoint at 0.3 s and holds i
 
 The bandwidth scale multiplies both bandwidths without changing the settling time you think in.
 
-### Output limits
+### Output limits and ramp
 
-The output is clamped to `withMaxVoltage(max)` (from `-max` to `max`) or
-`withVoltageLimits(min, max)`. Without either, the motor config's
-`withClosedLoopControllerMaximumVoltage(...)` is used, and without that the motor's nominal
-voltage, with an alert.
+The motor config limits and ramps the ADRC's output, as it does for every closed loop:
+
+- **`withClosedLoopControllerMaximumVoltage(...)`** limits the output, from `-max` to `max`.
+  Without it, the ADRC saturates at the motor's nominal voltage and raises an alert.
+- **`withClosedLoopRampRate(...)`** limits how quickly the output changes: the ramp rate is the
+  time it takes to change by 12 V. A motor controller treats the voltage a SystemCore closed loop
+  sends it as open loop, so its own closed loop ramp never applied to one; YAMS ramps the output
+  of an ADRC or an LQR itself, on every motor controller, the A301 too.
+
+The observer is told the voltage the motor controller applied, so a limit or ramp that holds the
+output back is not taken for a disturbance.
 
 ## Examples
 
 A whole robot with an ADRC arm, elevator and shooter is in the `adrc_mechanisms` example, for
 [Commands v2](examples/commands2/adrc_mechanisms/README.md) and
-[Commands v3](examples/commands3/adrc_mechanisms/README.md).
+[Commands v3](examples/commands3/adrc_mechanisms/README.md). The C++ example robot has the same three as
+`ADRCArmSubsystem`, `ADRCElevatorSubsystem` and `ADRCShooterSubsystem` in
+[examples/cpptest](examples/cpptest/README.md#adrc-subsystems).
 
 These are the settings YAMS's tests use, which hold each mechanism at its setpoint on every motor
-controller.
+controller. Each motor config also has `withClosedLoopControllerMaximumVoltage(Volts.of(12))`.
 
 ```java
 // Flywheel: order 1 on velocity, b0 derived from the wheel's inertia.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.01))
       .withADRCController(new ADRCConfig()
           .withSystemOrder(SystemOrder.FIRST)
-          .withSettlingTime(Seconds.of(0.15))
-          .withMaxVoltage(Volts.of(12)));
+          .withSettlingTime(Seconds.of(0.15)));
 flyWheel.setMechanismVelocitySetpoint(RPM.of(3000));
 
 // Arm under gravity, with no kG: order 2 on position.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
       .withADRCController(new ADRCConfig()
           .withSystemOrder(SystemOrder.SECOND)
-          .withSettlingTime(Seconds.of(0.6))
-          .withMaxVoltage(Volts.of(12)));
+          .withSettlingTime(Seconds.of(0.6)));
 arm.setMechanismPositionSetpoint(Degrees.of(45));
 
 // Pivot or turret: order 2 on position.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
       .withADRCController(new ADRCConfig()
           .withSystemOrder(SystemOrder.SECOND)
-          .withSettlingTime(Seconds.of(0.6))
-          .withMaxVoltage(Volts.of(12)));
+          .withSettlingTime(Seconds.of(0.6)));
 
 // Elevator under gravity, with no kG: order 1 on position, b0 is its speed per volt.
 config.withMechanismCircumference(Meters.of(2 * Math.PI * 0.02))
       .withADRCController(new ADRCConfig()
           .withSystemOrder(SystemOrder.FIRST)
           .withSettlingTime(Seconds.of(0.5))
-          .withB0(motor.Kv / (2 * Math.PI * gearing))
-          .withMaxVoltage(Volts.of(12)));
+          .withB0(motor, gearing));
 elevator.setMeasurementPositionSetpoint(Meters.of(0.5));
 ```
 
@@ -188,8 +195,8 @@ publishes these under `closedloop/adrc/`. A motor controller without an ADRC nev
 | `b0` | Yes | Input gain. |
 | `settlingTime` | Yes | Settling time, seconds. |
 | `bandwidthScale` | Yes | Bandwidth scale. |
-| `maxVoltage` | Yes | Maximum output, volts. The minimum is its negative unless the ADRC config sets one. |
-| `slewRateLimit` | Yes | Largest change in output per second, volts per second. 0 turns it off. |
+
+The output limit and ramp are the motor config's, tuned like any closed loop's ramp rate.
 
 The tunable values are applied while the Live Tuning command runs. Like a tuned PID, they are kept
 in the motor controller's `ADRCConfig`, so applying the motor config again keeps them. Loosely
@@ -240,9 +247,8 @@ use: anything else throws `IllegalArgumentException` and leaves the config as it
 controller reads the config directly, so it never sees a value it cannot run.
 
 Once a controller is built from it, the config also holds what the controller needs that the
-settings do not give: the control period, the `b0` used while `b0` is unset (the derived one), the
-maximum output used while it is unset (the motor config's limit or the nominal voltage), and the
-gains worked out from them. Building again, as applying the motor config again does, replaces
+settings do not give: the control period, the `b0` used while `b0` is unset (the derived one), and
+the gains worked out from them. Building again, as applying the motor config again does, replaces
 them.
 
 | Method | What it does |
@@ -252,9 +258,7 @@ them.
 | `withSettlingTime(Time)` | Settling time. Default 0.2 s. Must be finite and positive. Works the gains out again. |
 | `withBandwidthScale(double)` | Bandwidth scale. Default 1. Must be finite and positive. Works the gains out again. |
 | `withB0(double)` | Input gain. Default: derived, see above. Must be finite and non-zero. Works the gains out again. |
-| `withMaxVoltage(Voltage)` | Output limits of `-max` to `max`, or up to `max` from a minimum that is set. Must not be NaN or below the minimum. |
-| `withVoltageLimits(Voltage min, Voltage max)` | Asymmetric output limits. Must not be NaN, with the minimum not above the maximum. |
-| `withSlewRateLimit(Velocity<VoltageUnit>)` | Largest change in output per second, such as `Volts.per(Second).of(24)`. 0, the default, turns it off. Must not be negative. |
+| `withB0(DCMotor, MechanismGearing)` | Input gain set to the mechanism's speed per volt, `Kv / (2 * pi * G)`, for a first order position loop that back-EMF limits, such as an elevator's. In mechanism rotations, for a closed loop in rotations. |
 | `withInputDelay(Time)` | Delay between the output and the plant responding, rounded to whole loops. 0, the default, turns it off. Must be finite and not negative. |
 | `withCascaded(boolean)` | Use the cascaded observer: a second ESO, fed the first one's estimate of the measurement, supplies the disturbance the control law cancels. Default off. |
 | `withTrackingDifferentiator(TrackingDifferentiator.Method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. Leave out `params` for the method's defaults. Off by default. Its parameters are checked when the controller is built, as some depend on the period. |
@@ -262,22 +266,20 @@ them.
 | `getSystemOrder()` | `Optional<SystemOrder>`. |
 | `getSettlingTime()`, `getInputDelay()` | `Optional<Time>`. |
 | `getBandwidthScale()`, `getB0()` | `OptionalDouble`. |
-| `getMinVoltage()`, `getMaxVoltage()` | `Optional<Voltage>`. |
-| `getSlewRateLimit()` | `Optional<Velocity<VoltageUnit>>`. |
 | `getTdMethod()` | `Optional<TrackingDifferentiator.Method>`. |
 | `getTdParams()` | `Optional<double[]>`: a copy of the tracking differentiator parameters, or empty for the defaults. |
 | `isCascaded()` | Whether the cascaded observer is on. |
 | `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one. Throws if it cannot be derived. |
-| `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController` that reads this config, giving the config the period, `b0` and maximum output it needs. The motor controller calls this; you only need it to use the controller yourself. |
+| `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController` that reads this config, giving the config the period and `b0` it needs. The controller saturates at the motor config's closed loop maximum voltage, with no slew-rate limit of its own. The motor controller calls this; you only need it to use the controller yourself. |
 | `reportRejected(Optional<String> reason)` | Raise the YAMS alert for a refused value, or clear it with an empty reason. Live tuning calls it. |
 | `clone()` | A deep copy: the settings, the values given when a controller was built, and the gains, with matrices of its own. Changing the copy leaves the original alone. The copy raises its own alerts. `SmartMotorControllerConfig.clone()` copies each slot's ADRC config this way. |
 
 `buildController` throws `SmartMotorControllerConfigurationException` when the order is missing
-or `b0` cannot be derived. When neither the ADRC config nor the motor config limits the output, it
-uses the motor's nominal voltage and raises a YAMS alert saying so.
+or `b0` cannot be derived. When the motor config does not limit the output, it uses the motor's
+nominal voltage and raises a YAMS alert saying so.
 
-`ADRCConfig.DEFAULT_SETTLING_TIME`, `DEFAULT_BANDWIDTH_SCALE`, `DEFAULT_SLEW_RATE_LIMIT` and
-`DEFAULT_INPUT_DELAY` hold the defaults.
+`ADRCConfig.DEFAULT_SETTLING_TIME`, `DEFAULT_BANDWIDTH_SCALE` and `DEFAULT_INPUT_DELAY` hold the
+defaults.
 
 ### `SmartMotorController`
 
@@ -291,14 +293,14 @@ uses the motor's nominal voltage and raises a YAMS alert saying so.
 
 `yams.core.math.ADRCController`. The controller itself. The motor controller builds and runs it,
 but it can also be used on its own. Every setting comes from the controller's `ADRCConfig`;
-`initialize` only takes what the config can leave unset and the controller still needs: `b0`, the
-maximum output and the control period.
+`initialize` takes what the config can leave unset and the controller still needs, `b0` and the
+control period, and the output limits, which a motor controller applies itself.
 
 ```java
 ADRCController adrc = new ADRCController(new ADRCConfig()
     .withSystemOrder(SystemOrder.FIRST)
     .withSettlingTime(Seconds.of(0.2)));
-// b0 and the maximum output, used while the config leaves them unset, and the control period.
+// b0, used while the config leaves it unset, the output limit and the control period.
 adrc.initialize(b0, Volts.of(12), Milliseconds.of(20));
 
 // Every loop:
@@ -308,7 +310,8 @@ double volts = adrc.calculate(measurement, setpoint, appliedVoltage);
 | Method | What it does |
 | --- | --- |
 | `ADRCController(ADRCConfig)` | A controller that reads its settings from a config, with the config's system order. Throws if the config has none. |
-| `initialize(double b0, Voltage maxVoltage, Time period)` | Give the config the values it cannot hold itself, which makes it work out the gains, and start the observer and output at zero. `b0` and `maxVoltage` are used while the config leaves them unset; `buildController` passes the derived `b0` and the motor config's limit. Must be called before anything else. |
+| `initialize(double b0, Voltage maxVoltage, Time period)` | Give the config the values it cannot hold itself, which makes it work out the gains, and start the observer and output at zero. `b0` is used while the config leaves it unset. The output is limited from `-maxVoltage` to `maxVoltage`, with no slew-rate limit; `buildController` passes the derived `b0` and the motor config's limit. Must be called before anything else. |
+| `initialize(double b0, Voltage min, Voltage max, Velocity<VoltageUnit> slewRateLimit, Time period)` | The same, with asymmetric output limits and a slew-rate limit, for a controller run on its own. The minimum must not be above the maximum, and the slew-rate limit must not be negative; 0 turns it off. |
 | `calculate(measurement, setpoint)` | One control step. Returns the output. |
 | `calculate(measurement, setpoint, appliedOutput)` | One control step, telling the observer what the actuator applied since the last step. Use this when the actuator can apply less than asked. |
 | `step(reference, output, refDerivatives)` | One control step with the setpoint's derivatives, for feeding a planned trajectory's velocity and acceleration. `calculate` calls this with none. |
@@ -318,8 +321,9 @@ double volts = adrc.calculate(measurement, setpoint, appliedVoltage);
 | `getEstimatedStates()` | The observer's state: the measurement, its derivatives, then the disturbance. |
 | `getB0()`, `getSettlingTime()`, `getBandwidthScale()` | The config's tuning, with its defaults and the `b0` given to `initialize` filling in what it leaves unset. `getSettlingTime()` returns a `Time`. |
 | `getBandwidth()`, `getObserverBandwidth()` | The bandwidths that tuning gives. |
-| `getMinOutput()`, `getMaxOutput()`, `getLastOutput()` | The config's output limits, with the maximum given to `initialize` when it leaves it unset, and the last output. |
-| `getSlewRateLimit()` | The config's largest change in output per second, or 0 when it is off. |
+| `getMinOutput()`, `getMaxOutput()` | The output limits given to `initialize`, as `Voltage`. |
+| `getSlewRateLimit()` | The slew-rate limit given to `initialize`, 0 when it is off. |
+| `getLastOutput()` | The last output, volts. |
 | `getTrackingDifferentiator()` | The tracking differentiator, if the config turned one on. |
 | `getConfig()` | The `ADRCConfig` the controller reads. |
 | `getSystemOrder()`, `getControllerOrder()` | Plant order, and the observer's order (one more). |
@@ -357,6 +361,50 @@ double setpointVelocity = td.getYd();
 | `setSampleTime(dt)` | Change the sample time. |
 | `getMethod()` | The `Method`. |
 
+## C++
+
+The C++ port has the same classes in `yams::math` (`ADRCConfig`, `ADRCController` and
+`TrackingDifferentiator`), with the same behavior: the controller reads its config every loop,
+the config keeps the gains and works them out again when the settling time, bandwidth scale or
+`b0` changes, and the `With` methods refuse a value the controller cannot use. What differs:
+
+```cpp
+config.WithMotorGearing(12.0)
+    .WithMOI(0.1_kg_sq_m)  // b0 is derived from this
+    .WithClosedLoopMaxVoltage(12_V)
+    .WithADRCController(yams::math::ADRCConfig{}
+        .WithSystemOrder(yams::math::ADRCConfig::SystemOrder::SECOND)
+        .WithSettlingTime(600_ms));
+
+// Retune, as live tuning does: the motor config's ADRC config is shared with the controller.
+config.GetADRCController()->WithSettlingTime(800_ms);
+```
+
+- **Errors are exceptions.** A refused value throws `std::invalid_argument`; a built config given a
+  different system order throws `std::logic_error`; a missing order or a `b0` that cannot be
+  derived throws `exceptions::SmartMotorControllerConfigurationException`.
+- **Empty values are `std::optional`.** The tracking differentiator parameters are a
+  `std::vector<double>`, empty for the method's defaults.
+- **The motor config owns a copy.** `WithADRCController` copies the `ADRCConfig` it is given, and
+  `GetADRCController(slot)` returns that copy as a `std::shared_ptr`, shared with the controller.
+  Change the config through it, not through the one you passed in. Copying the motor config copies
+  each slot's ADRC config deeply. `WithFeedback` or `WithLQR` on the slot removes the ADRC, and
+  `WithoutADRCController(slot)` removes it too.
+- **Building a controller yourself** takes the config as a `std::shared_ptr`:
+  `ADRCConfig::BuildController(config, motor, motorConfig, period)`, or
+  `ADRCController{config}` followed by `Initialize(b0, maxVoltage, period)`, or
+  `Initialize(b0, minVoltage, maxVoltage, slewRateLimit, period)`.
+- **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`, and `WithB0` takes a
+  `wpi::math::DCMotor` and a `gearing::MechanismGearing`.
+- **Units where the value has one.** `Calculate`, `Step`, `GetMinOutput`, `GetMaxOutput` and
+  `GetLastOutput` use `volt_t`, `GetBandwidth` and `GetObserverBandwidth` use
+  `radians_per_second_t`, and the slew-rate limit is a `yams::math::volts_per_second_t`. The
+  measurement, setpoint and `b0` are plain numbers in the loop's units, as in Java.
+- **Thread safety.** The config guards its values with a mutex, so live tuning on the robot thread
+  and the closed loop thread never see a half-changed config.
+- **Moment of inertia.** `WithMOI(...)`, `WithWheelMOI(...)` and an exponential profile with an
+  inertia count as configured; `IsMomentOfInertiaConfigured()` tells.
+
 ## Things to know
 
 - **One controller per slot serves position and velocity.** Its observer is in the units of the
@@ -365,8 +413,8 @@ double setpointVelocity = td.getYd();
 - **Simulation needs an inertia**, as with a PID, unless the mechanism builds its own simulation.
 - **Motion profiles still apply.** With a trapezoidal or exponential profile, the ADRC follows the
   profile's next position, as a PID does.
-- **One `ADRCConfig` per motor controller.** A config holds the period, `b0` and maximum output of
-  the controller built from it, so two motor controllers sharing one config instance share those
+- **One `ADRCConfig` per motor controller.** A config holds the period and `b0` of the controller
+  built from it, so two motor controllers sharing one config instance share those
   too: the last one built sets them for both. Give each motor controller its own config, or a
   `clone()` of one.
 - **Tuning is safe while the loop runs.** The closed loop thread reads the gains once per loop,

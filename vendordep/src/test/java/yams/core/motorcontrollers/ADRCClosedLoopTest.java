@@ -74,8 +74,7 @@ public class ADRCClosedLoopTest {
   static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
     return new ADRCConfig()
         .withSystemOrder(order)
-        .withSettlingTime(Seconds.of(settlingSeconds))
-        .withMaxVoltage(Volts.of(12));
+        .withSettlingTime(Seconds.of(settlingSeconds));
   }
 
   /**
@@ -90,18 +89,6 @@ public class ADRCClosedLoopTest {
     return controller.ratio() * controller.motor().Kt / (2 * Math.PI * controller.motor().R * moi);
   }
 
-  /**
-   * The mechanism's speed per volt, the {@code b0} of a first order position loop on a mechanism
-   * whose back-EMF, rather than its inertia, sets how fast it moves: Kv / (2 pi G) mechanism
-   * rotations per second per volt.
-   *
-   * @param controller Motor controller, with its motor and gearing.
-   * @return Mechanism rotations per second per volt.
-   */
-  private static double speedPerVolt(Controller controller) {
-    return controller.motor().Kv / (2 * Math.PI * controller.ratio());
-  }
-
   private static yams.commands2.config.SmartMotorControllerConfig baseConfig(String name) {
     return ClosedLoopCases.baseConfig("ADRCClosedLoopTest " + name);
   }
@@ -114,22 +101,23 @@ public class ADRCClosedLoopTest {
    * @param command    Commands the setpoint.
    * @param measured   The measured value.
    * @param setpoint   The setpoint.
-   * @param tolerance  How far from the setpoint it may be while holding it.
+   * @param tolerance  How far from the setpoint it may be while holding it. A Talon, simulated in
+   *                   real time, is held to it on average (see {@link ClosedLoopCases.HoldError}).
    */
   private static void assertSettles(Controller controller, SmartMotorController smc,
       Runnable command, DoubleSupplier measured, double setpoint, double tolerance) {
-    final double[] worst = {0};
+    final ClosedLoopCases.HoldError error = new ClosedLoopCases.HoldError(controller);
     ClosedLoopCases.run(controller, smc, kSettleSeconds + kHoldSeconds, command, time -> {
       if (time >= kSettleSeconds) {
-        worst[0] = Math.max(worst[0], Math.abs(measured.getAsDouble() - setpoint));
+        error.add(measured.getAsDouble() - setpoint);
       }
     });
     final double end = measured.getAsDouble();
-    System.out.println(controller + ": ended at " + end + " (setpoint " + setpoint + "), at most "
-        + worst[0] + " from it while holding");
-    assertTrue(worst[0] <= tolerance,
-        controller + ": should hold " + setpoint + " within " + tolerance + ", but was " + worst[0]
-            + " from it, ending at " + end);
+    System.out.println(controller + ": ended at " + end + " (setpoint " + setpoint + "), " + error
+        + " while holding");
+    assertTrue(error.judged() <= tolerance,
+        controller + ": should hold " + setpoint + " within " + tolerance + ", but was " + error
+            + ", ending at " + end);
   }
 
   /** A flywheel's velocity loop: a first order plant. */
@@ -144,6 +132,7 @@ public class ADRCClosedLoopTest {
             // The observer runs at four times the closed loop bandwidth. It has to be faster than
             // the motor's back-EMF, which it estimates as part of the disturbance: about 220 rad/s
             // for a Kraken on this flywheel. A 0.15 s settling time puts it at 213 rad/s.
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.FIRST, 0.15)));
     try {
       assertSettles(controller, smc,
@@ -164,6 +153,7 @@ public class ADRCClosedLoopTest {
         baseConfig("pivot " + controller)
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Rotations.of(0))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
       assertSettles(controller, smc,
@@ -187,6 +177,7 @@ public class ADRCClosedLoopTest {
         baseConfig("arm " + controller)
             .withMomentOfInertia(KilogramSquareMeters.of(moi))
             .withStartingPosition(Rotations.of(start))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
       final SingleJointedArmSim sim = new SingleJointedArmSim(controller.motor(),
@@ -225,7 +216,8 @@ public class ADRCClosedLoopTest {
         baseConfig("elevator " + controller)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
             .withMomentOfInertia(KilogramSquareMeters.of(mass * drumRadius * drumRadius))
-            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(speedPerVolt(controller)));
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
+            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(controller.motor(), controller.gearing()));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(start)));
     final SmartMotorController smc = ClosedLoopCases.create(controller, cfg);
     try {

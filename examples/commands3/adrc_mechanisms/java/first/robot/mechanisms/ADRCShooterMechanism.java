@@ -57,7 +57,9 @@ public class ADRCShooterMechanism implements Mechanism {
               .withSystemOrder(SystemOrder.FLYWHEEL)
               // Short, so the observer keeps up with the back-EMF it estimates.
               .withSettlingTime(Seconds.of(0.15))
-              .withMaxVoltage(Volts.of(12)))
+)
+          // The output limit and ramp of every closed loop, the ADRC's too.
+          .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)
           // b0, how much one volt accelerates the wheel, is derived from the motor, the gearing and this inertia.
           .withMomentOfInertia(Inches.of(4), Pounds.of(1))

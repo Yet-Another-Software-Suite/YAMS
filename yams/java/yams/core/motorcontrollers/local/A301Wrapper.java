@@ -468,11 +468,13 @@ public class A301Wrapper extends SmartMotorController {
       m_closedLoopControllerThread.setName(config.getTelemetryName().get());
     }
 
-    // The A301 has no ramp rates, current limits or voltage compensation.
-    if (config.getOpenLoopRampRate().isPresent() || config.getClosedLoopRampRate().isPresent()) {
-      throw new SmartMotorControllerConfigurationException("A301 does not support ramp rates",
-          "Ramp rate could not be applied",
-          ".withOpenLoopRampRate and .withClosedLoopRampRate should be removed");
+    // The A301 has no ramp rates, current limits or voltage compensation of its own. Its closed loop
+    // runs on the SystemCore, which ramps the closed loop's output with withClosedLoopRampRate.
+    config.getClosedLoopRampRate();
+    if (config.getOpenLoopRampRate().isPresent()) {
+      throw new SmartMotorControllerConfigurationException("A301 does not support open loop ramp rates",
+          "Open loop ramp rate could not be applied",
+          ".withOpenLoopRampRate should be removed; .withClosedLoopRampRate ramps the closed loop");
     }
     if (config.getStatorStallCurrentLimit().isPresent()
         || config.getSupplyStallCurrentLimit().isPresent()) {
@@ -1078,11 +1080,11 @@ public class A301Wrapper extends SmartMotorController {
   /**
    * {@inheritDoc}
    *
-   * @throws UnsupportedOperationException always, since the A301 has no ramp rates.
+   * <p>The closed loop runs on the SystemCore, which ramps its output.
    */
   @Override
   public void setClosedLoopRampRate(Time rampRate) {
-    throw new UnsupportedOperationException("A301 does not support ramp rates.");
+    m_config.withClosedLoopRampRate(rampRate);
   }
 
   /**
@@ -1264,7 +1266,7 @@ public class A301Wrapper extends SmartMotorController {
     return Pair.of(Optional.empty(),
         Optional.of(List.of(DoubleTelemetryField.SupplyCurrent,
             DoubleTelemetryField.SupplyCurrentLimit, DoubleTelemetryField.StatorCurrentLimit,
-            DoubleTelemetryField.ClosedloopRampRate, DoubleTelemetryField.OpenloopRampRate)));
+            DoubleTelemetryField.OpenloopRampRate)));
   }
 
 }

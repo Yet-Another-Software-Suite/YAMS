@@ -266,6 +266,43 @@ final class ClosedLoopCases {
   }
 
   /**
+   * How far a mechanism is from its setpoint while it holds it. A motor controller simulated in real
+   * time is judged on its average error: if the test runner stalls, Phoenix's clock runs on without
+   * the mechanism and can knock it off its setpoint for a loop or two. The others are judged on their
+   * largest error.
+   */
+  static final class HoldError {
+    private final boolean realTime;
+    private double worst;
+    private double sum;
+    private int count;
+
+    HoldError(Controller controller) {
+      this.realTime = controller.realTime();
+    }
+
+    /** Add one loop's distance from the setpoint. */
+    void add(double error) {
+      final double distance = Math.abs(error);
+      worst = Math.max(worst, distance);
+      sum += distance;
+      count++;
+    }
+
+    /** The error the motor controller is judged on. */
+    double judged() {
+      return realTime ? sum / Math.max(count, 1) : worst;
+    }
+
+    @Override
+    public String toString() {
+      return realTime
+          ? "on average " + sum / Math.max(count, 1) + " (at most " + worst + ") from it"
+          : "at most " + worst + " from it";
+    }
+  }
+
+  /**
    * The average voltage the motor controller applies from {@code from} to {@code to} seconds after
    * the first command. Start half a second in: with many simulated Talons on the CAN bus, a Talon can
    * take a few hundred milliseconds to apply its first output.

@@ -155,7 +155,8 @@ class ADRCControllerTest {
 
   @Test
   void slewRateLimitsHowFastTheOutputChanges() {
-    final ADRCController adrc = initialized(config(1).withSlewRateLimit(Volts.per(Second).of(5)));
+    final ADRCController adrc = new ADRCController(config(1));
+    adrc.initialize(10, Volts.of(-12), Volts.of(12), Volts.per(Second).of(5), Seconds.of(kDt));
     double last = 0;
     for (int i = 0; i < 20; i++) {
       final double u = adrc.calculate(0, 100);
@@ -206,7 +207,6 @@ class ADRCControllerTest {
         && gains.bd.isIdentical(copied.bd, 0) && gains.k.isIdentical(copied.k, 0), "with the same values");
     assertEquals(gains.b0, copied.b0);
     assertEquals(adrc.getConfig().getBuiltPeriod(), copy.getBuiltPeriod());
-    assertEquals(adrc.getConfig().getBuiltMaxVoltage(), copy.getBuiltMaxVoltage());
     assertThrows(IllegalStateException.class, () -> copy.withSystemOrder(SystemOrder.FIRST), "the copy keeps the built order");
     copy.withSettlingTime(Seconds.of(1));
     assertNotSame(copied, copy.getGains(), "the copy works out its own gains");
@@ -215,26 +215,26 @@ class ADRCControllerTest {
   }
 
   @Test
-  void initializeReadsTheConfigOverTheGivenValues() {
+  void initializeReadsTheConfigOverTheGivenB0AndKeepsTheGivenLimits() {
     final ADRCController fromConfig = new ADRCController(config(1)
         .withSettlingTime(Seconds.of(0.4))
         .withBandwidthScale(2)
-        .withB0(5)
-        .withVoltageLimits(Volts.of(-6), Volts.of(8)));
-    fromConfig.initialize(10, Volts.of(12), Seconds.of(kDt));
+        .withB0(5));
+    fromConfig.initialize(10, Volts.of(-6), Volts.of(8), Volts.per(Second).of(3), Seconds.of(kDt));
     assertEquals(0.4, fromConfig.getSettlingTime().in(Seconds));
     assertEquals(2, fromConfig.getBandwidthScale());
     assertEquals(5, fromConfig.getB0(), "the config's b0, not the given one");
-    assertEquals(-6, fromConfig.getMinOutput());
-    assertEquals(8, fromConfig.getMaxOutput(), "the config's maximum, not the given one");
+    assertEquals(-6, fromConfig.getMinOutput().in(Volts));
+    assertEquals(8, fromConfig.getMaxOutput().in(Volts));
+    assertEquals(3, fromConfig.getSlewRateLimit().in(Volts.per(Second)));
 
     final ADRCController fromDefaults = initialized(config(1));
     assertEquals(ADRCConfig.DEFAULT_SETTLING_TIME, fromDefaults.getSettlingTime());
     assertEquals(ADRCConfig.DEFAULT_BANDWIDTH_SCALE, fromDefaults.getBandwidthScale());
     assertEquals(10, fromDefaults.getB0(), "the given b0, as the config leaves it unset");
-    assertEquals(-12, fromDefaults.getMinOutput());
-    assertEquals(12, fromDefaults.getMaxOutput());
-    assertEquals(0, fromDefaults.getSlewRateLimit());
+    assertEquals(-12, fromDefaults.getMinOutput().in(Volts), "the negative of the given maximum");
+    assertEquals(12, fromDefaults.getMaxOutput().in(Volts));
+    assertEquals(0, fromDefaults.getSlewRateLimit().in(Volts.per(Second)), "no slew rate limit");
   }
 
   @Test
@@ -280,8 +280,11 @@ class ADRCControllerTest {
     assertThrows(IllegalArgumentException.class, () -> adrc.initialize(10, Volts.of(12), Seconds.of(0)), "no period");
     assertThrows(IllegalArgumentException.class, () -> adrc.initialize(0, Volts.of(12), Seconds.of(kDt)), "a zero b0");
     assertThrows(IllegalArgumentException.class,
-        () -> new ADRCController(config(1).withVoltageLimits(Volts.of(6), null)).initialize(10, Volts.of(2), Seconds.of(kDt)),
-        "a configured minimum above the given maximum");
+        () -> adrc.initialize(10, Volts.of(6), Volts.of(2), Volts.per(Second).zero(), Seconds.of(kDt)),
+        "a minimum above the maximum");
+    assertThrows(IllegalArgumentException.class,
+        () -> adrc.initialize(10, Volts.of(-12), Volts.of(12), Volts.per(Second).of(-1), Seconds.of(kDt)),
+        "a negative slew rate limit");
     adrc.initialize(10, Volts.of(12), Seconds.of(kDt));
     assertTrue(adrc.isInitialized());
     assertThrows(IllegalArgumentException.class, () -> adrc.reset(new double[3], 0), "a state of the wrong length");

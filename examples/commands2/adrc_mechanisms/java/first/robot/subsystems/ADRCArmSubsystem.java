@@ -58,7 +58,9 @@ public class ADRCArmSubsystem extends SubsystemBase {
               .withSystemOrder(SystemOrder.ARM)
               // How quickly the arm should reach its setpoint.
               .withSettlingTime(Seconds.of(0.6))
-              .withMaxVoltage(Volts.of(12)))
+)
+          // The output limit and ramp of every closed loop, the ADRC's too.
+          .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)
           // b0, how much one volt accelerates the arm, is derived from the motor, the gearing and this inertia.
           .withMomentOfInertia(Meters.of(0.5), Kilograms.of(3))

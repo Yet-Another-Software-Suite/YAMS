@@ -157,8 +157,6 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.ADRCB0).enable();
         doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).enable();
         doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).enable();
-        doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).enable();
-        doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).enable();
         doubleFields.get(DoubleTelemetryField.ADRCOutput).enable();
         // Only kept for a motor controller configured with an LQR, see getDoubleFields.
         doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).enable();
@@ -366,8 +364,6 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.ADRCB0).setDefaultValue(e.getB0());
       doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).setDefaultValue(e.getSettlingTime().in(Seconds));
       doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).setDefaultValue(e.getBandwidthScale());
-      doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).setDefaultValue(e.getMaxOutput());
-      doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).setDefaultValue(e.getSlewRateLimit());
     });
     config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();

@@ -118,10 +118,12 @@ JAVA_GROUPS = [
      "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'
                     ' --tests "yams.core.motorcontrollers.NovaConfigTest"'},
     # ADRC closing a flywheel's velocity, a pivot's and an arm's angle and an elevator's height on
-    # every motor controller, and each YAMS mechanism doing the same. Simulated Talons, which Phoenix
-    # runs in real time, so each runs on its own.
+    # every motor controller, and each YAMS mechanism doing the same, and withClosedLoopRampRate
+    # ramping an ADRC and an LQR on every motor controller. Simulated Talons, which Phoenix runs in
+    # real time, so each runs on its own.
     {"group": "adrc-closed-loop",
-     "test-filter": '--tests "yams.core.motorcontrollers.ADRCClosedLoopTest"'},
+     "test-filter": '--tests "yams.core.motorcontrollers.ADRCClosedLoopTest"'
+                    ' --tests "yams.core.motorcontrollers.ClosedLoopRampTest"'},
     {"group": "adrc-mechanisms",
      "test-filter": '--tests "yams.core.motorcontrollers.ADRCMechanismTest"'},
     # Everything else: swerve config tests, the battery and motor simulation unit tests, and the
@@ -154,12 +156,17 @@ CPP_GROUPS = [
     # How followers are simulated: A301s following an A301, and a motor controller's loosely coupled
     # followers in its mechanism's motor model.
     {"group": "follower-simulation", "catch-filter": "[FollowerSimulation]"},
+    # An ADRC, written by FRC Team 8331, closing an arm's and a pivot's angle, an elevator's height and
+    # a flywheel's speed on every motor controller, and live tuning it on every motor controller. They
+    # simulate Talons in real time, so they run on their own.
+    {"group": "adrc-closed-loop", "catch-filter": "[ADRCClosedLoop],[ADRCLiveTuning]"},
     # Everything else: the math tests. New tags run here unless they get their own group and are
     # excluded.
     {"group": "other",
      "catch-filter": "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]"
                      "~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
-                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]~[FollowerSimulation]"},
+                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]~[FollowerSimulation]"
+                     "~[ADRCClosedLoop]~[ADRCLiveTuning]"},
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
@@ -168,7 +175,7 @@ JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limit
                          "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
 CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "follower-simulation",
-                        "swerve-drive", "other"}
+                        "swerve-drive", "adrc-closed-loop", "other"}
 
 JAVA_SOURCE = "yams/java/"
 JAVA_TESTS = "vendordep/src/test/java/"

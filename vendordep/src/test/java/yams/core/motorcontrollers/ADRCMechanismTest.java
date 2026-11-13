@@ -66,8 +66,7 @@ public class ADRCMechanismTest {
   private static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
     return new ADRCConfig()
         .withSystemOrder(order)
-        .withSettlingTime(Seconds.of(settlingSeconds))
-        .withMaxVoltage(Volts.of(12));
+        .withSettlingTime(Seconds.of(settlingSeconds));
   }
 
   private static yams.commands2.config.SmartMotorControllerConfig baseConfig(String name) {
@@ -76,23 +75,24 @@ public class ADRCMechanismTest {
 
   /**
    * Command a setpoint through the mechanism, step the mechanism's simulation, and check it settles
-   * there and holds it.
+   * there and holds it. A Talon, simulated in real time, is held to the tolerance on average (see
+   * {@link ClosedLoopCases.HoldError}).
    */
   private static void assertSettles(Controller controller, SmartMechanism mechanism,
       Runnable command, DoubleSupplier measured, double setpoint, double tolerance) {
-    final double[] worst = {0};
+    final ClosedLoopCases.HoldError error = new ClosedLoopCases.HoldError(controller);
     ClosedLoopCases.run(
         controller, mechanism::simIterate, kSettleSeconds + kHoldSeconds, command, time -> {
           if (time >= kSettleSeconds) {
-            worst[0] = Math.max(worst[0], Math.abs(measured.getAsDouble() - setpoint));
+            error.add(measured.getAsDouble() - setpoint);
           }
         });
     final double end = measured.getAsDouble();
     System.out.println(controller + " " + mechanism.getClass().getSimpleName() + ": ended at " + end
-        + " (setpoint " + setpoint + "), at most " + worst[0] + " from it while holding");
-    assertTrue(worst[0] <= tolerance,
-        controller + ": should hold " + setpoint + " within " + tolerance + ", but was " + worst[0]
-            + " from it, ending at " + end);
+        + " (setpoint " + setpoint + "), " + error + " while holding");
+    assertTrue(error.judged() <= tolerance,
+        controller + ": should hold " + setpoint + " within " + tolerance + ", but was " + error
+            + ", ending at " + end);
   }
 
   @ParameterizedTest(name = "{0}")
@@ -102,6 +102,7 @@ public class ADRCMechanismTest {
         baseConfig("arm " + controller)
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(-30))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
       final Arm arm = new Arm(new ArmConfig()
@@ -124,6 +125,7 @@ public class ADRCMechanismTest {
         baseConfig("pivot " + controller)
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(0))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
       final Pivot pivot =
@@ -144,6 +146,7 @@ public class ADRCMechanismTest {
     final SmartMotorController smc = ClosedLoopCases.create(controller,
         baseConfig("flywheel " + controller)
             .withMomentOfInertia(KilogramSquareMeters.of(0.01))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             .withADRCController(adrc(SystemOrder.FIRST, 0.15)));
     try {
       final FlyWheel flyWheel = new FlyWheel(new FlyWheelConfig().withDiameter(Inches.of(4)), smc);
@@ -164,9 +167,9 @@ public class ADRCMechanismTest {
     final yams.commands2.config.SmartMotorControllerConfig cfg =
         baseConfig("elevator " + controller)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
             // A first order ADRC on the position, with the mechanism's speed per volt as b0.
-            .withADRCController(
-                adrc(SystemOrder.FIRST, 0.5).withB0(controller.motor().Kv / (2 * Math.PI * controller.ratio())));
+            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(controller.motor(), controller.gearing()));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(0.1)));
     final SmartMotorController smc = ClosedLoopCases.create(controller, cfg);
     try {

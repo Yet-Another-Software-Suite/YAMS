@@ -114,6 +114,18 @@ public abstract class SmartMotorController {
    */
   protected Optional<Angle> m_lastClosedLoopMechanismPosition = Optional.empty();
 
+  /**
+   * Full scale of {@link SmartMotorControllerConfig#withClosedLoopRampRate(Time)}: the ramp rate is
+   * the time the output takes to change by this much, as on a Talon.
+   */
+  private static final double kClosedLoopRampFullScaleVolts = 12.0;
+
+  /**
+   * The voltage the closed loop sent last, which the closed loop ramp starts from; empty until it
+   * runs, and again whenever it starts over.
+   */
+  private Optional<Double> m_lastClosedLoopVoltage = Optional.empty();
+
   /** Simple PID controller for the motor controller. */
   protected Optional<PIDController> m_pid = Optional.empty();
 
@@ -461,6 +473,8 @@ public abstract class SmartMotorController {
    */
   private void resetClosedLoopControllerState() {
     m_pid.ifPresent(PIDController::reset);
+    // The closed loop ramp starts from the voltage the motor controller applies now.
+    m_lastClosedLoopVoltage = Optional.empty();
     // The motion profile starts from this position, so continuous wrapping keeps the angles the
     // loop measures next to it, rather than a whole wrapping range away from it.
     m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
@@ -717,30 +731,40 @@ public abstract class SmartMotorController {
       feedforward.set(feedforward.get() + m_config.convertToVoltage(getDCMotor(), setpointFeedforwardForce.get()).in(Volts));
     }
 
+    double outputVoltage = pidOutputVoltage.get() + feedforward.get();
+
+    // This loop sends the motor controller a voltage, which it treats as open loop, so its own
+    // closed loop ramp never applies. Ramp the output here instead, from the voltage sent last, or
+    // from the one applied when the loop starts over. The limits below still stop it at once.
+    Optional<Time> rampRate = m_config.getClosedLoopRampRate();
+    if (rampRate.isPresent() && rampRate.get().gt(Seconds.zero())) {
+      final double last = m_lastClosedLoopVoltage.orElseGet(() -> getVoltage().in(Volts));
+      final double maxChange = kClosedLoopRampFullScaleVolts / rampRate.get().in(Seconds)
+                               * getClosedLoopControllerPeriod().in(Seconds);
+      outputVoltage = last + Math.clamp(outputVoltage - last, -maxChange, maxChange);
+    }
+
     // Boundary check.
     if (mechUpperLimit.isPresent()) {
-      if (getMechanismPosition().gt(mechUpperLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) > 0) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+      if (getMechanismPosition().gt(mechUpperLimit.get()) && outputVoltage > 0) {
+        outputVoltage = 0.0;
       }
     }
     if (mechLowerLimit.isPresent()) {
-      if (getMechanismPosition().lt(mechLowerLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) < 0) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+      if (getMechanismPosition().lt(mechLowerLimit.get()) && outputVoltage < 0) {
+        outputVoltage = 0.0;
       }
     }
     if (temperatureCutoff.isPresent()) {
       if (getTemperature().gte(temperatureCutoff.get())) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+        outputVoltage = 0.0;
       }
     }
-    double outputVoltage = pidOutputVoltage.get() + feedforward.get();
     if (maximumVoltage.isPresent()) {
       double maxVolts = maximumVoltage.get().in(Volts);
       outputVoltage = Math.clamp(outputVoltage, -maxVolts, maxVolts);
     }
+    m_lastClosedLoopVoltage = Optional.of(outputVoltage);
     setVoltage(Volts.of(outputVoltage));
   }
 

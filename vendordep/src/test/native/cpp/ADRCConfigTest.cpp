@@ -1,0 +1,201 @@
+// Copyright (c) 2026 Yet Another Software Suite
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+// ADRCConfig on its own and in a SmartMotorControllerConfig: its values and the ones it refuses, deriving b0, building
+// a controller, the slots and copies. Mirrors the Java ADRCConfigTest. The ADRC was written by FRC Team 8331.
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+
+#include <cmath>
+#include <memory>
+#include <numbers>
+#include <stdexcept>
+
+#include <wpi/math/controller/SimpleMotorFeedforward.hpp>
+#include <wpi/math/system/DCMotor.hpp>
+#include <wpi/units/length.hpp>
+#include <wpi/units/moment_of_inertia.hpp>
+#include <wpi/units/time.hpp>
+#include <wpi/units/voltage.hpp>
+
+#include "yams/exceptions.hpp"
+#include "yams/gearing/GearBox.hpp"
+#include "yams/gearing/MechanismGearing.hpp"
+#include "yams/math/ADRCConfig.hpp"
+#include "yams/math/ADRCController.hpp"
+#include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
+
+namespace yams::test {
+
+using namespace math;
+using motorcontrollers::SmartMotorControllerConfig;
+using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
+
+namespace {
+/** A motor config with a 12:1 reduction. */
+SmartMotorControllerConfig SmcConfig() {
+  SmartMotorControllerConfig config;
+  config.WithMotorGearing(12.0);
+  return config;
+}
+
+std::shared_ptr<ADRCConfig> Shared(const ADRCConfig& config) { return std::make_shared<ADRCConfig>(config); }
+}  // namespace
+
+TEST_CASE("ADRCConfig.UnsetValuesAreEmptyAndBuildWithTheirDefaults", "[ADRCConfig]") {
+  ADRCConfig config;
+  CHECK_FALSE(config.GetSystemOrder());
+  CHECK_FALSE(config.GetSettlingTime());
+  CHECK_FALSE(config.GetBandwidthScale());
+  CHECK_FALSE(config.GetB0());
+  CHECK_FALSE(config.GetInputDelay());
+  CHECK_FALSE(config.IsCascaded());
+  CHECK_FALSE(config.GetTdMethod());
+  CHECK(config.GetTdParams().empty());
+
+  config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10);
+  auto smc = SmcConfig();
+  smc.WithClosedLoopMaxVoltage(10_V);
+  auto adrc = ADRCConfig::BuildController(Shared(config), wpi::math::DCMotor::NEO(1), smc, 20_ms);
+  CHECK(adrc.GetSettlingTime() == ADRCConfig::kDefaultSettlingTime);
+  CHECK(adrc.GetBandwidthScale() == ADRCConfig::kDefaultBandwidthScale);
+  CHECK(adrc.GetSlewRateLimit().value() == 0);
+  CHECK(adrc.GetMaxOutput().value() == 10);
+  CHECK(adrc.GetMinOutput().value() == -10);
+}
+
+TEST_CASE("ADRCConfig.KeepsEveryValueItIsGiven", "[ADRCConfig]") {
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::ARM)
+      .WithSettlingTime(0.6_s)
+      .WithBandwidthScale(1.5)
+      .WithB0(3)
+      .WithInputDelay(40_ms)
+      .WithCascaded(true)
+      .WithTrackingDifferentiator(TrackingDifferentiator::Method::EULER, {0.5});
+  CHECK(ADRCConfig::GetOrder(*config.GetSystemOrder()) == 2);
+  CHECK(config.GetSettlingTime()->value() == 0.6);
+  CHECK(*config.GetBandwidthScale() == 1.5);
+  CHECK(*config.GetB0() == 3);
+  CHECK(config.GetInputDelay()->value() == Catch::Approx(0.04));
+  CHECK(config.IsCascaded());
+  CHECK(*config.GetTdMethod() == TrackingDifferentiator::Method::EULER);
+  CHECK(config.GetTdParams() == std::vector<double>{0.5});
+  config.WithoutTrackingDifferentiator();
+  CHECK_FALSE(config.GetTdMethod());
+  CHECK(config.GetTdParams().empty());
+}
+
+TEST_CASE("ADRCConfig.RefusesValuesTheControllerCannotUse", "[ADRCConfig]") {
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithSettlingTime(0.3_s);
+  CHECK_THROWS_AS(config.WithSettlingTime(-1_s), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithSettlingTime(0_s), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithBandwidthScale(0), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithB0(0), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithB0(std::nan("")), std::invalid_argument);
+  CHECK_THROWS_AS(config.WithInputDelay(-1_s), std::invalid_argument);
+  // A refused value leaves the config as it was.
+  CHECK(config.GetSettlingTime()->value() == 0.3);
+  CHECK_FALSE(config.GetB0());
+}
+
+TEST_CASE("ADRCConfig.DerivesB0FromTheMotorGearingAndInertia", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::SECOND);
+  auto smc = SmcConfig();
+  // The placeholder inertia is never used.
+  CHECK_THROWS_AS(config.ResolveB0(motor, smc), exceptions::SmartMotorControllerConfigurationException);
+  smc.WithMOI(wpi::units::kilogram_square_meter_t{0.1});
+  const double expected = 12 * motor.Kt.value() / (2 * std::numbers::pi * motor.R.value() * 0.1);
+  CHECK(config.ResolveB0(motor, smc) == Catch::Approx(expected));
+  // A b0 that is set wins.
+  config.WithB0(7.0);
+  CHECK(config.ResolveB0(motor, smc) == 7.0);
+}
+
+TEST_CASE("ADRCConfig.B0FromTheMotorAndGearingIsTheMechanismsSpeedPerVolt", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  ADRCConfig config;
+  config.WithB0(motor, gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})});
+  // The motor's free speed per volt, in mechanism rotations per second, through a 12:1 reduction.
+  CHECK(*config.GetB0() == Catch::Approx(motor.Kv.value() / (2 * std::numbers::pi * 12)));
+}
+
+TEST_CASE("ADRCConfig.ALinearClosedLoopDerivesB0InMeters", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::SECOND);
+  auto smc = SmcConfig();
+  smc.WithMOI(wpi::units::kilogram_square_meter_t{0.1}).WithLinearClosedLoopController(true);
+  CHECK_THROWS_AS(config.ResolveB0(motor, smc), exceptions::SmartMotorControllerConfigurationException);
+  smc.WithMechanismCircumference(0.5_m);
+  const double expected = 12 * motor.Kt.value() / (2 * std::numbers::pi * motor.R.value() * 0.1) * 0.5;
+  CHECK(config.ResolveB0(motor, smc) == Catch::Approx(expected));
+}
+
+TEST_CASE("ADRCConfig.BuildingNeedsASystemOrder", "[ADRCConfig]") {
+  ADRCConfig config;
+  config.WithB0(10);
+  CHECK_THROWS_AS(ADRCConfig::BuildController(Shared(config), wpi::math::DCMotor::NEO(1), SmcConfig(), 20_ms),
+                  exceptions::SmartMotorControllerConfigurationException);
+}
+
+TEST_CASE("ADRCConfig.WithoutALimitTheMotorsNominalVoltageIsUsed", "[ADRCConfig]") {
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(10);
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  auto adrc = ADRCConfig::BuildController(Shared(config), motor, SmcConfig(), 20_ms);
+  CHECK(adrc.GetMaxOutput() == motor.nominalVoltage);
+}
+
+TEST_CASE("ADRCConfig.AnADRCReplacesTheSlotsPIDAndFeedforward", "[ADRCConfig]") {
+  auto smc = SmcConfig();
+  smc.WithFeedback(1.0, 0.0, 0.0)
+      .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
+          0.1_V, wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{1.0},
+          wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}});
+  ADRCConfig adrc;
+  adrc.WithSystemOrder(ADRCConfig::SystemOrder::FIRST);
+  smc.WithADRCController(adrc);
+  REQUIRE(smc.GetADRCController() != nullptr);
+  CHECK(smc.GetKp() == 0.0);
+  CHECK_FALSE(smc.GetSimpleFeedforward(Slot::SLOT_0));
+  CHECK_FALSE(smc.GetArmFeedforward(Slot::SLOT_0));
+  CHECK_FALSE(smc.GetElevatorFeedforward(Slot::SLOT_0));
+  CHECK_FALSE(smc.GetLQR(Slot::SLOT_0));
+  // Only its own slot.
+  CHECK(smc.GetADRCController(Slot::SLOT_1) == nullptr);
+  // A PID on the slot removes the ADRC.
+  smc.WithFeedback(2.0, 0.0, 0.0);
+  CHECK(smc.GetADRCController() == nullptr);
+  CHECK(smc.GetKp() == 2.0);
+  smc.WithADRCController(adrc).WithoutADRCController();
+  CHECK(smc.GetADRCController() == nullptr);
+}
+
+TEST_CASE("ADRCConfig.TheMotorConfigReturnsItsOwnInstance", "[ADRCConfig]") {
+  auto smc = SmcConfig();
+  ADRCConfig adrc;
+  adrc.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(3);
+  smc.WithADRCController(adrc);
+  CHECK(smc.GetADRCController() == smc.GetADRCController());
+  smc.GetADRCController()->WithB0(5);
+  CHECK(*smc.GetADRCController()->GetB0() == 5);
+  CHECK(*adrc.GetB0() == 3);
+}
+
+TEST_CASE("ADRCConfig.ACopyOfTheMotorConfigGetsItsOwnADRCConfig", "[ADRCConfig]") {
+  auto smc = SmcConfig();
+  ADRCConfig adrc;
+  adrc.WithSystemOrder(ADRCConfig::SystemOrder::FIRST).WithB0(3);
+  smc.WithADRCController(adrc);
+  SmartMotorControllerConfig copy = smc;
+  CHECK(copy.GetADRCController() != smc.GetADRCController());
+  copy.GetADRCController()->WithB0(9);
+  CHECK(*smc.GetADRCController()->GetB0() == 3);
+}
+
+}  // namespace yams::test

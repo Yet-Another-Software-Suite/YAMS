@@ -4,7 +4,6 @@
 package yams.core.math;
 
 import static org.wpilib.units.Units.Meters;
-import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -13,10 +12,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.units.VoltageUnit;
 import org.wpilib.units.measure.Time;
-import org.wpilib.units.measure.Velocity;
-import org.wpilib.units.measure.Voltage;
 import org.wpilib.util.Alert;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
@@ -51,7 +47,6 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * new ADRCConfig()
  *     .withSystemOrder(SystemOrder.FIRST)
  *     .withSettlingTime(Seconds.of(0.2))
- *     .withVoltageLimits(Volts.of(-12), Volts.of(12))
  * }</pre>
  *
  * <p>Every value starts empty. The getters return that empty {@link Optional}, and
@@ -94,17 +89,15 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * by 20 to 50 percent usually still works. Leave it unset to derive it from the motor, gearing,
  * and moment of inertia (see "What is never assumed" below); set it explicitly when the mechanism
  * has no meaningful inertia, such as a mechanism driven against a hard stop.
- * <li>{@link #withVoltageLimits(Voltage, Voltage)} sets the output saturation. Without it, the
- * maximum output falls back to the motor config's closed-loop voltage limit, or the motor's
- * nominal voltage with an alert.
- * <li>{@link #withSlewRateLimit(Velocity)} caps how fast the controller output can change, in
- * volts per second. Useful to stop a violent step when the loop first enables. Zero (the default)
- * disables the cap.
  * <li>{@link #withInputDelay(Time)} compensates a known delay between commanding the output and
  * seeing its effect, such as a deliberately slowed sensor. Zero (the default) disables it.
  * <li>{@link #withCascaded(boolean)} runs the observer in cascaded form, which some higher-order
  * plants track more accurately. Leave it disabled unless you have a reason.
  * </ul>
+ *
+ * <p>The output limits and ramp come from the motor config, as for every closed loop controller:
+ * {@code withClosedLoopControllerMaximumVoltage(...)} limits the output, and
+ * {@code withClosedLoopRampRate(...)} limits how quickly it changes.
  *
  * <p>The {@code withX(...)} methods only accept values the controller can use: an invalid one,
  * such as a settling time that is not positive or a zero {@code b0}, throws
@@ -161,8 +154,9 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * gearing, and the mechanism's moment of inertia, but only when the mechanism explicitly
  * configured that inertia with {@code withMomentOfInertia(...)} or
  * {@code withWheelMomentOfInertia(...)}. The library's placeholder inertia is never used.
- * <li>Output saturation comes from {@code withClosedLoopControllerMaximumVoltage(...)} or
- * {@code withVoltageLimits(...)}. Falling back to the motor's nominal voltage raises an alert.
+ * <li>Output saturation comes from the motor config's
+ * {@code withClosedLoopControllerMaximumVoltage(...)}. Without it, the controller saturates at the
+ * motor's nominal voltage and raises an alert.
  * <li>The control period comes from {@code withClosedLoopControlPeriod(...)}, so the controller
  * and the loop cannot disagree.
  * </ul>
@@ -176,8 +170,6 @@ public class ADRCConfig implements Cloneable {
   public static final Time DEFAULT_SETTLING_TIME = Seconds.of(0.2);
   /** Bandwidth scale used when none is set. */
   public static final double DEFAULT_BANDWIDTH_SCALE = 1.0;
-  /** Output slew-rate limit used when none is set; zero disables it. */
-  public static final Velocity<VoltageUnit> DEFAULT_SLEW_RATE_LIMIT = Volts.per(Second).of(0);
   /** Input delay used when none is set; zero disables it. */
   public static final Time DEFAULT_INPUT_DELAY = Seconds.of(0);
 
@@ -243,12 +235,6 @@ public class ADRCConfig implements Cloneable {
   private OptionalDouble bandwidthScale = OptionalDouble.empty();
   /** Explicit input gain; empty to derive it. */
   private OptionalDouble b0 = OptionalDouble.empty();
-  /** Explicit minimum output; empty for {@code -maxVoltage}. */
-  private Optional<Voltage> minVoltage = Optional.empty();
-  /** Explicit maximum output; empty to use the motor config. */
-  private Optional<Voltage> maxVoltage = Optional.empty();
-  /** Output slew-rate limit; empty for {@link #DEFAULT_SLEW_RATE_LIMIT}. */
-  private Optional<Velocity<VoltageUnit>> slewRateLimit = Optional.empty();
   /** Input delay; empty for {@link #DEFAULT_INPUT_DELAY}. */
   private Optional<Time> inputDelay = Optional.empty();
   /** Whether the cascaded extended-state-observer form is used. */
@@ -270,8 +256,6 @@ public class ADRCConfig implements Cloneable {
   private Optional<Time> builtPeriod = Optional.empty();
   /** {@code b0} used while {@link #b0} is unset, such as the derived one; set when a controller is built. */
   private OptionalDouble builtB0 = OptionalDouble.empty();
-  /** Maximum output used while {@link #maxVoltage} is unset; set when a controller is built. */
-  private Optional<Voltage> builtMaxVoltage = Optional.empty();
   /**
    * Observer and control gains worked out from this config once a controller is built, and again
    * whenever the settling time, bandwidth scale or {@code b0} changes. Replaced whole, so the
@@ -299,16 +283,12 @@ public class ADRCConfig implements Cloneable {
     this.settlingTime = cfg.settlingTime;
     this.bandwidthScale = cfg.bandwidthScale;
     this.b0 = cfg.b0;
-    this.minVoltage = cfg.minVoltage;
-    this.maxVoltage = cfg.maxVoltage;
-    this.slewRateLimit = cfg.slewRateLimit;
     this.inputDelay = cfg.inputDelay;
     this.cascaded = cfg.cascaded;
     this.tdMethod = cfg.tdMethod;
     this.tdParams = cfg.tdParams.map(double[]::clone);
     this.builtPeriod = cfg.builtPeriod;
     this.builtB0 = cfg.builtB0;
-    this.builtMaxVoltage = cfg.builtMaxVoltage;
     final ADRCController.Gains cfgGains = cfg.gains;
     this.gains = cfgGains == null ? null : cfgGains.copy();
   }
@@ -387,70 +367,20 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Set the maximum output, with the minimum at its negative unless
-   * {@link #withVoltageLimits(Voltage, Voltage)} set one.
+   * Set the input gain to the mechanism's speed per volt: the motor's free speed per volt, through
+   * the gearing. This is the {@code b0} of a {@link SystemOrder#FIRST} loop on position for a
+   * mechanism whose motor's back-EMF, more than its inertia, sets how fast it moves, such as an
+   * elevator. It is in mechanism rotations per second per volt, so it fits a closed loop in
+   * rotations, not a linear one.
    *
-   * @param maxVoltage Maximum output; must not be below the minimum.
+   * @param motor   Motor driving the mechanism, with every motor in its gearbox.
+   * @param gearing Gearing from the motor to the mechanism.
    * @return This config for chaining.
-   * @throws IllegalArgumentException if the maximum is NaN or below the minimum.
+   * @throws IllegalArgumentException if the speed per volt is not finite or is zero.
    */
-  public ADRCConfig withMaxVoltage(Voltage maxVoltage) {
-    checkVoltageLimits(minVoltage.orElse(null), maxVoltage);
-    this.maxVoltage = Optional.ofNullable(maxVoltage);
-    return this;
-  }
-
-  /**
-   * Set asymmetric output saturation.
-   *
-   * @param minVoltage Minimum output; must not be above {@code maxVoltage}.
-   * @param maxVoltage Maximum output.
-   * @return This config for chaining.
-   * @throws IllegalArgumentException if a limit is NaN or the minimum is above the maximum.
-   */
-  public ADRCConfig withVoltageLimits(Voltage minVoltage, Voltage maxVoltage) {
-    checkVoltageLimits(minVoltage, maxVoltage);
-    this.minVoltage = Optional.ofNullable(minVoltage);
-    this.maxVoltage = Optional.ofNullable(maxVoltage);
-    return this;
-  }
-
-  /**
-   * Check output limits: neither may be NaN, and the minimum, {@code -max} when it is unset, must
-   * not be above the maximum.
-   *
-   * @param min Minimum output, or {@code null} for {@code -max}.
-   * @param max Maximum output, or {@code null} to use the motor config.
-   * @throws IllegalArgumentException if a limit is NaN or the minimum is above the maximum.
-   */
-  private void checkVoltageLimits(Voltage min, Voltage max) {
-    final double minVolts = min == null ? Double.NEGATIVE_INFINITY : min.in(Volts);
-    final double maxVolts = max != null ? max.in(Volts)
-        : builtMaxVoltage.map(v -> v.in(Volts)).orElse(Double.POSITIVE_INFINITY);
-    final double effectiveMin = min == null && Double.isFinite(maxVolts) ? -maxVolts : minVolts;
-    if (Double.isNaN(minVolts) || Double.isNaN(maxVolts) || effectiveMin > maxVolts) {
-      throw new IllegalArgumentException(owner + " output limits must not be NaN, and the minimum ("
-          + effectiveMin + " V) must not be above the maximum (" + maxVolts + " V)");
-    }
-  }
-
-  /**
-   * Set the output slew-rate limit. Defaults to {@link #DEFAULT_SLEW_RATE_LIMIT}, which disables
-   * it.
-   *
-   * @param slewRateLimit Maximum output change per second; zero disables it. Must not be negative.
-   * @return This config for chaining.
-   * @throws IllegalArgumentException if the limit is NaN or negative.
-   */
-  public ADRCConfig withSlewRateLimit(Velocity<VoltageUnit> slewRateLimit) {
-    if (slewRateLimit != null) {
-      final double voltsPerSecond = slewRateLimit.in(Volts.per(Second));
-      if (Double.isNaN(voltsPerSecond) || voltsPerSecond < 0) {
-        throw new IllegalArgumentException(owner + " slew rate limit must not be negative, got " + voltsPerSecond + " V/s");
-      }
-    }
-    this.slewRateLimit = Optional.ofNullable(slewRateLimit);
-    return this;
+  public ADRCConfig withB0(DCMotor motor, MechanismGearing gearing) {
+    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism.
+    return withB0(motor.Kv / (2.0 * Math.PI * gearing.getMechanismToRotorRatio()));
   }
 
   /**
@@ -548,33 +478,6 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Get the configured minimum output.
-   *
-   * @return Minimum output, or empty for {@code -maxVoltage}.
-   */
-  public Optional<Voltage> getMinVoltage() {
-    return minVoltage;
-  }
-
-  /**
-   * Get the configured maximum output.
-   *
-   * @return Maximum output, or empty to use the motor config.
-   */
-  public Optional<Voltage> getMaxVoltage() {
-    return maxVoltage;
-  }
-
-  /**
-   * Get the configured slew-rate limit.
-   *
-   * @return Slew-rate limit, or empty for {@link #DEFAULT_SLEW_RATE_LIMIT}.
-   */
-  public Optional<Velocity<VoltageUnit>> getSlewRateLimit() {
-    return slewRateLimit;
-  }
-
-  /**
    * Get the configured input delay.
    *
    * @return Input delay, or empty for {@link #DEFAULT_INPUT_DELAY}.
@@ -614,11 +517,15 @@ public class ADRCConfig implements Cloneable {
    * Build a controller from this config, filling every unset value with its default.
    *
    * <p>The controller reads its settings from this config every step, and its gains too: the config
-   * keeps the control period, the {@code b0} and maximum output used while they are unset, and the
-   * gains worked out from them, and works the gains out again whenever its settling time, bandwidth
+   * keeps the control period, the {@code b0} used while it is unset, and the gains worked out from
+   * them, and works the gains out again whenever its settling time, bandwidth
    * scale or {@code b0} changes. So a change, as live tuning makes, takes effect on the next step
    * without resetting the state estimate. The system order, input delay and tracking differentiator
    * only take effect when a controller is built, and a built config refuses a different order.
+   *
+   * <p>The controller saturates at the motor config's closed loop maximum voltage, which the motor
+   * controller limits its output to as well, and has no slew-rate limit of its own: the motor
+   * controller ramps its output with {@code withClosedLoopRampRate(...)}.
    *
    * @param motor  Motor model used for {@code b0} derivation and the nominal-voltage fallback.
    * @param config Motor config that carries gearing, inertia, circumference, and the loop period.
@@ -705,24 +612,23 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Resolve the maximum output voltage.
+   * Resolve the maximum output voltage: the motor config's closed loop maximum voltage, or the
+   * motor's nominal voltage with an alert.
    *
    * @param motor  Motor model, used for the nominal-voltage fallback.
    * @param config Motor config, which may carry a closed-loop voltage limit.
    * @return Maximum output in volts.
    */
   private double resolveMaxVoltage(DCMotor motor, SmartMotorControllerConfig<?> config) {
-    if (maxVoltage.isPresent()) {
-      return maxVoltage.get().in(Volts);
-    }
     var configured = config.getClosedLoopControllerMaximumVoltage();
     if (configured.isPresent()) {
       return configured.get().in(Volts);
     }
     if (nominalVoltageAlert.isEmpty()) {
       nominalVoltageAlert = Optional.of(new Alert("YAMS", alertId("NominalVoltage"),
-          owner + " has no maxVoltage and the motor config has no closed-loop "
-              + "voltage limit; using the motor's nominal voltage (" + motor.nominalVoltage + " V).",
+          owner + ": the motor config has no closed loop voltage limit "
+              + "(withClosedLoopControllerMaximumVoltage); using the motor's nominal voltage ("
+              + motor.nominalVoltage + " V).",
           Alert.Level.MEDIUM));
     }
     nominalVoltageAlert.get().set(true);
@@ -744,12 +650,11 @@ public class ADRCConfig implements Cloneable {
    * gains. {@link ADRCController#initialize} calls this; a later call, as when the motor config is
    * applied again, replaces them.
    *
-   * @param b0         Input gain used while {@code b0} is unset.
-   * @param maxVoltage Maximum output used while the maximum is unset.
-   * @param period     Control period.
+   * @param b0     Input gain used while {@code b0} is unset.
+   * @param period Control period.
    * @throws IllegalArgumentException if a value is invalid, leaving the config as it was.
    */
-  void setBuiltValues(double b0, Voltage maxVoltage, Time period) {
+  void setBuiltValues(double b0, Time period) {
     final double seconds = period.in(Seconds);
     if (!Double.isFinite(seconds) || seconds <= 0) {
       throw new IllegalArgumentException(owner + " control period must be finite and positive");
@@ -758,15 +663,8 @@ public class ADRCConfig implements Cloneable {
     if (!Double.isFinite(usedB0) || usedB0 == 0.0) {
       throw new IllegalArgumentException(owner + " b0 must be finite and non-zero, got " + usedB0);
     }
-    final double max = this.maxVoltage.orElse(maxVoltage).in(Volts);
-    final double min = minVoltage.map(v -> v.in(Volts)).orElse(-max);
-    if (Double.isNaN(min) || Double.isNaN(max) || min > max) {
-      throw new IllegalArgumentException(owner + " output limits must not be NaN, and the minimum ("
-          + min + " V) must not be above the maximum (" + max + " V)");
-    }
     this.builtPeriod = Optional.of(period);
     this.builtB0 = OptionalDouble.of(b0);
-    this.builtMaxVoltage = Optional.of(maxVoltage);
     rebuildGains();
   }
 
@@ -803,16 +701,6 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Get the maximum output used while the maximum is unset.
-   *
-   * @return Maximum output given when the controller was built.
-   * @throws java.util.NoSuchElementException if no controller has been built.
-   */
-  Voltage getBuiltMaxVoltage() {
-    return builtMaxVoltage.orElseThrow();
-  }
-
-  /**
    * Report a value this config refused, as live tuning does when a tuned value throws. The alert
    * lives on the config, so it outlasts a controller rebuilt from it.
    *
@@ -835,8 +723,7 @@ public class ADRCConfig implements Cloneable {
     return "ADRCConfig{"
         + "systemOrder=" + systemOrder + ", settlingTime="
         + settlingTime + ", bandwidthScale=" + bandwidthScale + ", b0=" + b0
-        + ", minVoltage=" + minVoltage + ", maxVoltage=" + maxVoltage + ", slewRateLimit="
-        + slewRateLimit + ", inputDelay=" + inputDelay + ", cascaded=" + cascaded
+        + ", inputDelay=" + inputDelay + ", cascaded=" + cascaded
         + ", tdMethod=" + tdMethod + ", tdParams=" + tdParams.map(Arrays::toString) + '}';
   }
 }

@@ -10,7 +10,9 @@ import static org.wpilib.units.Units.Volts;
 import java.util.Arrays;
 import java.util.Optional;
 import org.ejml.simple.SimpleMatrix;
+import org.wpilib.units.VoltageUnit;
 import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
 
 /**
@@ -38,11 +40,16 @@ import org.wpilib.units.measure.Voltage;
  * bandwidth is {@code 4 * wc}.
  *
  * <p>The controller keeps only its running state: the observer's estimate, its last outputs and the
- * tracking differentiator. Everything else it reads from its {@link ADRCConfig}, including the
- * observer and control gains, which the config works out again whenever its settling time,
- * bandwidth scale or {@code b0} changes. So every live-tunable value takes effect on the next step.
- * The system order, input delay and tracking differentiator are fixed when the controller is
- * initialized.
+ * tracking differentiator, and the output limits and slew-rate limit it is initialized with.
+ * Everything else it reads from its {@link ADRCConfig}, including the observer and control gains,
+ * which the config works out again whenever its settling time, bandwidth scale or {@code b0}
+ * changes. So every live-tunable value takes effect on the next step. The system order, input delay
+ * and tracking differentiator are fixed when the controller is initialized.
+ *
+ * <p>A motor controller running this controller limits and ramps its output itself, with
+ * {@code withClosedLoopControllerMaximumVoltage(...)} and {@code withClosedLoopRampRate(...)}, and
+ * tells the observer the voltage it applied. The limits given to {@link #initialize} are for a
+ * controller run on its own.
  *
  * <h2>Example velocity control</h2>
  * <pre>{@code
@@ -51,7 +58,7 @@ import org.wpilib.units.measure.Voltage;
  * ADRCController adrc = new ADRCController(new ADRCConfig()
  *     .withSystemOrder(SystemOrder.FIRST)
  *     .withSettlingTime(Seconds.of(0.2)));
- * // b0 and the maximum output, which the config leaves unset, and the control period.
+ * // b0, which the config leaves unset, the output limit and the control period.
  * adrc.initialize(b0, Volts.of(12), Milliseconds.of(20));
  *
  * // In periodic():
@@ -130,6 +137,12 @@ public class ADRCController {
   private double[] uHistory;
   /** Reference tracking differentiator, or {@code null} when it is off. */
   private TrackingDifferentiator td;
+  /** Smallest output, volts. */
+  private double minOutput;
+  /** Largest output, volts. */
+  private double maxOutput;
+  /** Largest output change per second, volts per second; zero when it is off. */
+  private double slewRateLimit;
   /** Whether {@link #initialize} has completed. */
   private boolean initialized;
 
@@ -149,22 +162,50 @@ public class ADRCController {
   }
 
   /**
-   * Initialize the controller: give its config the values it cannot hold itself, which also works
-   * out its gains, and start the observer and the output at zero.
+   * Initialize the controller with symmetric output limits and no slew-rate limit, as a motor
+   * controller does: give its config the values it cannot hold itself, which also works out its
+   * gains, and start the observer and the output at zero.
    *
    * @param b0         Input gain used while the config leaves {@code b0} unset, such as the one
    *                   {@link ADRCConfig#resolveB0} derives. Must be finite and non-zero when used.
-   * @param maxVoltage Maximum output used while the config leaves it unset, such as the motor
-   *                   config's closed loop voltage limit.
+   * @param maxVoltage Largest output; the smallest is its negative. Must not be negative.
    * @param period     Control period. Must be finite and positive.
    * @throws IllegalArgumentException if a value is invalid, or the tracking differentiator cannot
    *                                  run at this period.
    */
   public void initialize(double b0, Voltage maxVoltage, Time period) {
+    initialize(b0, maxVoltage.unaryMinus(), maxVoltage, Volts.per(Second).zero(), period);
+  }
+
+  /**
+   * Initialize the controller: give its config the values it cannot hold itself, which also works
+   * out its gains, and start the observer and the output at zero.
+   *
+   * @param b0            Input gain used while the config leaves {@code b0} unset, such as the one
+   *                      {@link ADRCConfig#resolveB0} derives. Must be finite and non-zero when used.
+   * @param minVoltage    Smallest output. Must not be above {@code maxVoltage}.
+   * @param maxVoltage    Largest output.
+   * @param slewRateLimit Largest output change per second; zero turns it off. Must not be negative.
+   * @param period        Control period. Must be finite and positive.
+   * @throws IllegalArgumentException if a value is invalid, or the tracking differentiator cannot
+   *                                  run at this period.
+   */
+  public void initialize(double b0, Voltage minVoltage, Voltage maxVoltage, Velocity<VoltageUnit> slewRateLimit,
+      Time period) {
     this.initialized = false;
     final double seconds = period.in(Seconds);
     if (!Double.isFinite(seconds) || seconds <= 0) {
       throw new IllegalArgumentException("The control period must be finite and positive");
+    }
+    final double min = minVoltage.in(Volts);
+    final double max = maxVoltage.in(Volts);
+    if (Double.isNaN(min) || Double.isNaN(max) || min > max) {
+      throw new IllegalArgumentException("The output limits must not be NaN, and the minimum (" + min
+          + " V) must not be above the maximum (" + max + " V)");
+    }
+    final double slew = slewRateLimit.in(Volts.per(Second));
+    if (Double.isNaN(slew) || slew < 0) {
+      throw new IllegalArgumentException("The slew rate limit must not be negative, got " + slew + " V/s");
     }
     final double delaySteps =
         config.getInputDelay().orElse(ADRCConfig.DEFAULT_INPUT_DELAY).in(Seconds) / seconds;
@@ -174,7 +215,10 @@ public class ADRCController {
     final TrackingDifferentiator newTd = config.getTdMethod()
         .map(method -> new TrackingDifferentiator(method, seconds, config.getTdParams()))
         .orElse(null);
-    config.setBuiltValues(b0, maxVoltage, period);
+    config.setBuiltValues(b0, period);
+    this.minOutput = min;
+    this.maxOutput = max;
+    this.slewRateLimit = slew;
 
     this.xhat = new SimpleMatrix(controllerOrder, 1);
     this.secondaryXhat = new SimpleMatrix(controllerOrder, 1);
@@ -226,12 +270,11 @@ public class ADRCController {
     }
     double u = v / gains.b0;
 
-    double slewRateLimit = getSlewRateLimit();
     if (slewRateLimit > 0.0) {
       double maxChange = slewRateLimit * config.getBuiltPeriod().in(Seconds);
       u = uPrev + Math.max(-maxChange, Math.min(maxChange, u - uPrev));
     }
-    u = Math.min(Math.max(u, getMinOutput()), getMaxOutput());
+    u = Math.min(Math.max(u, minOutput), maxOutput);
 
     System.arraycopy(uHistory, 0, uHistory, 1, uHistory.length - 1);
     uHistory[0] = u;
@@ -562,34 +605,37 @@ public class ADRCController {
   }
 
   /**
-   * Get the minimum output: the config's, or the negative of the maximum.
+   * Get the smallest output, given to {@link #initialize}.
    *
-   * @return Minimum output.
+   * @return Smallest output.
    * @throws IllegalStateException if the controller has not been initialized.
    */
-  public double getMinOutput() {
-    return config.getMinVoltage().map(v -> v.in(Volts)).orElse(-getMaxOutput());
-  }
-
-  /**
-   * Get the maximum output: the config's, or the one given to {@link #initialize} while the config
-   * leaves it unset.
-   *
-   * @return Maximum output.
-   * @throws IllegalStateException if the controller has not been initialized.
-   */
-  public double getMaxOutput() {
+  public Voltage getMinOutput() {
     requireInitialized();
-    return config.getMaxVoltage().orElse(config.getBuiltMaxVoltage()).in(Volts);
+    return Volts.of(minOutput);
   }
 
   /**
-   * Get the output slew-rate limit from the config.
+   * Get the largest output, given to {@link #initialize}: for a motor controller, its closed loop
+   * maximum voltage.
    *
-   * @return Maximum output change per second, or zero when the limit is off.
+   * @return Largest output.
+   * @throws IllegalStateException if the controller has not been initialized.
    */
-  public double getSlewRateLimit() {
-    return config.getSlewRateLimit().orElse(ADRCConfig.DEFAULT_SLEW_RATE_LIMIT).in(Volts.per(Second));
+  public Voltage getMaxOutput() {
+    requireInitialized();
+    return Volts.of(maxOutput);
+  }
+
+  /**
+   * Get the output slew-rate limit given to {@link #initialize}.
+   *
+   * @return Largest output change per second, zero when the limit is off.
+   * @throws IllegalStateException if the controller has not been initialized.
+   */
+  public Velocity<VoltageUnit> getSlewRateLimit() {
+    requireInitialized();
+    return Volts.per(Second).of(slewRateLimit);
   }
 
   /**
