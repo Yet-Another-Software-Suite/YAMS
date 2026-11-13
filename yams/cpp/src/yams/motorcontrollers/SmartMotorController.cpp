@@ -224,6 +224,8 @@ void SmartMotorController::IterateClosedLoopController() {
   };
   ProfileState nextTrap{};
   ProfileState nextExpo{};
+  // The profile's state at the start of this loop, which the next state is profiled from.
+  std::optional<ProfileState> profileNow;
   bool velocityTrapezoidalProfile = false;
 
   auto calculateTrap = [&](ProfileState current, double goal) {
@@ -231,12 +233,14 @@ void SmartMotorController::IterateClosedLoopController() {
       using P = wpi::math::TrapezoidProfile<wpi::units::meters>;
       auto st = m_linearTrapState.value_or(P::State{wpi::units::meter_t{current.position},
                                                      wpi::units::meters_per_second_t{current.velocity}});
+      profileNow = ProfileState{st.position.value(), st.velocity.value()};
       auto n = linTrapProfile->Calculate(loopTime, st, P::State{wpi::units::meter_t{goal}, {}});
       return ProfileState{n.position.value(), n.velocity.value()};
     }
     using P = wpi::math::TrapezoidProfile<wpi::units::turns>;
     auto st = m_trapState.value_or(P::State{wpi::units::turn_t{current.position},
                                             wpi::units::turns_per_second_t{current.velocity}});
+    profileNow = ProfileState{st.position.value(), st.velocity.value()};
     auto n = trapProfile->Calculate(loopTime, st, P::State{wpi::units::turn_t{goal}, {}});
     return ProfileState{n.position.value(), n.velocity.value()};
   };
@@ -255,12 +259,14 @@ void SmartMotorController::IterateClosedLoopController() {
         using P = wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>;
         auto st = m_linearExpoState.value_or(
             P::State{wpi::units::meter_t{position}, wpi::units::meters_per_second_t{velocity}});
+        profileNow = ProfileState{st.position.value(), st.velocity.value()};
         auto n = linExpoProfile->Calculate(loopTime, st, P::State{wpi::units::meter_t{setpoint}, {}});
         nextExpo = {n.position.value(), n.velocity.value()};
       } else {
         using P = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
         auto st = m_expoState.value_or(
             P::State{wpi::units::turn_t{position}, wpi::units::turns_per_second_t{velocity}});
+        profileNow = ProfileState{st.position.value(), st.velocity.value()};
         auto n = expoProfile->Calculate(loopTime, st, P::State{wpi::units::turn_t{setpoint}, {}});
         nextExpo = {n.position.value(), n.velocity.value()};
       }
@@ -288,6 +294,7 @@ void SmartMotorController::IterateClosedLoopController() {
     double measured = mechanismPosition.value();
     double setpoint = wrappedSetpoint->value();
     double velProfile = 0.0;
+    bool profiled = false;
     if (linear) {
       measured = GetMeasurementPosition().value();
       setpoint = cfg.ConvertFromMechanism(*m_setpointPosition).value();
@@ -295,14 +302,23 @@ void SmartMotorController::IterateClosedLoopController() {
     if (hasExpo) {
       setpoint = nextExpo.position;
       velProfile = nextExpo.velocity;
+      profiled = true;
     } else if (hasTrap && !velocityProfileConfigured) {
       setpoint = nextTrap.position;
       velProfile = nextTrap.velocity;
+      profiled = true;
     }
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
-    // The observer is told the voltage the motor controller applied, not the one it asked for, so a current limit
-    // or a low battery is not mistaken for a disturbance.
-    if (m_adrc) pidOutput = m_adrc->Calculate(measured, setpoint, GetVoltage()).value();
+    // The ADRC follows the profile's state now and feeds forward how it moves to the next one, so it neither trails a
+    // moving profile nor runs a loop ahead of it. Without a profile, the setpoint stands still. The observer is told the
+    // voltage the motor controller applied, not the one it asked for, so a current limit or a low battery is not
+    // mistaken for a disturbance.
+    if (m_adrc) {
+      const math::ADRCController::Reference next{setpoint, velProfile};
+      const math::ADRCController::Reference now =
+          profiled && profileNow ? math::ADRCController::Reference{profileNow->position, profileNow->velocity} : next;
+      pidOutput = m_adrc->Calculate(measured, now, next, GetVoltage()).value();
+    }
     if (m_lqr) {
       if (!linear) {
         pidOutput =
@@ -326,9 +342,23 @@ void SmartMotorController::IterateClosedLoopController() {
       measured = GetMeasurementVelocity().value();
       setpoint = cfg.ConvertFromMechanism(*m_setpointVelocity).value();
     }
-    if (velocityTrapezoidalProfile) setpoint = nextTrap.position;
+    // A velocity profile's state holds the setpoint velocity as its position and the acceleration as its velocity.
+    double accelProfile = 0.0;
+    if (velocityTrapezoidalProfile) {
+      setpoint = nextTrap.position;
+      accelProfile = nextTrap.velocity;
+    }
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
-    if (m_adrc) pidOutput = m_adrc->Calculate(measured, setpoint, GetVoltage()).value();
+    // A velocity profile's state is a velocity and its acceleration: the ADRC follows it the same way it follows a
+    // position profile.
+    if (m_adrc) {
+      const math::ADRCController::Reference next{setpoint, accelProfile};
+      const math::ADRCController::Reference now =
+          velocityTrapezoidalProfile && profileNow
+              ? math::ADRCController::Reference{profileNow->position, profileNow->velocity}
+              : next;
+      pidOutput = m_adrc->Calculate(measured, now, next, GetVoltage()).value();
+    }
     if (m_lqr) {
       if (!linear) {
         pidOutput = m_lqr

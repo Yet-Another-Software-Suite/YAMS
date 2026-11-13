@@ -117,6 +117,92 @@ class ADRCControllerTest {
   }
 
   /**
+   * A setpoint moving at a steady rate, as a motion profile's does while it cruises. Given where it
+   * is now and where it will be next, the controller tracks it; told only the position, it trails
+   * it, by the rate divided by the bandwidth for a first order loop and twice that for a second
+   * order loop.
+   */
+  @ParameterizedTest(name = "order {0}")
+  @ValueSource(ints = {1, 2})
+  void tracksAMovingSetpointGivenItsRate(int order) {
+    final double rate = 0.5;
+    final double seconds = 4;
+    final double[] lag = new double[2];
+    for (int withRate = 0; withRate < 2; withRate++) {
+      final ADRCController adrc = controller(order, 0.5, 10);
+      final Plant plant = new Plant(order, 10, 0, 0);
+      final int steps = (int) Math.round(seconds / kDt);
+      for (int i = 0; i < steps; i++) {
+        final double now = rate * i * kDt;
+        final double next = rate * (i + 1) * kDt;
+        plant.step(withRate == 1
+            ? adrc.calculate(plant.output(), new ADRCController.Reference(now, rate),
+                new ADRCController.Reference(next, rate), Double.NaN)
+            : adrc.calculate(plant.output(), now, Double.NaN));
+      }
+      // The plant has run one period past the last setpoint: compare it with where the setpoint is now.
+      lag[withRate] = rate * steps * kDt - plant.output();
+    }
+    final double bandwidth = 2.0 * (order + 1) / 0.5;
+    assertEquals(order * rate / bandwidth, lag[0], 0.02,
+        "told only the position, order " + order + " should trail by about " + order + " rate/bandwidth");
+    assertTrue(Math.abs(lag[1]) < 0.02 * lag[0],
+        "given the rate, order " + order + " should track it, but trailed by " + lag[1] + " (vs " + lag[0] + ")");
+  }
+
+  /** A still reference is the plain setpoint, and a non-finite rate is taken as zero. */
+  @ParameterizedTest(name = "order {0}")
+  @ValueSource(ints = {1, 2})
+  void aStillReferenceIsThePlainSetpoint(int order) {
+    final ADRCController plain = controller(order, 0.5, 10);
+    final ADRCController still = controller(order, 0.5, 10);
+    final ADRCController nonFinite = controller(order, 0.5, 10);
+    for (int i = 0; i < 10; i++) {
+      final double expected = plain.calculate(0.1 * i, 1.0, Double.NaN);
+      assertEquals(expected, still.calculate(0.1 * i, ADRCController.Reference.still(1.0),
+          ADRCController.Reference.still(1.0), Double.NaN), 1e-12);
+      assertEquals(expected, nonFinite.calculate(0.1 * i, new ADRCController.Reference(1.0, Double.NaN),
+          new ADRCController.Reference(1.0, Double.POSITIVE_INFINITY), Double.NaN), 1e-12);
+    }
+  }
+
+  /**
+   * The general observer, which places its poles by Ackermann's formula and is used when the
+   * back-EMF is modeled, gives the same gains as the closed forms for a chain of integrators.
+   */
+  @ParameterizedTest(name = "order {0}")
+  @ValueSource(ints = {1, 2, 3, 4})
+  void placingTheObserverPolesMatchesTheClosedForms(int order) {
+    final ADRCController.Gains chain = ADRCController.computeGains(order, 20, 10, kDt);
+    final org.ejml.simple.SimpleMatrix c = new org.ejml.simple.SimpleMatrix(1, order + 1);
+    c.set(0, 0, 1.0);
+    // The chain's discrete state matrix, recovered from (I - L C) Ad with L known.
+    final org.ejml.simple.SimpleMatrix ad = org.ejml.simple.SimpleMatrix.identity(order + 1)
+        .minus(chain.ld.mult(c)).solve(chain.ad);
+    final org.ejml.simple.SimpleMatrix placed =
+        ADRCController.placeObserverPoles(ad, c, Math.exp(-4 * 20 * kDt));
+    for (int i = 0; i <= order; i++) {
+      assertEquals(chain.ld.get(i), placed.get(i), 1e-9 * Math.max(1, Math.abs(chain.ld.get(i))),
+          "gain " + i);
+    }
+  }
+
+  /**
+   * With the back-EMF in the observer's model, the observer still has every pole of its error
+   * dynamics, {@code (I - L C) Ad}, at the one its bandwidth gives.
+   */
+  @Test
+  void theBackEmfObserverPlacesItsPoles() {
+    final double tau = 0.16;
+    final ADRCController.Gains gains = ADRCController.computeGains(2, 20, 10, kDt, 1 / tau);
+    assertEquals(1 / tau, gains.backEmfRate, 1e-12);
+    final var eigen = gains.ad.eig();
+    for (int i = 0; i < eigen.getNumberOfEigenvalues(); i++) {
+      assertEquals(Math.exp(-80 * kDt), eigen.getEigenvalue(i).getMagnitude(), 1e-3);
+    }
+  }
+
+  /**
    * An actuator that applies less than it is asked for, as a motor controller does at its current
    * limit: told what was applied, the observer does not mistake the shortfall for a disturbance, and
    * the loop settles once the setpoint is within the actuator's reach.

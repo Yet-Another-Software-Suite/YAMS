@@ -118,6 +118,37 @@ class ADRCConfigTest {
   }
 
   @Test
+  void theBackEmfIsModeledWhereB0IsAnAccelerationPerVolt() {
+    final DCMotor motor = DCMotor.getNEO(1);
+    final double tau12 = 0.1 * motor.R / (12 * 12 * motor.Kt / motor.Kv);
+    final ADRCConfig pivot = new ADRCConfig().withSystemOrder(SystemOrder.PIVOT);
+    pivot.buildController(motor, smcConfig().withMomentOfInertia(KilogramSquareMeters.of(0.1)), Milliseconds.of(20));
+    assertTrue(pivot.isBackEmfModeled());
+    assertEquals(tau12, pivot.getModeledBackEmfTimeConstant().orElseThrow().in(Seconds), 1e-12,
+        "a second order position loop models its back-EMF time constant");
+    pivot.withBackEmfModel(false);
+    assertTrue(pivot.getModeledBackEmfTimeConstant().isEmpty(), "turned off, it is left in the disturbance");
+
+    final ADRCConfig flywheel = new ADRCConfig().withSystemOrder(SystemOrder.FLYWHEEL);
+    flywheel.buildController(motor, smcConfig().withMomentOfInertia(KilogramSquareMeters.of(0.1)), Milliseconds.of(20));
+    assertTrue(flywheel.getModeledBackEmfTimeConstant().isEmpty(), "a flywheel still lumps it into the disturbance");
+
+    final ADRCConfig geared = new ADRCConfig().withSystemOrder(SystemOrder.PIVOT);
+    geared.buildController(motor, smcConfig().withGearing(new MechanismGearing(GearBox.fromReductionStages(60)))
+        .withMomentOfInertia(KilogramSquareMeters.of(0.1)), Milliseconds.of(20));
+    assertTrue(geared.getModeledBackEmfTimeConstant().isEmpty(),
+        "a first order position loop's speed per volt already includes the back-EMF");
+
+    final ADRCConfig fixed = new ADRCConfig().withSystemOrder(SystemOrder.SECOND).withB0(10);
+    fixed.buildController(motor, smcConfig().withMomentOfInertia(KilogramSquareMeters.of(0.1)), Milliseconds.of(20));
+    assertTrue(fixed.getModeledBackEmfTimeConstant().isEmpty(), "a fixed order leaves the model to the user");
+
+    final ADRCConfig noInertia = new ADRCConfig().withSystemOrder(SystemOrder.FLYWHEEL).withB0(10);
+    noInertia.buildController(motor, smcConfig(), Milliseconds.of(20));
+    assertTrue(noInertia.getModeledBackEmfTimeConstant().isEmpty(), "without an inertia there is nothing to model");
+  }
+
+  @Test
   void aTrackingDifferentiatorAndAMotionProfileAreRefused() {
     final DCMotor motor = DCMotor.getNEO(1);
     final ADRCConfig cfg = new ADRCConfig().withSystemOrder(SystemOrder.FIRST).withB0(10)

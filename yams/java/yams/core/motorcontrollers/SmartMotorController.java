@@ -507,6 +507,8 @@ public abstract class SmartMotorController {
     AtomicReference<Boolean> velocityTrapezoidalProfile = new AtomicReference<>(false);
     AtomicReference<ExponentialProfile.State> nextExpoState = new AtomicReference<>(new ExponentialProfile.State(0.0, 0.0));
     AtomicReference<TrapezoidProfile.State> nextTrapState = new AtomicReference<>(new TrapezoidProfile.State(0.0, 0.0));
+    // The profile's state at the start of this loop, which the next state is profiled from.
+    AtomicReference<ADRCController.Reference> profileNow = new AtomicReference<>();
     AtomicReference<Double> pidOutputVoltage = new AtomicReference<>((double) 0);
     AtomicReference<Double> feedforward = new AtomicReference<>(0.0);
     Optional<Angle> mechLowerLimit = m_config.getMechanismLowerLimit();
@@ -576,9 +578,13 @@ public abstract class SmartMotorController {
       }
 
       if (m_expoProfile.isPresent()) {
-        nextExpoState.set(m_expoProfile.get().calculate(loopTime, m_expoState.orElse(new ExponentialProfile.State(position, velocity)), new ExponentialProfile.State(setpoint, 0)));
+        var now = m_expoState.orElse(new ExponentialProfile.State(position, velocity));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextExpoState.set(m_expoProfile.get().calculate(loopTime, now, new ExponentialProfile.State(setpoint, 0)));
       } else if (m_trapezoidProfile.isPresent()) {
-        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(position, velocity)), new TrapezoidProfile.State(setpoint, 0)));
+        var now = m_trapState.orElse(new TrapezoidProfile.State(position, velocity));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, now, new TrapezoidProfile.State(setpoint, 0)));
       }
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -593,7 +599,9 @@ public abstract class SmartMotorController {
 
       if (m_trapezoidProfile.isPresent()) {
         // TODO: 2027, Derive acceleration from SMCs
-        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(velocity, 0)), new TrapezoidProfile.State(setpoint, 0)));
+        var now = m_trapState.orElse(new TrapezoidProfile.State(velocity, 0));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, now, new TrapezoidProfile.State(setpoint, 0)));
         velocityTrapezoidalProfile.set(true);
       }
     }
@@ -603,6 +611,7 @@ public abstract class SmartMotorController {
       var measured = mechanismPosition.in(Rotations);
       var setpoint = wrappedSetpointPosition.get().in(Rotations);
       var velocityProfile = 0.0;
+      var profiled = false;
 
       // Set the measured value and setpoint to Meters, if linear
       if (m_config.getLinearClosedLoopControllerUse()) {
@@ -613,9 +622,11 @@ public abstract class SmartMotorController {
       if (m_expoProfile.isPresent()) {
         setpoint = nextExpoState.get().position; // Rotations or Meters; depending on config
         velocityProfile = nextExpoState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        profiled = true;
       } else if (m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Rotations or Meters; depending on config
         velocityProfile = nextTrapState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        profiled = true;
       }
 
       // Set the controller
@@ -630,9 +641,14 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured), Rotations.of(finalSetpoint), RotationsPerSecond.of(finalVelocityProfile)).in(Volts));
         }
       });
-      // The observer is told the voltage the motor controller applied, not the one it asked for, so
-      // a current limit or a low battery is not mistaken for a disturbance.
-      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalMeasured, finalSetpoint, getVoltage().in(Volts))));
+      // The ADRC follows the profile's state now and feeds forward how it moves to the next one,
+      // so it neither trails a moving profile nor runs a loop ahead of it. Without a profile, the
+      // setpoint stands still. The observer is told the voltage the motor controller applied, not the
+      // one it asked for, so a current limit or a low battery is not mistaken for a disturbance.
+      final ADRCController.Reference next = new ADRCController.Reference(finalSetpoint, finalVelocityProfile);
+      final ADRCController.Reference now = profiled && profileNow.get() != null ? profileNow.get() : next;
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(
+          finalMeasured, now, next, getVoltage().in(Volts))));
 
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -644,14 +660,16 @@ public abstract class SmartMotorController {
         setpoint = m_config.convertFromMechanism(setpointVelocity.get()).in(MetersPerSecond); // Convert setpoint to Meters
       }
 
+      var acceleration = 0.0;
       if (m_trapezoidProfile.isPresent() && m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Poorly named, in a velocity control loop, this
         // is the setpoint velocity.
-        var acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
+        acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
       }
 
       double finalVelocity = velocity;
       double finalSetpoint = setpoint;
+      double finalAcceleration = acceleration;
       m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalVelocity, finalSetpoint)));
       m_lqr.ifPresent(lqrController -> {
         if (m_config.getLinearClosedLoopControllerUse()) {
@@ -660,7 +678,13 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity), RotationsPerSecond.of(finalSetpoint)).in(Volts));
         }
       });
-      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(finalVelocity, finalSetpoint, getVoltage().in(Volts))));
+      // A velocity profile's state is a velocity and its acceleration: the ADRC follows it the same
+      // way it follows a position profile.
+      final ADRCController.Reference next = new ADRCController.Reference(finalSetpoint, finalAcceleration);
+      final ADRCController.Reference now = velocityTrapezoidalProfile.get() && profileNow.get() != null
+          ? profileNow.get() : next;
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(
+          finalVelocity, now, next, getVoltage().in(Volts))));
     }
 
     armFeedforward.ifPresent(armFeedforwardPerRotation -> {

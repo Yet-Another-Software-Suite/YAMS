@@ -115,6 +115,39 @@ class ADRCController {
   wpi::units::volt_t Calculate(double measurement, double setpoint, wpi::units::volt_t appliedOutput);
 
   /**
+   * A setpoint and how fast it is changing, such as a motion profile's state: a position and its velocity, or for a
+   * velocity loop, a velocity and its acceleration, in the loop's units.
+   */
+  struct Reference {
+    double value{0.0};  ///< The setpoint.
+    double rate{0.0};   ///< How fast it is changing, per second.
+
+    /** @return A setpoint standing still. */
+    static Reference Still(double value) { return Reference{value, 0.0}; }
+  };
+
+  /**
+   * Run one control step on a moving setpoint, such as a motion profile's, telling the observer what the actuator
+   * applied since the last step.
+   *
+   * The controller is given the setpoint where it is now, at the start of the control period, and where it will be at
+   * the end, as WPILib's feedforwards are. It follows the setpoint now, and feeds forward how it moves over the period:
+   * a first order loop the average rate over the period, and a higher order loop the rate now and the change of rate
+   * over the period. Given only the setpoint at the end of the period, its stiff feedback would pull the mechanism a
+   * period ahead of the profile. A setpoint standing still is Reference::Still(setpoint) for both. A tracking
+   * differentiator, when the config turns one on, replaces the rates with its own.
+   *
+   * @param measurement   Measured output.
+   * @param now           The setpoint now, and its rate.
+   * @param next          The setpoint one control period from now, and its rate.
+   * @param appliedOutput Output the actuator applied, such as the motor controller's voltage. A non-finite value is
+   *                      ignored.
+   * @return Controller output.
+   * @throws std::logic_error if the controller has not been initialized.
+   */
+  wpi::units::volt_t Calculate(double measurement, Reference now, Reference next, wpi::units::volt_t appliedOutput);
+
+  /**
    * Start the observer at a measurement, with the other states, the disturbance and the output at zero.
    *
    * @param measurement Measured output, in the units the controller is stepped with.
@@ -183,9 +216,11 @@ class ADRCController {
    * @param wc          Closed-loop bandwidth, radians per second.
    * @param b0          Input gain.
    * @param dt          Control period, seconds.
+   * @param backEmfRate One over the back-EMF time constant the observer's model includes, per second; 0 leaves the
+   *                    back-EMF in the disturbance. With it, the model is y^(order) = b0 u - backEmfRate y^(order-1) + f.
    * @return The gains.
    */
-  static ADRCGains ComputeGains(int systemOrder, double wc, double b0, double dt);
+  static ADRCGains ComputeGains(int systemOrder, double wc, double b0, double dt, double backEmfRate = 0.0);
 
   /** Throw std::logic_error unless Initialize has completed. */
   void RequireInitialized() const;

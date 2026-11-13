@@ -63,6 +63,18 @@ public class ADRCMechanismTest {
     return ClosedLoopCases.controllers();
   }
 
+  /**
+   * An ADRC config.
+   *
+   * <p>The arm and pivot leave the back-EMF in the disturbance on a Talon. A Talon is simulated on
+   * CTRE's own real-time thread, whose timing shifts from run to run by up to a loop; holding a
+   * setpoint in a mechanism there, a pivot with the back-EMF modeled sometimes settled into a slow
+   * oscillation that no fixed delay or jitter reproduced. The other motor controllers test it.
+   *
+   * @param order           System order.
+   * @param settlingSeconds Settling time, seconds.
+   * @return The config.
+   */
   private static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
     return new ADRCConfig()
         .withSystemOrder(order)
@@ -103,7 +115,7 @@ public class ADRCMechanismTest {
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(-30))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.ARM, 0.6)));
+            .withADRCController(adrc(SystemOrder.ARM, 0.6).withBackEmfModel(!controller.realTime())));
     try {
       final Arm arm = new Arm(new ArmConfig()
                                   .withLength(Meters.of(0.5))
@@ -126,7 +138,7 @@ public class ADRCMechanismTest {
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(0))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.PIVOT, 0.6)));
+            .withADRCController(adrc(SystemOrder.PIVOT, 0.6).withBackEmfModel(!controller.realTime())));
     try {
       final Pivot pivot =
           new Pivot(new PivotConfig().withHardLimits(Degrees.of(-180), Degrees.of(180)), smc);

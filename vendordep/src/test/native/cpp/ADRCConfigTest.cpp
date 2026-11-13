@@ -244,4 +244,45 @@ TEST_CASE("ADRCConfig.ACopyOfTheMotorConfigGetsItsOwnADRCConfig", "[ADRCConfig]"
   CHECK(*smc.GetADRCController()->GetB0() == 3);
 }
 
+TEST_CASE("ADRCConfig.ModelsTheBackEmfWhereB0IsAnAccelerationPerVolt", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  const double tau12 = 0.1 * motor.R.value() / (12 * 12 * motor.Kt.value() / motor.Kv.value());
+  auto inertia = SmcConfig();
+  inertia.WithMOI(wpi::units::kilogram_square_meter_t{0.1});
+
+  // A second order position loop models its back-EMF time constant, and can be turned off.
+  ADRCConfig pivot;
+  pivot.WithSystemOrder(ADRCConfig::SystemOrder::PIVOT);
+  auto shared = Shared(pivot);
+  ADRCConfig::BuildController(shared, motor, inertia, 20_ms);
+  CHECK(shared->IsBackEmfModeled());
+  REQUIRE(shared->GetModeledBackEmfTimeConstant());
+  CHECK(shared->GetModeledBackEmfTimeConstant()->value() == Catch::Approx(tau12));
+  shared->WithBackEmfModel(false);
+  CHECK_FALSE(shared->GetModeledBackEmfTimeConstant());
+
+  // A flywheel still lumps it into the disturbance.
+  ADRCConfig flywheel;
+  flywheel.WithSystemOrder(ADRCConfig::SystemOrder::FLYWHEEL);
+  auto sharedFlywheel = Shared(flywheel);
+  ADRCConfig::BuildController(sharedFlywheel, motor, inertia, 20_ms);
+  CHECK_FALSE(sharedFlywheel->GetModeledBackEmfTimeConstant());
+
+  // A first order position loop's speed per volt already includes it.
+  auto geared = SmartMotorControllerConfig{};
+  geared.WithMotorGearing(60.0).WithMOI(wpi::units::kilogram_square_meter_t{0.1});
+  ADRCConfig firstOrder;
+  firstOrder.WithSystemOrder(ADRCConfig::SystemOrder::PIVOT);
+  auto sharedFirst = Shared(firstOrder);
+  ADRCConfig::BuildController(sharedFirst, motor, geared, 20_ms);
+  CHECK_FALSE(sharedFirst->GetModeledBackEmfTimeConstant());
+
+  // A fixed order leaves the model to the user.
+  ADRCConfig fixed;
+  fixed.WithSystemOrder(ADRCConfig::SystemOrder::SECOND).WithB0(10);
+  auto sharedFixed = Shared(fixed);
+  ADRCConfig::BuildController(sharedFixed, motor, inertia, 20_ms);
+  CHECK_FALSE(sharedFixed->GetModeledBackEmfTimeConstant());
+}
+
 }  // namespace yams::test

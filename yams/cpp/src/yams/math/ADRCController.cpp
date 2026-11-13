@@ -28,13 +28,6 @@ double Binomial(int total, int choose) {
   return result;
 }
 
-/** value! */
-double Factorial(int value) {
-  double result = 1;
-  for (int i = 2; i <= value; ++i) result *= i;
-  return result;
-}
-
 /** Matrix exponential exp(a * dt) by Taylor series. */
 Eigen::MatrixXd Expm(const Eigen::MatrixXd& a, double dt) {
   const auto m = a.rows();
@@ -48,16 +41,41 @@ Eigen::MatrixXd Expm(const Eigen::MatrixXd& a, double dt) {
   return sum;
 }
 
-/** The discrete input matrix by Taylor series. */
+/**
+ * The discrete input matrix: the integral of exp(A t) over the period, times B. Its series, the sum of A^(i-1) dt^i /
+ * i!, ends after m terms for a chain of integrators, and converges quickly with the back-EMF in it.
+ */
 Eigen::MatrixXd DiscreteInput(const Eigen::MatrixXd& a, const Eigen::MatrixXd& b, double dt) {
   const auto m = a.rows();
   Eigen::MatrixXd sum = Eigen::MatrixXd::Zero(m, m);
-  Eigen::MatrixXd aPow = Eigen::MatrixXd::Identity(m, m);
-  for (int i = 1; i <= m + 1; ++i) {
-    sum += aPow * (std::pow(dt, i) / Factorial(i));
-    aPow = aPow * a;
+  Eigen::MatrixXd term = Eigen::MatrixXd::Identity(m, m) * dt;
+  for (int i = 1; i < 50; ++i) {
+    sum += term;
+    term = (term * a) * (dt / (i + 1));
+    if (term.cwiseAbs().maxCoeff() < 1e-18) break;
   }
   return sum * b;
+}
+
+/**
+ * The gain of an observer that corrects its prediction with the newest measurement, placing every pole of its error
+ * dynamics, (I - L C) Ad, at z: Ackermann's formula on the pair (Ad, C Ad).
+ */
+Eigen::VectorXd PlaceObserverPoles(const Eigen::MatrixXd& ad, const Eigen::MatrixXd& c, double z) {
+  const auto m = ad.rows();
+  Eigen::MatrixXd observability(m, m);
+  Eigen::MatrixXd row = c * ad;
+  for (Eigen::Index i = 0; i < m; ++i) {
+    observability.row(i) = row;
+    row = row * ad;
+  }
+  // (Ad - z I)^m, the characteristic polynomial with every pole at z.
+  const Eigen::MatrixXd shifted = ad - Eigen::MatrixXd::Identity(m, m) * z;
+  Eigen::MatrixXd polynomial = Eigen::MatrixXd::Identity(m, m);
+  for (Eigen::Index i = 0; i < m; ++i) polynomial = polynomial * shifted;
+  Eigen::VectorXd last = Eigen::VectorXd::Zero(m);
+  last(m - 1) = 1.0;
+  return polynomial * observability.fullPivLu().solve(last);
 }
 
 /** The observer gains for a plant order, from the discrete observer pole z = exp(-wo * dt). */
@@ -152,7 +170,9 @@ wpi::units::volt_t ADRCController::Step(double reference, double output, const s
   for (int i = 0; i < m_systemOrder; ++i) {
     v += gains.k(i) * (ref[i] - m_xhat(i));
   }
-  const double u = v / gains.b0;
+  // Supply the back-EMF the observer's model expects, from the estimated speed, so the observer's disturbance only
+  // holds what the model misses.
+  const double u = (v + gains.backEmfRate * m_xhat(m_systemOrder - 1)) / gains.b0;
 
   std::rotate(m_uHistory.rbegin(), m_uHistory.rbegin() + 1, m_uHistory.rend());
   m_uHistory[0] = u;
@@ -173,23 +193,45 @@ wpi::units::volt_t ADRCController::Calculate(double measurement, double setpoint
   return Step(setpoint, measurement);
 }
 
+wpi::units::volt_t ADRCController::Calculate(double measurement, Reference now, Reference next,
+                                             wpi::units::volt_t appliedOutput) {
+  RequireInitialized();
+  if (std::isfinite(appliedOutput.value())) {
+    m_uHistory[0] = appliedOutput.value();
+    m_uPrev = appliedOutput.value();
+  }
+  const double dt = m_config->GetStepValues().period;
+  const auto finiteOrZero = [](double value) { return std::isfinite(value) ? value : 0.0; };
+  std::vector<double> derivatives(static_cast<size_t>(m_systemOrder), 0.0);
+  if (m_systemOrder == 1) {
+    // The average rate over the period takes the setpoint exactly from now to next.
+    derivatives[0] = finiteOrZero((next.value - now.value) / dt);
+  } else {
+    derivatives[0] = finiteOrZero(now.rate);
+    derivatives[1] = finiteOrZero((next.rate - now.rate) / dt);
+  }
+  return Step(now.value, measurement, derivatives);
+}
+
 double ADRCController::Bandwidth(int systemOrder, double bandwidthScale, wpi::units::second_t settlingTime) {
   return 2.0 * (systemOrder + 1) * bandwidthScale / settlingTime.value();
 }
 
-ADRCGains ADRCController::ComputeGains(int systemOrder, double wc, double b0, double dt) {
+ADRCGains ADRCController::ComputeGains(int systemOrder, double wc, double b0, double dt, double backEmfRate) {
   const int m = systemOrder + 1;
   const double wo = kObserverBandwidthRatio * wc;
 
   Eigen::MatrixXd a = Eigen::MatrixXd::Zero(m, m);
   for (int i = 0; i < systemOrder; ++i) a(i, i + 1) = 1.0;
+  a(systemOrder - 1, systemOrder - 1) = -backEmfRate;
   Eigen::MatrixXd b = Eigen::MatrixXd::Zero(m, 1);
   b(systemOrder - 1, 0) = b0;
 
   ADRCGains gains;
-  gains.ld = ObserverGains(systemOrder, std::exp(-wo * dt), dt);
   Eigen::MatrixXd c = Eigen::MatrixXd::Zero(1, m);
   c(0, 0) = 1.0;
+  const double z = std::exp(-wo * dt);
+  gains.ld = backEmfRate == 0.0 ? ObserverGains(systemOrder, z, dt) : PlaceObserverPoles(Expm(a, dt), c, z);
   const Eigen::MatrixXd iMinusLc = Eigen::MatrixXd::Identity(m, m) - gains.ld * c;
   gains.ad = iMinusLc * Expm(a, dt);
   gains.bd = iMinusLc * DiscreteInput(a, b, dt);
@@ -198,6 +240,7 @@ ADRCGains ADRCController::ComputeGains(int systemOrder, double wc, double b0, do
     gains.k(systemOrder - i) = Binomial(systemOrder, i) * std::pow(wc, i);
   }
   gains.b0 = b0;
+  gains.backEmfRate = backEmfRate;
   return gains;
 }
 

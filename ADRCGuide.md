@@ -107,6 +107,12 @@ order with its speed per volt as `b0`; otherwise it is second order with its acc
 The choice needs the mechanism's moment of inertia, from `withMomentOfInertia(...)`. Without it,
 building the controller throws, except for `ELEVATOR`.
 
+A second order position loop's observer also models the motor's back-EMF, from the same `tau`, so
+its disturbance only holds what the model misses, such as gravity and friction. A first order
+loop's speed per volt already includes the back-EMF. See
+[Its observer has to model the back-EMF](#its-observer-has-to-model-the-back-emf), and
+`withBackEmfModel(false)` to turn it off.
+
 #### Elevators
 
 `ELEVATOR` is `POSITION` in a linear closed loop: it runs in meters, so its `b0` is too. It needs a
@@ -342,10 +348,10 @@ values last until the robot restarts: copy the ones you keep into the code.
 ## Following a motion profile
 
 A motion profile on the motor config turns a step into a trajectory: a position that moves at a
-limited speed and acceleration. Today YAMS gives the ADRC only the profile's next position, as it
-does a PID. This section explains why, what goes wrong when it is also given the profile's velocity,
-and what fixes it. Every number below was measured in simulation, on every motor controller YAMS
-tests, with this pivot:
+limited speed and acceleration. YAMS gives the ADRC the profile's state now and its state one
+control period ahead, and a second order position loop's observer models the motor's back-EMF.
+This section explains why both are needed. Every number below was measured in simulation with this
+pivot:
 
 - A NEO on a 12:1 reduction, with a 0.1 kg m² moment of inertia and no gravity.
 - `SystemOrder.PIVOT` with a 0.3 s settling time. The back-EMF time constant is 162 ms, so the
@@ -353,35 +359,37 @@ tests, with this pivot:
 - A trapezoidal profile to 90°, with a top speed of 40% of the motor's free speed at the mechanism
   and twice that per second as its acceleration. The move takes about 0.4 s.
 
-### Given only the profile's position, the ADRC trails it
+### Given only the profile's position, an ADRC trails it
 
-The ADRC treats every setpoint as standing still: it drives its estimated velocity to zero while
-the profile is moving. So it trails the profile, by up to 15° to 32° depending on the motor
-controller, and catches up after the profile ends. It arrives within 0° to 3° of the goal, so the
-lag is easy to miss on a step response, but a mechanism that has to be somewhere at a given time,
-such as an arm timed with an intake, is late.
+Told only where the profile is, the ADRC treats every setpoint as standing still: it drives its
+estimated velocity to zero while the profile is moving. So it trails the profile, by 15° to 32°
+depending on the motor controller, and catches up after the profile ends. It arrives within 0° to
+3° of the goal, so the lag is easy to miss on a step response, but a mechanism that has to be
+somewhere at a given time, such as an arm timed with an intake, is late.
 
-### Given its velocity too, it overshoots, for three reasons
+### Given the next state as a PID is, it runs a loop ahead
 
-Giving the ADRC the profile's velocity removes most of the lag, to 0° to 5°. But the pivot then
-overshoots the goal, by 3° to 10°. Three things cause it.
+A closed loop on the SystemCore is given the profile's state one control period ahead, which suits
+a PID: it pulls the mechanism toward where the profile will be when the period ends. An ADRC's
+feedback is far stiffer. Its position gain is the bandwidth squared, 400 here, so the one period
+lead, the profile's speed times the period while it cruises, asks for `400 × 0.02 = 8` rotations
+per second squared of extra acceleration per rotation per second of speed. At this profile's top
+speed that is about 10 rot/s², more than the 6.3 rot/s² the whole profile uses. Given the next
+position and velocity, the pivot ran ahead of the profile and overshot the goal by 3° to 11°.
 
-#### 1. The profile's next state leads the loop
+A zero order hold step is exact when the controller follows the profile's state now, at the start
+of the period, and feeds forward how it moves over the period. So
+`ADRCController.calculate(measurement, now, next, appliedOutput)` takes both states, as WPILib's
+feedforwards do:
 
-YAMS gives a closed loop the profile's state one control period ahead, which suits a PID: it pulls
-the mechanism toward where the profile will be when the period ends. An ADRC's feedback is far
-stiffer. Its position gain is the bandwidth squared, 400 here, so the one period lead, which is
-the profile's speed times the period while it cruises, asks for `400 × 0.02 = 8` rotations per
-second squared of extra acceleration per rotation per second. At this profile's top speed that is
-about 10 rot/s², more than the 6.3 rot/s² the whole profile uses. The pivot runs ahead of the
-profile, then past the goal.
+- **A second order loop** follows the position now, and takes the velocity now and the change of
+  velocity over the period, the profile's acceleration, as its feedforward.
+- **A first order loop** follows the position now, and takes the average velocity over the period,
+  `(next - now) / period`, which carries the setpoint exactly from one to the other.
 
-A zero order hold step is exact when the controller is given the profile's state now, at the start
-of the period, with the profile's acceleration over the period as its feedforward. The ADRC uses
-its reference's derivatives up to the plant order, so a second order loop takes the velocity and
-the acceleration, and a first order loop the velocity, best the average over the period.
+Without a profile, both states are the setpoint standing still, so nothing changes.
 
-#### 2. The observer lumps the back-EMF in with the disturbance
+### Its observer has to model the back-EMF
 
 The ADRC's model of a second order position loop is `x'' = b0 u + f`: the voltage accelerates the
 mechanism, and `f`, the total disturbance, is everything else. The observer estimates `f` and the
@@ -389,16 +397,16 @@ control law cancels it. For a DC motor, everything else includes its back-EMF, w
 mechanism in proportion to its speed:
 
 ```
-x'' = b u - x' / τ + d
+x'' = b u - x' / tau + d
 ```
 
-where `τ` is the back-EMF time constant and `d` is gravity, friction and anything else. Lumped
-together, `f = -x' / τ + d` changes as fast as the mechanism's speed does. The observer follows a
+where `tau` is the back-EMF time constant and `d` is gravity, friction and anything else. Lumped
+together, `f = -x' / tau + d` changes as fast as the mechanism's speed does. The observer follows a
 changing `f` with a lag of about one over its bandwidth, so it underestimates the braking while the
-pivot speeds up and overestimates it, pushing too long, while the pivot slows down. A slower
-observer lags more: at a 0.6 s settling time the overshoot grew to 8° to 16°. Without the
-profile's velocity the same lag is there, but the ADRC's velocity feedback, which drives the
-estimated velocity to zero, happens to brake the mechanism and hide it.
+pivot speeds up and overestimates it, pushing too long, while the pivot slows down. On the SPARK MAX and
+SPARK Flex the lag was enough to make the pivot oscillate after the profile ended, overshooting by
+6.7° to 8.3°. Without the profile's velocity the same lag is there, but the ADRC's velocity
+feedback, which drives the estimated velocity to zero, happens to brake the mechanism and hide it.
 
 Adding the back-EMF voltage as a feedforward, a kV of `G / Kv` volts per mechanism radian per
 second, does not help. It made the overshoot worse (up to 15°), because the observer has already
@@ -406,49 +414,56 @@ lumped the back-EMF into `f`, and the control law already cancels it: the feedfo
 second time.
 
 What does help is putting the back-EMF into the observer's model, so `f` only holds what the model
-misses (a model assisted observer):
+misses:
 
 ```
-x'' = b0 u - x̂' / τ + f
+x'' = b0 u - x̂' / tau + f
 ```
 
 The observer is told the back-EMF it should expect from its estimated velocity, and the control
-law cancels that modeled back-EMF along with the estimated `f`. `τ` comes from the motor, the
+law supplies that modeled back-EMF along with cancelling `f`. `tau` comes from the motor, the
 gearing and the moment of inertia, which YAMS already uses to derive `b0` and to choose the loop's
-form.
+form. The observer's gains are placed by Ackermann's formula, so its poles stay where its bandwidth
+puts them.
 
-#### 3. The SPARKs oscillate in simulation
+### What each change does
 
-The SPARK MAX and SPARK Flex flip the sign of their output every loop in simulation, and settle
-into a limit cycle of about ±10 V around the goal. This happens without the profile's velocity
-too. The voltage the ADRC is told was applied does not explain how the simulated mechanism moved,
-in any period or one or two periods later, so the observer is not told what the simulated motor
-really got. It is separate from the profile, and is still to be found.
+The furthest the pivot ran past 90°:
 
-### What each fix does
+| Fed to the ADRC | SPARK MAX | SPARK Flex | Thrifty Nova | A301 |
+| --- | --- | --- | --- | --- |
+| The next position only | +3.1° | +1.6° | +0.2° | 0.0° |
+| The next position and velocity | +8.0° | +11.4° | +6.5° | +2.8° |
+| The state now and next, back-EMF lumped | +6.7° | +8.3° | +1.7° | +0.4° |
+| The state now and next, back-EMF modeled | +0.8° | +1.1° | +0.3° | +0.1° |
 
-The peak position past 90°, and the worst the pivot trailed the profile while it moved:
+The last row is what YAMS does. With it, the pivot strayed from the profile by at most 0.1° to 1.5°
+while it moved, against 15° to 25° given only the next position, and every controller ended within
+0.01° of the goal.
 
-| Fed to the ADRC | TalonFX | TalonFXS | Thrifty Nova | A301 | Worst lag |
-| --- | --- | --- | --- | --- | --- |
-| The next position only (today) | +1.5° | +0.1° | +0.2° | 0.0° | 15° to 32° |
-| The next position and velocity | +10.1° | +9.8° | +6.5° | +2.8° | 0° to 5° |
-| The current position, velocity and acceleration | +4.3° | +1.4° | +1.7° | +0.4° | 0° to 18° |
-| The same, with the back-EMF in the observer's model | 0.0° | +0.1° | +0.1° | 0.0° | 0° to 3° |
+### On a Talon in simulation
 
-The SPARKs are left out: their oscillation hides the effect of the feed.
+A Talon is simulated on CTRE's own real-time thread, whose timing shifts by up to a loop from run
+to run. There, the modeled back-EMF tracks a profile within 2° to 5° once the shift is allowed for,
+but holding a setpoint in a Pivot mechanism, a TalonFXS sometimes settled into a slow oscillation
+instead, about 3 Hz, which the lumped observer did only rarely and far less. No fixed delay, jitter,
+quantization, misreported voltage or inertia error up to twice the real one reproduced it in a
+deterministic simulation, where the modeled back-EMF did as well as the lumped one or better, so
+it is attributed to that thread. YAMS's own tests leave the back-EMF lumped on the Talons.
 
-### Status
+If a mechanism oscillates slowly while holding with the back-EMF modeled, turn it off with
+`withBackEmfModel(false)`.
 
-YAMS gives the ADRC the profile's next position only, until the observer models the back-EMF.
-Then it will give the profile's current state and its acceleration. The same lumping is likely why
-a flywheel's ADRC needs a short settling time: a velocity loop also lumps the back-EMF, `v' = b u -
-v / τ + d`, which is the whole voltage a flywheel needs to hold its speed. Modeling it should let
-a flywheel use a longer, quieter settling time; that is not measured yet.
+### Flywheels
+
+A flywheel's velocity loop lumps the back-EMF too, `v' = b u - v / tau + d`, which is the whole
+voltage it needs to hold its speed. Modeling it let a flywheel settle up to twice as fast at a
+settling time of 0.3 s or more, but at 0.15 s, on a Talon, it overshot by 6% to 7% instead of under
+1%. So a `FLYWHEEL` still lumps the back-EMF, and keeps its short settling time.
 
 A [tracking differentiator](#smoothing-the-setpoint-the-tracking-differentiator) gives the ADRC
-its smoothed setpoint and that setpoint's rate together, from the same moment, so it has no
-timing lead. It still lumps the back-EMF, so it may overshoot the same way on a fast move.
+its smoothed setpoint and that setpoint's rate together, from the same moment, so it has no timing
+lead, and a second order loop's observer models the back-EMF with one too.
 
 ## Examples
 
@@ -570,6 +585,7 @@ them.
 | `withB0(double)` | Input gain. Default: derived, see above. Must be finite and non-zero. Works the gains out again. |
 | `withInputDelay(Time)` | Delay between the output and the plant responding, rounded to whole loops. 0, the default, turns it off. Must be finite and not negative. |
 | `withCascaded(boolean)` | Use the cascaded observer: a second ESO, fed the first one's estimate of the measurement, supplies the disturbance the control law cancels. Default off. |
+| `withBackEmfModel(boolean)` | Whether a second order position loop's observer models the motor's back-EMF. Default on. See [Its observer has to model the back-EMF](#its-observer-has-to-model-the-back-emf). Works the gains out again. |
 | `withTrackingDifferentiator(TrackingDifferentiator.Method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. Leave out `params` for the method's defaults. Off by default. Its parameters are checked when the controller is built, as some depend on the period. |
 | `withoutTrackingDifferentiator()` | Turn the tracking differentiator off. |
 | `getSystemOrder()` | `Optional<SystemOrder>`. `SystemOrder.getOrder()` is 0 for a position loop chosen when built; `isChosenWhenBuilt()` and `requiresLinearClosedLoop()` tell them apart. The controller's `getSystemOrder()` gives the chosen order. |
@@ -578,6 +594,8 @@ them.
 | `getTdMethod()` | `Optional<TrackingDifferentiator.Method>`. |
 | `getTdParams()` | `Optional<double[]>`: a copy of the tracking differentiator parameters, or empty for the defaults. |
 | `isCascaded()` | Whether the cascaded observer is on. |
+| `isBackEmfModeled()` | Whether the back-EMF may be modeled: `true` unless turned off. |
+| `getModeledBackEmfTimeConstant()` | `Optional<Time>`: the back-EMF time constant the built controller's observer models, or empty when it is lumped into the disturbance. |
 | `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one, a speed per volt for a first order position loop. Throws if it cannot be derived, if a position loop's form cannot be chosen, or if the order is `ELEVATOR` and the closed loop is not linear. |
 | `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController` that reads this config, giving the config the period and `b0` it needs. The controller does not limit or ramp its output; the motor controller does. The motor controller calls this; you only need it to use the controller yourself. |
 | `reportRejected(Optional<String> reason)` | Raise the YAMS alert for a refused value, or clear it with an empty reason. Live tuning calls it. |
@@ -626,6 +644,8 @@ double volts = MathUtil.clamp(adrc.calculate(measurement, setpoint, appliedVolta
 | `initialize(double b0, Time period)` | Give the config the values it cannot hold itself, which makes it work out the gains, and start the observer and output at zero. `b0` is used while the config leaves it unset; `buildController` passes the derived one. Must be called before anything else. |
 | `calculate(measurement, setpoint)` | One control step. Returns the output. |
 | `calculate(measurement, setpoint, appliedOutput)` | One control step, telling the observer what the actuator applied since the last step. Use this when the actuator can apply less than asked. |
+| `calculate(measurement, Reference now, Reference next, appliedOutput)` | One control step on a moving setpoint, such as a motion profile's: the setpoint now and one period ahead, each with its rate. See [Following a motion profile](#following-a-motion-profile). |
+| `ADRCController.Reference(value, rate)`, `Reference.still(value)` | A setpoint and how fast it is changing, in the loop's units; a still one has no rate. |
 | `step(reference, output, refDerivatives)` | One control step with the setpoint's derivatives, for feeding a planned trajectory's velocity and acceleration. `calculate` calls this with none. |
 | `reset(measurement)` | Start the observer at a measurement, with the other states and the output at zero. |
 | `reset(double[] xhatInit, double uInit)` | Start the observer at a full state and output. |
@@ -706,7 +726,9 @@ config.GetADRCController()->WithSettlingTime(800_ms);
 - **Building a controller yourself** takes the config as a `std::shared_ptr`:
   `ADRCConfig::BuildController(config, motor, motorConfig, period)`, or
   `ADRCController{config}` followed by `Initialize(b0, period)`.
-- **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`.
+- **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`. A moving setpoint is
+  `ADRCController::Reference{value, rate}`, or `Reference::Still(value)`, and the back-EMF option
+  is `WithBackEmfModel(bool)`, with `IsBackEmfModeled()` and `GetModeledBackEmfTimeConstant()`.
 - **System orders.** `SystemOrder` is an `enum class`, and aliases share a value: `ARM` and
   `PIVOT` equal `POSITION`. `ADRCConfig::GetOrder(order)` gives its order, 0 for one chosen when
   built, and `IsChosenWhenBuilt(order)` and `RequiresLinearClosedLoop(order)` tell them apart.
@@ -725,7 +747,7 @@ config.GetADRCController()->WithSettlingTime(800_ms);
   enabled does not reset it yet, so pick one per mechanism.
 - **Simulation needs an inertia**, as with a PID, unless the mechanism builds its own simulation.
 - **Motion profiles still apply.** With a trapezoidal or exponential profile, the ADRC follows the
-  profile's next position, as a PID does, and trails a moving profile. See
+  profile's state now and feeds forward how it moves to the next one. See
   [Following a motion profile](#following-a-motion-profile).
 - **One `ADRCConfig` per motor controller.** A config holds the period and `b0` of the controller
   built from it, so two motor controllers sharing one config instance share those

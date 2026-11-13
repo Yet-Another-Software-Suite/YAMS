@@ -87,6 +87,11 @@ public class ADRCController {
     final SimpleMatrix k;
     /** Input gain the matrices were worked out with, which the control law divides by. */
     final double b0;
+    /**
+     * One over the back-EMF time constant the observer's model includes, per second; 0 when the
+     * back-EMF is left in the disturbance.
+     */
+    final double backEmfRate;
 
     /**
      * Hold a set of gains.
@@ -95,12 +100,15 @@ public class ADRCController {
      * @param ad Discrete state matrix.
      * @param bd Discrete input matrix.
      * @param k  Controller gains.
+     * @param backEmfRate One over the modeled back-EMF time constant, or 0.
      * @param b0 Input gain.
      */
-    Gains(SimpleMatrix ld, SimpleMatrix ad, SimpleMatrix bd, SimpleMatrix k, double b0) {
+    Gains(SimpleMatrix ld, SimpleMatrix ad, SimpleMatrix bd, SimpleMatrix k, double b0,
+        double backEmfRate) {
       this.ld = ld;
       this.ad = ad;
       this.bd = bd;
+      this.backEmfRate = backEmfRate;
       this.k = k;
       this.b0 = b0;
     }
@@ -111,7 +119,7 @@ public class ADRCController {
      * @return The copy.
      */
     Gains copy() {
-      return new Gains(ld.copy(), ad.copy(), bd.copy(), k.copy(), b0);
+      return new Gains(ld.copy(), ad.copy(), bd.copy(), k.copy(), b0, backEmfRate);
     }
   }
 
@@ -225,7 +233,9 @@ public class ADRCController {
     for (int i = 0; i < systemOrder; i++) {
       v += gains.k.get(i) * (ref[i] - xhat.get(i));
     }
-    final double u = v / gains.b0;
+    // Supply the back-EMF the observer's model expects, from the estimated speed, so the observer's
+    // disturbance only holds what the model misses.
+    final double u = (v + gains.backEmfRate * xhat.get(systemOrder - 1)) / gains.b0;
 
     System.arraycopy(uHistory, 0, uHistory, 1, uHistory.length - 1);
     uHistory[0] = u;
@@ -273,6 +283,73 @@ public class ADRCController {
   }
 
   /**
+   * A setpoint and how fast it is changing, such as a motion profile's state: a position and its
+   * velocity, or for a velocity loop, a velocity and its acceleration.
+   *
+   * @param value The setpoint, in the loop's units.
+   * @param rate  How fast it is changing, in the loop's units per second.
+   */
+  public record Reference(double value, double rate) {
+    /**
+     * A setpoint standing still.
+     *
+     * @param value The setpoint, in the loop's units.
+     * @return The reference.
+     */
+    public static Reference still(double value) {
+      return new Reference(value, 0.0);
+    }
+  }
+
+  /**
+   * Run one control step on a moving setpoint, such as a motion profile's, telling the observer
+   * what the actuator really applied last step.
+   *
+   * <p>The controller is given the setpoint where it is now, at the start of the control period,
+   * and where it will be at the end, as WPILib's feedforwards are. It follows the setpoint now, and
+   * feeds forward how it moves over the period: a first order loop the average rate over the
+   * period, and a higher order loop the rate now and the change of rate over the period. Given only
+   * the setpoint at the end of the period, its stiff feedback would pull the mechanism a period
+   * ahead of the profile. A setpoint standing still is {@code Reference.still(setpoint)} for both.
+   * A tracking differentiator, when the config turns one on, replaces the rates with its own.
+   *
+   * @param measurement   Measured output.
+   * @param now           The setpoint now, and its rate.
+   * @param next          The setpoint one control period from now, and its rate.
+   * @param appliedOutput Output the actuator applied since the last step, such as the motor
+   *                      controller's measured voltage. A non-finite value is ignored.
+   * @return Controller output.
+   * @throws IllegalStateException if the controller has not been initialized.
+   */
+  public double calculate(double measurement, Reference now, Reference next, double appliedOutput) {
+    requireInitialized();
+    if (Double.isFinite(appliedOutput)) {
+      uHistory[0] = appliedOutput;
+      uPrev = appliedOutput;
+    }
+    final double dt = config.getBuiltPeriod().in(Seconds);
+    final double[] derivatives = new double[systemOrder];
+    if (systemOrder == 1) {
+      // The average rate over the period takes the setpoint exactly from now to next.
+      derivatives[0] = finiteOrZero((next.value() - now.value()) / dt);
+    } else {
+      derivatives[0] = finiteOrZero(now.rate());
+      derivatives[1] = finiteOrZero((next.rate() - now.rate()) / dt);
+    }
+    return step(now.value(), measurement, derivatives);
+  }
+
+  /**
+   * A value, or zero when it is not finite.
+   *
+   * @param value Value.
+   * @return The value, or zero.
+   */
+  private static double finiteOrZero(double value) {
+    return Double.isFinite(value) ? value : 0.0;
+  }
+
+  /**
    * The closed-loop bandwidth a settling time and bandwidth scale give.
    *
    * @param systemOrder    Plant order.
@@ -294,6 +371,27 @@ public class ADRCController {
    * @return The gains.
    */
   static Gains computeGains(int systemOrder, double wc, double b0, double dt) {
+    return computeGains(systemOrder, wc, b0, dt, 0.0);
+  }
+
+  /**
+   * Work out the observer and controller gains, with the motor's back-EMF in the observer's model.
+   *
+   * <p>A motor's back-EMF brakes the mechanism in proportion to its speed, so its highest
+   * derivative but one, {@code y^(order-1)}, slows at {@code backEmfRate} times itself: the
+   * observer's model is {@code y^(order) = b0 u - backEmfRate y^(order-1) + f}. Left out, the
+   * back-EMF is lumped into the disturbance {@code f}, which changes as fast as the speed does, and
+   * the observer lags it whenever the mechanism speeds up or slows down.
+   *
+   * @param systemOrder Plant order, 1 through 4.
+   * @param wc          Closed-loop bandwidth, radians per second.
+   * @param b0          Input gain.
+   * @param dt          Control period, seconds.
+   * @param backEmfRate One over the back-EMF time constant, per second; 0 leaves the back-EMF in
+   *                    the disturbance.
+   * @return The gains.
+   */
+  static Gains computeGains(int systemOrder, double wc, double b0, double dt, double backEmfRate) {
     final int m = systemOrder + 1;
     final double wo = OBSERVER_BANDWIDTH_RATIO * wc;
 
@@ -301,19 +399,53 @@ public class ADRCController {
     for (int i = 0; i < systemOrder; i++) {
       a.set(i, i + 1, 1.0);
     }
+    a.set(systemOrder - 1, systemOrder - 1, -backEmfRate);
     SimpleMatrix b = new SimpleMatrix(m, 1);
     b.set(systemOrder - 1, 0, b0);
 
-    SimpleMatrix ld = new SimpleMatrix(m, 1, true, computeLdData(systemOrder, Math.exp(-wo * dt), dt));
     SimpleMatrix c = new SimpleMatrix(1, m);
     c.set(0, 0, 1.0);
+    final double zEso = Math.exp(-wo * dt);
+    SimpleMatrix ld = backEmfRate == 0.0
+        ? new SimpleMatrix(m, 1, true, computeLdData(systemOrder, zEso, dt))
+        : placeObserverPoles(computeExpm(a, dt), c, zEso);
     SimpleMatrix iMinusLc = SimpleMatrix.identity(m).minus(ld.mult(c));
 
     SimpleMatrix k = new SimpleMatrix(systemOrder, 1);
     for (int i = 1; i <= systemOrder; i++) {
       k.set(systemOrder - i, 0, binomial(systemOrder, i) * Math.pow(wc, i));
     }
-    return new Gains(ld, iMinusLc.mult(computeExpm(a, dt)), iMinusLc.mult(computeBd(a, b, dt)), k, b0);
+    return new Gains(ld, iMinusLc.mult(computeExpm(a, dt)), iMinusLc.mult(computeBd(a, b, dt)), k, b0,
+        backEmfRate);
+  }
+
+  /**
+   * The gain of an observer that corrects its prediction with the newest measurement, placing
+   * every pole of its error dynamics, {@code (I - L C) Ad}, at {@code z}: Ackermann's formula on
+   * the pair {@code (Ad, C Ad)}.
+   *
+   * @param ad Discrete state matrix.
+   * @param c  Output matrix.
+   * @param z  Pole, inside the unit circle.
+   * @return Observer gain, a column.
+   */
+  static SimpleMatrix placeObserverPoles(SimpleMatrix ad, SimpleMatrix c, double z) {
+    final int m = ad.getNumRows();
+    SimpleMatrix observability = new SimpleMatrix(m, m);
+    SimpleMatrix row = c.mult(ad);
+    for (int i = 0; i < m; i++) {
+      observability.setRow(i, 0, row.getDDRM().getData());
+      row = row.mult(ad);
+    }
+    // (Ad - z I)^m, the characteristic polynomial with every pole at z.
+    final SimpleMatrix shifted = ad.minus(SimpleMatrix.identity(m).scale(z));
+    SimpleMatrix polynomial = SimpleMatrix.identity(m);
+    for (int i = 0; i < m; i++) {
+      polynomial = polynomial.mult(shifted);
+    }
+    final SimpleMatrix last = new SimpleMatrix(m, 1);
+    last.set(m - 1, 0, 1.0);
+    return polynomial.mult(observability.solve(last));
   }
 
   /**
@@ -349,11 +481,16 @@ public class ADRCController {
   private static SimpleMatrix computeBd(SimpleMatrix a, SimpleMatrix b, double dt) {
     int m = a.getNumRows();
 
+    // The integral of exp(A t) over the period: the sum of A^(i-1) dt^i / i!, which ends after m
+    // terms for a chain of integrators, and converges quickly with the back-EMF in it.
     SimpleMatrix sum = new SimpleMatrix(m, m);
-    SimpleMatrix aPow = SimpleMatrix.identity(m);
-    for (int i = 1; i <= m + 1; i++) {
-      sum = sum.plus(aPow.scale(Math.pow(dt, i) / factorial(i)));
-      aPow = aPow.mult(a);
+    SimpleMatrix term = SimpleMatrix.identity(m).scale(dt);
+    for (int i = 1; i < 50; i++) {
+      sum = sum.plus(term);
+      term = term.mult(a).scale(dt / (i + 1));
+      if (term.elementMaxAbs() < 1e-18) {
+        break;
+      }
     }
     return sum.mult(b);
   }
@@ -425,20 +562,6 @@ public class ADRCController {
     double result = 1;
     for (int i = 1; i <= choose; i++) {
       result = result * (total - i + 1) / i;
-    }
-    return result;
-  }
-
-  /**
-   * Factorial.
-   *
-   * @param value Non-negative integer.
-   * @return {@code value!}.
-   */
-  private static double factorial(int value) {
-    double result = 1;
-    for (int i = 2; i <= value; i++) {
-      result *= i;
     }
     return result;
   }

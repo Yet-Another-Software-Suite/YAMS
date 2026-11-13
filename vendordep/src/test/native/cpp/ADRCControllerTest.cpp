@@ -229,4 +229,49 @@ TEST_CASE("ADRCController.RejectsInvalidArguments", "[ADRCController]") {
   adrc.GetConfig()->WithSystemOrder(ADRCConfig::SystemOrder::FIRST);
 }
 
+TEST_CASE("ADRCController.TracksAMovingSetpointGivenItsRate", "[ADRCController]") {
+  // A setpoint moving at a steady rate, as a motion profile's does while it cruises. Given where it is now and where it
+  // will be next, the controller tracks it; told only the position, it trails it, by the rate divided by the bandwidth
+  // for a first order loop and twice that for a second order loop.
+  const int order = GENERATE(1, 2);
+  const double rate = 0.5;
+  const int steps = static_cast<int>(std::lround(4.0 / kDt));
+  double lag[2] = {0, 0};
+  for (int withRate = 0; withRate < 2; ++withRate) {
+    ADRCController adrc = Controller(order, 0.5, 10);
+    Plant plant{order, 10, 0, 0};
+    for (int i = 0; i < steps; ++i) {
+      const double now = rate * i * kDt;
+      const double next = rate * (i + 1) * kDt;
+      plant.Step(withRate == 1 ? adrc.Calculate(plant.Output(), ADRCController::Reference{now, rate},
+                                                ADRCController::Reference{next, rate}, wpi::units::volt_t{std::nan("")})
+                                     .value()
+                               : adrc.Calculate(plant.Output(), now, wpi::units::volt_t{std::nan("")}).value());
+    }
+    // The plant has run one period past the last setpoint: compare it with where the setpoint is now.
+    lag[withRate] = rate * steps * kDt - plant.Output();
+  }
+  const double bandwidth = 2.0 * (order + 1) / 0.5;
+  CHECK(lag[0] == Catch::Approx(order * rate / bandwidth).margin(0.02));
+  CHECK(std::abs(lag[1]) < 0.02 * lag[0]);
+}
+
+TEST_CASE("ADRCController.AStillReferenceIsThePlainSetpoint", "[ADRCController]") {
+  // A still reference is the plain setpoint, and a non-finite rate is taken as zero.
+  const int order = GENERATE(1, 2);
+  ADRCController plain = Controller(order, 0.5, 10);
+  ADRCController still = Controller(order, 0.5, 10);
+  ADRCController nonFinite = Controller(order, 0.5, 10);
+  const wpi::units::volt_t none{std::nan("")};
+  for (int i = 0; i < 10; ++i) {
+    const double expected = plain.Calculate(0.1 * i, 1.0, none).value();
+    CHECK(still.Calculate(0.1 * i, ADRCController::Reference::Still(1.0), ADRCController::Reference::Still(1.0), none)
+              .value() == Catch::Approx(expected).margin(1e-12));
+    CHECK(nonFinite
+              .Calculate(0.1 * i, ADRCController::Reference{1.0, std::nan("")},
+                         ADRCController::Reference{1.0, std::numeric_limits<double>::infinity()}, none)
+              .value() == Catch::Approx(expected).margin(1e-12));
+  }
+}
+
 }  // namespace yams::test

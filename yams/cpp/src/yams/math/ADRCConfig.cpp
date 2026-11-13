@@ -37,11 +37,13 @@ ADRCConfig::ADRCConfig(const ADRCConfig& other) : m_instance{gInstances++} {
   m_b0 = other.m_b0;
   m_inputDelay = other.m_inputDelay;
   m_cascaded = other.m_cascaded;
+  m_backEmfModel = other.m_backEmfModel;
   m_tdMethod = other.m_tdMethod;
   m_tdParams = other.m_tdParams;
   m_builtPeriod = other.m_builtPeriod;
   m_builtB0 = other.m_builtB0;
   m_builtOrder = other.m_builtOrder;
+  m_builtBackEmfTimeConstant = other.m_builtBackEmfTimeConstant;
   // Gains of its own, so retuning the copy leaves the original's alone.
   m_gains = other.m_gains ? std::make_shared<const ADRCGains>(*other.m_gains) : nullptr;
 }
@@ -57,11 +59,13 @@ ADRCConfig& ADRCConfig::operator=(const ADRCConfig& other) {
   m_b0 = copy.m_b0;
   m_inputDelay = copy.m_inputDelay;
   m_cascaded = copy.m_cascaded;
+  m_backEmfModel = copy.m_backEmfModel;
   m_tdMethod = copy.m_tdMethod;
   m_tdParams = std::move(copy.m_tdParams);
   m_builtPeriod = copy.m_builtPeriod;
   m_builtB0 = copy.m_builtB0;
   m_builtOrder = copy.m_builtOrder;
+  m_builtBackEmfTimeConstant = copy.m_builtBackEmfTimeConstant;
   m_gains = std::move(copy.m_gains);
   return *this;
 }
@@ -129,6 +133,13 @@ ADRCConfig& ADRCConfig::WithCascaded(bool cascaded) {
   return *this;
 }
 
+ADRCConfig& ADRCConfig::WithBackEmfModel(bool backEmfModel) {
+  std::scoped_lock lock{m_mutex};
+  m_backEmfModel = backEmfModel;
+  RebuildGains();
+  return *this;
+}
+
 ADRCConfig& ADRCConfig::WithTrackingDifferentiator(TrackingDifferentiator::Method method,
                                                    std::vector<double> params) {
   std::scoped_lock lock{m_mutex};
@@ -167,6 +178,15 @@ std::optional<wpi::units::second_t> ADRCConfig::GetInputDelay() const {
 bool ADRCConfig::IsCascaded() const {
   std::scoped_lock lock{m_mutex};
   return m_cascaded;
+}
+bool ADRCConfig::IsBackEmfModeled() const {
+  std::scoped_lock lock{m_mutex};
+  return m_backEmfModel;
+}
+std::optional<wpi::units::second_t> ADRCConfig::GetModeledBackEmfTimeConstant() const {
+  std::scoped_lock lock{m_mutex};
+  if (!m_backEmfModel || !m_builtBackEmfTimeConstant) return std::nullopt;
+  return wpi::units::second_t{*m_builtBackEmfTimeConstant};
 }
 std::optional<TrackingDifferentiator::Method> ADRCConfig::GetTdMethod() const {
   std::scoped_lock lock{m_mutex};
@@ -286,6 +306,11 @@ ADRCController ADRCConfig::BuildController(const std::shared_ptr<ADRCConfig>& se
     // The controller sizes its observer from the order, so it is known before the controller is made.
     std::scoped_lock lock{self->m_mutex};
     self->m_builtOrder = plant.order;
+    // A position loop that chose second order models its back-EMF: its b0 is an acceleration per volt, its inertia is
+    // known, and its back-EMF time constant is at least two control periods, slow enough for the loop to see.
+    self->m_builtBackEmfTimeConstant = IsChosenWhenBuilt(order) && !plant.speedPerVolt
+                                           ? std::optional<double>{plant.backEmfTimeConstant}
+                                           : std::nullopt;
   }
   ADRCController controller{self};
   controller.Initialize(b0, period);
@@ -302,7 +327,7 @@ ADRCConfig::Plant ADRCConfig::ChoosePlant(const wpi::math::DCMotor& motor,
         "mechanism circumference.",
         "WithLinearClosedLoopController(true) and WithMechanismCircumference(...) on the motor config");
   }
-  if (!IsChosenWhenBuilt(order)) return Plant{GetOrder(order), false};
+  if (!IsChosenWhenBuilt(order)) return Plant{GetOrder(order), false, std::nan("")};
   const auto& gearing = config.GetMotorGearing();
   const double rotorToMechanism = gearing ? gearing->GetMechanismToRotorRatio() : std::nan("");
   if (!std::isfinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
@@ -312,7 +337,7 @@ ADRCConfig::Plant ADRCConfig::ChoosePlant(const wpi::math::DCMotor& motor,
   }
   if (!config.IsMomentOfInertiaConfigured()) {
     // An elevator's speed is nearly always set by its motor's back-EMF.
-    if (RequiresLinearClosedLoop(order)) return Plant{1, true};
+    if (RequiresLinearClosedLoop(order)) return Plant{1, true, std::nan("")};
     throw exceptions::SmartMotorControllerConfigurationException(
         owner + " cannot choose the form of its position loop without a moment of inertia",
         "A position loop chosen when built picks first or second order from the motor's back-EMF time constant at the "
@@ -324,7 +349,7 @@ ADRCConfig::Plant ADRCConfig::ChoosePlant(const wpi::math::DCMotor& motor,
                               (rotorToMechanism * rotorToMechanism * motor.Kt.value() / motor.Kv.value());
   const double period = config.GetClosedLoopControlPeriod().value_or(wpi::units::millisecond_t{20}).value();
   const bool speedPerVolt = timeConstant < kSpeedPerVoltTimeConstantPeriods * period;
-  return Plant{speedPerVolt ? 1 : 2, speedPerVolt};
+  return Plant{speedPerVolt ? 1 : 2, speedPerVolt, timeConstant};
 }
 
 int ADRCConfig::PlantOrder() const {
@@ -363,8 +388,10 @@ void ADRCConfig::RebuildGains() {
   const int order = PlantOrderLocked();
   const double wc = ADRCController::Bandwidth(order, m_bandwidthScale.value_or(kDefaultBandwidthScale),
                                               m_settlingTime.value_or(kDefaultSettlingTime));
+  const double backEmfRate =
+      m_backEmfModel && m_builtBackEmfTimeConstant ? 1.0 / *m_builtBackEmfTimeConstant : 0.0;
   m_gains = std::make_shared<const ADRCGains>(
-      ADRCController::ComputeGains(order, wc, m_b0.value_or(*m_builtB0), m_builtPeriod->value()));
+      ADRCController::ComputeGains(order, wc, m_b0.value_or(*m_builtB0), m_builtPeriod->value(), backEmfRate));
 }
 
 ADRCConfig::StepValues ADRCConfig::GetStepValues() const {

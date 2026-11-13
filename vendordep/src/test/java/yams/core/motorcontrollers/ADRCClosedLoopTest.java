@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Volts;
 import static org.wpilib.units.Units.Seconds;
 
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.wpilib.math.trajectory.TrapezoidProfile;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
@@ -47,6 +49,20 @@ public class ADRCClosedLoopTest {
 
   /** How long it is then watched holding there. */
   private static final double kHoldSeconds = 0.5;
+
+  /** How far a profiled pivot may stray from its profile while it moves, degrees. */
+  private static final double kProfileTrackingDegrees = 2.5;
+
+  /** How far a profiled pivot may run past its goal, degrees. */
+  private static final double kProfileOvershootDegrees = 1.5;
+
+  /**
+   * How far a profiled pivot on a Talon may stray from its profile, and run past its goal, degrees.
+   * A Talon is simulated on CTRE's own real-time thread, whose timing shifts by up to a loop from
+   * run to run. With the back-EMF modeled, a pivot there sometimes oscillated, so on a Talon it is
+   * left in the disturbance, and this pivot then overshot by up to 5.3 degrees.
+   */
+  private static final double kRealTimeProfileDegrees = 10;
 
   @BeforeEach
   void startTest() {
@@ -160,6 +176,66 @@ public class ADRCClosedLoopTest {
           ()
               -> smc.setPosition(Rotations.of(setpoint)),
           () -> smc.getMechanismPosition().in(Rotations), setpoint, Degrees.of(1).in(Rotations));
+    } finally {
+      ClosedLoopCases.close(smc);
+    }
+  }
+
+  /**
+   * A pivot following a trapezoidal profile tracks it and stops on the goal. The ADRC follows the
+   * profile's state now, feeds forward how it moves to the next one, and its observer models the
+   * motor's back-EMF, as it does by default (except on a Talon, see
+   * {@link #kRealTimeProfileDegrees}). Measured on this pivot: told only the profile's next position, it trailed the
+   * moving profile by 15 to 32 degrees; given the next state as a PID is, it ran a loop ahead and
+   * overshot by up to 10 degrees; and with the back-EMF left in the disturbance, it still overshot
+   * by up to 4 degrees.
+   */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("controllers")
+  void pivotFollowsItsProfile(Controller controller) {
+    final double goal = Degrees.of(90).in(Rotations);
+    // A cruise speed of 40% of the motor's free speed at the mechanism, reached in half a second.
+    final double maxVelocity = 0.4 * controller.motor().freeSpeed / (2 * Math.PI) / controller.ratio();
+    final double maxAcceleration = 2 * maxVelocity;
+    final TrapezoidProfile profile =
+        new TrapezoidProfile(new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+    final SmartMotorController smc = ClosedLoopCases.create(controller,
+        baseConfig("profiled pivot " + controller)
+            .withMomentOfInertia(KilogramSquareMeters.of(0.1))
+            .withStartingPosition(Rotations.of(0))
+            .withClosedLoopControllerMaximumVoltage(Volts.of(12))
+            .withTrapezoidalProfile(RotationsPerSecond.of(maxVelocity),
+                RotationsPerSecondPerSecond.of(maxAcceleration))
+            .withADRCController(adrc(SystemOrder.PIVOT, 0.3).withBackEmfModel(!controller.realTime())));
+    // The profile as the motor controller steps it, one control period per loop.
+    final TrapezoidProfile.State[] expected = {new TrapezoidProfile.State(0, 0)};
+    final double[] worst = {0, 0};
+    try {
+      ClosedLoopCases.run(controller, smc, 1.5,
+          () -> smc.setPosition(Rotations.of(goal)),
+          time -> {
+            final double position = smc.getMechanismPosition().in(Rotations);
+            // The loop that just ran aimed at this state. A Talon, simulated in real time, can report
+            // its position up to a loop later, so it is also compared with the state before.
+            final double previous = expected[0].position;
+            expected[0] = profile.calculate(ClosedLoopCases.kPeriod, expected[0], new TrapezoidProfile.State(goal, 0));
+            final double error = Math.abs(position - expected[0].position);
+            worst[0] = Math.max(worst[0],
+                controller.realTime() ? Math.min(error, Math.abs(position - previous)) : error);
+            worst[1] = Math.max(worst[1], position - goal);
+          });
+      final double tracking = Rotations.of(worst[0]).in(Degrees);
+      final double overshoot = Rotations.of(worst[1]).in(Degrees);
+      final double end = Rotations.of(Math.abs(smc.getMechanismPosition().in(Rotations) - goal)).in(Degrees);
+      System.out.printf("%s: followed the profile within %.2f deg, overshot by %.2f deg, ended %.2f deg from the goal%n",
+          controller, tracking, overshoot, end);
+      final double trackingLimit = controller.realTime() ? kRealTimeProfileDegrees : kProfileTrackingDegrees;
+      final double overshootLimit = controller.realTime() ? kRealTimeProfileDegrees : kProfileOvershootDegrees;
+      assertTrue(tracking <= trackingLimit,
+          controller + ": should follow the profile within " + trackingLimit + " deg, but was " + tracking);
+      assertTrue(overshoot <= overshootLimit,
+          controller + ": should overshoot by at most " + overshootLimit + " deg, but did by " + overshoot);
+      assertTrue(end <= 1.0, controller + ": should end within 1 deg of the goal, but was " + end);
     } finally {
       ClosedLoopCases.close(smc);
     }

@@ -317,6 +317,8 @@ public class ADRCConfig implements Cloneable {
   private Optional<Time> inputDelay = Optional.empty();
   /** Whether the cascaded extended-state-observer form is used. */
   private boolean cascaded = false;
+  /** Whether the observer models the motor's back-EMF, when it can be derived. */
+  private boolean backEmfModel = true;
   /** Tracking differentiator method; empty when it is disabled. */
   private Optional<TrackingDifferentiator.Method> tdMethod = Optional.empty();
   /** Tracking differentiator parameters; empty for the method defaults. */
@@ -334,6 +336,11 @@ public class ADRCConfig implements Cloneable {
   private OptionalDouble builtB0 = OptionalDouble.empty();
   /** Plant order of the controller built from this config; 0 until one is built. */
   private int builtOrder = 0;
+  /**
+   * The motor's back-EMF time constant at the mechanism, seconds, when the built controller's plant
+   * can model it; empty otherwise.
+   */
+  private OptionalDouble builtBackEmfTimeConstant = OptionalDouble.empty();
   /**
    * Observer and control gains worked out from this config once a controller is built, and again
    * whenever the settling time, bandwidth scale or {@code b0} changes. Replaced whole, so the
@@ -363,11 +370,13 @@ public class ADRCConfig implements Cloneable {
     this.b0 = cfg.b0;
     this.inputDelay = cfg.inputDelay;
     this.cascaded = cfg.cascaded;
+    this.backEmfModel = cfg.backEmfModel;
     this.tdMethod = cfg.tdMethod;
     this.tdParams = cfg.tdParams.map(double[]::clone);
     this.builtPeriod = cfg.builtPeriod;
     this.builtB0 = cfg.builtB0;
     this.builtOrder = cfg.builtOrder;
+    this.builtBackEmfTimeConstant = cfg.builtBackEmfTimeConstant;
     final ADRCController.Gains cfgGains = cfg.gains;
     this.gains = cfgGains == null ? null : cfgGains.copy();
   }
@@ -477,6 +486,41 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
+   * Choose whether the observer models the motor's back-EMF. On by default.
+   *
+   * <p>A motor's back-EMF brakes the mechanism in proportion to its speed. Left out of the
+   * observer's model, it is lumped into the disturbance the observer estimates, which then changes
+   * as fast as the speed does: the observer lags it whenever the mechanism speeds up or slows down,
+   * and a mechanism following a motion profile overshoots. Modeled, the disturbance only holds
+   * what the model misses, such as gravity and friction.
+   *
+   * <p>Measured in simulation, a 12:1 pivot following a trapezoidal profile overshot by at most 1.1
+   * degrees with it on the motor controllers simulated in step with the robot, and by up to 8.3
+   * without, where the SPARKs oscillated. Held at a setpoint in a Pivot mechanism on a TalonFXS,
+   * whose simulation runs on CTRE's own real-time thread, it sometimes oscillated instead. To cancel
+   * the modeled back-EMF, the control law pushes with the observer's estimated speed, which cancels
+   * the damping the back-EMF gives the motor, so a loop whose timing is far from what it was built
+   * for can be better off without it.
+   *
+   * <p>It applies to a position loop that chose second order when built from a motor config (see
+   * {@link SystemOrder#POSITION}), whose back-EMF time constant comes from the motor, the gearing
+   * and the moment of inertia. A first order position loop's {@code b0}, a speed per volt, already
+   * includes the back-EMF. A {@link SystemOrder#FLYWHEEL} still lumps it into the disturbance:
+   * modeled, a flywheel settled up to twice as fast at a settling time of 0.3 s or more, but
+   * overshot by up to 7% at 0.15 s on a loop with a period of delay. {@link SystemOrder#FIRST} to
+   * {@link SystemOrder#FOURTH} leave the model to you. Changing it on a built config works the gains
+   * out again.
+   *
+   * @param backEmfModel Whether to model the back-EMF.
+   * @return This config for chaining.
+   */
+  public ADRCConfig withBackEmfModel(boolean backEmfModel) {
+    this.backEmfModel = backEmfModel;
+    rebuildGains();
+    return this;
+  }
+
+  /**
    * Enable a tracking differentiator on the reference. Disabled by default.
    *
    * <p>The differentiator smooths the reference and supplies its derivatives, so a step setpoint
@@ -563,6 +607,27 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
+   * Whether the observer may model the motor's back-EMF. See {@link #withBackEmfModel(boolean)}.
+   *
+   * @return {@code true} unless it was turned off.
+   */
+  public boolean isBackEmfModeled() {
+    return backEmfModel;
+  }
+
+  /**
+   * The back-EMF time constant the built controller's observer models.
+   *
+   * @return The time constant, or empty when the back-EMF is left in the disturbance: it was turned
+   *     off, the plant does not model it, or no controller has been built.
+   */
+  public Optional<Time> getModeledBackEmfTimeConstant() {
+    return backEmfModel && builtBackEmfTimeConstant.isPresent()
+        ? Optional.of(Seconds.of(builtBackEmfTimeConstant.getAsDouble()))
+        : Optional.empty();
+  }
+
+  /**
    * Get the configured tracking differentiator method.
    *
    * @return Differentiation method, or empty when the differentiator is disabled.
@@ -627,6 +692,12 @@ public class ADRCConfig implements Cloneable {
     final double b0ForLoop = resolveB0(motor, config);
     // The controller sizes its observer from the order, so it is known before the controller is made.
     this.builtOrder = plant.order();
+    // A position loop that chose second order models its back-EMF: its b0 is an acceleration per
+    // volt, its inertia is known, and its back-EMF time constant is at least two control periods,
+    // slow enough for the loop to see.
+    this.builtBackEmfTimeConstant = systemOrder.get().isChosenWhenBuilt() && !plant.speedPerVolt()
+        ? OptionalDouble.of(backEmfTimeConstant(motor, config))
+        : OptionalDouble.empty();
     ADRCController controller = new ADRCController(this);
     controller.initialize(b0ForLoop, period);
     return controller;
@@ -871,7 +942,8 @@ public class ADRCConfig implements Cloneable {
         ADRCController.bandwidth(order, bandwidthScale.orElse(DEFAULT_BANDWIDTH_SCALE),
             settlingTime.orElse(DEFAULT_SETTLING_TIME)),
         b0.orElse(builtB0.getAsDouble()),
-        builtPeriod.get().in(Seconds));
+        builtPeriod.get().in(Seconds),
+        getModeledBackEmfTimeConstant().map(tau -> 1.0 / tau.in(Seconds)).orElse(0.0));
   }
 
   /**

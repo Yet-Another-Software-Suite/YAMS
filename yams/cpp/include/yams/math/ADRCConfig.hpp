@@ -35,6 +35,8 @@ struct ADRCGains {
   Eigen::VectorXd bd;  ///< Discrete ESO input matrix.
   Eigen::VectorXd k;   ///< Controller gains.
   double b0{1.0};      ///< Input gain the matrices were worked out with, which the control law divides by.
+  /** One over the back-EMF time constant the observer's model includes, per second; 0 when it is in the disturbance. */
+  double backEmfRate{0.0};
 };
 
 /**
@@ -213,6 +215,25 @@ class ADRCConfig {
    */
   ADRCConfig& WithCascaded(bool cascaded);
   /**
+   * Choose whether the observer models the motor's back-EMF. On by default.
+   *
+   * A motor's back-EMF brakes the mechanism in proportion to its speed. Left out of the observer's model, it is lumped
+   * into the disturbance the observer estimates, which then changes as fast as the speed does: the observer lags it
+   * whenever the mechanism speeds up or slows down, and a mechanism following a motion profile overshoots. Modeled, the
+   * disturbance only holds what the model misses, such as gravity and friction.
+   *
+   * It applies to a position loop that chose second order when built from a motor config (see SystemOrder::POSITION),
+   * whose back-EMF time constant comes from the motor, the gearing and the moment of inertia. A first order position
+   * loop's b0, a speed per volt, already includes the back-EMF. A FLYWHEEL still lumps it into the disturbance. FIRST to
+   * FOURTH leave the model to you. To cancel the modeled back-EMF, the control law pushes with the observer's estimated
+   * speed, which cancels the damping the back-EMF gives the motor, so a loop whose timing is far from what it was built
+   * for can be better off without it. Changing it on a built config works the gains out again.
+   *
+   * @param backEmfModel Whether to model the back-EMF.
+   * @return This config for chaining.
+   */
+  ADRCConfig& WithBackEmfModel(bool backEmfModel);
+  /**
    * Smooth the reference with a tracking differentiator. Off by default. Its parameters are checked when the
    * controller is built, as some depend on the period. A motion profile on the motor config also shapes the setpoint,
    * so a config with both is refused when the controller is built.
@@ -241,6 +262,13 @@ class ADRCConfig {
   std::optional<wpi::units::second_t> GetInputDelay() const;
   /** @return Whether the cascaded observer is on. */
   bool IsCascaded() const;
+  /** @return Whether the observer may model the motor's back-EMF: true unless it was turned off. */
+  bool IsBackEmfModeled() const;
+  /**
+   * @return The back-EMF time constant the built controller's observer models, or empty when the back-EMF is left in
+   *         the disturbance: it was turned off, the plant does not model it, or no controller has been built.
+   */
+  std::optional<wpi::units::second_t> GetModeledBackEmfTimeConstant() const;
   /** @return The tracking differentiator method, or empty when it is off. */
   std::optional<TrackingDifferentiator::Method> GetTdMethod() const;
   /** @return The tracking differentiator parameters; empty for the method defaults. */
@@ -295,10 +323,14 @@ class ADRCConfig {
     bool cascaded;
   };
 
-  /** The plant a controller is built for: its order, and whether b0 is a speed per volt. */
+  /**
+   * The plant a controller is built for: its order, whether b0 is a speed per volt, and for a position loop chosen when
+   * built, its back-EMF time constant in seconds (NaN otherwise).
+   */
   struct Plant {
     int order;
     bool speedPerVolt;
+    double backEmfTimeConstant;
   };
   /** Choose the plant from the system order and, for a position loop chosen when built, the time constant. */
   Plant ChoosePlant(const wpi::math::DCMotor& motor, const motorcontrollers::SmartMotorControllerConfig& config,
@@ -326,12 +358,15 @@ class ADRCConfig {
   std::optional<double> m_b0;
   std::optional<wpi::units::second_t> m_inputDelay;
   bool m_cascaded{false};
+  bool m_backEmfModel{true};
   std::optional<TrackingDifferentiator::Method> m_tdMethod;
   std::vector<double> m_tdParams;
 
   std::optional<wpi::units::second_t> m_builtPeriod;
   std::optional<double> m_builtB0;
   int m_builtOrder{0};
+  /** The back-EMF time constant, seconds, when the built controller's plant can model it. */
+  std::optional<double> m_builtBackEmfTimeConstant;
   std::shared_ptr<const ADRCGains> m_gains;
 
   std::unique_ptr<wpi::util::Alert> m_rejectedAlert;
