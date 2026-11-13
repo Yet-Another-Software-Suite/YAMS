@@ -11,6 +11,7 @@ import static org.wpilib.units.Units.Volts;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.units.VoltageUnit;
 import org.wpilib.units.measure.Time;
@@ -47,7 +48,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * velocity-loop configuration for a shooter wheel looks like this:
  *
  * <pre>{@code
- * new ADRCConfig("Shooter")
+ * new ADRCConfig()
  *     .withSystemOrder(SystemOrder.FIRST)
  *     .withSettlingTime(Seconds.of(0.2))
  *     .withVoltageLimits(Volts.of(-12), Volts.of(12))
@@ -118,7 +119,7 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * double...)}, for example:
  *
  * <pre>{@code
- * new ADRCConfig("Shooter")
+ * new ADRCConfig()
  *     .withSystemOrder(SystemOrder.FIRST)
  *     .withTrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.9)
  * }</pre>
@@ -230,8 +231,8 @@ public class ADRCConfig implements Cloneable {
     }
   }
 
-  /** Display name used in error and warning messages. */
-  private final String name;
+  /** The motor controller this config belongs to, named in errors and alerts once it is built. */
+  private String owner = "ADRC";
   /** Plant order; empty until it is configured. */
   private Optional<SystemOrder> systemOrder = Optional.empty();
   /** Desired settling time; empty for {@link #DEFAULT_SETTLING_TIME}. */
@@ -253,21 +254,21 @@ public class ADRCConfig implements Cloneable {
   /** Tracking differentiator method; empty when it is disabled. */
   private Optional<TrackingDifferentiator.Method> tdMethod = Optional.empty();
   /** Tracking differentiator parameters; empty for the method defaults. */
-  private double[] tdParams = new double[0];
+  private Optional<double[]> tdParams = Optional.empty();
   /** Alert raised when the maximum output falls back to the motor's nominal voltage. */
   private Optional<Alert> nominalVoltageAlert = Optional.empty();
+  /** Alert raised while this config holds a value its controller rejected. */
+  private Optional<Alert> rejectedAlert = Optional.empty();
+  /** Counts every config made, so each one's alerts get their own ids. */
+  private static final AtomicInteger INSTANCES = new AtomicInteger();
+  /** This config's number, for its alert ids. */
+  private final int instance = INSTANCES.getAndIncrement();
 
   /**
-   * Create a named configuration.
-   *
-   * <p>The name identifies this controller in error and warning messages, such as
-   * {@code ADRC "Shooter" has no system order}.
-   *
-   * @param name Display name for this controller.
+   * Create a configuration. It belongs to the motor controller it is given to, whose telemetry name
+   * its errors and alerts use.
    */
-  public ADRCConfig(String name) {
-    this.name = name;
-  }
+  public ADRCConfig() {}
 
   /**
    * Copy an existing configuration.
@@ -275,7 +276,7 @@ public class ADRCConfig implements Cloneable {
    * @param cfg Configuration to copy.
    */
   private ADRCConfig(ADRCConfig cfg) {
-    this.name = cfg.name;
+    this.owner = cfg.owner;
     this.systemOrder = cfg.systemOrder;
     this.settlingTime = cfg.settlingTime;
     this.bandwidthScale = cfg.bandwidthScale;
@@ -286,21 +287,12 @@ public class ADRCConfig implements Cloneable {
     this.inputDelay = cfg.inputDelay;
     this.cascaded = cfg.cascaded;
     this.tdMethod = cfg.tdMethod;
-    this.tdParams = cfg.tdParams.clone();
+    this.tdParams = cfg.tdParams.map(double[]::clone);
   }
 
   @Override
   public ADRCConfig clone() {
     return new ADRCConfig(this);
-  }
-
-  /**
-   * Get the display name.
-   *
-   * @return Config name.
-   */
-  public String getName() {
-    return name;
   }
 
   /**
@@ -420,7 +412,7 @@ public class ADRCConfig implements Cloneable {
   public ADRCConfig withTrackingDifferentiator(
       TrackingDifferentiator.Method method, double... params) {
     this.tdMethod = Optional.ofNullable(method);
-    this.tdParams = params == null ? new double[0] : params.clone();
+    this.tdParams = params == null || params.length == 0 ? Optional.empty() : Optional.of(params.clone());
     return this;
   }
 
@@ -431,7 +423,7 @@ public class ADRCConfig implements Cloneable {
    */
   public ADRCConfig withoutTrackingDifferentiator() {
     this.tdMethod = Optional.empty();
-    this.tdParams = new double[0];
+    this.tdParams = Optional.empty();
     return this;
   }
 
@@ -528,14 +520,20 @@ public class ADRCConfig implements Cloneable {
   /**
    * Get the tracking differentiator parameters.
    *
-   * @return Copy of the parameters; empty for the method defaults.
+   * @return Copy of the parameters, or empty for the method defaults.
    */
-  public double[] getTdParams() {
-    return tdParams.clone();
+  public Optional<double[]> getTdParams() {
+    return tdParams.map(double[]::clone);
   }
 
   /**
    * Build a controller from this config, filling every unset value with its default.
+   *
+   * <p>The controller keeps this config: after changing its settling time, bandwidth scale,
+   * {@code b0}, output limits or slew-rate limit, as live tuning does, {@link ADRCController#reset()}
+   * retunes the controller to it without resetting its state estimate. The system order, input
+   * delay, cascaded observer and tracking differentiator only take effect when a controller is
+   * built.
    *
    * @param motor  Motor model used for {@code b0} derivation and the nominal-voltage fallback.
    * @param config Motor config that carries gearing, inertia, circumference, and the loop period.
@@ -548,14 +546,15 @@ public class ADRCConfig implements Cloneable {
    */
   public ADRCController buildController(
       DCMotor motor, SmartMotorControllerConfig<?> config, Time period) {
-    SystemOrder order = systemOrder.orElseThrow(() -> new SmartMotorControllerConfigurationException(
-        "ADRC \"" + name + "\" has no system order",
+    owner = config.getTelemetryName().map(name -> name + " ADRC").orElse("ADRC");
+    systemOrder.orElseThrow(() -> new SmartMotorControllerConfigurationException(
+        owner + " has no system order",
         "withSystemOrder(...) was never called, and there is no safe default plant order.",
-        "withADRCController(new ADRCConfig(\"" + name + "\").withSystemOrder(SystemOrder.FIRST))"));
+        "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
     double resolvedMaxVoltage = resolveMaxVoltage(motor, config);
     double resolvedMinVoltage = minVoltage.map(v -> v.in(Volts)).orElse(-resolvedMaxVoltage);
 
-    ADRCController controller = new ADRCController(order.getOrder());
+    ADRCController controller = new ADRCController(this);
     controller.initialize(
         settlingTime.orElse(DEFAULT_SETTLING_TIME),
         bandwidthScale.orElse(DEFAULT_BANDWIDTH_SCALE),
@@ -589,20 +588,18 @@ public class ADRCConfig implements Cloneable {
     }
     if (!config.isMomentOfInertiaConfigured()) {
       throw new SmartMotorControllerConfigurationException(
-          "ADRC \"" + name + "\" has no b0 and cannot derive one",
+          owner + " has no b0 and cannot derive one",
           "withB0(...) was never called and the mechanism never configured its moment of inertia, "
               + "so the library's placeholder inertia would be used. Inertia is different for "
               + "every mechanism.",
-          "withADRCController(new ADRCConfig(\"" + name
-              + "\").withB0(...)) or call withMomentOfInertia(...) on the motor config");
+          "withADRCController(new ADRCConfig().withB0(...)) or call withMomentOfInertia(...) on the motor config");
     }
     MechanismGearing gearing = config.getGearing();
     if (gearing == null) {
       throw new SmartMotorControllerConfigurationException(
-          "ADRC \"" + name + "\" cannot derive b0 without gearing",
+          owner + " cannot derive b0 without gearing",
           "No gearing was configured, so the rotor-to-mechanism ratio is unknown.",
-          "withADRCController(new ADRCConfig(\"" + name
-              + "\").withB0(...)) or call withGearing(...) on the motor config");
+          "withADRCController(new ADRCConfig().withB0(...)) or call withGearing(...) on the motor config");
     }
 
     // YAMS's gearing getters are named for the direction the factor converts, and the two names are
@@ -611,14 +608,14 @@ public class ADRCConfig implements Cloneable {
     double rotorToMechanism = gearing.getMechanismToRotorRatio();
     if (!Double.isFinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
       throw new SmartMotorControllerConfigurationException(
-          "ADRC \"" + name + "\" cannot derive b0 from gear ratio " + rotorToMechanism,
+          owner + " cannot derive b0 from gear ratio " + rotorToMechanism,
           "The rotor-to-mechanism ratio must be finite and positive.",
           "withGearing(...) with a positive reduction");
     }
     double inertia = config.getMOI();
     if (!Double.isFinite(inertia) || inertia <= 0.0) {
       throw new SmartMotorControllerConfigurationException(
-          "ADRC \"" + name + "\" cannot derive b0 from inertia " + inertia + " kg*m^2",
+          owner + " cannot derive b0 from inertia " + inertia + " kg*m^2",
           "The mechanism moment of inertia must be finite and positive.",
           "withMomentOfInertia(...) with a real value");
     }
@@ -628,7 +625,7 @@ public class ADRCConfig implements Cloneable {
     if (config.getLinearClosedLoopControllerUse()) {
       if (config.getMechanismCircumference().isEmpty()) {
         throw new SmartMotorControllerConfigurationException(
-            "ADRC \"" + name + "\" cannot derive linear b0 without a mechanism circumference",
+            owner + " cannot derive linear b0 without a mechanism circumference",
             "The linear closed loop needs a circumference to convert rotations to meters.",
             "withMechanismCircumference(...) or withWheelDiameter(...)");
       }
@@ -654,8 +651,8 @@ public class ADRCConfig implements Cloneable {
       return configured.get().in(Volts);
     }
     if (nominalVoltageAlert.isEmpty()) {
-      nominalVoltageAlert = Optional.of(new Alert("YAMS", "ADRC_" + name + "_NominalVoltage",
-          "ADRC \"" + name + "\" has no maxVoltage and the motor config has no closed-loop "
+      nominalVoltageAlert = Optional.of(new Alert("YAMS", alertId("NominalVoltage"),
+          owner + " has no maxVoltage and the motor config has no closed-loop "
               + "voltage limit; using the motor's nominal voltage (" + motor.nominalVoltage + " V).",
           Alert.Level.MEDIUM));
     }
@@ -663,13 +660,41 @@ public class ADRCConfig implements Cloneable {
     return motor.nominalVoltage;
   }
 
+  /**
+   * Build an alert id of this config's own, so two configs never share an alert.
+   *
+   * @param alert What the alert is about.
+   * @return Alert id.
+   */
+  private String alertId(String alert) {
+    return "ADRC_" + instance + "_" + alert;
+  }
+
+  /**
+   * Report whether the controller built from this config could use its values. The alert lives on
+   * the config, so it outlasts a controller rebuilt from it.
+   *
+   * @param reason Why the controller rejected a value, or empty once it accepted them.
+   */
+  void reportRejected(Optional<String> reason) {
+    if (reason.isEmpty()) {
+      rejectedAlert.ifPresent(alert -> alert.set(false));
+      return;
+    }
+    if (rejectedAlert.isEmpty()) {
+      rejectedAlert = Optional.of(new Alert("YAMS", alertId("Rejected"), "", Alert.Level.HIGH));
+    }
+    rejectedAlert.get().setText(owner + " not retuned: " + reason.get());
+    rejectedAlert.get().set(true);
+  }
+
   @Override
   public String toString() {
     return "ADRCConfig{"
-        + "name='" + name + '\'' + ", systemOrder=" + systemOrder + ", settlingTime="
+        + "systemOrder=" + systemOrder + ", settlingTime="
         + settlingTime + ", bandwidthScale=" + bandwidthScale + ", b0=" + b0
         + ", minVoltage=" + minVoltage + ", maxVoltage=" + maxVoltage + ", slewRateLimit="
         + slewRateLimit + ", inputDelay=" + inputDelay + ", cascaded=" + cascaded
-        + ", tdMethod=" + tdMethod + ", tdParams=" + Arrays.toString(tdParams) + '}';
+        + ", tdMethod=" + tdMethod + ", tdParams=" + tdParams.map(Arrays::toString) + '}';
   }
 }

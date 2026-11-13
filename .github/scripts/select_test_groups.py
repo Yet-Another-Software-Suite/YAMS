@@ -99,7 +99,8 @@ JAVA_GROUPS = [
     {"group": "live-tuning",
      "test-filter": '--tests "yams.core.motorcontrollers.LiveTuningTest"'
                     ' --tests "yams.core.telemetry.MechanismLiveTuningTest"'
-                    ' --tests "yams.mechs.VoltageLiveTuningTest"'},
+                    ' --tests "yams.mechs.VoltageLiveTuningTest"'
+                    ' --tests "yams.core.motorcontrollers.ADRCLiveTuningTest"'},
     # Every motor controller (SPARK MAX, SPARK Flex, TalonFX, TalonFXS and Nova) given the same gains
     # in YAMS units: the voltage of each feedback and feedforward gain, and the gains of the selected
     # closed loop slot. The Talons run in real time, as Phoenix simulates them, and one JVM with all

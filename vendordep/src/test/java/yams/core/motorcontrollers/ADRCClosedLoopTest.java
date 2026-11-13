@@ -72,7 +72,7 @@ public class ADRCClosedLoopTest {
    * @return The config.
    */
   static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
-    return new ADRCConfig("ADRCClosedLoopTest")
+    return new ADRCConfig()
         .withSystemOrder(order)
         .withSettlingTime(Seconds.of(settlingSeconds))
         .withMaxVoltage(Volts.of(12));

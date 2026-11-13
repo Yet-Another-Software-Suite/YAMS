@@ -3,7 +3,9 @@
 
 package yams.core.math;
 
+import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -43,7 +45,7 @@ import org.wpilib.units.measure.Time;
  * <pre>{@code
  * // A first-order velocity plant driven by volts, with b0 in (rotations per second) per volt
  * // per second.
- * ADRCController adrc = new ADRCController(1);
+ * ADRCController adrc = new ADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST));
  * adrc.initialize(
  *     Seconds.of(0.2),                      // desired settling time
  *     1.0,                                  // closed-loop bandwidth scale
@@ -55,7 +57,7 @@ import org.wpilib.units.measure.Time;
  *     1.0,                                  // b0 scale
  *     0.0,                                  // slew-rate limit, output units per second
  *     0.0,                                  // input delay, seconds
- *     Optional.empty(), new double[0],      // tracking differentiator (off)
+ *     Optional.empty(), Optional.empty(),   // tracking differentiator (off)
  *     false);                               // cascaded observer
  *
  * // In periodic():
@@ -129,18 +131,25 @@ public class ADRCController {
   /** Whether the cascaded ESO form is used. */
   private boolean useCascaded;
 
+  /** Config this controller runs, which {@link #reset()} retunes it to. */
+  private final ADRCConfig config;
+  /** {@code b0} given to {@link #initialize}, used while the config leaves it unset. */
+  private double configB0;
+  /** Maximum output given to {@link #initialize}, used while the config leaves it unset. */
+  private double configMaxOutput;
+
   /**
-   * Create an active disturbance rejection controller.
+   * Create an active disturbance rejection controller for a config. The plant order comes from the
+   * config, and {@link #reset()} retunes the controller to the config after it changes.
    *
-   * @param systemOrder Plant order, from 1 through 4.
-   * @throws IllegalArgumentException if the order is outside that range.
+   * @param config Config this controller runs.
+   * @throws IllegalArgumentException if the config has no system order.
    */
-  public ADRCController(int systemOrder) {
-    if (systemOrder < 1 || systemOrder > 4) {
-      throw new IllegalArgumentException(
-          "System order must be between 1 and 4, got: " + systemOrder);
-    }
-    this.systemOrder = systemOrder;
+  public ADRCController(ADRCConfig config) {
+    this.config = config;
+    this.systemOrder = config.getSystemOrder()
+        .orElseThrow(() -> new IllegalArgumentException("The ADRC config has no system order"))
+        .getOrder();
     this.controllerOrder = systemOrder + 1;
     this.uMin = Double.NEGATIVE_INFINITY;
     this.uMax = Double.POSITIVE_INFINITY;
@@ -171,7 +180,7 @@ public class ADRCController {
    */
   public void initialize(Time tSettle, double kob, double b0, double uMin, double uMax, double dt,
       Optional<double[]> xhatInit, double uInit, double ke, double slewRateLimit,
-      double inputDelay, Optional<TrackingDifferentiator.Method> tdMethod, double[] tdParams,
+      double inputDelay, Optional<TrackingDifferentiator.Method> tdMethod, Optional<double[]> tdParams,
       boolean useCascaded) {
     this.initialized = false;
     final double settleSeconds = tSettle.in(Seconds);
@@ -232,6 +241,8 @@ public class ADRCController {
     computeControllerGains();
 
     setTd(tdMethod, tdParams);
+    this.configB0 = b0;
+    this.configMaxOutput = uMax;
     this.initialized = true;
   }
 
@@ -543,7 +554,7 @@ public class ADRCController {
    * @throws IllegalStateException    if the controller has not been initialized.
    * @throws IllegalArgumentException if the method or parameters are invalid.
    */
-  public void setTd(Optional<TrackingDifferentiator.Method> method, double[] params) {
+  public void setTd(Optional<TrackingDifferentiator.Method> method, Optional<double[]> params) {
     if (dt <= 0.0) {
       throw new IllegalStateException(
           "Controller must be initialized before setting the tracking differentiator");
@@ -698,6 +709,94 @@ public class ADRCController {
     }
     this.b0 = b0 / ke;
     computeEsoGains();
+  }
+
+  /**
+   * Retune to the {@link ADRCConfig} this controller runs, as live tuning does after changing it.
+   * The settling time, bandwidth scale, {@code b0}, output limits and slew-rate limit are read
+   * again; while the config leaves {@code b0} or the maximum output unset, the values given to
+   * {@link #initialize} are kept. The state estimate is kept, so the output does not jump. A value
+   * the controller cannot use leaves it as it was and raises an alert until a reset accepts the
+   * config.
+   *
+   * @throws IllegalStateException if the controller has not been initialized.
+   */
+  public void reset() {
+    if (!initialized) {
+      throw new IllegalStateException("Controller must be initialized before reset");
+    }
+    ADRCConfig cfg = config;
+    double max = cfg.getMaxVoltage().map(v -> v.in(Volts)).orElse(configMaxOutput);
+    try {
+      retune(cfg.getSettlingTime().orElse(ADRCConfig.DEFAULT_SETTLING_TIME),
+          cfg.getBandwidthScale().orElse(ADRCConfig.DEFAULT_BANDWIDTH_SCALE),
+          cfg.getB0().orElse(configB0),
+          cfg.getMinVoltage().map(v -> v.in(Volts)).orElse(-max),
+          max,
+          cfg.getSlewRateLimit().orElse(ADRCConfig.DEFAULT_SLEW_RATE_LIMIT).in(Volts.per(Second)));
+      cfg.reportRejected(Optional.empty());
+    } catch (IllegalArgumentException e) {
+      cfg.reportRejected(Optional.of(e.getMessage()));
+    }
+  }
+
+  /**
+   * Retune every live-tunable value at once, keeping the current state estimate and output history.
+   *
+   * <p>Every value is checked before any is applied, so a rejected value leaves the controller as
+   * it was. The estimated disturbance carries over, so the output does not jump. {@link #reset()}
+   * calls this with the values of the {@link ADRCConfig} the controller was built from.
+   *
+   * @param tSettle       Desired closed-loop settling time. Must be finite and positive.
+   * @param kob           Closed-loop bandwidth scale. Must be finite and positive.
+   * @param b0            Input gain, in the same units as the one the controller was initialized
+   *                      with. Must be finite and non-zero.
+   * @param uMin          Minimum output.
+   * @param uMax          Maximum output.
+   * @param slewRateLimit Maximum output change per second. A non-positive or NaN value disables the
+   *                      limit.
+   * @throws IllegalStateException    if the controller has not been initialized.
+   * @throws IllegalArgumentException if a value is invalid.
+   */
+  public void retune(Time tSettle, double kob, double b0, double uMin, double uMax,
+      double slewRateLimit) {
+    if (!initialized) {
+      throw new IllegalStateException("Controller must be initialized before retuning");
+    }
+    final double settleSeconds = tSettle.in(Seconds);
+    if (!Double.isFinite(settleSeconds) || settleSeconds <= 0 || !Double.isFinite(kob) || kob <= 0) {
+      throw new IllegalArgumentException("tSettle and kob must be finite and positive");
+    }
+    if (!Double.isFinite(b0) || b0 == 0.0 || !Double.isFinite(b0 / ke)) {
+      throw new IllegalArgumentException("b0 must be finite and non-zero");
+    }
+    if (Double.isNaN(uMin) || Double.isNaN(uMax) || uMin > uMax) {
+      throw new IllegalArgumentException("uMin and uMax must not be NaN and uMin must be <= uMax");
+    }
+    final double newWc = 2.0 * (systemOrder + 1) * kob / settleSeconds;
+    final double newWo = OBSERVER_BANDWIDTH_RATIO * newWc;
+    if (!Double.isFinite(newWc) || !Double.isFinite(newWo)) {
+      throw new IllegalArgumentException("tuning produced non-finite bandwidths");
+    }
+    this.tSettle = tSettle;
+    this.kob = kob;
+    this.wc = newWc;
+    this.wo = newWo;
+    this.b0 = b0 / ke;
+    this.uMin = uMin;
+    this.uMax = uMax;
+    this.slewRateLimit = slewRateLimit > 0.0 ? slewRateLimit : Double.POSITIVE_INFINITY;
+    computeEsoGains();
+    computeControllerGains();
+  }
+
+  /**
+   * Get the output slew-rate limit.
+   *
+   * @return Maximum output change per second, or zero when the limit is disabled.
+   */
+  public double getSlewRateLimit() {
+    return Double.isInfinite(slewRateLimit) ? 0.0 : slewRateLimit;
   }
 
   /**

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import yams.core.math.ADRCConfig.SystemOrder;
 
 /**
  * The {@link ADRCController} on its own, driving an ideal plant: a chain of {@code order}
@@ -59,9 +60,15 @@ class ADRCControllerTest {
     }
   }
 
+  /** A controller for a plant of order 1 through 4. */
+  private static ADRCController newController(int order) {
+    final SystemOrder[] orders = {SystemOrder.FIRST, SystemOrder.SECOND, SystemOrder.THIRD, SystemOrder.FOURTH};
+    return new ADRCController(new ADRCConfig().withSystemOrder(orders[order - 1]));
+  }
+
   private static ADRCController controller(int order, double settlingTime, double b0, double limit) {
-    final ADRCController adrc = new ADRCController(order);
-    adrc.initialize(Seconds.of(settlingTime), 1.0, b0, -limit, limit, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.empty(), new double[0], false);
+    final ADRCController adrc = newController(order);
+    adrc.initialize(Seconds.of(settlingTime), 1.0, b0, -limit, limit, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.empty(), Optional.empty(), false);
     return adrc;
   }
 
@@ -138,8 +145,8 @@ class ADRCControllerTest {
 
   @Test
   void slewRateLimitsHowFastTheOutputChanges() {
-    final ADRCController adrc = new ADRCController(1);
-    adrc.initialize(Seconds.of(0.2), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 5.0, 0.0, Optional.empty(), new double[0], false);
+    final ADRCController adrc = newController(1);
+    adrc.initialize(Seconds.of(0.2), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 5.0, 0.0, Optional.empty(), Optional.empty(), false);
     double last = 0;
     for (int i = 0; i < 20; i++) {
       final double u = adrc.calculate(0, 100);
@@ -178,15 +185,15 @@ class ADRCControllerTest {
 
   @Test
   void inputGainScaleDividesB0() {
-    final ADRCController adrc = new ADRCController(1);
-    adrc.initialize(Seconds.of(0.2), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 2.0, 0.0, 0.0, Optional.empty(), new double[0], false);
+    final ADRCController adrc = newController(1);
+    adrc.initialize(Seconds.of(0.2), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 2.0, 0.0, 0.0, Optional.empty(), Optional.empty(), false);
     assertEquals(5, adrc.getB0());
   }
 
   @Test
   void inputDelayHoldsTheSetpointOnADelayedPlant() {
-    final ADRCController adrc = new ADRCController(1);
-    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 2 * kDt, Optional.empty(), new double[0], false);
+    final ADRCController adrc = newController(1);
+    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 2 * kDt, Optional.empty(), Optional.empty(), false);
     final Plant plant = new Plant(1, 10, -3, 0);
     final double[] pending = {0, 0};
     double worst = 0;
@@ -205,8 +212,8 @@ class ADRCControllerTest {
   @ParameterizedTest(name = "{0}")
   @EnumSource(TrackingDifferentiator.Method.class)
   void trackingDifferentiatorSmoothsTheSetpoint(TrackingDifferentiator.Method method) {
-    final ADRCController adrc = new ADRCController(2);
-    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.of(method), new double[0], false);
+    final ADRCController adrc = newController(2);
+    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.of(method), Optional.empty(), false);
     final Plant plant = new Plant(2, 10, -3, 0);
     final double worst = run(adrc, plant, 1.0, 15);
     assertTrue(worst < 1e-2, method + ": should hold 1.0, but was " + worst + " from it");
@@ -214,28 +221,27 @@ class ADRCControllerTest {
 
   @Test
   void cascadedObserverHoldsTheSetpoint() {
-    final ADRCController adrc = new ADRCController(1);
-    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.empty(), new double[0], true);
+    final ADRCController adrc = newController(1);
+    adrc.initialize(Seconds.of(0.5), 1.0, 10, -12, 12, kDt, Optional.empty(), 0.0, 1.0, 0.0, 0.0, Optional.empty(), Optional.empty(), true);
     assertTrue(run(adrc, new Plant(1, 10, -3, 0), 1.0, 6) < 1e-3);
   }
 
   @Test
   void rejectsInvalidArguments() {
-    assertThrows(IllegalArgumentException.class, () -> new ADRCController(0));
-    assertThrows(IllegalArgumentException.class, () -> new ADRCController(5));
-    final ADRCController adrc = new ADRCController(1);
+    assertThrows(IllegalArgumentException.class, () -> new ADRCController(new ADRCConfig()), "no system order");
+    final ADRCController adrc = newController(1);
     assertFalse(adrc.isInitialized());
     assertThrows(IllegalStateException.class, () -> adrc.calculate(0, 0));
     assertThrows(IllegalStateException.class, () -> adrc.reset(0));
     assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(Seconds.of(0), 1, 10, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), new double[0], false));
+        () -> adrc.initialize(Seconds.of(0), 1, 10, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), Optional.empty(), false));
     assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(Seconds.of(0.2), 1, 0, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), new double[0], false));
+        () -> adrc.initialize(Seconds.of(0.2), 1, 0, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), Optional.empty(), false));
     assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(Seconds.of(0.2), 1, 10, 12, -12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), new double[0], false));
+        () -> adrc.initialize(Seconds.of(0.2), 1, 10, 12, -12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), Optional.empty(), false));
     assertThrows(IllegalArgumentException.class,
-        () -> adrc.initialize(Seconds.of(0.2), 1, 10, -12, 12, kDt, Optional.of(new double[3]), 0, 1, 0, 0, Optional.empty(), new double[0], false));
-    adrc.initialize(Seconds.of(0.2), 1, 10, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), new double[0], false);
+        () -> adrc.initialize(Seconds.of(0.2), 1, 10, -12, 12, kDt, Optional.of(new double[3]), 0, 1, 0, 0, Optional.empty(), Optional.empty(), false));
+    adrc.initialize(Seconds.of(0.2), 1, 10, -12, 12, kDt, Optional.empty(), 0, 1, 0, 0, Optional.empty(), Optional.empty(), false);
     assertTrue(adrc.isInitialized());
     assertThrows(IllegalArgumentException.class, () -> adrc.setB0(0));
     assertThrows(IllegalArgumentException.class, () -> adrc.updateTuning(Seconds.of(-1), 1));

@@ -56,7 +56,7 @@ class ADRCConfigTest {
 
   @Test
   void unsetValuesAreEmptyAndBuildWithTheirDefaults() {
-    final ADRCConfig cfg = new ADRCConfig("Defaults");
+    final ADRCConfig cfg = new ADRCConfig();
     assertTrue(cfg.getSystemOrder().isEmpty());
     assertTrue(cfg.getSettlingTime().isEmpty());
     assertTrue(cfg.getBandwidthScale().isEmpty());
@@ -66,7 +66,7 @@ class ADRCConfigTest {
     assertTrue(cfg.getSlewRateLimit().isEmpty());
     assertTrue(cfg.getInputDelay().isEmpty());
     assertTrue(cfg.getTdMethod().isEmpty());
-    assertArrayEquals(new double[0], cfg.getTdParams());
+    assertTrue(cfg.getTdParams().isEmpty());
     assertFalse(cfg.isCascaded());
     assertThrows(SmartMotorControllerConfigurationException.class,
         () -> cfg.buildController(DCMotor.getNEO(1),
@@ -81,7 +81,7 @@ class ADRCConfigTest {
 
   @Test
   void keepsEveryValueItIsGiven() {
-    final ADRCConfig cfg = new ADRCConfig("Shooter")
+    final ADRCConfig cfg = new ADRCConfig()
         .withSystemOrder(SystemOrder.SECOND)
         .withSettlingTime(Seconds.of(0.4))
         .withBandwidthScale(1.5)
@@ -101,16 +101,16 @@ class ADRCConfigTest {
     assertEquals(0.04, cfg.getInputDelay().orElseThrow().in(Seconds));
     assertTrue(cfg.isCascaded());
     assertEquals(TrackingDifferentiator.Method.LD, cfg.getTdMethod().orElseThrow());
-    assertArrayEquals(new double[] {0.5}, cfg.getTdParams());
+    assertArrayEquals(new double[] {0.5}, cfg.getTdParams().orElseThrow());
 
     cfg.withoutTrackingDifferentiator();
     assertTrue(cfg.getTdMethod().isEmpty());
-    assertArrayEquals(new double[0], cfg.getTdParams());
+    assertTrue(cfg.getTdParams().isEmpty());
   }
 
   @Test
   void theControllerRejectsAnInvalidValue() {
-    final ADRCConfig cfg = new ADRCConfig("Invalid")
+    final ADRCConfig cfg = new ADRCConfig()
         .withSystemOrder(SystemOrder.FIRST)
         .withB0(10)
         .withSettlingTime(Seconds.of(-1));
@@ -125,7 +125,7 @@ class ADRCConfigTest {
   @Test
   void derivesB0FromTheMotorGearingAndInertia() {
     final DCMotor motor = DCMotor.getNEO(1);
-    final ADRCConfig cfg = new ADRCConfig("Derived").withSystemOrder(SystemOrder.SECOND);
+    final ADRCConfig cfg = new ADRCConfig().withSystemOrder(SystemOrder.SECOND);
     assertThrows(SmartMotorControllerConfigurationException.class,
         () -> cfg.resolveB0(motor, smcConfig()), "the placeholder inertia is never used");
     final double expected = 12 * motor.Kt / (2 * Math.PI * motor.R * 0.1);
@@ -145,13 +145,13 @@ class ADRCConfigTest {
             .withLinearClosedLoopController(true);
     final double perRotation = 12 * motor.Kt / (2 * Math.PI * motor.R * 0.01);
     assertEquals(
-        perRotation * circumference, new ADRCConfig("Linear").resolveB0(motor, smc), 1e-9);
+        perRotation * circumference, new ADRCConfig().resolveB0(motor, smc), 1e-9);
   }
 
   @Test
   void buildsAControllerFromTheConfig() {
     final ADRCController controller =
-        new ADRCConfig("Built")
+        new ADRCConfig()
             .withSystemOrder(SystemOrder.SECOND)
             .withSettlingTime(Seconds.of(0.5))
             .withB0(10)
@@ -164,7 +164,7 @@ class ADRCConfigTest {
     assertEquals(9, controller.getMaxOutput(), "the motor config's closed loop voltage limit");
     assertEquals(-9, controller.getMinOutput());
     final ADRCController fallback =
-        new ADRCConfig("Fallback")
+        new ADRCConfig()
             .withSystemOrder(SystemOrder.FIRST)
             .withB0(10)
             .buildController(DCMotor.getNEO(1), smcConfig(), Milliseconds.of(20));
@@ -181,7 +181,7 @@ class ADRCConfigTest {
             .withFeedforward(new SimpleMotorFeedforward(0, 1, 0))
             .withFeedforward(new ArmFeedforward(0, 1, 0, 0))
             .withFeedforward(new ElevatorFeedforward(0, 1, 0, 0))
-            .withADRCController(new ADRCConfig("Replace").withSystemOrder(SystemOrder.FIRST));
+            .withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST));
     assertTrue(smc.getADRCController(slot).isPresent());
     assertTrue(smc.getPID(slot).isEmpty());
     assertTrue(smc.getLQRClosedLoopController().isEmpty());
@@ -199,7 +199,7 @@ class ADRCConfigTest {
     final yams.commands2.config.SmartMotorControllerConfig smc =
         smcConfig()
             .withClosedLoopController(1, 0, 0, ClosedLoopControllerSlot.SLOT_1)
-            .withADRCController(new ADRCConfig("Slot0").withSystemOrder(SystemOrder.FIRST),
+            .withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST),
                 ClosedLoopControllerSlot.SLOT_0);
     assertTrue(smc.getADRCController(ClosedLoopControllerSlot.SLOT_0).isPresent());
     assertTrue(smc.getPID(ClosedLoopControllerSlot.SLOT_1).isPresent());
@@ -209,7 +209,7 @@ class ADRCConfigTest {
   @Test
   void aCopyOfTheMotorConfigGetsItsOwnADRCConfig() {
     final yams.commands2.config.SmartMotorControllerConfig smc = smcConfig().withADRCController(
-        new ADRCConfig("Copied").withSystemOrder(SystemOrder.FIRST).withB0(3));
+        new ADRCConfig().withSystemOrder(SystemOrder.FIRST).withB0(3));
     final yams.commands2.config.SmartMotorControllerConfig copy =
         (yams.commands2.config.SmartMotorControllerConfig) smc.clone();
     assertNotSame(smc.getADRCController().orElseThrow(), copy.getADRCController().orElseThrow());

@@ -18,6 +18,8 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -98,6 +100,19 @@ public class SmartMotorControllerTelemetry {
       this.config = config;
       doubleFields = config.getDoubleFields(smartMotorController);
       boolFields = config.getBoolFields(smartMotorController);
+      // The ADRC fields only exist for a motor controller running an ADRC, so live tuning always finds one.
+      if (smartMotorController.getADRCController().isEmpty()) {
+        doubleFields.get(DoubleTelemetryField.ADRCDisturbance).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidth).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCObserverBandwidth).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCSystemOrder).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCB0).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCOutput).disable();
+      }
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
         if (!entry.getValue().enabled)
           continue;
@@ -178,6 +193,8 @@ public class SmartMotorControllerTelemetry {
         case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
         case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime().in(Seconds)));
         case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
+        case ADRCMaxVoltage -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getMaxOutput()));
+        case ADRCSlewRateLimit -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSlewRateLimit()));
         case ADRCOutput -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getLastOutput()));
       }
     }
@@ -319,9 +336,22 @@ public class SmartMotorControllerTelemetry {
           case kP -> smartMotorController.setKp(dt.get());
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
-          case ADRCB0 -> retuneADRC(smartMotorController, adrc -> adrc.setB0(dt.get()));
-          case ADRCSettlingTime -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(Seconds.of(dt.get()), adrc.getBandwidthScale()));
-          case ADRCBandwidthScale -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(adrc.getSettlingTime(), dt.get()));
+          case ADRCB0, ADRCSettlingTime, ADRCBandwidthScale, ADRCMaxVoltage, ADRCSlewRateLimit -> {
+            // Kept in the ADRC's config, like a tuned PID, then the ADRC is reset to it, keeping its state estimate so
+            // its output doesn't jump. A value it can't use, such as a b0 of 0, leaves it as it was and raises an
+            // alert. Loosely coupled followers are tuned the same way.
+            List<SmartMotorController> tuned = new ArrayList<>(List.of(smartMotorController));
+            smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> tuned.addAll(List.of(followers)));
+            for (SmartMotorController smc : tuned) {
+              smc.getConfig().getADRCController(smc.getClosedLoopControllerSlot()).ifPresent(adrcConfig -> adrcConfig
+                  .withB0(doubleFields.get(DoubleTelemetryField.ADRCB0).get())
+                  .withSettlingTime(Seconds.of(doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).get()))
+                  .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get())
+                  .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).get()))
+                  .withSlewRateLimit(Volts.per(Second).of(doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).get())));
+              smc.getADRCController().ifPresent(ADRCController::reset);
+            }
+          }
           case kS -> smartMotorController.setKs(dt.get());
           case kV -> smartMotorController.setKv(dt.get());
           case kA -> smartMotorController.setKa(dt.get());
@@ -392,23 +422,6 @@ public class SmartMotorControllerTelemetry {
         }
       }
     }
-  }
-
-  /**
-   * Apply a live tuning change to the ADRC, reporting a rejected value instead of stopping the
-   * tuning loop. A value the ADRC cannot use leaves the controller as it was.
-   *
-   * @param smc    Motor controller being tuned.
-   * @param action Change to apply.
-   */
-  private void retuneADRC(SmartMotorController smc, java.util.function.Consumer<ADRCController> action) {
-    smc.getADRCController().ifPresent(adrc -> {
-      try {
-        action.accept(adrc);
-      } catch (RuntimeException e) {
-        DriverStationBackend.reportWarning("[WARNING] " + smc.getName() + " ADRC not retuned: " + e.getMessage(), false);
-      }
-    });
   }
 
   /**
@@ -566,6 +579,10 @@ public class SmartMotorControllerTelemetry {
     ADRCSettlingTime("closedloop/adrc/settlingTime", 0.2, true, "seconds"),
     /** ADRC closed-loop bandwidth scale. */
     ADRCBandwidthScale("closedloop/adrc/bandwidthScale", 1, true, "none"),
+    /** ADRC maximum output voltage; the minimum is its negative unless the ADRC config sets one. */
+    ADRCMaxVoltage("closedloop/adrc/maxVoltage", 12, true, "volts"),
+    /** ADRC output slew-rate limit, volts per second; 0 turns it off. */
+    ADRCSlewRateLimit("closedloop/adrc/slewRateLimit", 0, true, "volts_per_second"),
     /** ADRC output voltage. */
     ADRCOutput("closedloop/adrc/output", 0, false, "volts"),
     /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */

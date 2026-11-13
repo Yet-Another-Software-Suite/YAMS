@@ -4,6 +4,7 @@
 package yams.core.math;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Tracking differentiator.
@@ -92,7 +93,7 @@ import java.util.Arrays;
  *
  * <pre>{@code
  * TrackingDifferentiator td =
- *     new TrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.02, new double[] {0.9});
+ *     new TrackingDifferentiator(TrackingDifferentiator.Method.EULER, 0.02, Optional.of(new double[] {0.9}));
  * td.update(setpoint);
  * double smoothSetpoint = td.getY();
  * double setpointVelocity = td.getYd();
@@ -124,7 +125,7 @@ public class TrackingDifferentiator {
   /** Sample time in seconds. */
   private double dt;
   /** Method parameters. */
-  private double[] params;
+  private double[] params = new double[0];
 
   /** Previous filtered value, used by the Euler method. */
   private double prevY;
@@ -148,11 +149,11 @@ public class TrackingDifferentiator {
    *
    * @param method Differentiation method.
    * @param dt     Sample time in seconds.
-   * @param params Method parameters. May be {@code null} to use the method defaults.
+   * @param params Method parameters, or empty to use the method defaults.
    * @throws IllegalArgumentException if the method is {@code null}, the sample time is invalid, or
    *                                  the parameters do not validate.
    */
-  public TrackingDifferentiator(Method method, double dt, double[] params) {
+  public TrackingDifferentiator(Method method, double dt, Optional<double[]> params) {
     if (method == null) {
       throw new IllegalArgumentException("TD method must not be null");
     }
@@ -162,7 +163,7 @@ public class TrackingDifferentiator {
 
     this.method = method;
     this.dt = dt;
-    this.params = params != null ? params.clone() : null;
+    this.params = params.map(double[]::clone).orElseGet(() -> new double[0]);
 
     validateParams();
     initializeState(0.0);
@@ -198,7 +199,7 @@ public class TrackingDifferentiator {
    * @return Parameter value.
    */
   private double param(int index, double defaultValue) {
-    return params != null && params.length > index ? params[index] : defaultValue;
+    return params.length > index ? params[index] : defaultValue;
   }
 
   /** Validate the parameters at the current sample time. */

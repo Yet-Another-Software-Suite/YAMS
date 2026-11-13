@@ -64,7 +64,7 @@ public class ADRCMechanismTest {
   }
 
   private static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
-    return new ADRCConfig("ADRCMechanismTest")
+    return new ADRCConfig()
         .withSystemOrder(order)
         .withSettlingTime(Seconds.of(settlingSeconds))
         .withMaxVoltage(Volts.of(12));
