@@ -43,15 +43,18 @@ motor controller runs the ADRC.
 - **With the applied voltage.** Each loop, the observer is told the voltage the motor
   controller actually applied, not the one it asked for. So a current limit, a low battery or
   saturation is not mistaken for a disturbance.
+- **Limited and ramped by the motor config.** The motor controller limits the output to
+  `withClosedLoopControllerMaximumVoltage(...)` and ramps it with `withClosedLoopRampRate(...)`,
+  as for every closed loop. See [Output limits and ramp](#output-limits-and-ramp).
 - **From where the mechanism is.** When the closed loop starts, and every loop while the robot
   is disabled, the observer is reset to the measurement: the position, or the velocity while a
   velocity setpoint is set. Enabling the robot does not look like a step from zero.
 - **From its config.** The `ADRCController` keeps only its running state: the observer's
-  estimate, its last outputs and the tracking differentiator. Everything else it reads from its
-  `ADRCConfig` every loop, including the observer and control gains. The config works the gains
-  out when the controller is built, and again whenever its settling time, bandwidth scale or `b0`
-  changes. So a change to any of those, or to the output limits, slew-rate limit or cascaded
-  observer, takes effect on the next loop. The system order, input delay and tracking
+  estimate, its last outputs and the tracking differentiator, and the output limit it was built
+  with. Everything else it reads from its `ADRCConfig` every loop, including the observer and
+  control gains. The config works the gains out when the controller is built, and again whenever
+  its settling time, bandwidth scale or `b0` changes. So a change to any of those, or to the
+  cascaded observer, takes effect on the next loop. The system order, input delay and tracking
   differentiator are fixed when the controller is built.
 
 ## Choosing the settings
@@ -66,7 +69,7 @@ The order of the plant from the voltage to what you control, set with an
 | --- | --- | --- | --- |
 | Flywheel, roller | Velocity | `FIRST` | Derived, or acceleration per volt |
 | Arm, pivot, turret | Position | `SECOND` | Derived, or acceleration per volt |
-| Elevator, or any mechanism whose speed is set by its back-EMF | Position | `FIRST` | Speed per volt: `Kv / (2 pi G)` |
+| Elevator, or any mechanism whose speed is set by its back-EMF | Position | `FIRST` | Speed per volt: `withB0(motor, gearing)` |
 
 There is no default system order. `buildController` throws until one is set.
 
