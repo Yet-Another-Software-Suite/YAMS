@@ -109,7 +109,6 @@ public class SmartMotorControllerTelemetry {
         doubleFields.get(DoubleTelemetryField.ADRCB0).disable();
         doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).disable();
         doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).disable();
-        doubleFields.get(DoubleTelemetryField.ADRCOutput).disable();
       }
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
         if (!entry.getValue().enabled)
@@ -191,7 +190,6 @@ public class SmartMotorControllerTelemetry {
         case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
         case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime().in(Seconds)));
         case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
-        case ADRCOutput -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getLastOutput()));
       }
     }
   }
@@ -593,8 +591,6 @@ public class SmartMotorControllerTelemetry {
     ADRCSettlingTime("closedloop/adrc/settlingTime", 0.2, true, "seconds"),
     /** ADRC closed-loop bandwidth scale. */
     ADRCBandwidthScale("closedloop/adrc/bandwidthScale", 1, true, "none"),
-    /** ADRC output voltage. */
-    ADRCOutput("closedloop/adrc/output", 0, false, "volts"),
     /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */
     LQRQelmsPosition("closedloop/lqr/qelms/position", 0, true, "tunable_position"),
     /** LQR velocity error tolerance (qelms), in RPM or meters per second. */

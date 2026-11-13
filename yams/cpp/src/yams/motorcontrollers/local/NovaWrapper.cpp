@@ -461,8 +461,11 @@ bool NovaWrapper::NovaCanRunClosedLoop(const SmartMotorControllerConfig& config)
   const auto wrappingMax = config.GetWrappingMax();
   const bool continuousWrapping = config.IsWrappingContinuous();
   const bool trapezoidProfile = config.HasTrapezoidProfile();
-  if (UsesSystemCoreController() || config.HasExponentialProfile() || config.HasLinearExponentialProfile() ||
-      (trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse()))
+  // Read every profile option before deciding, so the config's option check sees them all used, even when an LQR or
+  // ADRC already decides it.
+  const bool exponentialProfile = config.HasExponentialProfile() || config.HasLinearExponentialProfile();
+  const bool velocityProfile = trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse();
+  if (UsesSystemCoreController() || exponentialProfile || velocityProfile)
     return false;
   if (!wrappingMax) return true;
   const bool fromZero = std::abs(config.GetWrappingMin()->value()) <= 1e-9;

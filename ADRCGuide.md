@@ -20,7 +20,7 @@ SmartMotorControllerConfig config = new SmartMotorControllerConfig(this)
     .withMomentOfInertia(Inches.of(18), Pounds.of(8)) // b0 is derived from this
     .withClosedLoopControllerMaximumVoltage(Volts.of(12))
     .withADRCController(new ADRCConfig()
-        .withSystemOrder(SystemOrder.SECOND)  // a position loop
+        .withSystemOrder(SystemOrder.ARM)  // a position loop; first or second order is chosen for you
         .withSettlingTime(Seconds.of(0.6)));
 ```
 
@@ -50,8 +50,8 @@ motor controller runs the ADRC.
   is disabled, the observer is reset to the measurement: the position, or the velocity while a
   velocity setpoint is set. Enabling the robot does not look like a step from zero.
 - **From its config.** The `ADRCController` keeps only its running state: the observer's
-  estimate, its last outputs and the tracking differentiator. Everything else it reads from its `ADRCConfig` every loop, including the observer and
-  control gains. The config works the gains out when the controller is built, and again whenever
+  estimate, its last outputs and the tracking differentiator. Everything else it reads from its
+  `ADRCConfig` every loop, including the observer and control gains. The config works the gains out when the controller is built, and again whenever
   its settling time, bandwidth scale or `b0` changes. So a change to any of those, or to the
   cascaded observer, takes effect on the next loop. The system order, input delay and tracking
   differentiator are fixed when the controller is built.
@@ -61,48 +61,59 @@ motor controller runs the ADRC.
 ### System order
 
 The order of the plant from the voltage to what you control, set with an
-`ADRCConfig.SystemOrder`: `FIRST` to `FOURTH`, with `FLYWHEEL` the same as `FIRST` and `ARM` the
-same as `SECOND`. `ELEVATOR` is first order too, with its speed per volt as `b0` (see below).
+`ADRCConfig.SystemOrder`.
 
 | Mechanism | Setpoint | Order | `b0` |
 | --- | --- | --- | --- |
-| Flywheel, roller | Velocity | `FIRST` | Derived, or acceleration per volt |
-| Arm, pivot, turret | Position | `SECOND` | Derived, or acceleration per volt |
-| Elevator, or any linear mechanism whose speed is set by its back-EMF | Position, linear | `ELEVATOR` | Derived speed per volt |
+| Flywheel, roller | Velocity | `FIRST` (or `FLYWHEEL`) | Acceleration per volt, derived from the inertia |
+| Arm, pivot, turret | Position | `ARM`, `PIVOT` or `POSITION` | Chosen when built, see below |
+| Elevator | Position, linear | `ELEVATOR` | Chosen when built, see below; in meters |
+
+`FIRST`, `SECOND`, `THIRD` and `FOURTH` are fixed orders, for when you know the plant.
 
 There is no default system order. `buildController` throws until one is set.
 
-### `b0`, the input gain
+#### Position loops
 
-`b0` is how much one volt moves the plant's highest derivative: mechanism rotations per second
-squared per volt for an order 1 velocity loop or an order 2 position loop.
+A position loop is one of two plants, depending on what sets how fast the mechanism moves:
 
-If `b0` is not set, it is derived from the motor, the gearing and the mechanism's moment of
-inertia:
+- **Its inertia**, for a lightly geared mechanism. A voltage accelerates it, and the acceleration
+  integrates twice into its position: second order, with its acceleration per volt as `b0`.
+- **Its motor's back-EMF**, for a heavily geared one. Each volt moves it at about the same speed,
+  reached sooner than the loop can act: first order, with its speed per volt as `b0`.
+
+The wrong form works badly. A 60:1 NEO pivot run second order overshoots a 135° step by 77°; first
+order, it settles in half a second with no overshoot. Geared 12:1, the same pivot is the other way
+round.
+
+`POSITION` (and `ARM`, `PIVOT` and `ELEVATOR`, which are the same) chooses for you when the
+controller is built, from the motor's back-EMF time constant at the mechanism:
 
 ```
-b0 = G * Kt / (2 * pi * R * J)    rotations per second squared per volt
+tau = J * R / (G^2 * Kt * Ke)    seconds
 ```
 
-where `G` is motor rotations per mechanism rotation, `Kt` and `R` come from the `DCMotor`, and `J`
-is the moment of inertia. With a linear closed loop it is multiplied by the mechanism
-circumference, for meters per second squared per volt.
+where `J` is the moment of inertia, `G` motor rotations per mechanism rotation, and `R`, `Kt` and
+`Ke` (the inverse of `Kv`) come from the `DCMotor`. When `tau` is under two control periods (40 ms
+at the default 20 ms, `ADRCConfig.SPEED_PER_VOLT_TIME_CONSTANT_PERIODS`), the position loop is first
+order with its speed per volt as `b0`; otherwise it is second order with its acceleration per volt.
 
-The derivation only uses an inertia you set with `withMomentOfInertia(...)` or
-`withWheelMomentOfInertia(...)`. YAMS's placeholder inertia is never used: without one, and
-without `withB0(...)`, building the controller throws.
+| Mechanism | `tau` | Chosen |
+| --- | --- | --- |
+| NEO, 60:1, 0.1 kg·m² pivot | 6 ms | First order, speed per volt |
+| NEO, 60:1, 3 kg 0.5 m arm | 16 ms | First order, speed per volt |
+| NEO, 12:1, 0.1 kg·m² pivot | 160 ms | Second order, acceleration per volt |
 
-The derived `b0` ignores back-EMF, which the observer has to estimate as part of the disturbance.
-That suits flywheels and arms. An elevator's back-EMF, not its inertia, sets how fast it moves,
-so an elevator uses `SystemOrder.ELEVATOR`: first order on its position, with its speed per volt
-as `b0`.
+The choice needs the mechanism's moment of inertia, from `withMomentOfInertia(...)`. Without it,
+building the controller throws, except for `ELEVATOR`.
 
-An elevator's closed loop is linear, in meters, so its `b0` is in meters per second per volt. It is
-derived from the motor, the gearing and the mechanism circumference, with no inertia: the motor's
-free speed per volt through the gearing, times the circumference, `Kv / (2 * pi * G) * C`.
-`SystemOrder.ELEVATOR` needs a linear closed loop: without one, building the controller throws,
-even with `withB0(...)` set. With an ADRC there is no `ElevatorFeedforward` to turn the linear
-closed loop on, so turn it on yourself:
+#### Elevators
+
+`ELEVATOR` is `POSITION` in a linear closed loop: it runs in meters, so its `b0` is too. It needs a
+linear closed loop: without one, building the controller throws, even with `withB0(...)` set. With
+an ADRC there is no `ElevatorFeedforward` to turn the linear closed loop on, so turn it on yourself.
+Without a moment of inertia, an elevator is first order with its speed per volt, since an
+elevator's speed is nearly always set by its motor's back-EMF.
 
 ```java
 config.withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
@@ -112,6 +123,24 @@ config.withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
         .withSystemOrder(SystemOrder.ELEVATOR)
         .withSettlingTime(Seconds.of(0.5)));
 ```
+
+### `b0`, the input gain
+
+`b0` is how much one volt moves the plant's highest derivative, in the loop's units: mechanism
+rotations, or meters for a linear closed loop. If it is not set, it is derived:
+
+```
+acceleration per volt:  b0 = G * Kt / (2 * pi * R * J)    rotations per second squared per volt
+speed per volt:         b0 = Kv / (2 * pi * G)            rotations per second per volt
+```
+
+With a linear closed loop both are multiplied by the mechanism circumference. A velocity loop and
+a second order position loop use the acceleration per volt, a first order position loop the speed
+per volt (see [Position loops](#position-loops)).
+
+The acceleration per volt only uses an inertia you set with `withMomentOfInertia(...)` or
+`withWheelMomentOfInertia(...)`. YAMS's placeholder inertia is never used: without one, and
+without `withB0(...)`, building the controller throws.
 
 `b0` does not have to be exact: the observer absorbs a `b0` off by a factor of two. If the
 mechanism overshoots or oscillates, lower `b0`; if it is sluggish, raise it.
@@ -146,6 +175,88 @@ The motor config limits and ramps the ADRC's output, as it does for every closed
 The observer is told the voltage the motor controller applied, so a limit or ramp that holds the
 output back is not taken for a disturbance.
 
+## Tuning an ADRC
+
+An ADRC has few knobs, and the defaults get a mechanism moving. Tuning means picking the system
+order, giving YAMS what it needs to derive `b0`, and then shortening the settling time until the
+mechanism stops getting better.
+
+### 1. Describe the plant
+
+- **Pick the system order.** `FLYWHEEL` (or `FIRST`) for a velocity loop, and `ARM`, `PIVOT`,
+  `POSITION` or `ELEVATOR` for a position loop, which choose first or second order for you (see
+  [Position loops](#position-loops)).
+- **Set the moment of inertia** with `withMomentOfInertia(...)`, so YAMS can derive `b0` and choose
+  a position loop's form. Without it, set `withB0(...)` and a fixed order yourself.
+- **Set the output limit and ramp on the motor config:** `withClosedLoopControllerMaximumVoltage(...)`,
+  and `withClosedLoopRampRate(...)` only if the mechanism needs its output ramped. A ramp adds lag,
+  which makes a position loop overshoot more.
+
+### 2. Graph it
+
+Run the robot, in simulation first, with `HIGH` telemetry, and graph these in AdvantageScope:
+
+| Topic | What to look for |
+| --- | --- |
+| `closedloop/setpoint/position` or `velocity` | The step you command. |
+| `mechanism/position` or `velocity` (`measurement/position` for a linear loop) | How the mechanism follows it. |
+| `motor/outputVoltage` | Whether the output saturates, and whether it chatters. |
+| `closedloop/adrc/disturbance` | What the observer estimates: steady under gravity, smooth while moving. |
+
+Command steps of the size the robot uses, both ways. The example robots' demo steps an arm 45°,
+90°, 0° and -20°, a second apart.
+
+### 3. Shorten the settling time
+
+Start at about 0.5 s for a position loop and 0.3 s for a velocity loop, and shorten the settling
+time while each step gets faster and stays clean. Stop when shortening it no longer helps:
+
+- **The output saturates for most of a move.** The mechanism is going as fast as it can, and a
+  shorter settling time only makes it overshoot. A big elevator move is like this.
+- **It overshoots or rings.** Lengthen the settling time again.
+- **The output or the disturbance chatters.** The observer is fast enough to amplify sensor noise.
+
+These are the measurements behind the example robots' settings, in simulation:
+
+| Mechanism | Settling time | Worst overshoot | Settles in |
+| --- | --- | --- | --- |
+| Arm, NEO 60:1, 3 kg, 0.5 m (first order) | 0.6 s | 0° | 0.60 s |
+| | **0.3 s** | 0° | 0.34 s |
+| | 0.2 s | 0° | 0.28 s |
+| Elevator, NEO 12:1, 16 lb, 22T #25 sprocket | 0.5 s | 0 m | 1.28 s |
+| | **0.3 s** | 0 m | 1.16 s |
+| Shooter, NEO direct, 4 in 1 lb wheel | 0.3 s | 2.7 RPM | 0.48 s |
+| | **0.2 s** | 2.8 RPM | 0.44 s |
+| | 0.15 s | 46 RPM | 0.44 s |
+| | 0.1 s | 96 RPM | 0.42 s |
+
+The elevator barely speeds up: its motor's top speed limits a 1 m move, whatever the settling time.
+The examples leave some margin rather than take the fastest clean value, since a real mechanism has
+friction, backlash and sensor noise the simulation does not.
+
+### 4. Adjust `b0` if it still misbehaves
+
+The derived `b0` is a starting point, and the observer absorbs one off by a factor of two. If the
+mechanism still overshoots or oscillates, lower `b0`; if it is sluggish, raise it. On a 12:1 arm,
+half the derived `b0` cut the overshoot from 2.7° to 1.2°, and twice it raised it to 13.6°.
+
+A position loop that overshoots badly whatever the settling time is likely the wrong form: check
+which order it chose (`closedloop/adrc/systemOrder`), and the moment of inertia it was chosen from.
+
+### 5. Tune live, then copy the values back
+
+With `HIGH` telemetry, the Live Tuning command retunes `b0`, the settling time and the bandwidth
+scale while the robot runs (see [Telemetry and live tuning](#telemetry-and-live-tuning)). Tuned
+values last until the robot restarts: copy the ones you keep into the code.
+
+### Leave these alone at first
+
+- **Bandwidth scale** scales both bandwidths together. The settling time does the same job in units
+  you can reason about.
+- **Input delay**, the **cascaded observer** and the **tracking differentiator** are for unusual
+  plants. A motion profile on the motor config shapes setpoints better than a tracking
+  differentiator.
+
 ## Examples
 
 A whole robot with an ADRC arm, elevator and shooter is in the `adrc_mechanisms` example, for
@@ -155,7 +266,7 @@ A whole robot with an ADRC arm, elevator and shooter is in the `adrc_mechanisms`
 [examples/cpptest](examples/cpptest/README.md#adrc-subsystems).
 
 These are the settings YAMS's tests use, which hold each mechanism at its setpoint on every motor
-controller. Each motor config also has `withClosedLoopControllerMaximumVoltage(Volts.of(12))`.
+controller. The example robots use the tuned settling times from [Tuning an ADRC](#tuning-an-adrc). Each motor config also has `withClosedLoopControllerMaximumVoltage(Volts.of(12))`.
 
 ```java
 // Flywheel: order 1 on velocity, b0 derived from the wheel's inertia.
@@ -165,17 +276,17 @@ config.withMomentOfInertia(KilogramSquareMeters.of(0.01))
           .withSettlingTime(Seconds.of(0.15)));
 flyWheel.setMechanismVelocitySetpoint(RPM.of(3000));
 
-// Arm under gravity, with no kG: order 2 on position.
+// Arm under gravity, with no kG: its position loop's form is chosen from the motor, gearing and inertia.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
       .withADRCController(new ADRCConfig()
-          .withSystemOrder(SystemOrder.SECOND)
+          .withSystemOrder(SystemOrder.ARM)
           .withSettlingTime(Seconds.of(0.6)));
 arm.setMechanismPositionSetpoint(Degrees.of(45));
 
-// Pivot or turret: order 2 on position.
+// Pivot or turret: the same.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
       .withADRCController(new ADRCConfig()
-          .withSystemOrder(SystemOrder.SECOND)
+          .withSystemOrder(SystemOrder.PIVOT)
           .withSettlingTime(Seconds.of(0.6)));
 
 // Elevator under gravity, with no kG: first order on position in meters, b0 its derived speed per volt.
@@ -198,7 +309,6 @@ publishes these under `closedloop/adrc/`. A motor controller without an ADRC nev
 | `bandwidth` | No | Controller bandwidth `wc`, radians per second. |
 | `observerBandwidth` | No | Observer bandwidth `wo`, radians per second. |
 | `systemOrder` | No | Plant order. |
-| `output` | No | The last output, volts. |
 | `b0` | Yes | Input gain. |
 | `settlingTime` | Yes | Settling time, seconds. |
 | `bandwidthScale` | Yes | Bandwidth scale. |
@@ -261,7 +371,7 @@ them.
 | Method | What it does |
 | --- | --- |
 | `new ADRCConfig()` | A config for one motor controller. Its errors and alerts name that motor controller by its telemetry name. |
-| `withSystemOrder(SystemOrder)` | Plant order. Required. Once a controller is built, a different order, or a change between `ELEVATOR` and `FIRST`, throws `IllegalStateException`: the observer's size and the kind of `b0` depend on it, so a new order needs a new `ADRCConfig`. |
+| `withSystemOrder(SystemOrder)` | Plant order. Required. Once a controller is built, an order that would build a different controller (not just an alias) throws `IllegalStateException`: the observer's size and the kind of `b0` depend on it, so a new order needs a new `ADRCConfig`. |
 | `withSettlingTime(Time)` | Settling time. Default 0.2 s. Must be finite and positive. Works the gains out again. |
 | `withBandwidthScale(double)` | Bandwidth scale. Default 1. Must be finite and positive. Works the gains out again. |
 | `withB0(double)` | Input gain. Default: derived, see above. Must be finite and non-zero. Works the gains out again. |
@@ -269,13 +379,13 @@ them.
 | `withCascaded(boolean)` | Use the cascaded observer: a second ESO, fed the first one's estimate of the measurement, supplies the disturbance the control law cancels. Default off. |
 | `withTrackingDifferentiator(TrackingDifferentiator.Method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. Leave out `params` for the method's defaults. Off by default. Its parameters are checked when the controller is built, as some depend on the period. |
 | `withoutTrackingDifferentiator()` | Turn the tracking differentiator off. |
-| `getSystemOrder()` | `Optional<SystemOrder>`. |
+| `getSystemOrder()` | `Optional<SystemOrder>`. `SystemOrder.getOrder()` is 0 for a position loop chosen when built; `isChosenWhenBuilt()` and `requiresLinearClosedLoop()` tell them apart. The controller's `getSystemOrder()` gives the chosen order. |
 | `getSettlingTime()`, `getInputDelay()` | `Optional<Time>`. |
 | `getBandwidthScale()`, `getB0()` | `OptionalDouble`. |
 | `getTdMethod()` | `Optional<TrackingDifferentiator.Method>`. |
 | `getTdParams()` | `Optional<double[]>`: a copy of the tracking differentiator parameters, or empty for the defaults. |
 | `isCascaded()` | Whether the cascaded observer is on. |
-| `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one, a speed per volt for `ELEVATOR`. Throws if it cannot be derived, or if the order is `ELEVATOR` and the closed loop is not linear. |
+| `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one, a speed per volt for a first order position loop. Throws if it cannot be derived, if a position loop's form cannot be chosen, or if the order is `ELEVATOR` and the closed loop is not linear. |
 | `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController` that reads this config, giving the config the period and `b0` it needs. The controller does not limit or ramp its output; the motor controller does. The motor controller calls this; you only need it to use the controller yourself. |
 | `reportRejected(Optional<String> reason)` | Raise the YAMS alert for a refused value, or clear it with an empty reason. Live tuning calls it. |
 | `clone()` | A deep copy: the settings, the values given when a controller was built, and the gains, with matrices of its own. Changing the copy leaves the original alone. The copy raises its own alerts. `SmartMotorControllerConfig.clone()` copies each slot's ADRC config this way. |
@@ -380,7 +490,7 @@ config.WithMotorGearing(12.0)
     .WithMOI(0.1_kg_sq_m)  // b0 is derived from this
     .WithClosedLoopMaxVoltage(12_V)
     .WithADRCController(yams::math::ADRCConfig{}
-        .WithSystemOrder(yams::math::ADRCConfig::SystemOrder::SECOND)
+        .WithSystemOrder(yams::math::ADRCConfig::SystemOrder::ARM)
         .WithSettlingTime(600_ms));
 
 // Retune, as live tuning does: the motor config's ADRC config is shared with the controller.
@@ -401,9 +511,9 @@ config.GetADRCController()->WithSettlingTime(800_ms);
   `ADRCConfig::BuildController(config, motor, motorConfig, period)`, or
   `ADRCController{config}` followed by `Initialize(b0, period)`.
 - **Names.** The motor config's output limit is `WithClosedLoopMaxVoltage`.
-- **System orders.** `SystemOrder` is an `enum class`: `ADRCConfig::GetOrder(order)` gives its
-  order, 1 for `ELEVATOR`, and `ADRCConfig::IsSpeedPerVolt(order)` whether its `b0` is a speed per
-  volt.
+- **System orders.** `SystemOrder` is an `enum class`, and aliases share a value: `ARM` and
+  `PIVOT` equal `POSITION`. `ADRCConfig::GetOrder(order)` gives its order, 0 for one chosen when
+  built, and `IsChosenWhenBuilt(order)` and `RequiresLinearClosedLoop(order)` tell them apart.
 - **Units where the value has one.** `Calculate`, `Step` and `GetLastOutput` use `volt_t`, and
   `GetBandwidth` and `GetObserverBandwidth` use `radians_per_second_t`. The
   measurement, setpoint and `b0` are plain numbers in the loop's units, as in Java.

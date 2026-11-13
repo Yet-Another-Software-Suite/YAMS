@@ -126,7 +126,7 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.PivotHoldsItsAngle", "[A
   for (const auto& param : Controllers()) {
     DYNAMIC_SECTION(param.name) {
       // A position loop is second order; b0 is derived from the inertia.
-      auto bundle = MakeBundle(param, AdrcConfig(param, "Pivot", math::ADRCConfig::SystemOrder::SECOND, 0.6_s, 0.1));
+      auto bundle = MakeBundle(param, AdrcConfig(param, "Pivot", math::ADRCConfig::SystemOrder::PIVOT, 0.6_s, 0.1));
       REQUIRE(bundle.smc->GetADRCController() != nullptr);
       auto* pivotCfg = new PivotConfig;
       pivotCfg->WithMinAngle(-180.0_deg).WithMaxAngle(180.0_deg);
@@ -154,7 +154,7 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.ArmHoldsItsAngleAgainstG
     DYNAMIC_SECTION(param.name) {
       // An arm is second order too; the observer takes gravity for part of the disturbance.
       auto bundle =
-          MakeBundle(param, AdrcConfig(param, "Arm", math::ADRCConfig::SystemOrder::SECOND, 0.6_s, 0.1, -30.0_deg));
+          MakeBundle(param, AdrcConfig(param, "Arm", math::ADRCConfig::SystemOrder::ARM, 0.6_s, 0.1, -30.0_deg));
       REQUIRE(bundle.smc->GetADRCController() != nullptr);
       auto* armCfg = new ArmConfig;
       armCfg->WithArmLength(0.5_m).WithMinAngle(-180.0_deg).WithMaxAngle(180.0_deg);
@@ -256,6 +256,8 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.TheClosedLoopRampLimitsH
   constexpr double kRampVoltsPerSecond = 24.0;
   // Slack for the applied voltage, which a motor controller reports in steps.
   constexpr double kSlackVolts = 0.75;
+  // The most the ramp lets the output change in one 20 ms loop.
+  constexpr double kRampStepVolts = kRampVoltsPerSecond * 0.02;
   for (const auto& param : Controllers()) {
     for (const bool lqr : {false, true}) {
       for (const bool ramped : {true, false}) {
@@ -288,19 +290,30 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.TheClosedLoopRampLimitsH
               wpi::cmd::Run([&bundle] { bundle.smc->SetPosition(wpi::units::turn_t{1}); },
                             {bundle.smc->GetConfig().GetSubsystem()});
           wpi::cmd::CommandScheduler::GetInstance().Schedule(command);
+          // A Talon, simulated in real time, is checked against the ramp from the first command. The others are
+          // stepped in sim time, one closed loop per step, so each step's change is checked: that holds wherever the
+          // ramp starts from.
+          const bool ctre = IsCTRE(bundle);
           double time = 0;
           double worstOverRamp = 0;
+          double largestStep = 0;
+          double previous = bundle.smc->GetVoltage().value();
           SchedulerHelper::RunForDuration(0.5_s, [&] {
             time += 0.02;
-            worstOverRamp =
-                std::max(worstOverRamp, std::abs(bundle.smc->GetVoltage().value()) - kRampVoltsPerSecond * time);
+            const double volts = bundle.smc->GetVoltage().value();
+            worstOverRamp = std::max(worstOverRamp, std::abs(volts) - kRampVoltsPerSecond * time);
+            largestStep = std::max(largestStep, std::abs(volts - previous));
+            previous = volts;
           });
-          INFO(param.name << ": " << worstOverRamp << " V over a " << kRampVoltsPerSecond << " V/s ramp");
-          if (ramped) {
+          INFO(param.name << ": " << worstOverRamp << " V over a " << kRampVoltsPerSecond << " V/s ramp, largest step "
+                          << largestStep << " V against " << kRampStepVolts << " V");
+          if (ctre) {
             CHECK(worstOverRamp <= kSlackVolts);
+          } else if (ramped) {
+            CHECK(largestStep <= kRampStepVolts + 0.05);
           } else {
-            // Without the ramp the same step rises faster, so the ramp is what held it back.
-            CHECK(worstOverRamp > kSlackVolts);
+            // Without the ramp the same step changes faster, so the ramp is what held it back.
+            CHECK(largestStep > kRampStepVolts + 0.05);
           }
 
           SchedulerHelper::CancelAll();

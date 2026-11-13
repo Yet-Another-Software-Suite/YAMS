@@ -81,21 +81,29 @@ class ADRCConfig {
  public:
   /**
    * Plant order: how many integrators sit between the motor voltage and the measured output. Velocity loops on a DC
-   * motor are FIRST, position loops SECOND, and an elevator's position is ELEVATOR, first order with its speed per volt
-   * as b0.
+   * motor are FIRST. For a position loop, POSITION and its aliases choose between first and second order when the
+   * controller is built, from the motor, gearing and inertia.
    */
   enum class SystemOrder {
     FIRST = 1,     ///< First order: the loop commands and measures velocity, such as a flywheel.
     FLYWHEEL = 1,  ///< A flywheel's velocity loop; the same as FIRST.
-    SECOND = 2,    ///< Second order: the loop commands and measures position, such as an arm or turret.
-    ARM = 2,       ///< An arm's position loop; the same as SECOND.
+    SECOND = 2,    ///< Second order: a position loop whose inertia sets how fast it moves. POSITION chooses for you.
     THIRD = 3,     ///< Third order: the measurement sits two integrations behind the voltage. Rare.
     FOURTH = 4,    ///< Fourth order: three integrations between the voltage and the measurement. Rare.
     /**
-     * An elevator's position loop, in a linear closed loop. An elevator's speed is set by its motor's back-EMF more
-     * than by its inertia: each volt moves it at about the same speed. So its position is a first order plant, with its
-     * speed per volt as b0, in meters per second per volt, which ResolveB0 derives from the motor, gearing and mechanism
-     * circumference. The motor config must use a linear closed loop.
+     * A position loop whose form is chosen when the controller is built from a motor config, from the motor's back-EMF
+     * time constant at the mechanism, J * R / (G^2 * Kt * Ke). Under kSpeedPerVoltTimeConstantPeriods control periods,
+     * the motor's back-EMF, more than the mechanism's inertia, sets how fast it moves, so its position is first order
+     * with its speed per volt as b0. Otherwise it is second order with its acceleration per volt as b0. Both are in the
+     * loop's units. It needs the mechanism's moment of inertia.
+     */
+    POSITION = 100,
+    ARM = 100,    ///< An arm's position loop; the same as POSITION.
+    PIVOT = 100,  ///< A pivot's or turret's position loop; the same as POSITION.
+    /**
+     * An elevator's position loop, in a linear closed loop: POSITION in meters. Without a moment of inertia, it is first
+     * order with its speed per volt as b0, since an elevator's speed is nearly always set by its motor's back-EMF. The
+     * motor config must use a linear closed loop.
      */
     ELEVATOR = 101,
   };
@@ -104,20 +112,32 @@ class ADRCConfig {
    * Get a system order as an integer.
    *
    * @param order System order.
-   * @return Plant order, 1 through 4; 1 for ELEVATOR.
+   * @return Plant order, 1 through 4, or 0 for a position loop whose order is chosen when the controller is built.
    */
   static constexpr int GetOrder(SystemOrder order) {
-    return order == SystemOrder::ELEVATOR ? 1 : static_cast<int>(order);
+    return IsChosenWhenBuilt(order) ? 0 : static_cast<int>(order);
   }
 
   /**
-   * Whether b0 is the mechanism's speed per volt, derived from the motor and gearing, rather than its acceleration per
-   * volt, derived from its inertia.
+   * Whether the order and the kind of b0 are chosen when the controller is built.
+   *
+   * @param order System order.
+   * @return True for POSITION, ARM, PIVOT and ELEVATOR.
+   */
+  static constexpr bool IsChosenWhenBuilt(SystemOrder order) {
+    return order == SystemOrder::POSITION || order == SystemOrder::ELEVATOR;
+  }
+
+  /**
+   * Whether the motor config must use a linear closed loop.
    *
    * @param order System order.
    * @return True for ELEVATOR.
    */
-  static constexpr bool IsSpeedPerVolt(SystemOrder order) { return order == SystemOrder::ELEVATOR; }
+  static constexpr bool RequiresLinearClosedLoop(SystemOrder order) { return order == SystemOrder::ELEVATOR; }
+
+  /** A position loop's back-EMF time constant below which it is first order with its speed per volt, in periods. */
+  static constexpr double kSpeedPerVoltTimeConstantPeriods = 2.0;
 
   /** Closed-loop settling time used when none is set. */
   static constexpr wpi::units::second_t kDefaultSettlingTime{0.2};
@@ -149,8 +169,7 @@ class ADRCConfig {
    *
    * @param order Plant order.
    * @return This config for chaining.
-   * @throws std::logic_error if a controller was built from this config with a different order, or a different kind of
-   *         b0.
+   * @throws std::logic_error if a controller was built from this config with a different order.
    */
   ADRCConfig& WithSystemOrder(SystemOrder order);
   /**
@@ -275,6 +294,18 @@ class ADRCConfig {
     bool cascaded;
   };
 
+  /** The plant a controller is built for: its order, and whether b0 is a speed per volt. */
+  struct Plant {
+    int order;
+    bool speedPerVolt;
+  };
+  /** Choose the plant from the system order and, for a position loop chosen when built, the time constant. */
+  Plant ChoosePlant(const wpi::math::DCMotor& motor, const motorcontrollers::SmartMotorControllerConfig& config,
+                    SystemOrder order, const std::string& owner) const;
+  /** @return The plant order: the system order's, or the one chosen when built; throws until then. Locks. */
+  int PlantOrder() const;
+  /** PlantOrder for a caller that holds the lock. */
+  int PlantOrderLocked() const;
   /** Give the config the values a built controller needs, and work out the gains; throws std::invalid_argument. */
   void SetBuiltValues(double b0, wpi::units::second_t period);
   /** Work the gains out again, once built. The caller holds the lock. */
@@ -299,6 +330,7 @@ class ADRCConfig {
 
   std::optional<wpi::units::second_t> m_builtPeriod;
   std::optional<double> m_builtB0;
+  int m_builtOrder{0};
   std::shared_ptr<const ADRCGains> m_gains;
 
   std::unique_ptr<wpi::util::Alert> m_rejectedAlert;

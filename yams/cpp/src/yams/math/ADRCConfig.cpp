@@ -41,6 +41,7 @@ ADRCConfig::ADRCConfig(const ADRCConfig& other) : m_instance{gInstances++} {
   m_tdParams = other.m_tdParams;
   m_builtPeriod = other.m_builtPeriod;
   m_builtB0 = other.m_builtB0;
+  m_builtOrder = other.m_builtOrder;
   // Gains of its own, so retuning the copy leaves the original's alone.
   m_gains = other.m_gains ? std::make_shared<const ADRCGains>(*other.m_gains) : nullptr;
 }
@@ -60,6 +61,7 @@ ADRCConfig& ADRCConfig::operator=(const ADRCConfig& other) {
   m_tdParams = std::move(copy.m_tdParams);
   m_builtPeriod = copy.m_builtPeriod;
   m_builtB0 = copy.m_builtB0;
+  m_builtOrder = copy.m_builtOrder;
   m_gains = std::move(copy.m_gains);
   return *this;
 }
@@ -68,11 +70,10 @@ ADRCConfig::~ADRCConfig() = default;
 
 ADRCConfig& ADRCConfig::WithSystemOrder(SystemOrder order) {
   std::scoped_lock lock{m_mutex};
-  if (m_builtPeriod &&
-      (GetOrder(order) != GetOrder(*m_systemOrder) || IsSpeedPerVolt(order) != IsSpeedPerVolt(*m_systemOrder))) {
-    throw std::logic_error(std::format(
-        "{} already runs a controller of order {}{}; a new order needs a new ADRCConfig", m_owner,
-        GetOrder(*m_systemOrder), IsSpeedPerVolt(*m_systemOrder) ? " for an elevator" : ""));
+  // Aliases share a value, so a built config refuses any other value.
+  if (m_builtPeriod && order != *m_systemOrder) {
+    throw std::logic_error(std::format("{} already runs a controller of order {}; a new order needs a new ADRCConfig",
+                                       m_owner, m_builtOrder != 0 ? m_builtOrder : GetOrder(*m_systemOrder)));
   }
   m_systemOrder = order;
   return *this;
@@ -180,33 +181,29 @@ double ADRCConfig::ResolveB0(const wpi::math::DCMotor& motor,
                              const motorcontrollers::SmartMotorControllerConfig& config) const {
   std::string owner;
   std::optional<double> b0;
-  bool elevator = false;
+  std::optional<SystemOrder> order;
   {
     std::scoped_lock lock{m_mutex};
     b0 = m_b0;
     owner = m_owner;
-    elevator = m_systemOrder && IsSpeedPerVolt(*m_systemOrder);
+    order = m_systemOrder;
   }
-  if (elevator && !config.GetLinearClosedLoopControllerUse()) {
+  if (!order) {
     throw exceptions::SmartMotorControllerConfigurationException(
-        owner + " is an elevator's ADRC, but the closed loop is not linear",
-        "SystemOrder::ELEVATOR runs in meters, with b0 in meters per second per volt, so the motor config needs a "
-        "linear closed loop and a mechanism circumference.",
-        "WithLinearClosedLoopController(true) and WithMechanismCircumference(...) on the motor config");
+        owner + " has no system order",
+        "WithSystemOrder(...) was never called, and there is no safe default plant order.",
+        "WithADRCController(ADRCConfig{}.WithSystemOrder(ADRCConfig::SystemOrder::FIRST))");
   }
+  const Plant plant = ChoosePlant(motor, config, *order, owner);
   if (b0) return *b0;
-  if (elevator) {
+  if (plant.speedPerVolt) {
     const auto& gearing = config.GetMotorGearing();
-    const double rotorToMechanism = gearing ? gearing->GetMechanismToRotorRatio() : std::nan("");
-    if (!std::isfinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
-      throw exceptions::SmartMotorControllerConfigurationException(
-          std::format("{} cannot derive the elevator's b0 from gear ratio {}", owner, rotorToMechanism),
-          "The rotor-to-mechanism ratio must be finite and positive.", "WithMotorGearing(...) with a positive reduction");
-    }
-    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism, and each mechanism
-    // rotation moves the carriage one circumference.
-    return motor.Kv.value() / (2.0 * std::numbers::pi * rotorToMechanism) *
-           config.GetMechanismCircumference()->value();
+    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism.
+    const double rotationsPerSecondPerVolt =
+        motor.Kv.value() / (2.0 * std::numbers::pi * gearing->GetMechanismToRotorRatio());
+    return config.GetLinearClosedLoopControllerUse()
+               ? rotationsPerSecondPerVolt * config.GetMechanismCircumference()->value()
+               : rotationsPerSecondPerVolt;
   }
   if (!config.IsMomentOfInertiaConfigured()) {
     throw exceptions::SmartMotorControllerConfigurationException(
@@ -264,9 +261,74 @@ ADRCController ADRCConfig::BuildController(const std::shared_ptr<ADRCConfig>& se
           "WithADRCController(ADRCConfig{}.WithSystemOrder(ADRCConfig::SystemOrder::FIRST))");
     }
   }
+  SystemOrder order;
+  std::string owner;
+  {
+    std::scoped_lock lock{self->m_mutex};
+    order = *self->m_systemOrder;
+    owner = self->m_owner;
+  }
+  const Plant plant = self->ChoosePlant(motor, config, order, owner);
+  const double b0 = self->ResolveB0(motor, config);
+  {
+    // The controller sizes its observer from the order, so it is known before the controller is made.
+    std::scoped_lock lock{self->m_mutex};
+    self->m_builtOrder = plant.order;
+  }
   ADRCController controller{self};
-  controller.Initialize(self->ResolveB0(motor, config), period);
+  controller.Initialize(b0, period);
   return controller;
+}
+
+ADRCConfig::Plant ADRCConfig::ChoosePlant(const wpi::math::DCMotor& motor,
+                                          const motorcontrollers::SmartMotorControllerConfig& config,
+                                          SystemOrder order, const std::string& owner) const {
+  if (RequiresLinearClosedLoop(order) && !config.GetLinearClosedLoopControllerUse()) {
+    throw exceptions::SmartMotorControllerConfigurationException(
+        owner + " is an elevator's ADRC, but the closed loop is not linear",
+        "SystemOrder::ELEVATOR runs in meters, with b0 in meters, so the motor config needs a linear closed loop and a "
+        "mechanism circumference.",
+        "WithLinearClosedLoopController(true) and WithMechanismCircumference(...) on the motor config");
+  }
+  if (!IsChosenWhenBuilt(order)) return Plant{GetOrder(order), false};
+  const auto& gearing = config.GetMotorGearing();
+  const double rotorToMechanism = gearing ? gearing->GetMechanismToRotorRatio() : std::nan("");
+  if (!std::isfinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
+    throw exceptions::SmartMotorControllerConfigurationException(
+        std::format("{} cannot derive b0 from gear ratio {}", owner, rotorToMechanism),
+        "The rotor-to-mechanism ratio must be finite and positive.", "WithMotorGearing(...) with a positive reduction");
+  }
+  if (!config.IsMomentOfInertiaConfigured()) {
+    // An elevator's speed is nearly always set by its motor's back-EMF.
+    if (RequiresLinearClosedLoop(order)) return Plant{1, true};
+    throw exceptions::SmartMotorControllerConfigurationException(
+        owner + " cannot choose the form of its position loop without a moment of inertia",
+        "A position loop chosen when built picks first or second order from the motor's back-EMF time constant at the "
+        "mechanism, which needs its moment of inertia.",
+        "WithMOI(...) on the motor config, or SystemOrder::FIRST or SECOND");
+  }
+  // The motor's back-EMF time constant at the mechanism, J * R / (G^2 * Kt * Ke), with Ke the inverse of Kv.
+  const double timeConstant = config.GetMOI().value() * motor.R.value() /
+                              (rotorToMechanism * rotorToMechanism * motor.Kt.value() / motor.Kv.value());
+  const double period = config.GetClosedLoopControlPeriod().value_or(wpi::units::millisecond_t{20}).value();
+  const bool speedPerVolt = timeConstant < kSpeedPerVoltTimeConstantPeriods * period;
+  return Plant{speedPerVolt ? 1 : 2, speedPerVolt};
+}
+
+int ADRCConfig::PlantOrder() const {
+  std::scoped_lock lock{m_mutex};
+  return PlantOrderLocked();
+}
+
+int ADRCConfig::PlantOrderLocked() const {
+  if (!m_systemOrder) throw std::invalid_argument("The ADRC config has no system order");
+  if (!IsChosenWhenBuilt(*m_systemOrder)) return GetOrder(*m_systemOrder);
+  if (m_builtOrder == 0) {
+    throw std::logic_error(m_owner +
+                           " uses a system order chosen when built from a motor config with BuildController; use FIRST "
+                           "or SECOND to build one yourself");
+  }
+  return m_builtOrder;
 }
 
 void ADRCConfig::SetBuiltValues(double b0, wpi::units::second_t period) {
@@ -286,7 +348,7 @@ void ADRCConfig::SetBuiltValues(double b0, wpi::units::second_t period) {
 
 void ADRCConfig::RebuildGains() {
   if (!m_builtPeriod) return;
-  const int order = GetOrder(*m_systemOrder);
+  const int order = PlantOrderLocked();
   const double wc = ADRCController::Bandwidth(order, m_bandwidthScale.value_or(kDefaultBandwidthScale),
                                               m_settlingTime.value_or(kDefaultSettlingTime));
   m_gains = std::make_shared<const ADRCGains>(

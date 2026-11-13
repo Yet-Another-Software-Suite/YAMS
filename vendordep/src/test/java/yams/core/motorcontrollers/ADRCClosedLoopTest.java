@@ -154,7 +154,7 @@ public class ADRCClosedLoopTest {
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Rotations.of(0))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
+            .withADRCController(adrc(SystemOrder.PIVOT, 0.6)));
     try {
       assertSettles(controller, smc,
           ()
@@ -178,7 +178,7 @@ public class ADRCClosedLoopTest {
             .withMomentOfInertia(KilogramSquareMeters.of(moi))
             .withStartingPosition(Rotations.of(start))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
+            .withADRCController(adrc(SystemOrder.ARM, 0.6)));
     try {
       final SingleJointedArmSim sim = new SingleJointedArmSim(controller.motor(),
           controller.ratio(), moi, length, Degrees.of(-180).in(Radians),

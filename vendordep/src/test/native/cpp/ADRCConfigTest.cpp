@@ -60,7 +60,7 @@ TEST_CASE("ADRCConfig.UnsetValuesAreEmptyAndBuildWithTheirDefaults", "[ADRCConfi
 
 TEST_CASE("ADRCConfig.KeepsEveryValueItIsGiven", "[ADRCConfig]") {
   ADRCConfig config;
-  config.WithSystemOrder(ADRCConfig::SystemOrder::ARM)
+  config.WithSystemOrder(ADRCConfig::SystemOrder::SECOND)
       .WithSettlingTime(0.6_s)
       .WithBandwidthScale(1.5)
       .WithB0(3)
@@ -111,16 +111,16 @@ TEST_CASE("ADRCConfig.DerivesB0FromTheMotorGearingAndInertia", "[ADRCConfig]") {
 
 TEST_CASE("ADRCConfig.AnElevatorIsFirstOrderWithItsSpeedPerVoltInMetersAsB0", "[ADRCConfig]") {
   const auto motor = wpi::math::DCMotor::NEO(1);
-  STATIC_CHECK(ADRCConfig::GetOrder(ADRCConfig::SystemOrder::ELEVATOR) == 1);
-  STATIC_CHECK(ADRCConfig::IsSpeedPerVolt(ADRCConfig::SystemOrder::ELEVATOR));
-  STATIC_CHECK_FALSE(ADRCConfig::IsSpeedPerVolt(ADRCConfig::SystemOrder::FIRST));
+  STATIC_CHECK(ADRCConfig::IsChosenWhenBuilt(ADRCConfig::SystemOrder::ELEVATOR));
+  STATIC_CHECK(ADRCConfig::RequiresLinearClosedLoop(ADRCConfig::SystemOrder::ELEVATOR));
+  STATIC_CHECK_FALSE(ADRCConfig::IsChosenWhenBuilt(ADRCConfig::SystemOrder::FIRST));
   ADRCConfig config;
   config.WithSystemOrder(ADRCConfig::SystemOrder::ELEVATOR);
   // An elevator's closed loop must be linear.
   auto rotations = SmcConfig();
   rotations.WithMechanismCircumference(0.15_m);
   CHECK_THROWS_AS(config.ResolveB0(motor, rotations), exceptions::SmartMotorControllerConfigurationException);
-  // The motor's free speed per volt through a 12:1 reduction and a 0.15 m circumference, with no inertia.
+  // Without an inertia, the motor's free speed per volt through a 12:1 reduction and a 0.15 m circumference.
   auto linear = SmcConfig();
   linear.WithMechanismCircumference(0.15_m).WithLinearClosedLoopController(true);
   CHECK(config.ResolveB0(motor, linear) == Catch::Approx(motor.Kv.value() / (2 * std::numbers::pi * 12) * 0.15));
@@ -130,13 +130,40 @@ TEST_CASE("ADRCConfig.AnElevatorIsFirstOrderWithItsSpeedPerVoltInMetersAsB0", "[
   CHECK_THROWS_AS(config.ResolveB0(motor, SmcConfig()), exceptions::SmartMotorControllerConfigurationException);
 }
 
+// A position loop chosen when built: a 60:1 NEO pivot's back-EMF time constant, 6 ms, is under two 20 ms periods, so
+// it is first order with its speed per volt; at 12:1 it is 160 ms, so it is second order with its acceleration per volt.
+TEST_CASE("ADRCConfig.APositionLoopIsChosenFromTheBackEmfTimeConstant", "[ADRCConfig]") {
+  const auto motor = wpi::math::DCMotor::NEO(1);
+  STATIC_CHECK(ADRCConfig::SystemOrder::ARM == ADRCConfig::SystemOrder::POSITION);
+  STATIC_CHECK(ADRCConfig::SystemOrder::PIVOT == ADRCConfig::SystemOrder::POSITION);
+  STATIC_CHECK(ADRCConfig::GetOrder(ADRCConfig::SystemOrder::POSITION) == 0);
+  auto geared = SmcConfig();
+  geared.WithMotorGearing(60.0).WithMOI(wpi::units::kilogram_square_meter_t{0.1});
+  ADRCConfig config;
+  config.WithSystemOrder(ADRCConfig::SystemOrder::POSITION);
+  auto first = ADRCConfig::BuildController(Shared(config), motor, geared, 20_ms);
+  CHECK(first.GetSystemOrder() == 1);
+  CHECK(first.GetB0() == Catch::Approx(motor.Kv.value() / (2 * std::numbers::pi * 60)));
+  auto light = SmcConfig();
+  light.WithMOI(wpi::units::kilogram_square_meter_t{0.1});
+  auto second = ADRCConfig::BuildController(Shared(config), motor, light, 20_ms);
+  CHECK(second.GetSystemOrder() == 2);
+  CHECK(second.GetB0() == Catch::Approx(12 * motor.Kt.value() / (2 * std::numbers::pi * motor.R.value() * 0.1)));
+  // It needs an inertia to choose, and is only chosen when built from a motor config.
+  CHECK_THROWS_AS(ADRCConfig::BuildController(Shared(config), motor, SmcConfig(), 20_ms),
+                  exceptions::SmartMotorControllerConfigurationException);
+  CHECK_THROWS_AS(ADRCController{Shared(config)}, std::logic_error);
+}
+
 TEST_CASE("ADRCConfig.ALinearClosedLoopDerivesB0InMeters", "[ADRCConfig]") {
   const auto motor = wpi::math::DCMotor::NEO(1);
   ADRCConfig config;
   config.WithSystemOrder(ADRCConfig::SystemOrder::SECOND);
   auto smc = SmcConfig();
   smc.WithMOI(wpi::units::kilogram_square_meter_t{0.1}).WithLinearClosedLoopController(true);
-  CHECK_THROWS_AS(config.ResolveB0(motor, smc), exceptions::SmartMotorControllerConfigurationException);
+  // A linear closed loop needs a circumference: without one, b0 stays in rotations.
+  const double perRotation = 12 * motor.Kt.value() / (2 * std::numbers::pi * motor.R.value() * 0.1);
+  CHECK(config.ResolveB0(motor, smc) == Catch::Approx(perRotation));
   smc.WithMechanismCircumference(0.5_m);
   const double expected = 12 * motor.Kt.value() / (2 * std::numbers::pi * motor.R.value() * 0.1) * 0.5;
   CHECK(config.ResolveB0(motor, smc) == Catch::Approx(expected));

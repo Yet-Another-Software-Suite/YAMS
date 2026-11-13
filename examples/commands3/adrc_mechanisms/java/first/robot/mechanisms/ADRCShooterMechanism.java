@@ -55,8 +55,8 @@ public class ADRCShooterMechanism implements Mechanism {
           .withADRCController(new ADRCConfig()
               // A velocity loop on a flywheel is first order.
               .withSystemOrder(SystemOrder.FLYWHEEL)
-              // Short, so the observer keeps up with the back-EMF it estimates.
-              .withSettlingTime(Seconds.of(0.15))
+              // Short, so the observer keeps up with the back-EMF it estimates; 0.15 s overshoots by about 45 RPM.
+              .withSettlingTime(Seconds.of(0.2))
 )
           // The output limit and ramp of every closed loop, the ADRC's too.
           .withClosedLoopControllerMaximumVoltage(Volts.of(12))

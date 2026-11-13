@@ -103,7 +103,7 @@ public class ADRCMechanismTest {
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(-30))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
+            .withADRCController(adrc(SystemOrder.ARM, 0.6)));
     try {
       final Arm arm = new Arm(new ArmConfig()
                                   .withLength(Meters.of(0.5))
@@ -126,7 +126,7 @@ public class ADRCMechanismTest {
             .withMomentOfInertia(KilogramSquareMeters.of(0.1))
             .withStartingPosition(Degrees.of(0))
             .withClosedLoopControllerMaximumVoltage(Volts.of(12))
-            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
+            .withADRCController(adrc(SystemOrder.PIVOT, 0.6)));
     try {
       final Pivot pivot =
           new Pivot(new PivotConfig().withHardLimits(Degrees.of(-180), Degrees.of(180)), smc);

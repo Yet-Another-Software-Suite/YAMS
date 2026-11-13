@@ -79,9 +79,9 @@ class ADRCMechanismsTest {
         assertTrue(nt.getTopic(motor + "closedloop/adrc/" + field).exists(), motor + " publishes adrc/" + field);
       }
     }
-    assertEquals(0.6, nt.getEntry(kArm + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
-    assertEquals(0.5, nt.getEntry(kElevator + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
-    assertEquals(0.15, nt.getEntry(kShooter + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
+    assertEquals(0.3, nt.getEntry(kArm + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
+    assertEquals(0.3, nt.getEntry(kElevator + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
+    assertEquals(0.2, nt.getEntry(kShooter + "closedloop/adrc/settlingTime").getDouble(0), 1e-9);
   }
 
   @Test
@@ -117,7 +117,7 @@ class ADRCMechanismsTest {
         "the ADRC runs the new settling time");
     step(2);
     assertEquals(30, robot.arm.getAngle().in(Degrees), 2, "still holding after the retune");
-    set(kArm + "closedloop/adrc/settlingTime", 0.6);
+    set(kArm + "closedloop/adrc/settlingTime", 0.3);
     step(0.1);
   }
 

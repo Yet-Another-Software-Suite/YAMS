@@ -21,10 +21,10 @@ using Cfg = SmartMotorControllerConfig;
 
 ADRCArmSubsystem::ADRCArmSubsystem() {
   ADRCConfig adrc;
-  // A position loop on an arm is second order.
+  // A position loop on an arm; its order and b0 are chosen from the motor, gearing and inertia.
   adrc.WithSystemOrder(ADRCConfig::SystemOrder::ARM)
       // How quickly the arm should reach its setpoint.
-      .WithSettlingTime(0.6_s);
+      .WithSettlingTime(0.3_s);
 
   m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()
@@ -33,7 +33,7 @@ ADRCArmSubsystem::ADRCArmSubsystem() {
       // The ADRC takes the place of kP, kI, kD and the feedforward. The motor config keeps its own copy.
       .WithADRCController(adrc)
       .WithMotorGearing(60.0)
-      // b0, how much one volt accelerates the arm, is derived from the motor, the gearing and this inertia.
+      // The ADRC's order and b0 are derived from the motor, the gearing and this inertia.
       .WithMOI(0.5_m, 3_kg)
       .WithMechanismLimits(-20_deg, 100_deg)
       .WithStartingPosition(-20_deg)

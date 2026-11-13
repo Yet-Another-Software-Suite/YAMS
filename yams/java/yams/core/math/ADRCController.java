@@ -147,9 +147,7 @@ public class ADRCController {
    */
   public ADRCController(ADRCConfig config) {
     this.config = config;
-    this.systemOrder = config.getSystemOrder()
-        .orElseThrow(() -> new IllegalArgumentException("The ADRC config has no system order"))
-        .getOrder();
+    this.systemOrder = config.plantOrder();
     this.controllerOrder = systemOrder + 1;
   }
 

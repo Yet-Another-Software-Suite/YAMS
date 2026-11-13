@@ -23,8 +23,8 @@ ADRCShooterSubsystem::ADRCShooterSubsystem() {
   ADRCConfig adrc;
   // A velocity loop on a flywheel is first order.
   adrc.WithSystemOrder(ADRCConfig::SystemOrder::FLYWHEEL)
-      // Short, so the observer keeps up with the back-EMF it estimates.
-      .WithSettlingTime(0.15_s);
+      // Short, so the observer keeps up with the back-EMF it estimates; 0.15 s overshoots by about 45 RPM.
+      .WithSettlingTime(0.2_s);
 
   m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()

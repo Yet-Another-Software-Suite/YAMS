@@ -20,9 +20,10 @@
 // An arm run by an active disturbance rejection controller (ADRC) instead of a PID controller: a NEO (CAN 30) on a
 // 60:1 reduction, moving a 3 kg, 0.5 m arm. The ADRC was written by FRC Team 8331.
 //
-// The arm's position is a second order plant: a voltage accelerates it, and the acceleration integrates twice into its
-// angle. The ADRC's observer estimates gravity, friction and anything that bumps the arm as one disturbance and cancels
-// it, so the arm needs no kG.
+// SystemOrder::ARM chooses the form of the position loop when the controller is built. Geared 60:1, the NEO's back-EMF
+// sets the arm's speed within about 16 ms, sooner than the 20 ms loop can act, so its position is first order, with its
+// speed per volt as b0. A lightly geared arm would be second order. The ADRC's observer estimates gravity, friction and
+// anything that bumps the arm as one disturbance and cancels it, so the arm needs no kG.
 //
 // With HIGH telemetry, the ADRC's settings are tunable live in place of kP, kI and kD, under
 // /Tuning/ADRCArm/ArmMotor/closedloop/adrc.

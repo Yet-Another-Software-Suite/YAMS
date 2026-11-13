@@ -4,6 +4,7 @@
 package yams.core.math;
 
 import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Seconds;
 
 import java.util.Arrays;
@@ -64,11 +65,14 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * <li>{@link SystemOrder#FIRST}: you command and measure velocity (flywheels, shooter wheels,
  * intake and conveyor rollers). A brushed or brushless DC motor's velocity responds to voltage
  * directly, so most FRC speed loops are first order.
- * <li>{@link SystemOrder#SECOND}: you command and measure position (arms, pivots, turrets).
- * Position is the integral of velocity, which adds one order.
- * <li>{@link SystemOrder#ELEVATOR}: an elevator's position, in a linear closed loop. An elevator's
- * speed is set by its motor's back-EMF more than by its inertia, so its position is first order,
- * with its speed per volt as {@code b0}, which is derived from the motor and gearing.
+ * <li>{@link SystemOrder#SECOND}: you command and measure position, and the mechanism's inertia
+ * sets how fast it moves. Position is the integral of velocity, which adds one order.
+ * <li>{@link SystemOrder#POSITION}, {@link SystemOrder#ARM}, {@link SystemOrder#PIVOT} and
+ * {@link SystemOrder#ELEVATOR}: you command and measure position, and the config chooses the form
+ * when the controller is built. A mechanism geared down far enough has its speed set by its motor's
+ * back-EMF more than by its inertia: each volt moves it at about the same speed, so its position
+ * is first order, with its speed per volt as {@code b0}. Otherwise its position is second order,
+ * with its acceleration per volt as {@code b0}. See {@link SystemOrder#POSITION}.
  * <li>{@link SystemOrder#THIRD} and {@link SystemOrder#FOURTH}: rare. Use when the measured
  * quantity sits two or more integrations behind the voltage, for example a mechanism whose
  * actuator itself has significant first-order lag. Most mechanisms never need these.
@@ -179,73 +183,122 @@ public class ADRCConfig implements Cloneable {
    * Plant order for the active disturbance rejection controller.
    *
    * <p>The order is how many integrators sit between the motor voltage and the measured output:
-   * velocity loops on a DC motor are {@link #FIRST}, position loops are {@link #SECOND}, and an
-   * elevator's position is {@link #ELEVATOR}, first order with a speed per volt as {@code b0}. The
-   * class documentation of {@link ADRCConfig} walks through choosing a value.
+   * velocity loops on a DC motor are {@link #FIRST}. For a position loop, {@link #POSITION} and its
+   * aliases choose between first and second order when the controller is built, from the motor,
+   * gearing and inertia. The class documentation of {@link ADRCConfig} walks through choosing a
+   * value.
    */
   public enum SystemOrder {
     /**
      * First-order plant: the loop commands and measures velocity, e.g. a flywheel or shooter
      * wheel. The common case for FRC mechanisms.
      */
-    FIRST(1, false),
+    FIRST(1, false, false),
     /** A flywheel's velocity loop; the same as {@link #FIRST}. */
-    FLYWHEEL(1, false),
+    FLYWHEEL(1, false, false),
     /**
-     * Second-order plant: the loop commands and measures position, e.g. an arm or turret. Position
-     * is the integral of velocity, so the plant is one order higher.
+     * Second-order plant: the loop commands and measures position, and the mechanism's inertia sets
+     * how fast it moves. Position is the integral of velocity, so the plant is one order higher.
+     * {@link #POSITION} chooses between this and a first order position loop for you.
      */
-    SECOND(2, false),
-    /** An arm's position loop; the same as {@link #SECOND}. */
-    ARM(2, false),
-    /**
-     * An elevator's position loop, in a linear closed loop. An elevator's speed is set by its
-     * motor's back-EMF more than by its inertia: each volt moves it at about the same speed. So its
-     * position is a first order plant, with its speed per volt as {@code b0}, in meters per second
-     * per volt, which {@link ADRCConfig#resolveB0} derives from the motor, gearing and mechanism
-     * circumference. The motor config must use a linear closed loop.
-     */
-    ELEVATOR(1, true),
+    SECOND(2, false, false),
     /**
      * Third-order plant: the measured quantity sits two integrations behind the voltage. Rare;
      * see the class documentation for when this applies.
      */
-    THIRD(3, false),
+    THIRD(3, false, false),
     /**
      * Fourth-order plant: three integrations between the voltage and the measurement. Rare; see
      * the class documentation for when this applies.
      */
-    FOURTH(4, false);
+    FOURTH(4, false, false),
+    /**
+     * A position loop whose form is chosen when the controller is built from a motor config, from
+     * the motor's back-EMF time constant at the mechanism, {@code J * R / (G^2 * Kt * Ke)}.
+     *
+     * <p>When it is under {@link ADRCConfig#SPEED_PER_VOLT_TIME_CONSTANT_PERIODS} control periods,
+     * the motor's back-EMF, more than the mechanism's inertia, sets how fast it moves: each volt
+     * moves it at about the same speed, sooner than the loop can act. Its position is then a first
+     * order plant, with its speed per volt as {@code b0}. Otherwise its position is a second order
+     * plant, with its acceleration per volt as {@code b0}. Both are in the loop's units, rotations
+     * or meters for a linear closed loop. A heavily geared arm or pivot is usually first order, a
+     * lightly geared one second order.
+     *
+     * <p>The time constant needs the mechanism's moment of inertia, set with
+     * {@code withMomentOfInertia(...)}; without it, building the controller throws.
+     */
+    POSITION(0, true, false),
+    /** An arm's position loop; the same as {@link #POSITION}. */
+    ARM(0, true, false),
+    /** A pivot's or turret's position loop; the same as {@link #POSITION}. */
+    PIVOT(0, true, false),
+    /**
+     * An elevator's position loop, in a linear closed loop; {@link #POSITION} in meters. Without a
+     * moment of inertia, it is first order with its speed per volt as {@code b0}, since an
+     * elevator's speed is nearly always set by its motor's back-EMF. The motor config must use a
+     * linear closed loop.
+     */
+    ELEVATOR(0, true, true);
 
-    /** Plant order as an integer. */
+    /** Plant order as an integer, or 0 when it is chosen when the controller is built. */
     private final int order;
-    /** Whether {@code b0} is the mechanism's speed per volt, as for an elevator. */
-    private final boolean speedPerVolt;
+    /** Whether the order and {@code b0} are chosen when the controller is built. */
+    private final boolean chosenWhenBuilt;
+    /** Whether the motor config must use a linear closed loop. */
+    private final boolean linear;
 
-    SystemOrder(int order, boolean speedPerVolt) {
+    SystemOrder(int order, boolean chosenWhenBuilt, boolean linear) {
       this.order = order;
-      this.speedPerVolt = speedPerVolt;
+      this.chosenWhenBuilt = chosenWhenBuilt;
+      this.linear = linear;
     }
 
     /**
      * Get the plant order as an integer.
      *
-     * @return Plant order, 1 through 4.
+     * @return Plant order, 1 through 4, or 0 for a position loop whose order is chosen when the
+     *     controller is built.
      */
     public int getOrder() {
       return order;
     }
 
     /**
-     * Whether {@code b0} is the mechanism's speed per volt, derived from the motor and gearing,
-     * rather than its acceleration per volt, derived from its inertia.
+     * Whether the order and the kind of {@code b0} are chosen when the controller is built.
+     *
+     * @return {@code true} for {@link #POSITION}, {@link #ARM}, {@link #PIVOT} and
+     *     {@link #ELEVATOR}.
+     */
+    public boolean isChosenWhenBuilt() {
+      return chosenWhenBuilt;
+    }
+
+    /**
+     * Whether the motor config must use a linear closed loop.
      *
      * @return {@code true} for {@link #ELEVATOR}.
      */
-    public boolean isSpeedPerVolt() {
-      return speedPerVolt;
+    public boolean requiresLinearClosedLoop() {
+      return linear;
+    }
+
+    /**
+     * Whether a controller built with this order behaves as one built with another, as aliases do.
+     *
+     * @param other The other order.
+     * @return {@code true} when both have the same order, are chosen the same way and need the same
+     *     kind of closed loop.
+     */
+    boolean behavesLike(SystemOrder other) {
+      return order == other.order && chosenWhenBuilt == other.chosenWhenBuilt && linear == other.linear;
     }
   }
+
+  /**
+   * A position loop's back-EMF time constant below which it is first order, with its speed per
+   * volt as {@code b0}, in control periods. See {@link SystemOrder#POSITION}.
+   */
+  public static final double SPEED_PER_VOLT_TIME_CONSTANT_PERIODS = 2.0;
 
   /** The motor controller this config belongs to, named in errors and alerts once it is built. */
   private String owner = "ADRC";
@@ -276,6 +329,8 @@ public class ADRCConfig implements Cloneable {
   private Optional<Time> builtPeriod = Optional.empty();
   /** {@code b0} used while {@link #b0} is unset, such as the derived one; set when a controller is built. */
   private OptionalDouble builtB0 = OptionalDouble.empty();
+  /** Plant order of the controller built from this config; 0 until one is built. */
+  private int builtOrder = 0;
   /**
    * Observer and control gains worked out from this config once a controller is built, and again
    * whenever the settling time, bandwidth scale or {@code b0} changes. Replaced whole, so the
@@ -309,6 +364,7 @@ public class ADRCConfig implements Cloneable {
     this.tdParams = cfg.tdParams.map(double[]::clone);
     this.builtPeriod = cfg.builtPeriod;
     this.builtB0 = cfg.builtB0;
+    this.builtOrder = cfg.builtOrder;
     final ADRCController.Gains cfgGains = cfg.gains;
     this.gains = cfgGains == null ? null : cfgGains.copy();
   }
@@ -328,8 +384,7 @@ public class ADRCConfig implements Cloneable {
    */
   public ADRCConfig withSystemOrder(SystemOrder systemOrder) {
     if (builtPeriod.isPresent()
-        && (systemOrder == null || systemOrder.getOrder() != this.systemOrder.orElseThrow().getOrder()
-            || systemOrder.isSpeedPerVolt() != this.systemOrder.orElseThrow().isSpeedPerVolt())) {
+        && (systemOrder == null || !systemOrder.behavesLike(this.systemOrder.orElseThrow()))) {
       throw new IllegalStateException(owner + " already runs a " + this.systemOrder.orElseThrow()
           + " controller; a new order needs a new ADRCConfig");
     }
@@ -549,8 +604,12 @@ public class ADRCConfig implements Cloneable {
         owner + " has no system order",
         "withSystemOrder(...) was never called, and there is no safe default plant order.",
         "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
+    final Plant plant = choosePlant(motor, config);
+    final double b0ForLoop = resolveB0(motor, config);
+    // The controller sizes its observer from the order, so it is known before the controller is made.
+    this.builtOrder = plant.order();
     ADRCController controller = new ADRCController(this);
-    controller.initialize(resolveB0(motor, config), period);
+    controller.initialize(b0ForLoop, period);
     return controller;
   }
 
@@ -568,18 +627,11 @@ public class ADRCConfig implements Cloneable {
    *                                                    set and cannot be derived safely.
    */
   public double resolveB0(DCMotor motor, SmartMotorControllerConfig<?> config) {
-    final boolean elevator = systemOrder.map(SystemOrder::isSpeedPerVolt).orElse(false);
-    if (elevator && !config.getLinearClosedLoopControllerUse()) {
-      throw new SmartMotorControllerConfigurationException(
-          owner + " is an elevator's ADRC, but the closed loop is not linear",
-          "SystemOrder.ELEVATOR runs in meters, with b0 in meters per second per volt, so the motor "
-              + "config needs a linear closed loop and a mechanism circumference.",
-          "withLinearClosedLoopController(true) and withMechanismCircumference(...) on the motor config");
-    }
+    final Plant plant = choosePlant(motor, config);
     if (b0.isPresent()) {
       return b0.getAsDouble();
     }
-    if (elevator) {
+    if (plant.speedPerVolt()) {
       return speedPerVolt(motor, config);
     }
     if (!config.isMomentOfInertiaConfigured()) {
@@ -632,27 +684,129 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * The elevator's speed per volt: the motor's free speed per volt, through the gearing, times the
-   * mechanism circumference.
+   * The plant a controller is built for: its order, and whether {@code b0} is a speed per volt.
+   *
+   * @param order        Plant order, 1 through 4.
+   * @param speedPerVolt Whether {@code b0} is the mechanism's speed per volt, rather than its
+   *                     acceleration per volt.
+   */
+  private record Plant(int order, boolean speedPerVolt) {}
+
+  /**
+   * Choose the plant: the system order's, or for a position loop chosen when built, first order
+   * with a speed per volt when the motor's back-EMF time constant is under
+   * {@link #SPEED_PER_VOLT_TIME_CONSTANT_PERIODS} control periods, and second order otherwise.
    *
    * @param motor  Motor model.
-   * @param config Motor config, with a linear closed loop, the gearing and the circumference.
-   * @return Meters per second per volt.
+   * @param config Motor config with the gearing, inertia, circumference and control period.
+   * @return The plant.
+   * @throws SmartMotorControllerConfigurationException if the order is missing, an elevator's closed
+   *                                                    loop is not linear, or a position loop's
+   *                                                    form cannot be chosen.
+   */
+  private Plant choosePlant(DCMotor motor, SmartMotorControllerConfig<?> config) {
+    final SystemOrder order = systemOrder.orElseThrow(() -> new SmartMotorControllerConfigurationException(
+        owner + " has no system order",
+        "withSystemOrder(...) was never called, and there is no safe default plant order.",
+        "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
+    if (order.requiresLinearClosedLoop() && !config.getLinearClosedLoopControllerUse()) {
+      throw new SmartMotorControllerConfigurationException(
+          owner + " is an elevator's ADRC, but the closed loop is not linear",
+          "SystemOrder.ELEVATOR runs in meters, with b0 in meters, so "
+              + "the motor config needs a linear closed loop and a mechanism circumference.",
+          "withLinearClosedLoopController(true) and withMechanismCircumference(...) on the motor config");
+    }
+    if (!order.isChosenWhenBuilt()) {
+      return new Plant(order.getOrder(), false);
+    }
+    if (!config.isMomentOfInertiaConfigured()) {
+      if (order.requiresLinearClosedLoop()) {
+        // An elevator's speed is nearly always set by its motor's back-EMF.
+        return new Plant(1, true);
+      }
+      throw new SmartMotorControllerConfigurationException(
+          owner + " cannot choose the form of its position loop without a moment of inertia",
+          "SystemOrder." + order + " chooses first or second order from the motor's back-EMF time "
+              + "constant at the mechanism, which needs its moment of inertia.",
+          "withMomentOfInertia(...) on the motor config, or SystemOrder.FIRST or SECOND");
+    }
+    final double timeConstant = backEmfTimeConstant(motor, config);
+    final double period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20)).in(Seconds);
+    final boolean speedPerVolt = timeConstant < SPEED_PER_VOLT_TIME_CONSTANT_PERIODS * period;
+    return new Plant(speedPerVolt ? 1 : 2, speedPerVolt);
+  }
+
+  /**
+   * The motor's back-EMF time constant at the mechanism, {@code J * R / (G^2 * Kt * Ke)}: how long
+   * the mechanism takes to reach the speed a voltage gives it.
+   *
+   * @param motor  Motor model.
+   * @param config Motor config with the gearing and the moment of inertia.
+   * @return Time constant, seconds.
+   */
+  private double backEmfTimeConstant(DCMotor motor, SmartMotorControllerConfig<?> config) {
+    final double rotorToMechanism = rotorToMechanism(config);
+    // Ke, volts per radian per second, is the inverse of Kv.
+    return config.getMOI() * motor.R / (rotorToMechanism * rotorToMechanism * motor.Kt / motor.Kv);
+  }
+
+  /**
+   * Rotor rotations per mechanism rotation.
+   *
+   * @param config Motor config with the gearing.
+   * @return Rotor rotations per mechanism rotation.
    * @throws SmartMotorControllerConfigurationException if the gearing is missing or not positive.
    */
-  private double speedPerVolt(DCMotor motor, SmartMotorControllerConfig<?> config) {
+  private double rotorToMechanism(SmartMotorControllerConfig<?> config) {
     final MechanismGearing gearing = config.getGearing();
     final double rotorToMechanism = gearing == null ? Double.NaN : gearing.getMechanismToRotorRatio();
     if (!Double.isFinite(rotorToMechanism) || rotorToMechanism <= 0.0) {
       throw new SmartMotorControllerConfigurationException(
-          owner + " cannot derive the elevator's b0 from gear ratio " + rotorToMechanism,
+          owner + " cannot derive b0 from gear ratio " + rotorToMechanism,
           "The rotor-to-mechanism ratio must be finite and positive.",
           "withGearing(...) with a positive reduction");
     }
-    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism,
-    // and each mechanism rotation moves the carriage one circumference.
-    return motor.Kv / (2.0 * Math.PI * rotorToMechanism)
-           * config.getMechanismCircumference().orElseThrow().in(Meters);
+    return rotorToMechanism;
+  }
+
+  /**
+   * The mechanism's speed per volt: the motor's free speed per volt, through the gearing, in the
+   * loop's units.
+   *
+   * @param motor  Motor model.
+   * @param config Motor config with the gearing, and the circumference for a linear closed loop.
+   * @return Mechanism rotations per second per volt, or meters per second per volt for a linear
+   *     closed loop.
+   * @throws SmartMotorControllerConfigurationException if the gearing is missing or not positive.
+   */
+  private double speedPerVolt(DCMotor motor, SmartMotorControllerConfig<?> config) {
+    // Kv is in radians per second per volt at the motor; the reduction slows it at the mechanism.
+    final double rotationsPerSecondPerVolt = motor.Kv / (2.0 * Math.PI * rotorToMechanism(config));
+    return config.getLinearClosedLoopControllerUse()
+           ? rotationsPerSecondPerVolt * config.getMechanismCircumference().orElseThrow().in(Meters)
+           : rotationsPerSecondPerVolt;
+  }
+
+  /**
+   * The plant order of this config's controller: the system order's, or the one chosen when the
+   * controller was built.
+   *
+   * @return Plant order, 1 through 4.
+   * @throws IllegalArgumentException if no system order is set.
+   * @throws IllegalStateException    if the order is chosen when built, and no controller was
+   *                                  built from a motor config.
+   */
+  int plantOrder() {
+    final SystemOrder order = systemOrder.orElseThrow(
+        () -> new IllegalArgumentException("The ADRC config has no system order"));
+    if (!order.isChosenWhenBuilt()) {
+      return order.getOrder();
+    }
+    if (builtOrder == 0) {
+      throw new IllegalStateException(owner + " uses SystemOrder." + order + ", which chooses its order when "
+          + "built from a motor config with buildController; use FIRST or SECOND to build one yourself");
+    }
+    return builtOrder;
   }
 
   /**
@@ -693,7 +847,7 @@ public class ADRCConfig implements Cloneable {
     if (builtPeriod.isEmpty()) {
       return;
     }
-    final int order = systemOrder.orElseThrow().getOrder();
+    final int order = plantOrder();
     gains = ADRCController.computeGains(order,
         ADRCController.bandwidth(order, bandwidthScale.orElse(DEFAULT_BANDWIDTH_SCALE),
             settlingTime.orElse(DEFAULT_SETTLING_TIME)),

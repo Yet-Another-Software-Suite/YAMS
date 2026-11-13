@@ -96,9 +96,7 @@ Eigen::VectorXd ObserverGains(int systemOrder, double z, double dt) {
 
 ADRCController::ADRCController(std::shared_ptr<ADRCConfig> config) : m_config{std::move(config)} {
   if (!m_config) throw std::invalid_argument("The ADRC config must not be null");
-  const auto order = m_config->GetSystemOrder();
-  if (!order) throw std::invalid_argument("The ADRC config has no system order");
-  m_systemOrder = ADRCConfig::GetOrder(*order);
+  m_systemOrder = m_config->PlantOrder();
 }
 
 void ADRCController::Initialize(double b0, wpi::units::second_t period) {

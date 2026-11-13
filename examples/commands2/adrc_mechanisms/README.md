@@ -6,9 +6,9 @@ each in its own subsystem. **The ADRC was written by FRC Team 8331**, who contri
 
 | Subsystem | Motor | Mechanism | ADRC |
 | --- | --- | --- | --- |
-| `ADRCArmSubsystem` | NEO on a 60:1 reduction (CAN 20) | 3 kg, 0.5 m arm, from -20° (stowed) to 100° | `ARM` (second order) on position, 0.6 s settling time, `b0` derived from the inertia |
-| `ADRCElevatorSubsystem` | NEO on a 12:1 reduction (CAN 21) | 16 lb carriage on a 22 tooth, 1/4 in pitch sprocket, 0 to 1.5 m | `ELEVATOR`: first order on position, 0.5 s settling time, `b0` its speed per volt |
-| `ADRCShooterSubsystem` | NEO, direct drive (CAN 22) | 4 in, 1 lb wheel | `FLYWHEEL` (first order) on velocity, 0.15 s settling time, `b0` derived from the inertia |
+| `ADRCArmSubsystem` | NEO on a 60:1 reduction (CAN 20) | 3 kg, 0.5 m arm, from -20° (stowed) to 100° | `ARM` on position, 0.3 s settling time; at 60:1 it is first order with its speed per volt as `b0` |
+| `ADRCElevatorSubsystem` | NEO on a 12:1 reduction (CAN 21) | 16 lb carriage on a 22 tooth, 1/4 in pitch sprocket, 0 to 1.5 m | `ELEVATOR`: first order on position, 0.3 s settling time, `b0` its speed per volt |
+| `ADRCShooterSubsystem` | NEO, direct drive (CAN 22) | 4 in, 1 lb wheel | `FLYWHEEL` (first order) on velocity, 0.2 s settling time, `b0` derived from the inertia |
 
 ## Setting up an ADRC
 
@@ -20,7 +20,7 @@ new SmartMotorControllerConfig(this)
     .withControlMode(ControlMode.CLOSED_LOOP)
     .withADRCController(new ADRCConfig()
         .withSystemOrder(SystemOrder.ARM)
-        .withSettlingTime(Seconds.of(0.6)))
+        .withSettlingTime(Seconds.of(0.3)))
     .withClosedLoopControllerMaximumVoltage(Volts.of(12))
     .withGearing(new MechanismGearing(60))
     .withMomentOfInertia(Meters.of(0.5), Kilograms.of(3)); // b0 is derived from this
@@ -37,7 +37,9 @@ setpoints as they do with a PID, and the motor controller runs the ADRC on the S
   in meters, so `b0` is in meters per second per volt. `SystemOrder.ELEVATOR` needs it: without it, the motor
   controller refuses the config.
 - **The shooter's settling time is short,** so the observer keeps up with the back-EMF it estimates. A short settling
-  time also makes it recover quickly after each shot.
+  time also makes it recover quickly after each shot. Shorter than 0.2 s, it overshoots: about 45 RPM at 0.15 s.
+- **Each settling time was picked by measuring.** The [ADRC guide's tuning section](../../../ADRCGuide.md#tuning-an-adrc)
+  shows how.
 
 ## Live tuning an ADRC
 

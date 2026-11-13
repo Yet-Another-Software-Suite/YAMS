@@ -31,7 +31,7 @@ ADRCElevatorSubsystem::ADRCElevatorSubsystem() {
 
   ADRCConfig adrc;
   // First order on position, with b0 its speed per volt from the motor, gearing and sprocket.
-  adrc.WithSystemOrder(ADRCConfig::SystemOrder::ELEVATOR).WithSettlingTime(0.5_s);
+  adrc.WithSystemOrder(ADRCConfig::SystemOrder::ELEVATOR).WithSettlingTime(0.3_s);
 
   m_motorConfig.WithSubsystem(this)
       .WithClosedLoopMode()

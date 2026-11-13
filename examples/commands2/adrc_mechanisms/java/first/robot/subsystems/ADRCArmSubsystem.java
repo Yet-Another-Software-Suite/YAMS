@@ -36,9 +36,11 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  * An arm run by an active disturbance rejection controller (ADRC) instead of a PID controller: a NEO on a 60:1
  * reduction, moving a 3 kg, 0.5 m arm. The ADRC was written by FRC Team 8331.
  *
- * <p>The arm's position is a second order plant: a voltage accelerates it, and the acceleration integrates twice into
- * its angle. The ADRC's observer estimates gravity, friction and anything that bumps the arm as one disturbance and
- * cancels it, so the arm needs no kG.
+ * <p>SystemOrder.ARM chooses the form of the position loop when the controller is built. Geared 60:1, the NEO's back-EMF
+ * sets the arm's speed within about 16 ms, sooner than the 20 ms loop can act, so each volt moves it at about the same
+ * speed: its position is first order, with its speed per volt as b0. A lightly geared arm would be second order. The
+ * ADRC's observer estimates gravity, friction and anything that bumps the arm as one disturbance and cancels it, so
+ * the arm needs no kG.
  *
  * <p>With HIGH telemetry, the ADRC's settings are tunable live in place of kP, kI and kD, under
  * {@code /Tuning/ADRCArm/ArmMotor/closedloop/adrc}.
@@ -54,15 +56,15 @@ public class ADRCArmSubsystem extends SubsystemBase {
           .withControlMode(ControlMode.CLOSED_LOOP)
           // The ADRC takes the place of kP, kI, kD and the feedforward.
           .withADRCController(new ADRCConfig()
-              // A position loop on an arm is second order.
+              // A position loop on an arm; its order and b0 are chosen from the motor, gearing and inertia.
               .withSystemOrder(SystemOrder.ARM)
               // How quickly the arm should reach its setpoint.
-              .withSettlingTime(Seconds.of(0.6))
+              .withSettlingTime(Seconds.of(0.3))
 )
           // The output limit and ramp of every closed loop, the ADRC's too.
           .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)
-          // b0, how much one volt accelerates the arm, is derived from the motor, the gearing and this inertia.
+          // The ADRC's order and b0 are derived from the motor, the gearing and this inertia.
           .withMomentOfInertia(Meters.of(0.5), Kilograms.of(3))
           .withSoftLimits(Degrees.of(-20), Degrees.of(100))
           .withStartingPosition(Degrees.of(-20))

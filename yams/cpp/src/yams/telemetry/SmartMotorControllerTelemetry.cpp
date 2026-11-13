@@ -64,7 +64,6 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
     doubleFields.at(DoubleTelemetryField::ADRCB0).Disable();
     doubleFields.at(DoubleTelemetryField::ADRCSettlingTime).Disable();
     doubleFields.at(DoubleTelemetryField::ADRCBandwidthScale).Disable();
-    doubleFields.at(DoubleTelemetryField::ADRCOutput).Disable();
   }
 
   for (auto& [field, dt] : doubleFields) {
@@ -223,9 +222,6 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         break;
       case DoubleTelemetryField::ADRCBandwidthScale:
         if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetBandwidthScale());
-        break;
-      case DoubleTelemetryField::ADRCOutput:
-        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetLastOutput().value());
         break;
       default:
         break;

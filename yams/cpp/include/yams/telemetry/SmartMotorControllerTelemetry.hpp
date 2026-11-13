@@ -62,7 +62,6 @@ enum class DoubleTelemetryField {
   ADRCB0,              ///< ADRC input gain (tunable). ADRC only.
   ADRCSettlingTime,    ///< ADRC settling time, s (tunable). ADRC only.
   ADRCBandwidthScale,  ///< ADRC bandwidth scale (tunable). ADRC only.
-  ADRCOutput,          ///< ADRC output, V. ADRC only.
   TunableSetpointPosition,            ///< Live-tunable position setpoint degrees or meters.
   SetpointPosition,                   ///< Read-only position setpoint rotations or meters.
   TunableSetpointVelocity,            ///< Live-tunable velocity setpoint RPM or m/s.

@@ -61,7 +61,7 @@ public class ADRCElevatorMechanism implements Mechanism {
           .withADRCController(new ADRCConfig()
               // First order on position, with b0 its speed per volt from the motor, gearing and sprocket.
               .withSystemOrder(SystemOrder.ELEVATOR)
-              .withSettlingTime(Seconds.of(0.5)))
+              .withSettlingTime(Seconds.of(0.3)))
           // The output limit and ramp of every closed loop, the ADRC's too.
           .withClosedLoopControllerMaximumVoltage(Volts.of(12))
           .withGearing(GEARING)

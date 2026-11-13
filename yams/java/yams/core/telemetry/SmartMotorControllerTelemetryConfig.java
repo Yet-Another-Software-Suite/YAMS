@@ -157,7 +157,6 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.ADRCB0).enable();
         doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).enable();
         doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).enable();
-        doubleFields.get(DoubleTelemetryField.ADRCOutput).enable();
         // Only kept for a motor controller configured with an LQR, see getDoubleFields.
         doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).enable();
         doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).enable();

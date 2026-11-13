@@ -81,8 +81,6 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"closedloop/adrc/settlingTime", 0.2, field, true, "seconds"};
     case DoubleTelemetryField::ADRCBandwidthScale:
       return {"closedloop/adrc/bandwidthScale", 1.0, field, true, "none"};
-    case DoubleTelemetryField::ADRCOutput:
-      return {"closedloop/adrc/output", 0.0, field, false, "volts"};
     case DoubleTelemetryField::TunableSetpointPosition:
       return {"closedloop/setpoint/position", 0.0, field, true, "tunable_position"};
     case DoubleTelemetryField::SetpointPosition:
@@ -210,7 +208,6 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::ADRCB0,
            DoubleTelemetryField::ADRCSettlingTime,
            DoubleTelemetryField::ADRCBandwidthScale,
-           DoubleTelemetryField::ADRCOutput,
            DoubleTelemetryField::TunableSetpointPosition,
            DoubleTelemetryField::SetpointPosition,
            DoubleTelemetryField::TunableSetpointVelocity,
@@ -323,7 +320,6 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::ADRCB0).Enable();
     m_doubleFields.at(DoubleTelemetryField::ADRCSettlingTime).Enable();
     m_doubleFields.at(DoubleTelemetryField::ADRCBandwidthScale).Enable();
-    m_doubleFields.at(DoubleTelemetryField::ADRCOutput).Enable();
     // Only kept for a motor controller configured with an LQR, see the LQR defaults below.
     m_doubleFields.at(DoubleTelemetryField::LQRQelmsPosition).Enable();
     m_doubleFields.at(DoubleTelemetryField::LQRQelmsVelocity).Enable();
