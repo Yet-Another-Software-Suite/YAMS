@@ -948,8 +948,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Whether the mechanism's moment of inertia was explicitly configured.
    *
    * <p>The {@link #getMOI()} value has a placeholder default so simulation can run without a
-   * model. Physical derivations, such as the ADRC input gain, must not use that placeholder: an
-   * inertia that was never configured describes no real mechanism.
+   * model. Physical derivations, such as the active disturbance rejection controller's input gain,
+   * must not use that placeholder: an inertia that was never configured describes no real
+   * mechanism.
    *
    * @return {@code true} when {@code withMomentOfInertia(...)} or
    *         {@code withWheelMomentOfInertia(...)} was called.
@@ -1861,18 +1862,20 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the ADRC as the closed loop controller for the {@link SmartMotorController}, in slot 0.
+   * Set an active disturbance rejection controller as the closed loop controller for the
+   * {@link SmartMotorController}, in slot 0.
    *
    * <p>This is the drop-in replacement for {@link #withClosedLoopController(double, double, double)}:
    * the mechanism keeps calling {@code setVelocity(...)} and {@code setPosition(...)}, and the motor
-   * controller runs the ADRC on its closed-loop thread.
+   * controller runs the controller on its closed-loop thread.
    *
-   * <p>ADRC estimates and cancels the disturbance that feedforward models, so this clears the PID,
-   * LQR, and feedforward for the slot. Mixing them would double-count the plant gain.
+   * <p>The controller estimates and cancels the disturbance that feedforward models, so this clears
+   * the PID, LQR, and feedforward for the slot. Mixing them would double-count the plant gain.
    *
-   * <p><b>ADRC was written by FRC Team 8331</b>, who contributed it to YAMS.
+   * <p><b>The active disturbance rejection controller was written by FRC Team 8331</b>, who
+   * contributed it to YAMS.
    *
-   * @param controller ADRC configuration.
+   * @param controller Controller configuration.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @see ADRCConfig
    */
@@ -1881,11 +1884,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   }
 
   /**
-   * Set the ADRC as the closed loop controller for a slot.
+   * Set an active disturbance rejection controller as the closed loop controller for a slot.
    *
-   * <p><b>ADRC was written by FRC Team 8331</b>, who contributed it to YAMS.
+   * <p><b>The active disturbance rejection controller was written by FRC Team 8331</b>, who
+   * contributed it to YAMS.
    *
-   * @param controller ADRC configuration, or {@code null} to clear the slot.
+   * @param controller Controller configuration, or {@code null} to clear the slot.
    * @param slot       Closed loop controller slot.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */

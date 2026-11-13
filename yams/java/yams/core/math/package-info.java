@@ -25,7 +25,14 @@
  * {@link yams.core.math.ExponentialProfilePIDController}</b> a profiled PID variant that uses an
  * exponential motion profile to generate setpoints. Compared to a trapezoidal profile, the
  * exponential profile produces smoother acceleration transitions and is less prone to
- * overshoot on mechanisms with significant inertia.
+ * overshoot on mechanisms with significant inertia. <li><b>
+ * {@link yams.core.math.ADRCController}</b> and <b>{@link yams.core.math.TrackingDifferentiator}</b>
+ * implement active disturbance rejection control: the controller estimates the total disturbance
+ * (friction, back-EMF, loads) with an extended state observer and cancels it, so the closed loop
+ * settles in the requested time from only a plant order and an approximate input gain. The
+ * tracking differentiator smooths step references and supplies their derivatives. Teams usually
+ * configure both through {@link yams.core.motorcontrollers.config.ADRCConfig} rather than
+ * constructing them directly.
  * </ul>
  *
  * <h2>Example LQR Setup</h2>
