@@ -125,6 +125,10 @@ voltage, with an alert.
 
 ## Examples
 
+A whole robot with an ADRC arm, elevator and shooter is in the `adrc_mechanisms` example, for
+[Commands v2](examples/commands2/adrc_mechanisms/README.md) and
+[Commands v3](examples/commands3/adrc_mechanisms/README.md).
+
 These are the settings YAMS's tests use, which hold each mechanism at its setpoint on every motor
 controller.
 
