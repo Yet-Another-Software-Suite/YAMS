@@ -12,6 +12,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <Eigen/LU>
+
 namespace yams::math {
 
 namespace {
