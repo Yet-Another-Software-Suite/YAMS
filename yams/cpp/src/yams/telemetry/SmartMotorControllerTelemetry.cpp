@@ -159,6 +159,9 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
       case DoubleTelemetryField::MeasurementPosition:
         if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementPosition().value());
         break;
+      case DoubleTelemetryField::MeasurementCircumference:
+        if (auto circumference = cfg.GetMechanismCircumference()) dt.Set(circumference->value());
+        break;
       case DoubleTelemetryField::MeasurementVelocity:
         if (cfg.GetMechanismCircumference()) dt.Set(smc.GetMeasurementVelocity().value());
         break;
@@ -179,6 +182,10 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         break;
       case DoubleTelemetryField::RotorVelocity:
         dt.Set(smc.GetRotorVelocity().value());
+        break;
+      case DoubleTelemetryField::RotorGearRatio:
+        // The ratio the wrappers convert with.
+        dt.Set(cfg.GetMotorGearing().value_or(gearing::MechanismGearing::kOne).GetMechanismToRotorRatio());
         break;
       case DoubleTelemetryField::ExternalEncoderPosition:
         dt.Set(smc.GetExternalEncoderMechanismPosition().value_or(wpi::units::turn_t{0}).value());

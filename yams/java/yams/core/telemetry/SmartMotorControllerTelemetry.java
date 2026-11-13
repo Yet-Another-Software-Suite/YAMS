@@ -160,6 +160,7 @@ public class SmartMotorControllerTelemetry {
         case SupplyCurrent -> smc.getSupplyCurrent().ifPresent(current -> dt.set(current.in(Amps)));
         case MotorTemperature -> dt.set(smc.getTemperature().in(Fahrenheit));
         case MeasurementPosition -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(smc.getMeasurementPosition().in(Meters)));
+        case MeasurementCircumference -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(circumference.in(Meters)));
         case MeasurementVelocity -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(smc.getMeasurementVelocity().in(MetersPerSecond)));
         case MeasurementAcceleration -> cfg.getMechanismCircumference().ifPresent(c -> dt.set(smc.getMeasurementAcceleration().in(MetersPerSecondPerSecond)));
         case MechanismPosition -> dt.set(smc.getMechanismPosition().in(Rotations));
@@ -167,6 +168,7 @@ public class SmartMotorControllerTelemetry {
         case MechanismAcceleration -> dt.set(smc.getMechanismAcceleration().in(RotationsPerSecondPerSecond));
         case RotorPosition -> dt.set(smc.getRotorPosition().in(Rotations));
         case RotorVelocity -> dt.set(smc.getRotorVelocity().in(RotationsPerSecond));
+        case RotorGearRatio -> dt.set(cfg.getGearing().getMechanismToRotorRatio());
         case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderMechanismPosition().orElse(Rotations.zero()).in(Rotations));
         case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderMechanismVelocity().orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
         case ActiveClosedLoopControllerSlot -> dt.set(smc.getClosedLoopControllerSlot().ordinal());
@@ -578,6 +580,11 @@ public class SmartMotorControllerTelemetry {
     MotorTemperature("motor/temperature", 0, false, "fahrenheit"),
     /** Measurement position */
     MeasurementPosition("measurement/position", 0, false, "meters"),
+    /**
+     * The mechanism's circumference, meters per mechanism rotation, published only when the mechanism
+     * has one: a rotor reading divided by {@code rotor/gearRatio} and times this is in meters.
+     */
+    MeasurementCircumference("measurement/circumference", 0, false, "meters"),
     /** Measurement velocity. */
     MeasurementVelocity("measurement/velocity", 0, false, "meters_per_second"),
     /** Measurement acceleration. */
@@ -600,6 +607,11 @@ public class SmartMotorControllerTelemetry {
     RotorPosition("rotor/position", 0, false, "rotations"),
     /** Rotor velocity in rotations. */
     RotorVelocity("rotor/velocity", 0, false, "rotations_per_second"),
+    /**
+     * Rotor rotations per mechanism rotation, the reduction from the motor config's gearing: 60 for a
+     * 60:1 arm. Divide a rotor reading by it to get the mechanism's.
+     */
+    RotorGearRatio("rotor/gearRatio", 1, false, "none"),
     /** External encoder's mechanism position in rotations, published only when an external encoder is defined. */
     ExternalEncoderPosition("externalencoder/position", 0, false, "rotations"),
     /** External encoder's mechanism velocity in rotations per second, published only when an external encoder is defined. */

@@ -71,6 +71,7 @@ enum class DoubleTelemetryField {
   SupplyCurrentLimit,                 ///< Configured supply current limit (A, tunable).
   MotorTemperature,                   ///< Motor controller temperature (°F).
   MeasurementPosition,                ///< Linear measurement position (m).
+  MeasurementCircumference,           ///< The mechanism's circumference (m per mechanism rotation), if it has one.
   MeasurementVelocity,                ///< Linear measurement velocity (m/s).
   MeasurementAcceleration,            ///< Linear measurement acceleration (m/s²).
   MeasurementLowerLimit,              ///< Configured lower linear soft limit (m, tunable).
@@ -82,6 +83,7 @@ enum class DoubleTelemetryField {
   MechanismUpperLimit,                ///< Configured upper angular soft limit (degrees, tunable).
   RotorPosition,                      ///< Raw rotor position in rotations.
   RotorVelocity,                      ///< Raw rotor velocity in rotations per second.
+  RotorGearRatio,                     ///< Rotor rotations per mechanism rotation: 60 for a 60:1 arm.
   ExternalEncoderPosition,  ///< External encoder's mechanism position in rotations, only with an external encoder.
   ExternalEncoderVelocity,  ///< External encoder's mechanism velocity in rotations per second, only with an external encoder.
   ClosedloopRampRate,       ///< Closed-loop duty-cycle ramp rate (s, tunable).

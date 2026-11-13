@@ -97,6 +97,8 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"motor/temperature", 0.0, field, false, "fahrenheit"};
     case DoubleTelemetryField::MeasurementPosition:
       return {"measurement/position", 0.0, field, false, "meters"};
+    case DoubleTelemetryField::MeasurementCircumference:
+      return {"measurement/circumference", 0.0, field, false, "meters"};
     case DoubleTelemetryField::MeasurementVelocity:
       return {"measurement/velocity", 0.0, field, false, "meters_per_second"};
     case DoubleTelemetryField::MeasurementAcceleration:
@@ -119,6 +121,8 @@ static DoubleTelemetry<DoubleTelemetryField> MakeDouble(DoubleTelemetryField fie
       return {"rotor/position", 0.0, field, false, "rotations"};
     case DoubleTelemetryField::RotorVelocity:
       return {"rotor/velocity", 0.0, field, false, "rotations_per_second"};
+    case DoubleTelemetryField::RotorGearRatio:
+      return {"rotor/gearRatio", 1.0, field, false, "none"};
     case DoubleTelemetryField::ExternalEncoderPosition:
       return {"externalencoder/position", 0.0, field, false, "rotations"};
     case DoubleTelemetryField::ExternalEncoderVelocity:
@@ -202,6 +206,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::SupplyCurrentLimit,
            DoubleTelemetryField::MotorTemperature,
            DoubleTelemetryField::MeasurementPosition,
+           DoubleTelemetryField::MeasurementCircumference,
            DoubleTelemetryField::MeasurementVelocity,
            DoubleTelemetryField::MeasurementAcceleration,
            DoubleTelemetryField::MeasurementLowerLimit,
@@ -213,6 +218,7 @@ SmartMotorControllerTelemetryConfig::SmartMotorControllerTelemetryConfig() {
            DoubleTelemetryField::MechanismUpperLimit,
            DoubleTelemetryField::RotorPosition,
            DoubleTelemetryField::RotorVelocity,
+           DoubleTelemetryField::RotorGearRatio,
            DoubleTelemetryField::ExternalEncoderPosition,
            DoubleTelemetryField::ExternalEncoderVelocity,
            DoubleTelemetryField::ClosedloopRampRate,
@@ -314,6 +320,7 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::SetpointPosition).Enable();
     m_doubleFields.at(DoubleTelemetryField::SetpointVelocity).Enable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementPosition).Enable();
+    m_doubleFields.at(DoubleTelemetryField::MeasurementCircumference).Enable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementVelocity).Enable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementAcceleration).Enable();
     m_doubleFields.at(DoubleTelemetryField::MechanismPosition).Enable();
@@ -321,6 +328,7 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithTe
     m_doubleFields.at(DoubleTelemetryField::MechanismAcceleration).Enable();
     m_doubleFields.at(DoubleTelemetryField::RotorPosition).Enable();
     m_doubleFields.at(DoubleTelemetryField::RotorVelocity).Enable();
+    m_doubleFields.at(DoubleTelemetryField::RotorGearRatio).Enable();
     m_doubleFields.at(DoubleTelemetryField::ExternalEncoderPosition).Enable();
     m_doubleFields.at(DoubleTelemetryField::ExternalEncoderVelocity).Enable();
   }
@@ -439,6 +447,14 @@ SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithRo
   m_doubleFields.at(DoubleTelemetryField::RotorPosition).Enable();
   return *this;
 }
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithMeasurementCircumference() {
+  m_doubleFields.at(DoubleTelemetryField::MeasurementCircumference).Enable();
+  return *this;
+}
+SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithRotorGearRatio() {
+  m_doubleFields.at(DoubleTelemetryField::RotorGearRatio).Enable();
+  return *this;
+}
 SmartMotorControllerTelemetryConfig& SmartMotorControllerTelemetryConfig::WithRotorVelocity() {
   m_doubleFields.at(DoubleTelemetryField::RotorVelocity).Enable();
   return *this;
@@ -487,6 +503,7 @@ SmartMotorControllerTelemetryConfig::GetDoubleFields(SmartMotorController& smc) 
     m_doubleFields.at(DoubleTelemetryField::MeasurementLowerLimit).Disable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementUpperLimit).Disable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementPosition).Disable();
+    m_doubleFields.at(DoubleTelemetryField::MeasurementCircumference).Disable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementVelocity).Disable();
     m_doubleFields.at(DoubleTelemetryField::MeasurementAcceleration).Disable();
   } else {
