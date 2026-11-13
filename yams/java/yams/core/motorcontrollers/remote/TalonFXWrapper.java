@@ -594,7 +594,7 @@ public class TalonFXWrapper extends SmartMotorController {
     setpointVelocity = Optional.empty();
     setpointFeedforwardForce = Optional.empty();
     setpointPosition = Optional.ofNullable(angle);
-    if (angle != null && m_lqr.isEmpty()) {
+    if (angle != null && !usesSystemCoreController()) {
       switch (m_positionReq.getName()) {
         case "MotionMagicDutyCycle":
           ensureRequest(() -> m_talonfx.setControl(((MotionMagicDutyCycle) m_positionReq).withPosition(angle)));
@@ -671,7 +671,7 @@ public class TalonFXWrapper extends SmartMotorController {
     setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.empty();
-    if (angularVelocity != null && m_lqr.isEmpty()) {
+    if (angularVelocity != null && !usesSystemCoreController()) {
       // The request objects are reused, so clear any feedforward left by setVelocity(velocity, force).
       switch (m_velocityReq.getName()) {
         case "MotionMagicVelocityDutyCycle":
@@ -720,7 +720,7 @@ public class TalonFXWrapper extends SmartMotorController {
     setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.ofNullable(feedforwardForce);
-    if (angularVelocity != null && m_lqr.isEmpty() && setpointFeedforwardForce.isPresent()) {
+    if (angularVelocity != null && !usesSystemCoreController() && setpointFeedforwardForce.isPresent()) {
       Voltage feedforwardVoltage = m_config.convertToVoltage(m_dcmotor, feedforwardForce);
       Current feedforwardCurrent = m_config.convertToCurrent(m_dcmotor, feedforwardForce);
       switch (m_velocityReq.getName()) {
@@ -823,6 +823,7 @@ public class TalonFXWrapper extends SmartMotorController {
     m_zeroOffsetNoExternalEncoderAlert.set(false);
     this.m_looseFollowers = config.getLooselyCoupledFollowers();
     m_lqr = config.getLQRClosedLoopController();
+    applyADRCConfig(config);
 
     // Sim periodic
     if (RobotBase.isSimulation() && !m_config.getSimulationPeriod().isEquivalent(Milliseconds.of(20)))
@@ -867,8 +868,8 @@ public class TalonFXWrapper extends SmartMotorController {
       m_talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     }
 
-    if (m_lqr.isPresent()) {
-      if (m_config.getClosedLoopTolerance().isPresent()) {
+    if (usesSystemCoreController()) {
+      if (m_adrc.isEmpty() && m_config.getClosedLoopTolerance().isPresent()) {
         throw new IllegalArgumentException("[ERROR] Cannot set closed-loop controller error tolerance on " + (config.getTelemetryName().isPresent() ? getName() : "TalonFX(" + m_talonfx.getDeviceID() + ")"));
       }
       m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(true));
@@ -897,7 +898,7 @@ public class TalonFXWrapper extends SmartMotorController {
       }
     }
 
-    if (config.getClosedLoopTolerance().isPresent()) {
+    if (config.getClosedLoopTolerance().isPresent() && m_adrc.isEmpty()) {
       throw new SmartMotorControllerConfigurationException("Closed loop tolerance is not available on TalonFX", "Cannot set closed loop tolerance on TalonFX", ".withClosedLoopTolerance");
     }
 
@@ -1163,15 +1164,15 @@ public class TalonFXWrapper extends SmartMotorController {
     // Unsupported options.
     // TODO: This isn't really unsupported but needs to be adjusted to 1microsecond since the
     // control loop runs at that speed
-    if (config.getClosedLoopControlPeriod().isPresent()) {
+    if (config.getClosedLoopControlPeriod().isPresent() && m_adrc.isEmpty()) {
       throw new IllegalArgumentException("[ERROR] ClosedLoopControlPeriod is not supported");
     }
-    // The cutoff is checked by iterateClosedLoopController(), which only runs with an LQR controller:
-    // PID and motion profiles run on the Talon and never reach it.
-    if (config.getTemperatureCutoff().isPresent() && m_lqr.isEmpty()) {
-      throw new IllegalArgumentException("[ERROR] TemperatureCutoff is only supported with an LQR controller");
+    // The cutoff is checked by iterateClosedLoopController(), which only runs with an LQR or ADRC
+    // controller: PID and motion profiles run on the Talon and never reach it.
+    if (config.getTemperatureCutoff().isPresent() && !usesSystemCoreController()) {
+      throw new IllegalArgumentException("[ERROR] TemperatureCutoff is only supported with an LQR or ADRC controller");
     }
-    if (config.getFeedbackSynchronizationThreshold().isPresent()) {
+    if (config.getFeedbackSynchronizationThreshold().isPresent() && !usesSystemCoreController()) {
       throw new IllegalArgumentException("[ERROR] FeedbackSynchronizationThreshold is not supported");
     }
     if (config.getVoltageCompensation().isPresent()) {

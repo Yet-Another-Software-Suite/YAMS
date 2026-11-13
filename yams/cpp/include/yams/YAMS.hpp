@@ -22,10 +22,13 @@
 #include "yams/gearing/Sprocket.hpp"
 
 // ---- Math ------------------------------------------------------------------
+#include "yams/math/ADRCConfig.hpp"
+#include "yams/math/ADRCController.hpp"
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/math/LQRConfig.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/math/SmartMath.hpp"
+#include "yams/math/TrackingDifferentiator.hpp"
 
 // ---- Units -----------------------------------------------------------------
 #include "yams/units/YUnits.hpp"

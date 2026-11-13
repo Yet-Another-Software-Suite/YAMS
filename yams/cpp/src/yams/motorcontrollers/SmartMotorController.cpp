@@ -90,6 +90,20 @@ bool SmartMotorController::IsClosedLoopControllerStopped() const {
 
 math::LQRController* SmartMotorController::GetLQRController() { return m_lqr ? &*m_lqr : nullptr; }
 
+math::ADRCController* SmartMotorController::GetADRCController() { return m_adrc ? &*m_adrc : nullptr; }
+
+bool SmartMotorController::UsesSystemCoreController() const { return m_lqr.has_value() || m_adrc.has_value(); }
+
+void SmartMotorController::ApplyADRCConfig(const SmartMotorControllerConfig& config) {
+  const auto adrcConfig = config.GetADRCController(m_slot);
+  if (!adrcConfig) {
+    m_adrc.reset();
+    return;
+  }
+  const wpi::units::second_t period = config.GetClosedLoopControlPeriod().value_or(20_ms);
+  m_adrc.emplace(math::ADRCConfig::BuildController(adrcConfig, GetDCMotor(), config, period));
+}
+
 void SmartMotorController::StartClosedLoopController() {
   if (m_closedLoopControllerThread &&
       m_config->GetMotorControllerMode() == ControlMode::CLOSED_LOOP && !m_closedLoopControllerRunning) {
@@ -104,6 +118,8 @@ void SmartMotorController::StartClosedLoopController() {
 
 void SmartMotorController::ResetClosedLoopControllerState() {
   if (m_pid) m_pid->Reset();
+  // The closed loop ramp starts from the voltage the motor controller applies now.
+  m_lastClosedLoopVoltage.reset();
   // The motion profile starts from this position, so continuous wrapping keeps the angles the
   // loop measures next to it, rather than a whole wrapping range away from it.
   m_lastClosedLoopMechanismPosition = GetMechanismPosition();
@@ -114,6 +130,17 @@ void SmartMotorController::ResetClosedLoopControllerState() {
     } else {
       m_lqr->Reset(wpi::units::radian_t{GetMechanismPosition()},
                    wpi::units::radians_per_second_t{GetMechanismVelocity()});
+    }
+  }
+  if (m_adrc) {
+    // The ADRC's observer starts from what the loop steps it with: the velocity while only a velocity setpoint is
+    // set, the position otherwise.
+    const bool velocityLoop = !m_setpointPosition && m_setpointVelocity;
+    if (m_config->GetLinearClosedLoopControllerUse()) {
+      m_adrc->Reset(velocityLoop ? GetMeasurementVelocity().value() : GetMeasurementPosition().value());
+    } else {
+      m_adrc->Reset(velocityLoop ? wpi::units::turns_per_second_t{GetMechanismVelocity()}.value()
+                                 : wpi::units::turn_t{GetMechanismPosition()}.value());
     }
   }
 }
@@ -197,6 +224,8 @@ void SmartMotorController::IterateClosedLoopController() {
   };
   ProfileState nextTrap{};
   ProfileState nextExpo{};
+  // The profile's state at the start of this loop, which the next state is profiled from.
+  std::optional<ProfileState> profileNow;
   bool velocityTrapezoidalProfile = false;
 
   auto calculateTrap = [&](ProfileState current, double goal) {
@@ -204,12 +233,14 @@ void SmartMotorController::IterateClosedLoopController() {
       using P = wpi::math::TrapezoidProfile<wpi::units::meters>;
       auto st = m_linearTrapState.value_or(P::State{wpi::units::meter_t{current.position},
                                                      wpi::units::meters_per_second_t{current.velocity}});
+      profileNow = ProfileState{st.position.value(), st.velocity.value()};
       auto n = linTrapProfile->Calculate(loopTime, st, P::State{wpi::units::meter_t{goal}, {}});
       return ProfileState{n.position.value(), n.velocity.value()};
     }
     using P = wpi::math::TrapezoidProfile<wpi::units::turns>;
     auto st = m_trapState.value_or(P::State{wpi::units::turn_t{current.position},
                                             wpi::units::turns_per_second_t{current.velocity}});
+    profileNow = ProfileState{st.position.value(), st.velocity.value()};
     auto n = trapProfile->Calculate(loopTime, st, P::State{wpi::units::turn_t{goal}, {}});
     return ProfileState{n.position.value(), n.velocity.value()};
   };
@@ -228,12 +259,14 @@ void SmartMotorController::IterateClosedLoopController() {
         using P = wpi::math::ExponentialProfile<wpi::units::meters, wpi::units::volts>;
         auto st = m_linearExpoState.value_or(
             P::State{wpi::units::meter_t{position}, wpi::units::meters_per_second_t{velocity}});
+        profileNow = ProfileState{st.position.value(), st.velocity.value()};
         auto n = linExpoProfile->Calculate(loopTime, st, P::State{wpi::units::meter_t{setpoint}, {}});
         nextExpo = {n.position.value(), n.velocity.value()};
       } else {
         using P = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
         auto st = m_expoState.value_or(
             P::State{wpi::units::turn_t{position}, wpi::units::turns_per_second_t{velocity}});
+        profileNow = ProfileState{st.position.value(), st.velocity.value()};
         auto n = expoProfile->Calculate(loopTime, st, P::State{wpi::units::turn_t{setpoint}, {}});
         nextExpo = {n.position.value(), n.velocity.value()};
       }
@@ -261,6 +294,7 @@ void SmartMotorController::IterateClosedLoopController() {
     double measured = mechanismPosition.value();
     double setpoint = wrappedSetpoint->value();
     double velProfile = 0.0;
+    bool profiled = false;
     if (linear) {
       measured = GetMeasurementPosition().value();
       setpoint = cfg.ConvertFromMechanism(*m_setpointPosition).value();
@@ -268,11 +302,23 @@ void SmartMotorController::IterateClosedLoopController() {
     if (hasExpo) {
       setpoint = nextExpo.position;
       velProfile = nextExpo.velocity;
+      profiled = true;
     } else if (hasTrap && !velocityProfileConfigured) {
       setpoint = nextTrap.position;
       velProfile = nextTrap.velocity;
+      profiled = true;
     }
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
+    // The ADRC follows the profile's state now and feeds forward how it moves to the next one, so it neither trails a
+    // moving profile nor runs a loop ahead of it. Without a profile, the setpoint stands still. The observer is told the
+    // voltage the motor controller applied, not the one it asked for, so a current limit or a low battery is not
+    // mistaken for a disturbance.
+    if (m_adrc) {
+      const math::ADRCController::Reference next{setpoint, velProfile};
+      const math::ADRCController::Reference now =
+          profiled && profileNow ? math::ADRCController::Reference{profileNow->position, profileNow->velocity} : next;
+      pidOutput = m_adrc->Calculate(measured, now, next, GetVoltage()).value();
+    }
     if (m_lqr) {
       if (!linear) {
         pidOutput =
@@ -296,8 +342,23 @@ void SmartMotorController::IterateClosedLoopController() {
       measured = GetMeasurementVelocity().value();
       setpoint = cfg.ConvertFromMechanism(*m_setpointVelocity).value();
     }
-    if (velocityTrapezoidalProfile) setpoint = nextTrap.position;
+    // A velocity profile's state holds the setpoint velocity as its position and the acceleration as its velocity.
+    double accelProfile = 0.0;
+    if (velocityTrapezoidalProfile) {
+      setpoint = nextTrap.position;
+      accelProfile = nextTrap.velocity;
+    }
     if (m_pid) pidOutput = m_pid->Calculate(measured, setpoint);
+    // A velocity profile's state is a velocity and its acceleration: the ADRC follows it the same way it follows a
+    // position profile.
+    if (m_adrc) {
+      const math::ADRCController::Reference next{setpoint, accelProfile};
+      const math::ADRCController::Reference now =
+          velocityTrapezoidalProfile && profileNow
+              ? math::ADRCController::Reference{profileNow->position, profileNow->velocity}
+              : next;
+      pidOutput = m_adrc->Calculate(measured, now, next, GetVoltage()).value();
+    }
     if (m_lqr) {
       if (!linear) {
         pidOutput = m_lqr
@@ -419,21 +480,31 @@ void SmartMotorController::IterateClosedLoopController() {
     ffOutput += cfg.ConvertToVoltage(GetDCMotor(), *m_setpointFeedforwardForce).value();
   }
 
-  // Boundary safety
-  if (mechUpper && GetMechanismPosition() > *mechUpper && (pidOutput + ffOutput) > 0.0) {
-    pidOutput = ffOutput = 0.0;
-  }
-  if (mechLower && GetMechanismPosition() < *mechLower && (pidOutput + ffOutput) < 0.0) {
-    pidOutput = ffOutput = 0.0;
-  }
-  if (tempCutoff && GetTemperature() >= *tempCutoff) {
-    pidOutput = ffOutput = 0.0;
+  double output = pidOutput + ffOutput;
+
+  // This loop sends the motor controller a voltage, which it treats as open loop, so its own closed loop ramp never
+  // applies. Ramp the output here instead, from the voltage sent last, or from the one applied when the loop starts
+  // over. The limits below still stop it at once.
+  if (const auto rampRate = cfg.GetClosedLoopRampRate(); rampRate && rampRate->value() > 0.0) {
+    const double last = m_lastClosedLoopVoltage.value_or(GetVoltage().value());
+    const double maxChange = kClosedLoopRampFullScaleVolts / rampRate->value() * loopTime.value();
+    output = last + std::clamp(output - last, -maxChange, maxChange);
   }
 
-  double output = pidOutput + ffOutput;
+  // Boundary safety
+  if (mechUpper && GetMechanismPosition() > *mechUpper && output > 0.0) {
+    output = 0.0;
+  }
+  if (mechLower && GetMechanismPosition() < *mechLower && output < 0.0) {
+    output = 0.0;
+  }
+  if (tempCutoff && GetTemperature() >= *tempCutoff) {
+    output = 0.0;
+  }
   if (maxV) {
     output = std::clamp(output, -maxV->value(), maxV->value());
   }
+  m_lastClosedLoopVoltage = output;
   SetVoltage(wpi::units::volt_t{output});
 }
 

@@ -455,7 +455,7 @@ public class SparkWrapper extends SmartMotorController {
    */
   private void iterateSimulatedArmGravity() {
     final boolean simulatingMaxMotion = m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse();
-    if (!RobotBase.isSimulation() || m_config.getArmFeedforward(m_slot).isEmpty() || setpointPosition.isEmpty() || simulatingMaxMotion || m_expoProfile.isPresent() || m_lqr.isPresent()) {
+    if (!RobotBase.isSimulation() || m_config.getArmFeedforward(m_slot).isEmpty() || setpointPosition.isEmpty() || simulatingMaxMotion || m_expoProfile.isPresent() || usesSystemCoreController()) {
       return;
     }
     final Angle setpoint = setpointPosition.get();
@@ -473,7 +473,7 @@ public class SparkWrapper extends SmartMotorController {
    * profile, nor an arm's kCos in simulation.
    */
   private void iterateSimulatedMaxMotionPosition() {
-    if (!(RobotBase.isSimulation() && m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) || setpointPosition.isEmpty()) {
+    if (!(RobotBase.isSimulation() && m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse() && m_expoProfile.isEmpty() && !usesSystemCoreController()) || setpointPosition.isEmpty()) {
       m_simMaxMotionState = Optional.empty();
       return;
     }
@@ -656,7 +656,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointPosition = Optional.ofNullable(angle);
     // While simulating MAXMotion, simIterate() follows the profile to this setpoint instead.
     final boolean simulatingMaxMotion = RobotBase.isSimulation() && m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse();
-    if (m_expoProfile.isEmpty() && m_lqr.isEmpty() && angle != null && !simulatingMaxMotion) {
+    if (m_expoProfile.isEmpty() && !usesSystemCoreController() && angle != null && !simulatingMaxMotion) {
       useVelocityGains(false);
       // The SPARK wraps the setpoint over the continuous wrapping range itself.
       configureSpark(() -> m_sparkPidController.setSetpoint(angle.times(m_mechanismToFeedbackSensorRatio).in(Rotations), m_positionControlType, m_closedLoopSlot));
@@ -695,7 +695,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.empty();
-    if (m_lqr.isEmpty() && angularVelocity != null) {
+    if (!usesSystemCoreController() && angularVelocity != null) {
       useVelocityGains(true);
       configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).times(m_mechanismToFeedbackSensorRatio).in(RPM), m_velocityControlType, m_closedLoopSlot));
     }
@@ -718,7 +718,7 @@ public class SparkWrapper extends SmartMotorController {
     setpointPosition = Optional.empty();
     setpointVelocity = Optional.ofNullable(angularVelocity);
     setpointFeedforwardForce = Optional.ofNullable(feedforwardForce);
-    if (m_lqr.isEmpty() && angularVelocity != null && setpointFeedforwardForce.isPresent()) {
+    if (!usesSystemCoreController() && angularVelocity != null && setpointFeedforwardForce.isPresent()) {
       Voltage feedforwardVoltage = m_config.convertToVoltage(getDCMotor(), feedforwardForce);
       useVelocityGains(true);
       configureSpark(() -> m_sparkPidController.setSetpoint(setpointVelocity.orElse(RPM.of(0)).times(m_mechanismToFeedbackSensorRatio).in(RPM), m_velocityControlType, m_closedLoopSlot, feedforwardVoltage.in(Volts),
@@ -794,6 +794,7 @@ public class SparkWrapper extends SmartMotorController {
     }
     m_lqr = config.getLQRClosedLoopController();
     m_pid = config.getPID(m_slot);
+    applyADRCConfig(config);
     m_looseFollowers = config.getLooselyCoupledFollowers();
 
     // Handle motion profile
@@ -811,7 +812,7 @@ public class SparkWrapper extends SmartMotorController {
       }
       m_positionControlType = ControlType.kMAXMotionPositionControl;
       m_velocityControlType = ControlType.kMAXMotionVelocityControl;
-      if (RobotBase.isSimulation() && !m_config.getVelocityTrapezoidalProfileInUse() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+      if (RobotBase.isSimulation() && !m_config.getVelocityTrapezoidalProfileInUse() && m_expoProfile.isEmpty() && !usesSystemCoreController()) {
         // REVLib's MAXMotion simulation does not follow the profile (REVLib 2027.0.0-alpha-7): it
         // passes the cruise velocity and the setpoint. In simulation, simIterate() runs the profile
         // and the SPARK holds each point of it with position control instead.
@@ -820,7 +821,7 @@ public class SparkWrapper extends SmartMotorController {
     });
 
     // Handle closed loop controller thread
-    if (m_expoProfile.isPresent() || m_lqr.isPresent()) {
+    if (m_expoProfile.isPresent() || usesSystemCoreController()) {
       m_systemCoreClosedLoopAlert.ifPresent(alert -> alert.set(true));
       iterateClosedLoopController();
 
@@ -1089,22 +1090,22 @@ public class SparkWrapper extends SmartMotorController {
       throw new SmartMotorControllerConfigurationException("External encoder gearing is not supported when there is no external encoder", "External encoder gearing could not be set", "withExternalEncoderGearing");
     }
 
-    if (config.getClosedLoopControlPeriod().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+    if (config.getClosedLoopControlPeriod().isPresent() && m_expoProfile.isEmpty() && !usesSystemCoreController()) {
       throw new SmartMotorControllerConfigurationException("Closed loop control period is unsupported without Exponential Profiles", "Closed loop control period does not take affect", ".withClosedLoopControlPeriod");
     }
 
-    if (config.getClosedLoopControllerMaximumVoltage().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+    if (config.getClosedLoopControllerMaximumVoltage().isPresent() && m_expoProfile.isEmpty() && !usesSystemCoreController()) {
       throw new SmartMotorControllerConfigurationException("Closed loop controller maximum voltage is only available for Exponential Profiled " + "closed loop controllers", "Closed loop controller maximum voltage could not be applied",
           "withClosedLoopControllerMaximumVoltage");
     }
 
     // The cutoff is checked by iterateClosedLoopController(), which only runs with an exponential
-    // profile or an LQR controller: a trapezoidal profile runs on the SPARK and never reaches it.
-    if (config.getTemperatureCutoff().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+    // profile or a SystemCore controller: a trapezoidal profile runs on the SPARK and never reaches it.
+    if (config.getTemperatureCutoff().isPresent() && m_expoProfile.isEmpty() && !usesSystemCoreController()) {
       throw new SmartMotorControllerConfigurationException("Temperature cutoff is only available for exponentially profiled or LQR closed loop controllers", "Temperature cutoff could not be applied", "withTemperatureCutoff");
     }
 
-    if (config.getFeedbackSynchronizationThreshold().isPresent() && m_expoProfile.isEmpty() && m_lqr.isEmpty()) {
+    if (config.getFeedbackSynchronizationThreshold().isPresent() && m_expoProfile.isEmpty() && !usesSystemCoreController()) {
       throw new SmartMotorControllerConfigurationException("Feedback synchronization threshold is only available for exponentially profiled closed " + "loop controllers", "Feedback synchronization threshold could not be applied",
           "withFeedbackSynchronizationThreshold");
     }

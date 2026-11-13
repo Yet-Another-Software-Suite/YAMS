@@ -89,8 +89,7 @@ public class MechanismTelemetry {
    */
   public void setupLoopTime() {
     var loopTimePublisherTopic = networkTable.getDoubleTopic("loopTime");
-    loopTimePublisherTopic.setProperties("{\"units\": \"second\"}");
-    loopTimePublisher = Optional.of(loopTimePublisherTopic.publish());
+    loopTimePublisher = Optional.of(loopTimePublisherTopic.publishEx("double", "{\"units\": \"second\"}"));
   }
 
   /**
@@ -168,10 +167,7 @@ public class MechanismTelemetry {
    */
   public DoubleConsumer publishDouble(String key, String unit) {
     var topic = networkTable.getDoubleTopic(key);
-    if (unit != null) {
-      topic.setProperties("{\"units\": \"" + unit + "\"}");
-    }
-    DoublePublisher publisher = topic.publish();
+    DoublePublisher publisher = unit != null ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
     Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) Timer.getTimestamp()));
     return value -> {
       publisher.accept(value);

@@ -96,6 +96,26 @@ A tank-drive differential drivetrain.
 - Commands: `TankDrive(leftSupplier, rightSupplier)`, `ArcadeDrive(xSupplier, rotSupplier)`, `Stop()`
 - Default command: `Stop()`
 
+### ADRC subsystems
+
+An arm, an elevator and a shooter, each run by an active disturbance rejection controller (ADRC) instead of a PID
+and feedforward. The ADRC was written by FRC Team 8331. They are in `subsystems/adrc/` and match the Java
+`adrc_mechanisms` example. See [ADRCGuide.md](../../ADRCGuide.md).
+
+- **ADRCArmSubsystem:** a NEO (SparkMax ID 30) on a 60:1 reduction moving a 3 kg, 0.5 m arm. `SystemOrder::ARM`
+  with a 0.3 s settling time chooses the form from the motor, gearing and inertia: at 60:1 the NEO's back-EMF sets the
+  arm's speed, so it is first order with its speed per volt as `b0`. Gravity needs no kG.
+- **ADRCElevatorSubsystem:** a NEO (SparkMax ID 31) on a 12:1 reduction lifting a 16 lb carriage on a 22 tooth,
+  1/4 in pitch sprocket. `SystemOrder::ELEVATOR`, first order on the position, with a 0.3 s settling time, since
+  back-EMF sets an elevator's speed. Its closed loop is linear, in meters, as `SystemOrder::ELEVATOR` needs, and `b0`
+  is derived as its speed per volt in meters per second.
+- **ADRCShooterSubsystem:** a NEO (SparkMax ID 32) turning a 4 in, 1 lb wheel directly. A first order ADRC with a
+  0.2 s settling time; `b0` is derived from the wheel's inertia. It coasts when nothing else uses it.
+- Commands: `SetAngle(degree_t)`, `SetHeight(meter_t)` and `SpinUp(degrees_per_second_t)`. `GetADRC()` returns each
+  one's running `ADRCController`.
+- With HIGH telemetry, the ADRC's settings are tunable live in place of kP, kI and kD, under
+  `closedloop/adrc/` in each motor's tuning table.
+
 ## Vendor dependencies
 
 | Library           | Purpose                               |

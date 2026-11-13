@@ -11,8 +11,6 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Newtons;
-import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.RadiansPerSecondPerSecond;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
@@ -59,6 +57,7 @@ import org.wpilib.units.measure.Voltage;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
+import yams.core.math.ADRCConfig;
 import yams.core.math.LQRController;
 import yams.core.mechanisms.positional.Elevator;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
@@ -105,7 +104,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Missing options that would be decremented for each motor application.
    */
-  private final List<SmartMotorControllerOptions> missingOptions = Arrays.asList(SmartMotorControllerOptions.values());
+  private final List<SmartMotorControllerOptions> missingOptions =
+      Arrays.asList(SmartMotorControllerOptions.values());
   /**
    * Validation set to confirm all options have been applied to the Smart Motor Controller.
    */
@@ -114,7 +114,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Validation set to confirm all options have been applied to the Smart Motor Controller's
    * external encoder.
    */
-  private Set<ExternalEncoderOptions> externalEncoderOptions = EnumSet.allOf(ExternalEncoderOptions.class);
+  private Set<ExternalEncoderOptions> externalEncoderOptions =
+      EnumSet.allOf(ExternalEncoderOptions.class);
   /**
    * External encoder.
    */
@@ -130,27 +131,33 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Simple feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> simpleFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> simpleFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Elevator feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> elevatorFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> elevatorFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Arm feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> armFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> armFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Simple feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> sim_simpleFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, SimpleMotorFeedforward> sim_simpleFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Elevator feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> sim_elevatorFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, ElevatorFeedforward> sim_elevatorFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Arm feedforward for the motor controller.
    */
-  private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> sim_armFeedforward = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, ArmFeedforward> sim_armFeedforward =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Exponential Profile
    */
@@ -170,11 +177,17 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private EnumMap<ClosedLoopControllerSlot, PIDController> pid = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, PIDController> pid =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Controller for the {@link SmartMotorController}.
    */
   private Optional<LQRController> lqr = Optional.empty();
+  /**
+   * ADRC controllers for the {@link SmartMotorController}, one per slot.
+   */
+  private EnumMap<ClosedLoopControllerSlot, ADRCConfig> adrc =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Controller for the {@link SmartMotorController}.
    */
@@ -182,14 +195,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Controller for the {@link SmartMotorController}.
    */
-  private EnumMap<ClosedLoopControllerSlot, PIDController> sim_pid = new EnumMap<>(ClosedLoopControllerSlot.class);
+  private EnumMap<ClosedLoopControllerSlot, PIDController> sim_pid =
+      new EnumMap<>(ClosedLoopControllerSlot.class);
   /**
    * Gearing for the {@link SmartMotorController}.
    */
   private MechanismGearing gearing;
   /**
    * External encoder gearing,
-   defaults to 1:1. */
+   defaults to 1:1.
+ */
   private Optional<MechanismGearing> externalEncoderGearing = Optional.empty();
   /**
    * Mechanism Circumference for distance calculations.
@@ -212,7 +227,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private Optional<Time> openLoopRampRate = Optional.empty();
   /**
    * Closed loop ramp rate, amount of time to go from 0 to
-   100 speed. */
+   100 speed.
+ */
   private Optional<Time> closeLoopRampRate = Optional.empty();
   /**
    * Set the stator current limit in Amps for the {@link SmartMotorController}.
@@ -256,7 +272,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private Optional<Angle> zeroOffset = Optional.empty();
   /**
    * Temperature cutoff for the {@link SmartMotorController} to prevent
-   running if above. */
+   running if above.
+ */
   private Optional<Temperature> temperatureCutoff = Optional.empty();
   /**
    * The encoder readings are inverted.
@@ -272,15 +289,18 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private boolean useExternalEncoder = true;
   /**
    * {@link SmartMotorController}
-   starting angle. */
+   starting angle.
+ */
   private Optional<Angle> startingPosition = Optional.empty();
   /**
    * {@link SmartMotorController} starting angle to be used
-   during simulation. */
+   during simulation.
+ */
   private Optional<Angle> sim_startingPosition = Optional.empty();
   /**
    * Maximum voltage output for the motor controller while
-   using the closed loop controller. */
+   using the closed loop controller.
+ */
   private Optional<Voltage> closedLoopControllerMaximumVoltage = Optional.empty();
   /**
    * Feedback synchronization threshold.
@@ -312,6 +332,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private MomentOfInertia moi = KilogramSquareMeters.of(0.02);
   /**
+   * Whether {@link #moi} was set by the team rather than left at the placeholder. Kept separate
+   * from the validation set, which each wrapper resets before applying the config.
+   */
+  private boolean momentOfInertiaConfigured = false;
+  /**
    * Loosely coupled followers.
    */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
@@ -331,7 +356,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *           construct this.
    */
   protected SmartMotorControllerConfig() {
-    HAL.reportUsage(null, null);
+    HAL.reportUsage("SmartMotorController", "YAMS");
   }
 
   /**
@@ -348,14 +373,21 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.externalEncoder = cfg.externalEncoder;
     this.externalEncoderInverted = cfg.externalEncoderInverted;
     this.followers = cfg.followers;
-    this.simpleFeedforward = copyMap(cfg.simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
-    this.elevatorFeedforward = copyMap(cfg.elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
-    this.armFeedforward = copyMap(cfg.armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
-    this.sim_simpleFeedforward = copyMap(cfg.sim_simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
-    this.sim_elevatorFeedforward = copyMap(cfg.sim_elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
-    this.sim_armFeedforward = copyMap(cfg.sim_armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
+    this.simpleFeedforward =
+        copyMap(cfg.simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
+    this.elevatorFeedforward =
+        copyMap(cfg.elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
+    this.armFeedforward =
+        copyMap(cfg.armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
+    this.sim_simpleFeedforward =
+        copyMap(cfg.sim_simpleFeedforward, SmartMotorControllerConfig::copySimpleFeedforward);
+    this.sim_elevatorFeedforward =
+        copyMap(cfg.sim_elevatorFeedforward, SmartMotorControllerConfig::copyElevatorFeedforward);
+    this.sim_armFeedforward =
+        copyMap(cfg.sim_armFeedforward, SmartMotorControllerConfig::copyArmFeedforward);
     this.sim_lqr = cfg.sim_lqr.map(SmartMotorControllerConfig::copyLqr);
     this.lqr = cfg.lqr.map(SmartMotorControllerConfig::copyLqr);
+    this.adrc = copyMap(cfg.adrc, ADRCConfig::clone);
     this.exponentialProfile = cfg.exponentialProfile;
     this.trapezoidProfile = cfg.trapezoidProfile;
     this.sim_exponentialProfile = cfg.sim_exponentialProfile;
@@ -391,6 +423,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.wrappingContinuous = cfg.wrappingContinuous;
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
+    this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -403,15 +436,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Copy a map of per-slot controllers, so a cloned config never shares controller state, such as
    * gains changed by live tuning, with the config it was cloned from.
    */
-  private static <V> EnumMap<ClosedLoopControllerSlot, V> copyMap(EnumMap<ClosedLoopControllerSlot, V> map,
-                                                                 java.util.function.UnaryOperator<V> copy) {
+  private static <V> EnumMap<ClosedLoopControllerSlot, V> copyMap(
+      EnumMap<ClosedLoopControllerSlot, V> map, java.util.function.UnaryOperator<V> copy) {
     EnumMap<ClosedLoopControllerSlot, V> copied = new EnumMap<>(ClosedLoopControllerSlot.class);
     map.forEach((slot, value) -> copied.put(slot, copy.apply(value)));
     return copied;
   }
 
   private PIDController copyPid(PIDController pid) {
-    PIDController copied = applyContinuousWrapping(new PIDController(pid.getP(), pid.getI(), pid.getD(), pid.getPeriod()));
+    PIDController copied = applyContinuousWrapping(
+        new PIDController(pid.getP(), pid.getI(), pid.getD(), pid.getPeriod()));
     copied.setIZone(pid.getIZone());
     copied.setTolerance(pid.getErrorTolerance(), pid.getErrorDerivativeTolerance());
     return copied;
@@ -442,15 +476,15 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   protected abstract T self();
 
-  @Override
-  public abstract T clone();
+  @Override public abstract T clone();
 
   /**
    * Set the vendor specific config for the {@link SmartMotorController} which will be used as a
    * base. Vendor configs will be overridden by the {@link SmartMotorControllerConfig} options.
    *
    * @param vendorConfig Vendor specific config object. Must be of the correct type for the
-   *                     {@link SmartMotorController}. Only the root configuration class is accepted.
+   *                     {@link SmartMotorController}. Only the root configuration class is
+   * accepted.
    * @return {@link SmartMotorControllerConfig} for chaining.
    * @implSpec {@link SmartMotorControllerConfig} options will always take precedence and overwrite
    *           the vendor config. Apply any changes after the {@link SmartMotorController} is
@@ -517,7 +551,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withFeedbackSynchronizationThreshold(Angle angle) {
     if (mechanismCircumference.isPresent()) {
-      throw new SmartMotorControllerConfigurationException("Auto-synchronization is unavailable when using distance based mechanisms", "Cannot set synchronization threshold.", "withMechanismCircumference(Distance) should be removed.");
+      throw new SmartMotorControllerConfigurationException(
+          "Auto-synchronization is unavailable when using distance based mechanisms",
+          "Cannot set synchronization threshold.",
+          "withMechanismCircumference(Distance) should be removed.");
     }
     feedbackSynchronizationThreshold = Optional.ofNullable(angle);
     return self();
@@ -650,7 +687,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withExternalEncoderZeroOffset(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot set zero offset.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot set zero offset.", "withMechanismCircumference(Distance)");
     }
     return withExternalEncoderZeroOffset(convertToMechanism(distance));
   }
@@ -704,13 +742,19 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withContinuousWrapping(Angle bottom, Angle top) {
     if (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent()) {
-      throw new SmartMotorControllerConfigurationException("Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping", "withSoftLimits(Angle,Angle) should be removed");
+      throw new SmartMotorControllerConfigurationException(
+          "Soft limits set while configuring continuous wrapping", "Cannot set continuous wrapping",
+          "withSoftLimits(Angle,Angle) should be removed");
     }
     if (linearClosedLoopController) {
-      throw new SmartMotorControllerConfigurationException("Distance based mechanism used with continuous wrapping", "Cannot set continuous wrapping", "withMechanismCircumference(Distance) should be removed");
+      throw new SmartMotorControllerConfigurationException(
+          "Distance based mechanism used with continuous wrapping",
+          "Cannot set continuous wrapping",
+          "withMechanismCircumference(Distance) should be removed");
     }
-    if (pid.isEmpty() && lqr.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("No closed loop controller used", "Cannot set continuous wrapping!", "withClosedLoopController()");
+    if (pid.isEmpty() && lqr.isEmpty() && adrc.isEmpty()) {
+      throw new SmartMotorControllerConfigurationException("No closed loop controller used",
+          "Cannot set continuous wrapping!", "withClosedLoopController()");
     }
 
     maxWrappingAngle = Optional.of(top);
@@ -731,7 +775,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private PIDController applyContinuousWrapping(PIDController controller) {
     if (wrappingContinuous && minWrappingAngle.isPresent() && maxWrappingAngle.isPresent()) {
-      controller.enableContinuousInput(minWrappingAngle.get().in(Rotations), maxWrappingAngle.get().in(Rotations));
+      controller.enableContinuousInput(
+          minWrappingAngle.get().in(Rotations), maxWrappingAngle.get().in(Rotations));
     } else {
       controller.disableContinuousInput();
     }
@@ -752,8 +797,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       for (var pidController : pid.values()) {
         pidController.setTolerance(getClosedLoopTolerance().orElse(tolerance).in(Rotations));
       }
-      if (pid.isEmpty()) {
-        throw new SmartMotorControllerConfigurationException("No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
+      if (pid.isEmpty() && adrc.isEmpty()) {
+        throw new SmartMotorControllerConfigurationException(
+            "No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
       }
     }
     return self();
@@ -773,16 +819,20 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopTolerance(Distance tolerance) {
     if (!linearClosedLoopController) {
-      throw new SmartMotorControllerConfigurationException("Linear closed loop controller used with distance tolerance.", "Closed loop tolerance cannot be set.", "withLinearClosedLoopController(true)");
+      throw new SmartMotorControllerConfigurationException(
+          "Linear closed loop controller used with distance tolerance.",
+          "Closed loop tolerance cannot be set.", "withLinearClosedLoopController(true)");
     }
     if (tolerance != null) {
       Angle toleranceAngle = convertToMechanism(tolerance);
       closedLoopTolerance = Optional.ofNullable(toleranceAngle);
       for (var pidController : pid.values()) {
-        pidController.setTolerance(convertFromMechanism(getClosedLoopTolerance().orElse(toleranceAngle)).in(Meters));
+        pidController.setTolerance(
+            convertFromMechanism(getClosedLoopTolerance().orElse(toleranceAngle)).in(Meters));
       }
-      if (pid.isEmpty()) {
-        throw new SmartMotorControllerConfigurationException("No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
+      if (pid.isEmpty() && adrc.isEmpty()) {
+        throw new SmartMotorControllerConfigurationException(
+            "No PID controller used", "Cannot set tolerance!", "withClosedLoopController()");
       }
     }
     return self();
@@ -831,7 +881,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param telemetryConfig Config that specifies what to log.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withTelemetry(String telemetryName, SmartMotorControllerTelemetryConfig telemetryConfig) {
+  public T withTelemetry(
+      String telemetryName, SmartMotorControllerTelemetryConfig telemetryConfig) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.verbosity = Optional.of(TelemetryVerbosity.HIGH);
     this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
@@ -870,10 +921,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withSoftLimits(Distance low, Distance high) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot set soft limits.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot set soft limits.", "withMechanismCircumference(Distance)");
     }
 
-    return withSoftLimits(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)), Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
+    return withSoftLimits(Rotations.of(low.in(Meters) / mechanismCircumference.get().in(Meters)),
+        Rotations.of(high.in(Meters) / mechanismCircumference.get().in(Meters)));
   }
 
   /**
@@ -889,16 +942,21 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withMomentOfInertia(Distance length, Mass weight) {
     if (length == null || weight == null) {
-      throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withMomentOfInertia(Inches.of(18), Pounds.of(8))");
+      throw new SmartMotorControllerConfigurationException("Length or Weight cannot be null!",
+          "MOI is necessary for standalone SmartMotorController simulation!",
+          "withMomentOfInertia(Inches.of(18), Pounds.of(8))");
     } else {
-      moi = KilogramSquareMeters.of(SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+      moi = KilogramSquareMeters.of(
+          SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
+      momentOfInertiaConfigured = true;
+      basicOptions.remove(BasicOptions.MomentOfInertia);
     }
     return self();
   }
 
   /**
-   * Set the moment of inertia of a wheel, roller or flywheel: a solid disk of the given diameter and
-   * mass spinning about its center, {@code 1/2 * mass * radius^2}.
+   * Set the moment of inertia of a wheel, roller or flywheel: a solid disk of the given diameter
+   * and mass spinning about its center, {@code 1/2 * mass * radius^2}.
    *
    * @param diameter Diameter of the wheel.
    * @param mass     Mass of the wheel, including anything that spins with it.
@@ -907,10 +965,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withWheelMomentOfInertia(Distance diameter, Mass mass) {
     if (diameter == null || mass == null) {
-      throw new SmartMotorControllerConfigurationException("Diameter or mass cannot be null!", "MOI is necessary for standalone SmartMotorController simulation!", "withWheelMomentOfInertia(Inches.of(4), Pounds.of(1))");
+      throw new SmartMotorControllerConfigurationException("Diameter or mass cannot be null!",
+          "MOI is necessary for standalone SmartMotorController simulation!",
+          "withWheelMomentOfInertia(Inches.of(4), Pounds.of(1))");
     }
     double radius = diameter.in(Meters) / 2.0;
-    moi = KilogramSquareMeters.of(0.5 * mass.in(Kilograms) * radius * radius);
+    moi = KilogramSquareMeters.of(0.5 * mass.in(Kilograms) *radius * radius);
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
   }
 
@@ -923,7 +985,24 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withMomentOfInertia(MomentOfInertia MOI) {
     moi = MOI;
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
+  }
+
+  /**
+   * Whether the mechanism's moment of inertia was explicitly configured.
+   *
+   * <p>The {@link #getMOI()} value has a placeholder default so simulation can run without a
+   * model. Physical derivations, such as the active disturbance rejection controller's input gain,
+   * must not use that placeholder: an inertia that was never configured describes no real
+   * mechanism.
+   *
+   * @return {@code true} when {@code withMomentOfInertia(...)} or
+   *         {@code withWheelMomentOfInertia(...)} was called.
+   */
+  public boolean isMomentOfInertiaConfigured() {
+    return momentOfInertiaConfigured;
   }
 
   /**
@@ -939,10 +1018,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withSoftLimits(Angle low, Angle high) {
     if (wrappingContinuous && maxWrappingAngle.isPresent()) {
-      throw new SmartMotorControllerConfigurationException("Soft limits set while configuring continuous wrapping", "Cannot set soft limits", "withContinuousWrapping(Angle,Angle) should be removed, or withWrapping(Angle,Angle) used instead");
+      throw new SmartMotorControllerConfigurationException(
+          "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
+          "withContinuousWrapping(Angle,Angle) should be removed, or withWrapping(Angle,Angle) "
+              + "used instead");
     }
     if (low != null && high != null && low.gte(high)) {
-      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit", "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
+      throw new SmartMotorControllerConfigurationException("Lower limit is higher than upper limit",
+          "Cannot configure SmartMotorController", "withSoftLimit(LOW, HIGH)");
     }
     mechanismLowerLimit = Optional.ofNullable(low);
     mechanismUpperLimit = Optional.ofNullable(high);
@@ -1029,7 +1112,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withVoltageCompensation(Voltage voltageCompensation) {
-    this.voltageCompensation = voltageCompensation == null ? Optional.empty() : Optional.of(voltageCompensation);
+    this.voltageCompensation =
+        voltageCompensation == null ? Optional.empty() : Optional.of(voltageCompensation);
     return self();
   }
 
@@ -1072,7 +1156,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withStatorCurrentLimit(Current stallCurrent) {
-    this.statorStallCurrentLimit = stallCurrent == null ? OptionalInt.empty() : OptionalInt.of((int) stallCurrent.in(Amps));
+    this.statorStallCurrentLimit =
+        stallCurrent == null ? OptionalInt.empty() : OptionalInt.of((int) stallCurrent.in(Amps));
     return self();
   }
 
@@ -1093,7 +1178,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withSupplyCurrentLimit(Current supplyCurrent) {
-    this.supplyStallCurrentLimit = supplyCurrent == null ? OptionalInt.empty() : OptionalInt.of((int) supplyCurrent.in(Amps));
+    this.supplyStallCurrentLimit =
+        supplyCurrent == null ? OptionalInt.empty() : OptionalInt.of((int) supplyCurrent.in(Amps));
     return self();
   }
 
@@ -1109,7 +1195,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
 
   /**
    * Set the closed loop ramp rate. The ramp rate is the minimum time it should take to go from 0
-   * power to full power in the motor controller while using PID.
+   * power to full power in the motor controller while using PID. A closed loop the SystemCore runs,
+   * such as an LQR or an ADRC, sends the motor controller a voltage, which it treats as open loop, so
+   * YAMS ramps that loop's output itself, by 12 V per ramp rate.
    *
    * @param rate time to go from 0 to full throttle.
    * @return {@link SmartMotorControllerConfig} for chaining.
@@ -1137,11 +1225,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * <p>Supported external encoders:
    * <ul>
-   *   <li>SPARK MAX and SPARK Flex: the SPARK's absolute encoder, the SPARK MAX's alternate encoder or
-   *       the SPARK Flex's external encoder (quadrature, whose counts per revolution come from the
-   *       vendor config), or an encoder the SPARK reads over CAN (a REVLib {@code DetachedEncoder}).
-   *   <li>TalonFX and TalonFXS: a CANcoder, or a CANdi whose PWM input is selected by the feedback
-   *       sensor source of the vendor config.
+   *   <li>SPARK MAX and SPARK Flex: the SPARK's absolute encoder, the SPARK MAX's alternate encoder
+   * or the SPARK Flex's external encoder (quadrature, whose counts per revolution come from the
+   *       vendor config), or an encoder the SPARK reads over CAN (a REVLib {@code
+   * DetachedEncoder}). <li>TalonFX and TalonFXS: a CANcoder, or a CANdi whose PWM input is selected
+   * by the feedback sensor source of the vendor config.
    * </ul>
    *
    * @param externalEncoder External encoder attached to the {@link SmartMotorController}
@@ -1330,6 +1418,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<ArmFeedforward> getArmFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.ArmFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_armFeedforward.containsKey(slot)) {
       return Optional.ofNullable(sim_armFeedforward.get(slot));
     }
@@ -1408,6 +1499,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<ElevatorFeedforward> getElevatorFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.ElevatorFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_elevatorFeedforward.containsKey(slot)) {
       return Optional.ofNullable(sim_elevatorFeedforward.get(slot));
     }
@@ -1422,7 +1516,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param elevatorFeedforward {@link ElevatorFeedforward} to set.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withSimFeedforward(ElevatorFeedforward elevatorFeedforward, ClosedLoopControllerSlot slot) {
+  public T withSimFeedforward(
+      ElevatorFeedforward elevatorFeedforward, ClosedLoopControllerSlot slot) {
     if (elevatorFeedforward == null) {
       this.sim_elevatorFeedforward.remove(slot);
     } else {
@@ -1482,6 +1577,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Optional<SimpleMotorFeedforward> getSimpleFeedforward(ClosedLoopControllerSlot slot) {
     basicOptions.remove(BasicOptions.SimpleFeedforward);
+    if (isADRCConfigured(slot)) {
+      return Optional.empty();
+    }
     if (RobotBase.isSimulation() && sim_simpleFeedforward.containsKey(slot)) {
       return Optional.of(sim_simpleFeedforward.get(slot));
     }
@@ -1512,7 +1610,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param kD   KD scalar for the PID Controller.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withSimClosedLoopController(double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
+  public T withSimClosedLoopController(
+      double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
     this.sim_pid.put(slot, applyContinuousWrapping(new PIDController(kP, kI, kD)));
     this.sim_lqr = Optional.empty();
     return self();
@@ -1564,8 +1663,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withProfile(TrapezoidProfile.Constraints profile) {
-    DriverStationBackend.reportWarning("Trapezoidal profile will be given rotations/s and rotations/s^2 " + "for rotational closed loop controllers.", true);
-    DriverStationBackend.reportWarning("Trapezoidal profile will be given meters/s and meters/s^2 for " + "linear closed loop controllers.", true);
+    DriverStationBackend.reportWarning(
+        "Trapezoidal profile will be given rotations/s and rotations/s^2 "
+            + "for rotational closed loop controllers.",
+        true);
+    DriverStationBackend.reportWarning(
+        "Trapezoidal profile will be given meters/s and meters/s^2 for "
+            + "linear closed loop controllers.",
+        true);
     this.exponentialProfile = Optional.empty();
     this.trapezoidProfile = Optional.ofNullable(profile);
     return self();
@@ -1581,7 +1686,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withTrapezoidalProfile(LinearVelocity maxVel, LinearAcceleration maxAccel) {
     linearClosedLoopController = true;
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxVel.in(MetersPerSecond), maxAccel.in(MetersPerSecondPerSecond)));
+    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
+        maxVel.in(MetersPerSecond), maxAccel.in(MetersPerSecondPerSecond)));
     return self();
   }
 
@@ -1594,7 +1700,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withTrapezoidalProfile(AngularVelocity maxVel, AngularAcceleration maxAccel) {
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxVel.in(RotationsPerSecond), maxAccel.in(RotationsPerSecondPerSecond)));
+    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
+        maxVel.in(RotationsPerSecond), maxAccel.in(RotationsPerSecondPerSecond)));
     return self();
   }
 
@@ -1605,9 +1712,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param maxJerk  Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withTrapezoidalProfile(AngularAcceleration maxAccel, Velocity<AngularAccelerationUnit> maxJerk) {
+  public T withTrapezoidalProfile(
+      AngularAcceleration maxAccel, Velocity<AngularAccelerationUnit> maxJerk) {
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(RotationsPerSecondPerSecond), maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
+    this.trapezoidProfile =
+        Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(RotationsPerSecondPerSecond),
+            maxJerk.in(RotationsPerSecondPerSecond.per(Second))));
     velocityTrapezoidalProfile = true;
     return self();
   }
@@ -1619,9 +1729,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param maxJerk  Max velocity for the profile.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withTrapezoidalProfile(LinearAcceleration maxAccel, Velocity<LinearAccelerationUnit> maxJerk) {
+  public T withTrapezoidalProfile(
+      LinearAcceleration maxAccel, Velocity<LinearAccelerationUnit> maxJerk) {
     this.exponentialProfile = Optional.empty();
-    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(maxAccel.in(MetersPerSecondPerSecond), maxJerk.in(MetersPerSecondPerSecond.per(Second))));
+    this.trapezoidProfile = Optional.of(new TrapezoidProfile.Constraints(
+        maxAccel.in(MetersPerSecondPerSecond), maxJerk.in(MetersPerSecondPerSecond.per(Second))));
     velocityTrapezoidalProfile = true;
     linearClosedLoopController = true;
     return self();
@@ -1635,8 +1747,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withProfile(ExponentialProfile.Constraints profile) {
-    DriverStationBackend.reportWarning("Exponential profile will be given rotations/s and rotations/s^2 " + "for rotational closed loop controllers.", true);
-    DriverStationBackend.reportWarning("Exponential profile will be given meters/s and meters/s^2 for " + "linear closed loop controllers.", true);
+    DriverStationBackend.reportWarning(
+        "Exponential profile will be given rotations/s and rotations/s^2 "
+            + "for rotational closed loop controllers.",
+        true);
+    DriverStationBackend.reportWarning(
+        "Exponential profile will be given meters/s and meters/s^2 for "
+            + "linear closed loop controllers.",
+        true);
     this.exponentialProfile = Optional.ofNullable(profile);
     this.trapezoidProfile = Optional.empty();
     return self();
@@ -1652,17 +1770,21 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
     this.moi = moi;
-    var sysid = Models.singleJointedArmFromPhysicalConstants(motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
+    momentOfInertiaConfigured = true;
+    basicOptions.remove(BasicOptions.MomentOfInertia);
+    var sysid = Models.singleJointedArmFromPhysicalConstants(
+        motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     // The arm model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the dynamics.
     // A(0,0) and B(0,0) are always 0, which would make kV and kA NaN/infinite.
     var A = sysid.getA(1, 1); // 1/s
     var B = sysid.getB(1, 0); // (radians/s^2)/V
-    // -A / B and 1 / B are in volts per radian per second (per second); the profile is in rotations,
-    // and a rotation is 2 pi radians.
+    // -A / B and 1 / B are in volts per radian per second (per second); the profile is in
+    // rotations, and a rotation is 2 pi radians.
     var kV = -A / B * 2 * Math.PI;
     var kA = 1.0 / B * 2 * Math.PI;
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV, kA));
+    this.exponentialProfile =
+        Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV, kA));
     return self();
   }
 
@@ -1676,7 +1798,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius) {
-    var sysid = Models.elevatorFromPhysicalConstants(motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
+    var sysid = Models.elevatorFromPhysicalConstants(
+        motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
     var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
     // The elevator model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the
     // dynamics. A(0,0) and B(0,0) are always 0, which would make kV and kA NaN/infinite.
@@ -1685,7 +1808,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
     this.trapezoidProfile = Optional.empty();
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(MetersPerSecond), kA.in(MetersPerSecondPerSecond)));
+    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(
+        maxVolts.in(Volts), kV.in(MetersPerSecond), kA.in(MetersPerSecondPerSecond)));
     this.linearClosedLoopController = true;
     return self();
   }
@@ -1698,12 +1822,15 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param maxAcceleration Maximum acceleration.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withExponentialProfile(Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
+  public T withExponentialProfile(
+      Voltage maxVolts, AngularVelocity maxVelocity, AngularAcceleration maxAcceleration) {
     var maxV = maxVolts.in(Volts);
     this.trapezoidProfile = Optional.empty();
     // kV and kA, in volts per rotation per second (per second), reach the maximum velocity and
     // acceleration at the maximum voltage.
-    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxV, maxV / maxVelocity.in(RotationsPerSecond), maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
+    this.exponentialProfile = Optional.of(ExponentialProfile.Constraints.fromCharacteristics(maxV,
+        maxV / maxVelocity.in(RotationsPerSecond),
+        maxV / maxAcceleration.in(RotationsPerSecondPerSecond)));
     return self();
   }
 
@@ -1745,6 +1872,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(LQRController controller) {
     this.pid.clear();
+    this.adrc.clear();
     this.lqr = Optional.ofNullable(controller);
     return self();
   }
@@ -1765,8 +1893,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *             Mechanism Circumference is configured), the outputs are in Volts.
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withClosedLoopController(double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
+  public T withClosedLoopController(
+      double kP, double kI, double kD, ClosedLoopControllerSlot slot) {
     this.pid.put(slot, applyContinuousWrapping(new PIDController(kP, kI, kD)));
+    this.adrc.remove(slot);
     this.lqr = Optional.empty();
     return self();
   }
@@ -1798,6 +1928,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(PIDController controller, ClosedLoopControllerSlot slot) {
     this.pid.put(slot, applyContinuousWrapping(controller));
+    this.adrc.remove(slot);
     this.lqr = Optional.empty();
     return self();
   }
@@ -1812,6 +1943,89 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withClosedLoopController(PIDController controller) {
     return withClosedLoopController(controller, ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Set an active disturbance rejection controller as the closed loop controller for the
+   * {@link SmartMotorController}, in slot 0.
+   *
+   * <p>This is the drop-in replacement for {@link #withClosedLoopController(double, double,
+   * double)}: the mechanism keeps calling {@code setVelocity(...)} and {@code setPosition(...)},
+   * and the motor controller runs the controller on its closed-loop thread.
+   *
+   * <p>The controller estimates and cancels the disturbance that feedforward models, so this clears
+   * the PID, LQR, and feedforward for the slot. Mixing them would double-count the plant gain.
+   *
+   * <p><b>The active disturbance rejection controller was written by FRC Team 8331</b>, who
+   * contributed it to YAMS.
+   *
+   * @param controller Controller configuration.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   * @see ADRCConfig
+   */
+  public T withADRCController(ADRCConfig controller) {
+    return withADRCController(controller, ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Set an active disturbance rejection controller as the closed loop controller for a slot.
+   *
+   * <p><b>The active disturbance rejection controller was written by FRC Team 8331</b>, who
+   * contributed it to YAMS.
+   *
+   * @param controller Controller configuration, or {@code null} to clear the slot.
+   * @param slot       Closed loop controller slot.
+   * @return {@link SmartMotorControllerConfig} for chaining.
+   */
+  public T withADRCController(ADRCConfig controller, ClosedLoopControllerSlot slot) {
+    if (controller == null) {
+      this.adrc.remove(slot);
+      return self();
+    }
+    this.adrc.put(slot, controller);
+    this.pid.remove(slot);
+    this.sim_pid.remove(slot);
+    this.lqr = Optional.empty();
+    this.sim_lqr = Optional.empty();
+    // ADRC's observer estimates the same disturbance feedforward models, so keeping both would
+    // double-count the plant gain. Clear every feedforward form for this slot.
+    this.simpleFeedforward.remove(slot);
+    this.sim_simpleFeedforward.remove(slot);
+    this.elevatorFeedforward.remove(slot);
+    this.sim_elevatorFeedforward.remove(slot);
+    this.armFeedforward.remove(slot);
+    this.sim_armFeedforward.remove(slot);
+    return self();
+  }
+
+  /**
+   * Get the ADRC configuration for a slot.
+   *
+   * @param slot Closed loop controller slot.
+   * @return {@link ADRCConfig} if one is configured for the slot.
+   */
+  public Optional<ADRCConfig> getADRCController(ClosedLoopControllerSlot slot) {
+    basicOptions.remove(BasicOptions.ADRC);
+    return Optional.ofNullable(adrc.get(slot));
+  }
+
+  /**
+   * Get the ADRC configuration for slot 0.
+   *
+   * @return {@link ADRCConfig} if one is configured for slot 0.
+   */
+  public Optional<ADRCConfig> getADRCController() {
+    return getADRCController(ClosedLoopControllerSlot.SLOT_0);
+  }
+
+  /**
+   * Whether an ADRC is configured for a slot.
+   *
+   * @param slot Closed loop controller slot.
+   * @return {@code true} when ADRC owns the slot.
+   */
+  private boolean isADRCConfigured(ClosedLoopControllerSlot slot) {
+    return adrc.containsKey(slot);
   }
 
   /**
@@ -1877,7 +2091,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param simpleFeedforward {@link SimpleMotorFeedforward}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withSimFeedforward(SimpleMotorFeedforward simpleFeedforward, ClosedLoopControllerSlot slot) {
+  public T withSimFeedforward(
+      SimpleMotorFeedforward simpleFeedforward, ClosedLoopControllerSlot slot) {
     if (simpleFeedforward == null) {
       this.sim_simpleFeedforward.remove(slot);
     } else {
@@ -1930,7 +2145,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @param simpleFeedforward {@link SimpleMotorFeedforward}
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
-  public T withFeedforward(SimpleMotorFeedforward simpleFeedforward, ClosedLoopControllerSlot slot) {
+  public T withFeedforward(
+      SimpleMotorFeedforward simpleFeedforward, ClosedLoopControllerSlot slot) {
     if (simpleFeedforward == null) {
       this.simpleFeedforward.remove(slot);
     } else {
@@ -2030,12 +2246,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
    *                                                    configured.
    */
-  public Velocity<AngularAccelerationUnit> convertToMechanism(Velocity<LinearAccelerationUnit> jerk) {
+  public Velocity<AngularAccelerationUnit> convertToMechanism(
+      Velocity<LinearAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert LinearVelocity to AngularVelocity.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert LinearVelocity to AngularVelocity.",
+          "withMechanismCircumference(Distance)");
     }
 
-    return RotationsPerSecondPerSecond.per(Second).of(jerk.in(MetersPerSecondPerSecond.per(Second)) / mechanismCircumference.get().in(Meters));
+    return RotationsPerSecondPerSecond.per(Second).of(
+        jerk.in(MetersPerSecondPerSecond.per(Second)) / mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2047,12 +2267,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @throws SmartMotorControllerConfigurationException if the mechanism circumference is not
    *                                                    configured.
    */
-  public Velocity<LinearAccelerationUnit> convertFromMechanism(Velocity<AngularAccelerationUnit> jerk) {
+  public Velocity<LinearAccelerationUnit> convertFromMechanism(
+      Velocity<AngularAccelerationUnit> jerk) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert LinearVelocity to AngularVelocity.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert LinearVelocity to AngularVelocity.",
+          "withMechanismCircumference(Distance)");
     }
 
-    return MetersPerSecondPerSecond.per(Second).of(jerk.in(RotationsPerSecondPerSecond.per(Second)) * mechanismCircumference.get().in(Meters));
+    return MetersPerSecondPerSecond.per(Second).of(
+        jerk.in(RotationsPerSecondPerSecond.per(Second)) * mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2066,10 +2290,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public AngularVelocity convertToMechanism(LinearVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert LinearVelocity to AngularVelocity.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert LinearVelocity to AngularVelocity.",
+          "withMechanismCircumference(Distance)");
     }
 
-    return RotationsPerSecond.of(velocity.in(MetersPerSecond) / mechanismCircumference.get().in(Meters));
+    return RotationsPerSecond.of(
+        velocity.in(MetersPerSecond) / mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2083,10 +2310,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public AngularAcceleration convertToMechanism(LinearAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert LinearAcceleration to AngularAcceleration.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert LinearAcceleration to AngularAcceleration.",
+          "withMechanismCircumference(Distance)");
     }
 
-    return RotationsPerSecondPerSecond.of(acceleration.in(MetersPerSecondPerSecond) / mechanismCircumference.get().in(Meters));
+    return RotationsPerSecondPerSecond.of(
+        acceleration.in(MetersPerSecondPerSecond) / mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2100,7 +2330,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Angle convertToMechanism(Distance distance) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert Distance to Angle.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert Distance to Angle.", "withMechanismCircumference(Distance)");
     }
     return Rotations.of(distance.in(Meters) / (mechanismCircumference.get().in(Meters)));
   }
@@ -2116,9 +2347,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public Distance convertFromMechanism(Angle rotations) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert Angle to Distance.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert Angle to Distance.", "withMechanismCircumference(Distance)");
     }
-    return Meters.of(rotations.in(Rotations) * mechanismCircumference.get().in(Meters));
+    return Meters.of(rotations.in(Rotations) *mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2132,9 +2364,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public LinearVelocity convertFromMechanism(AngularVelocity velocity) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert AngularVelocity to LinearVelocity.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert AngularVelocity to LinearVelocity.",
+          "withMechanismCircumference(Distance)");
     }
-    return MetersPerSecond.of(velocity.in(RotationsPerSecond) * mechanismCircumference.get().in(Meters));
+    return MetersPerSecond.of(
+        velocity.in(RotationsPerSecond) *mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2148,9 +2383,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public LinearAcceleration convertFromMechanism(AngularAcceleration acceleration) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert AngularAcceleration to LinearAcceleration.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert AngularAcceleration to LinearAcceleration.",
+          "withMechanismCircumference(Distance)");
     }
-    return MetersPerSecondPerSecond.of(acceleration.in(RotationsPerSecondPerSecond) * mechanismCircumference.get().in(Meters));
+    return MetersPerSecondPerSecond.of(
+        acceleration.in(RotationsPerSecondPerSecond) *mechanismCircumference.get().in(Meters));
   }
 
   /**
@@ -2198,11 +2436,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private double forceToRotorTorque(Force feedforwardForce) {
     if (mechanismCircumference.isEmpty()) {
-      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined", "Cannot convert feedforward Force to Voltage/Current.", "withMechanismCircumference(Distance)");
+      throw new SmartMotorControllerConfigurationException("Mechanism circumference is undefined",
+          "Cannot convert feedforward Force to Voltage/Current.",
+          "withMechanismCircumference(Distance)");
     }
     double gearRatio = gearing.getMechanismToRotorRatio();
     double radiusMeters = mechanismCircumference.get().in(Meters) / (2 * Math.PI);
-    return feedforwardForce.in(Newtons) * radiusMeters / gearRatio;
+    return feedforwardForce.in(Newtons) *radiusMeters / gearRatio;
   }
 
   /**
@@ -2320,7 +2560,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withExternalEncoderGearing(MechanismGearing externalEncoderGearing) {
     if (externalEncoderGearing.getMechanismToRotorRatio() > 1) {
       DriverStationBackend.reportWarning(
-          "[IMPORTANT] Your gearing is set in a way that the external " + "encoder will exceed the maximum reading, " + "this WILL result in multiple angle's being read as the same 'angle.\n\t" + "Ignore this warning IF your mechanism will never travel outside of the slice you " + "are reading, adjust the offset accordingly.\n\t" + "You have been warned! (^.^) - Rivet",
+          "[IMPORTANT] Your gearing is set in a way that the external "
+              + "encoder will exceed the maximum reading, "
+              + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
+              + "Ignore this warning IF your mechanism will never travel outside of the slice you "
+              + "are reading, adjust the offset accordingly.\n\t"
+              + "You have been warned! (^.^) - Rivet",
           true);
     }
     this.externalEncoderGearing = Optional.of(externalEncoderGearing);
@@ -2337,7 +2582,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withExternalEncoderGearing(double reductionRatio) {
     if (reductionRatio > 1) {
       DriverStationBackend.reportWarning(
-          "[IMPORTANT] Your gearing is set in a way that the external " + "encoder will exceed the maximum reading, " + "this WILL result in multiple angle's being read as the same 'angle.\n\t" + "Ignore this warning IF your mechanism will never travel outside of the slice you " + "are reading, adjust the offset accordingly.\n\t" + "You have been warned! (^.^) - Rivet",
+          "[IMPORTANT] Your gearing is set in a way that the external "
+              + "encoder will exceed the maximum reading, "
+              + "this WILL result in multiple angle's being read as the same 'angle.\n\t"
+              + "Ignore this warning IF your mechanism will never travel outside of the slice you "
+              + "are reading, adjust the offset accordingly.\n\t"
+              + "You have been warned! (^.^) - Rivet",
           true);
     }
     this.externalEncoderGearing = Optional.of(new MechanismGearing(reductionRatio));
@@ -2353,9 +2603,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *                                                    (minimum is not maximum minus 1 rotation).
    */
   public Optional<Angle> getWrappingMax() {
-    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent() && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxWrappingAngle.get().in(Rotations) - 1).in(
-          Rotations) + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
+    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent()
+        && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) -1))) {
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
+          "Cannot get the wrapping.",
+          "withContinuousWrapping(Rotations.of("
+              + Rotations.of(maxWrappingAngle.get().in(Rotations) -1).in(Rotations)
+              + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     basicOptions.remove(BasicOptions.ContinuousWrapping);
     return maxWrappingAngle;
@@ -2370,9 +2624,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *                                                    (minimum is not maximum minus 1 rotation).
    */
   public Optional<Angle> getWrappingMin() {
-    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent() && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) - 1))) {
-      throw new SmartMotorControllerConfigurationException("Bounds are not correct!", "Cannot get the wrapping.", "withContinuousWrapping(Rotations.of(" + Rotations.of(maxWrappingAngle.get().in(Rotations) - 1).in(
-          Rotations) + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
+    if (maxWrappingAngle.isPresent() && minWrappingAngle.isPresent()
+        && !minWrappingAngle.get().equals(Rotations.of(maxWrappingAngle.get().in(Rotations) -1))) {
+      throw new SmartMotorControllerConfigurationException("Bounds are not correct!",
+          "Cannot get the wrapping.",
+          "withContinuousWrapping(Rotations.of("
+              + Rotations.of(maxWrappingAngle.get().in(Rotations) -1).in(Rotations)
+              + "),Rotations.of(" + maxWrappingAngle.get().in(Rotations) + ")) instead ");
     }
     return minWrappingAngle;
   }
@@ -2388,7 +2646,10 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public boolean isWrappingContinuous() {
     if (wrappingContinuous && maxWrappingAngle.isPresent()
         && (mechanismUpperLimit.isPresent() || mechanismLowerLimit.isPresent())) {
-      throw new SmartMotorControllerConfigurationException("Soft limits set with continuous wrapping", "Cannot use continuous wrapping", "withSoftLimits(Angle,Angle) should be removed, or withWrapping(Angle,Angle) used instead");
+      throw new SmartMotorControllerConfigurationException(
+          "Soft limits set with continuous wrapping", "Cannot use continuous wrapping",
+          "withSoftLimits(Angle,Angle) should be removed, or withWrapping(Angle,Angle) used "
+              + "instead");
     }
     return wrappingContinuous;
   }
@@ -2410,9 +2671,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     if (!wrappingContinuous || getWrappingMax().isEmpty() || getWrappingMin().isEmpty()) {
       return setpoint;
     }
-    final double halfRange = (maxWrappingAngle.get().in(Rotations) - minWrappingAngle.get().in(Rotations)) / 2;
+    final double halfRange =
+        (maxWrappingAngle.get().in(Rotations) -minWrappingAngle.get().in(Rotations)) / 2;
     final double currentRotations = current.in(Rotations);
-    return Rotations.of(currentRotations + MathUtil.inputModulus(setpoint.in(Rotations) - currentRotations, -halfRange, halfRange));
+    return Rotations.of(currentRotations
+        + MathUtil.inputModulus(setpoint.in(Rotations) -currentRotations, -halfRange, halfRange));
   }
 
   /**
@@ -2473,6 +2736,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public void resetValidationCheck() {
     basicOptions = EnumSet.allOf(BasicOptions.class);
+    // Inertia is optional: it only feeds the simulation and the ADRC's b0 derivation, which reads
+    // it through getMOI() after this reset. No wrapper has to fetch it to apply the config.
+    basicOptions.remove(BasicOptions.MomentOfInertia);
     externalEncoderOptions = EnumSet.allOf(ExternalEncoderOptions.class);
   }
 
@@ -2490,7 +2756,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       for (BasicOptions option : basicOptions) {
         System.err.println("Missing required option: " + option);
       }
-      throw new SmartMotorControllerConfigurationException("Basic options are not applied", "Cannot validate basic options.", "get");
+      throw new SmartMotorControllerConfigurationException(
+          "Basic options are not applied", "Cannot validate basic options.", "get");
     }
   }
 
@@ -2507,7 +2774,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
       for (ExternalEncoderOptions option : externalEncoderOptions) {
         System.err.println("Missing required option: " + option);
       }
-      throw new SmartMotorControllerConfigurationException("External encoder options are not applied", "Cannot validate external encoder options.", "get");
+      throw new SmartMotorControllerConfigurationException(
+          "External encoder options are not applied", "Cannot validate external encoder options.",
+          "get");
     }
   }
 
@@ -2537,8 +2806,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   /**
    * Setup live tuning for the {@link SmartMotorController}
    */
-  public void setupLiveTuning()
-  {
+  public void setupLiveTuning() {
     // Intentionally empty
   }
 
@@ -2573,7 +2841,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     UpperLimit,
     /** Closed loop controller lower limit. */
     LowerLimit,
-    //    MomentOfInertia,
+    /** Mechanism moment of inertia. */
+    MomentOfInertia,
     /** Motor zero power mode. */
     ZeroPower,
     /** Voltage compensation. */
@@ -2605,12 +2874,13 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     ElevatorFeedforward,
     /** PID controller. */
     PID,
+    /** ADRC controller. */
+    ADRC,
     /** Trapezoidal profile. */
     TrapezoidalProfile,
     /** Exponentially profiled closed loop controller. */
     ExponentialProfile,
   }
-
 
   /** External encoder options */
   private enum ExternalEncoderOptions {
@@ -2623,7 +2893,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     /** External encoder inversion. */
     ExternalEncoderInverted
   }
-
 
   /** All possible options that must be checked and applied during motor config application. */
   public enum SmartMotorControllerOptions {

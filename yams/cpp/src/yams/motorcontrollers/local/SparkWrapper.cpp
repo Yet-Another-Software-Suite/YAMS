@@ -496,6 +496,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -516,7 +518,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_positionControlType = SparkLowLevel::ControlType::kMAXMotionPositionControl;
     m_velocityControlType = SparkLowLevel::ControlType::kMAXMotionVelocityControl;
     if (wpi::RobotBase::IsSimulation() && !config.GetVelocityTrapezoidalProfileInUse() &&
-        !hasExpo && !m_lqr) {
+        !hasExpo && !UsesSystemCoreController()) {
       // REVLib's MAXMotion simulation does not follow the profile (REVLib 2027.0.0-alpha-7). In
       // simulation, SimIterate() runs the profile and the SPARK holds each point of it with
       // position control instead.
@@ -526,7 +528,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 
   // SPARKs have no exponential profile or LQR: the RoboRIO runs the closed loop and sends
   // voltages to the SPARK.
-  if (hasExpo || m_lqr) {
+  if (hasExpo || UsesSystemCoreController()) {
     if (!m_rioControllerAlert) {
       m_rioControllerAlert.emplace("YAMS", AlertId("ClosedLoop"),
                                    GetName() + " closed loop controller is running on the SystemCore.",
@@ -621,24 +623,24 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
   LoadLooselyCoupledFollowers();
 
-  if (config.GetClosedLoopControlPeriod() && !hasExpo && !m_lqr)
+  if (config.GetClosedLoopControlPeriod() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Closed loop control period is unsupported without Exponential Profiles",
         "Closed loop control period does not take affect", "WithClosedLoopControlPeriod");
-  if (config.GetClosedLoopControllerMaximumVoltage() && !hasExpo && !m_lqr)
+  if (config.GetClosedLoopControllerMaximumVoltage() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Closed loop controller maximum voltage is only available for Exponential Profiled "
         "closed loop controllers",
         "Closed loop controller maximum voltage could not be applied",
         "WithClosedLoopMaxVoltage");
   // The cutoff is checked by IterateClosedLoopController(), which only runs with an exponential
-  // profile or an LQR controller: a trapezoidal profile runs on the SPARK and never reaches it.
-  if (config.GetTemperatureCutoff() && !hasExpo && !m_lqr)
+  // profile or a SystemCore controller: a trapezoidal profile runs on the SPARK and never reaches it.
+  if (config.GetTemperatureCutoff() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Temperature cutoff is only available for exponentially profiled or LQR closed loop "
         "controllers",
         "Temperature cutoff could not be applied", "WithTemperatureCutoff");
-  if (config.GetFeedbackSynchronizationThreshold() && !hasExpo && !m_lqr)
+  if (config.GetFeedbackSynchronizationThreshold() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Feedback synchronization threshold is only available for exponentially profiled closed "
         "loop controllers",
@@ -919,7 +921,7 @@ void SparkWrapper::SimIterate() {
 }
 
 void SparkWrapper::IterateSimulatedMaxMotionPosition() {
-  if (!SimulatingMaxMotion() || HasExponentialProfile() || m_lqr || !m_setpointPosition) {
+  if (!SimulatingMaxMotion() || HasExponentialProfile() || UsesSystemCoreController() || !m_setpointPosition) {
     m_simMaxMotionState.reset();
     return;
   }
@@ -978,7 +980,7 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
 void SparkWrapper::IterateSimulatedArmGravity() {
   // Only for a plain position setpoint; the simulated MAXMotion profile adds the gravity itself.
   if (!m_config->GetArmFeedforward(m_slot) || !m_setpointPosition || SimulatingMaxMotion() ||
-      HasExponentialProfile() || m_lqr) {
+      HasExponentialProfile() || UsesSystemCoreController()) {
     return;
   }
   const auto ff = GetSlotFeedforward(*m_config, m_slot);
@@ -1086,7 +1088,7 @@ void SparkWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointFeedforwardForce.reset();
   m_setpointPosition = angle;
   // While simulating MAXMotion, SimIterate() follows the profile to this setpoint instead.
-  if (!HasExponentialProfile() && !m_lqr && !SimulatingMaxMotion()) {
+  if (!HasExponentialProfile() && !UsesSystemCoreController() && !SimulatingMaxMotion()) {
     UseVelocityGains(false);
     // The SPARK wraps the setpoint over the continuous wrapping range itself.
     ConfigureSpark([&] {
@@ -1105,7 +1107,7 @@ void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
-  if (!m_lqr) {
+  if (!UsesSystemCoreController()) {
     UseVelocityGains(true);
     ConfigureSpark([&] {
       return m_sparkPid->SetSetpoint(velocity.value() * m_mechanismToFeedbackSensorRatio * 60.0,
@@ -1117,7 +1119,7 @@ void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
 
 void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
                                wpi::units::newton_t feedforwardForce) {
-  if (m_lqr) {
+  if (UsesSystemCoreController()) {
     // The RoboRIO loop adds the force's voltage.
     SetVelocity(velocity);
     m_setpointFeedforwardForce = feedforwardForce;
