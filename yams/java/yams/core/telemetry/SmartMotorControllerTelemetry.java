@@ -176,7 +176,7 @@ public class SmartMotorControllerTelemetry {
         case ADRCObserverBandwidth -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getObserverBandwidth()));
         case ADRCSystemOrder -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSystemOrder()));
         case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
-        case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime()));
+        case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime().in(Seconds)));
         case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
         case ADRCOutput -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getLastOutput()));
       }
@@ -320,7 +320,7 @@ public class SmartMotorControllerTelemetry {
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
           case ADRCB0 -> retuneADRC(smartMotorController, adrc -> adrc.setB0(dt.get()));
-          case ADRCSettlingTime -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(dt.get(), adrc.getBandwidthScale()));
+          case ADRCSettlingTime -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(Seconds.of(dt.get()), adrc.getBandwidthScale()));
           case ADRCBandwidthScale -> retuneADRC(smartMotorController, adrc -> adrc.updateTuning(adrc.getSettlingTime(), dt.get()));
           case kS -> smartMotorController.setKs(dt.get());
           case kV -> smartMotorController.setKv(dt.get());

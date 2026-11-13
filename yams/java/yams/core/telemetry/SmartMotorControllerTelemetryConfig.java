@@ -9,6 +9,7 @@ import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
@@ -371,7 +372,7 @@ public class SmartMotorControllerTelemetryConfig {
       // Seed the tuning topics with the controller's values, so the dashboard shows what is
       // running instead of the enum defaults.
       doubleFields.get(DoubleTelemetryField.ADRCB0).setDefaultValue(e.getB0());
-      doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).setDefaultValue(e.getSettlingTime());
+      doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).setDefaultValue(e.getSettlingTime().in(Seconds));
       doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).setDefaultValue(e.getBandwidthScale());
     });
     config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {

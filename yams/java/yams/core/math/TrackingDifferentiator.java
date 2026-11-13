@@ -17,7 +17,7 @@ import java.util.Arrays;
  * instantaneous change.
  *
  * <p>Mechanisms rarely construct this class directly; they configure one through
- * {@link yams.core.motorcontrollers.config.ADRCConfig#withTrackingDifferentiator(Method, double...)}
+ * {@link ADRCConfig#withTrackingDifferentiator(Method, double...)}
  * and the controller applies it to every setpoint.
  *
  * <h2>The methods</h2>
@@ -107,35 +107,41 @@ public class TrackingDifferentiator {
     TOD,
     /** Linear differentiator; parameter {@code lambda} greater than 0, default 1.0. */
     LD,
-    /** Nonlinear reduced differentiator; parameters {@code lambda1}, {@code lambda2}, default 1.0 each. */
+    /**
+       Nonlinear reduced differentiator; parameters {@code lambda1}, {@code lambda2}, default 1.0
+       each.
+     */
     RED,
-    /** Integral differentiator; parameters {@code alpha}, {@code beta}, {@code gamma}, {@code r}, defaults 0.5, 1.0, 1.0, 1.0. */
+    /**
+       Integral differentiator; parameters {@code alpha}, {@code beta}, {@code gamma}, {@code r},
+       defaults 0.5, 1.0, 1.0, 1.0.
+     */
     INTD
   }
 
   /** Differentiation method. */
   private final Method method;
   /** Sample time in seconds. */
-  private double       dt;
+  private double dt;
   /** Method parameters. */
-  private double[]     params;
+  private double[] params;
 
   /** Previous filtered value, used by the Euler method. */
-  private double       prevY;
+  private double prevY;
   /** Previous filtered derivative, used by the Euler method. */
-  private double       prevYd;
+  private double prevYd;
 
   /** First state of the continuous methods. */
-  private double       v1;
+  private double v1;
   /** Second state of the continuous methods. */
-  private double       v2;
+  private double v2;
 
   /** Filtered reference. */
-  private double       y   = 0.0;
+  private double y = 0.0;
   /** Filtered reference derivative. */
-  private double       yd  = 0.0;
+  private double yd = 0.0;
   /** Filtered reference second derivative. */
-  private double       ydd = 0.0;
+  private double ydd = 0.0;
 
   /**
    * Create a tracking differentiator.
@@ -235,7 +241,8 @@ public class TrackingDifferentiator {
       case RED: {
         double lambda1 = param(0, 1.0);
         double lambda2 = param(1, 1.0);
-        if (!Double.isFinite(lambda1) || !Double.isFinite(lambda2) || lambda1 <= 0.0 || lambda2 <= 0.0) {
+        if (!Double.isFinite(lambda1) || !Double.isFinite(lambda2) || lambda1 <= 0.0
+            || lambda2 <= 0.0) {
           throw new IllegalArgumentException("lambda1 and lambda2 must be positive for RED");
         }
         break;
@@ -248,7 +255,8 @@ public class TrackingDifferentiator {
         if (!Double.isFinite(alpha) || alpha < 0.0 || alpha >= 1.0) {
           throw new IllegalArgumentException("alpha must be in [0, 1) for INTD");
         }
-        if (!Double.isFinite(beta) || !Double.isFinite(gamma) || !Double.isFinite(r) || beta <= 0.0 || gamma <= 0.0 || r <= 0.0) {
+        if (!Double.isFinite(beta) || !Double.isFinite(gamma) || !Double.isFinite(r) || beta <= 0.0
+            || gamma <= 0.0 || r <= 0.0) {
           throw new IllegalArgumentException("beta, gamma, r must be positive for INTD");
         }
         break;

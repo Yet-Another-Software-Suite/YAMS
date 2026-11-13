@@ -19,9 +19,9 @@ SmartMotorControllerConfig config = new SmartMotorControllerConfig(this)
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
     .withMomentOfInertia(Inches.of(18), Pounds.of(8)) // b0 is derived from this
     .withADRCController(new ADRCConfig("Arm")
-        .withSystemOrder(2)       // a position loop
-        .withSettlingTime(0.6)    // seconds
-        .withMaxVoltage(12));
+        .withSystemOrder(SystemOrder.SECOND)  // a position loop
+        .withSettlingTime(Seconds.of(0.6))
+        .withMaxVoltage(Volts.of(12)));
 ```
 
 `withADRCController` takes the place of `withClosedLoopController(kP, kI, kD)` and
@@ -51,13 +51,15 @@ motor controller runs the ADRC.
 
 ### System order
 
-The order of the plant from the voltage to what you control.
+The order of the plant from the voltage to what you control, set with an
+`ADRCConfig.SystemOrder`: `FIRST` to `FOURTH`, with `FLYWHEEL` the same as `FIRST` and `ARM` and
+`ELEVATOR` the same as `SECOND`.
 
 | Mechanism | Setpoint | Order | `b0` |
 | --- | --- | --- | --- |
-| Flywheel, roller | Velocity | 1 | Derived, or acceleration per volt |
-| Arm, pivot, turret | Position | 2 | Derived, or acceleration per volt |
-| Elevator, or any mechanism whose speed is set by its back-EMF | Position | 1 | Speed per volt: `Kv / (2 pi G)` |
+| Flywheel, roller | Velocity | `FIRST` | Derived, or acceleration per volt |
+| Arm, pivot, turret | Position | `SECOND` | Derived, or acceleration per volt |
+| Elevator, or any mechanism whose speed is set by its back-EMF | Position | `FIRST` | Speed per volt: `Kv / (2 pi G)` |
 
 There is no default system order. `buildController` throws until one is set.
 
@@ -83,14 +85,15 @@ without `withB0(...)`, building the controller throws.
 
 The derived `b0` ignores back-EMF, which the observer has to estimate as part of the disturbance.
 That suits flywheels and arms. An elevator's back-EMF, not its inertia, sets how fast it moves,
-so for an elevator use order 1 on its position, with its speed per volt as `b0`:
+so for an elevator use order 1 (`SystemOrder.FIRST`, not `ELEVATOR`) on its position, with its
+speed per volt as `b0`:
 
 ```java
 DCMotor motor = DCMotor.getNEO(1);
 double gearing = 12; // motor rotations per drum rotation
 config.withADRCController(new ADRCConfig("Elevator")
-    .withSystemOrder(1)
-    .withSettlingTime(0.5)
+    .withSystemOrder(SystemOrder.FIRST)
+    .withSettlingTime(Seconds.of(0.5))
     .withB0(motor.Kv / (2 * Math.PI * gearing))); // drum rotations per second per volt
 ```
 
@@ -118,7 +121,7 @@ The bandwidth scale multiplies both bandwidths without changing the settling tim
 The output is clamped to `withMaxVoltage(max)` (from `-max` to `max`) or
 `withVoltageLimits(min, max)`. Without either, the motor config's
 `withClosedLoopControllerMaximumVoltage(...)` is used, and without that the motor's nominal
-voltage, with a warning.
+voltage, with an alert.
 
 ## Examples
 
@@ -128,22 +131,34 @@ controller.
 ```java
 // Flywheel: order 1 on velocity, b0 derived from the wheel's inertia.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.01))
-      .withADRCController(new ADRCConfig("Shooter").withSystemOrder(1).withSettlingTime(0.15).withMaxVoltage(12));
+      .withADRCController(new ADRCConfig("Shooter")
+          .withSystemOrder(SystemOrder.FIRST)
+          .withSettlingTime(Seconds.of(0.15))
+          .withMaxVoltage(Volts.of(12)));
 flyWheel.setMechanismVelocitySetpoint(RPM.of(3000));
 
 // Arm under gravity, with no kG: order 2 on position.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
-      .withADRCController(new ADRCConfig("Arm").withSystemOrder(2).withSettlingTime(0.6).withMaxVoltage(12));
+      .withADRCController(new ADRCConfig("Arm")
+          .withSystemOrder(SystemOrder.SECOND)
+          .withSettlingTime(Seconds.of(0.6))
+          .withMaxVoltage(Volts.of(12)));
 arm.setMechanismPositionSetpoint(Degrees.of(45));
 
 // Pivot or turret: order 2 on position.
 config.withMomentOfInertia(KilogramSquareMeters.of(0.1))
-      .withADRCController(new ADRCConfig("Turret").withSystemOrder(2).withSettlingTime(0.6).withMaxVoltage(12));
+      .withADRCController(new ADRCConfig("Turret")
+          .withSystemOrder(SystemOrder.SECOND)
+          .withSettlingTime(Seconds.of(0.6))
+          .withMaxVoltage(Volts.of(12)));
 
 // Elevator under gravity, with no kG: order 1 on position, b0 is its speed per volt.
 config.withMechanismCircumference(Meters.of(2 * Math.PI * 0.02))
-      .withADRCController(new ADRCConfig("Elevator").withSystemOrder(1).withSettlingTime(0.5)
-          .withB0(motor.Kv / (2 * Math.PI * gearing)).withMaxVoltage(12));
+      .withADRCController(new ADRCConfig("Elevator")
+          .withSystemOrder(SystemOrder.FIRST)
+          .withSettlingTime(Seconds.of(0.5))
+          .withB0(motor.Kv / (2 * Math.PI * gearing))
+          .withMaxVoltage(Volts.of(12)));
 elevator.setMeasurementPositionSetpoint(Meters.of(0.5));
 ```
 
@@ -191,38 +206,48 @@ LQR, and the Talons accept `withClosedLoopTolerance(...)`.
 
 ### `ADRCConfig`
 
-`yams.core.motorcontrollers.config.ADRCConfig`. The settings for one motor controller's ADRC.
-Every `with` method returns the config for chaining.
+`yams.core.math.ADRCConfig`. The settings for one motor controller's ADRC. Every `with` method
+returns the config for chaining.
+
+Every setting starts empty. The getters return that `Optional` as it is, and `buildController`
+fills each empty one with its default. The `with` methods store what they are given without
+checking it: a value the controller cannot use, such as a settling time that is not positive or a
+minimum voltage above the maximum, makes `ADRCController.initialize` throw
+`IllegalArgumentException` when the motor controller builds the controller.
 
 | Method | What it does |
 | --- | --- |
-| `new ADRCConfig(name)` | A config named `name` (letters, digits, `_` and `-`). |
-| `withSystemOrder(int)` | Plant order, 1 to 4. Required. |
-| `withSettlingTime(double)` | Settling time, seconds. Default 0.2. |
+| `new ADRCConfig(name)` | A config named `name`, used in its errors and alerts. |
+| `withSystemOrder(SystemOrder)` | Plant order. Required. |
+| `withSettlingTime(Time)` | Settling time. Default 0.2 s. |
 | `withBandwidthScale(double)` | Bandwidth scale. Default 1. |
 | `withB0(double)` | Input gain. Default: derived, see above. |
-| `withMaxVoltage(double)` | Output limits of `-max` to `max`, volts. |
-| `withVoltageLimits(double min, double max)` | Asymmetric output limits, volts. |
-| `withSlewRateLimit(double)` | Largest change in output per second, volts per second. 0, the default, turns it off. |
-| `withInputDelay(double)` | Delay between the output and the plant responding, seconds, rounded to whole loops. 0, the default, turns it off. |
+| `withMaxVoltage(Voltage)` | Output limits of `-max` to `max`. |
+| `withVoltageLimits(Voltage min, Voltage max)` | Asymmetric output limits. |
+| `withSlewRateLimit(Velocity<VoltageUnit>)` | Largest change in output per second, such as `Volts.per(Second).of(24)`. 0, the default, turns it off. |
+| `withInputDelay(Time)` | Delay between the output and the plant responding, rounded to whole loops. 0, the default, turns it off. |
 | `withCascaded(boolean)` | Use the cascaded observer: a second ESO, fed the first one's estimate of the measurement, supplies the disturbance the control law cancels. Default off. |
-| `withTrackingDifferentiator(String method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. `"none"`, the default, turns it off. |
+| `withTrackingDifferentiator(TrackingDifferentiator.Method, double... params)` | Smooth the setpoint with a tracking differentiator, see below. Leave out `params` for the method's defaults. Off by default. |
+| `withoutTrackingDifferentiator()` | Turn the tracking differentiator off. |
 | `getName()` | The config's name. |
-| `getSystemOrder()` | `OptionalInt`, empty until set. |
-| `getSettlingTime()`, `getBandwidthScale()`, `getSlewRateLimit()`, `getInputDelay()` | The value in use, or its default. |
-| `getB0()`, `getMinVoltage()`, `getMaxVoltage()` | `OptionalDouble`, empty when it was not set. |
-| `isCascaded()`, `getTdMethod()`, `getTdParams()` | The cascaded and tracking differentiator settings. |
+| `getSystemOrder()` | `Optional<SystemOrder>`. |
+| `getSettlingTime()`, `getInputDelay()` | `Optional<Time>`. |
+| `getBandwidthScale()`, `getB0()` | `OptionalDouble`. |
+| `getMinVoltage()`, `getMaxVoltage()` | `Optional<Voltage>`. |
+| `getSlewRateLimit()` | `Optional<Velocity<VoltageUnit>>`. |
+| `getTdMethod()` | `Optional<TrackingDifferentiator.Method>`. |
+| `getTdParams()` | A copy of the tracking differentiator parameters; empty for the defaults. |
+| `isCascaded()` | Whether the cascaded observer is on. |
 | `resolveB0(DCMotor, SmartMotorControllerConfig)` | The `b0` the controller will use: the one set, or the derived one. Throws if it cannot be derived. |
-| `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController`. The motor controller calls this; you only need it to use the controller yourself. |
+| `buildController(DCMotor, SmartMotorControllerConfig, Time period)` | Build an initialized `ADRCController`, filling in the defaults. The motor controller calls this; you only need it to use the controller yourself. |
 | `clone()` | A copy. `SmartMotorControllerConfig.clone()` copies each slot's ADRC config. |
 
-Validation: each `with` method throws `IllegalArgumentException` for a value it cannot use, such
-as a settling time that is not positive, or a minimum voltage at or above the maximum.
 `buildController` throws `SmartMotorControllerConfigurationException` when the order is missing
-or `b0` cannot be derived.
+or `b0` cannot be derived. When neither the ADRC config nor the motor config limits the output, it
+uses the motor's nominal voltage and raises a YAMS alert saying so.
 
-`ADRCConfig.DEFAULT_SETTLING_TIME`, `DEFAULT_BANDWIDTH_SCALE`, `DEFAULT_SLEW_RATE_LIMIT`,
-`DEFAULT_INPUT_DELAY` and `DEFAULT_TD_METHOD` hold the defaults.
+`ADRCConfig.DEFAULT_SETTLING_TIME`, `DEFAULT_BANDWIDTH_SCALE`, `DEFAULT_SLEW_RATE_LIMIT` and
+`DEFAULT_INPUT_DELAY` hold the defaults.
 
 ### `SmartMotorController`
 
@@ -240,18 +265,18 @@ but it can also be used on its own:
 ```java
 ADRCController adrc = new ADRCController(1);
 adrc.initialize(
-    0.2,            // settling time, seconds
-    1.0,            // bandwidth scale
-    b0,             // input gain
-    -12.0, 12.0,    // output limits
-    0.02,           // control period, seconds
-    null,           // initial observer state (null: zero)
-    0.0,            // initial output
-    1.0,            // input gain scale: b0 is divided by it
-    0.0,            // slew rate limit (0: off)
-    0.0,            // input delay, seconds (0: off)
-    "none", null,   // tracking differentiator and its parameters
-    false);         // cascaded observer
+    Seconds.of(0.2),                  // settling time
+    1.0,                              // bandwidth scale
+    b0,                               // input gain
+    -12.0, 12.0,                      // output limits
+    0.02,                             // control period, seconds
+    Optional.empty(),                 // initial observer state (empty: zero)
+    0.0,                              // initial output
+    1.0,                              // input gain scale: b0 is divided by it
+    0.0,                              // slew rate limit, per second, over each period (0: off)
+    0.0,                              // input delay, seconds (0: off)
+    Optional.empty(), new double[0],  // tracking differentiator (empty: off) and its parameters
+    false);                           // cascaded observer
 
 // Every loop:
 double volts = adrc.calculate(measurement, setpoint, appliedVoltage);
@@ -266,13 +291,13 @@ double volts = adrc.calculate(measurement, setpoint, appliedVoltage);
 | `step(reference, output, refDerivatives)` | One control step with the setpoint's derivatives, for feeding a planned trajectory's velocity and acceleration. `calculate` calls this with none. |
 | `reset(measurement)` | Start the observer at a measurement, with the other states and the output at zero. |
 | `reset(double[] xhatInit, double uInit)` | Start the observer at a full state and output. |
-| `updateTuning(settlingTime, bandwidthScale)` | Retune, keeping the estimated disturbance. |
+| `updateTuning(Time settlingTime, bandwidthScale)` | Retune, keeping the estimated disturbance. |
 | `setB0(b0)` | Change the input gain, keeping the estimated disturbance. |
 | `setSaturation(min, max)` | Change the output limits. |
-| `setTd(method, params)` | Change the tracking differentiator. |
+| `setTd(Optional<Method>, params)` | Change the tracking differentiator; empty turns it off. |
 | `getEstimatedDisturbance()` | The estimated total disturbance. Divide by `b0` to see it in volts. |
 | `getEstimatedStates()` | The observer's state: the measurement, its derivatives, then the disturbance. |
-| `getB0()`, `getBandwidth()`, `getObserverBandwidth()`, `getSettlingTime()`, `getBandwidthScale()` | The tuning in use. |
+| `getB0()`, `getBandwidth()`, `getObserverBandwidth()`, `getSettlingTime()`, `getBandwidthScale()` | The tuning in use. `getSettlingTime()` returns a `Time`. |
 | `getMinOutput()`, `getMaxOutput()`, `getLastOutput()` | Output limits and the last output. |
 | `getSystemOrder()`, `getControllerOrder()` | Plant order, and the observer's order (one more). |
 | `isInitialized()` | Whether `initialize` has run. |
@@ -284,7 +309,8 @@ and second derivatives, so a step does not kick the controller. `ADRCConfig.with
 puts one in front of the ADRC; it can also be used on its own.
 
 ```java
-TrackingDifferentiator td = new TrackingDifferentiator("ld", 0.02, new double[] {0.2});
+TrackingDifferentiator td =
+    new TrackingDifferentiator(TrackingDifferentiator.Method.LD, 0.02, new double[] {0.2});
 td.update(setpoint);
 double smoothSetpoint = td.getY();
 double setpointVelocity = td.getYd();
@@ -292,21 +318,21 @@ double setpointVelocity = td.getYd();
 
 | Method | Parameters (defaults) | Behavior |
 | --- | --- | --- |
-| `euler` | `alpha` (0.9), from 0 to 1 | First order smoothing. Larger is smoother and slower. |
-| `tod` | `r` (1), positive | Time optimal: reaches the setpoint as fast as a bounded acceleration `r` allows. |
-| `ld` | `lambda` (1), more than half the sample time | Linear, critically damped, with time constant `lambda`. |
-| `red` | `lambda1`, `lambda2` (1, 1), positive | Nonlinear, fast to converge near the setpoint. |
-| `intd` | `alpha` (0.5) from 0 to below 1, `beta`, `gamma`, `r` (1, 1, 1) positive | Integral form with a smooth saturation. |
+| `EULER` | `alpha` (0.9), from 0 to 1 | First order smoothing. Larger is smoother and slower. |
+| `TOD` | `r` (1), positive | Time optimal: reaches the setpoint as fast as a bounded acceleration `r` allows. |
+| `LD` | `lambda` (1), more than half the sample time | Linear, critically damped, with time constant `lambda`. |
+| `RED` | `lambda1`, `lambda2` (1, 1), positive | Nonlinear, fast to converge near the setpoint. |
+| `INTD` | `alpha` (0.5) from 0 to below 1, `beta`, `gamma`, `r` (1, 1, 1) positive | Integral form with a smooth saturation. |
 
 | Method | What it does |
 | --- | --- |
-| `TrackingDifferentiator(method, dt, params)` | A differentiator with a sample time, seconds. `params` may be `null` for the defaults. |
+| `TrackingDifferentiator(Method, dt, params)` | A differentiator with a sample time, seconds. An empty `params` uses the defaults. |
 | `update(reference)` | Advance one sample. |
 | `getY()`, `getYd()`, `getYdd()` | The smooth setpoint and its first and second derivatives. |
 | `reset(value)` | Start at a value, at rest. |
 | `setParameters(params)` | Change the parameters; invalid ones are rejected and the old ones kept. |
 | `setSampleTime(dt)` | Change the sample time. |
-| `getMethod()` | The method's name. |
+| `getMethod()` | The `Method`. |
 
 ## Things to know
 

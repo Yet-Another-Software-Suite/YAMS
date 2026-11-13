@@ -467,26 +467,15 @@ public abstract class SmartMotorController {
     // A velocity profile starts from the measured velocity in the closed loop iteration.
     m_trapState = m_config.getVelocityTrapezoidalProfileInUse() ? Optional.empty() : getTrapezoidalProfileState();
     m_expoState = getExponentialProfileState();
+    // The ADRC's observer starts from what the loop steps it with: the velocity while only a
+    // velocity setpoint is set, the position otherwise.
+    boolean velocityLoop = setpointPosition.isEmpty() && setpointVelocity.isPresent();
     m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
+    m_adrc.ifPresent(adrc -> adrc.reset(velocityLoop ? getMechanismVelocity().in(RotationsPerSecond) : getMechanismPosition().in(Rotations)));
     if (m_config.getLinearClosedLoopControllerUse()) {
       m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
+      m_adrc.ifPresent(adrc -> adrc.reset(velocityLoop ? getMeasurementVelocity().in(MetersPerSecond) : getMeasurementPosition().in(Meters)));
     }
-    // ADRC's ESO is stepped with whichever measurement the loop commands. Seed it from the same
-    // quantity: velocity while the last command was a velocity, position otherwise.
-    m_adrc.ifPresent(adrc -> adrc.reset(getADRCResetMeasurement()));
-  }
-
-  /**
-   * Get the measurement to seed the ADRC's ESO with, in the same units the loop will step it with.
-   *
-   * @return Mechanism position, or mechanism velocity while running a velocity-only loop.
-   */
-  private double getADRCResetMeasurement() {
-    boolean linear = m_config.getLinearClosedLoopControllerUse();
-    if (setpointPosition.isEmpty() && setpointVelocity.isPresent()) {
-      return linear ? getMeasurementVelocity().in(MetersPerSecond) : getMechanismVelocity().in(RotationsPerSecond);
-    }
-    return linear ? getMeasurementPosition().in(Meters) : getMechanismPosition().in(Rotations);
   }
 
   /**

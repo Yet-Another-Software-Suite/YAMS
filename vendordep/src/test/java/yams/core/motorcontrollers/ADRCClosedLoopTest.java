@@ -11,21 +11,22 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Volts;
+import static org.wpilib.units.Units.Seconds;
 
-import java.nio.file.Path;
 import java.util.function.DoubleSupplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.wpilib.preferences.Preferences;
 import org.wpilib.simulation.ElevatorSim;
 import org.wpilib.simulation.RoboRioSim;
 import org.wpilib.simulation.SingleJointedArmSim;
+import yams.core.math.ADRCConfig;
+import yams.core.math.ADRCConfig.SystemOrder;
 import yams.core.motorcontrollers.ClosedLoopCases.Controller;
-import yams.core.motorcontrollers.config.ADRCConfig;
 import yams.core.motorcontrollers.simulation.ArmSimSupplier;
 import yams.core.motorcontrollers.simulation.ElevatorSimSupplier;
 import yams.helpers.MockHardwareExtension;
@@ -34,10 +35,11 @@ import yams.helpers.MockHardwareExtension;
  * Every motor controller closing its loop with an ADRC: a flywheel's velocity, a pivot's and an
  * arm's angle, and an elevator's height.
  *
- * <p>The ADRC runs on the SystemCore for every motor controller, from the same config. Its {@code b0}
- * is derived from the motor, the gearing and the moment of inertia, and the configs have no
+ * <p>The ADRC runs on the SystemCore for every motor controller, from the same config. Its {@code
+ * b0} is derived from the motor, the gearing and the moment of inertia, and the configs have no
  * feedforward: the ADRC's observer estimates gravity, friction and back-EMF as one disturbance and
- * cancels it. So an arm or elevator that ends at its setpoint, with no kG, shows the observer works.
+ * cancels it. So an arm or elevator that ends at its setpoint, with no kG, shows the observer
+ * works.
  */
 public class ADRCClosedLoopTest {
   /** How long each mechanism is given to settle at its setpoint. */
@@ -45,9 +47,6 @@ public class ADRCClosedLoopTest {
 
   /** How long it is then watched holding there. */
   private static final double kHoldSeconds = 0.5;
-
-  @TempDir
-  static Path deployDirectory;
 
   @BeforeEach
   void startTest() {
@@ -72,11 +71,11 @@ public class ADRCClosedLoopTest {
    * @param settlingTime Desired settling time, seconds.
    * @return The config.
    */
-  static ADRCConfig adrc(int order, double settlingTime) {
-    return new ADRCConfig("ADRCClosedLoopTest", deployDirectory)
+  static ADRCConfig adrc(SystemOrder order, double settlingSeconds) {
+    return new ADRCConfig("ADRCClosedLoopTest")
         .withSystemOrder(order)
-        .withSettlingTime(settlingTime)
-        .withMaxVoltage(12);
+        .withSettlingTime(Seconds.of(settlingSeconds))
+        .withMaxVoltage(Volts.of(12));
   }
 
   /**
@@ -117,29 +116,18 @@ public class ADRCClosedLoopTest {
    * @param setpoint   The setpoint.
    * @param tolerance  How far from the setpoint it may be while holding it.
    */
-  private static void assertSettles(
-      Controller controller,
-      SmartMotorController smc,
-      Runnable command,
-      DoubleSupplier measured,
-      double setpoint,
-      double tolerance) {
+  private static void assertSettles(Controller controller, SmartMotorController smc,
+      Runnable command, DoubleSupplier measured, double setpoint, double tolerance) {
     final double[] worst = {0};
-    ClosedLoopCases.run(
-        controller,
-        smc,
-        kSettleSeconds + kHoldSeconds,
-        command,
-        time -> {
-          if (time >= kSettleSeconds) {
-            worst[0] = Math.max(worst[0], Math.abs(measured.getAsDouble() - setpoint));
-          }
-        });
+    ClosedLoopCases.run(controller, smc, kSettleSeconds + kHoldSeconds, command, time -> {
+      if (time >= kSettleSeconds) {
+        worst[0] = Math.max(worst[0], Math.abs(measured.getAsDouble() - setpoint));
+      }
+    });
     final double end = measured.getAsDouble();
     System.out.println(controller + ": ended at " + end + " (setpoint " + setpoint + "), at most "
         + worst[0] + " from it while holding");
-    assertTrue(
-        worst[0] <= tolerance,
+    assertTrue(worst[0] <= tolerance,
         controller + ": should hold " + setpoint + " within " + tolerance + ", but was " + worst[0]
             + " from it, ending at " + end);
   }
@@ -149,25 +137,19 @@ public class ADRCClosedLoopTest {
   @MethodSource("controllers")
   void flywheelReachesItsVelocity(Controller controller) {
     // Half the motor's free speed, at the mechanism.
-    final double setpoint =
-        0.5 * controller.motor().freeSpeed / (2 * Math.PI) / controller.ratio();
-    final SmartMotorController smc =
-        ClosedLoopCases.create(
-            controller,
-            baseConfig("flywheel " + controller)
-                .withMomentOfInertia(KilogramSquareMeters.of(0.01))
-                // The observer runs at four times the closed loop bandwidth. It has to be faster than
-                // the motor's back-EMF, which it estimates as part of the disturbance: about 220 rad/s
-                // for a Kraken on this flywheel. A 0.15 s settling time puts it at 213 rad/s.
-                .withADRCController(adrc(1, 0.15)));
+    final double setpoint = 0.5 * controller.motor().freeSpeed / (2 * Math.PI) / controller.ratio();
+    final SmartMotorController smc = ClosedLoopCases.create(controller,
+        baseConfig("flywheel " + controller)
+            .withMomentOfInertia(KilogramSquareMeters.of(0.01))
+            // The observer runs at four times the closed loop bandwidth. It has to be faster than
+            // the motor's back-EMF, which it estimates as part of the disturbance: about 220 rad/s
+            // for a Kraken on this flywheel. A 0.15 s settling time puts it at 213 rad/s.
+            .withADRCController(adrc(SystemOrder.FIRST, 0.15)));
     try {
-      assertSettles(
-          controller,
-          smc,
-          () -> smc.setVelocity(RotationsPerSecond.of(setpoint)),
-          () -> smc.getMechanismVelocity().in(RotationsPerSecond),
-          setpoint,
-          0.02 * setpoint);
+      assertSettles(controller, smc,
+          ()
+              -> smc.setVelocity(RotationsPerSecond.of(setpoint)),
+          () -> smc.getMechanismVelocity().in(RotationsPerSecond), setpoint, 0.02 * setpoint);
     } finally {
       ClosedLoopCases.close(smc);
     }
@@ -178,21 +160,16 @@ public class ADRCClosedLoopTest {
   @MethodSource("controllers")
   void pivotReachesItsAngle(Controller controller) {
     final double setpoint = Degrees.of(90).in(Rotations);
-    final SmartMotorController smc =
-        ClosedLoopCases.create(
-            controller,
-            baseConfig("pivot " + controller)
-                .withMomentOfInertia(KilogramSquareMeters.of(0.1))
-                .withStartingPosition(Rotations.of(0))
-                .withADRCController(adrc(2, 0.6)));
+    final SmartMotorController smc = ClosedLoopCases.create(controller,
+        baseConfig("pivot " + controller)
+            .withMomentOfInertia(KilogramSquareMeters.of(0.1))
+            .withStartingPosition(Rotations.of(0))
+            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
-      assertSettles(
-          controller,
-          smc,
-          () -> smc.setPosition(Rotations.of(setpoint)),
-          () -> smc.getMechanismPosition().in(Rotations),
-          setpoint,
-          Degrees.of(1).in(Rotations));
+      assertSettles(controller, smc,
+          ()
+              -> smc.setPosition(Rotations.of(setpoint)),
+          () -> smc.getMechanismPosition().in(Rotations), setpoint, Degrees.of(1).in(Rotations));
     } finally {
       ClosedLoopCases.close(smc);
     }
@@ -206,33 +183,21 @@ public class ADRCClosedLoopTest {
     final double length = 0.5;
     final double start = Degrees.of(-30).in(Rotations);
     final double setpoint = Degrees.of(45).in(Rotations);
-    final SmartMotorController smc =
-        ClosedLoopCases.create(
-            controller,
-            baseConfig("arm " + controller)
-                .withMomentOfInertia(KilogramSquareMeters.of(moi))
-                .withStartingPosition(Rotations.of(start))
-                .withADRCController(adrc(2, 0.6)));
+    final SmartMotorController smc = ClosedLoopCases.create(controller,
+        baseConfig("arm " + controller)
+            .withMomentOfInertia(KilogramSquareMeters.of(moi))
+            .withStartingPosition(Rotations.of(start))
+            .withADRCController(adrc(SystemOrder.SECOND, 0.6)));
     try {
-      final SingleJointedArmSim sim =
-          new SingleJointedArmSim(
-              controller.motor(),
-              controller.ratio(),
-              moi,
-              length,
-              Degrees.of(-180).in(Radians),
-              Degrees.of(180).in(Radians),
-              true,
-              Rotations.of(start).in(Radians));
+      final SingleJointedArmSim sim = new SingleJointedArmSim(controller.motor(),
+          controller.ratio(), moi, length, Degrees.of(-180).in(Radians),
+          Degrees.of(180).in(Radians), true, Rotations.of(start).in(Radians));
       smc.setSimSupplier(new ArmSimSupplier(sim, smc));
       smc.setupSimulation();
-      assertSettles(
-          controller,
-          smc,
-          () -> smc.setPosition(Rotations.of(setpoint)),
-          () -> smc.getMechanismPosition().in(Rotations),
-          setpoint,
-          Degrees.of(1).in(Rotations));
+      assertSettles(controller, smc,
+          ()
+              -> smc.setPosition(Rotations.of(setpoint)),
+          () -> smc.getMechanismPosition().in(Rotations), setpoint, Degrees.of(1).in(Rotations));
     } finally {
       ClosedLoopCases.close(smc);
     }
@@ -242,9 +207,10 @@ public class ADRCClosedLoopTest {
    * An elevator under gravity, with no kG, closed in drum rotations.
    *
    * <p>An elevator's back-EMF, not its inertia, sets how fast it moves: it reaches the speed its
-   * voltage gives it within a few milliseconds, far quicker than a 50 Hz loop can act on. So a second
-   * order ADRC with the inertia's {@code b0} has an observer too slow for the disturbance, and a first
-   * order ADRC on its position, with the mechanism's speed per volt as {@code b0}, fits it.
+   * voltage gives it within a few milliseconds, far quicker than a 50 Hz loop can act on. So a
+   * second order ADRC with the inertia's {@code b0} has an observer too slow for the disturbance,
+   * and a first order ADRC on its position, with the mechanism's speed per volt as {@code b0}, fits
+   * it.
    */
   @ParameterizedTest(name = "{0}")
   @MethodSource("controllers")
@@ -259,22 +225,18 @@ public class ADRCClosedLoopTest {
         baseConfig("elevator " + controller)
             .withMechanismCircumference(Meters.of(2 * Math.PI * drumRadius))
             .withMomentOfInertia(KilogramSquareMeters.of(mass * drumRadius * drumRadius))
-            .withADRCController(adrc(1, 0.5).withB0(speedPerVolt(controller)));
+            .withADRCController(adrc(SystemOrder.FIRST, 0.5).withB0(speedPerVolt(controller)));
     cfg.withStartingPosition(cfg.convertToMechanism(Meters.of(start)));
     final SmartMotorController smc = ClosedLoopCases.create(controller, cfg);
     try {
-      final ElevatorSim sim =
-          new ElevatorSim(
-              controller.motor(), controller.ratio(), mass, drumRadius, 0, 2, true, start, 0.0, 0.0);
+      final ElevatorSim sim = new ElevatorSim(
+          controller.motor(), controller.ratio(), mass, drumRadius, 0, 2, true, start, 0.0, 0.0);
       smc.setSimSupplier(new ElevatorSimSupplier(sim, smc));
       smc.setupSimulation();
-      assertSettles(
-          controller,
-          smc,
-          () -> smc.setPosition(Meters.of(setpoint)),
-          () -> smc.getMeasurementPosition().in(Meters),
-          setpoint,
-          0.01);
+      assertSettles(controller, smc,
+          ()
+              -> smc.setPosition(Meters.of(setpoint)),
+          () -> smc.getMeasurementPosition().in(Meters), setpoint, 0.01);
     } finally {
       ClosedLoopCases.close(smc);
     }
