@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import org.ejml.simple.SimpleMatrix;
 import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
 
 /**
  * Active disturbance rejection controller.
@@ -34,31 +35,24 @@ import org.wpilib.units.measure.Time;
  * mechanisms whose measured output sits further integrations behind the input. The extended state
  * observer is one order higher than the plant, with its final state holding the disturbance
  * estimate. Gains are generated from a single closed-loop bandwidth {@code wc}; the observer
- * bandwidth is {@code 4 * wc}. The design settling time and bandwidth scale are supplied through
- * {@link #initialize}.
+ * bandwidth is {@code 4 * wc}.
  *
- * <p>An optional {@link TrackingDifferentiator} can smooth the reference and provide its
- * derivatives. A first-order input delay and an output slew-rate limit are also supported. Both are
- * disabled by passing {@code 0}.
+ * <p>The controller keeps only its running state: the observer's estimate, its last outputs and the
+ * tracking differentiator. Everything else it reads from its {@link ADRCConfig}, including the
+ * observer and control gains, which the config works out again whenever its settling time,
+ * bandwidth scale or {@code b0} changes. So every live-tunable value takes effect on the next step.
+ * The system order, input delay and tracking differentiator are fixed when the controller is
+ * initialized.
  *
  * <h2>Example velocity control</h2>
  * <pre>{@code
  * // A first-order velocity plant driven by volts, with b0 in (rotations per second) per volt
  * // per second.
- * ADRCController adrc = new ADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST));
- * adrc.initialize(
- *     Seconds.of(0.2),                      // desired settling time
- *     1.0,                                  // closed-loop bandwidth scale
- *     b0,                                   // approximate input gain
- *     -12.0, 12.0,                          // output saturation, volts
- *     0.02,                                 // control period, seconds
- *     Optional.empty(),                     // initial observer state (zero)
- *     0.0,                                  // initial output
- *     1.0,                                  // b0 scale
- *     0.0,                                  // slew-rate limit, output units per second
- *     0.0,                                  // input delay, seconds
- *     Optional.empty(), Optional.empty(),   // tracking differentiator (off)
- *     false);                               // cascaded observer
+ * ADRCController adrc = new ADRCController(new ADRCConfig()
+ *     .withSystemOrder(SystemOrder.FIRST)
+ *     .withSettlingTime(Seconds.of(0.2)));
+ * // b0 and the maximum output, which the config leaves unset, and the control period.
+ * adrc.initialize(b0, Volts.of(12), Milliseconds.of(20));
  *
  * // In periodic():
  * double volts = adrc.calculate(
@@ -66,81 +60,82 @@ import org.wpilib.units.measure.Time;
  *     setpoint.in(RotationsPerSecond));           // reference
  * }</pre>
  *
- * <p>The output units are whatever the actuator accepts (volts, duty cycle, ...). Keep {@code b0}
- * in the matching units: for a velocity loop {@code b0} is the steady-state velocity change per
- * unit of input per second, i.e. {@code (output units / second) / input unit}.
+ * <p>Keep {@code b0} in the units of the loop: for a velocity loop it is the velocity change per
+ * second per volt.
  */
 public class ADRCController {
   /** Observer bandwidth as a multiple of the controller bandwidth. */
   private static final double OBSERVER_BANDWIDTH_RATIO = 4.0;
 
-  /** Plant order. */
+  /**
+   * Observer and control gains worked out from a config. Never changed once made: the config
+   * replaces the whole object, so a step never uses a mix of old and new gains.
+   */
+  static final class Gains {
+    /** ESO observer gains. */
+    final SimpleMatrix ld;
+    /** Discrete ESO state matrix. */
+    final SimpleMatrix ad;
+    /** Discrete ESO input matrix. */
+    final SimpleMatrix bd;
+    /** Controller gains. */
+    final SimpleMatrix k;
+    /** Input gain the matrices were worked out with, which the control law divides by. */
+    final double b0;
+
+    /**
+     * Hold a set of gains.
+     *
+     * @param ld Observer gains.
+     * @param ad Discrete state matrix.
+     * @param bd Discrete input matrix.
+     * @param k  Controller gains.
+     * @param b0 Input gain.
+     */
+    Gains(SimpleMatrix ld, SimpleMatrix ad, SimpleMatrix bd, SimpleMatrix k, double b0) {
+      this.ld = ld;
+      this.ad = ad;
+      this.bd = bd;
+      this.k = k;
+      this.b0 = b0;
+    }
+
+    /**
+     * Copy these gains, with matrices of their own.
+     *
+     * @return The copy.
+     */
+    Gains copy() {
+      return new Gains(ld.copy(), ad.copy(), bd.copy(), k.copy(), b0);
+    }
+  }
+
+  /** Config this controller reads its settings and gains from. */
+  private final ADRCConfig config;
+  /**
+   * Plant order, which sizes the observer. The config refuses another order once a controller is
+   * built from it.
+   */
   private final int systemOrder;
   /** ESO order, one greater than the plant order. */
   private final int controllerOrder;
 
-  /** Output slew-rate limit, output units per second. */
-  private double slewRateLimit = Double.POSITIVE_INFINITY;
   /** ESO state estimate. */
   private SimpleMatrix xhat;
-  /** Second ESO state estimate used by the cascaded form. */
+  /** Second ESO state estimate, which the cascaded form takes its disturbance from. */
   private SimpleMatrix secondaryXhat;
-  /** ESO observer gains. */
-  private SimpleMatrix ld;
-  /** Discrete ESO state matrix. */
-  private SimpleMatrix ad;
-  /** Discrete ESO input matrix. */
-  private SimpleMatrix bd;
-  /** Controller gains. */
-  private SimpleMatrix k;
-  /** Continuous ESO state matrix. */
-  private SimpleMatrix phi;
-  /** Continuous ESO input matrix. */
-  private SimpleMatrix gam;
   /** Previous output. */
   private double uPrev;
-  /** Controller bandwidth. */
-  private double wc;
-  /** Observer bandwidth. */
-  private double wo;
-  /** Input gain. */
-  private double b0;
-  /** Input-gain scale the controller's {@code b0} is divided by. */
-  private double ke;
-  /** Desired closed-loop settling time. */
-  private Time tSettle;
-  /** Closed-loop bandwidth scale. */
-  private double kob;
-  /** Control period. */
-  private double dt;
-  /** Minimum output. */
-  private double uMin;
-  /** Maximum output. */
-  private double uMax;
-
-  /** Input delay in whole control steps. */
-  private int inputDelaySteps;
-  /** Output history used to compensate the input delay. */
+  /** Outputs of the last steps, newest first, for the input delay: its length is the delay plus one. */
   private double[] uHistory;
-  /** Whether a tracking differentiator is active. */
-  private boolean useTd;
-  /** Reference tracking differentiator. */
+  /** Reference tracking differentiator, or {@code null} when it is off. */
   private TrackingDifferentiator td;
   /** Whether {@link #initialize} has completed. */
   private boolean initialized;
-  /** Whether the cascaded ESO form is used. */
-  private boolean useCascaded;
-
-  /** Config this controller runs, which {@link #reset()} retunes it to. */
-  private final ADRCConfig config;
-  /** {@code b0} given to {@link #initialize}, used while the config leaves it unset. */
-  private double configB0;
-  /** Maximum output given to {@link #initialize}, used while the config leaves it unset. */
-  private double configMaxOutput;
 
   /**
    * Create an active disturbance rejection controller for a config. The plant order comes from the
-   * config, and {@link #reset()} retunes the controller to the config after it changes.
+   * config, and the controller reads every other setting from it.
    *
    * @param config Config this controller runs.
    * @throws IllegalArgumentException if the config has no system order.
@@ -151,98 +146,41 @@ public class ADRCController {
         .orElseThrow(() -> new IllegalArgumentException("The ADRC config has no system order"))
         .getOrder();
     this.controllerOrder = systemOrder + 1;
-    this.uMin = Double.NEGATIVE_INFINITY;
-    this.uMax = Double.POSITIVE_INFINITY;
   }
 
   /**
-   * Initialize the controller and compute its gains.
+   * Initialize the controller: give its config the values it cannot hold itself, which also works
+   * out its gains, and start the observer and the output at zero.
    *
-   * @param tSettle       Desired closed-loop settling time. Must be finite and positive.
-   * @param kob           Closed-loop bandwidth scale. Must be finite and positive. Larger values
-   *                      are more aggressive.
-   * @param b0            Approximate input gain. Must be finite and non-zero.
-   * @param uMin          Minimum output.
-   * @param uMax          Maximum output.
-   * @param dt            Control period, seconds. Must be finite and positive.
-   * @param xhatInit      Initial observer state, length {@code systemOrder + 1}. Empty starts at
-   *                      zero.
-   * @param uInit         Initial output.
-   * @param ke            Input-gain scale. The controller uses {@code b0 / ke}. Must be finite and
-   *                      positive.
-   * @param slewRateLimit Maximum output change per second, limited over each control period
-   *                      {@code dt}. A non-positive or NaN value disables the limit.
-   * @param inputDelay    Input delay, seconds. Must be finite and non-negative.
-   * @param tdMethod      Tracking differentiator method, or empty to disable it.
-   * @param tdParams      Tracking differentiator parameters; empty for the method defaults.
-   * @param useCascaded   Whether to run the cascaded observer form.
-   * @throws IllegalArgumentException if any argument is invalid.
+   * @param b0         Input gain used while the config leaves {@code b0} unset, such as the one
+   *                   {@link ADRCConfig#resolveB0} derives. Must be finite and non-zero when used.
+   * @param maxVoltage Maximum output used while the config leaves it unset, such as the motor
+   *                   config's closed loop voltage limit.
+   * @param period     Control period. Must be finite and positive.
+   * @throws IllegalArgumentException if a value is invalid, or the tracking differentiator cannot
+   *                                  run at this period.
    */
-  public void initialize(Time tSettle, double kob, double b0, double uMin, double uMax, double dt,
-      Optional<double[]> xhatInit, double uInit, double ke, double slewRateLimit,
-      double inputDelay, Optional<TrackingDifferentiator.Method> tdMethod, Optional<double[]> tdParams,
-      boolean useCascaded) {
+  public void initialize(double b0, Voltage maxVoltage, Time period) {
     this.initialized = false;
-    final double settleSeconds = tSettle.in(Seconds);
-    if (!Double.isFinite(settleSeconds) || settleSeconds <= 0 || !Double.isFinite(kob) || kob <= 0
-        || !Double.isFinite(dt) || dt <= 0 || !Double.isFinite(ke) || ke <= 0) {
-      throw new IllegalArgumentException("tSettle, kob, dt, and ke must be finite and positive");
+    final double seconds = period.in(Seconds);
+    if (!Double.isFinite(seconds) || seconds <= 0) {
+      throw new IllegalArgumentException("The control period must be finite and positive");
     }
-    if (xhatInit.isPresent() && xhatInit.get().length != controllerOrder) {
-      throw new IllegalArgumentException("xhatInit length must equal controller order");
+    final double delaySteps =
+        config.getInputDelay().orElse(ADRCConfig.DEFAULT_INPUT_DELAY).in(Seconds) / seconds;
+    if (delaySteps > Integer.MAX_VALUE - 1) {
+      throw new IllegalArgumentException("The input delay is too many control periods");
     }
-    if (!Double.isFinite(b0) || b0 == 0.0) {
-      throw new IllegalArgumentException("b0 must be finite and non-zero");
-    }
-    if (Double.isNaN(uMin) || Double.isNaN(uMax) || uMin > uMax) {
-      throw new IllegalArgumentException("uMin and uMax must not be NaN and uMin must be <= uMax");
-    }
-    if (!Double.isFinite(inputDelay) || inputDelay < 0.0) {
-      throw new IllegalArgumentException("inputDelay must be finite and >= 0");
-    }
-    if (!Double.isFinite(uInit)) {
-      throw new IllegalArgumentException("uInit must be finite");
-    }
-    this.b0 = b0 / ke;
-    if (!Double.isFinite(this.b0)) {
-      throw new IllegalArgumentException("b0 / ke must be finite");
-    }
-    this.ke = ke;
-    this.tSettle = tSettle;
-    this.kob = kob;
-    this.dt = dt;
-    this.uMin = uMin;
-    this.uMax = uMax;
-    this.useCascaded = useCascaded;
-    double newWc = 2.0 * (systemOrder + 1) * kob / settleSeconds;
-    double newWo = OBSERVER_BANDWIDTH_RATIO * newWc;
-    if (!Double.isFinite(newWc) || !Double.isFinite(newWo)) {
-      throw new IllegalArgumentException("tuning produced non-finite bandwidths");
-    }
-    this.wc = newWc;
-    this.wo = newWo;
+    final TrackingDifferentiator newTd = config.getTdMethod()
+        .map(method -> new TrackingDifferentiator(method, seconds, config.getTdParams()))
+        .orElse(null);
+    config.setBuiltValues(b0, maxVoltage, period);
 
-    double[] xInit = xhatInit.map(double[]::clone).orElseGet(() -> new double[controllerOrder]);
-    this.xhat = new SimpleMatrix(controllerOrder, 1, true, xInit);
-    this.secondaryXhat = new SimpleMatrix(
-        controllerOrder, 1, true, useCascaded ? xInit : new double[controllerOrder]);
-    this.uPrev = uInit;
-    this.slewRateLimit = slewRateLimit > 0.0 ? slewRateLimit : Double.POSITIVE_INFINITY;
-
-    double delaySteps = inputDelay / dt;
-    if (!Double.isFinite(delaySteps) || delaySteps > Integer.MAX_VALUE - 1) {
-      throw new IllegalArgumentException("inputDelay / dt is too large");
-    }
-    this.inputDelaySteps = (int) Math.round(delaySteps);
-    this.uHistory = new double[this.inputDelaySteps + 1];
-    Arrays.fill(this.uHistory, this.uPrev);
-
-    computeEsoGains();
-    computeControllerGains();
-
-    setTd(tdMethod, tdParams);
-    this.configB0 = b0;
-    this.configMaxOutput = uMax;
+    this.xhat = new SimpleMatrix(controllerOrder, 1);
+    this.secondaryXhat = new SimpleMatrix(controllerOrder, 1);
+    this.uPrev = 0.0;
+    this.uHistory = new double[(int) Math.round(delaySteps) + 1];
+    this.td = newTd;
     this.initialized = true;
   }
 
@@ -257,52 +195,47 @@ public class ADRCController {
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double step(double reference, double output, double[] refDerivatives) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before use");
-    }
+    requireInitialized();
+    // One read, so the whole step uses the same gains while live tuning replaces them.
+    final Gains gains = config.getGains();
 
-    double refFiltered = reference;
-    double[] refDerivs = new double[systemOrder];
+    // The reference and its derivatives, up to the plant order.
+    double[] ref = new double[systemOrder + 1];
+    ref[0] = reference;
     if (refDerivatives != null) {
       System.arraycopy(
-          refDerivatives, 0, refDerivs, 0, Math.min(systemOrder, refDerivatives.length));
+          refDerivatives, 0, ref, 1, Math.min(systemOrder, refDerivatives.length));
     }
-    if (useTd && td != null) {
+    if (td != null) {
       td.update(reference);
-      refFiltered = td.getY();
-      refDerivs[0] = td.getYd();
+      ref[0] = td.getY();
+      ref[1] = td.getYd();
     }
 
-    double uForEso = uHistory[inputDelaySteps];
+    // The observers are told the output that reached the plant, one input delay ago.
+    double uForEso = uHistory[uHistory.length - 1];
+    this.xhat = gains.ad.mult(xhat).plus(gains.bd.scale(uForEso)).plus(gains.ld.scale(output));
+    this.secondaryXhat = gains.ad.mult(secondaryXhat).plus(gains.bd.scale(uForEso))
+        .plus(gains.ld.scale(xhat.get(0)));
 
-    this.xhat = ad.mult(xhat).plus(bd.scale(uForEso)).plus(ld.scale(output));
-    if (useCascaded) {
-      updateLeso2(uForEso);
-    }
-
-    SimpleMatrix refVec = new SimpleMatrix(systemOrder + 1, 1);
-    refVec.set(0, 0, refFiltered);
+    // The cascaded form cancels the second observer's disturbance estimate.
+    SimpleMatrix disturbance = config.isCascaded() ? secondaryXhat : xhat;
+    double v = ref[systemOrder] - disturbance.get(systemOrder);
     for (int i = 0; i < systemOrder; i++) {
-      refVec.set(i + 1, 0, refDerivs[i]);
+      v += gains.k.get(i) * (ref[i] - xhat.get(i));
     }
+    double u = v / gains.b0;
 
-    double u = useCascaded ? computeControlCascaded(refVec) : computeControlLinear(refVec);
-    double maxChange = slewRateLimit * dt;
-
-    double deltaU = u - uPrev;
-    if (Math.abs(deltaU) > maxChange) {
-      deltaU = Math.signum(deltaU) * maxChange;
+    double slewRateLimit = getSlewRateLimit();
+    if (slewRateLimit > 0.0) {
+      double maxChange = slewRateLimit * config.getBuiltPeriod().in(Seconds);
+      u = uPrev + Math.max(-maxChange, Math.min(maxChange, u - uPrev));
     }
+    u = Math.min(Math.max(u, getMinOutput()), getMaxOutput());
 
-    u = uPrev + deltaU;
-    u = saturate(u);
-
-    if (uHistory.length > 1) {
-      System.arraycopy(uHistory, 0, uHistory, 1, uHistory.length - 1);
-    }
+    System.arraycopy(uHistory, 0, uHistory, 1, uHistory.length - 1);
     uHistory[0] = u;
     uPrev = u;
-
     return u;
   }
 
@@ -337,9 +270,7 @@ public class ADRCController {
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double calculate(double measurement, double setpoint, double appliedOutput) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before use");
-    }
+    requireInitialized();
     if (Double.isFinite(appliedOutput)) {
       uHistory[0] = appliedOutput;
       uPrev = appliedOutput;
@@ -348,66 +279,47 @@ public class ADRCController {
   }
 
   /**
-   * Update the second ESO used by the cascaded form.
+   * The closed-loop bandwidth a settling time and bandwidth scale give.
    *
-   * @param u Delayed output.
+   * @param systemOrder    Plant order.
+   * @param bandwidthScale Bandwidth scale.
+   * @param settlingTime   Settling time.
+   * @return Closed-loop bandwidth, radians per second.
    */
-  private void updateLeso2(double u) {
-    this.secondaryXhat = ad.mult(secondaryXhat).plus(bd.scale(u)).plus(ld.scale(xhat.get(0)));
+  static double bandwidth(int systemOrder, double bandwidthScale, Time settlingTime) {
+    return 2.0 * (systemOrder + 1) * bandwidthScale / settlingTime.in(Seconds);
   }
 
   /**
-   * Linear controller law.
+   * Work out the observer and controller gains.
    *
-   * @param refVec Reference vector.
-   * @return Controller output.
+   * @param systemOrder Plant order, 1 through 4.
+   * @param wc          Closed-loop bandwidth, radians per second.
+   * @param b0          Input gain.
+   * @param dt          Control period, seconds.
+   * @return The gains.
    */
-  private double computeControlLinear(SimpleMatrix refVec) {
-    double v = refVec.get(systemOrder) - xhat.get(systemOrder);
-    for (int i = 0; i < systemOrder; i++) {
-      v += k.get(i) * (refVec.get(i) - xhat.get(i));
-    }
-    return v / b0;
-  }
-
-  /**
-   * Cascaded controller law.
-   *
-   * @param refVec Reference vector.
-   * @return Controller output.
-   */
-  private double computeControlCascaded(SimpleMatrix refVec) {
-    double v = refVec.get(systemOrder) - secondaryXhat.get(systemOrder);
-    for (int i = 0; i < systemOrder; i++) {
-      v += k.get(i) * (refVec.get(i) - xhat.get(i));
-    }
-    return v / b0;
-  }
-
-  /** Compute the ESO and controller gains from the current bandwidths. */
-  private void computeEsoGains() {
-    int m = controllerOrder;
+  static Gains computeGains(int systemOrder, double wc, double b0, double dt) {
+    final int m = systemOrder + 1;
+    final double wo = OBSERVER_BANDWIDTH_RATIO * wc;
 
     SimpleMatrix a = new SimpleMatrix(m, m);
     for (int i = 0; i < systemOrder; i++) {
       a.set(i, i + 1, 1.0);
     }
-
     SimpleMatrix b = new SimpleMatrix(m, 1);
     b.set(systemOrder - 1, 0, b0);
 
-    double z = Math.exp(-wo * dt);
-    this.ld = new SimpleMatrix(m, 1, true, computeLdData(z, dt));
-
-    this.phi = computeExpm(a, dt);
-    this.gam = computeBd(a, b, dt);
-
+    SimpleMatrix ld = new SimpleMatrix(m, 1, true, computeLdData(systemOrder, Math.exp(-wo * dt), dt));
     SimpleMatrix c = new SimpleMatrix(1, m);
     c.set(0, 0, 1.0);
     SimpleMatrix iMinusLc = SimpleMatrix.identity(m).minus(ld.mult(c));
 
-    this.ad = iMinusLc.mult(phi);
-    this.bd = iMinusLc.mult(gam);
+    SimpleMatrix k = new SimpleMatrix(systemOrder, 1);
+    for (int i = 1; i <= systemOrder; i++) {
+      k.set(systemOrder - i, 0, binomial(systemOrder, i) * Math.pow(wc, i));
+    }
+    return new Gains(ld, iMinusLc.mult(computeExpm(a, dt)), iMinusLc.mult(computeBd(a, b, dt)), k, b0);
   }
 
   /**
@@ -417,7 +329,7 @@ public class ADRCController {
    * @param dt Time step.
    * @return {@code exp(a * dt)}.
    */
-  private SimpleMatrix computeExpm(SimpleMatrix a, double dt) {
+  private static SimpleMatrix computeExpm(SimpleMatrix a, double dt) {
     int m = a.getNumRows();
     SimpleMatrix sum = SimpleMatrix.identity(m);
     SimpleMatrix term = SimpleMatrix.identity(m);
@@ -440,7 +352,7 @@ public class ADRCController {
    * @param dt Time step.
    * @return Discrete input matrix.
    */
-  private SimpleMatrix computeBd(SimpleMatrix a, SimpleMatrix b, double dt) {
+  private static SimpleMatrix computeBd(SimpleMatrix a, SimpleMatrix b, double dt) {
     int m = a.getNumRows();
 
     SimpleMatrix sum = new SimpleMatrix(m, m);
@@ -453,15 +365,15 @@ public class ADRCController {
   }
 
   /**
-   * Compute the observer gains for the current order.
+   * Compute the observer gains for a plant order.
    *
-   * @param zEso Discrete observer pole, {@code exp(-wo * dt)}.
-   * @param dt   Control period.
+   * @param systemOrder Plant order, 1 through 4.
+   * @param zEso        Discrete observer pole, {@code exp(-wo * dt)}.
+   * @param dt          Control period.
    * @return Observer gain vector data.
    */
-  private double[] computeLdData(double zEso, double dt) {
-    int m = controllerOrder;
-    double[] res = new double[m];
+  private static double[] computeLdData(int systemOrder, double zEso, double dt) {
+    double[] res = new double[systemOrder + 1];
     switch (systemOrder) {
       case 1:
         res[0] = 1.0 - zEso * zEso;
@@ -498,15 +410,6 @@ public class ADRCController {
     return res;
   }
 
-  /** Compute the controller gains from the current bandwidth. */
-  private void computeControllerGains() {
-    this.k = new SimpleMatrix(systemOrder, 1);
-    double w = wc;
-    for (int i = 1; i <= systemOrder; i++) {
-      this.k.set(systemOrder - i, 0, binomial(systemOrder, i) * Math.pow(w, i));
-    }
-  }
-
   /**
    * Binomial coefficient.
    *
@@ -514,7 +417,7 @@ public class ADRCController {
    * @param choose Number of items chosen.
    * @return {@code total choose choose}.
    */
-  private double binomial(int total, int choose) {
+  private static double binomial(int total, int choose) {
     if (choose < 0 || choose > total) {
       return 0;
     }
@@ -538,53 +441,12 @@ public class ADRCController {
    * @param value Non-negative integer.
    * @return {@code value!}.
    */
-  private double factorial(int value) {
+  private static double factorial(int value) {
     double result = 1;
     for (int i = 2; i <= value; i++) {
       result *= i;
     }
     return result;
-  }
-
-  /**
-   * Set or replace the tracking differentiator.
-   *
-   * @param method Differentiation method, or empty to disable it.
-   * @param params Method parameters; empty for the method defaults.
-   * @throws IllegalStateException    if the controller has not been initialized.
-   * @throws IllegalArgumentException if the method or parameters are invalid.
-   */
-  public void setTd(Optional<TrackingDifferentiator.Method> method, Optional<double[]> params) {
-    if (dt <= 0.0) {
-      throw new IllegalStateException(
-          "Controller must be initialized before setting the tracking differentiator");
-    }
-
-    TrackingDifferentiator newTd = method
-        .map(m -> new TrackingDifferentiator(m, this.dt, params))
-        .orElse(null);
-    if (newTd != null) {
-      newTd.reset(tdSeed());
-    }
-
-    this.td = newTd;
-    this.useTd = newTd != null;
-  }
-
-  /**
-   * Pick the value a new or reset tracking differentiator starts from.
-   *
-   * <p>During {@link #initialize} the old differentiator is stale, so the freshly supplied initial
-   * state wins. At runtime an existing differentiator carries its output forward, which keeps a
-   * live method change from looking like a step from zero.
-   *
-   * @return Old differentiator output when running, else the measured-state estimate, else zero.
-   */
-  private double tdSeed() {
-    if (initialized && td != null) {
-      return td.getY();
-    }
-    return xhat == null ? 0.0 : xhat.get(0);
   }
 
   /**
@@ -600,9 +462,7 @@ public class ADRCController {
    * @throws IllegalArgumentException if {@code measurement} is not finite.
    */
   public void reset(double measurement) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before reset");
-    }
+    requireInitialized();
     if (!Double.isFinite(measurement)) {
       throw new IllegalArgumentException("measurement must be finite");
     }
@@ -614,9 +474,8 @@ public class ADRCController {
   /**
    * Reset the observer state and output history.
    *
-   * <p>When the cascaded observer is enabled, both observers start from the supplied state. The
-   * tracking differentiator, when enabled, starts at {@code xhatInit[0]} (or zero when
-   * {@code xhatInit} is {@code null}).
+   * <p>Both observers start from the supplied state. The tracking differentiator, when enabled,
+   * starts at {@code xhatInit[0]} (or zero when {@code xhatInit} is {@code null}).
    *
    * @param xhatInit Initial observer state, length {@code systemOrder + 1}. {@code null} starts at
    *                 zero.
@@ -626,9 +485,7 @@ public class ADRCController {
    *                                  not finite.
    */
   public void reset(double[] xhatInit, double uInit) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before reset");
-    }
+    requireInitialized();
     if (xhatInit != null && xhatInit.length != controllerOrder) {
       throw new IllegalArgumentException("xhatInit length must equal controller order");
     }
@@ -637,263 +494,111 @@ public class ADRCController {
     }
     double[] xInit = xhatInit == null ? new double[controllerOrder] : xhatInit.clone();
     this.xhat = new SimpleMatrix(controllerOrder, 1, true, xInit);
-    this.secondaryXhat = new SimpleMatrix(
-        controllerOrder, 1, true, useCascaded ? xInit : new double[controllerOrder]);
+    this.secondaryXhat = new SimpleMatrix(controllerOrder, 1, true, xInit);
     this.uPrev = uInit;
     Arrays.fill(this.uHistory, this.uPrev);
-    if (useTd && td != null) {
+    if (td != null) {
       td.reset(xInit[0]);
     }
   }
 
   /**
-   * Change the output saturation limits.
-   *
-   * @param uMin Minimum output.
-   * @param uMax Maximum output.
-   * @throws IllegalArgumentException if a limit is NaN or {@code uMin > uMax}.
-   */
-  public void setSaturation(double uMin, double uMax) {
-    if (Double.isNaN(uMin) || Double.isNaN(uMax) || uMin > uMax) {
-      throw new IllegalArgumentException("uMin and uMax must not be NaN and uMin must be <= uMax");
-    }
-    this.uMin = uMin;
-    this.uMax = uMax;
-  }
-
-  /**
-   * Retune the controller bandwidths and recompute the gains.
-   *
-   * @param tSettle Desired closed-loop settling time. Must be finite and positive.
-   * @param kob     Closed-loop bandwidth scale. Must be finite and positive.
-   * @throws IllegalStateException    if the controller has not been initialized.
-   * @throws IllegalArgumentException if a value is invalid.
-   */
-  public void updateTuning(Time tSettle, double kob) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before updating tuning");
-    }
-    final double settleSeconds = tSettle.in(Seconds);
-    if (!Double.isFinite(settleSeconds) || settleSeconds <= 0 || !Double.isFinite(kob) || kob <= 0) {
-      throw new IllegalArgumentException("tSettle and kob must be finite and positive");
-    }
-    double newWc = 2.0 * (systemOrder + 1) * kob / settleSeconds;
-    double newWo = OBSERVER_BANDWIDTH_RATIO * newWc;
-    if (!Double.isFinite(newWc) || !Double.isFinite(newWo)) {
-      throw new IllegalArgumentException("tuning produced non-finite bandwidths");
-    }
-    this.wc = newWc;
-    this.wo = newWo;
-    this.tSettle = tSettle;
-    this.kob = kob;
-    computeEsoGains();
-    computeControllerGains();
-  }
-
-  /**
-   * Replace the input gain, keeping the current state estimate and output history.
-   *
-   * <p>The observer and the control law both use {@code b0}, so the gains are recomputed. The
-   * estimated disturbance carries over, so a live-tuned input gain does not make the output jump.
-   *
-   * @param b0 New input gain, in the same units as the one the controller was initialized with.
-   * @throws IllegalStateException    if the controller has not been initialized.
-   * @throws IllegalArgumentException if the value is not finite or is zero.
-   */
-  public void setB0(double b0) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before changing b0");
-    }
-    if (!Double.isFinite(b0) || b0 == 0.0) {
-      throw new IllegalArgumentException("b0 must be finite and non-zero");
-    }
-    this.b0 = b0 / ke;
-    computeEsoGains();
-  }
-
-  /**
-   * Retune to the {@link ADRCConfig} this controller runs, as live tuning does after changing it.
-   * The settling time, bandwidth scale, {@code b0}, output limits and slew-rate limit are read
-   * again; while the config leaves {@code b0} or the maximum output unset, the values given to
-   * {@link #initialize} are kept. The state estimate is kept, so the output does not jump. A value
-   * the controller cannot use leaves it as it was and raises an alert until a reset accepts the
-   * config.
+   * Throw unless {@link #initialize} has completed.
    *
    * @throws IllegalStateException if the controller has not been initialized.
    */
-  public void reset() {
+  private void requireInitialized() {
     if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before reset");
-    }
-    ADRCConfig cfg = config;
-    double max = cfg.getMaxVoltage().map(v -> v.in(Volts)).orElse(configMaxOutput);
-    try {
-      retune(cfg.getSettlingTime().orElse(ADRCConfig.DEFAULT_SETTLING_TIME),
-          cfg.getBandwidthScale().orElse(ADRCConfig.DEFAULT_BANDWIDTH_SCALE),
-          cfg.getB0().orElse(configB0),
-          cfg.getMinVoltage().map(v -> v.in(Volts)).orElse(-max),
-          max,
-          cfg.getSlewRateLimit().orElse(ADRCConfig.DEFAULT_SLEW_RATE_LIMIT).in(Volts.per(Second)));
-      cfg.reportRejected(Optional.empty());
-    } catch (IllegalArgumentException e) {
-      cfg.reportRejected(Optional.of(e.getMessage()));
+      throw new IllegalStateException("Controller must be initialized before use");
     }
   }
 
   /**
-   * Retune every live-tunable value at once, keeping the current state estimate and output history.
+   * Get the input gain the gains were worked out with: the config's, or the one given to
+   * {@link #initialize} while the config leaves it unset.
    *
-   * <p>Every value is checked before any is applied, so a rejected value leaves the controller as
-   * it was. The estimated disturbance carries over, so the output does not jump. {@link #reset()}
-   * calls this with the values of the {@link ADRCConfig} the controller was built from.
-   *
-   * @param tSettle       Desired closed-loop settling time. Must be finite and positive.
-   * @param kob           Closed-loop bandwidth scale. Must be finite and positive.
-   * @param b0            Input gain, in the same units as the one the controller was initialized
-   *                      with. Must be finite and non-zero.
-   * @param uMin          Minimum output.
-   * @param uMax          Maximum output.
-   * @param slewRateLimit Maximum output change per second. A non-positive or NaN value disables the
-   *                      limit.
-   * @throws IllegalStateException    if the controller has not been initialized.
-   * @throws IllegalArgumentException if a value is invalid.
-   */
-  public void retune(Time tSettle, double kob, double b0, double uMin, double uMax,
-      double slewRateLimit) {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before retuning");
-    }
-    final double settleSeconds = tSettle.in(Seconds);
-    if (!Double.isFinite(settleSeconds) || settleSeconds <= 0 || !Double.isFinite(kob) || kob <= 0) {
-      throw new IllegalArgumentException("tSettle and kob must be finite and positive");
-    }
-    if (!Double.isFinite(b0) || b0 == 0.0 || !Double.isFinite(b0 / ke)) {
-      throw new IllegalArgumentException("b0 must be finite and non-zero");
-    }
-    if (Double.isNaN(uMin) || Double.isNaN(uMax) || uMin > uMax) {
-      throw new IllegalArgumentException("uMin and uMax must not be NaN and uMin must be <= uMax");
-    }
-    final double newWc = 2.0 * (systemOrder + 1) * kob / settleSeconds;
-    final double newWo = OBSERVER_BANDWIDTH_RATIO * newWc;
-    if (!Double.isFinite(newWc) || !Double.isFinite(newWo)) {
-      throw new IllegalArgumentException("tuning produced non-finite bandwidths");
-    }
-    this.tSettle = tSettle;
-    this.kob = kob;
-    this.wc = newWc;
-    this.wo = newWo;
-    this.b0 = b0 / ke;
-    this.uMin = uMin;
-    this.uMax = uMax;
-    this.slewRateLimit = slewRateLimit > 0.0 ? slewRateLimit : Double.POSITIVE_INFINITY;
-    computeEsoGains();
-    computeControllerGains();
-  }
-
-  /**
-   * Get the output slew-rate limit.
-   *
-   * @return Maximum output change per second, or zero when the limit is disabled.
-   */
-  public double getSlewRateLimit() {
-    return Double.isInfinite(slewRateLimit) ? 0.0 : slewRateLimit;
-  }
-
-  /**
-   * Get the input gain the controller is using.
-   *
-   * @return Input gain, in the same units the controller was initialized with.
+   * @return Input gain.
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getB0() {
-    if (!initialized) {
-      throw new IllegalStateException("Controller must be initialized before reading b0");
-    }
-    return b0;
+    requireInitialized();
+    return config.getGains().b0;
   }
 
   /**
-   * Get the closed-loop bandwidth.
+   * Get the closed-loop bandwidth the config's settling time and bandwidth scale give.
    *
    * @return Closed-loop bandwidth, radians per second.
-   * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getBandwidth() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the bandwidth");
-    }
-    return wc;
+    return bandwidth(systemOrder, getBandwidthScale(), getSettlingTime());
   }
 
   /**
-   * Get the observer bandwidth.
+   * Get the observer bandwidth, four times the closed-loop bandwidth.
    *
    * @return Observer bandwidth, radians per second.
-   * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getObserverBandwidth() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the observer bandwidth");
-    }
-    return wo;
+    return OBSERVER_BANDWIDTH_RATIO * getBandwidth();
   }
 
   /**
-   * Get the desired closed-loop settling time.
+   * Get the desired closed-loop settling time from the config.
    *
    * @return Settling time.
-   * @throws IllegalStateException if the controller has not been initialized.
    */
   public Time getSettlingTime() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the settling time");
-    }
-    return tSettle;
+    return config.getSettlingTime().orElse(ADRCConfig.DEFAULT_SETTLING_TIME);
   }
 
   /**
-   * Get the closed-loop bandwidth scale.
+   * Get the closed-loop bandwidth scale from the config.
    *
    * @return Bandwidth scale.
-   * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getBandwidthScale() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the bandwidth scale");
-    }
-    return kob;
+    return config.getBandwidthScale().orElse(ADRCConfig.DEFAULT_BANDWIDTH_SCALE);
   }
 
   /**
-   * Get the minimum output.
+   * Get the minimum output: the config's, or the negative of the maximum.
    *
    * @return Minimum output.
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getMinOutput() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the output limits");
-    }
-    return uMin;
+    return config.getMinVoltage().map(v -> v.in(Volts)).orElse(-getMaxOutput());
   }
 
   /**
-   * Get the maximum output.
+   * Get the maximum output: the config's, or the one given to {@link #initialize} while the config
+   * leaves it unset.
    *
    * @return Maximum output.
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getMaxOutput() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading the output limits");
-    }
-    return uMax;
+    requireInitialized();
+    return config.getMaxVoltage().orElse(config.getBuiltMaxVoltage()).in(Volts);
+  }
+
+  /**
+   * Get the output slew-rate limit from the config.
+   *
+   * @return Maximum output change per second, or zero when the limit is off.
+   */
+  public double getSlewRateLimit() {
+    return config.getSlewRateLimit().orElse(ADRCConfig.DEFAULT_SLEW_RATE_LIMIT).in(Volts.per(Second));
+  }
+
+  /**
+   * Get the tracking differentiator the controller smooths its reference with.
+   *
+   * @return The tracking differentiator, or empty when it is off.
+   */
+  public Optional<TrackingDifferentiator> getTrackingDifferentiator() {
+    return Optional.ofNullable(td);
   }
 
   /**
@@ -906,10 +611,7 @@ public class ADRCController {
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double[] getEstimatedStates() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading state estimates");
-    }
+    requireInitialized();
     double[] out = new double[controllerOrder];
     System.arraycopy(xhat.getDDRM().getData(), 0, out, 0, controllerOrder);
     return out;
@@ -925,11 +627,8 @@ public class ADRCController {
    * @throws IllegalStateException if the controller has not been initialized.
    */
   public double getEstimatedDisturbance() {
-    if (!initialized) {
-      throw new IllegalStateException(
-          "Controller must be initialized before reading disturbance estimates");
-    }
-    return useCascaded ? secondaryXhat.get(systemOrder) : xhat.get(systemOrder);
+    requireInitialized();
+    return (config.isCascaded() ? secondaryXhat : xhat).get(systemOrder);
   }
 
   /**
@@ -960,21 +659,20 @@ public class ADRCController {
   }
 
   /**
+   * Get the config this controller reads its settings and gains from.
+   *
+   * @return The {@link ADRCConfig}.
+   */
+  public ADRCConfig getConfig() {
+    return config;
+  }
+
+  /**
    * Whether {@link #initialize} has completed successfully.
    *
    * @return {@code true} if the controller is ready to use.
    */
   public boolean isInitialized() {
     return initialized;
-  }
-
-  /**
-   * Saturate an output.
-   *
-   * @param u Output.
-   * @return Output clamped to {@code [uMin, uMax]}.
-   */
-  private double saturate(double u) {
-    return Math.min(Math.max(u, uMin), uMax);
   }
 }

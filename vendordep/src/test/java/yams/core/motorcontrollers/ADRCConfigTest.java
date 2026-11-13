@@ -109,17 +109,28 @@ class ADRCConfigTest {
   }
 
   @Test
-  void theControllerRejectsAnInvalidValue() {
+  void refusesValuesTheControllerCannotUse() {
     final ADRCConfig cfg = new ADRCConfig()
         .withSystemOrder(SystemOrder.FIRST)
-        .withB0(10)
-        .withSettlingTime(Seconds.of(-1));
-    assertThrows(IllegalArgumentException.class,
-        () -> cfg.buildController(DCMotor.getNEO(1), smcConfig(), Milliseconds.of(20)));
-    cfg.withSettlingTime(Seconds.of(0.2)).withVoltageLimits(Volts.of(6), Volts.of(4));
-    assertThrows(IllegalArgumentException.class,
-        () -> cfg.buildController(DCMotor.getNEO(1), smcConfig(), Milliseconds.of(20)),
-        "limits that cross");
+        .withSettlingTime(Seconds.of(0.3))
+        .withMaxVoltage(Volts.of(12));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withSettlingTime(Seconds.of(-1)));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withSettlingTime(Seconds.of(0)));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withBandwidthScale(0));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withB0(0));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withB0(Double.NaN));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withVoltageLimits(Volts.of(6), Volts.of(4)), "limits that cross");
+    assertThrows(IllegalArgumentException.class, () -> cfg.withMaxVoltage(Volts.of(-1)), "a maximum below its own -max minimum");
+    assertThrows(IllegalArgumentException.class, () -> cfg.withSlewRateLimit(Volts.per(Second).of(-1)));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withInputDelay(Seconds.of(-1)));
+    // A refused value leaves the config as it was.
+    assertEquals(0.3, cfg.getSettlingTime().orElseThrow().in(Seconds));
+    assertEquals(12, cfg.getMaxVoltage().orElseThrow().in(Volts));
+    assertTrue(cfg.getMinVoltage().isEmpty());
+    assertTrue(cfg.getB0().isEmpty());
+    // A maximum below a minimum that is set is refused too.
+    cfg.withVoltageLimits(Volts.of(-2), Volts.of(12));
+    assertThrows(IllegalArgumentException.class, () -> cfg.withMaxVoltage(Volts.of(-3)));
   }
 
   @Test

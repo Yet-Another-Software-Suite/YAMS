@@ -106,9 +106,11 @@ import yams.core.motorcontrollers.SmartMotorControllerConfig;
  * plants track more accurately. Leave it disabled unless you have a reason.
  * </ul>
  *
- * <p>The {@code withX(...)} methods store what they are given without checking it. An invalid
- * value, such as a negative settling time or a zero {@code b0}, is reported by
- * {@link ADRCController#initialize} when the motor controller builds the controller.
+ * <p>The {@code withX(...)} methods only accept values the controller can use: an invalid one,
+ * such as a settling time that is not positive or a zero {@code b0}, throws
+ * {@link IllegalArgumentException} and leaves the config as it was. The controller reads its
+ * settings from this config instead of keeping copies, so the config never holds a value it cannot
+ * run.
  *
  * <h2>Smoothing the reference with a tracking differentiator</h2>
  *
@@ -264,6 +266,19 @@ public class ADRCConfig implements Cloneable {
   /** This config's number, for its alert ids. */
   private final int instance = INSTANCES.getAndIncrement();
 
+  /** Control period of the controller built from this config; empty until one is built. */
+  private Optional<Time> builtPeriod = Optional.empty();
+  /** {@code b0} used while {@link #b0} is unset, such as the derived one; set when a controller is built. */
+  private OptionalDouble builtB0 = OptionalDouble.empty();
+  /** Maximum output used while {@link #maxVoltage} is unset; set when a controller is built. */
+  private Optional<Voltage> builtMaxVoltage = Optional.empty();
+  /**
+   * Observer and control gains worked out from this config once a controller is built, and again
+   * whenever the settling time, bandwidth scale or {@code b0} changes. Replaced whole, so the
+   * controller's thread never uses a mix of old and new gains.
+   */
+  private volatile ADRCController.Gains gains;
+
   /**
    * Create a configuration. It belongs to the motor controller it is given to, whose telemetry name
    * its errors and alerts use.
@@ -271,7 +286,10 @@ public class ADRCConfig implements Cloneable {
   public ADRCConfig() {}
 
   /**
-   * Copy an existing configuration.
+   * Copy an existing configuration deeply: its settings, the values given when a controller was
+   * built from it, and its own copy of the gains. The units, {@link Optional}s and the method are
+   * immutable, so they are shared; the arrays and matrices are copied. The copy raises its own
+   * alerts, so none are copied.
    *
    * @param cfg Configuration to copy.
    */
@@ -288,6 +306,11 @@ public class ADRCConfig implements Cloneable {
     this.cascaded = cfg.cascaded;
     this.tdMethod = cfg.tdMethod;
     this.tdParams = cfg.tdParams.map(double[]::clone);
+    this.builtPeriod = cfg.builtPeriod;
+    this.builtB0 = cfg.builtB0;
+    this.builtMaxVoltage = cfg.builtMaxVoltage;
+    final ADRCController.Gains cfgGains = cfg.gains;
+    this.gains = cfgGains == null ? null : cfgGains.copy();
   }
 
   @Override
@@ -302,6 +325,11 @@ public class ADRCConfig implements Cloneable {
    * @return This config for chaining.
    */
   public ADRCConfig withSystemOrder(SystemOrder systemOrder) {
+    if (builtPeriod.isPresent()
+        && (systemOrder == null || systemOrder.getOrder() != this.systemOrder.orElseThrow().getOrder())) {
+      throw new IllegalStateException(owner + " already runs a controller of order "
+          + this.systemOrder.orElseThrow().getOrder() + "; a new order needs a new ADRCConfig");
+    }
     this.systemOrder = Optional.ofNullable(systemOrder);
     return this;
   }
@@ -309,33 +337,52 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set the desired closed-loop settling time. Defaults to {@link #DEFAULT_SETTLING_TIME}.
    *
-   * @param settlingTime Settling time; must be positive.
+   * @param settlingTime Settling time; must be finite and positive.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if the settling time is not finite and positive.
    */
   public ADRCConfig withSettlingTime(Time settlingTime) {
+    if (settlingTime != null) {
+      final double seconds = settlingTime.in(Seconds);
+      if (!Double.isFinite(seconds) || seconds <= 0) {
+        throw new IllegalArgumentException(owner + " settling time must be finite and positive, got " + seconds + " s");
+      }
+    }
     this.settlingTime = Optional.ofNullable(settlingTime);
+    rebuildGains();
     return this;
   }
 
   /**
    * Set the closed-loop bandwidth scale. Defaults to {@link #DEFAULT_BANDWIDTH_SCALE}.
    *
-   * @param bandwidthScale Bandwidth scale; must be positive. Larger is more aggressive.
+   * @param bandwidthScale Bandwidth scale; must be finite and positive. Larger is more aggressive.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if the bandwidth scale is not finite and positive.
    */
   public ADRCConfig withBandwidthScale(double bandwidthScale) {
+    if (!Double.isFinite(bandwidthScale) || bandwidthScale <= 0) {
+      throw new IllegalArgumentException(owner + " bandwidth scale must be finite and positive, got " + bandwidthScale);
+    }
     this.bandwidthScale = OptionalDouble.of(bandwidthScale);
+    rebuildGains();
     return this;
   }
 
   /**
    * Set the input gain explicitly instead of deriving it.
    *
-   * @param b0 Input gain in mechanism units per second squared per volt; must be non-zero.
+   * @param b0 Input gain in mechanism units per second squared per volt; must be finite and
+   *           non-zero.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if {@code b0} is not finite or is zero.
    */
   public ADRCConfig withB0(double b0) {
+    if (!Double.isFinite(b0) || b0 == 0.0) {
+      throw new IllegalArgumentException(owner + " b0 must be finite and non-zero, got " + b0);
+    }
     this.b0 = OptionalDouble.of(b0);
+    rebuildGains();
     return this;
   }
 
@@ -343,10 +390,12 @@ public class ADRCConfig implements Cloneable {
    * Set the maximum output, with the minimum at its negative unless
    * {@link #withVoltageLimits(Voltage, Voltage)} set one.
    *
-   * @param maxVoltage Maximum output.
+   * @param maxVoltage Maximum output; must not be below the minimum.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if the maximum is NaN or below the minimum.
    */
   public ADRCConfig withMaxVoltage(Voltage maxVoltage) {
+    checkVoltageLimits(minVoltage.orElse(null), maxVoltage);
     this.maxVoltage = Optional.ofNullable(maxVoltage);
     return this;
   }
@@ -357,21 +406,49 @@ public class ADRCConfig implements Cloneable {
    * @param minVoltage Minimum output; must not be above {@code maxVoltage}.
    * @param maxVoltage Maximum output.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if a limit is NaN or the minimum is above the maximum.
    */
   public ADRCConfig withVoltageLimits(Voltage minVoltage, Voltage maxVoltage) {
+    checkVoltageLimits(minVoltage, maxVoltage);
     this.minVoltage = Optional.ofNullable(minVoltage);
     this.maxVoltage = Optional.ofNullable(maxVoltage);
     return this;
   }
 
   /**
+   * Check output limits: neither may be NaN, and the minimum, {@code -max} when it is unset, must
+   * not be above the maximum.
+   *
+   * @param min Minimum output, or {@code null} for {@code -max}.
+   * @param max Maximum output, or {@code null} to use the motor config.
+   * @throws IllegalArgumentException if a limit is NaN or the minimum is above the maximum.
+   */
+  private void checkVoltageLimits(Voltage min, Voltage max) {
+    final double minVolts = min == null ? Double.NEGATIVE_INFINITY : min.in(Volts);
+    final double maxVolts = max != null ? max.in(Volts)
+        : builtMaxVoltage.map(v -> v.in(Volts)).orElse(Double.POSITIVE_INFINITY);
+    final double effectiveMin = min == null && Double.isFinite(maxVolts) ? -maxVolts : minVolts;
+    if (Double.isNaN(minVolts) || Double.isNaN(maxVolts) || effectiveMin > maxVolts) {
+      throw new IllegalArgumentException(owner + " output limits must not be NaN, and the minimum ("
+          + effectiveMin + " V) must not be above the maximum (" + maxVolts + " V)");
+    }
+  }
+
+  /**
    * Set the output slew-rate limit. Defaults to {@link #DEFAULT_SLEW_RATE_LIMIT}, which disables
    * it.
    *
-   * @param slewRateLimit Maximum output change per second; zero disables it.
+   * @param slewRateLimit Maximum output change per second; zero disables it. Must not be negative.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if the limit is NaN or negative.
    */
   public ADRCConfig withSlewRateLimit(Velocity<VoltageUnit> slewRateLimit) {
+    if (slewRateLimit != null) {
+      final double voltsPerSecond = slewRateLimit.in(Volts.per(Second));
+      if (Double.isNaN(voltsPerSecond) || voltsPerSecond < 0) {
+        throw new IllegalArgumentException(owner + " slew rate limit must not be negative, got " + voltsPerSecond + " V/s");
+      }
+    }
     this.slewRateLimit = Optional.ofNullable(slewRateLimit);
     return this;
   }
@@ -379,10 +456,17 @@ public class ADRCConfig implements Cloneable {
   /**
    * Set the input delay. Defaults to {@link #DEFAULT_INPUT_DELAY}, which disables it.
    *
-   * @param inputDelay Input delay; zero disables it.
+   * @param inputDelay Input delay; zero disables it. Must be finite and not negative.
    * @return This config for chaining.
+   * @throws IllegalArgumentException if the delay is not finite or is negative.
    */
   public ADRCConfig withInputDelay(Time inputDelay) {
+    if (inputDelay != null) {
+      final double seconds = inputDelay.in(Seconds);
+      if (!Double.isFinite(seconds) || seconds < 0) {
+        throw new IllegalArgumentException(owner + " input delay must be finite and not negative, got " + seconds + " s");
+      }
+    }
     this.inputDelay = Optional.ofNullable(inputDelay);
     return this;
   }
@@ -529,11 +613,12 @@ public class ADRCConfig implements Cloneable {
   /**
    * Build a controller from this config, filling every unset value with its default.
    *
-   * <p>The controller keeps this config: after changing its settling time, bandwidth scale,
-   * {@code b0}, output limits or slew-rate limit, as live tuning does, {@link ADRCController#reset()}
-   * retunes the controller to it without resetting its state estimate. The system order, input
-   * delay, cascaded observer and tracking differentiator only take effect when a controller is
-   * built.
+   * <p>The controller reads its settings from this config every step, and its gains too: the config
+   * keeps the control period, the {@code b0} and maximum output used while they are unset, and the
+   * gains worked out from them, and works the gains out again whenever its settling time, bandwidth
+   * scale or {@code b0} changes. So a change, as live tuning makes, takes effect on the next step
+   * without resetting the state estimate. The system order, input delay and tracking differentiator
+   * only take effect when a controller is built, and a built config refuses a different order.
    *
    * @param motor  Motor model used for {@code b0} derivation and the nominal-voltage fallback.
    * @param config Motor config that carries gearing, inertia, circumference, and the loop period.
@@ -542,7 +627,8 @@ public class ADRCConfig implements Cloneable {
    * @throws SmartMotorControllerConfigurationException if the order is missing or {@code b0} cannot
    *                                                    be derived.
    * @throws IllegalArgumentException                   if {@link ADRCController#initialize} rejects
-   *                                                    a configured value.
+   *                                                    the derived {@code b0}, the motor config's
+   *                                                    limit or the tracking differentiator.
    */
   public ADRCController buildController(
       DCMotor motor, SmartMotorControllerConfig<?> config, Time period) {
@@ -551,25 +637,8 @@ public class ADRCConfig implements Cloneable {
         owner + " has no system order",
         "withSystemOrder(...) was never called, and there is no safe default plant order.",
         "withADRCController(new ADRCConfig().withSystemOrder(SystemOrder.FIRST))"));
-    double resolvedMaxVoltage = resolveMaxVoltage(motor, config);
-    double resolvedMinVoltage = minVoltage.map(v -> v.in(Volts)).orElse(-resolvedMaxVoltage);
-
     ADRCController controller = new ADRCController(this);
-    controller.initialize(
-        settlingTime.orElse(DEFAULT_SETTLING_TIME),
-        bandwidthScale.orElse(DEFAULT_BANDWIDTH_SCALE),
-        resolveB0(motor, config),
-        resolvedMinVoltage,
-        resolvedMaxVoltage,
-        period.in(Seconds),
-        Optional.empty(),
-        0.0,
-        1.0,
-        slewRateLimit.orElse(DEFAULT_SLEW_RATE_LIMIT).in(Volts.per(Second)),
-        inputDelay.orElse(DEFAULT_INPUT_DELAY).in(Seconds),
-        tdMethod,
-        tdParams,
-        cascaded);
+    controller.initialize(resolveB0(motor, config), Volts.of(resolveMaxVoltage(motor, config)), period);
     return controller;
   }
 
@@ -671,12 +740,85 @@ public class ADRCConfig implements Cloneable {
   }
 
   /**
-   * Report whether the controller built from this config could use its values. The alert lives on
-   * the config, so it outlasts a controller rebuilt from it.
+   * Give this config the values a controller needs that the config does not hold, and work out the
+   * gains. {@link ADRCController#initialize} calls this; a later call, as when the motor config is
+   * applied again, replaces them.
    *
-   * @param reason Why the controller rejected a value, or empty once it accepted them.
+   * @param b0         Input gain used while {@code b0} is unset.
+   * @param maxVoltage Maximum output used while the maximum is unset.
+   * @param period     Control period.
+   * @throws IllegalArgumentException if a value is invalid, leaving the config as it was.
    */
-  void reportRejected(Optional<String> reason) {
+  void setBuiltValues(double b0, Voltage maxVoltage, Time period) {
+    final double seconds = period.in(Seconds);
+    if (!Double.isFinite(seconds) || seconds <= 0) {
+      throw new IllegalArgumentException(owner + " control period must be finite and positive");
+    }
+    final double usedB0 = this.b0.orElse(b0);
+    if (!Double.isFinite(usedB0) || usedB0 == 0.0) {
+      throw new IllegalArgumentException(owner + " b0 must be finite and non-zero, got " + usedB0);
+    }
+    final double max = this.maxVoltage.orElse(maxVoltage).in(Volts);
+    final double min = minVoltage.map(v -> v.in(Volts)).orElse(-max);
+    if (Double.isNaN(min) || Double.isNaN(max) || min > max) {
+      throw new IllegalArgumentException(owner + " output limits must not be NaN, and the minimum ("
+          + min + " V) must not be above the maximum (" + max + " V)");
+    }
+    this.builtPeriod = Optional.of(period);
+    this.builtB0 = OptionalDouble.of(b0);
+    this.builtMaxVoltage = Optional.of(maxVoltage);
+    rebuildGains();
+  }
+
+  /** Work the gains out again from the settling time, bandwidth scale and {@code b0}, once built. */
+  private void rebuildGains() {
+    if (builtPeriod.isEmpty()) {
+      return;
+    }
+    final int order = systemOrder.orElseThrow().getOrder();
+    gains = ADRCController.computeGains(order,
+        ADRCController.bandwidth(order, bandwidthScale.orElse(DEFAULT_BANDWIDTH_SCALE),
+            settlingTime.orElse(DEFAULT_SETTLING_TIME)),
+        b0.orElse(builtB0.getAsDouble()),
+        builtPeriod.get().in(Seconds));
+  }
+
+  /**
+   * Get the gains worked out from this config.
+   *
+   * @return The gains, or {@code null} until a controller is built.
+   */
+  ADRCController.Gains getGains() {
+    return gains;
+  }
+
+  /**
+   * Get the control period of the controller built from this config.
+   *
+   * @return Control period.
+   * @throws java.util.NoSuchElementException if no controller has been built.
+   */
+  Time getBuiltPeriod() {
+    return builtPeriod.orElseThrow();
+  }
+
+  /**
+   * Get the maximum output used while the maximum is unset.
+   *
+   * @return Maximum output given when the controller was built.
+   * @throws java.util.NoSuchElementException if no controller has been built.
+   */
+  Voltage getBuiltMaxVoltage() {
+    return builtMaxVoltage.orElseThrow();
+  }
+
+  /**
+   * Report a value this config refused, as live tuning does when a tuned value throws. The alert
+   * lives on the config, so it outlasts a controller rebuilt from it.
+   *
+   * @param reason Why the value was refused, or empty once a tuned value is accepted.
+   */
+  public void reportRejected(Optional<String> reason) {
     if (reason.isEmpty()) {
       rejectedAlert.ifPresent(alert -> alert.set(false));
       return;
@@ -684,7 +826,7 @@ public class ADRCConfig implements Cloneable {
     if (rejectedAlert.isEmpty()) {
       rejectedAlert = Optional.of(new Alert("YAMS", alertId("Rejected"), "", Alert.Level.HIGH));
     }
-    rejectedAlert.get().setText(owner + " not retuned: " + reason.get());
+    rejectedAlert.get().setText("Not retuned: " + reason.get());
     rejectedAlert.get().set(true);
   }
 

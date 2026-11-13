@@ -30,7 +30,7 @@ import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
-import yams.core.math.ADRCController;
+import yams.core.math.ADRCConfig;
 import yams.core.math.LQRConfig.LQRType;
 
 /**
@@ -201,6 +201,22 @@ public class SmartMotorControllerTelemetry {
   }
 
   /**
+   * Set an ADRC config's live-tunable values to the tuning fields.
+   *
+   * @param adrcConfig Config to tune.
+   * @throws IllegalArgumentException if the config refuses a value, after setting the ones before
+   *                                  it.
+   */
+  private void applyADRCTuning(ADRCConfig adrcConfig) {
+    adrcConfig
+        .withB0(doubleFields.get(DoubleTelemetryField.ADRCB0).get())
+        .withSettlingTime(Seconds.of(doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).get()))
+        .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get())
+        .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).get()))
+        .withSlewRateLimit(Volts.per(Second).of(doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).get()));
+  }
+
+  /**
    * Apply the tuning values from {@link NetworkTable} to the {@link SmartMotorController}
    *
    * @param smartMotorController {@link SmartMotorController} to control.
@@ -337,19 +353,23 @@ public class SmartMotorControllerTelemetry {
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
           case ADRCB0, ADRCSettlingTime, ADRCBandwidthScale, ADRCMaxVoltage, ADRCSlewRateLimit -> {
-            // Kept in the ADRC's config, like a tuned PID, then the ADRC is reset to it, keeping its state estimate so
-            // its output doesn't jump. A value it can't use, such as a b0 of 0, leaves it as it was and raises an
-            // alert. Loosely coupled followers are tuned the same way.
+            // Kept in the ADRC's config, like a tuned PID. The ADRC reads its settings and gains from the config,
+            // which works the gains out again as they change, so the ADRC runs them on its next step and keeps its
+            // state estimate, so its output doesn't jump. A value the config refuses, such as a b0 of 0, leaves
+            // it as it was and raises an alert. Loosely coupled followers are tuned the same way.
             List<SmartMotorController> tuned = new ArrayList<>(List.of(smartMotorController));
             smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> tuned.addAll(List.of(followers)));
             for (SmartMotorController smc : tuned) {
-              smc.getConfig().getADRCController(smc.getClosedLoopControllerSlot()).ifPresent(adrcConfig -> adrcConfig
-                  .withB0(doubleFields.get(DoubleTelemetryField.ADRCB0).get())
-                  .withSettlingTime(Seconds.of(doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).get()))
-                  .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get())
-                  .withMaxVoltage(Volts.of(doubleFields.get(DoubleTelemetryField.ADRCMaxVoltage).get()))
-                  .withSlewRateLimit(Volts.per(Second).of(doubleFields.get(DoubleTelemetryField.ADRCSlewRateLimit).get())));
-              smc.getADRCController().ifPresent(ADRCController::reset);
+              smc.getConfig().getADRCController(smc.getClosedLoopControllerSlot()).ifPresent(adrcConfig -> {
+                try {
+                  // Tune a copy first, so a refused value leaves every value as it was.
+                  applyADRCTuning(adrcConfig.clone());
+                  applyADRCTuning(adrcConfig);
+                  adrcConfig.reportRejected(Optional.empty());
+                } catch (IllegalArgumentException e) {
+                  adrcConfig.reportRejected(Optional.of(e.getMessage()));
+                }
+              });
             }
           }
           case kS -> smartMotorController.setKs(dt.get());

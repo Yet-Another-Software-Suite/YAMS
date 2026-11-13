@@ -50,9 +50,10 @@ With HIGH telemetry, a motor controller with an ADRC publishes its settings in p
 | `maxVoltage` | Maximum output voltage |
 | `slewRateLimit` | Maximum change in the output, volts per second; 0 for none |
 
-A change is stored in the motor controller's `ADRCConfig`, and the ADRC is retuned to it. Retuning keeps the estimated
-disturbance, so the output doesn't jump. A value the ADRC can't use, such as a settling time of 0, leaves it as it was
-and raises an alert.
+A change is stored in the motor controller's `ADRCConfig`, which the ADRC reads its settings and gains from, and the
+config works the gains out again, so the ADRC runs the change on its next loop. The estimated disturbance carries over,
+so the output doesn't jump. The config refuses a value the ADRC
+can't use, such as a settling time of 0: every value stays as it was, and an alert is raised.
 
 ## Controls
 
