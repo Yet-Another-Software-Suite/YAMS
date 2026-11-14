@@ -331,7 +331,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *           construct this.
    */
   protected SmartMotorControllerConfig() {
-    HAL.reportUsage(null, null);
+    HAL.reportUsage("SmartMotorController", "YAMS");
   }
 
   /**
