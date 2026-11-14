@@ -47,10 +47,9 @@ constexpr size_t kArtColumns = 13;
 /** Columns left beside Rivet for the version and phrase. */
 constexpr size_t kSideColumns = 12;
 
-/** Full-width rows under Rivet: the website, then a pointer to the live tuner. */
+/** Full-width rows under Rivet: the website, then the live tuner. */
 constexpr std::string_view kFooter[] = {
     "yassrobotics.com",
-    "Don't forget to try",
     "tuning.yassrobotics.com",
 };
 

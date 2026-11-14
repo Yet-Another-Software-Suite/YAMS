@@ -44,10 +44,9 @@ public final class Rivet {
   /** Columns left beside Rivet for the version and phrase. */
   private static final int SIDE_COLUMNS = 12;
 
-  /** Full-width rows under Rivet: the website, then a pointer to the live tuner. */
+  /** Full-width rows under Rivet: the website, then the live tuner. */
   private static final String[] FOOTER = {
       "yassrobotics.com",
-      "Don't forget to try",
       "tuning.yassrobotics.com",
   };
 
