@@ -192,7 +192,7 @@ void Rivet::Show() {
   }
   const std::string side[] = {"\033[97mYAMS " + VersionLabel(),
                               "\033[97m" + std::string{kWebsite}, "", "",
-                              "\033[92m" + std::string{kTuner}};
+                              "\033[97m" + std::string{kTuner}};
   for (size_t row = 0; row < std::size(kArt); ++row) {
     std::string line = Colorize(kArt[row]);
     if (row >= kVersionRow && row - kVersionRow < std::size(side) &&

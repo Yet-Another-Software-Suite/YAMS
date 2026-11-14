@@ -124,7 +124,7 @@ public final class Rivet {
     try {
       int artWidth = Arrays.stream(ART).mapToInt(String::length).max().orElse(0);
       String[] side = {
-          "\033[97mYAMS " + versionLabel(), "\033[97m" + WEBSITE, "", "", "\033[92m" + TUNER
+          "\033[97mYAMS " + versionLabel(), "\033[97m" + WEBSITE, "", "", "\033[97m" + TUNER
       };
       for (int row = 0; row < ART.length; row++) {
         String line = colorize(ART[row]);
