@@ -31,8 +31,8 @@ namespace {
 constexpr std::string_view kArt[] = {
     R"( .-.    .-.)",
     R"(( o )--( O ))",
-    R"((  ~~~~~~  ))",
-    R"( \  `--'  /)",
+    R"((  ,~^^~, |))",
+    R"( \  `--' ;/)",
     R"( /`-....-'\)",
     R"((_/      \_))",
 };
@@ -44,8 +44,8 @@ constexpr std::string_view kArt[] = {
 constexpr std::string_view kArtColors[] = {
     " ggg    yyy",
     "g w gggy y y",
-    "g  rrrrrr  g",
-    " g  rrrr  g",
+    "g  rrrrrr yg",
+    " g  rrrr yg",
     " gggllllggg",
     "ggg      ggg",
 };
@@ -62,33 +62,32 @@ constexpr std::string_view kFooter[] = {
 };
 
 /**
- * What Rivet might say beside the art; one is picked at random each startup. The first thirteen are
- * Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with kSignature, into
- * five rows of kSideColumns.
+ * What Rivet might say beside the art; one is picked at random each startup. Keep each to three or
+ * four words. The first thirteen are Rivet's speech bubbles from yassrobotics.com/rivet, trimmed.
  */
 constexpr std::string_view kPhrases[] = {
-    "I lick batteries for fun.",
-    "I programmed an arm today :)",
-    "This mustache is 100% real.",
-    "Ask me about YAGSL sometime.",
-    "I once inspected 40 robots in one day.",
+    "I lick batteries.",
+    "I programmed an arm.",
+    "Mustache 100% real.",
+    "Ask me about YAGSL.",
+    "Inspected 40 robots today.",
     "Simulation first, always.",
-    "My pronouns change when I feel like it.",
-    "That tickles.",
+    "My pronouns change often.",
+    "Hey, that tickles!",
     "Free software, free frog.",
-    "I'm basically a CSA now.",
-    "Pi Day is my Super Bowl.",
+    "Basically a CSA now.",
+    "Pi Day rules.",
     "Rivet was here.",
-    "I may have eaten a battery once.",
-    "Ribbit!",
+    "Ate a battery once.",
+    "Ribbit ribbit ribbit!",
     "Battery charged? *lick*",
-    "Need a CSA? I brought zip ties.",
-    "Clipboard in hand, tape measure ready.",
-    "Whistle on, penalty stick ready.",
-    "Hop in, we're going for a joyride.",
-    "Got a sticker? That's my face!",
-    "Spare bolts make great stocking stuffers.",
-    "Gear ratios are my love language.",
+    "Need a CSA?",
+    "Clipboard in hand.",
+    "Whistle on, penalty ready.",
+    "Hop in, joyride time!",
+    "That sticker's my face!",
+    "Bolts in my stocking.",
+    "I love gear ratios.",
     "kP, kI, kD, kRibbit.",
     "Part leprechaun, all frog.",
     "Bumpers on? Let's play!",
