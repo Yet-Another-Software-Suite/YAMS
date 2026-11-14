@@ -99,6 +99,9 @@ public final class Rivet {
   /** Printed under the YAMS version. */
   private static final String WEBSITE = "yassrobotics.com";
 
+  /** Printed a few rows under the website, pointing teams at the live tuner. */
+  private static final String TUNER = "Don't forget to try tuning.yassrobotics.com";
+
   /** Resource, next to this class, that the build writes the YAMS version into. */
   private static final String VERSION_RESOURCE = "yams-version.txt";
 
@@ -111,8 +114,8 @@ public final class Rivet {
   private Rivet() {}
 
   /**
-   * Show Rivet on the display, with the YAMS version and yassrobotics.com to the right of Rivet and
-   * a random phrase underneath. Only the first call does anything.
+   * Show Rivet on the display, with the YAMS version, yassrobotics.com and the live tuner link to
+   * the right of Rivet and a random phrase underneath. Only the first call does anything.
    */
   public static void show() {
     if (!shown.compareAndSet(false, true)) {
@@ -120,11 +123,13 @@ public final class Rivet {
     }
     try {
       int artWidth = Arrays.stream(ART).mapToInt(String::length).max().orElse(0);
-      String[] side = {"\033[97mYAMS " + versionLabel(), "\033[92m" + WEBSITE};
+      String[] side = {
+          "\033[97mYAMS " + versionLabel(), "\033[1;97m" + WEBSITE, "", "", "\033[92m" + TUNER
+      };
       for (int row = 0; row < ART.length; row++) {
         String line = colorize(ART[row]);
         int sideRow = row - VERSION_ROW;
-        if (sideRow >= 0 && sideRow < side.length) {
+        if (sideRow >= 0 && sideRow < side.length && !side[sideRow].isEmpty()) {
           line += " ".repeat(artWidth - ART[row].length() + VERSION_GAP) + side[sideRow];
         }
         DriverStationDisplay.addLine(line);

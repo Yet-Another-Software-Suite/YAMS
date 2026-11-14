@@ -115,6 +115,9 @@ constexpr size_t kVersionGap = 4;
 /** Printed under the YAMS version. */
 constexpr std::string_view kWebsite = "yassrobotics.com";
 
+/** Printed a few rows under the website, pointing teams at the live tuner. */
+constexpr std::string_view kTuner = "Don't forget to try tuning.yassrobotics.com";
+
 /** Width of the widest row of kArt. */
 constexpr size_t ArtWidth() {
   size_t width = 0;
@@ -188,10 +191,12 @@ void Rivet::Show() {
     return;
   }
   const std::string side[] = {"\033[97mYAMS " + VersionLabel(),
-                              "\033[92m" + std::string{kWebsite}};
+                              "\033[1;97m" + std::string{kWebsite}, "", "",
+                              "\033[92m" + std::string{kTuner}};
   for (size_t row = 0; row < std::size(kArt); ++row) {
     std::string line = Colorize(kArt[row]);
-    if (row >= kVersionRow && row - kVersionRow < std::size(side)) {
+    if (row >= kVersionRow && row - kVersionRow < std::size(side) &&
+        !side[row - kVersionRow].empty()) {
       line.append(ArtWidth() - kArt[row].size() + kVersionGap, ' ');
       line += side[row - kVersionRow];
     }

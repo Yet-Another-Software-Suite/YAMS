@@ -19,8 +19,8 @@ class Rivet final {
   Rivet() = delete;
 
   /**
-   * Show Rivet on the display, with the YAMS version and yassrobotics.com to the right of Rivet and
-   * a random phrase underneath. Only the first call does anything.
+   * Show Rivet on the display, with the YAMS version, yassrobotics.com and the live tuner link to
+   * the right of Rivet and a random phrase underneath. Only the first call does anything.
    */
   static void Show();
 
