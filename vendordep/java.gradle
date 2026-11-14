@@ -9,6 +9,22 @@ sourceSets {
     }
 }
 
+// Bake the YAMS version into the core jar so Rivet can show it at startup. A resource, not the jar
+// manifest, because GradleRIO merges vendor jars into one robot jar and drops their manifests.
+def yamsVersionDir = layout.buildDirectory.dir("generated/yams-version")
+def generateYamsVersion = tasks.register('generateYamsVersion') {
+    def version = pubVersion
+    def outputDir = yamsVersionDir
+    inputs.property('version', version)
+    outputs.dir(outputDir)
+    doLast {
+        def versionFile = outputDir.get().file('yams/core/yams-version.txt').asFile
+        versionFile.parentFile.mkdirs()
+        versionFile.text = version
+    }
+}
+sourceSets.main.resources.srcDir(generateYamsVersion)
+
 var javaVersion = "25"
 
 dependencies {

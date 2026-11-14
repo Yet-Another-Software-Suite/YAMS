@@ -55,6 +55,7 @@ import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
 import org.wpilib.util.Pair;
+import yams.core.Rivet;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
 import yams.core.math.ADRCConfig;
@@ -357,6 +358,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   protected SmartMotorControllerConfig() {
     HAL.reportUsage("SmartMotorController", "YAMS");
+    Rivet.show();
   }
 
   /**

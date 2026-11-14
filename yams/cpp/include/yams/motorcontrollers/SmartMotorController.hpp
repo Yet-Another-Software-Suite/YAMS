@@ -55,6 +55,11 @@ class SmartMotorController {
   /** Calls Close() so telemetry, battery-sim state and close hooks are always released. */
   virtual ~SmartMotorController();
 
+ protected:
+  /** Shows Rivet on the SystemCore display the first time any YAMS motor controller is built. */
+  SmartMotorController();
+
+ public:
   // ---- Configuration ------------------------------------------------------
 
   /**

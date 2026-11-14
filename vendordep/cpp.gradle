@@ -77,6 +77,10 @@ model {
             }
             nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
             wpi.vendor.nativeVendor.cpp(it)
+            // The YAMS version Rivet shows at startup. Unquoted; Rivet.cpp turns it into a string.
+            binaries.all {
+                cppCompiler.define 'YAMS_VERSION', pubVersion
+            }
             if (skipCpp) {
                 binaries.all { buildable = false }
             }

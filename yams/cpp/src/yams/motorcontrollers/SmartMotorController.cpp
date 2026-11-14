@@ -23,12 +23,15 @@
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/time.hpp>
 
+#include "yams/Rivet.hpp"
 #include "yams/exceptions.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerCommandRegistry.hpp"
 #include "yams/motorcontrollers/simulation/BatterySim.hpp"
 #include "yams/motorcontrollers/simulation/FollowerSimSupplier.hpp"
 
 namespace yams::motorcontrollers {
+
+SmartMotorController::SmartMotorController() { yams::Rivet::Show(); }
 
 SmartMotorController::~SmartMotorController() { Close(); }
 
