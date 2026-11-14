@@ -16,7 +16,7 @@ import org.wpilib.driverstation.DriverStationDisplay;
  * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
  * <p>The splash is written once, the first time a YAMS motor controller config or swerve drive is
- * built, and fits the display's default 25 columns by 10 rows: Rivet on the left, the YAMS version
+ * built, and fits the display's default 28 columns by 13 rows: Rivet on the left, the YAMS version
  * and a random phrase from Rivet beside, and yassrobotics.com along the bottom. It uses {@link
  * DriverStationDisplay} line mode, so robot code that writes its own lines afterwards simply
  * replaces it.
@@ -50,7 +50,7 @@ public final class Rivet {
   private static final int ART_COLUMNS = 13;
 
   /** Columns left beside Rivet for the version and phrase. */
-  private static final int SIDE_COLUMNS = 12;
+  private static final int SIDE_COLUMNS = 15;
 
   /** Full-width rows under Rivet. */
   private static final String[] FOOTER = {
@@ -58,8 +58,9 @@ public final class Rivet {
   };
 
   /**
-   * What Rivet might say beside the art; one is picked at random each startup. Keep each to three or
-   * four words. The first thirteen are Rivet's speech bubbles from yassrobotics.com/rivet, trimmed.
+   * What Rivet might say beside the art; one is picked at random each startup. Keep each to three
+   * or four words. The first thirteen are Rivet's speech bubbles from yassrobotics.com/rivet,
+   * trimmed.
    */
   private static final String[] PHRASES = {
       "I lick batteries.",

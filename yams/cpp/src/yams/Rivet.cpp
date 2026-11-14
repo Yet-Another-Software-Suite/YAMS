@@ -54,7 +54,7 @@ constexpr std::string_view kArtColors[] = {
 constexpr size_t kArtColumns = 13;
 
 /** Columns left beside Rivet for the version and phrase. */
-constexpr size_t kSideColumns = 12;
+constexpr size_t kSideColumns = 15;
 
 /** Full-width rows under Rivet. */
 constexpr std::string_view kFooter[] = {
