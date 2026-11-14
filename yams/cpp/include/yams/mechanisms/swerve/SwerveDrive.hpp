@@ -39,6 +39,7 @@
 #include <wpi/units/velocity.hpp>
 #include <wpi/util/array.hpp>
 
+#include "yams/Rivet.hpp"
 #include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
@@ -160,6 +161,7 @@ class SwerveDrive {
     ResetOdometry(m_config->GetInitialPose());
 
     SetupTelemetry();
+    Rivet::Show();
 
     m_field2d.SetRobotPose(GetPose());
     telemetry::EnsureMechanismsTunableBackend();
