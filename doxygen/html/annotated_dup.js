@@ -16,11 +16,41 @@ var annotated_dup =
         [ "MechanismGearing", "classyams_1_1gearing_1_1MechanismGearing.html", "classyams_1_1gearing_1_1MechanismGearing" ],
         [ "Sprocket", "classyams_1_1gearing_1_1Sprocket.html", "classyams_1_1gearing_1_1Sprocket" ]
       ] ],
+      [ "motorcontrollers", "namespaceyams_1_1motorcontrollers.html", [
+        [ "simulation", "namespaceyams_1_1motorcontrollers_1_1simulation.html", [
+          [ "ArmSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier" ],
+          [ "BatterySim", "classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html", null ],
+          [ "DCMotorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier" ],
+          [ "ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier" ],
+          [ "FollowerSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier" ],
+          [ "NovaSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier" ],
+          [ "Sensor", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor" ],
+          [ "SensorData", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData" ]
+        ] ],
+        [ "local", "namespaceyams_1_1motorcontrollers_1_1local.html", [
+          [ "A301Wrapper", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper" ],
+          [ "NovaWrapper", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper" ],
+          [ "SparkWrapper", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper" ]
+        ] ],
+        [ "remote", "namespaceyams_1_1motorcontrollers_1_1remote.html", [
+          [ "TalonFXSWrapper", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper" ],
+          [ "TalonFXWrapper", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper" ]
+        ] ],
+        [ "SimSupplier", "classyams_1_1motorcontrollers_1_1SimSupplier.html", "classyams_1_1motorcontrollers_1_1SimSupplier" ],
+        [ "SmartMotorController", "classyams_1_1motorcontrollers_1_1SmartMotorController.html", "classyams_1_1motorcontrollers_1_1SmartMotorController" ],
+        [ "SmartMotorControllerCommandRegistry", "classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html", null ],
+        [ "SmartMotorControllerConfig", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig" ],
+        [ "YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ]
+      ] ],
       [ "math", "namespaceyams_1_1math.html", [
+        [ "ADRCGains", "structyams_1_1math_1_1ADRCGains.html", "structyams_1_1math_1_1ADRCGains" ],
+        [ "ADRCConfig", "classyams_1_1math_1_1ADRCConfig.html", "classyams_1_1math_1_1ADRCConfig" ],
+        [ "ADRCController", "classyams_1_1math_1_1ADRCController.html", "classyams_1_1math_1_1ADRCController" ],
         [ "DerivativeTimeFilter", "classyams_1_1math_1_1DerivativeTimeFilter.html", "classyams_1_1math_1_1DerivativeTimeFilter" ],
         [ "LQRConfig", "classyams_1_1math_1_1LQRConfig.html", "classyams_1_1math_1_1LQRConfig" ],
         [ "LQRController", "classyams_1_1math_1_1LQRController.html", "classyams_1_1math_1_1LQRController" ],
-        [ "SmartMath", "classyams_1_1math_1_1SmartMath.html", "classyams_1_1math_1_1SmartMath" ]
+        [ "SmartMath", "classyams_1_1math_1_1SmartMath.html", "classyams_1_1math_1_1SmartMath" ],
+        [ "TrackingDifferentiator", "classyams_1_1math_1_1TrackingDifferentiator.html", "classyams_1_1math_1_1TrackingDifferentiator" ]
       ] ],
       [ "mechanisms", "namespaceyams_1_1mechanisms.html", [
         [ "config", "namespaceyams_1_1mechanisms_1_1config.html", [
@@ -54,31 +84,6 @@ var annotated_dup =
         ] ],
         [ "SmartMechanism", "classyams_1_1mechanisms_1_1SmartMechanism.html", "classyams_1_1mechanisms_1_1SmartMechanism" ]
       ] ],
-      [ "motorcontrollers", "namespaceyams_1_1motorcontrollers.html", [
-        [ "simulation", "namespaceyams_1_1motorcontrollers_1_1simulation.html", [
-          [ "ArmSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier" ],
-          [ "BatterySim", "classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html", null ],
-          [ "DCMotorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier" ],
-          [ "ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier" ],
-          [ "NovaSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier.html", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier" ],
-          [ "Sensor", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor.html", "classyams_1_1motorcontrollers_1_1simulation_1_1Sensor" ],
-          [ "SensorData", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html", "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData" ]
-        ] ],
-        [ "local", "namespaceyams_1_1motorcontrollers_1_1local.html", [
-          [ "A301Wrapper", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1A301Wrapper" ],
-          [ "NovaWrapper", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1NovaWrapper" ],
-          [ "SparkWrapper", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper.html", "classyams_1_1motorcontrollers_1_1local_1_1SparkWrapper" ]
-        ] ],
-        [ "remote", "namespaceyams_1_1motorcontrollers_1_1remote.html", [
-          [ "TalonFXSWrapper", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper.html", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXSWrapper" ],
-          [ "TalonFXWrapper", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper.html", "classyams_1_1motorcontrollers_1_1remote_1_1TalonFXWrapper" ]
-        ] ],
-        [ "SimSupplier", "classyams_1_1motorcontrollers_1_1SimSupplier.html", "classyams_1_1motorcontrollers_1_1SimSupplier" ],
-        [ "SmartMotorController", "classyams_1_1motorcontrollers_1_1SmartMotorController.html", "classyams_1_1motorcontrollers_1_1SmartMotorController" ],
-        [ "SmartMotorControllerCommandRegistry", "classyams_1_1motorcontrollers_1_1SmartMotorControllerCommandRegistry.html", null ],
-        [ "SmartMotorControllerConfig", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html", "classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig" ],
-        [ "YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ]
-      ] ],
       [ "telemetry", "namespaceyams_1_1telemetry.html", [
         [ "MechanismTelemetry", "classyams_1_1telemetry_1_1MechanismTelemetry.html", "classyams_1_1telemetry_1_1MechanismTelemetry" ],
         [ "UnsupportedTelemetryFields", "structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html", "structyams_1_1telemetry_1_1UnsupportedTelemetryFields" ],
@@ -96,6 +101,7 @@ var annotated_dup =
       ] ],
       [ "units", "namespaceyams_1_1units.html", [
         [ "EasyCRT", "classyams_1_1units_1_1EasyCRT.html", "classyams_1_1units_1_1EasyCRT" ]
-      ] ]
+      ] ],
+      [ "Rivet", "classyams_1_1Rivet.html", "classyams_1_1Rivet" ]
     ] ]
 ];

@@ -1,5 +1,8 @@
 var hierarchy =
 [
+    [ "yams::math::ADRCConfig", "classyams_1_1math_1_1ADRCConfig.html", null ],
+    [ "yams::math::ADRCController", "classyams_1_1math_1_1ADRCController.html", null ],
+    [ "yams::math::ADRCGains", "structyams_1_1math_1_1ADRCGains.html", null ],
     [ "yams::mechanisms::config::ArmConfig", "classyams_1_1mechanisms_1_1config_1_1ArmConfig.html", null ],
     [ "yams::motorcontrollers::simulation::BatterySim", "classyams_1_1motorcontrollers_1_1simulation_1_1BatterySim.html", null ],
     [ "yams::telemetry::BooleanTelemetry&lt; F &gt;", "classyams_1_1telemetry_1_1BooleanTelemetry.html", null ],
@@ -17,6 +20,8 @@ var hierarchy =
     [ "yams::telemetry::MechanismTelemetry", "classyams_1_1telemetry_1_1MechanismTelemetry.html", null ],
     [ "yams::motorcontrollers::SmartMotorControllerConfig::PIDGains", "structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html", null ],
     [ "yams::mechanisms::config::PivotConfig", "classyams_1_1mechanisms_1_1config_1_1PivotConfig.html", null ],
+    [ "yams::math::ADRCController::Reference", "structyams_1_1math_1_1ADRCController_1_1Reference.html", null ],
+    [ "yams::Rivet", "classyams_1_1Rivet.html", null ],
     [ "std::runtime_error", null, [
       [ "yams::exceptions::YamsException", "classyams_1_1exceptions_1_1YamsException.html", [
         [ "yams::exceptions::ArmConfigurationException", "classyams_1_1exceptions_1_1ArmConfigurationException.html", null ],
@@ -35,6 +40,7 @@ var hierarchy =
       [ "yams::motorcontrollers::simulation::ArmSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ArmSimSupplier.html", null ],
       [ "yams::motorcontrollers::simulation::DCMotorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html", null ],
       [ "yams::motorcontrollers::simulation::ElevatorSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html", null ],
+      [ "yams::motorcontrollers::simulation::FollowerSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html", null ],
       [ "yams::motorcontrollers::simulation::NovaSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1NovaSimSupplier.html", null ]
     ] ],
     [ "yams::math::SmartMath", "classyams_1_1math_1_1SmartMath.html", null ],
@@ -76,6 +82,7 @@ var hierarchy =
     [ "wpi::math::SwerveModuleVelocity", null, [
       [ "yams::mechanisms::swerve::SwerveModuleVelocityWithAzimuth", "structyams_1_1mechanisms_1_1swerve_1_1SwerveModuleVelocityWithAzimuth.html", null ]
     ] ],
+    [ "yams::math::TrackingDifferentiator", "classyams_1_1math_1_1TrackingDifferentiator.html", null ],
     [ "yams::telemetry::UnsupportedTelemetryFields", "structyams_1_1telemetry_1_1UnsupportedTelemetryFields.html", null ],
     [ "yams::motorcontrollers::YMotors", "structyams_1_1motorcontrollers_1_1YMotors.html", null ]
 ];

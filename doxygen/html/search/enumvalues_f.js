@@ -1,16 +1,16 @@
 var searchData=
 [
-  ['setpointforce_0',['SetpointForce',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba53ce496d1f8045b34dc00dfd14d73871',1,'yams::telemetry']]],
-  ['setpointposition_1',['SetpointPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba6ae24e569f3d3f041dea585576b18133',1,'yams::telemetry']]],
-  ['setpointvelocity_2',['SetpointVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac412d01968c4fcd6cf5613938e78864d',1,'yams::telemetry']]],
-  ['simplemotorfeedforward_3',['SimpleMotorFeedForward',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3a285786c0dea8af07450f86969650505f',1,'yams::telemetry']]],
-  ['slot_5f0_4',['SLOT_0',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a81078b5ffe742dc7d1c26cdbc05bdf34',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f1_5',['SLOT_1',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a90d71ec57b92ac66f93b7b0a658b8606',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f2_6',['SLOT_2',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a7eccd0b49279bdde76135e56b98f6248',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['slot_5f3_7',['SLOT_3',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#acdc3626942088138de81d50081b979c4a6cbcb9543d25d2275c1a9b74375aa33b',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['state_8',['State',['../classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#a187f08aa9125f5a772017cdbf2c5c345a46a2a41cc6e552044816a2d04634545d',1,'yams::telemetry::SwerveModuleTelemetryConfig']]],
-  ['statorcurrent_9',['StatorCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba3786e14c328f1ff3e0e8d914b00593f2',1,'yams::telemetry']]],
-  ['statorcurrentlimit_10',['StatorCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac741e8ea2b5294fffc2e4a6d70d69337',1,'yams::telemetry']]],
-  ['supplycurrent_11',['SupplyCurrent',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba33993099d27fb7c7678a005175fa4076',1,'yams::telemetry']]],
-  ['supplycurrentlimit_12',['SupplyCurrentLimit',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba59e11379b07e676d83d6c6c8d4b995ff',1,'yams::telemetry']]]
+  ['red_0',['RED',['../classyams_1_1math_1_1TrackingDifferentiator.html#a66d8951cb99886fc90bba8f85c006720aa2d9547b5d3dd9f05984475f7c926da0',1,'yams::math::TrackingDifferentiator']]],
+  ['robotrelative_1',['RobotRelative',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80ad2afb2e679f0594018bad3ca7d29cfbd',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['roll_2',['ROLL',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aa08cd1a31f17f0247ac89e2fbaadaa9e8',1,'yams::mechanisms::config']]],
+  ['rotationcontrollermeasurement_3',['RotationControllerMeasurement',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149afd1c2ddcff5504ee049547a20021b40b',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['rotationcontrollersetpoint_4',['RotationControllerSetpoint',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a857f25760424a42f535384becf8a7d97',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['rotationcube_5',['RotationCube',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80ab6f5230b57ad99b39ac26ac629d6f688',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['rotationd_6',['RotationD',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1afd00ba27e6a5c7d36e42e06e1b3b0dec',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['rotationi_7',['RotationI',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a1babf7e4ba285c75aa9fbf00350bc147',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['rotationp_8',['RotationP',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1ae1f3ad07f08b90c77b61fa85d02e87b2',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['rotationscale_9',['RotationScale',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a10b253ef31cec1f8d234d75579e5507e',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['rotorgearratio_10',['RotorGearRatio',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbadfee9c3462d4080b3fb494d3a31be2fe',1,'yams::telemetry']]],
+  ['rotorposition_11',['RotorPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf1014ba007be5c1e7ec2af7a0562378b',1,'yams::telemetry']]],
+  ['rotorvelocity_12',['RotorVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaa0dbcaafbc64845e3e800d8eb3394e19',1,'yams::telemetry']]]
 ];

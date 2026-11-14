@@ -154,26 +154,28 @@ $(function(){initNavTree('ElevatorSimSupplier_8hpp_source.html','',''); });
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  wpi::sim::ElevatorSim&amp; m_sim;</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  std::function&lt;double()&gt; m_dutyCycleSupplier;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <a class="code hl_class" href="classyams_1_1gearing_1_1MechanismGearing.html">gearing::MechanismGearing</a> m_gearing;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  wpi::units::second_t m_period;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">void</span>* m_batteryKey;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  wpi::math::LinearFilter&lt;double&gt; m_supplyCurrentFilter;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keywordtype">bool</span> m_inputFed{<span class="keyword">false</span>};</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keywordtype">bool</span> m_simUpdated{<span class="keyword">false</span>};</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  wpi::units::volt_t m_lastInputVoltage{0};</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_class" href="classyams_1_1math_1_1DerivativeTimeFilter.html">math::DerivativeTimeFilter</a> m_rotorAccelFilter;</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  wpi::units::meter_t m_circumference;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>};</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  std::function&lt;double(<span class="keywordtype">double</span>)&gt; m_mechanismDutyCycle;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <a class="code hl_class" href="classyams_1_1gearing_1_1MechanismGearing.html">gearing::MechanismGearing</a> m_gearing;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  wpi::units::second_t m_period;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">void</span>* m_batteryKey;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  wpi::math::LinearFilter&lt;double&gt; m_supplyCurrentFilter;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  wpi::units::ampere_t m_supplyCurrent{0};</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  wpi::units::ampere_t m_statorCurrent{0};</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keywordtype">bool</span> m_inputFed{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordtype">bool</span> m_simUpdated{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  wpi::units::volt_t m_lastInputVoltage{0};</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  math::DerivativeTimeFilter m_rotorAccelFilter;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  wpi::units::meter_t m_circumference;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>};</div>
 </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}  <span class="comment">// namespace yams::motorcontrollers::simulation</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}  <span class="comment">// namespace yams::motorcontrollers::simulation</span></div>
 <div class="ttc" id="aDerivativeTimeFilter_8hpp_html"><div class="ttname"><a href="DerivativeTimeFilter_8hpp.html">DerivativeTimeFilter.hpp</a></div></div>
 <div class="ttc" id="aMechanismGearing_8hpp_html"><div class="ttname"><a href="MechanismGearing_8hpp.html">MechanismGearing.hpp</a></div></div>
 <div class="ttc" id="aSimSupplier_8hpp_html"><div class="ttname"><a href="SimSupplier_8hpp.html">SimSupplier.hpp</a></div></div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>
-<div class="ttc" id="aclassyams_1_1math_1_1DerivativeTimeFilter_html"><div class="ttname"><a href="classyams_1_1math_1_1DerivativeTimeFilter.html">yams::math::DerivativeTimeFilter</a></div><div class="ttdef"><b>Definition</b> DerivativeTimeFilter.hpp:18</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SimSupplier_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SimSupplier.html">yams::motorcontrollers::SimSupplier</a></div><div class="ttdef"><b>Definition</b> SimSupplier.hpp:22</div></div>
-<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorController_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">yams::motorcontrollers::SmartMotorController</a></div><div class="ttdef"><b>Definition</b> SmartMotorController.hpp:48</div></div>
+<div class="ttc" id="aclassyams_1_1motorcontrollers_1_1SmartMotorController_html"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">yams::motorcontrollers::SmartMotorController</a></div><div class="ttdef"><b>Definition</b> SmartMotorController.hpp:49</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier_html_a08165f3a68a955cf61e73c16d22f2e0f"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#a08165f3a68a955cf61e73c16d22f2e0f">yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismVelocity</a></div><div class="ttdeci">wpi::units::turns_per_second_t GetMechanismVelocity() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier_html_a12060ae3466c130ec07e83526f0580ea"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#a12060ae3466c130ec07e83526f0580ea">yams::motorcontrollers::simulation::ElevatorSimSupplier::FeedUpdateSim</a></div><div class="ttdeci">void FeedUpdateSim() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier_html_a1e88c36ee1711a787fbb544f9158e6df"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#a1e88c36ee1711a787fbb544f9158e6df">yams::motorcontrollers::simulation::ElevatorSimSupplier::GetStatorCurrent</a></div><div class="ttdeci">wpi::units::ampere_t GetStatorCurrent() override</div></div>
@@ -199,7 +201,7 @@ $(function(){initNavTree('ElevatorSimSupplier_8hpp_source.html','',''); });
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier_html_aee908cae205026f4fd01147720415964"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#aee908cae205026f4fd01147720415964">yams::motorcontrollers::simulation::ElevatorSimSupplier::StarveUpdateSim</a></div><div class="ttdeci">void StarveUpdateSim() override</div></div>
 <div class="ttc" id="aclassyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier_html_af368a2f9fcbcfe7e21339920c5e73e4f"><div class="ttname"><a href="classyams_1_1motorcontrollers_1_1simulation_1_1ElevatorSimSupplier.html#af368a2f9fcbcfe7e21339920c5e73e4f">yams::motorcontrollers::simulation::ElevatorSimSupplier::GetMechanismAcceleration</a></div><div class="ttdeci">wpi::units::turns_per_second_squared_t GetMechanismAcceleration() override</div></div>
 <div class="ttc" id="anamespaceyams_1_1motorcontrollers_1_1simulation_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers_1_1simulation.html">yams::motorcontrollers::simulation</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
-<div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> SimSensorConfig.hpp:15</div></div>
+<div class="ttc" id="anamespaceyams_1_1motorcontrollers_html"><div class="ttname"><a href="namespaceyams_1_1motorcontrollers.html">yams::motorcontrollers</a></div><div class="ttdef"><b>Definition</b> ADRCConfig.hpp:20</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

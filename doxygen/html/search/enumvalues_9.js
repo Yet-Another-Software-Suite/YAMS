@@ -1,12 +1,15 @@
 var searchData=
 [
-  ['low_0',['LOW',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a3f238a96c96348553cc916ab4525620ca41bc94cbd8eebea13ce0491b2ac11b88',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
-  ['lqrencoderposition_1',['LQREncoderPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbae15ebc2555f95127158efefa65624af3',1,'yams::telemetry']]],
-  ['lqrencodervelocity_2',['LQREncoderVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba788f01baadafddd745dd7a52b4fa975e',1,'yams::telemetry']]],
-  ['lqrmaxvoltage_3',['LQRMaxVoltage',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaee0f1b7e4e6813e5df0986c3bb74ed30',1,'yams::telemetry']]],
-  ['lqrmodelposition_4',['LQRModelPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf0452dd5fdc49a3761836d23bf2bbb6a',1,'yams::telemetry']]],
-  ['lqrmodelvelocity_5',['LQRModelVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbae82ae325c44072de2bcf38dd4bf53e1f',1,'yams::telemetry']]],
-  ['lqrqelmsposition_6',['LQRQelmsPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf676f9f9b686a8bc516b84c7bd3747e9',1,'yams::telemetry']]],
-  ['lqrqelmsvelocity_7',['LQRQelmsVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf38d1c6fcf756d75cb3a449291f3b941',1,'yams::telemetry']]],
-  ['lqrrelms_8',['LQRRelms',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba3e275dcaf03a777c9c82271dc0f78858',1,'yams::telemetry']]]
+  ['ka_0',['kA',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba30f767aa191cd5d261e767fd78393607',1,'yams::telemetry']]],
+  ['kboolean_1',['kBoolean',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8caa57f58630ea0106aa965e5bf61a49d02c',1,'yams::motorcontrollers::simulation::SensorData']]],
+  ['kd_2',['kD',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba64fa0b7138d2992f2e7daa5080eb5ed0',1,'yams::telemetry']]],
+  ['kdouble_3',['kDouble',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8caa7fb3efa35444cd88d5a31dc125ca9c28',1,'yams::motorcontrollers::simulation::SensorData']]],
+  ['kenum_4',['kEnum',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8caa57aeb634ac17cdd0c8f3e6c82b16cf99',1,'yams::motorcontrollers::simulation::SensorData']]],
+  ['kg_5',['kG',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba091eb6206c7543b67256e7dc4bf2dc48',1,'yams::telemetry']]],
+  ['ki_6',['kI',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba0dffd4727830beb64cebb872ad89cc23',1,'yams::telemetry']]],
+  ['kint_7',['kInt',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8caa355088fbd6ac81f051e0bd6ede5ab8e0',1,'yams::motorcontrollers::simulation::SensorData']]],
+  ['klong_8',['kLong',['../classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#a53f85542143720a890544eed306bd8caa6a285ab26ec7ec4c22536626eeaaf52e',1,'yams::motorcontrollers::simulation::SensorData']]],
+  ['kp_9',['kP',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba31f3f313ce63f58c2391afd8e01b8f8d',1,'yams::telemetry']]],
+  ['ks_10',['kS',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac65dfb11fc5387999d90b7a3e1b70653',1,'yams::telemetry']]],
+  ['kv_11',['kV',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba63b39853c60d1092c257c1ab898bad0a',1,'yams::telemetry']]]
 ];

@@ -6,6 +6,7 @@ yams.commands3.config
 yams.commands3.mechanisms
 yams.commands3.swerve
 yams.commands3.telemetry
+yams.core
 yams.core.exceptions
 yams.core.gearing
 yams.core.math

@@ -1,0 +1,26 @@
+var classyams_1_1math_1_1ADRCController =
+[
+    [ "Reference", "structyams_1_1math_1_1ADRCController_1_1Reference.html", "structyams_1_1math_1_1ADRCController_1_1Reference" ],
+    [ "ADRCController", "classyams_1_1math_1_1ADRCController.html#a56e523492a313c393edfc452b479a3f0", null ],
+    [ "Calculate", "classyams_1_1math_1_1ADRCController.html#a28ecb4cbcc8a73fc70af11bb4c02b1ce", null ],
+    [ "Calculate", "classyams_1_1math_1_1ADRCController.html#a3160d5524b2803f8bc2e88f1cea2e14d", null ],
+    [ "Calculate", "classyams_1_1math_1_1ADRCController.html#a228e372ff03e1f664977a00c92f2342e", null ],
+    [ "GetB0", "classyams_1_1math_1_1ADRCController.html#a7072924d337a8f27467b84159924c885", null ],
+    [ "GetBandwidth", "classyams_1_1math_1_1ADRCController.html#adafeb754daed59ac2ab4cbba77eb41a6", null ],
+    [ "GetBandwidthScale", "classyams_1_1math_1_1ADRCController.html#a51ff21121bb9165aaf25f427c40ac55e", null ],
+    [ "GetConfig", "classyams_1_1math_1_1ADRCController.html#af07bc3735eb12d99c474471603bf33fb", null ],
+    [ "GetControllerOrder", "classyams_1_1math_1_1ADRCController.html#af37625db7d83edb6dc34a8ce2e01056f", null ],
+    [ "GetEstimatedDisturbance", "classyams_1_1math_1_1ADRCController.html#ad49a7ef6cb332e67ad38e06a3d1eaca2", null ],
+    [ "GetEstimatedStates", "classyams_1_1math_1_1ADRCController.html#a56b12d16fc56fe49645ff1934c1e5520", null ],
+    [ "GetLastOutput", "classyams_1_1math_1_1ADRCController.html#a625eedf3022b7d75d6549a8f1f3d436e", null ],
+    [ "GetObserverBandwidth", "classyams_1_1math_1_1ADRCController.html#ad03a3c7bd645d87d691a4f17403e3db8", null ],
+    [ "GetSettlingTime", "classyams_1_1math_1_1ADRCController.html#a3cef0da9ff1a78597144c69a6ee195f7", null ],
+    [ "GetSystemOrder", "classyams_1_1math_1_1ADRCController.html#a2a92569ae0877aa93e279066b45284d3", null ],
+    [ "GetTrackingDifferentiator", "classyams_1_1math_1_1ADRCController.html#a2eff08b804bb3da8ee829063486751ef", null ],
+    [ "Initialize", "classyams_1_1math_1_1ADRCController.html#a8ff4436f0eafcb775a2bd29f57384a59", null ],
+    [ "IsInitialized", "classyams_1_1math_1_1ADRCController.html#a73ca7bea2650c3e15a96b638ce402a7e", null ],
+    [ "Reset", "classyams_1_1math_1_1ADRCController.html#aa98c178ea3fe7aa4acd739766a6cf1b2", null ],
+    [ "Reset", "classyams_1_1math_1_1ADRCController.html#a35b7ec4ef229d5c0f4dbac72876f6fa0", null ],
+    [ "Step", "classyams_1_1math_1_1ADRCController.html#af8050df7bd2ef3814111b98bcff49581", null ],
+    [ "ADRCConfig", "classyams_1_1math_1_1ADRCController.html#ab83f468800c8eb70a642fcd35062776f", null ]
+];

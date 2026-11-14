@@ -7,5 +7,6 @@ var dir_4575c352274ed5df14ae620a0e1314c4 =
     [ "telemetry", "dir_e49d5c1dd0475dfeac7fe48e75ed2ae6.html", "dir_e49d5c1dd0475dfeac7fe48e75ed2ae6" ],
     [ "units", "dir_fb92314239e022d2e3678c1ad72c176e.html", "dir_fb92314239e022d2e3678c1ad72c176e" ],
     [ "exceptions.hpp", "exceptions_8hpp.html", "exceptions_8hpp" ],
+    [ "Rivet.hpp", "Rivet_8hpp.html", "Rivet_8hpp" ],
     [ "YAMS.hpp", "YAMS_8hpp.html", null ]
 ];

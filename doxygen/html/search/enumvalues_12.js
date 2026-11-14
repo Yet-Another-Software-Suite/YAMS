@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['xy_0',['XY',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325a74c53bcd3dcb2bb79993b2fec37d362a',1,'yams::mechanisms::config::MechanismPositionConfig']]],
-  ['xz_1',['XZ',['../classyams_1_1mechanisms_1_1config_1_1MechanismPositionConfig.html#aaa509aecf464a1c40f07fc365d424325a27db3b98d01e664c17a6620b222c6469',1,'yams::mechanisms::config::MechanismPositionConfig']]]
+  ['velocitycontrol_0',['VelocityControl',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3acab54b4af19a9f13a3b5ca544256d04c',1,'yams::telemetry']]],
+  ['velocitymeasurementdelay_1',['VelocityMeasurementDelay',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba50acbe0a9bee8968b01c56bd5af4c345',1,'yams::telemetry']]]
 ];

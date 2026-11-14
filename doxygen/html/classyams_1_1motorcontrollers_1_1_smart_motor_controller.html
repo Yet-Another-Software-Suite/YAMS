@@ -81,6 +81,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classyams_1_1motorcontrollers_1_1_smart_motor_controller-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">yams::motorcontrollers::SmartMotorController Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
@@ -118,8 +119,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:acb133dee1a3413e5d245a659c318665b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73b0ff0abc5dfa53364ca93581874c0f" id="r_a73b0ff0abc5dfa53364ca93581874c0f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73b0ff0abc5dfa53364ca93581874c0f">SetupSimulation</a> ()=0</td></tr>
 <tr class="separator:a73b0ff0abc5dfa53364ca93581874c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa65892e25f3e4d2b892fd4adb242e400" id="r_aa65892e25f3e4d2b892fd4adb242e400"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa65892e25f3e4d2b892fd4adb242e400">SimIterate</a> ()=0</td></tr>
-<tr class="separator:aa65892e25f3e4d2b892fd4adb242e400"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55be2db8338f9429df0d52e5c61244e6" id="r_a55be2db8338f9429df0d52e5c61244e6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55be2db8338f9429df0d52e5c61244e6">SimIterate</a> ()</td></tr>
+<tr class="separator:a55be2db8338f9429df0d52e5c61244e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cc995feac576477865f4cf46757c0fd" id="r_a2cc995feac576477865f4cf46757c0fd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cc995feac576477865f4cf46757c0fd">SetSimSupplier</a> (std::shared_ptr&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> &gt; supplier)</td></tr>
 <tr class="separator:a2cc995feac576477865f4cf46757c0fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2026dd192b4f903f41aed09bb4332da3" id="r_a2026dd192b4f903f41aed09bb4332da3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2026dd192b4f903f41aed09bb4332da3">GetSimSupplier</a> () const</td></tr>
@@ -188,6 +189,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a05686305c0327991263ede212adfa910"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad02d4e9ffb48e4b2f17cddde4f80815c" id="r_ad02d4e9ffb48e4b2f17cddde4f80815c"><td class="memItemLeft" align="right" valign="top">virtual wpi::math::DCMotor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad02d4e9ffb48e4b2f17cddde4f80815c">GetDCMotor</a> ()=0</td></tr>
 <tr class="separator:ad02d4e9ffb48e4b2f17cddde4f80815c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80a5d9bf0f3319e7d4254f6009a635e6" id="r_a80a5d9bf0f3319e7d4254f6009a635e6"><td class="memItemLeft" align="right" valign="top">wpi::math::DCMotor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a80a5d9bf0f3319e7d4254f6009a635e6">GetMechanismDCMotor</a> ()</td></tr>
+<tr class="separator:a80a5d9bf0f3319e7d4254f6009a635e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77a7d4fc8fd3827dc127a5943edc6390" id="r_a77a7d4fc8fd3827dc127a5943edc6390"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77a7d4fc8fd3827dc127a5943edc6390">SetMechanismSimSupplier</a> (std::shared_ptr&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> &gt; supplier)</td></tr>
+<tr class="separator:a77a7d4fc8fd3827dc127a5943edc6390"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0820b812092a56621f2ef105c95e5f0a" id="r_a0820b812092a56621f2ef105c95e5f0a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0820b812092a56621f2ef105c95e5f0a">GetMechanismDutyCycle</a> (double dutyCycle)</td></tr>
+<tr class="separator:a0820b812092a56621f2ef105c95e5f0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93996001026d16e87eebe17771eee331" id="r_a93996001026d16e87eebe17771eee331"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a93996001026d16e87eebe17771eee331">SetZeroPower</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#aefe3e39d1d0073649bc288c817d3de5b">MotorMode</a> mode)=0</td></tr>
 <tr class="separator:a93996001026d16e87eebe17771eee331"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada08da2b3aca99dfab71e5daa8bf86f9" id="r_ada08da2b3aca99dfab71e5daa8bf86f9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada08da2b3aca99dfab71e5daa8bf86f9">SetMotorInverted</a> (bool inverted)=0</td></tr>
@@ -262,6 +269,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1b9711f019905a08fad877ad0433f91a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abacad19d4461efc10c70c17806085077" id="r_abacad19d4461efc10c70c17806085077"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_l_q_r_controller.html">math::LQRController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abacad19d4461efc10c70c17806085077">GetLQRController</a> ()</td></tr>
 <tr class="separator:abacad19d4461efc10c70c17806085077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad459e88c468ba4bab36159ff4a9fd9d" id="r_aad459e88c468ba4bab36159ff4a9fd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1math_1_1_a_d_r_c_controller.html">math::ADRCController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad459e88c468ba4bab36159ff4a9fd9d">GetADRCController</a> ()</td></tr>
+<tr class="separator:aad459e88c468ba4bab36159ff4a9fd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2f0dd46441ab2f6b34ed69ace2706bc" id="r_aa2f0dd46441ab2f6b34ed69ace2706bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2f0dd46441ab2f6b34ed69ace2706bc">IterateClosedLoopController</a> ()</td></tr>
 <tr class="separator:aa2f0dd46441ab2f6b34ed69ace2706bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28a214c858bd06bc5f9ccfce53d73871" id="r_a28a214c858bd06bc5f9ccfce53d73871"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a28a214c858bd06bc5f9ccfce53d73871">SetupTelemetry</a> (std::shared_ptr&lt; wpi::nt::NetworkTable &gt; dataTable, std::shared_ptr&lt; wpi::nt::NetworkTable &gt; tuningTable)</td></tr>
@@ -315,8 +324,14 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:a3af662d8a51b721ce11c19ed87a96891" id="r_a3af662d8a51b721ce11c19ed87a96891"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3af662d8a51b721ce11c19ed87a96891">SmartMotorController</a> ()</td></tr>
+<tr class="separator:a3af662d8a51b721ce11c19ed87a96891"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0012f24c492856a9d9f45464eb27cf5d" id="r_a0012f24c492856a9d9f45464eb27cf5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0012f24c492856a9d9f45464eb27cf5d">LoadLooselyCoupledFollowers</a> ()</td></tr>
 <tr class="separator:a0012f24c492856a9d9f45464eb27cf5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec0a43c428c87ef9593e301d3ae3d9d1" id="r_aec0a43c428c87ef9593e301d3ae3d9d1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec0a43c428c87ef9593e301d3ae3d9d1">Follow</a> (<a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">SmartMotorController</a> &amp;leader, bool inverted)</td></tr>
+<tr class="separator:aec0a43c428c87ef9593e301d3ae3d9d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18475605501a4dfc2e8c992b91e87648" id="r_a18475605501a4dfc2e8c992b91e87648"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a18475605501a4dfc2e8c992b91e87648">CalculateSimDutyCycle</a> (double dutyCycle)</td></tr>
+<tr class="separator:a18475605501a4dfc2e8c992b91e87648"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3af51d134b879741d7d41b6676568351" id="r_a3af51d134b879741d7d41b6676568351"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3af51d134b879741d7d41b6676568351">ConfigureSoftwarePID</a> (const <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;config)</td></tr>
 <tr class="separator:a3af51d134b879741d7d41b6676568351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad015ae54cac6ca9908b1d123b985426b" id="r_ad015ae54cac6ca9908b1d123b985426b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad015ae54cac6ca9908b1d123b985426b">ForwardPositionToFollowers</a> (wpi::units::turn_t pos)</td></tr>
@@ -327,6 +342,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="separator:a5782ae1bbb2fb8b6fe317550cd8f2ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b4b4fff183f6db669722054b32acebc" id="r_a9b4b4fff183f6db669722054b32acebc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b4b4fff183f6db669722054b32acebc">ForwardVelocityToFollowers</a> (wpi::units::meters_per_second_t vel)</td></tr>
 <tr class="separator:a9b4b4fff183f6db669722054b32acebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a308dec2ae14258e1ab9e9176b53b5e18" id="r_a308dec2ae14258e1ab9e9176b53b5e18"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a308dec2ae14258e1ab9e9176b53b5e18">UsesSystemCoreController</a> () const</td></tr>
+<tr class="separator:a308dec2ae14258e1ab9e9176b53b5e18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4ff1c106c557e469e7c666a72aeddbe" id="r_af4ff1c106c557e469e7c666a72aeddbe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4ff1c106c557e469e7c666a72aeddbe">ApplyADRCConfig</a> (const <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;config)</td></tr>
+<tr class="separator:af4ff1c106c557e469e7c666a72aeddbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1bdb62d42e40ef2a8612f80adfce335" id="r_ae1bdb62d42e40ef2a8612f80adfce335"><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae1bdb62d42e40ef2a8612f80adfce335">BatterySimKey</a> () const</td></tr>
 <tr class="separator:ae1bdb62d42e40ef2a8612f80adfce335"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -340,10 +359,16 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:af05fd0959e6561484393211f342d7d6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9fc7de8cb321be8044e407471ebe9de" id="r_ab9fc7de8cb321be8044e407471ebe9de"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">SmartMotorController</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9fc7de8cb321be8044e407471ebe9de">m_looseFollowers</a></td></tr>
 <tr class="separator:ab9fc7de8cb321be8044e407471ebe9de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa025cbc8171b42c5fecf920a05cebdd" id="r_afa025cbc8171b42c5fecf920a05cebdd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa025cbc8171b42c5fecf920a05cebdd">m_iteratedByLeader</a> {false}</td></tr>
+<tr class="separator:afa025cbc8171b42c5fecf920a05cebdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a87bd52355b9b46db7e4197ee751515" id="r_a4a87bd52355b9b46db7e4197ee751515"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a87bd52355b9b46db7e4197ee751515">m_simulatesMechanism</a> {false}</td></tr>
+<tr class="separator:a4a87bd52355b9b46db7e4197ee751515"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cd7005a5633c5d1804c975baac60cf1" id="r_a0cd7005a5633c5d1804c975baac60cf1"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::math::PIDController &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cd7005a5633c5d1804c975baac60cf1">m_pid</a></td></tr>
 <tr class="separator:a0cd7005a5633c5d1804c975baac60cf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae824dc1fc0224f846e6cafa545504b83" id="r_ae824dc1fc0224f846e6cafa545504b83"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="classyams_1_1math_1_1_l_q_r_controller.html">math::LQRController</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae824dc1fc0224f846e6cafa545504b83">m_lqr</a></td></tr>
 <tr class="separator:ae824dc1fc0224f846e6cafa545504b83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac68ef9656e50abd2889a844473b595fd" id="r_ac68ef9656e50abd2889a844473b595fd"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="classyams_1_1math_1_1_a_d_r_c_controller.html">math::ADRCController</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac68ef9656e50abd2889a844473b595fd">m_adrc</a></td></tr>
+<tr class="separator:ac68ef9656e50abd2889a844473b595fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d8a73378661ae37bef733fe94b25d95" id="r_a6d8a73378661ae37bef733fe94b25d95"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::math::TrapezoidProfile&lt; wpi::units::turns &gt;::State &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d8a73378661ae37bef733fe94b25d95">m_trapState</a></td></tr>
 <tr class="separator:a6d8a73378661ae37bef733fe94b25d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c3e0850b3f6b4cc9074012e4382152f" id="r_a2c3e0850b3f6b4cc9074012e4382152f"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::math::ExponentialProfile&lt; wpi::units::turns, wpi::units::volts &gt;::State &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c3e0850b3f6b4cc9074012e4382152f">m_expoState</a></td></tr>
@@ -354,6 +379,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:aca2a9e9e9fa1389bcb6d04f174510c3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a052eafc722ac6ab2f1f8d0dcfdd4c02b" id="r_a052eafc722ac6ab2f1f8d0dcfdd4c02b"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a052eafc722ac6ab2f1f8d0dcfdd4c02b">m_lastClosedLoopMechanismPosition</a></td></tr>
 <tr class="separator:a052eafc722ac6ab2f1f8d0dcfdd4c02b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a948bfe2d0b961a6e3f5a172f16a84f5e" id="r_a948bfe2d0b961a6e3f5a172f16a84f5e"><td class="memItemLeft" align="right" valign="top">std::optional&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a948bfe2d0b961a6e3f5a172f16a84f5e">m_lastClosedLoopVoltage</a></td></tr>
+<tr class="separator:a948bfe2d0b961a6e3f5a172f16a84f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8b6c66e45a6ef7fe52c23d2903ce777" id="r_ab8b6c66e45a6ef7fe52c23d2903ce777"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turn_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8b6c66e45a6ef7fe52c23d2903ce777">m_setpointPosition</a></td></tr>
 <tr class="separator:ab8b6c66e45a6ef7fe52c23d2903ce777"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1236dab38dc06d341b2ef2b114d124ce" id="r_a1236dab38dc06d341b2ef2b114d124ce"><td class="memItemLeft" align="right" valign="top">std::optional&lt; wpi::units::turns_per_second_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1236dab38dc06d341b2ef2b114d124ce">m_setpointVelocity</a></td></tr>
@@ -384,6 +411,11 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a764f208285d36b8f5256b91eb0f58c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a756ef3b7ccd18861d91a0b17453ceedd" id="r_a756ef3b7ccd18861d91a0b17453ceedd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a756ef3b7ccd18861d91a0b17453ceedd">m_closed</a> {false}</td></tr>
 <tr class="separator:a756ef3b7ccd18861d91a0b17453ceedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
+<tr class="memitem:af156affb84338ee65bb6f3acaf9605f6" id="r_af156affb84338ee65bb6f3acaf9605f6"><td class="memItemLeft" align="right" valign="top">static constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af156affb84338ee65bb6f3acaf9605f6">kClosedLoopRampFullScaleVolts</a> = 12.0</td></tr>
+<tr class="separator:af156affb84338ee65bb6f3acaf9605f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class for all YAMS motor controller wrappers.</p>
@@ -458,6 +490,32 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a3af662d8a51b721ce11c19ed87a96891" name="a3af662d8a51b721ce11c19ed87a96891"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3af662d8a51b721ce11c19ed87a96891">&#9670;&#160;</a></span>SmartMotorController()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">yams::motorcontrollers::SmartMotorController::SmartMotorController </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Shows <a class="el" href="classyams_1_1_rivet.html">Rivet</a> on the Driver Station display the first time any YAMS motor controller is built. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a5cbf668d8658da13c22e8687acccb380" name="a5cbf668d8658da13c22e8687acccb380"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5cbf668d8658da13c22e8687acccb380">&#9670;&#160;</a></span>AddCloseHook()</h2>
@@ -477,6 +535,44 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">hook</td><td>Callable run once on <a class="el" href="#a7d4c4a7f768484bc817aae56aa885e6b">Close()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af4ff1c106c557e469e7c666a72aeddbe" name="af4ff1c106c557e469e7c666a72aeddbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4ff1c106c557e469e7c666a72aeddbe">&#9670;&#160;</a></span>ApplyADRCConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::SmartMotorController::ApplyADRCConfig </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html">SmartMotorControllerConfig</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Build the ADRC for this motor's slot from the config, replacing any previous one, or clear it. The control period is the closed loop control period, the one IterateClosedLoopController runs at, so the controller's discrete model cannot drift from the loop that steps it. Each wrapper calls this when a config is applied.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>Config being applied. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classyams_1_1exceptions_1_1_smart_motor_controller_configuration_exception.html">exceptions::SmartMotorControllerConfigurationException</a></td><td>if the ADRC config cannot build a controller. </td></tr>
   </table>
   </dd>
 </dl>
@@ -564,6 +660,32 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a18475605501a4dfc2e8c992b91e87648" name="a18475605501a4dfc2e8c992b91e87648"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18475605501a4dfc2e8c992b91e87648">&#9670;&#160;</a></span>CalculateSimDutyCycle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double yams::motorcontrollers::SmartMotorController::CalculateSimDutyCycle </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dutyCycle</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Weigh a duty cycle this motor controller applies with its loosely coupled followers' own. </p>
+
+</div>
+</div>
 <a id="a5f9666fe626a8144bdd0d4e20ae33fa2" name="a5f9666fe626a8144bdd0d4e20ae33fa2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5f9666fe626a8144bdd0d4e20ae33fa2">&#9670;&#160;</a></span>CheckConfigSafety()</h2>
 
@@ -626,6 +748,43 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>Config being applied. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aec0a43c428c87ef9593e301d3ae3d9d1" name="aec0a43c428c87ef9593e301d3ae3d9d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec0a43c428c87ef9593e301d3ae3d9d1">&#9670;&#160;</a></span>Follow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::SmartMotorController::Follow </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller.html">SmartMotorController</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>leader</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>inverted</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Read the simulation of a leader whose motor model has this motor, instead of simulating it. Its current is in the leader's, so BatterySim does not count it again. Its own loosely coupled followers read the leader's simulation too.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">leader</td><td>Motor controller whose simulation has this motor. Must outlive this one's use of it. </td></tr>
+    <tr><td class="paramname">inverted</td><td>Whether this motor is inverted from the leader. </td></tr>
   </table>
   </dd>
 </dl>
@@ -733,6 +892,25 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Forward a velocity setpoint to all loosely coupled followers. Call at the end of SetVelocity(turns_per_second_t) in each concrete wrapper. </p>
+
+</div>
+</div>
+<a id="aad459e88c468ba4bab36159ff4a9fd9d" name="aad459e88c468ba4bab36159ff4a9fd9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad459e88c468ba4bab36159ff4a9fd9d">&#9670;&#160;</a></span>GetADRCController()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1math_1_1_a_d_r_c_controller.html">math::ADRCController</a> * yams::motorcontrollers::SmartMotorController::GetADRCController </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The ADRC running the closed loop, if the config selected one. Use it to read the estimated disturbance or states. The ADRC was written by FRC Team 8331.</p>
+<dl class="section return"><dt>Returns</dt><dd>The ADRC, or nullptr if the closed loop does not use one. </dd></dl>
 
 </div>
 </div>
@@ -1116,6 +1294,50 @@ Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Mechanism acceleration in turns per second squared. </dd></dl>
 
 <p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_a301_wrapper.html#ad0c570d87c8595cb18d352131b7e942e">yams::motorcontrollers::local::A301Wrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_nova_wrapper.html#aa6611df084c539aeaf8f71d5ab00ddba">yams::motorcontrollers::local::NovaWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#aa0e4a43e0e565d8b38de2a1a0afc94f0">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#a765be11969ffeb8991d52ed60a7f3eed">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#afabde9ea9fd5fae2161420b2a7a2ebc1">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+
+</div>
+</div>
+<a id="a80a5d9bf0f3319e7d4254f6009a635e6" name="a80a5d9bf0f3319e7d4254f6009a635e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80a5d9bf0f3319e7d4254f6009a635e6">&#9670;&#160;</a></span>GetMechanismDCMotor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::math::DCMotor yams::motorcontrollers::SmartMotorController::GetMechanismDCMotor </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the motors of the mechanism this motor controller drives: its own <a class="el" href="#ad02d4e9ffb48e4b2f17cddde4f80815c">GetDCMotor()</a> and its loosely coupled followers', except those already given a mechanism of their own. A mechanism simulates every motor with it. A follower's torque is given at this motor's rotor, from the gearing of each, and the free speed is this motor's.</p>
+<dl class="section return"><dt>Returns</dt><dd>DCMotor of every motor on the mechanism. </dd></dl>
+
+</div>
+</div>
+<a id="a0820b812092a56621f2ef105c95e5f0a" name="a0820b812092a56621f2ef105c95e5f0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0820b812092a56621f2ef105c95e5f0a">&#9670;&#160;</a></span>GetMechanismDutyCycle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double yams::motorcontrollers::SmartMotorController::GetMechanismDutyCycle </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dutyCycle</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's simulation has its loosely coupled followers' motors too, and each motor controller applies its own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its share of <a class="el" href="#a80a5d9bf0f3319e7d4254f6009a635e6">GetMechanismDCMotor()</a>'s torque. Otherwise it is the given duty cycle.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dutyCycle</td><td>Duty cycle this motor controller applies. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Duty cycle of every motor in its simulation. </dd></dl>
 
 </div>
 </div>
@@ -2638,6 +2860,30 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a77a7d4fc8fd3827dc127a5943edc6390" name="a77a7d4fc8fd3827dc127a5943edc6390"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77a7d4fc8fd3827dc127a5943edc6390">&#9670;&#160;</a></span>SetMechanismSimSupplier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::SmartMotorController::SetMechanismSimSupplier </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>supplier</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set the simulation of the mechanism this motor controller drives, made with <a class="el" href="#a80a5d9bf0f3319e7d4254f6009a635e6">GetMechanismDCMotor()</a>. Each loosely coupled follower reads it, so its encoder follows the mechanism, and its current is not counted again by BatterySim. A follower that drives a mechanism of its own must be given it first, so it is left out of this one.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">supplier</td><td>Simulation of the mechanism. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9f89e138cc69c4aefc9d9d5c37a1857f" name="a9f89e138cc69c4aefc9d9d5c37a1857f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9f89e138cc69c4aefc9d9d5c37a1857f">&#9670;&#160;</a></span>SetMechanismUpperLimit()</h2>
 
@@ -3000,7 +3246,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Attach a <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> that provides physics-model position and velocity for simulation. When set, mechanism <a class="el" href="#aa65892e25f3e4d2b892fd4adb242e400">SimIterate()</a> calls will use this supplier instead of the internal DCMotorSim.</p>
+<p>Attach a <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> that provides physics-model position and velocity for simulation. When set, mechanism <a class="el" href="#a55be2db8338f9429df0d52e5c61244e6">SimIterate()</a> calls will use this supplier instead of the internal DCMotorSim.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">supplier</td><td>Shared <a class="el" href="classyams_1_1motorcontrollers_1_1_sim_supplier.html">SimSupplier</a> instance, or nullptr to detach. </td></tr>
@@ -3379,8 +3625,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="aa65892e25f3e4d2b892fd4adb242e400" name="aa65892e25f3e4d2b892fd4adb242e400"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa65892e25f3e4d2b892fd4adb242e400">&#9670;&#160;</a></span>SimIterate()</h2>
+<a id="a55be2db8338f9429df0d52e5c61244e6" name="a55be2db8338f9429df0d52e5c61244e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55be2db8338f9429df0d52e5c61244e6">&#9670;&#160;</a></span>SimIterate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3397,13 +3643,13 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Advance the motor simulation by one loop iteration. </p>
+<p>Advance the motor simulation by one loop iteration. Each motor controller's <a class="el" href="#a55be2db8338f9429df0d52e5c61244e6">SimIterate()</a> calls this last, with <a class="el" href="#a55be2db8338f9429df0d52e5c61244e6">SmartMotorController::SimIterate()</a>: it iterates the loosely coupled followers reading this motor controller's mechanism's simulation, which a mechanism steps right before. Each follower's iterates its own. </p>
 
-<p>Implemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_a301_wrapper.html#ad883466f608e67ff7c021ba6aaf15c9b">yams::motorcontrollers::local::A301Wrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_nova_wrapper.html#a59c828f1d35a08034452ec892d68769f">yams::motorcontrollers::local::NovaWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a807cfa2b27abd056a7e8737db58ccb9d">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#abf014f373c9d5bc6e8e4af9a89c200a4">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#ae286eb0b64444c78bffd3d0c567fa8c7">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
+<p>Reimplemented in <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_a301_wrapper.html#ad883466f608e67ff7c021ba6aaf15c9b">yams::motorcontrollers::local::A301Wrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_nova_wrapper.html#a59c828f1d35a08034452ec892d68769f">yams::motorcontrollers::local::NovaWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1local_1_1_spark_wrapper.html#a807cfa2b27abd056a7e8737db58ccb9d">yams::motorcontrollers::local::SparkWrapper</a>, <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_s_wrapper.html#abf014f373c9d5bc6e8e4af9a89c200a4">yams::motorcontrollers::remote::TalonFXSWrapper</a>, and <a class="el" href="classyams_1_1motorcontrollers_1_1remote_1_1_talon_f_x_wrapper.html#ae286eb0b64444c78bffd3d0c567fa8c7">yams::motorcontrollers::remote::TalonFXWrapper</a>.</p>
 
 </div>
 </div>
@@ -3527,6 +3773,33 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a308dec2ae14258e1ab9e9176b53b5e18" name="a308dec2ae14258e1ab9e9176b53b5e18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a308dec2ae14258e1ab9e9176b53b5e18">&#9670;&#160;</a></span>UsesSystemCoreController()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::SmartMotorController::UsesSystemCoreController </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether the closed loop controller runs on the SystemCore instead of the motor controller. An LQR and an ADRC both need the measured state every loop, so they run here. Wrappers use this to leave their onboard closed loop alone and send a plain voltage.</p>
+<dl class="section return"><dt>Returns</dt><dd>true when an LQR or an ADRC owns the closed loop. </dd></dl>
+
+</div>
+</div>
 <a id="a4fcf8d0014e7c3828572e44c6c2efba5" name="a4fcf8d0014e7c3828572e44c6c2efba5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4fcf8d0014e7c3828572e44c6c2efba5">&#9670;&#160;</a></span>WithTelemetry()</h2>
 
@@ -3554,6 +3827,52 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="af156affb84338ee65bb6f3acaf9605f6" name="af156affb84338ee65bb6f3acaf9605f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af156affb84338ee65bb6f3acaf9605f6">&#9670;&#160;</a></span>kClosedLoopRampFullScaleVolts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr double yams::motorcontrollers::SmartMotorController::kClosedLoopRampFullScaleVolts = 12.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Full scale of <a class="el" href="classyams_1_1motorcontrollers_1_1_smart_motor_controller_config.html#a2b3bcc61d7fcb56255e29ecb524f95df">SmartMotorControllerConfig::WithClosedLoopRampRate</a>: the ramp rate is the time the output takes to change by this much, as on a Talon. </p>
+
+</div>
+</div>
+<a id="ac68ef9656e50abd2889a844473b595fd" name="ac68ef9656e50abd2889a844473b595fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac68ef9656e50abd2889a844473b595fd">&#9670;&#160;</a></span>m_adrc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;<a class="el" href="classyams_1_1math_1_1_a_d_r_c_controller.html">math::ADRCController</a>&gt; yams::motorcontrollers::SmartMotorController::m_adrc</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>ADRC running the closed loop, when the config selects one. Written by FRC Team 8331. </p>
+
+</div>
+</div>
 <a id="a756ef3b7ccd18861d91a0b17453ceedd" name="a756ef3b7ccd18861d91a0b17453ceedd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a756ef3b7ccd18861d91a0b17453ceedd">&#9670;&#160;</a></span>m_closed</h2>
 
@@ -3688,6 +4007,29 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="afa025cbc8171b42c5fecf920a05cebdd" name="afa025cbc8171b42c5fecf920a05cebdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa025cbc8171b42c5fecf920a05cebdd">&#9670;&#160;</a></span>m_iteratedByLeader</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::SmartMotorController::m_iteratedByLeader {false}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether this motor controller reads a leader's simulation, such as a mechanism's, which the leader iterates right after it steps. Its own <a class="el" href="#a55be2db8338f9429df0d52e5c61244e6">SimIterate()</a> then does nothing, so it is not iterated twice in a loop. </p>
+
+</div>
+</div>
 <a id="a052eafc722ac6ab2f1f8d0dcfdd4c02b" name="a052eafc722ac6ab2f1f8d0dcfdd4c02b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a052eafc722ac6ab2f1f8d0dcfdd4c02b">&#9670;&#160;</a></span>m_lastClosedLoopMechanismPosition</h2>
 
@@ -3708,6 +4050,29 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Mechanism position the closed-loop controller last used, unwrapped across the continuous wrapping point. </p>
+
+</div>
+</div>
+<a id="a948bfe2d0b961a6e3f5a172f16a84f5e" name="a948bfe2d0b961a6e3f5a172f16a84f5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a948bfe2d0b961a6e3f5a172f16a84f5e">&#9670;&#160;</a></span>m_lastClosedLoopVoltage</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt;double&gt; yams::motorcontrollers::SmartMotorController::m_lastClosedLoopVoltage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The voltage the closed loop sent last, which the closed loop ramp starts from; empty until it runs, and again whenever it starts over. </p>
 
 </div>
 </div>
@@ -3952,6 +4317,29 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4a87bd52355b9b46db7e4197ee751515" name="a4a87bd52355b9b46db7e4197ee751515"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a87bd52355b9b46db7e4197ee751515">&#9670;&#160;</a></span>m_simulatesMechanism</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool yams::motorcontrollers::SmartMotorController::m_simulatesMechanism {false}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Whether this motor controller's simulation is its mechanism's, set with SetMechanismSimSupplier, which has its loosely coupled followers' motors. </p>
 
 </div>
 </div>

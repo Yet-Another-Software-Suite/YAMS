@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['simpleff_0',['simpleFF',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#ad9ee109363aa06783415040e17569ebb',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
+  ['rate_0',['rate',['../structyams_1_1math_1_1ADRCController_1_1Reference.html#a70748e15b989f4cfb0206bedd011d5c9',1,'yams::math::ADRCController::Reference']]]
 ];

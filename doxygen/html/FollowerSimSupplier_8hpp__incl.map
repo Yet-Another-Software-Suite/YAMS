@@ -1,0 +1,24 @@
+<map id="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/FollowerSimSupplier.hpp" name="/home/runner/work/YAMS/YAMS/yams/cpp/include/yams/motorcontrollers/simulation/FollowerSimSupplier.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="514,5,773,84"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,225,154,252"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="531,87,133,222,131,217,529,82"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="178,225,426,252"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="577,85,340,219,338,214,572,84"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="450,225,669,252"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="629,83,573,212,569,209,624,85"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="1056,225,1215,252"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="743,82,1091,218,1085,219,742,87"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="1239,225,1400,252"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="773,80,1261,219,1256,221,773,85"/>
+<area shape="rect" id="Node000007" href="$SimSupplier_8hpp.html" title=" " alt="" coords="666,132,835,177"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="683,82,721,121,715,120,681,87"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="665,168,170,227,169,222,665,162"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="668,171,390,224,389,219,662,171"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="702,177,605,221,603,216,697,178"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="836,171,1061,221,1056,221,835,176"/>
+<area shape="poly" id="edge13_Node000007_Node000006" title=" " alt="" coords="836,165,1226,223,1221,224,835,171"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="879,225,1032,252"/>
+<area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="805,175,911,219,906,218,804,180"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="693,225,855,252"/>
+<area shape="poly" id="edge12_Node000007_Node000009" title=" " alt="" coords="758,175,768,211,764,208,755,179"/>
+</map>

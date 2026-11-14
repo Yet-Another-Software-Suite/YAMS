@@ -1,5 +1,28 @@
 var searchData=
 [
-  ['velocitycontrol_0',['VelocityControl',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3acab54b4af19a9f13a3b5ca544256d04c',1,'yams::telemetry']]],
-  ['velocitymeasurementdelay_1',['VelocityMeasurementDelay',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba50acbe0a9bee8968b01c56bd5af4c345',1,'yams::telemetry']]]
+  ['temperaturelimit_0',['TemperatureLimit',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3a27e4461bfdcae2fc134c892e568a6983',1,'yams::telemetry']]],
+  ['third_1',['THIRD',['../classyams_1_1math_1_1ADRCConfig.html#ab162bf509449dbdfb6ca3d7fa7c50954ac39efd068faa8bf1b4e348d7cd43c229',1,'yams::math::ADRCConfig']]],
+  ['tod_2',['TOD',['../classyams_1_1math_1_1TrackingDifferentiator.html#a66d8951cb99886fc90bba8f85c006720aced08f9753e42c326f2543214af8dd94',1,'yams::math::TrackingDifferentiator']]],
+  ['translationcube_3',['TranslationCube',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80a0898c4abb341abb448ed6a70a20225f1',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['translationd_4',['TranslationD',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a265265392ae8e9e8feccc42644183cb8',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['translationi_5',['TranslationI',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a8a11ea6fe811c5f577b4066f6bbbbe5e',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['translationp_6',['TranslationP',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1ac0dba8b6b6906dc9984e1cc626abd102',1,'yams::telemetry::SwerveDriveTelemetryConfig']]],
+  ['translationscale_7',['TranslationScale',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149ac5ed05126cd8d791c8affd4795097150',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['trapezoidalprofilemaxacceleration_8',['TrapezoidalProfileMaxAcceleration',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba0228bbdf83d9a3a529d0f83bf01f2534',1,'yams::telemetry']]],
+  ['trapezoidalprofilemaxjerk_9',['TrapezoidalProfileMaxJerk',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaf700cf3fac9d95cc1f2758278e2c651b',1,'yams::telemetry']]],
+  ['trapezoidalprofilemaxvelocity_10',['TrapezoidalProfileMaxVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbaba787f9e89a498fd4d5d34f876609764',1,'yams::telemetry']]],
+  ['tunablealliancerelative_11',['TunableAllianceRelative',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80a8354fa4db54ec21016d5d75bf4177a6a',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunableclosedloopcontrollerslot_12',['TunableClosedLoopControllerSlot',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba31748088e3ecff44b15790a9a51d09a7',1,'yams::telemetry']]],
+  ['tunabledeadband_13',['TunableDeadband',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a6835f78c1068a979878cffb4ce55528d',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablemaxangularvelocity_14',['TunableMaxAngularVelocity',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a04206134ffcb05ca123f26587c309f9b',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablemaxlinearvelocity_15',['TunableMaxLinearVelocity',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149acb9450640fd9f2639be774060206e1ba',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablerobotrelative_16',['TunableRobotRelative',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80acb144cd592a35a42a5eb881afa8899f1',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablerotationcube_17',['TunableRotationCube',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80a4d45e9e318256edb4d568205f0b1e04d',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablerotationscale_18',['TunableRotationScale',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149a253ae946a5602b173bbe86de821ba7e3',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablesetpointposition_19',['TunableSetpointPosition',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba810f54345cdff825f27245110e05138a',1,'yams::telemetry']]],
+  ['tunablesetpointvelocity_20',['TunableSetpointVelocity',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbac1ccc23fe01a4944f742accd0fc49628',1,'yams::telemetry']]],
+  ['tunabletranslationcube_21',['TunableTranslationCube',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#afa3f9653233ae8e5b1b1a18040928c80aa38659aa3a34e57a9b590c35cf74a93f',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunabletranslationscale_22',['TunableTranslationScale',['../classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStreamTelemetry.html#aac670b3d377d6d676cfcbbd96599f149afb5e3e0b0f182fa0d08a8f29f254784f',1,'yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry']]],
+  ['tunablevoltage_23',['TunableVoltage',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba6cc279736728abd8918e30d787a07ff3',1,'yams::telemetry']]],
+  ['tunablevoltageenabled_24',['TunableVoltageEnabled',['../namespaceyams_1_1telemetry.html#a238ac794488fd869e4dda99a31cfd4c3a9e3b72bdd35a59c9c7daf70ced012d68',1,'yams::telemetry']]]
 ];

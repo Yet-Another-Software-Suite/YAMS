@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['pitch_0',['PITCH',['../namespaceyams_1_1mechanisms_1_1config.html#a2330abe78bb98cf43a364422e289a66aa79cc664d2e33a452df89eb4904e8ca1c',1,'yams::mechanisms::config']]],
-  ['pose_1',['Pose',['../classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0a8109c9c9d6a2ca3bec3e006fe51a5f3e',1,'yams::telemetry::SwerveDriveTelemetryConfig']]]
+  ['open_5floop_0',['OPEN_LOOP',['../classyams_1_1motorcontrollers_1_1SmartMotorControllerConfig.html#a73061bc4b0051a91dc7ed817147d3ba9a8962a9ac03b4abae53d6aea79b374f7d',1,'yams::motorcontrollers::SmartMotorControllerConfig']]],
+  ['openloopramprate_1',['OpenloopRampRate',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dbab3083b65ad6378cef1abecccc8c32c85',1,'yams::telemetry']]],
+  ['outputvoltage_2',['OutputVoltage',['../namespaceyams_1_1telemetry.html#a22dea677a14f77eebd6f2123521ea7dba40aa78975a7e1af51b0b8e932e87bb59',1,'yams::telemetry']]]
 ];

@@ -1,0 +1,27 @@
+var classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier =
+[
+    [ "FollowerSimSupplier", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a683b08e8347037817a571bf09836ef95", null ],
+    [ "FeedInput", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#acaa8fdcb2b4c768063bd360583835330", null ],
+    [ "FeedUpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a963795da687d22b354424487e7add0ea", null ],
+    [ "GetMechanismAcceleration", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a987e50bd3c373dd0aa4e074dfa5d34cf", null ],
+    [ "GetMechanismPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#af6887e5e895fc9ad32059e233c2f59ad", null ],
+    [ "GetMechanismStatorVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a3f1942d0c0382a681179c2cb5bc27885", null ],
+    [ "GetMechanismSupplyVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a1ed13aed9b972e54384544326701b4ba", null ],
+    [ "GetMechanismVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#aa367d92676003384b81e283544fd02d6", null ],
+    [ "GetRotorAcceleration", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a916a814f8bebe305b5c968ff54348276", null ],
+    [ "GetRotorPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a570ae0310e701342ca01ddc8706391b4", null ],
+    [ "GetRotorVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a4d623b6810465b58fcd4b5d9ee8c363f", null ],
+    [ "GetStatorCurrent", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#ab7ceb7d6f53f5f32fb6a383d46e47e72", null ],
+    [ "GetSupplyCurrent", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#ae1dd913be8d5e1cc38e297f7193141bd", null ],
+    [ "GetUpdatedSim", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#ab3723c0582e143b3e4d78975ba68c80d", null ],
+    [ "IsInputFed", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#af2260ca49b7cb1ed5f98a6fdb55b2366", null ],
+    [ "SetMechanismPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a8bcaee3f0202dc7f60df4261348ff193", null ],
+    [ "SetMechanismStatorDutyCycle", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a0de1c21d20faf4fb30314b6f4a79956e", null ],
+    [ "SetMechanismStatorVoltage", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#aed177fc28b64dcf469fcce05b5265c3b", null ],
+    [ "SetMechanismVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a8964b7f14ceb5a92724a351b227e36a3", null ],
+    [ "SetRotorPosition", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a95b32281a67191b092a791b6d71e21dd", null ],
+    [ "SetRotorVelocity", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a8338859e32949ac8f0d383eb6b7037e2", null ],
+    [ "StarveInput", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#ae9ac4fa11a7bcbc03ee4349b4aa33fa1", null ],
+    [ "StarveUpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a8a819a06346ce41ad9b0eb6d09fb05b2", null ],
+    [ "UpdateSim", "classyams_1_1motorcontrollers_1_1simulation_1_1FollowerSimSupplier.html#a5c3fcb7abc8ce7619fb8ee3d03c08a1d", null ]
+];

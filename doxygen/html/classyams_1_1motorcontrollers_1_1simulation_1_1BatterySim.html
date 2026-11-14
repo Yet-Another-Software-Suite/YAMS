@@ -105,6 +105,7 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a86380ad47196073e6081669324406eb1" id="r_a86380ad47196073e6081669324406eb1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a86380ad47196073e6081669324406eb1">ResetDischarge</a> ()</td></tr>
 <tr class="memitem:a4c8d89fde3e172ddf8f445b3ba1482cc" id="r_a4c8d89fde3e172ddf8f445b3ba1482cc"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c8d89fde3e172ddf8f445b3ba1482cc">GetStateOfCharge</a> ()</td></tr>
 <tr class="memitem:a3af4da9c7a09760332bab23567794b94" id="r_a3af4da9c7a09760332bab23567794b94"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3af4da9c7a09760332bab23567794b94">RemoveCurrent</a> (const void *id)</td></tr>
+<tr class="memitem:aea59d022b6a89ec807fd361df82e0596" id="r_aea59d022b6a89ec807fd361df82e0596"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea59d022b6a89ec807fd361df82e0596">SetSimulatedByLeader</a> (const void *id, bool inLeader)</td></tr>
 <tr class="memitem:a494fc2bf14ba57f25519c1573657f2a2" id="r_a494fc2bf14ba57f25519c1573657f2a2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a494fc2bf14ba57f25519c1573657f2a2">Reset</a> ()</td></tr>
 <tr class="memitem:aac88cf26935eb29fd1689decf1ef4c17" id="r_aac88cf26935eb29fd1689decf1ef4c17"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac88cf26935eb29fd1689decf1ef4c17">HasCurrent</a> (const void *id)</td></tr>
 </table><table class="memberdecls">
@@ -446,6 +447,43 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Reset the simulated battery back to a full charge. </p>
+
+</div>
+</div>
+<a id="aea59d022b6a89ec807fd361df82e0596" name="aea59d022b6a89ec807fd361df82e0596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea59d022b6a89ec807fd361df82e0596">&#9670;&#160;</a></span>SetSimulatedByLeader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void yams::motorcontrollers::simulation::BatterySim::SetSimulatedByLeader </td>
+          <td>(</td>
+          <td class="paramtype">const void *</td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>inLeader</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set whether a consumer's current is in a leader's, so it is not counted again. A mechanism sets it for its motor controller's loosely coupled followers, since its simulation has their motors, and an A301 sets it for the A301s following it.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>Key the follower's current is registered under (the <a class="el" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html">SmartMotorController</a>). </td></tr>
+    <tr><td class="paramname">inLeader</td><td>Whether its current is in its leader's. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
