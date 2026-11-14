@@ -7,6 +7,7 @@
 #include <atomic>
 #include <cstddef>
 #include <iterator>
+#include <random>
 #include <string>
 #include <string_view>
 #include <wpi/driverstation/DriverStationDisplay.hpp>
@@ -60,8 +61,52 @@ constexpr std::string_view kArt[] = {
     "      ################          ######################",
 };
 
-/** Caption under the art. */
-constexpr std::string_view kCaption = "                    Ribbit! - Rivet";
+/**
+ * What Rivet might say under the art; one is picked at random each startup. The first thirteen are
+ * Rivet's speech bubbles from yassrobotics.com/rivet.
+ */
+constexpr std::string_view kPhrases[] = {
+    "I lick batteries for fun.",
+    "I programmed an arm today :)",
+    "This mustache is 100% real.",
+    "Ask me about YAGSL sometime.",
+    "I once inspected 40 robots in one day.",
+    "Simulation first, always.",
+    "My pronouns change when I feel like it.",
+    "That tickles.",
+    "Free software, free frog.",
+    "I'm basically a CSA now.",
+    "Pi Day is my Super Bowl.",
+    "Rivet was here.",
+    "I may have eaten a battery once.",
+    "Ribbit!",
+    "Is this battery charged? Only one way to find out.",
+    "Have you checked your CAN wiring?",
+    "Clipboard in hand, tape measure ready.",
+    "Whistle on, penalty stick ready.",
+    "Hop in, we're going for a joyride.",
+    "Got a sticker? That's my face!",
+    "Spare bolts make great stocking stuffers.",
+    "Gear ratios are my love language.",
+    "Did you tune your PIDs today?",
+    "Part leprechaun, all frog.",
+    "Bumpers on? Let's play!",
+};
+
+/** Credit after the phrase. */
+constexpr std::string_view kSignature = " - Rivet";
+
+/** A random phrase from kPhrases, signed and centered under the art. */
+std::string Caption(size_t artWidth) {
+  std::random_device seed;
+  std::uniform_int_distribution<size_t> pick{0, std::size(kPhrases) - 1};
+  std::string caption{kPhrases[pick(seed)]};
+  caption += kSignature;
+  if (caption.size() < artWidth) {
+    caption.insert(0, (artWidth - caption.size()) / 2, ' ');
+  }
+  return caption;
+}
 
 /** Row of kArt the YAMS version is printed beside, level with the mustache. */
 constexpr size_t kVersionRow = 13;
@@ -154,7 +199,7 @@ void Rivet::Show() {
     }
     wpi::DriverStationDisplay::AddLine(line);
   }
-  wpi::DriverStationDisplay::AddLine(kCaption);
+  wpi::DriverStationDisplay::AddLine(Caption(ArtWidth()));
   wpi::DriverStationDisplay::UpdateLines();
 }
 

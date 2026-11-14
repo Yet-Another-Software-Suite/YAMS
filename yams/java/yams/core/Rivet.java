@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.wpilib.driverstation.DriverStationDisplay;
 
@@ -56,8 +57,40 @@ public final class Rivet {
       "      ################          ######################",
   };
 
-  /** Caption under the art. */
-  private static final String CAPTION = "                    Ribbit! - Rivet";
+  /**
+   * What Rivet might say under the art; one is picked at random each startup. The first thirteen
+   * are Rivet's speech bubbles from yassrobotics.com/rivet.
+   */
+  private static final String[] PHRASES = {
+      "I lick batteries for fun.",
+      "I programmed an arm today :)",
+      "This mustache is 100% real.",
+      "Ask me about YAGSL sometime.",
+      "I once inspected 40 robots in one day.",
+      "Simulation first, always.",
+      "My pronouns change when I feel like it.",
+      "That tickles.",
+      "Free software, free frog.",
+      "I'm basically a CSA now.",
+      "Pi Day is my Super Bowl.",
+      "Rivet was here.",
+      "I may have eaten a battery once.",
+      "Ribbit!",
+      "Is this battery charged? Only one way to find out.",
+      "Have you checked your CAN wiring?",
+      "Clipboard in hand, tape measure ready.",
+      "Whistle on, penalty stick ready.",
+      "Hop in, we're going for a joyride.",
+      "Got a sticker? That's my face!",
+      "Spare bolts make great stocking stuffers.",
+      "Gear ratios are my love language.",
+      "Did you tune your PIDs today?",
+      "Part leprechaun, all frog.",
+      "Bumpers on? Let's play!",
+  };
+
+  /** Credit after the phrase. */
+  private static final String SIGNATURE = " - Rivet";
 
   /** Row of {@link #ART} the YAMS version is printed beside, level with the mustache. */
   private static final int VERSION_ROW = 13;
@@ -80,8 +113,8 @@ public final class Rivet {
   private Rivet() {}
 
   /**
-   * Show Rivet on the display, with the YAMS version and yassrobotics.com to the right of Rivet.
-   * Only the first call does anything.
+   * Show Rivet on the display, with the YAMS version and yassrobotics.com to the right of Rivet and
+   * a random phrase underneath. Only the first call does anything.
    */
   public static void show() {
     if (!shown.compareAndSet(false, true)) {
@@ -98,7 +131,10 @@ public final class Rivet {
         }
         DriverStationDisplay.addLine(line);
       }
-      DriverStationDisplay.addLine(CAPTION);
+      String caption =
+          PHRASES[ThreadLocalRandom.current().nextInt(PHRASES.length)] + SIGNATURE;
+      DriverStationDisplay.addLine(
+          " ".repeat(Math.max(0, (artWidth - caption.length()) / 2)) + caption);
       DriverStationDisplay.updateLines();
     } catch (RuntimeException | LinkageError e) {
       // The splash is a nicety; never stop a robot because the display is unavailable.
