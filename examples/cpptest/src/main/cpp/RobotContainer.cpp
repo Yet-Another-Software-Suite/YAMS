@@ -43,6 +43,13 @@ void RobotContainer::ConfigureBindings() {
   m_xboxController.B().WhileTrue(m_elevator.SetHeight(0_m));
   m_xboxController.X().WhileTrue(m_elevator.ElevCmd(0.8));
 
+  // ADRC bindings (uncomment with the ADRC subsystems, in place of the elevator bindings above):
+  // m_xboxController.A().OnTrue(m_adrcArm.SetAngle(0_deg));
+  // m_xboxController.B().OnTrue(m_adrcArm.SetAngle(-20_deg));
+  // m_xboxController.Y().OnTrue(m_adrcElevator.SetHeight(1_m));
+  // m_xboxController.X().OnTrue(m_adrcElevator.SetHeight(0_m));
+  // m_xboxController.RightBumper().WhileTrue(m_adrcShooter.SpinUp(wpi::units::revolutions_per_minute_t{3000}));
+
   // Turret bindings:
   // m_xboxController.A().WhileTrue(m_turret.TurretCmd(1));
   // m_xboxController.B().WhileTrue(m_turret.TurretCmd(-1));

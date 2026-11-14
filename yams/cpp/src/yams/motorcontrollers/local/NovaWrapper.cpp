@@ -162,6 +162,8 @@ void NovaWrapper::LoadClosedLoopController(const SmartMotorControllerConfig& con
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -218,7 +220,7 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
         "Closed loop controller maximum voltage is only available for exponentially profiled or "
         "LQR closed loop controllers",
         "Closed loop controller maximum voltage could not be applied",
-        "WithClosedLoopControllerMaximumVoltage");
+        "WithClosedLoopMaxVoltage");
   if (m_closedLoopOnNova && synchronizationThreshold)
     throw exceptions::SmartMotorControllerConfigurationException(
         "Feedback synchronization threshold is only available for exponentially profiled or LQR "
@@ -459,8 +461,11 @@ bool NovaWrapper::NovaCanRunClosedLoop(const SmartMotorControllerConfig& config)
   const auto wrappingMax = config.GetWrappingMax();
   const bool continuousWrapping = config.IsWrappingContinuous();
   const bool trapezoidProfile = config.HasTrapezoidProfile();
-  if (m_lqr || config.HasExponentialProfile() || config.HasLinearExponentialProfile() ||
-      (trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse()))
+  // Read every profile option before deciding, so the config's option check sees them all used, even when an LQR or
+  // ADRC already decides it.
+  const bool exponentialProfile = config.HasExponentialProfile() || config.HasLinearExponentialProfile();
+  const bool velocityProfile = trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse();
+  if (UsesSystemCoreController() || exponentialProfile || velocityProfile)
     return false;
   if (!wrappingMax) return true;
   const bool fromZero = std::abs(config.GetWrappingMin()->value()) <= 1e-9;

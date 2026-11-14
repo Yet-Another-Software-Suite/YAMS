@@ -93,8 +93,6 @@ public class A301WrapperTest {
     assertRejected(configException, "supply limit", cfg -> cfg.withSupplyCurrentLimit(Amps.of(40)));
     assertRejected(configException, "open ramp", cfg -> cfg.withOpenLoopRampRate(Seconds.of(0.1)));
     assertRejected(
-        configException, "closed ramp", cfg -> cfg.withClosedLoopRampRate(Seconds.of(0.1)));
-    assertRejected(
         configException, "voltage comp", cfg -> cfg.withVoltageCompensation(Volts.of(12)));
     assertRejected(configException, "vendor config", cfg -> cfg.withVendorConfig(new Object()));
     assertRejected(

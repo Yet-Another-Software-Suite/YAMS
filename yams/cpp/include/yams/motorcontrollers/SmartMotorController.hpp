@@ -32,6 +32,7 @@
 
 #include "SimSupplier.hpp"
 #include "SmartMotorControllerConfig.hpp"
+#include "yams/math/ADRCController.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
@@ -657,6 +658,14 @@ class SmartMotorController {
    */
   math::LQRController* GetLQRController();
 
+  /**
+   * The ADRC running the closed loop, if the config selected one. Use it to read the estimated disturbance or states.
+   * The ADRC was written by FRC Team 8331.
+   *
+   * @return The ADRC, or nullptr if the closed loop does not use one.
+   */
+  math::ADRCController* GetADRCController();
+
   /** Run one iteration of the closed-loop controller on the calling thread. */
   void IterateClosedLoopController();
 
@@ -926,6 +935,27 @@ class SmartMotorController {
 
   std::optional<wpi::math::PIDController> m_pid;
   std::optional<math::LQRController> m_lqr;
+  /** ADRC running the closed loop, when the config selects one. Written by FRC Team 8331. */
+  std::optional<math::ADRCController> m_adrc;
+
+  /**
+   * Whether the closed loop controller runs on the SystemCore instead of the motor controller. An LQR and an ADRC
+   * both need the measured state every loop, so they run here. Wrappers use this to leave their onboard closed loop
+   * alone and send a plain voltage.
+   *
+   * @return true when an LQR or an ADRC owns the closed loop.
+   */
+  bool UsesSystemCoreController() const;
+
+  /**
+   * Build the ADRC for this motor's slot from the config, replacing any previous one, or clear it. The control period
+   * is the closed loop control period, the one IterateClosedLoopController runs at, so the controller's discrete model
+   * cannot drift from the loop that steps it. Each wrapper calls this when a config is applied.
+   *
+   * @param config Config being applied.
+   * @throws exceptions::SmartMotorControllerConfigurationException if the ADRC config cannot build a controller.
+   */
+  void ApplyADRCConfig(const SmartMotorControllerConfig& config);
 
   // Angular motion profile state
   std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> m_trapState;
@@ -942,6 +972,14 @@ class SmartMotorController {
    * wrapping point.
    */
   std::optional<wpi::units::turn_t> m_lastClosedLoopMechanismPosition;
+  /**
+   * Full scale of SmartMotorControllerConfig::WithClosedLoopRampRate: the ramp rate is the time the output takes to
+   * change by this much, as on a Talon.
+   */
+  static constexpr double kClosedLoopRampFullScaleVolts = 12.0;
+  /** The voltage the closed loop sent last, which the closed loop ramp starts from; empty until it runs, and again
+   * whenever it starts over. */
+  std::optional<double> m_lastClosedLoopVoltage;
 
   std::optional<wpi::units::turn_t> m_setpointPosition;
   std::optional<wpi::units::turns_per_second_t> m_setpointVelocity;

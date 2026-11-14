@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 /**
- * REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.
+ * REV Robotics motor controller wrappers whose closed-loop control runs on the SystemCore.
  *
  * <p>This package contains adapters for REV SPARK MAX and SPARK FLEX motor controllers. Because the
- * REV hardware offloads PID execution to the roboRIO (rather than to the motor controller itself),
+ * REV hardware offloads PID execution to the SystemCore (rather than to the motor controller itself),
  * these wrappers are classified as <em>local</em>: the control loop runs on the robot controller
  * and sends periodic duty-cycle or voltage commands to the hardware.
  *

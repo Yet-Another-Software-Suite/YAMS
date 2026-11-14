@@ -55,6 +55,17 @@ void SmartMotorControllerTelemetry::SetupTelemetry(
 
   SmartMotorControllerConfig& cfg = smc.GetConfig();
 
+  // A motor controller without an ADRC never shows the ADRC's fields.
+  if (!smc.GetADRCController()) {
+    doubleFields.at(DoubleTelemetryField::ADRCDisturbance).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCBandwidth).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCObserverBandwidth).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCSystemOrder).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCB0).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCSettlingTime).Disable();
+    doubleFields.at(DoubleTelemetryField::ADRCBandwidthScale).Disable();
+  }
+
   for (auto& [field, dt] : doubleFields) {
     if (nt4Enabled) {
       dt.TransformUnit(cfg);
@@ -197,6 +208,27 @@ void SmartMotorControllerTelemetry::Publish(SmartMotorController& smc) {
         break;
       case DoubleTelemetryField::ActiveClosedLoopControllerSlot:
         dt.Set(static_cast<double>(static_cast<int>(smc.GetClosedLoopControllerSlot())));
+        break;
+      case DoubleTelemetryField::ADRCDisturbance:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetEstimatedDisturbance());
+        break;
+      case DoubleTelemetryField::ADRCBandwidth:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetBandwidth().value());
+        break;
+      case DoubleTelemetryField::ADRCObserverBandwidth:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetObserverBandwidth().value());
+        break;
+      case DoubleTelemetryField::ADRCSystemOrder:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetSystemOrder());
+        break;
+      case DoubleTelemetryField::ADRCB0:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetB0());
+        break;
+      case DoubleTelemetryField::ADRCSettlingTime:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetSettlingTime().value());
+        break;
+      case DoubleTelemetryField::ADRCBandwidthScale:
+        if (auto* adrc = smc.GetADRCController()) dt.Set(adrc->GetBandwidthScale());
         break;
       default:
         break;
@@ -424,11 +456,43 @@ void SmartMotorControllerTelemetry::ApplyTuningValues(SmartMotorController& smc)
         }
         break;
       }
+      case DoubleTelemetryField::ADRCB0:
+      case DoubleTelemetryField::ADRCSettlingTime:
+      case DoubleTelemetryField::ADRCBandwidthScale: {
+        // Kept in the ADRC's config, like a tuned PID. The ADRC reads its settings and gains from the config, which
+        // works the gains out again as they change, so the ADRC runs them on its next step and keeps its state
+        // estimate, so its output doesn't jump. A value the config refuses, such as a b0 of 0, leaves it as it was
+        // and raises an alert. Loosely coupled followers are tuned the same way.
+        std::vector<SmartMotorController*> tuned{&smc};
+        const auto& followers = smc.GetLooselyCoupledFollowers();
+        tuned.insert(tuned.end(), followers.begin(), followers.end());
+        for (auto* motor : tuned) {
+          auto adrcConfig = motor->GetConfig().GetADRCController(motor->GetClosedLoopControllerSlot());
+          if (!adrcConfig) continue;
+          try {
+            // Tune a copy first, so a refused value leaves every value as it was.
+            math::ADRCConfig copy{*adrcConfig};
+            ApplyADRCTuning(copy);
+            ApplyADRCTuning(*adrcConfig);
+            adrcConfig->ReportRejected(std::nullopt);
+          } catch (const std::invalid_argument& e) {
+            adrcConfig->ReportRejected(std::string{e.what()});
+          }
+        }
+        break;
+      }
       default:
         break;
     }
   }
 
+}
+
+void SmartMotorControllerTelemetry::ApplyADRCTuning(math::ADRCConfig& adrcConfig) {
+  auto value = [this](DoubleTelemetryField field) { return m_doubleFields->at(field).Get(); };
+  adrcConfig.WithB0(value(DoubleTelemetryField::ADRCB0))
+      .WithSettlingTime(wpi::units::second_t{value(DoubleTelemetryField::ADRCSettlingTime)})
+      .WithBandwidthScale(value(DoubleTelemetryField::ADRCBandwidthScale));
 }
 
 void SmartMotorControllerTelemetry::StopTuning(SmartMotorController& smc) {

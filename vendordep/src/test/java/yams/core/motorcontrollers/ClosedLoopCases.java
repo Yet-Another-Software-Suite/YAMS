@@ -223,13 +223,31 @@ final class ClosedLoopCases {
       double seconds,
       Runnable command,
       DoubleConsumer afterLoop) {
+    run(controller, smc::simIterate, seconds, command, afterLoop);
+  }
+
+  /**
+   * Run the simulation, commanding the setpoint each loop as a robot does.
+   *
+   * @param controller Motor controller under test.
+   * @param simIterate Steps the simulation: the motor controller's, or its mechanism's.
+   * @param seconds How long to run.
+   * @param command Commands the setpoint; run before the first loop and in every loop.
+   * @param afterLoop Given the time since the first command, in seconds, after each loop.
+   */
+  static void run(
+      Controller controller,
+      Runnable simIterate,
+      double seconds,
+      Runnable command,
+      DoubleConsumer afterLoop) {
     final double[] time = {0};
     try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
       command.run();
       final long startNanos = System.nanoTime();
       scheduler.addPeriodic(
           () -> {
-            smc.simIterate();
+            simIterate.run();
             time[0] += kPeriod;
             command.run();
             afterLoop.accept(time[0]);
@@ -244,6 +262,43 @@ final class ClosedLoopCases {
           },
           Seconds.of(kPeriod));
       scheduler.runFor(Seconds.of(seconds));
+    }
+  }
+
+  /**
+   * How far a mechanism is from its setpoint while it holds it. A motor controller simulated in real
+   * time is judged on its average error: if the test runner stalls, Phoenix's clock runs on without
+   * the mechanism and can knock it off its setpoint for a loop or two. The others are judged on their
+   * largest error.
+   */
+  static final class HoldError {
+    private final boolean realTime;
+    private double worst;
+    private double sum;
+    private int count;
+
+    HoldError(Controller controller) {
+      this.realTime = controller.realTime();
+    }
+
+    /** Add one loop's distance from the setpoint. */
+    void add(double error) {
+      final double distance = Math.abs(error);
+      worst = Math.max(worst, distance);
+      sum += distance;
+      count++;
+    }
+
+    /** The error the motor controller is judged on. */
+    double judged() {
+      return realTime ? sum / Math.max(count, 1) : worst;
+    }
+
+    @Override
+    public String toString() {
+      return realTime
+          ? "on average " + sum / Math.max(count, 1) + " (at most " + worst + ") from it"
+          : "at most " + worst + " from it";
     }
   }
 

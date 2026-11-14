@@ -34,6 +34,7 @@
 #include <wpi/units/voltage.hpp>
 
 #include "yams/gearing/MechanismGearing.hpp"
+#include "yams/math/ADRCConfig.hpp"
 #include "yams/math/LQRConfig.hpp"
 
 namespace yams::motorcontrollers {
@@ -264,6 +265,37 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithLQR(
       const math::LQRConfig& lqrConfig,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  // ---- ADRC --------------------------------------------------------------
+
+  /**
+   * Use an active disturbance rejection controller as the closed loop controller for a slot. It takes the place of
+   * the slot's PID and feedforward: the mechanism keeps calling SetPosition and SetVelocity, and the motor controller
+   * runs the ADRC on its closed loop thread.
+   *
+   * The ADRC's observer estimates what a feedforward models, so this removes the slot's PID, LQR and feedforwards,
+   * and their simulation overrides. While a slot has an ADRC, its feedforward getters return empty. Setting a PID or
+   * an LQR on the slot afterwards removes the ADRC.
+   *
+   * <b>The active disturbance rejection controller was written by FRC Team 8331</b>, who contributed it to YAMS.
+   *
+   * @param adrcConfig ADRC configuration. The motor config keeps its own copy, which GetADRCController returns and
+   *                   live tuning changes.
+   * @param slot       Gain slot (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithADRCController(
+      const math::ADRCConfig& adrcConfig,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Remove the ADRC from a slot.
+   *
+   * @param slot Gain slot (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithoutADRCController(
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -499,7 +531,9 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithOpenLoopRampRate(wpi::units::second_t rampRate);
 
   /**
-   * Set the closed-loop output ramp rate.
+   * Set the closed-loop output ramp rate. A closed loop the motor controller runs uses its own ramp. A closed loop the
+   * SystemCore runs, such as an LQR or an ADRC, sends the motor controller a voltage, which it treats as open loop, so
+   * YAMS ramps that loop's output itself, by 12 V per ramp rate.
    *
    * @param rampRate Time to ramp from 0 to full output.
    * @return *this for chaining.
@@ -1035,6 +1069,16 @@ class SmartMotorControllerConfig {
   std::optional<math::LQRConfig> GetLQR(ClosedLoopControllerSlot slot) const;
 
   /**
+   * Get the ADRC configuration of a slot. It is this config's own instance, shared with the controller built from it,
+   * so changing it, as live tuning does, changes what the controller runs.
+   *
+   * @param slot Gain slot (default SLOT_0).
+   * @return The ADRC config, or null if the slot has none.
+   */
+  std::shared_ptr<math::ADRCConfig> GetADRCController(
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0) const;
+
+  /**
    * Get the proportional gain for the specified slot.
    *
    * @param slot Gain slot to query (default SLOT_0).
@@ -1162,6 +1206,11 @@ class SmartMotorControllerConfig {
   wpi::units::second_t GetSimulationPeriod() const;
   /** @return Moment of inertia for simulation (kg·m²). */
   wpi::units::kilogram_square_meter_t GetMOI() const;
+  /**
+   * @return Whether a moment of inertia was set (WithMOI, WithWheelMOI or an exponential profile with one), so an ADRC
+   *         can derive its b0 from it instead of the placeholder.
+   */
+  bool IsMomentOfInertiaConfigured() const;
   /** @return Optional starting mechanism position (turns). */
   std::optional<wpi::units::turn_t> GetStartingPosition() const;
   /** @return Optional vendor-specific hardware config (set via WithVendorConfig). */
@@ -1372,8 +1421,30 @@ class SmartMotorControllerConfig {
   double ForceToRotorTorque(wpi::units::newton_t feedforwardForce) const;
   /** Throw SmartMotorControllerConfigurationException if no circumference is configured. */
   void RequireCircumference(const std::string& action) const;
-  /** @return true if any slot has PID gains or an LQR configured. */
+  /** @return true if any slot has PID gains, an LQR or an ADRC configured. */
   bool HasClosedLoopController() const;
+
+  /**
+   * A slot's ADRC config, shared with the controller built from it. Copying the motor config copies it deeply, so a
+   * copy's ADRC is tuned on its own, as in Java.
+   */
+  struct ADRCSlot {
+    std::shared_ptr<math::ADRCConfig> config;  ///< The ADRC config, or null when the slot has none.
+    ADRCSlot() = default;
+    /** Deep copy. */
+    ADRCSlot(const ADRCSlot& other)
+        : config{other.config ? std::make_shared<math::ADRCConfig>(*other.config) : nullptr} {}
+    /** Deep copy. */
+    ADRCSlot& operator=(const ADRCSlot& other) {
+      if (this != &other) config = other.config ? std::make_shared<math::ADRCConfig>(*other.config) : nullptr;
+      return *this;
+    }
+    ADRCSlot(ADRCSlot&&) = default;
+    ADRCSlot& operator=(ADRCSlot&&) = default;
+  };
+  ADRCSlot m_adrc[kNumSlots];
+  /** Whether a moment of inertia was set, not the placeholder. */
+  bool m_momentOfInertiaConfigured{false};
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {

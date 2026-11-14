@@ -454,6 +454,8 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -486,8 +488,9 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
 
   // Phoenix 6 has no LQR: hand control to the RoboRIO when one is configured.
-  if (m_lqr) {
-    if (config.GetClosedLoopTolerance())
+  if (UsesSystemCoreController()) {
+    // An ADRC can use a closed loop tolerance; an LQR cannot.
+    if (!m_adrc && config.GetClosedLoopTolerance())
       throw std::invalid_argument("[ERROR] Cannot set closed-loop controller error tolerance on " +
                                   GetName());
     m_rioControllerAlert->Set(true);
@@ -509,7 +512,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_closedLoopControllerThread.reset();
   }
 
-  if (config.GetClosedLoopTolerance())
+  if (config.GetClosedLoopTolerance() && !m_adrc)
     throw ConfigException("Closed loop tolerance is not available on TalonFX",
                           "Cannot set closed loop tolerance on TalonFX", "WithClosedLoopTolerance");
 
@@ -574,13 +577,13 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   ApplyVendorControlRequest(config);
 
   // Unsupported options.
-  if (config.GetClosedLoopControlPeriod())
+  if (config.GetClosedLoopControlPeriod() && !m_adrc)
     throw std::invalid_argument("[ERROR] ClosedLoopControlPeriod is not supported");
   // The cutoff is checked by IterateClosedLoopController(), which only runs with an LQR controller:
   // PID and motion profiles run on the Talon and never reach it.
-  if (config.GetTemperatureCutoff() && !m_lqr)
-    throw std::invalid_argument("[ERROR] TemperatureCutoff is only supported with an LQR controller");
-  if (config.GetFeedbackSynchronizationThreshold())
+  if (config.GetTemperatureCutoff() && !UsesSystemCoreController())
+    throw std::invalid_argument("[ERROR] TemperatureCutoff is only supported with an LQR or ADRC controller");
+  if (config.GetFeedbackSynchronizationThreshold() && !UsesSystemCoreController())
     throw std::invalid_argument("[ERROR] FeedbackSynchronizationThreshold is not supported");
   if (config.GetVoltageCompensation())
     throw std::invalid_argument("[ERROR] VoltageCompensation is not supported");
@@ -900,7 +903,7 @@ void TalonFXWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointFeedforwardForce.reset();
   m_setpointPosition = angle;
   // With an LQR the RoboRIO closed loop drives the motor.
-  if (m_lqr) return;
+  if (UsesSystemCoreController()) return;
   EnsureRequest([&] {
     return std::visit([&](auto& req) { return m_talon->SetControl(req.WithPosition(angle)); },
                       m_positionReq);
@@ -916,7 +919,7 @@ void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
-  if (m_lqr) return;
+  if (UsesSystemCoreController()) return;
   // The request objects are reused, so clear any feedforward left by SetVelocity(velocity, force).
   EnsureRequest([&] {
     return std::visit(
@@ -931,7 +934,7 @@ void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
 
 void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
                                  wpi::units::newton_t feedforwardForce) {
-  if (m_lqr) {
+  if (UsesSystemCoreController()) {
     // The RoboRIO loop adds the force's voltage.
     SetVelocity(velocity);
     m_setpointFeedforwardForce = feedforwardForce;

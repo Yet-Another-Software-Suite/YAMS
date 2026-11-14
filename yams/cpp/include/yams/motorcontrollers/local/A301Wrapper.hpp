@@ -217,7 +217,7 @@ class A301Wrapper : public SmartMotorController {
   void SetStatorCurrentLimit(wpi::units::ampere_t currentLimit) override;
   /** The A301 has no current limits; always throws std::runtime_error. */
   void SetSupplyCurrentLimit(wpi::units::ampere_t currentLimit) override;
-  /** The A301 has no ramp rates; always throws std::runtime_error. */
+  /** The closed loop runs on the SystemCore, which ramps its output. */
   void SetClosedLoopRampRate(wpi::units::second_t rampRate) override;
   /** The A301 has no ramp rates; always throws std::runtime_error. */
   void SetOpenLoopRampRate(wpi::units::second_t rampRate) override;

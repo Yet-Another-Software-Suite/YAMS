@@ -16,16 +16,23 @@
  * cost) and R (input cost) weighting matrices along with the plant model; {@code LQRController}
  * solves the discrete algebraic Riccati equation at construction time and exposes a
  * {@code calculate()} method suitable for calling from a periodic loop. <li><b>
- * {@link yams.core.math.DerivativeTimeFilter}</b> computes a filtered derivative estimate for use as the
- * D term in PID controllers. Rather than a raw finite difference (which amplifies sensor noise),
- * this class applies a configurable low-pass filter to the derivative signal, trading off noise
- * rejection against phase lag. <li><b>{@link yams.core.math.SmartMath}</b> a collection of static
- * helper methods for common control-theory and unit-conversion tasks (clamping, interpolation,
- * wrapping angles, etc.) that do not belong to a specific controller class. <li><b>
+ * {@link yams.core.math.DerivativeTimeFilter}</b> computes a filtered derivative estimate for use
+ * as the D term in PID controllers. Rather than a raw finite difference (which amplifies sensor
+ * noise), this class applies a configurable low-pass filter to the derivative signal, trading off
+ * noise rejection against phase lag. <li><b>{@link yams.core.math.SmartMath}</b> a collection of
+ * static helper methods for common control-theory and unit-conversion tasks (clamping,
+ * interpolation, wrapping angles, etc.) that do not belong to a specific controller class. <li><b>
  * {@link yams.core.math.ExponentialProfilePIDController}</b> a profiled PID variant that uses an
  * exponential motion profile to generate setpoints. Compared to a trapezoidal profile, the
  * exponential profile produces smoother acceleration transitions and is less prone to
- * overshoot on mechanisms with significant inertia.
+ * overshoot on mechanisms with significant inertia. <li><b>
+ * {@link yams.core.math.ADRCController}</b> and <b>{@link
+ * yams.core.math.TrackingDifferentiator}</b> implement active disturbance rejection control: the
+ * controller estimates the total disturbance (friction, back-EMF, loads) with an extended state
+ * observer and cancels it, so the closed loop settles in the requested time from only a plant order
+ * and an approximate input gain. The tracking differentiator smooths step references and supplies
+ * their derivatives. Teams usually configure both through {@link yams.core.math.ADRCConfig} rather
+ * than constructing them directly.
  * </ul>
  *
  * <h2>Example LQR Setup</h2>
@@ -58,5 +65,7 @@
  * @see yams.core.math.DerivativeTimeFilter
  * @see yams.core.math.SmartMath
  * @see yams.core.math.ExponentialProfilePIDController
+ * @see yams.core.math.ADRCController
+ * @see yams.core.math.TrackingDifferentiator
  */
 package yams.core.math;

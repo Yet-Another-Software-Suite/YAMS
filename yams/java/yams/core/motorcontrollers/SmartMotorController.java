@@ -49,6 +49,7 @@ import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.gearing.MechanismGearing;
+import yams.core.math.ADRCController;
 import yams.core.math.LQRController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
@@ -113,11 +114,26 @@ public abstract class SmartMotorController {
    */
   protected Optional<Angle> m_lastClosedLoopMechanismPosition = Optional.empty();
 
+  /**
+   * Full scale of {@link SmartMotorControllerConfig#withClosedLoopRampRate(Time)}: the ramp rate is
+   * the time the output takes to change by this much, as on a Talon.
+   */
+  private static final double kClosedLoopRampFullScaleVolts = 12.0;
+
+  /**
+   * The voltage the closed loop sent last, which the closed loop ramp starts from; empty until it
+   * runs, and again whenever it starts over.
+   */
+  private Optional<Double> m_lastClosedLoopVoltage = Optional.empty();
+
   /** Simple PID controller for the motor controller. */
   protected Optional<PIDController> m_pid = Optional.empty();
 
   /** LQR controller for the motor controller. */
   protected Optional<LQRController> m_lqr = Optional.empty();
+
+  /** ADRC controller for the motor controller, when the config selects one. */
+  protected Optional<ADRCController> m_adrc = Optional.empty();
 
   /** Setpoint position */
   protected Optional<Angle> setpointPosition = Optional.empty();
@@ -351,6 +367,48 @@ public abstract class SmartMotorController {
   }
 
   /**
+   * Whether the closed loop controller runs on the SystemCore instead of the motor controller.
+   * Both LQR and ADRC need the measured state each loop, so they run here.
+   *
+   * <p>Wrappers use this to leave their onboard closed loop controller alone: when it is
+   * {@code true}, the wrapper sends a plain voltage command and this class closes the loop.
+   *
+   * @return {@code true} when LQR or ADRC owns the closed loop.
+   */
+  protected boolean usesSystemCoreController() {
+    return m_lqr.isPresent() || m_adrc.isPresent();
+  }
+
+  /**
+   * Get the ADRC controller running the closed loop, if the config selected one.
+   *
+   * @return The {@link ADRCController}, or an empty optional when PID or LQR owns the loop.
+   */
+  public Optional<ADRCController> getADRCController() {
+    return m_adrc;
+  }
+
+  /**
+   * Build the ADRC controller for this motor's slot from the config, replacing any previous one.
+   *
+   * <p>The control period comes from {@code withClosedLoopControlPeriod(...)}, the same value
+   * {@link #iterateClosedLoopController()} runs at, so the controller's discrete model cannot drift
+   * from the loop that steps it.
+   *
+   * @param config Config being applied.
+   * @throws SmartMotorControllerConfigurationException if the ADRC config cannot build a controller.
+   */
+  protected void applyADRCConfig(SmartMotorControllerConfig<?> config) {
+    var adrcConfig = config.getADRCController(m_slot);
+    if (adrcConfig.isEmpty()) {
+      m_adrc = Optional.empty();
+      return;
+    }
+    Time period = config.getClosedLoopControlPeriod().orElse(Milliseconds.of(20));
+    m_adrc = Optional.of(adrcConfig.get().buildController(getDCMotor(), config, period));
+  }
+
+  /**
    * Whether a closed loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
    * stopped, as a duty cycle or voltage command does. False when the closed loop controller runs on the motor
    * controller.
@@ -406,7 +464,8 @@ public abstract class SmartMotorController {
   }
 
   /**
-   * Start the closed loop controller's PID, motion profile and LQR from where the mechanism is now.
+   * Start the closed loop controller's PID, motion profile, LQR, and ADRC from where the mechanism
+   * is now.
    *
    * @throws SmartMotorControllerConfigurationException if a linear closed loop controller is in use
    *                                                    and the mechanism circumference is not
@@ -414,15 +473,22 @@ public abstract class SmartMotorController {
    */
   private void resetClosedLoopControllerState() {
     m_pid.ifPresent(PIDController::reset);
+    // The closed loop ramp starts from the voltage the motor controller applies now.
+    m_lastClosedLoopVoltage = Optional.empty();
     // The motion profile starts from this position, so continuous wrapping keeps the angles the
     // loop measures next to it, rather than a whole wrapping range away from it.
     m_lastClosedLoopMechanismPosition = Optional.of(getMechanismPosition());
     // A velocity profile starts from the measured velocity in the closed loop iteration.
     m_trapState = m_config.getVelocityTrapezoidalProfileInUse() ? Optional.empty() : getTrapezoidalProfileState();
     m_expoState = getExponentialProfileState();
+    // The ADRC's observer starts from what the loop steps it with: the velocity while only a
+    // velocity setpoint is set, the position otherwise.
+    boolean velocityLoop = setpointPosition.isEmpty() && setpointVelocity.isPresent();
     m_lqr.ifPresent(lqr -> lqr.reset(getMechanismPosition(), getMechanismVelocity()));
+    m_adrc.ifPresent(adrc -> adrc.reset(velocityLoop ? getMechanismVelocity().in(RotationsPerSecond) : getMechanismPosition().in(Rotations)));
     if (m_config.getLinearClosedLoopControllerUse()) {
       m_lqr.ifPresent(lqr -> lqr.reset(getMeasurementPosition(), getMeasurementVelocity()));
+      m_adrc.ifPresent(adrc -> adrc.reset(velocityLoop ? getMeasurementVelocity().in(MetersPerSecond) : getMeasurementPosition().in(Meters)));
     }
   }
 
@@ -441,6 +507,8 @@ public abstract class SmartMotorController {
     AtomicReference<Boolean> velocityTrapezoidalProfile = new AtomicReference<>(false);
     AtomicReference<ExponentialProfile.State> nextExpoState = new AtomicReference<>(new ExponentialProfile.State(0.0, 0.0));
     AtomicReference<TrapezoidProfile.State> nextTrapState = new AtomicReference<>(new TrapezoidProfile.State(0.0, 0.0));
+    // The profile's state at the start of this loop, which the next state is profiled from.
+    AtomicReference<ADRCController.Reference> profileNow = new AtomicReference<>();
     AtomicReference<Double> pidOutputVoltage = new AtomicReference<>((double) 0);
     AtomicReference<Double> feedforward = new AtomicReference<>(0.0);
     Optional<Angle> mechLowerLimit = m_config.getMechanismLowerLimit();
@@ -510,9 +578,13 @@ public abstract class SmartMotorController {
       }
 
       if (m_expoProfile.isPresent()) {
-        nextExpoState.set(m_expoProfile.get().calculate(loopTime, m_expoState.orElse(new ExponentialProfile.State(position, velocity)), new ExponentialProfile.State(setpoint, 0)));
+        var now = m_expoState.orElse(new ExponentialProfile.State(position, velocity));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextExpoState.set(m_expoProfile.get().calculate(loopTime, now, new ExponentialProfile.State(setpoint, 0)));
       } else if (m_trapezoidProfile.isPresent()) {
-        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(position, velocity)), new TrapezoidProfile.State(setpoint, 0)));
+        var now = m_trapState.orElse(new TrapezoidProfile.State(position, velocity));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, now, new TrapezoidProfile.State(setpoint, 0)));
       }
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -527,7 +599,9 @@ public abstract class SmartMotorController {
 
       if (m_trapezoidProfile.isPresent()) {
         // TODO: 2027, Derive acceleration from SMCs
-        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, m_trapState.orElse(new TrapezoidProfile.State(velocity, 0)), new TrapezoidProfile.State(setpoint, 0)));
+        var now = m_trapState.orElse(new TrapezoidProfile.State(velocity, 0));
+        profileNow.set(new ADRCController.Reference(now.position, now.velocity));
+        nextTrapState.set(m_trapezoidProfile.get().calculate(loopTime, now, new TrapezoidProfile.State(setpoint, 0)));
         velocityTrapezoidalProfile.set(true);
       }
     }
@@ -537,6 +611,7 @@ public abstract class SmartMotorController {
       var measured = mechanismPosition.in(Rotations);
       var setpoint = wrappedSetpointPosition.get().in(Rotations);
       var velocityProfile = 0.0;
+      var profiled = false;
 
       // Set the measured value and setpoint to Meters, if linear
       if (m_config.getLinearClosedLoopControllerUse()) {
@@ -547,9 +622,11 @@ public abstract class SmartMotorController {
       if (m_expoProfile.isPresent()) {
         setpoint = nextExpoState.get().position; // Rotations or Meters; depending on config
         velocityProfile = nextExpoState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        profiled = true;
       } else if (m_trapezoidProfile.isPresent() && !m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Rotations or Meters; depending on config
         velocityProfile = nextTrapState.get().velocity; // RotationsPerSecond or MetersPerSecond; depending on config
+        profiled = true;
       }
 
       // Set the controller
@@ -564,6 +641,14 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(Rotations.of(finalMeasured), Rotations.of(finalSetpoint), RotationsPerSecond.of(finalVelocityProfile)).in(Volts));
         }
       });
+      // The ADRC follows the profile's state now and feeds forward how it moves to the next one,
+      // so it neither trails a moving profile nor runs a loop ahead of it. Without a profile, the
+      // setpoint stands still. The observer is told the voltage the motor controller applied, not the
+      // one it asked for, so a current limit or a low battery is not mistaken for a disturbance.
+      final ADRCController.Reference next = new ADRCController.Reference(finalSetpoint, finalVelocityProfile);
+      final ADRCController.Reference now = profiled && profileNow.get() != null ? profileNow.get() : next;
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(
+          finalMeasured, now, next, getVoltage().in(Volts))));
 
     } else if (setpointVelocity.isPresent()) {
       var setpoint = setpointVelocity.get().in(RotationsPerSecond);
@@ -575,14 +660,16 @@ public abstract class SmartMotorController {
         setpoint = m_config.convertFromMechanism(setpointVelocity.get()).in(MetersPerSecond); // Convert setpoint to Meters
       }
 
+      var acceleration = 0.0;
       if (m_trapezoidProfile.isPresent() && m_config.getVelocityTrapezoidalProfileInUse()) {
         setpoint = nextTrapState.get().position; // Poorly named, in a velocity control loop, this
         // is the setpoint velocity.
-        var acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
+        acceleration = nextTrapState.get().velocity; // Again poorly named, this is the setpoint acceleration.
       }
 
       double finalVelocity = velocity;
       double finalSetpoint = setpoint;
+      double finalAcceleration = acceleration;
       m_pid.ifPresent(pidController -> pidOutputVoltage.set(pidController.calculate(finalVelocity, finalSetpoint)));
       m_lqr.ifPresent(lqrController -> {
         if (m_config.getLinearClosedLoopControllerUse()) {
@@ -591,6 +678,13 @@ public abstract class SmartMotorController {
           pidOutputVoltage.set(lqrController.calculate(RotationsPerSecond.of(finalVelocity), RotationsPerSecond.of(finalSetpoint)).in(Volts));
         }
       });
+      // A velocity profile's state is a velocity and its acceleration: the ADRC follows it the same
+      // way it follows a position profile.
+      final ADRCController.Reference next = new ADRCController.Reference(finalSetpoint, finalAcceleration);
+      final ADRCController.Reference now = velocityTrapezoidalProfile.get() && profileNow.get() != null
+          ? profileNow.get() : next;
+      m_adrc.ifPresent(adrcController -> pidOutputVoltage.set(adrcController.calculate(
+          finalVelocity, now, next, getVoltage().in(Volts))));
     }
 
     armFeedforward.ifPresent(armFeedforwardPerRotation -> {
@@ -661,30 +755,40 @@ public abstract class SmartMotorController {
       feedforward.set(feedforward.get() + m_config.convertToVoltage(getDCMotor(), setpointFeedforwardForce.get()).in(Volts));
     }
 
+    double outputVoltage = pidOutputVoltage.get() + feedforward.get();
+
+    // This loop sends the motor controller a voltage, which it treats as open loop, so its own
+    // closed loop ramp never applies. Ramp the output here instead, from the voltage sent last, or
+    // from the one applied when the loop starts over. The limits below still stop it at once.
+    Optional<Time> rampRate = m_config.getClosedLoopRampRate();
+    if (rampRate.isPresent() && rampRate.get().gt(Seconds.zero())) {
+      final double last = m_lastClosedLoopVoltage.orElseGet(() -> getVoltage().in(Volts));
+      final double maxChange = kClosedLoopRampFullScaleVolts / rampRate.get().in(Seconds)
+                               * getClosedLoopControllerPeriod().in(Seconds);
+      outputVoltage = last + Math.clamp(outputVoltage - last, -maxChange, maxChange);
+    }
+
     // Boundary check.
     if (mechUpperLimit.isPresent()) {
-      if (getMechanismPosition().gt(mechUpperLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) > 0) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+      if (getMechanismPosition().gt(mechUpperLimit.get()) && outputVoltage > 0) {
+        outputVoltage = 0.0;
       }
     }
     if (mechLowerLimit.isPresent()) {
-      if (getMechanismPosition().lt(mechLowerLimit.get()) && (pidOutputVoltage.get() + feedforward.get()) < 0) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+      if (getMechanismPosition().lt(mechLowerLimit.get()) && outputVoltage < 0) {
+        outputVoltage = 0.0;
       }
     }
     if (temperatureCutoff.isPresent()) {
       if (getTemperature().gte(temperatureCutoff.get())) {
-        feedforward.set(0.0);
-        pidOutputVoltage.set(0.0);
+        outputVoltage = 0.0;
       }
     }
-    double outputVoltage = pidOutputVoltage.get() + feedforward.get();
     if (maximumVoltage.isPresent()) {
       double maxVolts = maximumVoltage.get().in(Volts);
       outputVoltage = Math.clamp(outputVoltage, -maxVolts, maxVolts);
     }
+    m_lastClosedLoopVoltage = Optional.of(outputVoltage);
     setVoltage(Volts.of(outputVoltage));
   }
 

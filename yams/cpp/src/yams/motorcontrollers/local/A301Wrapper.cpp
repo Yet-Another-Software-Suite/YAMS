@@ -145,6 +145,8 @@ void A301Wrapper::LoadClosedLoopController(const SmartMotorControllerConfig& con
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -206,11 +208,13 @@ bool A301Wrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     throw std::invalid_argument(
         "[Error] Closed loop control period is only supported in closed loop mode.");
 
-  // The A301 has no ramp rates, current limits or voltage compensation.
-  if (config.GetOpenLoopRampRate() || config.GetClosedLoopRampRate())
+  // The A301 has no ramp rates, current limits or voltage compensation of its own. Its closed loop runs on the
+  // SystemCore, which ramps the closed loop's output with WithClosedLoopRampRate.
+  config.GetClosedLoopRampRate();
+  if (config.GetOpenLoopRampRate())
     throw exceptions::SmartMotorControllerConfigurationException(
-        "A301 does not support ramp rates", "Ramp rate could not be applied",
-        "WithOpenLoopRampRate and WithClosedLoopRampRate should be removed");
+        "A301 does not support open loop ramp rates", "Open loop ramp rate could not be applied",
+        "WithOpenLoopRampRate should be removed; WithClosedLoopRampRate ramps the closed loop");
   if (config.GetStatorCurrentLimit() || config.GetSupplyCurrentLimit())
     throw exceptions::SmartMotorControllerConfigurationException(
         "A301 does not support current limits", "Current limit could not be applied",
@@ -646,9 +650,7 @@ void A301Wrapper::SetSupplyCurrentLimit(wpi::units::ampere_t) {
   throw std::runtime_error("A301 does not support current limits.");
 }
 
-void A301Wrapper::SetClosedLoopRampRate(wpi::units::second_t) {
-  throw std::runtime_error("A301 does not support ramp rates.");
-}
+void A301Wrapper::SetClosedLoopRampRate(wpi::units::second_t rampRate) { m_config->WithClosedLoopRampRate(rampRate); }
 
 void A301Wrapper::SetOpenLoopRampRate(wpi::units::second_t) {
   throw std::runtime_error("A301 does not support ramp rates.");
@@ -815,7 +817,6 @@ telemetry::UnsupportedTelemetryFields A301Wrapper::GetUnsupportedTelemetryFields
                             telemetry::DoubleTelemetryField::SupplyCurrent,
                             telemetry::DoubleTelemetryField::SupplyCurrentLimit,
                             telemetry::DoubleTelemetryField::StatorCurrentLimit,
-                            telemetry::DoubleTelemetryField::ClosedloopRampRate,
                             telemetry::DoubleTelemetryField::OpenloopRampRate}};
 }
 
