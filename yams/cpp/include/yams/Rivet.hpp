@@ -11,9 +11,9 @@ namespace yams {
  * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
  * The splash is written once, the first time a YAMS motor controller or swerve drive is built. The
- * display's default view is 27 columns by 16 rows: Rivet fills it, with the YAMS version and
- * yassrobotics.com underneath. Expanding the display shows a full resolution Rivet to the right with
- * a random phrase from Rivet under it. It uses wpi::DriverStationDisplay line mode, so robot code
+ * Display panel docked in the Driver Station shows about 26 columns by 9 rows, and Rivet fits in it,
+ * with the YAMS version and yassrobotics.com underneath. Expanding the display (or popping it out)
+ * shows a full resolution Rivet to the right with a random phrase from Rivet under it. It uses wpi::DriverStationDisplay line mode, so robot code
  * that writes its own lines afterwards simply replaces it.
  */
 class Rivet final {

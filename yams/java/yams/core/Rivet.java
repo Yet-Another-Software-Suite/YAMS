@@ -15,9 +15,10 @@ import org.wpilib.driverstation.DriverStationDisplay;
  * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
  * <p>The splash is written once, the first time a YAMS motor controller config or swerve drive is
- * built. The display's default view is 27 columns by 16 rows: Rivet fills it, with the YAMS version
- * and yassrobotics.com underneath. Expanding the display shows a full resolution Rivet to the right
- * with a random phrase from Rivet under it. It uses {@link DriverStationDisplay} line mode, so
+ * built. The Display panel docked in the Driver Station shows about 26 columns by 9 rows, and Rivet
+ * fits in it, with the YAMS version and yassrobotics.com underneath. Expanding the display (or
+ * popping it out) shows a full resolution Rivet to the right with a random phrase from Rivet under
+ * it. It uses {@link DriverStationDisplay} line mode, so
  * robot code that writes its own lines afterwards simply replaces it.
  *
  * <p>Both pictures are traced from the official Rivet pixel art, outline left off. Each glyph
@@ -27,21 +28,17 @@ import org.wpilib.driverstation.DriverStationDisplay;
  */
 public final class Rivet {
 
-  /** Rivet for the default view, one character per pixel across and two pixels per row. */
+  /** Rivet scaled to fit the docked Display panel, 25 columns by 9 rows. */
   private static final String[] SMALL = {
-      "    %%%%%%        %OOOO%%",
-      "   %@@##@@%%%%%%%OO@@@@OO%",
-      "   %@####@%%%%%%Oo@####@oO",
-      " %%%@@##@@%%%%%%Oo@####@oO",
-      " %%%%%%%%%%%%%%%%OO@@@@OO%%",
-      "%%~%%%%~~~~~~~~~~%%OOOO%%|%",
-      "%%v~~~~===~~~v===~~~v~v%||%",
-      " %%%vvvvvvv%vvvvvvvv%%%%%%",
-      "   %%%%%%%%%%%%%%%%%%%%%%",
-      "    %%%%++++++++%%%%%%%%%%",
-      "    %%%++++++++++%%%%%%%%%",
-      "   %%8%++++++++++%%%%%8%%%",
-      "  8888%%%++++++8%%%%%%8888",
+      "    %%%%%        %OOO%%",
+      "   %@###@%%%%%%Oo@###@oO",
+      " %%%@@#@@%%%%%%Oo@###@oO",
+      "%%%%%%%%~~%%~~~%%OOOOO%|%",
+      "%%%~~~====~~v===~~%%%%%|%",
+      " %%%%vvvv%%%vvvvv%%%%%%",
+      "   %%%%%+++++++%%%%%%%%%",
+      "   %%%++++++++++%%%%%%%%",
+      "  8888%%++++++8%%%%%8888",
   };
 
   /** Full resolution Rivet, two characters per pixel, to the right of {@link #SMALL}. */

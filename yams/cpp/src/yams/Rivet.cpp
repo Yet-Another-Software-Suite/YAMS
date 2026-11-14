@@ -29,21 +29,17 @@ namespace {
 // for one color: # pupils, @ eye whites, % body, + belly, 8 feet shading, O and o monocle,
 // | monocle chain, ~ and = mustache, v mouth.
 
-/** Rivet for the default view, one character per pixel across and two pixels per row. */
+/** Rivet scaled to fit the docked Display panel, 25 columns by 9 rows. */
 constexpr std::string_view kSmall[] = {
-    "    %%%%%%        %OOOO%%",
-    "   %@@##@@%%%%%%%OO@@@@OO%",
-    "   %@####@%%%%%%Oo@####@oO",
-    " %%%@@##@@%%%%%%Oo@####@oO",
-    " %%%%%%%%%%%%%%%%OO@@@@OO%%",
-    "%%~%%%%~~~~~~~~~~%%OOOO%%|%",
-    "%%v~~~~===~~~v===~~~v~v%||%",
-    " %%%vvvvvvv%vvvvvvvv%%%%%%",
-    "   %%%%%%%%%%%%%%%%%%%%%%",
-    "    %%%%++++++++%%%%%%%%%%",
-    "    %%%++++++++++%%%%%%%%%",
-    "   %%8%++++++++++%%%%%8%%%",
-    "  8888%%%++++++8%%%%%%8888",
+    "    %%%%%        %OOO%%",
+    "   %@###@%%%%%%Oo@###@oO",
+    " %%%@@#@@%%%%%%Oo@###@oO",
+    "%%%%%%%%~~%%~~~%%OOOOO%|%",
+    "%%%~~~====~~v===~~%%%%%|%",
+    " %%%%vvvv%%%vvvvv%%%%%%",
+    "   %%%%%+++++++%%%%%%%%%",
+    "   %%%++++++++++%%%%%%%%",
+    "  8888%%++++++8%%%%%8888",
 };
 
 /** Full resolution Rivet, two characters per pixel, to the right of kSmall. */
