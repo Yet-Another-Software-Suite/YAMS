@@ -56,7 +56,7 @@ class SmartMotorController {
   virtual ~SmartMotorController();
 
  protected:
-  /** Shows Rivet on the SystemCore display the first time any YAMS motor controller is built. */
+  /** Shows Rivet on the Driver Station display the first time any YAMS motor controller is built. */
   SmartMotorController();
 
  public:

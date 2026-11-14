@@ -6,58 +6,55 @@ package yams.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.wpilib.driverstation.DriverStationDisplay;
 
 /**
- * Rivet, the YASS mascot, says hi on the SystemCore display when YAMS starts up.
+ * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
- * <p>The art is written once, the first time a YAMS motor controller config or swerve drive is
- * built. It uses {@link DriverStationDisplay} line mode, so robot code that writes its own lines
- * afterwards simply replaces it.
+ * <p>The splash is written once, the first time a YAMS motor controller config or swerve drive is
+ * built, and fits the display's default 25 columns by 10 rows: Rivet on the left, the YAMS version
+ * and a random phrase from Rivet beside, and the YASS links along the bottom. It uses {@link
+ * DriverStationDisplay} line mode, so robot code that writes its own lines afterwards simply
+ * replaces it.
  */
 public final class Rivet {
 
   /**
-   * Rivet, traced from the official pixel art with two characters per pixel. Each glyph stands for
-   * one color: {@code #} pupils, {@code @} eye whites, {@code %} body, {@code 8} feet
-   * shading, {@code +} belly, {@code O} and {@code o} monocle, {@code |} monocle chain, {@code ~}
-   * and {@code =} mustache, {@code v} mouth.
+   * Rivet, drawn from the official pixel art at 12 by 7 characters. Each glyph stands for one
+   * color: {@code @} eye whites, {@code #} pupils, {@code %} body, {@code +} belly, {@code 8} feet,
+   * {@code O} monocle, {@code |} monocle chain, {@code ~} and {@code =} mustache, {@code v} mouth.
    */
   private static final String[] ART = {
-      "          %%%%%%%%                    %%%%%%%%",
-      "        %%%%%%%%%%%%                %%OOOOOOOO%%%%",
-      "        %%@@@@@@@@%%%%%%%%%%%%%%%%%%OOooooooooOO%%",
-      "      %%@@@@####@@@@%%%%%%%%%%%%%%OOoo@@@@@@@@ooOO%%",
-      "      %%@@########@@%%%%%%%%%%%%OOoo@@@@####@@@@ooOO",
-      "      %%@@########@@%%%%%%%%%%%%OOoo@@########@@ooOO",
-      "    %%%%@@@@####@@@@%%%%%%%%%%%%OOoo@@########@@ooOO",
-      "  %%%%%%%%@@@@@@@@%%%%%%%%%%%%%%OOoo@@@@####@@@@ooOO",
-      "  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%OOoo@@@@@@@@ooOO%%%%",
-      "  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%OOooooooooOO||%%%%",
-      "%%%%%%%%%%%%%%%%~~~~~~%%~~~~~~~~%%%%%%OOOOOOOO%%%%||%%",
-      "%%%%~~%%%%%%%%~~======~~======~~~~%%%%%%%%%%~~%%%%||%%",
-      "%%%%vv~~%%%%~~========~~==========~~~~%%%%~~vv%%%%||%%",
-      "  %%%%%%~~~~========~~~~~~vv==========~~vv%%%%%%||%%%%",
-      "  %%%%%%vv========~~vv%%vvvv==========vv%%%%%%%%%%%%",
-      "  %%%%%%%%vvvvvvvvvv%%%%%%vvvvvvvvvvvv%%%%%%%%%%%%",
-      "      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      "      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      "        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-      "        %%%%%%%%++++++++++++++++%%%%%%%%%%%%%%%%%%%%",
-      "        %%%%%%++++++++++++++++++++%%%%%%%%%%%%%%%%%%",
-      "        %%%%%%++++++++++++++++++++%%%%%%%%%%%%%%%%%%",
-      "      %%%%%%%%++++++++++++++++++++%%%%%%%%%%88%%%%%%",
-      "      %%%%88%%%%++++++++++++++++%%%%%%%%%%%%88%%%%%%",
-      "    %%%%8888%%%%%%++++++++++++88%%%%%%%%%%%%88%%%%%%",
-      "    888888  %%%%%%            88%%%%%%%%%%  88888888",
+      " %@@%  OOOO",
+      "%@##@%O@##@O",
+      "%%@@%%%OOOO|",
+      "%~~====~~%%|",
+      "%%vvvvvv%%%%",
+      " %%+++++%%%",
+      "888%    %888",
+  };
+
+  /** Columns Rivet takes up, plus one space before the text beside Rivet. */
+  private static final int ART_COLUMNS = 13;
+
+  /** Columns left beside Rivet for the version and phrase. */
+  private static final int SIDE_COLUMNS = 12;
+
+  /** Full-width rows under Rivet: the website, then a pointer to the live tuner. */
+  private static final String[] FOOTER = {
+      "yassrobotics.com",
+      "Don't forget to try",
+      "tuning.yassrobotics.com",
   };
 
   /**
-   * What Rivet might say under the art; one is picked at random each startup. The first thirteen
-   * are Rivet's speech bubbles from yassrobotics.com/rivet.
+   * What Rivet might say beside the art; one is picked at random each startup. The first thirteen
+   * are Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with {@link
+   * #SIGNATURE}, into the five rows under the version.
    */
   private static final String[] PHRASES = {
       "I lick batteries for fun.",
@@ -74,7 +71,7 @@ public final class Rivet {
       "Rivet was here.",
       "I may have eaten a battery once.",
       "Ribbit!",
-      "Just checking if this battery is charged. *lick*",
+      "Battery charged? *lick*",
       "Need a CSA? I brought zip ties.",
       "Clipboard in hand, tape measure ready.",
       "Whistle on, penalty stick ready.",
@@ -88,19 +85,10 @@ public final class Rivet {
   };
 
   /** Credit after the phrase. */
-  private static final String SIGNATURE = " - Rivet";
+  private static final String SIGNATURE = "- Rivet";
 
-  /** Row of {@link #ART} the YAMS version is printed beside, level with the mustache. */
-  private static final int VERSION_ROW = 12;
-
-  /** Spaces between the widest row of {@link #ART} and the text beside it. */
-  private static final int VERSION_GAP = 4;
-
-  /** Printed under the YAMS version. */
-  private static final String WEBSITE = "yassrobotics.com";
-
-  /** Printed a few rows under the website, pointing teams at the live tuner. */
-  private static final String TUNER = "Don't forget to try tuning.yassrobotics.com";
+  /** ANSI white, for the text around Rivet. */
+  private static final String WHITE = "\033[97m";
 
   /** Resource, next to this class, that the build writes the YAMS version into. */
   private static final String VERSION_RESOURCE = "yams-version.txt";
@@ -114,30 +102,28 @@ public final class Rivet {
   private Rivet() {}
 
   /**
-   * Show Rivet on the display, with the YAMS version, yassrobotics.com and the live tuner link to
-   * the right of Rivet and a random phrase underneath. Only the first call does anything.
+   * Show Rivet on the Driver Station display, with the YAMS version and a random phrase beside
+   * Rivet and the YASS links underneath. Only the first call does anything.
    */
   public static void show() {
     if (!shown.compareAndSet(false, true)) {
       return;
     }
     try {
-      int artWidth = Arrays.stream(ART).mapToInt(String::length).max().orElse(0);
-      String[] side = {
-          "\033[97mYAMS " + versionLabel(), "\033[97m" + WEBSITE, "", "", "\033[97m" + TUNER
-      };
+      List<String> side = new ArrayList<>();
+      side.add("YAMS");
+      side.add(versionLabel());
+      side.addAll(wrap(PHRASES[ThreadLocalRandom.current().nextInt(PHRASES.length)]));
       for (int row = 0; row < ART.length; row++) {
         String line = colorize(ART[row]);
-        int sideRow = row - VERSION_ROW;
-        if (sideRow >= 0 && sideRow < side.length && !side[sideRow].isEmpty()) {
-          line += " ".repeat(artWidth - ART[row].length() + VERSION_GAP) + side[sideRow];
+        if (row < side.size()) {
+          line += " ".repeat(ART_COLUMNS - ART[row].length()) + WHITE + side.get(row);
         }
         DriverStationDisplay.addLine(line);
       }
-      String caption =
-          PHRASES[ThreadLocalRandom.current().nextInt(PHRASES.length)] + SIGNATURE;
-      DriverStationDisplay.addLine(
-          " ".repeat(Math.max(0, (artWidth - caption.length()) / 2)) + caption);
+      for (String line : FOOTER) {
+        DriverStationDisplay.addLine(WHITE + line);
+      }
       DriverStationDisplay.updateLines();
     } catch (RuntimeException | LinkageError e) {
       // The splash is a nicety; never stop a robot because the display is unavailable.
@@ -175,6 +161,34 @@ public final class Rivet {
   }
 
   /**
+   * Word-wrap a phrase to the columns beside Rivet and sign it, on the last line when it fits.
+   *
+   * @param phrase Phrase from {@link #PHRASES}.
+   * @return Lines of at most {@link #SIDE_COLUMNS} characters.
+   */
+  private static List<String> wrap(String phrase) {
+    List<String> lines = new ArrayList<>();
+    String line = "";
+    for (String word : phrase.split(" ")) {
+      if (line.isEmpty()) {
+        line = word;
+      } else if (line.length() + 1 + word.length() <= SIDE_COLUMNS) {
+        line += " " + word;
+      } else {
+        lines.add(line);
+        line = word;
+      }
+    }
+    if (line.length() + 1 + SIGNATURE.length() <= SIDE_COLUMNS) {
+      lines.add(line + " " + SIGNATURE);
+    } else {
+      lines.add(line);
+      lines.add(SIGNATURE);
+    }
+    return lines;
+  }
+
+  /**
    * Color a line of the art, switching the ANSI color only where the glyph changes.
    *
    * @param line Plain ASCII line.
@@ -202,11 +216,11 @@ public final class Rivet {
   private static String color(char glyph) {
     return switch (glyph) {
       case '#' -> "\033[90m";
-      case '@' -> "\033[97m";
+      case '@' -> WHITE;
       case '%', '+' -> "\033[92m";
       case '8' -> "\033[32m";
       case 'O' -> "\033[93m";
-      case 'o', '|' -> "\033[33m";
+      case '|' -> "\033[33m";
       case '~', '=', 'v' -> "\033[31m";
       default -> "\033[0m";
     };

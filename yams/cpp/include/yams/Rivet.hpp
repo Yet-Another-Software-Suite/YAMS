@@ -8,19 +8,21 @@
 namespace yams {
 
 /**
- * Rivet, the YASS mascot, says hi on the SystemCore display when YAMS starts up.
+ * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
- * The art is written once, the first time a YAMS motor controller or swerve drive is built. It
- * uses wpi::DriverStationDisplay line mode, so robot code that writes its own lines afterwards
- * simply replaces it.
+ * The splash is written once, the first time a YAMS motor controller or swerve drive is built, and
+ * fits the display's default 25 columns by 10 rows: Rivet on the left, the YAMS version and a
+ * random phrase from Rivet beside, and the YASS links along the bottom. It uses
+ * wpi::DriverStationDisplay line mode, so robot code that writes its own lines afterwards simply
+ * replaces it.
  */
 class Rivet final {
  public:
   Rivet() = delete;
 
   /**
-   * Show Rivet on the display, with the YAMS version, yassrobotics.com and the live tuner link to
-   * the right of Rivet and a random phrase underneath. Only the first call does anything.
+   * Show Rivet on the Driver Station display, with the YAMS version and a random phrase beside
+   * Rivet and the YASS links underneath. Only the first call does anything.
    */
   static void Show();
 

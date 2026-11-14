@@ -3,13 +3,14 @@
 
 #include "yams/Rivet.hpp"
 
-#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <iterator>
 #include <random>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 #include <wpi/driverstation/DriverStationDisplay.hpp>
 
 // The build defines YAMS_VERSION, unquoted, as the release version. Builds from source get "dev".
@@ -26,42 +27,37 @@ namespace yams {
 namespace {
 
 /**
- * Rivet, traced from the official pixel art with two characters per pixel. Each glyph stands for
- * one color: # pupils, @ eye whites, % body, 8 feet shading, + belly, O and o
- * monocle, | monocle chain, ~ and = mustache, v mouth.
+ * Rivet, drawn from the official pixel art at 12 by 7 characters. Each glyph stands for one color:
+ * @ eye whites, # pupils, % body, + belly, 8 feet, O monocle, | monocle chain, ~ and = mustache,
+ * v mouth.
  */
 constexpr std::string_view kArt[] = {
-    "          %%%%%%%%                    %%%%%%%%",
-    "        %%%%%%%%%%%%                %%OOOOOOOO%%%%",
-    "        %%@@@@@@@@%%%%%%%%%%%%%%%%%%OOooooooooOO%%",
-    "      %%@@@@####@@@@%%%%%%%%%%%%%%OOoo@@@@@@@@ooOO%%",
-    "      %%@@########@@%%%%%%%%%%%%OOoo@@@@####@@@@ooOO",
-    "      %%@@########@@%%%%%%%%%%%%OOoo@@########@@ooOO",
-    "    %%%%@@@@####@@@@%%%%%%%%%%%%OOoo@@########@@ooOO",
-    "  %%%%%%%%@@@@@@@@%%%%%%%%%%%%%%OOoo@@@@####@@@@ooOO",
-    "  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%OOoo@@@@@@@@ooOO%%%%",
-    "  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%OOooooooooOO||%%%%",
-    "%%%%%%%%%%%%%%%%~~~~~~%%~~~~~~~~%%%%%%OOOOOOOO%%%%||%%",
-    "%%%%~~%%%%%%%%~~======~~======~~~~%%%%%%%%%%~~%%%%||%%",
-    "%%%%vv~~%%%%~~========~~==========~~~~%%%%~~vv%%%%||%%",
-    "  %%%%%%~~~~========~~~~~~vv==========~~vv%%%%%%||%%%%",
-    "  %%%%%%vv========~~vv%%vvvv==========vv%%%%%%%%%%%%",
-    "  %%%%%%%%vvvvvvvvvv%%%%%%vvvvvvvvvvvv%%%%%%%%%%%%",
-    "      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-    "      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-    "        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
-    "        %%%%%%%%++++++++++++++++%%%%%%%%%%%%%%%%%%%%",
-    "        %%%%%%++++++++++++++++++++%%%%%%%%%%%%%%%%%%",
-    "        %%%%%%++++++++++++++++++++%%%%%%%%%%%%%%%%%%",
-    "      %%%%%%%%++++++++++++++++++++%%%%%%%%%%88%%%%%%",
-    "      %%%%88%%%%++++++++++++++++%%%%%%%%%%%%88%%%%%%",
-    "    %%%%8888%%%%%%++++++++++++88%%%%%%%%%%%%88%%%%%%",
-    "    888888  %%%%%%            88%%%%%%%%%%  88888888",
+    " %@@%  OOOO",
+    "%@##@%O@##@O",
+    "%%@@%%%OOOO|",
+    "%~~====~~%%|",
+    "%%vvvvvv%%%%",
+    " %%+++++%%%",
+    "888%    %888",
+};
+
+/** Columns Rivet takes up, plus one space before the text beside Rivet. */
+constexpr size_t kArtColumns = 13;
+
+/** Columns left beside Rivet for the version and phrase. */
+constexpr size_t kSideColumns = 12;
+
+/** Full-width rows under Rivet: the website, then a pointer to the live tuner. */
+constexpr std::string_view kFooter[] = {
+    "yassrobotics.com",
+    "Don't forget to try",
+    "tuning.yassrobotics.com",
 };
 
 /**
- * What Rivet might say under the art; one is picked at random each startup. The first thirteen are
- * Rivet's speech bubbles from yassrobotics.com/rivet.
+ * What Rivet might say beside the art; one is picked at random each startup. The first thirteen are
+ * Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with kSignature, into the
+ * five rows under the version.
  */
 constexpr std::string_view kPhrases[] = {
     "I lick batteries for fun.",
@@ -78,7 +74,7 @@ constexpr std::string_view kPhrases[] = {
     "Rivet was here.",
     "I may have eaten a battery once.",
     "Ribbit!",
-    "Just checking if this battery is charged. *lick*",
+    "Battery charged? *lick*",
     "Need a CSA? I brought zip ties.",
     "Clipboard in hand, tape measure ready.",
     "Whistle on, penalty stick ready.",
@@ -92,40 +88,12 @@ constexpr std::string_view kPhrases[] = {
 };
 
 /** Credit after the phrase. */
-constexpr std::string_view kSignature = " - Rivet";
+constexpr std::string_view kSignature = "- Rivet";
 
-/** A random phrase from kPhrases, signed and centered under the art. */
-std::string Caption(size_t artWidth) {
-  std::random_device seed;
-  std::uniform_int_distribution<size_t> pick{0, std::size(kPhrases) - 1};
-  std::string caption{kPhrases[pick(seed)]};
-  caption += kSignature;
-  if (caption.size() < artWidth) {
-    caption.insert(0, (artWidth - caption.size()) / 2, ' ');
-  }
-  return caption;
-}
+/** ANSI white, for the text around Rivet. */
+constexpr std::string_view kWhite = "\033[97m";
 
-/** Row of kArt the YAMS version is printed beside, level with the mustache. */
-constexpr size_t kVersionRow = 12;
-
-/** Spaces between the widest row of kArt and the text beside it. */
-constexpr size_t kVersionGap = 4;
-
-/** Printed under the YAMS version. */
-constexpr std::string_view kWebsite = "yassrobotics.com";
-
-/** Printed a few rows under the website, pointing teams at the live tuner. */
-constexpr std::string_view kTuner = "Don't forget to try tuning.yassrobotics.com";
-
-/** Width of the widest row of kArt. */
-constexpr size_t ArtWidth() {
-  size_t width = 0;
-  for (std::string_view line : kArt) {
-    width = std::max(width, line.size());
-  }
-  return width;
-}
+std::atomic<bool> shown{false};
 
 /** The version as shown beside Rivet, with a v in front of release numbers. */
 std::string VersionLabel() {
@@ -138,7 +106,34 @@ std::string VersionLabel() {
   return label;
 }
 
-std::atomic<bool> shown{false};
+/** Word-wrap a phrase to the columns beside Rivet and sign it, on the last line when it fits. */
+std::vector<std::string> Wrap(std::string_view phrase) {
+  std::vector<std::string> lines;
+  std::string line;
+  while (!phrase.empty()) {
+    size_t space = phrase.find(' ');
+    std::string_view word = phrase.substr(0, space);
+    phrase = space == std::string_view::npos ? std::string_view{} : phrase.substr(space + 1);
+    if (line.empty()) {
+      line = word;
+    } else if (line.size() + 1 + word.size() <= kSideColumns) {
+      line += ' ';
+      line += word;
+    } else {
+      lines.push_back(line);
+      line = word;
+    }
+  }
+  if (line.size() + 1 + kSignature.size() <= kSideColumns) {
+    line += ' ';
+    line += kSignature;
+    lines.push_back(line);
+  } else {
+    lines.push_back(line);
+    lines.emplace_back(kSignature);
+  }
+  return lines;
+}
 
 /** ANSI color for a glyph, close to the color it stands for in the pixel art. */
 std::string_view Color(char glyph) {
@@ -146,7 +141,7 @@ std::string_view Color(char glyph) {
     case '#':
       return "\033[90m";
     case '@':
-      return "\033[97m";
+      return kWhite;
     case '%':
     case '+':
       return "\033[92m";
@@ -154,7 +149,6 @@ std::string_view Color(char glyph) {
       return "\033[32m";
     case 'O':
       return "\033[93m";
-    case 'o':
     case '|':
       return "\033[33m";
     case '~':
@@ -190,19 +184,26 @@ void Rivet::Show() {
   if (shown.exchange(true)) {
     return;
   }
-  const std::string side[] = {"\033[97mYAMS " + VersionLabel(),
-                              "\033[97m" + std::string{kWebsite}, "", "",
-                              "\033[97m" + std::string{kTuner}};
+  std::random_device seed;
+  std::uniform_int_distribution<size_t> pick{0, std::size(kPhrases) - 1};
+  std::vector<std::string> side{"YAMS", VersionLabel()};
+  for (std::string& line : Wrap(kPhrases[pick(seed)])) {
+    side.push_back(std::move(line));
+  }
   for (size_t row = 0; row < std::size(kArt); ++row) {
     std::string line = Colorize(kArt[row]);
-    if (row >= kVersionRow && row - kVersionRow < std::size(side) &&
-        !side[row - kVersionRow].empty()) {
-      line.append(ArtWidth() - kArt[row].size() + kVersionGap, ' ');
-      line += side[row - kVersionRow];
+    if (row < side.size()) {
+      line.append(kArtColumns - kArt[row].size(), ' ');
+      line += kWhite;
+      line += side[row];
     }
     wpi::DriverStationDisplay::AddLine(line);
   }
-  wpi::DriverStationDisplay::AddLine(Caption(ArtWidth()));
+  for (std::string_view footer : kFooter) {
+    std::string line{kWhite};
+    line += footer;
+    wpi::DriverStationDisplay::AddLine(line);
+  }
   wpi::DriverStationDisplay::UpdateLines();
 }
 
