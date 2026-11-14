@@ -17,6 +17,7 @@
 
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/Commands.hpp>
+#include <wpi/system/Timer.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_velocity.hpp>
 #include <wpi/units/length.hpp>
@@ -290,33 +291,36 @@ TEST_CASE_METHOD(ADRCClosedLoopFixture, "ADRCClosedLoop.TheClosedLoopRampLimitsH
               wpi::cmd::Run([&bundle] { bundle.smc->SetPosition(wpi::units::turn_t{1}); },
                             {bundle.smc->GetConfig().GetSubsystem()});
           wpi::cmd::CommandScheduler::GetInstance().Schedule(command);
-          // A Talon, simulated in real time, is checked against the ramp from the first command. The others are
-          // stepped in sim time, one closed loop per step, so the change over two steps is checked against two ramp
-          // steps: that holds wherever the ramp starts from, and when a slow runner reads one step's output before its
-          // closed loop has run, so the next read sees two loops' change at once.
+          // A Talon, simulated in real time, is checked against the ramp from the first command. The others run
+          // their closed loop every 20 ms of sim time, and the ramp holds each loop to one ramp step. Sim time is not
+          // paused, so it also moves on in real time, and a step of the scheduler can hold more than 20 ms of it, and
+          // so two closed loops. Each change is checked against the sim time it took instead: a change over dt holds
+          // at most dt / 20 ms + 1 loops, so at most kRampVoltsPerSecond * dt plus one ramp step.
           const bool ctre = IsCTRE(bundle);
           double time = 0;
           double worstOverRamp = 0;
           double largestStep = 0;
-          double largestTwoSteps = 0;
+          double worstStepOverRamp = 0;
           double previous = bundle.smc->GetVoltage().value();
-          double beforePrevious = previous;
+          double previousTime = wpi::Timer::GetTimestamp().value();
           SchedulerHelper::RunForDuration(0.5_s, [&] {
             time += 0.02;
             const double volts = bundle.smc->GetVoltage().value();
+            const double now = wpi::Timer::GetTimestamp().value();
             worstOverRamp = std::max(worstOverRamp, std::abs(volts) - kRampVoltsPerSecond * time);
             largestStep = std::max(largestStep, std::abs(volts - previous));
-            largestTwoSteps = std::max(largestTwoSteps, std::abs(volts - beforePrevious));
-            beforePrevious = previous;
+            worstStepOverRamp =
+                std::max(worstStepOverRamp, std::abs(volts - previous) - kRampVoltsPerSecond * (now - previousTime));
             previous = volts;
+            previousTime = now;
           });
           INFO(param.name << ": " << worstOverRamp << " V over a " << kRampVoltsPerSecond << " V/s ramp, largest step "
-                          << largestStep << " V and largest change over two steps " << largestTwoSteps
-                          << " V against " << kRampStepVolts << " V a step");
+                          << largestStep << " V, and a step at most " << worstStepOverRamp
+                          << " V over the ramp for its sim time, against " << kRampStepVolts << " V a loop");
           if (ctre) {
             CHECK(worstOverRamp <= kSlackVolts);
           } else if (ramped) {
-            CHECK(largestTwoSteps <= 2 * kRampStepVolts + 0.05);
+            CHECK(worstStepOverRamp <= kRampStepVolts + 0.05);
           } else {
             // Without the ramp the same step changes faster, so the ramp is what held it back.
             CHECK(largestStep > kRampStepVolts + 0.05);
