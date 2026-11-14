@@ -15,33 +15,29 @@ import org.wpilib.driverstation.DriverStationDisplay;
  * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
  *
  * <p>The splash is written once, the first time a YAMS motor controller config or swerve drive is
- * built. The Display panel docked in the Driver Station shows about 26 columns by 9 rows, and Rivet
- * fits in it, with the YAMS version and yassrobotics.com underneath. Expanding the display (or
- * popping it out) shows a full resolution Rivet to the right with a random phrase from Rivet under
- * it. It uses {@link DriverStationDisplay} line mode, so
- * robot code that writes its own lines afterwards simply replaces it.
- *
- * <p>Both pictures are traced from the official Rivet pixel art, outline left off. Each glyph
- * stands for one color: {@code #} pupils, {@code @} eye whites, {@code %} body, {@code +} belly,
- * {@code 8} feet shading, {@code O} and {@code o} monocle, {@code |} monocle chain, {@code ~} and
- * {@code =} mustache, {@code v} mouth.
+ * built. The Display panel docked in the Driver Station shows about 26 columns by 9 rows, so it
+ * gets a short welcome with the YAMS version, yassrobotics.com and the live tuner, plus an arrow to
+ * the panel's pop-out button. Popping the display out (or scrolling right) shows Rivet at full
+ * resolution with a random phrase from Rivet under it. It uses {@link DriverStationDisplay} line
+ * mode, so robot code that writes its own lines afterwards simply replaces it.
  */
 public final class Rivet {
 
-  /** Rivet scaled to fit the docked Display panel, 25 columns by 9 rows. */
-  private static final String[] SMALL = {
-      "    %%%%%        %OOO%%",
-      "   %@###@%%%%%%Oo@###@oO",
-      " %%%@@#@@%%%%%%Oo@###@oO",
-      "%%%%%%%%~~%%~~~%%OOOOO%|%",
-      "%%%~~~====~~v===~~%%%%%|%",
-      " %%%%vvvv%%%vvvvv%%%%%%",
-      "   %%%%%+++++++%%%%%%%%%",
-      "   %%%++++++++++%%%%%%%%",
-      "  8888%%++++++8%%%%%8888",
-  };
+  /** Ends just left of the docked panel's pop-out button, which sits over columns 21 to 25. */
+  private static final String CLICK_FOR_MORE = "Click for more ---->";
 
-  /** Full resolution Rivet, two characters per pixel, to the right of {@link #SMALL}. */
+  /** Shown under the YAMS version. */
+  private static final String WEBSITE = "yassrobotics.com";
+
+  /** Shown under the website, after a blank row. */
+  private static final String[] TUNER = {"Don't forget to try", "tuning.yassrobotics.com"};
+
+  /**
+   * Rivet at full resolution, two characters per pixel, traced from the official Rivet pixel art
+   * with the outline left off. Each glyph stands for one color: {@code #} pupils, {@code @} eye
+   * whites, {@code %} body, {@code +} belly, {@code 8} feet shading, {@code O} and {@code o}
+   * monocle, {@code |} monocle chain, {@code ~} and {@code =} handlebar mustache, {@code v} mouth.
+   */
   private static final String[] FULL = {
       "          %%%%%%%%                    %%%%%%%%",
       "        %%%%%%%%%%%%                %%OOOOOOOO%%%%",
@@ -71,11 +67,8 @@ public final class Rivet {
       "    888888  %%%%%%            88%%%%%%%%%%  88888888",
   };
 
-  /** Columns before {@link #FULL}: the default view's width plus a gap. */
+  /** Column {@link #FULL} starts at, past the docked panel. */
   private static final int FULL_COLUMN = 30;
-
-  /** Shown under {@link #SMALL} after a blank row, below the YAMS version. */
-  private static final String WEBSITE = "yassrobotics.com";
 
   /**
    * What Rivet might say under {@link #FULL}; one is picked at random each startup. Keep each to
@@ -113,8 +106,11 @@ public final class Rivet {
   /** Credit after the phrase. */
   private static final String SIGNATURE = " - Rivet";
 
-  /** ANSI white, for the text around Rivet. */
+  /** ANSI white, for text. */
   private static final String WHITE = "\033[97m";
+
+  /** ANSI bright green, for the welcome. */
+  private static final String GREEN = "\033[92m";
 
   /** Resource, next to this class, that the build writes the YAMS version into. */
   private static final String VERSION_RESOURCE = "yams-version.txt";
@@ -128,27 +124,23 @@ public final class Rivet {
   private Rivet() {}
 
   /**
-   * Show Rivet on the Driver Station display. Only the first call does anything.
+   * Show the welcome and Rivet on the Driver Station display. Only the first call does anything.
    */
   public static void show() {
     if (!shown.compareAndSet(false, true)) {
       return;
     }
     try {
-      String[] under = {"", "YAMS " + versionLabel(), WEBSITE};
+      String[] welcome = {
+          "Welcome to YASS!", CLICK_FOR_MORE, "", "YAMS " + versionLabel(), WEBSITE, "", TUNER[0],
+          TUNER[1]
+      };
       String phrase = PHRASES[ThreadLocalRandom.current().nextInt(PHRASES.length)] + SIGNATURE;
       int fullWidth = Arrays.stream(FULL).mapToInt(String::length).max().orElse(0);
-      int rows = Math.max(SMALL.length + under.length, FULL.length + 2);
+      int rows = Math.max(welcome.length, FULL.length + 2);
       for (int row = 0; row < rows; row++) {
-        String left = "";
-        int leftWidth = 0;
-        if (row < SMALL.length) {
-          left = colorize(SMALL[row]);
-          leftWidth = SMALL[row].length();
-        } else if (row - SMALL.length < under.length) {
-          left = WHITE + under[row - SMALL.length];
-          leftWidth = under[row - SMALL.length].length();
-        }
+        String text = row < welcome.length ? welcome[row] : "";
+        String left = text.isEmpty() ? "" : (row == 0 ? GREEN : WHITE) + text;
         String right = "";
         if (row < FULL.length) {
           right = colorize(FULL[row]);
@@ -156,7 +148,7 @@ public final class Rivet {
           right = WHITE + " ".repeat(Math.max(0, (fullWidth - phrase.length()) / 2)) + phrase;
         }
         DriverStationDisplay.addLine(
-            right.isEmpty() ? left : left + " ".repeat(FULL_COLUMN - leftWidth) + right);
+            right.isEmpty() ? left : left + " ".repeat(FULL_COLUMN - text.length()) + right);
       }
       DriverStationDisplay.updateLines();
     } catch (RuntimeException | LinkageError e) {
@@ -185,7 +177,7 @@ public final class Rivet {
   }
 
   /**
-   * The version as shown under Rivet, with a {@code v} in front of release numbers.
+   * The version as shown in the welcome, with a {@code v} in front of release numbers.
    *
    * @return Version label, such as {@code v2026.11.14} or {@code dev}.
    */
@@ -195,9 +187,9 @@ public final class Rivet {
   }
 
   /**
-   * Color a line of art, switching the ANSI color only where the glyph changes.
+   * Color a line of {@link #FULL}, switching the ANSI color only where the glyph changes.
    *
-   * @param line Line of {@link #SMALL} or {@link #FULL}.
+   * @param line Line of {@link #FULL}.
    * @return The line with ANSI colors.
    */
   private static String colorize(String line) {
@@ -216,14 +208,14 @@ public final class Rivet {
   /**
    * ANSI color for a glyph, close to the color it stands for in the pixel art.
    *
-   * @param glyph Glyph from the art.
+   * @param glyph Glyph from {@link #FULL}.
    * @return ANSI color escape.
    */
   private static String color(char glyph) {
     return switch (glyph) {
       case '#' -> "\033[90m";
       case '@' -> WHITE;
-      case '%', '+' -> "\033[92m";
+      case '%', '+' -> GREEN;
       case '8' -> "\033[32m";
       case 'O' -> "\033[93m";
       case 'o', '|' -> "\033[33m";

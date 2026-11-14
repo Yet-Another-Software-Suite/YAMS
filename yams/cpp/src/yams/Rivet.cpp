@@ -25,24 +25,20 @@ namespace yams {
 
 namespace {
 
-// Both pictures are traced from the official Rivet pixel art, outline left off. Each glyph stands
-// for one color: # pupils, @ eye whites, % body, + belly, 8 feet shading, O and o monocle,
-// | monocle chain, ~ and = mustache, v mouth.
+/** Ends just left of the docked panel's pop-out button, which sits over columns 21 to 25. */
+constexpr std::string_view kClickForMore = "Click for more ---->";
 
-/** Rivet scaled to fit the docked Display panel, 25 columns by 9 rows. */
-constexpr std::string_view kSmall[] = {
-    "    %%%%%        %OOO%%",
-    "   %@###@%%%%%%Oo@###@oO",
-    " %%%@@#@@%%%%%%Oo@###@oO",
-    "%%%%%%%%~~%%~~~%%OOOOO%|%",
-    "%%%~~~====~~v===~~%%%%%|%",
-    " %%%%vvvv%%%vvvvv%%%%%%",
-    "   %%%%%+++++++%%%%%%%%%",
-    "   %%%++++++++++%%%%%%%%",
-    "  8888%%++++++8%%%%%8888",
-};
+/** Shown under the YAMS version. */
+constexpr std::string_view kWebsite = "yassrobotics.com";
 
-/** Full resolution Rivet, two characters per pixel, to the right of kSmall. */
+/** Shown under the website, after a blank row. */
+constexpr std::string_view kTuner[] = {"Don't forget to try", "tuning.yassrobotics.com"};
+
+/**
+ * Rivet at full resolution, two characters per pixel, traced from the official Rivet pixel art
+ * with the outline left off. Each glyph stands for one color: # pupils, @ eye whites, % body,
+ * + belly, 8 feet shading, O and o monocle, | monocle chain, ~ and = handlebar mustache, v mouth.
+ */
 constexpr std::string_view kFull[] = {
     "          %%%%%%%%                    %%%%%%%%",
     "        %%%%%%%%%%%%                %%OOOOOOOO%%%%",
@@ -72,11 +68,8 @@ constexpr std::string_view kFull[] = {
     "    888888  %%%%%%            88%%%%%%%%%%  88888888",
 };
 
-/** Columns before kFull: the default view's width plus a gap. */
+/** Column kFull starts at, past the docked panel. */
 constexpr size_t kFullColumn = 30;
-
-/** Shown under kSmall after a blank row, below the YAMS version. */
-constexpr std::string_view kWebsite = "yassrobotics.com";
 
 /**
  * What Rivet might say under kFull; one is picked at random each startup. Keep each to three or
@@ -113,12 +106,15 @@ constexpr std::string_view kPhrases[] = {
 /** Credit after the phrase. */
 constexpr std::string_view kSignature = " - Rivet";
 
-/** ANSI white, for the text around Rivet. */
+/** ANSI white, for text. */
 constexpr std::string_view kWhite = "\033[97m";
+
+/** ANSI bright green, for the welcome. */
+constexpr std::string_view kGreen = "\033[92m";
 
 std::atomic<bool> shown{false};
 
-/** The version as shown under Rivet, with a v in front of release numbers. */
+/** The version as shown in the welcome, with a v in front of release numbers. */
 std::string VersionLabel() {
   std::string_view version = Rivet::GetVersion();
   std::string label;
@@ -138,7 +134,7 @@ std::string_view Color(char glyph) {
       return kWhite;
     case '%':
     case '+':
-      return "\033[92m";
+      return kGreen;
     case '8':
       return "\033[32m";
     case 'O':
@@ -155,7 +151,7 @@ std::string_view Color(char glyph) {
   }
 }
 
-/** Color a line of art, switching the ANSI color only where the glyph changes. */
+/** Color a line of kFull, switching the ANSI color only where the glyph changes. */
 std::string Colorize(std::string_view line) {
   std::string colored;
   char previous = 0;
@@ -179,7 +175,14 @@ void Rivet::Show() {
   if (shown.exchange(true)) {
     return;
   }
-  const std::string under[] = {"", "YAMS " + VersionLabel(), std::string{kWebsite}};
+  const std::string welcome[] = {"Welcome to YASS!",
+                                 std::string{kClickForMore},
+                                 "",
+                                 "YAMS " + VersionLabel(),
+                                 std::string{kWebsite},
+                                 "",
+                                 std::string{kTuner[0]},
+                                 std::string{kTuner[1]}};
   std::random_device seed;
   std::uniform_int_distribution<size_t> pick{0, std::size(kPhrases) - 1};
   std::string phrase{kPhrases[pick(seed)]};
@@ -188,33 +191,29 @@ void Rivet::Show() {
   for (std::string_view line : kFull) {
     fullWidth = std::max(fullWidth, line.size());
   }
-  size_t rows = std::max(std::size(kSmall) + std::size(under), std::size(kFull) + 2);
+  size_t rows = std::max(std::size(welcome), std::size(kFull) + 2);
   for (size_t row = 0; row < rows; ++row) {
-    std::string left;
-    size_t leftWidth = 0;
-    if (row < std::size(kSmall)) {
-      left = Colorize(kSmall[row]);
-      leftWidth = kSmall[row].size();
-    } else if (row - std::size(kSmall) < std::size(under)) {
-      const std::string& text = under[row - std::size(kSmall)];
-      left = std::string{kWhite} + text;
-      leftWidth = text.size();
+    std::string_view text = row < std::size(welcome) ? std::string_view{welcome[row]} : "";
+    std::string line;
+    if (!text.empty()) {
+      line = row == 0 ? kGreen : kWhite;
+      line += text;
     }
     std::string right;
     if (row < std::size(kFull)) {
       right = Colorize(kFull[row]);
     } else if (row == std::size(kFull) + 1) {
-      right = std::string{kWhite};
+      right = kWhite;
       if (phrase.size() < fullWidth) {
         right.append((fullWidth - phrase.size()) / 2, ' ');
       }
       right += phrase;
     }
     if (!right.empty()) {
-      left.append(kFullColumn - leftWidth, ' ');
-      left += right;
+      line.append(kFullColumn - text.size(), ' ');
+      line += right;
     }
-    wpi::DriverStationDisplay::AddLine(left);
+    wpi::DriverStationDisplay::AddLine(line);
   }
   wpi::DriverStationDisplay::UpdateLines();
 }
