@@ -3,6 +3,7 @@
 
 #include "yams/Rivet.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <iterator>
@@ -26,19 +27,27 @@ namespace yams {
 
 namespace {
 
-/**
- * Rivet, drawn from the official pixel art at 12 by 7 characters. Each glyph stands for one color:
- * @ eye whites, # pupils, % body, + belly, 8 feet, O monocle, | monocle chain, ~ and = mustache,
- * v mouth.
- */
+/** Rivet, monocle and mustache included, at 12 by 6 characters. */
 constexpr std::string_view kArt[] = {
-    " %@@%  OOOO",
-    "%@##@%O@##@O",
-    "%%@@%%%OOOO|",
-    "%~~====~~%%|",
-    "%%vvvvvv%%%%",
-    " %%+++++%%%",
-    "888%    %888",
+    R"( .-.    .-.)",
+    R"(( o )--( O ))",
+    R"((  ~~~~~~  ))",
+    R"( \  `--'  /)",
+    R"( /`-....-'\)",
+    R"((_/      \_))",
+};
+
+/**
+ * Color of each character in kArt: g green body, l light green belly, w white eye, y gold monocle,
+ * r red mustache and smile.
+ */
+constexpr std::string_view kArtColors[] = {
+    " ggg    yyy",
+    "g w gggy y y",
+    "g  rrrrrr  g",
+    " g  rrrr  g",
+    " gggllllggg",
+    "ggg      ggg",
 };
 
 /** Columns Rivet takes up, plus one space before the text beside Rivet. */
@@ -54,8 +63,8 @@ constexpr std::string_view kFooter[] = {
 
 /**
  * What Rivet might say beside the art; one is picked at random each startup. The first thirteen are
- * Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with kSignature, into the
- * five rows under the version.
+ * Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with kSignature, into
+ * five rows of kSideColumns.
  */
 constexpr std::string_view kPhrases[] = {
     "I lick batteries for fun.",
@@ -133,41 +142,35 @@ std::vector<std::string> Wrap(std::string_view phrase) {
   return lines;
 }
 
-/** ANSI color for a glyph, close to the color it stands for in the pixel art. */
-std::string_view Color(char glyph) {
-  switch (glyph) {
-    case '#':
-      return "\033[90m";
-    case '@':
-      return kWhite;
-    case '%':
-    case '+':
-      return "\033[92m";
-    case '8':
+/** ANSI color for a code from kArtColors, close to Rivet's colors. */
+std::string_view Color(char code) {
+  switch (code) {
+    case 'g':
       return "\033[32m";
-    case 'O':
+    case 'l':
+      return "\033[92m";
+    case 'w':
+      return kWhite;
+    case 'y':
       return "\033[93m";
-    case '|':
-      return "\033[33m";
-    case '~':
-    case '=':
-    case 'v':
+    case 'r':
       return "\033[31m";
     default:
       return "\033[0m";
   }
 }
 
-/** Color a line of the art, switching the ANSI color only where the glyph changes. */
-std::string Colorize(std::string_view line) {
+/** Color a line of the art from its line of kArtColors, switching only where the color changes. */
+std::string Colorize(std::string_view line, std::string_view colors) {
   std::string colored;
   char previous = 0;
-  for (char glyph : line) {
-    if (glyph != previous && glyph != ' ') {
-      colored += Color(glyph);
-      previous = glyph;
+  for (size_t i = 0; i < line.size(); ++i) {
+    char code = i < colors.size() ? colors[i] : ' ';
+    if (code != previous && code != ' ') {
+      colored += Color(code);
+      previous = code;
     }
-    colored += glyph;
+    colored += line[i];
   }
   return colored;
 }
@@ -188,10 +191,12 @@ void Rivet::Show() {
   for (std::string& line : Wrap(kPhrases[pick(seed)])) {
     side.push_back(std::move(line));
   }
-  for (size_t row = 0; row < std::size(kArt); ++row) {
-    std::string line = Colorize(kArt[row]);
+  // The phrase can run past Rivet's feet; it stays in the column beside Rivet.
+  for (size_t row = 0; row < std::max(std::size(kArt), side.size()); ++row) {
+    std::string_view art = row < std::size(kArt) ? kArt[row] : std::string_view{};
+    std::string line = row < std::size(kArt) ? Colorize(kArt[row], kArtColors[row]) : "";
     if (row < side.size()) {
-      line.append(kArtColumns - kArt[row].size(), ' ');
+      line.append(kArtColumns - art.size(), ' ');
       line += kWhite;
       line += side[row];
     }

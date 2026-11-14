@@ -23,19 +23,27 @@ import org.wpilib.driverstation.DriverStationDisplay;
  */
 public final class Rivet {
 
-  /**
-   * Rivet, drawn from the official pixel art at 12 by 7 characters. Each glyph stands for one
-   * color: {@code @} eye whites, {@code #} pupils, {@code %} body, {@code +} belly, {@code 8} feet,
-   * {@code O} monocle, {@code |} monocle chain, {@code ~} and {@code =} mustache, {@code v} mouth.
-   */
+  /** Rivet, monocle and mustache included, at 12 by 6 characters. */
   private static final String[] ART = {
-      " %@@%  OOOO",
-      "%@##@%O@##@O",
-      "%%@@%%%OOOO|",
-      "%~~====~~%%|",
-      "%%vvvvvv%%%%",
-      " %%+++++%%%",
-      "888%    %888",
+      " .-.    .-.",
+      "( o )--( O )",
+      "(  ~~~~~~  )",
+      " \\  `--'  /",
+      " /`-....-'\\",
+      "(_/      \\_)",
+  };
+
+  /**
+   * Color of each character in {@link #ART}: {@code g} green body, {@code l} light green belly,
+   * {@code w} white eye, {@code y} gold monocle, {@code r} red mustache and smile.
+   */
+  private static final String[] ART_COLORS = {
+      " ggg    yyy",
+      "g w gggy y y",
+      "g  rrrrrr  g",
+      " g  rrrr  g",
+      " gggllllggg",
+      "ggg      ggg",
   };
 
   /** Columns Rivet takes up, plus one space before the text beside Rivet. */
@@ -52,7 +60,7 @@ public final class Rivet {
   /**
    * What Rivet might say beside the art; one is picked at random each startup. The first thirteen
    * are Rivet's speech bubbles from yassrobotics.com/rivet. Each must word-wrap, with {@link
-   * #SIGNATURE}, into the five rows under the version.
+   * #SIGNATURE}, into five rows of {@link #SIDE_COLUMNS}.
    */
   private static final String[] PHRASES = {
       "I lick batteries for fun.",
@@ -112,10 +120,12 @@ public final class Rivet {
       side.add("YAMS");
       side.add(versionLabel());
       side.addAll(wrap(PHRASES[ThreadLocalRandom.current().nextInt(PHRASES.length)]));
-      for (int row = 0; row < ART.length; row++) {
-        String line = colorize(ART[row]);
+      // The phrase can run past Rivet's feet; it stays in the column beside Rivet.
+      for (int row = 0; row < Math.max(ART.length, side.size()); row++) {
+        String art = row < ART.length ? ART[row] : "";
+        String line = row < ART.length ? colorize(ART[row], ART_COLORS[row]) : "";
         if (row < side.size()) {
-          line += " ".repeat(ART_COLUMNS - ART[row].length()) + WHITE + side.get(row);
+          line += " ".repeat(ART_COLUMNS - art.length()) + WHITE + side.get(row);
         }
         DriverStationDisplay.addLine(line);
       }
@@ -187,39 +197,39 @@ public final class Rivet {
   }
 
   /**
-   * Color a line of the art, switching the ANSI color only where the glyph changes.
+   * Color a line of the art, switching the ANSI color only where the color changes.
    *
-   * @param line Plain ASCII line.
+   * @param line Line of {@link #ART}.
+   * @param colors Matching line of {@link #ART_COLORS}.
    * @return The line with ANSI colors.
    */
-  private static String colorize(String line) {
+  private static String colorize(String line, String colors) {
     StringBuilder colored = new StringBuilder();
     char previous = 0;
-    for (char glyph : line.toCharArray()) {
-      if (glyph != previous && glyph != ' ') {
-        colored.append(color(glyph));
-        previous = glyph;
+    for (int i = 0; i < line.length(); i++) {
+      char code = i < colors.length() ? colors.charAt(i) : ' ';
+      if (code != previous && code != ' ') {
+        colored.append(color(code));
+        previous = code;
       }
-      colored.append(glyph);
+      colored.append(line.charAt(i));
     }
     return colored.toString();
   }
 
   /**
-   * ANSI color for a glyph, close to the color it stands for in the pixel art.
+   * ANSI color for a code from {@link #ART_COLORS}, close to Rivet's colors.
    *
-   * @param glyph Glyph from {@link #ART}.
+   * @param code Color code.
    * @return ANSI color escape.
    */
-  private static String color(char glyph) {
-    return switch (glyph) {
-      case '#' -> "\033[90m";
-      case '@' -> WHITE;
-      case '%', '+' -> "\033[92m";
-      case '8' -> "\033[32m";
-      case 'O' -> "\033[93m";
-      case '|' -> "\033[33m";
-      case '~', '=', 'v' -> "\033[31m";
+  private static String color(char code) {
+    return switch (code) {
+      case 'g' -> "\033[32m";
+      case 'l' -> "\033[92m";
+      case 'w' -> WHITE;
+      case 'y' -> "\033[93m";
+      case 'r' -> "\033[31m";
       default -> "\033[0m";
     };
   }
