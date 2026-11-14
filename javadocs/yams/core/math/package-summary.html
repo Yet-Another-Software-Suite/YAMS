@@ -84,16 +84,22 @@ implement discrete Linear Quadratic Regulator (LQR) control. <code>LQRConfig</co
 cost) and R (input cost) weighting matrices along with the plant model; <code>LQRController</code>
 solves the discrete algebraic Riccati equation at construction time and exposes a
 <code>calculate()</code> method suitable for calling from a periodic loop. <li><b>
-<a href="DerivativeTimeFilter.html" title="class in yams.core.math"><code>DerivativeTimeFilter</code></a></b> computes a filtered derivative estimate for use as the
-D term in PID controllers. Rather than a raw finite difference (which amplifies sensor noise),
-this class applies a configurable low-pass filter to the derivative signal, trading off noise
-rejection against phase lag. <li><b><a href="SmartMath.html" title="class in yams.core.math"><code>SmartMath</code></a></b> a collection of static
-helper methods for common control-theory and unit-conversion tasks (clamping, interpolation,
-wrapping angles, etc.) that do not belong to a specific controller class. <li><b>
+<a href="DerivativeTimeFilter.html" title="class in yams.core.math"><code>DerivativeTimeFilter</code></a></b> computes a filtered derivative estimate for use
+as the D term in PID controllers. Rather than a raw finite difference (which amplifies sensor
+noise), this class applies a configurable low-pass filter to the derivative signal, trading off
+noise rejection against phase lag. <li><b><a href="SmartMath.html" title="class in yams.core.math"><code>SmartMath</code></a></b> a collection of
+static helper methods for common control-theory and unit-conversion tasks (clamping,
+interpolation, wrapping angles, etc.) that do not belong to a specific controller class. <li><b>
 <a href="ExponentialProfilePIDController.html" title="class in yams.core.math"><code>ExponentialProfilePIDController</code></a></b> a profiled PID variant that uses an
 exponential motion profile to generate setpoints. Compared to a trapezoidal profile, the
 exponential profile produces smoother acceleration transitions and is less prone to
-overshoot on mechanisms with significant inertia.
+overshoot on mechanisms with significant inertia. <li><b>
+<a href="ADRCController.html" title="class in yams.core.math"><code>ADRCController</code></a></b> and <b><a href="TrackingDifferentiator.html" title="class in yams.core.math"><code>TrackingDifferentiator</code></a></b> implement active disturbance rejection control: the
+controller estimates the total disturbance (friction, back-EMF, loads) with an extended state
+observer and cancels it, so the closed loop settles in the requested time from only a plant order
+and an approximate input gain. The tracking differentiator smooths step references and supplies
+their derivatives. Teams usually configure both through <a href="ADRCConfig.html" title="class in yams.core.math"><code>ADRCConfig</code></a> rather
+than constructing them directly.
 </ul>
 
 <h2 id="example-lqr-setup-heading">Example LQR Setup</h2>
@@ -127,6 +133,8 @@ double filteredDeriv = dFilter.calculate(measurement);
 <li><a href="DerivativeTimeFilter.html" title="class in yams.core.math"><code>DerivativeTimeFilter</code></a></li>
 <li><a href="SmartMath.html" title="class in yams.core.math"><code>SmartMath</code></a></li>
 <li><a href="ExponentialProfilePIDController.html" title="class in yams.core.math"><code>ExponentialProfilePIDController</code></a></li>
+<li><a href="ADRCController.html" title="class in yams.core.math"><code>ADRCController</code></a></li>
+<li><a href="TrackingDifferentiator.html" title="class in yams.core.math"><code>TrackingDifferentiator</code></a></li>
 </ul>
 </dd>
 </dl>
@@ -136,11 +144,28 @@ double filteredDeriv = dFilter.calculate(measurement);
 <ul class="summary-list">
 <li>
 <div id="class-summary">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="class-summary-tab0" role="tab" aria-selected="true" aria-controls="class-summary.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary', 2)" class="active-table-tab">All Classes and Interfaces</button><button id="class-summary-tab2" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab2', 2)" class="table-tab">Classes</button><button id="class-summary-tab3" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab3', 2)" class="table-tab">Enum Classes</button><button id="class-summary-tab4" role="tab" aria-selected="false" aria-controls="class-summary.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('class-summary', 'class-summary-tab4', 2)" class="table-tab">Record Classes</button></div>
 <div id="class-summary.tabpanel" role="tabpanel" aria-labelledby="class-summary-tab0">
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Class</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ADRCConfig.html" title="class in yams.core.math">ADRCConfig</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Configuration for an active disturbance rejection controller.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="ADRCConfig.SystemOrder.html" title="enum class in yams.core.math">ADRCConfig.SystemOrder</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">Plant order for the active disturbance rejection controller.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="ADRCController.html" title="class in yams.core.math">ADRCController</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Active disturbance rejection controller.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab4"><a href="ADRCController.Reference.html" title="class in yams.core.math">ADRCController.Reference</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab4">
+<div class="block">A setpoint and how fast it is changing, such as a motion profile's state: a position and its
+velocity, or for a velocity loop, a velocity and its acceleration.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab2"><a href="DerivativeTimeFilter.html" title="class in yams.core.math">DerivativeTimeFilter</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab2">
 <div class="block">Find the derivative of a value over time in microseconds.</div>
@@ -164,6 +189,14 @@ double filteredDeriv = dFilter.calculate(measurement);
 <div class="col-first odd-row-color class-summary class-summary-tab2"><a href="SmartMath.html" title="class in yams.core.math">SmartMath</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">SmartMath class to handle math operations.</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab2"><a href="TrackingDifferentiator.html" title="class in yams.core.math">TrackingDifferentiator</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="block">Tracking differentiator.</div>
+</div>
+<div class="col-first odd-row-color class-summary class-summary-tab3"><a href="TrackingDifferentiator.Method.html" title="enum class in yams.core.math">TrackingDifferentiator.Method</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab3">
+<div class="block">Differentiation method.</div>
 </div>
 </div>
 </div>

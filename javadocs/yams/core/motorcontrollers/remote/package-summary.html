@@ -77,7 +77,7 @@ loadScripts(document, 'script');</script>
 <p>This package contains adapters for CTRE TalonFX-family motor controllers. Because the
 Phoenix 6 firmware executes PID loops directly on the motor controller hardware, these
 wrappers are classified as <em>remote</em>: setpoints are sent over CAN and the device
-closes the loop autonomously at a high update rate without consuming roboRIO CPU cycles.
+closes the loop autonomously at a high update rate without consuming SystemCore CPU cycles.
 
 <h2 id="core-types-heading">Core types</h2>
 <ul>
@@ -142,7 +142,7 @@ mode and zero power mode.</div>
 </div>
 <div class="col-first even-row-color"><a href="../local/package-summary.html">yams.core.motorcontrollers.local</a></div>
 <div class="col-last even-row-color">
-<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the roboRIO.</div>
+<div class="block">REV Robotics motor controller wrappers whose closed-loop control runs on the SystemCore.</div>
 </div>
 <div class="col-first odd-row-color"><a href="../simulation/package-summary.html">yams.core.motorcontrollers.simulation</a></div>
 <div class="col-last odd-row-color">

@@ -74,6 +74,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#m_lastClosedLoopMechanismPosition" tabindex="0">m_lastClosedLoopMechanismPosition</a></li>
 <li><a href="#m_pid" tabindex="0">m_pid</a></li>
 <li><a href="#m_lqr" tabindex="0">m_lqr</a></li>
+<li><a href="#m_adrc" tabindex="0">m_adrc</a></li>
 <li><a href="#setpointPosition" tabindex="0">setpointPosition</a></li>
 <li><a href="#setpointVelocity" tabindex="0">setpointVelocity</a></li>
 <li><a href="#setpointFeedforwardForce" tabindex="0">setpointFeedforwardForce</a></li>
@@ -85,6 +86,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#telemetryConfig" tabindex="0">telemetryConfig</a></li>
 <li><a href="#m_simSupplier" tabindex="0">m_simSupplier</a></li>
 <li><a href="#m_looseFollowers" tabindex="0">m_looseFollowers</a></li>
+<li><a href="#m_iteratedByLeader" tabindex="0">m_iteratedByLeader</a></li>
 <li><a href="#m_systemCoreClosedLoopAlert" tabindex="0">m_systemCoreClosedLoopAlert</a></li>
 <li><a href="#m_batterySimUUID" tabindex="0">m_batterySimUUID</a></li>
 </ol>
@@ -101,10 +103,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#checkConfigSafety()" tabindex="0">checkConfigSafety()</a></li>
 <li><a href="#getSimSupplier()" tabindex="0">getSimSupplier()</a></li>
 <li><a href="#setSimSupplier(yams.core.motorcontrollers.SimSupplier)" tabindex="0">setSimSupplier(SimSupplier)</a></li>
+<li><a href="#getMechanismDutyCycle(double)" tabindex="0">getMechanismDutyCycle(double)</a></li>
 <li><a href="#getTrapezoidalProfileState()" tabindex="0">getTrapezoidalProfileState()</a></li>
 <li><a href="#getExponentialProfileState()" tabindex="0">getExponentialProfileState()</a></li>
 <li><a href="#getVelocityMeasurementDelay()" tabindex="0">getVelocityMeasurementDelay()</a></li>
 <li><a href="#getClosedLoopControllerPeriod()" tabindex="0">getClosedLoopControllerPeriod()</a></li>
+<li><a href="#usesSystemCoreController()" tabindex="0">usesSystemCoreController()</a></li>
+<li><a href="#getADRCController()" tabindex="0">getADRCController()</a></li>
+<li><a href="#applyADRCConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" tabindex="0">applyADRCConfig(SmartMotorControllerConfig)</a></li>
 <li><a href="#isClosedLoopControllerStopped()" tabindex="0">isClosedLoopControllerStopped()</a></li>
 <li><a href="#stopClosedLoopController()" tabindex="0">stopClosedLoopController()</a></li>
 <li><a href="#startClosedLoopController()" tabindex="0">startClosedLoopController()</a></li>
@@ -194,6 +200,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#getUnsupportedTelemetryFields()" tabindex="0">getUnsupportedTelemetryFields()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#buildAlertId(java.lang.String,int,java.lang.String)" tabindex="0">buildAlertId(String, int, String)</a></li>
+<li><a href="#getMechanismDCMotor()" tabindex="0">getMechanismDCMotor()</a></li>
+<li><a href="#setMechanismSimSupplier(yams.core.motorcontrollers.SimSupplier)" tabindex="0">setMechanismSimSupplier(SimSupplier)</a></li>
+<li><a href="#follow(yams.core.motorcontrollers.SmartMotorController,boolean)" tabindex="0">follow(SmartMotorController, boolean)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 <li><a href="#toString()" tabindex="0">toString()</a></li>
 <li><a href="#getClosedLoopControllerSlot()" tabindex="0">getClosedLoopControllerSlot()</a></li>
@@ -267,35 +276,46 @@ Arm arm = new Arm(new ArmConfig(motor).withLength(Meters.of(0.5)));
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Field</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
-<div class="col-second even-row-color"><code><a href="#m_batterySimUUID" class="member-name-link">m_batterySimUUID</a></code></div>
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../math/ADRCController.html" title="class in yams.core.math">ADRCController</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#m_adrc" class="member-name-link">m_adrc</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">ADRC controller for the motor controller, when the config selects one.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#m_batterySimUUID" class="member-name-link">m_batterySimUUID</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Battery simulation UUID used when standalone simulation.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected org.wpilib.system.Notifier</code></div>
-<div class="col-second odd-row-color"><code><a href="#m_closedLoopControllerThread" class="member-name-link">m_closedLoopControllerThread</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>protected org.wpilib.system.Notifier</code></div>
+<div class="col-second even-row-color"><code><a href="#m_closedLoopControllerThread" class="member-name-link">m_closedLoopControllerThread</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Thread of the closed loop controller.</div>
 </div>
-<div class="col-first even-row-color"><code>protected final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#m_closeHooks" class="member-name-link">m_closeHooks</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>protected final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#m_closeHooks" class="member-name-link">m_closeHooks</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Hooks run on <a href="#close()"><code>close()</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a><wbr>&lt;?&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#m_config" class="member-name-link">m_config</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>protected <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a><wbr>&lt;?&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#m_config" class="member-name-link">m_config</a></code></div>
+<div class="col-last even-row-color">
 <div class="block"><a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for the motor.</div>
 </div>
-<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#m_expoProfile" class="member-name-link">m_expoProfile</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#m_expoProfile" class="member-name-link">m_expoProfile</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Exponential profile for the closed loop controller.</div>
 </div>
-<div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile.State&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#m_expoState" class="member-name-link">m_expoState</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile.State&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#m_expoState" class="member-name-link">m_expoState</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Exponential profile state for the closed loop controller.</div>
+</div>
+<div class="col-first odd-row-color"><code>protected boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#m_iteratedByLeader" class="member-name-link">m_iteratedByLeader</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether this motor controller reads a leader's simulation, such as a mechanism's, which the
+leader iterates right after it steps.</div>
 </div>
 <div class="col-first even-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#m_lastClosedLoopMechanismPosition" class="member-name-link">m_lastClosedLoopMechanismPosition</a></code></div>
@@ -419,380 +439,412 @@ wrapping point.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Register a hook to run when <a href="#close()"><code>close()</code></a> is called, so command-layer helpers (e.g.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyConfig</a><wbr>(<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;config)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyADRCConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyADRCConfig</a><wbr>(<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;config)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Build the ADRC controller for this motor's slot from the config, replacing any previous one.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#applyConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">applyConfig</a><wbr>(<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;config)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Apply the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> to the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTuningValues()" class="member-name-link">applyTuningValues</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTuningValues()" class="member-name-link">applyTuningValues</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Apply the live-tuned values (from the Tuning NetworkTable) to this <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildAlertId(java.lang.String,int,java.lang.String)" class="member-name-link">buildAlertId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;motorControllerType,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildAlertId(java.lang.String,int,java.lang.String)" class="member-name-link">buildAlertId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;motorControllerType,
  int&nbsp;deviceId,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;alertType)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Build a unique <code>Alert</code> identifier for this motor controller, for use once
 <a href="#m_config"><code>m_config</code></a> has been assigned by the implementing constructor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#checkConfigSafety()" class="member-name-link">checkConfigSafety</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#checkConfigSafety()" class="member-name-link">checkConfigSafety</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Check config for safe values.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#close()" class="member-name-link">close</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#close()" class="member-name-link">close</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Close the SMC for unit testing.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#create(java.lang.Object,org.wpilib.math.system.DCMotor,yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">create</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;motorController,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#create(java.lang.Object,org.wpilib.math.system.DCMotor,yams.core.motorcontrollers.SmartMotorControllerConfig)" class="member-name-link">create</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;motorController,
  org.wpilib.math.system.DCMotor&nbsp;motorSim,
  <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;cfg)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Create a <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> wrapper from the provided motor controller object.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Time</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getClosedLoopControllerPeriod()" class="member-name-link">getClosedLoopControllerPeriod</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#follow(yams.core.motorcontrollers.SmartMotorController,boolean)" class="member-name-link">follow</a><wbr>(<a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>&nbsp;leader,
+ boolean&nbsp;inverted)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Read the simulation of a leader whose motor model has this motor, instead of simulating it.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../math/ADRCController.html" title="class in yams.core.math">ADRCController</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getADRCController()" class="member-name-link">getADRCController</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the ADRC controller running the closed loop, if the config selected one.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Time</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getClosedLoopControllerPeriod()" class="member-name-link">getClosedLoopControllerPeriod</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the period the closed loop controller runs at.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.core.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getClosedLoopControllerSlot()" class="member-name-link">getClosedLoopControllerSlot</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.core.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getClosedLoopControllerSlot()" class="member-name-link">getClosedLoopControllerSlot</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the active closed loop controller slot.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a><wbr>&lt;?&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a><wbr>&lt;?&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getConfig()" class="member-name-link">getConfig</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.math.system.DCMotor</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDCMotor()" class="member-name-link">getDCMotor</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.math.system.DCMotor</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDCMotor()" class="member-name-link">getDCMotor</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the <code>DCMotor</code> modeling the motor controlled by the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDutyCycle()" class="member-name-link">getDutyCycle</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getDutyCycle()" class="member-name-link">getDutyCycle</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the duty cycle output of the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile.State&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getExponentialProfileState()" class="member-name-link">getExponentialProfileState</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.ExponentialProfile.State&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getExponentialProfileState()" class="member-name-link">getExponentialProfileState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the current encoder exponential profile state for the closed loop controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismPosition()" class="member-name-link">getExternalEncoderMechanismPosition</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the mechanism <code>Angle</code> from the external (absolute) encoder, scaled by the configured
 external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getExternalEncoderMechanismVelocity()" class="member-name-link">getExternalEncoderMechanismVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the mechanism <code>AngularVelocity</code> from the external (absolute) encoder, scaled by the
 configured external encoder <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>[]&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLooselyCoupledFollowers()" class="member-name-link">getLooselyCoupledFollowers</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>[]&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLooselyCoupledFollowers()" class="member-name-link">getLooselyCoupledFollowers</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the loosely coupled followers, which are sent the leader's setpoints and run their own
 closed loop controllers.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.LinearAcceleration</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.LinearAcceleration</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementAcceleration()" class="member-name-link">getMeasurementAcceleration</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
 with the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Distance</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementPosition()" class="member-name-link">getMeasurementPosition</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Distance</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementPosition()" class="member-name-link">getMeasurementPosition</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
 with the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMeasurementPositionSetpoint()" class="member-name-link">getMeasurementPositionSetpoint</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Distance&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMeasurementPositionSetpoint()" class="member-name-link">getMeasurementPositionSetpoint</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Mechanism setpoint position as a <code>Distance</code>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.LinearVelocity</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.LinearVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMeasurementVelocity()" class="member-name-link">getMeasurementVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the usable measurement of the motor for mechanisms operating under distance units converted
 with the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularAcceleration</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularAcceleration</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismAcceleration()" class="member-name-link">getMechanismAcceleration</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the Mechanism <code>AngularAcceleration</code>, calculating it on the robot controller if
 necessary by taking the derivative of the velocity.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismPosition()" class="member-name-link">getMechanismPosition</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.system.DCMotor</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismDCMotor()" class="member-name-link">getMechanismDCMotor</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the motors of the mechanism this motor controller drives: its own <a href="#getDCMotor()"><code>getDCMotor()</code></a> and
+its loosely coupled followers', except those already given a mechanism of their own.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismDutyCycle(double)" class="member-name-link">getMechanismDutyCycle</a><wbr>(double&nbsp;dutyCycle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Get the duty cycle the motors of this motor controller's simulation apply.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismPosition()" class="member-name-link">getMechanismPosition</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the mechanism <code>Angle</code> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> from
 <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionSetpoint()" class="member-name-link">getMechanismPositionSetpoint</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Angle&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismPositionSetpoint()" class="member-name-link">getMechanismPositionSetpoint</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Mechanism setpoint position.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismSetpointVelocity()" class="member-name-link">getMechanismSetpointVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMechanismSetpointVelocity()" class="member-name-link">getMechanismSetpointVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the Mechanism velocity setpoint.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismVelocity()" class="member-name-link">getMechanismVelocity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMechanismVelocity()" class="member-name-link">getMechanismVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the Mechanism <code>AngularVelocity</code> taking the configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a> into
 the measurement applied via the <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMotorController()" class="member-name-link">getMotorController</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMotorController()" class="member-name-link">getMotorController</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the Motor Controller Object passed into the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMotorControllerConfig()" class="member-name-link">getMotorControllerConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getMotorControllerConfig()" class="member-name-link">getMotorControllerConfig</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the motor controller object config generated by <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> based off the
 <a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the name of the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismPosition()" class="member-name-link">getRelativeMechanismPosition</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the mechanism <code>Angle</code> from the relative encoder in the motor, scaled by the configured
 <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRelativeMechanismVelocity()" class="member-name-link">getRelativeMechanismVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the mechanism <code>AngularVelocity</code> from the relative encoder in the motor, scaled by the
 configured <a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing"><code>MechanismGearing</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorPosition()" class="member-name-link">getRotorPosition</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Angle</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorPosition()" class="member-name-link">getRotorPosition</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the rotations of the motor with the relative encoder since the motor controller powered on
 scaled to the mechanism rotations.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorVelocity()" class="member-name-link">getRotorVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.AngularVelocity</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getRotorVelocity()" class="member-name-link">getRotorVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Gets the angular velocity of the motor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Force&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSetpointFeedforwardForce()" class="member-name-link">getSetpointFeedforwardForce</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Force&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSetpointFeedforwardForce()" class="member-name-link">getSetpointFeedforwardForce</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the feedforward <code>Force</code> last supplied to <a href="#setVelocity(org.wpilib.units.measure.AngularVelocity,org.wpilib.units.measure.Force)"><code>setVelocity(AngularVelocity, Force)</code></a>
 or <a href="#setVelocity(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Force)"><code>setVelocity(LinearVelocity, Force)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimSupplier()" class="member-name-link">getSimSupplier</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimSupplier()" class="member-name-link">getSimSupplier</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the sim supplier.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Current</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStatorCurrent()" class="member-name-link">getStatorCurrent</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Current</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getStatorCurrent()" class="member-name-link">getStatorCurrent</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the stator current of the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Current&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getSupplyCurrent()" class="member-name-link">getSupplyCurrent</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Current&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getSupplyCurrent()" class="member-name-link">getSupplyCurrent</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the supply current of the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Temperature</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getTemperature()" class="member-name-link">getTemperature</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Temperature</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getTemperature()" class="member-name-link">getTemperature</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a> temperature.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.TrapezoidProfile.State&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTrapezoidalProfileState()" class="member-name-link">getTrapezoidalProfileState</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.trajectory.TrapezoidProfile.State&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTrapezoidalProfileState()" class="member-name-link">getTrapezoidalProfileState</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the current encoder trapezoidal profile state for the closed loop controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.util.Pair<wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a>&gt;&gt;, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&gt;&gt;&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.util.Pair<wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.BooleanTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.BooleanTelemetryField</a>&gt;&gt;, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../telemetry/SmartMotorControllerTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SmartMotorControllerTelemetry.DoubleTelemetryField</a>&gt;&gt;&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getUnsupportedTelemetryFields()" class="member-name-link">getUnsupportedTelemetryFields</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get a list of unsupported telemetry fields if any exist.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Time&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.Time&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVelocityMeasurementDelay()" class="member-name-link">getVelocityMeasurementDelay</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get how far behind the mechanism the measured velocity is, from how the motor controller filters
 it, as WPILib's SysId works it out for its presets.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Voltage</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getVoltage()" class="member-name-link">getVoltage</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract org.wpilib.units.measure.Voltage</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getVoltage()" class="member-name-link">getVoltage</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get the voltage output of the motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isClosedLoopControllerStopped()" class="member-name-link">isClosedLoopControllerStopped</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isClosedLoopControllerStopped()" class="member-name-link">isClosedLoopControllerStopped</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Whether a closed loop controller run on the SystemCore, such as an LQR or an exponential profile, has been
 stopped, as a duty cycle or voltage command does.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isMotor(org.wpilib.math.system.DCMotor,org.wpilib.math.system.DCMotor)" class="member-name-link">isMotor</a><wbr>(org.wpilib.math.system.DCMotor&nbsp;a,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isMotor(org.wpilib.math.system.DCMotor,org.wpilib.math.system.DCMotor)" class="member-name-link">isMotor</a><wbr>(org.wpilib.math.system.DCMotor&nbsp;a,
  org.wpilib.math.system.DCMotor&nbsp;b)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Compare <code>DCMotor</code>s to identify the given motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iterateClosedLoopController()" class="member-name-link">iterateClosedLoopController</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#iterateClosedLoopController()" class="member-name-link">iterateClosedLoopController</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Iterate the closed loop controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#seedRelativeEncoder()" class="member-name-link">seedRelativeEncoder</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Seed the relative encoder with the position from the absolute encoder.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate</a><wbr>(org.wpilib.units.measure.Time&nbsp;rampRate)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopRampRate(org.wpilib.units.measure.Time)" class="member-name-link">setClosedLoopRampRate</a><wbr>(org.wpilib.units.measure.Time&nbsp;rampRate)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop ramp rate.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopSlot(yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot</a><wbr>(<a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.core.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setClosedLoopSlot(yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot)" class="member-name-link">setClosedLoopSlot</a><wbr>(<a href="SmartMotorController.ClosedLoopControllerSlot.html" title="enum class in yams.core.motorcontrollers">SmartMotorController.ClosedLoopControllerSlot</a>&nbsp;slot)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop controller slot to use.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setDutyCycle(double)" class="member-name-link">setDutyCycle</a><wbr>(double&nbsp;dutyCycle)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setDutyCycle(double)" class="member-name-link">setDutyCycle</a><wbr>(double&nbsp;dutyCycle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the dutycycle output of the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderInverted(boolean)" class="member-name-link">setEncoderInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the phase of the encoder attached to the brushless motor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(org.wpilib.units.measure.Angle)" class="member-name-link">setEncoderPosition</a><wbr>(org.wpilib.units.measure.Angle&nbsp;angle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder position</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setEncoderPosition</a><wbr>(org.wpilib.units.measure.Distance&nbsp;distance)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderPosition(org.wpilib.units.measure.Distance)" class="member-name-link">setEncoderPosition</a><wbr>(org.wpilib.units.measure.Distance&nbsp;distance)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder position.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(org.wpilib.units.measure.AngularVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(org.wpilib.units.measure.AngularVelocity&nbsp;velocity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder velocity</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setEncoderVelocity(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">setEncoderVelocity</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;velocity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the encoder velocity.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kV,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setExponentialProfile(java.util.OptionalDouble,java.util.OptionalDouble,java.util.Optional)" class="member-name-link">setExponentialProfile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kV,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/OptionalDouble.html" title="class or interface in java.util" class="external-link">OptionalDouble</a>&nbsp;kA,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;org.wpilib.units.measure.Voltage&gt;&nbsp;maxInput)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the exponential profile fields.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedback(double,double,double)" class="member-name-link">setFeedback</a><wbr>(double&nbsp;kP,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedback(double,double,double)" class="member-name-link">setFeedback</a><wbr>(double&nbsp;kP,
  double&nbsp;kI,
  double&nbsp;kD)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the closed loop feedback controller PID.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward</a><wbr>(double&nbsp;kS,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setFeedforward(double,double,double,double)" class="member-name-link">setFeedforward</a><wbr>(double&nbsp;kS,
  double&nbsp;kV,
  double&nbsp;kA,
  double&nbsp;kG)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the feedforward controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKa(double)" class="member-name-link">setKa</a><wbr>(double&nbsp;kA)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKa(double)" class="member-name-link">setKa</a><wbr>(double&nbsp;kA)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Acceleration feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKd(double)" class="member-name-link">setKd</a><wbr>(double&nbsp;kD)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKd(double)" class="member-name-link">setKd</a><wbr>(double&nbsp;kD)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kD for the feedback controller PID.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKg(double)" class="member-name-link">setKg</a><wbr>(double&nbsp;kG)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKg(double)" class="member-name-link">setKg</a><wbr>(double&nbsp;kG)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">kSin feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKi(double)" class="member-name-link">setKi</a><wbr>(double&nbsp;kI)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKi(double)" class="member-name-link">setKi</a><wbr>(double&nbsp;kI)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kI for the feedback controller PID.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKp(double)" class="member-name-link">setKp</a><wbr>(double&nbsp;kP)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKp(double)" class="member-name-link">setKp</a><wbr>(double&nbsp;kP)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set kP for the feedback controller PID.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKs(double)" class="member-name-link">setKs</a><wbr>(double&nbsp;kS)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKs(double)" class="member-name-link">setKs</a><wbr>(double&nbsp;kS)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Static feedforward element.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKv(double)" class="member-name-link">setKv</a><wbr>(double&nbsp;kV)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setKv(double)" class="member-name-link">setKv</a><wbr>(double&nbsp;kV)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Velocity feedforward element.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementLowerLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit</a><wbr>(org.wpilib.units.measure.Distance&nbsp;lowerLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementLowerLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementLowerLimit</a><wbr>(org.wpilib.units.measure.Distance&nbsp;lowerLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the measurement lower limit, only works if mechanism circumference is defined.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementUpperLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit</a><wbr>(org.wpilib.units.measure.Distance&nbsp;upperLimit)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMeasurementUpperLimit(org.wpilib.units.measure.Distance)" class="member-name-link">setMeasurementUpperLimit</a><wbr>(org.wpilib.units.measure.Distance&nbsp;upperLimit)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the measurement upper limit, only works if mechanism circumference is defined.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismCircumference(org.wpilib.units.measure.Distance)" class="member-name-link">setMechanismCircumference</a><wbr>(org.wpilib.units.measure.Distance&nbsp;circumference)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismCircumference(org.wpilib.units.measure.Distance)" class="member-name-link">setMechanismCircumference</a><wbr>(org.wpilib.units.measure.Distance&nbsp;circumference)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Update the mechanism circumference used for linear position/velocity conversions.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing</a><wbr>(<a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing">MechanismGearing</a>&nbsp;gearing)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismGearing(yams.core.gearing.MechanismGearing)" class="member-name-link">setMechanismGearing</a><wbr>(<a href="../gearing/MechanismGearing.html" title="class in yams.core.gearing">MechanismGearing</a>&nbsp;gearing)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Update the mechanism gearing used for position/velocity conversions.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimits(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLimits</a><wbr>(org.wpilib.units.measure.Angle&nbsp;lower,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimits(org.wpilib.units.measure.Angle,org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLimits</a><wbr>(org.wpilib.units.measure.Angle&nbsp;lower,
  org.wpilib.units.measure.Angle&nbsp;upper)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the Mechanism limits for the motor controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLimitsEnabled(boolean)" class="member-name-link">setMechanismLimitsEnabled</a><wbr>(boolean&nbsp;enabled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Enable or disable the mechanism/measurement limits in the motor controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLowerLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit</a><wbr>(org.wpilib.units.measure.Angle&nbsp;lowerLimit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismLowerLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismLowerLimit</a><wbr>(org.wpilib.units.measure.Angle&nbsp;lowerLimit)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the mechanism lower limit.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMechanismSimSupplier(yams.core.motorcontrollers.SimSupplier)" class="member-name-link">setMechanismSimSupplier</a><wbr>(<a href="SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the simulation of the mechanism this motor controller drives, made with <a href="#getMechanismDCMotor()"><code>getMechanismDCMotor()</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#setMechanismUpperLimit(org.wpilib.units.measure.Angle)" class="member-name-link">setMechanismUpperLimit</a><wbr>(org.wpilib.units.measure.Angle&nbsp;upperLimit)</code></div>
@@ -920,9 +972,9 @@ stopped, as a duty cycle or voltage command does.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set the motor zero power mode from COAST or BRAKE.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Simulation iteration.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
@@ -958,6 +1010,11 @@ controllers.</div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry under the motor name under the given <code>NetworkTable</code></div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#usesSystemCoreController()" class="member-name-link">usesSystemCoreController</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Whether the closed loop controller runs on the SystemCore instead of the motor controller.</div>
 </div>
 </div>
 </div>
@@ -1068,6 +1125,15 @@ wrapping point.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="m_adrc">
+<h3>m_adrc</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../math/ADRCController.html" title="class in yams.core.math">ADRCController</a>&gt;</span>&nbsp;<span class="element-name">m_adrc</span></div>
+<div class="block">ADRC controller for the motor controller, when the config selects one.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="setpointPosition">
 <h3>setpointPosition</h3>
 <div class="horizontal-scroll">
@@ -1165,6 +1231,17 @@ cleanup without core depending on any command framework types.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>[]&gt;</span>&nbsp;<span class="element-name">m_looseFollowers</span></div>
 <div class="block">Loosely coupled followers.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="m_iteratedByLeader">
+<h3>m_iteratedByLeader</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">m_iteratedByLeader</span></div>
+<div class="block">Whether this motor controller reads a leader's simulation, such as a mechanism's, which the
+leader iterates right after it steps. Its own <a href="#simIterate()"><code>simIterate()</code></a> then does nothing, so it is
+not iterated twice in a loop.</div>
 </div>
 </section>
 </li>
@@ -1292,6 +1369,24 @@ fallback identifier) is known.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getMechanismDutyCycle(double)">
+<h3>getMechanismDutyCycle</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMechanismDutyCycle</span><wbr><span class="parameters">(double&nbsp;dutyCycle)</span></div>
+<div class="block">Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
+simulation has its loosely coupled followers' motors too, and each motor controller applies its
+own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its
+share of <a href="#getMechanismDCMotor()"><code>getMechanismDCMotor()</code></a>'s torque. Otherwise it is the given duty cycle.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>dutyCycle</code> - Duty cycle this motor controller applies.</dd>
+<dt>Returns:</dt>
+<dd>Duty cycle of every motor in its simulation.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getTrapezoidalProfileState()">
 <h3>getTrapezoidalProfileState</h3>
 <div class="horizontal-scroll">
@@ -1352,6 +1447,55 @@ such as an LQR or an exponential profile, runs at <a href="SmartMotorControllerC
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>The closed loop controller's period.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="usesSystemCoreController()">
+<h3>usesSystemCoreController</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">usesSystemCoreController</span>()</div>
+<div class="block">Whether the closed loop controller runs on the SystemCore instead of the motor controller.
+Both LQR and ADRC need the measured state each loop, so they run here.
+
+<p>Wrappers use this to leave their onboard closed loop controller alone: when it is
+<code>true</code>, the wrapper sends a plain voltage command and this class closes the loop.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>true</code> when LQR or ADRC owns the closed loop.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getADRCController()">
+<h3>getADRCController</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="../math/ADRCController.html" title="class in yams.core.math">ADRCController</a>&gt;</span>&nbsp;<span class="element-name">getADRCController</span>()</div>
+<div class="block">Get the ADRC controller running the closed loop, if the config selected one.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The <a href="../math/ADRCController.html" title="class in yams.core.math"><code>ADRCController</code></a>, or an empty optional when PID or LQR owns the loop.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="applyADRCConfig(yams.core.motorcontrollers.SmartMotorControllerConfig)">
+<h3>applyADRCConfig</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyADRCConfig</span><wbr><span class="parameters">(<a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers">SmartMotorControllerConfig</a>&lt;?&gt;&nbsp;config)</span></div>
+<div class="block">Build the ADRC controller for this motor's slot from the config, replacing any previous one.
+
+<p>The control period comes from <code>withClosedLoopControlPeriod(...)</code>, the same value
+<a href="#iterateClosedLoopController()"><code>iterateClosedLoopController()</code></a> runs at, so the controller's discrete model cannot drift
+from the loop that steps it.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>config</code> - Config being applied.</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the ADRC config cannot build a controller.</dd>
 </dl>
 </div>
 </section>
@@ -1449,8 +1593,10 @@ on as it is, so setting a setpoint every loop doesn't reset it.</div>
 <section class="detail" id="simIterate()">
 <h3>simIterate</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">simIterate</span>()</div>
-<div class="block">Simulation iteration.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">simIterate</span>()</div>
+<div class="block">Simulation iteration. Each motor controller's simIterate() calls this last, with <code>
+super.simIterate()</code>: it iterates the loosely coupled followers reading this motor controller's
+mechanism's simulation, which a mechanism steps right before. Each follower's iterates its own.</div>
 </div>
 </section>
 </li>
@@ -2668,6 +2814,54 @@ used in place of the telemetry name so alerts from different motor controllers n
 <dd><code>alertType</code> - Alert type/qualifier, e.g. <code>"ClosedLoop"</code>.</dd>
 <dt>Returns:</dt>
 <dd>Unique <code>Alert</code> identifier.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMechanismDCMotor()">
+<h3>getMechanismDCMotor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.system.DCMotor</span>&nbsp;<span class="element-name">getMechanismDCMotor</span>()</div>
+<div class="block">Get the motors of the mechanism this motor controller drives: its own <a href="#getDCMotor()"><code>getDCMotor()</code></a> and
+its loosely coupled followers', except those already given a mechanism of their own. A
+mechanism simulates every motor with it. A follower's torque is given at this motor's rotor,
+from the gearing of each, and the free speed is this motor's.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><code>DCMotor</code> of every motor on the mechanism.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMechanismSimSupplier(yams.core.motorcontrollers.SimSupplier)">
+<h3>setMechanismSimSupplier</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMechanismSimSupplier</span><wbr><span class="parameters">(<a href="SimSupplier.html" title="interface in yams.core.motorcontrollers">SimSupplier</a>&nbsp;mechanismSupplier)</span></div>
+<div class="block">Set the simulation of the mechanism this motor controller drives, made with <a href="#getMechanismDCMotor()"><code>getMechanismDCMotor()</code></a>. Each loosely coupled follower reads it, so its encoder follows the
+mechanism, and its current is not counted again by <a href="simulation/BatterySim.html" title="class in yams.core.motorcontrollers.simulation"><code>BatterySim</code></a>. A follower that drives a
+mechanism of its own must be given it first, so it is left out of this one.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>mechanismSupplier</code> - Simulation of the mechanism.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="follow(yams.core.motorcontrollers.SmartMotorController,boolean)">
+<h3>follow</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">follow</span><wbr><span class="parameters">(<a href="SmartMotorController.html" title="class in yams.core.motorcontrollers">SmartMotorController</a>&nbsp;leader,
+ boolean&nbsp;inverted)</span></div>
+<div class="block">Read the simulation of a leader whose motor model has this motor, instead of simulating it.
+Its current is in the leader's, so <a href="simulation/BatterySim.html" title="class in yams.core.motorcontrollers.simulation"><code>BatterySim</code></a> does not count it again. Its own loosely
+coupled followers read the leader's simulation too.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>leader</code> - Motor controller whose simulation has this motor.</dd>
+<dd><code>inverted</code> - Whether this motor is inverted from the leader.</dd>
 </dl>
 </div>
 </section>

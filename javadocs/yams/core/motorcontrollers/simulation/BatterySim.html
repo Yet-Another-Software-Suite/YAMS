@@ -63,6 +63,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#disableDischarge()" tabindex="0">disableDischarge()</a></li>
 <li><a href="#resetDischarge()" tabindex="0">resetDischarge()</a></li>
 <li><a href="#removeCurrent(java.util.UUID)" tabindex="0">removeCurrent(UUID)</a></li>
+<li><a href="#setSimulatedByLeader(java.util.UUID,boolean)" tabindex="0">setSimulatedByLeader(UUID, boolean)</a></li>
 <li><a href="#reset()" tabindex="0">reset()</a></li>
 <li><a href="#getStateOfCharge()" tabindex="0">getStateOfCharge()</a></li>
 <li><a href="#calculateVoltage(java.util.UUID,double)" tabindex="0">calculateVoltage(UUID, double)</a></li>
@@ -161,6 +162,12 @@ fully-charged, disabled state.</div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resetDischarge()" class="member-name-link">resetDischarge</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Reset the simulated battery back to a full charge.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#setSimulatedByLeader(java.util.UUID,boolean)" class="member-name-link">setSimulatedByLeader</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
+ boolean&nbsp;inLeader)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Set whether a simulation's current is in a leader's, so it is not counted again.</div>
 </div>
 </div>
 </div>
@@ -291,6 +298,23 @@ closed simulation's last-known current draw would linger in <code>currents</code
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>id</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link"><code>UUID</code></a> of the simulation to remove.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setSimulatedByLeader(java.util.UUID,boolean)">
+<h3>setSimulatedByLeader</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSimulatedByLeader</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link">UUID</a>&nbsp;id,
+ boolean&nbsp;inLeader)</span></div>
+<div class="block">Set whether a simulation's current is in a leader's, so it is not counted again. A mechanism
+sets it for its motor controller's loosely coupled followers, since its simulation has their
+motors, and an A301 sets it for the A301s following it.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/UUID.html" title="class or interface in java.util" class="external-link"><code>UUID</code></a> of the follower's simulation.</dd>
+<dd><code>inLeader</code> - Whether its current is in its leader's.</dd>
 </dl>
 </div>
 </section>
