@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/UsageReporting.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/math/util/MathUtil.hpp>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
@@ -160,6 +161,10 @@ void SmartMotorControllerConfig::ValidateExternalEncoderOptions() const {
       "External encoder options are not fully applied",
       "ApplyConfig did not access all tracked external encoder options",
       "Call the corresponding getter for each missing option in ApplyConfig");
+}
+
+SmartMotorControllerConfig::SmartMotorControllerConfig() {
+  HAL_ReportUsage("SmartMotorController", "YAMS");
 }
 
 // ---- Feedback -----------------------------------------------------------

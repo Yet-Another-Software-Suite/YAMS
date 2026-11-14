@@ -74,6 +74,9 @@ class SmartMotorControllerConfig {
   /** Which PID/feedforward gain slot to use (hardware-level slot selection). */
   enum class ClosedLoopControllerSlot { SLOT_0, SLOT_1, SLOT_2, SLOT_3 };
 
+  /** Construct an empty config, and report YAMS usage to the HAL as the Java config does. */
+  SmartMotorControllerConfig();
+
   // ---- Feedback -------------------------------------------------------
 
   /**
