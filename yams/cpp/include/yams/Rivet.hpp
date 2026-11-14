@@ -12,7 +12,7 @@ namespace yams {
  *
  * The splash is written once, the first time a YAMS motor controller or swerve drive is built, and
  * fits the display's default 25 columns by 10 rows: Rivet on the left, the YAMS version and a
- * random phrase from Rivet beside, and the YASS links along the bottom. It uses
+ * random phrase from Rivet beside, and yassrobotics.com along the bottom. It uses
  * wpi::DriverStationDisplay line mode, so robot code that writes its own lines afterwards simply
  * replaces it.
  */
@@ -22,7 +22,7 @@ class Rivet final {
 
   /**
    * Show Rivet on the Driver Station display, with the YAMS version and a random phrase beside
-   * Rivet and the YASS links underneath. Only the first call does anything.
+   * Rivet and yassrobotics.com underneath. Only the first call does anything.
    */
   static void Show();
 

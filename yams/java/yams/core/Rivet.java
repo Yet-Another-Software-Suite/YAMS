@@ -17,7 +17,7 @@ import org.wpilib.driverstation.DriverStationDisplay;
  *
  * <p>The splash is written once, the first time a YAMS motor controller config or swerve drive is
  * built, and fits the display's default 25 columns by 10 rows: Rivet on the left, the YAMS version
- * and a random phrase from Rivet beside, and the YASS links along the bottom. It uses {@link
+ * and a random phrase from Rivet beside, and yassrobotics.com along the bottom. It uses {@link
  * DriverStationDisplay} line mode, so robot code that writes its own lines afterwards simply
  * replaces it.
  */
@@ -44,10 +44,9 @@ public final class Rivet {
   /** Columns left beside Rivet for the version and phrase. */
   private static final int SIDE_COLUMNS = 12;
 
-  /** Full-width rows under Rivet: the website, then the live tuner. */
+  /** Full-width rows under Rivet. */
   private static final String[] FOOTER = {
       "yassrobotics.com",
-      "tuning.yassrobotics.com",
   };
 
   /**
@@ -102,7 +101,7 @@ public final class Rivet {
 
   /**
    * Show Rivet on the Driver Station display, with the YAMS version and a random phrase beside
-   * Rivet and the YASS links underneath. Only the first call does anything.
+   * Rivet and yassrobotics.com underneath. Only the first call does anything.
    */
   public static void show() {
     if (!shown.compareAndSet(false, true)) {
