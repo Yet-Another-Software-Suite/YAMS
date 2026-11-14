@@ -15,6 +15,7 @@
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/UsageReporting.hpp>
 #include <wpi/math/estimator/SwerveDrivePoseEstimator.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
@@ -147,6 +148,7 @@ class SwerveDrive {
                         ComputeInitialPositions(*m_config), m_config->GetInitialPose()} {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
+    HAL_ReportUsage("RobotDrive", "YAGSL");
 
     if (auto optimization = m_config->GetModuleStateOptimization()) {
       for (auto* module : m_config->GetModules()) {
