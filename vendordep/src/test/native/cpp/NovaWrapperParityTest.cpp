@@ -367,52 +367,64 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaPari
   SECTION("A feedforward without a motion profile runs on the SystemCore") {
     // The Nova applies its motion profile slot's kS, kV, kA and kG only in a motion profile, so the
     // SystemCore runs the loop and applies them, with an alert saying why.
-    auto nova = MakeNova();
-    auto cfg = BaseConfig();
-    cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
-    NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
-    CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
-    CHECK(FeedforwardWithoutProfileAlert(smc));
+    // Each case is in its own block, so its wrapper is destroyed, clearing its alert, before the
+    // next is checked: these Novas share a name.
+    {
+      auto nova = MakeNova();
+      auto cfg = BaseConfig();
+      cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
+      NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+      CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(smc));
+    }
 
     // A feedforward of 0 too, as live tuning can change it.
-    auto zeroNova = MakeNova();
-    auto zeroCfg = BaseConfig();
-    zeroCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 0.0, 0.0));
-    NovaWrapper zero{zeroNova.get(), wpi::math::DCMotor::NEO(1), &zeroCfg};
-    CHECK(zero.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
-    CHECK(FeedforwardWithoutProfileAlert(zero));
+    {
+      auto zeroNova = MakeNova();
+      auto zeroCfg = BaseConfig();
+      zeroCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 0.0, 0.0));
+      NovaWrapper zero{zeroNova.get(), wpi::math::DCMotor::NEO(1), &zeroCfg};
+      CHECK(zero.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(zero));
+    }
 
     // And one on SLOT_1, which can be switched to later.
-    auto slot1Nova = MakeNova();
-    auto slot1Cfg = BaseConfig();
-    slot1Cfg.WithFeedback(1.0, 0.0, 0.0)
-        .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1)
-        .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0),
-                         SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
-    NovaWrapper slot1{slot1Nova.get(), wpi::math::DCMotor::NEO(1), &slot1Cfg};
-    CHECK(slot1.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
-    CHECK(FeedforwardWithoutProfileAlert(slot1));
+    {
+      auto slot1Nova = MakeNova();
+      auto slot1Cfg = BaseConfig();
+      slot1Cfg.WithFeedback(1.0, 0.0, 0.0)
+          .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1)
+          .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0),
+                           SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
+      NovaWrapper slot1{slot1Nova.get(), wpi::math::DCMotor::NEO(1), &slot1Cfg};
+      CHECK(slot1.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(slot1));
+    }
 
     // With a trapezoidal profile, the Nova runs it.
-    auto profiledNova = MakeNova();
-    auto profiledCfg = BaseConfig();
-    profiledCfg.WithFeedback(1.0, 0.0, 0.0)
-        .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.1))
-        .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
-                              wpi::units::turns_per_second_squared_t{2.0});
-    NovaWrapper profiled{profiledNova.get(), wpi::math::DCMotor::NEO(1), &profiledCfg};
-    CHECK(profiled.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
-    CHECK_FALSE(FeedforwardWithoutProfileAlert(profiled));
-    CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKS(); }, "kS on the Nova");
-    CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKA(); }, "kA on the Nova");
+    {
+      auto profiledNova = MakeNova();
+      auto profiledCfg = BaseConfig();
+      profiledCfg.WithFeedback(1.0, 0.0, 0.0)
+          .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.1))
+          .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                                wpi::units::turns_per_second_squared_t{2.0});
+      NovaWrapper profiled{profiledNova.get(), wpi::math::DCMotor::NEO(1), &profiledCfg};
+      CHECK(profiled.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+      CHECK_FALSE(FeedforwardWithoutProfileAlert(profiled));
+      CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKS(); }, "kS on the Nova");
+      CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKA(); }, "kA on the Nova");
+    }
 
     // A PID alone runs on the Nova.
-    auto pidNova = MakeNova();
-    auto pidCfg = BaseConfig();
-    pidCfg.WithFeedback(1.0, 0.0, 0.0);
-    NovaWrapper pid{pidNova.get(), wpi::math::DCMotor::NEO(1), &pidCfg};
-    CHECK(pid.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
-    CHECK_FALSE(FeedforwardWithoutProfileAlert(pid));
+    {
+      auto pidNova = MakeNova();
+      auto pidCfg = BaseConfig();
+      pidCfg.WithFeedback(1.0, 0.0, 0.0);
+      NovaWrapper pid{pidNova.get(), wpi::math::DCMotor::NEO(1), &pidCfg};
+      CHECK(pid.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+      CHECK_FALSE(FeedforwardWithoutProfileAlert(pid));
+    }
   }
   SECTION("Options only the SystemCore applies") {
     auto nova = MakeNova();
