@@ -26,9 +26,11 @@ namespace yams::motorcontrollers::local {
  *
  * The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
  * gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
- * kV, kA and kG and a constant or cosine gravity. The Nova applies a feedforward only with a motion
- * profile, so a feedforward needs a trapezoidal profile. An LQR, an exponential profile and a
- * velocity trapezoidal profile run on the SystemCore instead, and command the Nova with voltage.
+ * kV, kA and kG and a constant or cosine gravity. The Nova applies its motion profile slot's
+ * feedforward only while it runs a motion profile, so a feedforward without a trapezoidal profile
+ * runs on the SystemCore, where the whole feedforward applies to position and velocity setpoints
+ * alike. An LQR, an exponential profile and a velocity trapezoidal profile run on the SystemCore
+ * too, and command the Nova with voltage.
  * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
  * closed loop, so in simulation a NovaSimSupplier runs it.
  *
@@ -321,6 +323,11 @@ class NovaWrapper : public SmartMotorController {
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   std::optional<wpi::util::Alert> m_systemCoreClosedLoopAlert;
+  /**
+   * Set while a feedforward isn't applied on the Nova because there is no trapezoidal profile, so
+   * the SystemCore runs the closed loop and feedforward instead.
+   */
+  std::optional<wpi::util::Alert> m_feedforwardWithoutProfileAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;
@@ -342,7 +349,9 @@ class NovaWrapper : public SmartMotorController {
                             thrifty::NovaConfigBatch& novaConfig);
   /**
    * Whether the Nova can run the closed loop. It can't run an LQR, an exponential profile or a
-   * velocity trapezoidal profile. And it reads an absolute encoder closing its loop over [0, 1)
+   * velocity trapezoidal profile. It applies a feedforward only while it runs a motion profile, so
+   * not a feedforward without a trapezoidal profile, on either of its slots, as a slot can be
+   * switched to later. And it reads an absolute encoder closing its loop over [0, 1)
    * rotations, so not another range without continuous wrapping, nor continuous wrapping of an
    * absolute encoder geared to the mechanism. The SystemCore runs those instead, as it can any
    * closed loop.
