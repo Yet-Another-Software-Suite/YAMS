@@ -18,8 +18,11 @@ namespace yams::motorcontrollers::simulation {
 /**
  * A simulated Thrifty Nova driving a mechanism's SimSupplier. ThriftyLib's simulation ignores the
  * Nova's closed loop, so this runs it as the Nova would, with the gains read back from the Nova:
- * the voltage position and velocity loops with the PID slot's gains and its F times the target, and
- * the motion profile with its slot's kS, kV, kA and kG. It keeps within the Nova's soft limits,
+ * the voltage position loop with the PID slot's gains alone, the voltage velocity loop with them
+ * plus the request's feedforward and the PID slot's F times the target, and the motion profile with
+ * the PID slot's gains and the motion profile slot's kS, kV, kA and kG. As on the Nova, the motion
+ * profile slot's feedforward applies only in a motion profile, and a position request's
+ * feedforward is ignored. It keeps within the Nova's soft limits,
  * and, with its absolute wrapping on, takes a position the short way, one mechanism rotation apart.
  * Targets and gains are in mechanism rotations, as on a Nova with its sensor-to-mechanism ratio
  * set, and the integral and derivative gains are per second, as the Nova's are. Open loop output,

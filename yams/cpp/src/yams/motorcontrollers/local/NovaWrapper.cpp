@@ -28,6 +28,20 @@ namespace yams::motorcontrollers::local {
 namespace {
 
 using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
+
+/**
+ * Whether either of the Nova's closed loop slots, SLOT_0 or SLOT_1, has a feedforward. One whose
+ * gains are all zero counts, as live tuning can change them.
+ */
+bool HasFeedforward(const SmartMotorControllerConfig& config) {
+  for (auto slot : {Slot::SLOT_0, Slot::SLOT_1}) {
+    if (config.GetArmFeedforward(slot) || config.GetElevatorFeedforward(slot) ||
+        config.GetSimpleFeedforward(slot))
+      return true;
+  }
+  return false;
+}
+
 using FeedbackSensorType = thrifty::Motor::FeedbackSensorType;
 using TurnKv = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit;
 using TurnKa = wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit;
@@ -115,6 +129,10 @@ NovaWrapper::NovaWrapper(thrifty::Nova* nova, wpi::math::DCMotor motor,
       "YAMS", AlertId("ClosedLoop"),
       GetName() + " closed loop controller is running on the SystemCore.",
       wpi::util::Alert::Level::MEDIUM);
+  m_feedforwardWithoutProfileAlert.emplace(
+      "YAMS", AlertId("FeedforwardWithoutProfile"),
+      GetName() + " has a feedforward but no trapezoidal profile. The Nova only applies a feedforward in a motion profile, so the SystemCore runs its closed loop and feedforward instead. Add WithTrapezoidProfile to run them on the Nova.",
+      wpi::util::Alert::Level::MEDIUM);
 
   SetupSimulation();
   try {
@@ -131,6 +149,7 @@ NovaWrapper::NovaWrapper(thrifty::Nova* nova, wpi::math::DCMotor motor,
 NovaWrapper::~NovaWrapper() {
   Close();
   if (m_systemCoreClosedLoopAlert) m_systemCoreClosedLoopAlert->Set(false);
+  if (m_feedforwardWithoutProfileAlert) m_feedforwardWithoutProfileAlert->Set(false);
 }
 
 // ---- Helpers ----------------------------------------------------------------
@@ -201,6 +220,11 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // Checked in open loop too, as it reads the options the config validation tracks.
   const bool novaCanRunClosedLoop = NovaCanRunClosedLoop(config);
   m_closedLoopOnNova = closedLoop && novaCanRunClosedLoop;
+  // Only when the feedforward is what keeps the loop off the Nova: an LQR, an ADRC or an
+  // exponential profile runs on the SystemCore anyway.
+  m_feedforwardWithoutProfileAlert->Set(
+      closedLoop && !UsesSystemCoreController() && !config.HasExponentialProfile() &&
+      !config.HasLinearExponentialProfile() && !trapezoidProfile && HasFeedforward(config));
   m_novaSlot = m_slot == Slot::SLOT_1 ? thrifty::MotorControl::Slot::SLOT1
                                       : thrifty::MotorControl::Slot::SLOT0;
   config.GetMotorGearing();
@@ -351,8 +375,8 @@ bool NovaWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
                                : thrifty::NovaConfig::Pid1::AllowableError(tolerance->value()));
       }
 
-      // The motion profile slot: its constraints for the motion profile, and kS, kV, kA and kG,
-      // which the Nova applies with or without one.
+      // The motion profile slot: its constraints and kS, kV, kA and kG. With a feedforward, the
+      // Nova only runs the loop with a motion profile, the only time it applies them.
       double kS = 0.0, kV = 0.0, kA = 0.0, kG = 0.0;
       auto gravityType = thrifty::Motor::MPGravityType::CONSTANT;
       if (auto ff = config.GetArmFeedforward(slot)) {
@@ -467,6 +491,10 @@ bool NovaWrapper::NovaCanRunClosedLoop(const SmartMotorControllerConfig& config)
   const bool velocityProfile = trapezoidProfile && config.GetVelocityTrapezoidalProfileInUse();
   if (UsesSystemCoreController() || exponentialProfile || velocityProfile)
     return false;
+  // The Nova applies its motion profile slot's kS, kV, kA and kG only in a motion profile, not in
+  // its plain position and velocity control. A feedforward whose gains are all zero counts, as live
+  // tuning can change them.
+  if (!trapezoidProfile && HasFeedforward(config)) return false;
   if (!wrappingMax) return true;
   const bool fromZero = std::abs(config.GetWrappingMin()->value()) <= 1e-9;
   bool absoluteFeedback = false;

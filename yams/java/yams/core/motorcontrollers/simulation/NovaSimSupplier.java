@@ -27,9 +27,11 @@ import yams.core.motorcontrollers.SimSupplier;
 /**
  * A simulated Thrifty Nova driving a mechanism's {@link SimSupplier}. ThriftyLib's simulation
  * ignores the Nova's closed loop, so this runs it as the Nova would, with the gains read back from
- * the Nova: the voltage position and velocity loops with the PID slot's gains, its F times the
- * target and the motion profile slot's kS and kG (and kV times a velocity target), and the motion
- * profile with its slot's kS, kV, kA and kG. It keeps within the Nova's soft
+ * the Nova: the voltage position loop with the PID slot's gains alone, the voltage velocity loop
+ * with them plus the request's feedforward and the PID slot's F times the target, and the motion
+ * profile with the PID slot's gains and the motion profile slot's kS, kV, kA and kG. As on the
+ * Nova, the motion profile slot's feedforward applies only in a motion profile, and a position
+ * request's feedforward is ignored. It keeps within the Nova's soft
  * limits, and, with its absolute wrapping on, takes a position the short way, one mechanism rotation
  * apart. Targets and gains are in mechanism rotations, as on a Nova with its
  * sensor-to-mechanism ratio set, and the integral and derivative gains are per second, as the
@@ -123,8 +125,7 @@ public class NovaSimSupplier implements SimSupplier {
       final var status = nova.status();
       final double position = mechanism.getMechanismPosition().in(Rotations);
       final double velocity = mechanism.getMechanismVelocity().in(RotationsPerSecond);
-      // The request's feedforward, and the PID slot's F times the target.
-      double feedforward = controlRequest.getFF() + (slot1 ? status.Pid1.getF() : status.Pid0.getF()) * controlRequest.getTarget();
+      double feedforward = 0;
       // With continuous wrapping, a position target is the equivalent nearest the mechanism, one
       // mechanism rotation apart. The Nova wraps only an absolute encoder closing its loop.
       final boolean absoluteFeedback = status.getFeedbackSensor() == Motor.FeedbackSensorType.ABS
@@ -132,16 +133,12 @@ public class NovaSimSupplier implements SimSupplier {
       final double positionTarget = status.getAbsWrapping() && absoluteFeedback
                                     ? position + MathUtil.inputModulus(controlRequest.getTarget() - position, -0.5, 0.5)
                                     : controlRequest.getTarget();
-      // The motion profile slot's kS, kV and kG, which the Nova applies with or without a motion profile.
-      final double slotKs = slot1 ? status.Mp1.getKS() : status.Mp0.getKS();
-      final double slotKg = (slot1 ? status.Mp1.getKG() : status.Mp0.getKG())
-                            * ((slot1 ? status.Mp1.getGravType() : status.Mp0.getGravType()) == MPGravityType.COSINE
-                               ? Math.cos(2 * Math.PI * position) : 1);
       double error;
       if (controlRequest.getControlType() == ControlType.VOLTAGE_VELOCITY) {
         error = controlRequest.getTarget() - velocity;
-        feedforward += slotKs * Math.signum(controlRequest.getTarget())
-                       + (slot1 ? status.Mp1.getKV() : status.Mp0.getKV()) * controlRequest.getTarget() + slotKg;
+        // The request's feedforward, and the PID slot's F times the target. The motion profile
+        // slot's feedforward doesn't apply outside a motion profile.
+        feedforward += controlRequest.getFF() + (slot1 ? status.Pid1.getF() : status.Pid0.getF()) * controlRequest.getTarget();
       } else if (controlRequest.getControlType() == ControlType.MOTION_PROFILE) {
         final double kS = slot1 ? status.Mp1.getKS() : status.Mp0.getKS();
         final double kV = slot1 ? status.Mp1.getKV() : status.Mp0.getKV();
@@ -163,8 +160,9 @@ public class NovaSimSupplier implements SimSupplier {
                        + kG * (gravityType == MPGravityType.COSINE ? Math.cos(2 * Math.PI * position) : 1);
         error = next.position - position;
       } else {
+        // Voltage position: the PID slot's gains alone. The Nova ignores a position request's
+        // feedforward, and the motion profile slot's outside a motion profile.
         error = positionTarget - position;
-        feedforward += slotKs * Math.signum(error) + slotKg;
       }
       if (Math.abs(error) <= (slot1 ? status.Pid1.getAllowableError() : status.Pid0.getAllowableError())) {
         error = 0;

@@ -82,10 +82,11 @@ import yams.core.telemetry.SmartMotorControllerTelemetry.DoubleTelemetryField;
  * motor's or a quadrature encoder, such as a swerve azimuth seeded from a CANcoder, each target is
  * sent as the equivalent nearest the mechanism. A closed loop the Nova can't run runs on the
  * SystemCore instead, and commands the Nova with voltage: an LQR, an exponential profile, a
- * velocity trapezoidal profile, an absolute encoder closing the loop read over a range other than
- * [0, 1) without continuous wrapping, and continuous wrapping of an absolute encoder geared to the
- * mechanism. The Nova applies its motion profile slot's kS, kV, kA and kG with or without a
- * motion profile.
+ * velocity trapezoidal profile, a feedforward without a trapezoidal profile, an absolute encoder
+ * closing the loop read over a range other than [0, 1) without continuous wrapping, and continuous
+ * wrapping of an absolute encoder geared to the mechanism. The Nova applies its motion profile
+ * slot's kS, kV, kA and kG only while it runs a motion profile, so a feedforward without one runs
+ * on the SystemCore, where the whole feedforward applies to position and velocity setpoints alike.
  * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
  * closed loop, so in simulation a {@link NovaSimSupplier} runs it.
  *
@@ -135,12 +136,17 @@ public class NovaWrapper extends SmartMotorController {
   private final DerivativeTimeFilter m_accelerationFilter =
       new DerivativeTimeFilter(Milliseconds.of(20));
   /**
-   * Whether the closed loop runs on the Nova. An LQR, an exponential profile and a velocity
-   * trapezoidal profile run on the SystemCore instead.
+   * Whether the closed loop runs on the Nova. An LQR, an exponential profile, a velocity trapezoidal
+   * profile and a feedforward without a trapezoidal profile run on the SystemCore instead.
    */
   private boolean m_closedLoopOnNova = false;
   /** Nova slot of the closed loop slot in use. */
   private Motor.Slot m_novaSlot = Motor.Slot.SLOT0;
+  /**
+   * Set while a feedforward isn't applied on the Nova because there is no trapezoidal profile, so
+   * the SystemCore runs the closed loop and feedforward instead.
+   */
+  private final Alert m_feedforwardWithoutProfileAlert;
   /**
    * Mechanism rotations per unit of the closed loop gains and profile: 1, or the mechanism
    * rotations per meter for a linear closed loop controller.
@@ -193,6 +199,9 @@ public class NovaWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS",
         buildAlertId("Nova", m_nova.status().getCanId(), "ClosedLoop"),
         getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
+    m_feedforwardWithoutProfileAlert = new Alert("YAMS",
+        buildAlertId("Nova", m_nova.status().getCanId(), "FeedforwardWithoutProfile"),
+        getName() + " has a feedforward but no trapezoidal profile. The Nova only applies a feedforward in a motion profile, so the SystemCore runs its closed loop and feedforward instead. Add withTrapezoidalProfile to run them on the Nova.", Alert.Level.MEDIUM);
     setupSimulation();
     try {
       applyConfig(config);
@@ -499,7 +508,9 @@ public class NovaWrapper extends SmartMotorController {
 
   /**
    * Whether the Nova can run the closed loop. It can't run an LQR, an exponential profile or a
-   * velocity trapezoidal profile. And it reads an absolute encoder closing its loop over [0, 1)
+   * velocity trapezoidal profile. It applies a feedforward only while it runs a motion profile, so
+   * not a feedforward without a trapezoidal profile, on either of its slots, as a slot can be
+   * switched to later. And it reads an absolute encoder closing its loop over [0, 1)
    * rotations, so not another range without continuous wrapping, nor continuous wrapping of an
    * absolute encoder geared to the mechanism. The SystemCore runs those instead, as it can any
    * closed loop.
@@ -513,6 +524,11 @@ public class NovaWrapper extends SmartMotorController {
     final boolean continuousWrapping = config.isWrappingContinuous();
     if (usesSystemCoreController() || m_expoProfile.isPresent()
         || (m_trapezoidProfile.isPresent() && config.getVelocityTrapezoidalProfileInUse())) {
+      return false;
+    }
+    // The Nova applies its motion profile slot's kS, kV, kA and kG only in a motion profile, not
+    // in its plain position and velocity control.
+    if (m_trapezoidProfile.isEmpty() && hasFeedforward(config)) {
       return false;
     }
     if (wrappingMax.isEmpty()) {
@@ -537,6 +553,24 @@ public class NovaWrapper extends SmartMotorController {
         .orElse(MechanismGearing.kOne)
         .getMechanismToRotorRatio();
     return !absoluteFeedback || mechanismToAbsoluteEncoderRatio == 1;
+  }
+
+  /**
+   * Whether either of the Nova's closed loop slots, SLOT_0 or SLOT_1, has a feedforward. One whose
+   * gains are all zero counts, as live tuning can change them.
+   *
+   * @param config The config being applied.
+   * @return Whether a Nova slot has an arm, elevator or simple feedforward.
+   */
+  private static boolean hasFeedforward(SmartMotorControllerConfig<?> config) {
+    for (var slot : new ClosedLoopControllerSlot[] {ClosedLoopControllerSlot.SLOT_0,
+        ClosedLoopControllerSlot.SLOT_1}) {
+      if (config.getArmFeedforward(slot).isPresent() || config.getElevatorFeedforward(slot).isPresent()
+          || config.getSimpleFeedforward(slot).isPresent()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -599,6 +633,10 @@ public class NovaWrapper extends SmartMotorController {
     // Checked in open loop too, as it reads the options the config validation tracks.
     final boolean novaCanRunClosedLoop = novaCanRunClosedLoop(config);
     m_closedLoopOnNova = closedLoopMode && novaCanRunClosedLoop;
+    // Only when the feedforward is what keeps the loop off the Nova: an LQR, an ADRC or an
+    // exponential profile runs on the SystemCore anyway.
+    m_feedforwardWithoutProfileAlert.set(closedLoopMode && !usesSystemCoreController()
+        && m_expoProfile.isEmpty() && m_trapezoidProfile.isEmpty() && hasFeedforward(config));
     m_novaSlot = m_slot == ClosedLoopControllerSlot.SLOT_1 ? Motor.Slot.SLOT1 : Motor.Slot.SLOT0;
     // Gains of a linear mechanism are per meter; the Nova's are per mechanism rotation.
     m_rotationsPerGainUnit = m_closedLoopOnNova && config.getLinearClosedLoopControllerUse()
@@ -698,8 +736,8 @@ public class NovaWrapper extends SmartMotorController {
                                       : NovaConfig.Pid1.allowableError(tolerance.in(Rotations))));
         }
 
-        // The motion profile slot: its constraints for the motion profile, and kS, kV, kA and kG,
-        // which the Nova applies with or without one.
+        // The motion profile slot: its constraints and kS, kV, kA and kG. With a feedforward, the
+        // Nova only runs the loop with a motion profile, the only time it applies them.
         final boolean profile = config.getTrapezoidProfile().isPresent();
         final double maxVelocity =
             profile ? config.getTrapezoidProfile().get().maxVelocity * m_rotationsPerGainUnit : 0;
@@ -1664,6 +1702,12 @@ public class NovaWrapper extends SmartMotorController {
   @Override
   public Temperature getTemperature() {
     return Celsius.of(m_nova.status().getTemperature());
+  }
+
+  @Override
+  public void close() {
+    m_feedforwardWithoutProfileAlert.close();
+    super.close();
   }
 
   @Override
