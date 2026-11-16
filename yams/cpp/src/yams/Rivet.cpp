@@ -11,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <wpi/driverstation/DriverStationDisplay.hpp>
+#include <wpi/hal/HAL.h>
 
 // The build defines YAMS_VERSION, unquoted, as the release version. Builds from source get "dev".
 #define YAMS_STRINGIFY_IMPL(x) #x
@@ -173,6 +174,11 @@ std::string_view Rivet::GetVersion() {
 
 void Rivet::Show() {
   if (shown.exchange(true)) {
+    return;
+  }
+  // A statically initialized motor controller comes before the HAL is initialized, and writing to
+  // the display then crashes. Initializing it again does nothing.
+  if (!HAL_Initialize()) {
     return;
   }
   const std::string welcome[] = {"Welcome to YASS!",

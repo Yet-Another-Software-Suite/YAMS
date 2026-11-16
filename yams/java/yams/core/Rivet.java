@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.wpilib.driverstation.DriverStationDisplay;
+import org.wpilib.hardware.hal.HAL;
 
 /**
  * Rivet, the YASS mascot, says hi on the Driver Station display when YAMS starts up.
@@ -131,6 +132,12 @@ public final class Rivet {
       return;
     }
     try {
+      // A config made before the robot starts, such as a static field in a unit test, comes before
+      // the HAL is initialized, and writing to the display then crashes in native code. Initializing
+      // it again does nothing.
+      if (!HAL.initialize()) {
+        return;
+      }
       String[] welcome = {
           "Welcome to YASS!", CLICK_FOR_MORE, "", "YAMS " + versionLabel(), WEBSITE, "", TUNER[0],
           TUNER[1]
