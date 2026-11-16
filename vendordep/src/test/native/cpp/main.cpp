@@ -56,6 +56,10 @@ static void SigsegvHandler(int /*sig*/) {
 
 int main(int argc, char** argv) {
   std::signal(SIGSEGV, SigsegvHandler);
+  // Before any test makes a motor controller: the first one shows Rivet on the Driver Station
+  // display, which crashes if the HAL isn't initialized yet. A robot program initializes it
+  // before it makes the robot, so only the tests need this.
+  HAL_Initialize();
   // ExceptionTracerListener registers itself with Catch2 via CATCH_REGISTER_LISTENER.
   int result = Catch::Session().run(argc, argv);
   // Destroy CommandPtrs while SendableRegistry is still alive; avoids a
