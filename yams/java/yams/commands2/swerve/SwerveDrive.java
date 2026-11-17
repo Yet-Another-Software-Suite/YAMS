@@ -15,6 +15,7 @@ import org.wpilib.units.measure.Distance;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
+import yams.core.telemetry.NetworkTablesBackends;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.swerve.SwerveDrive} that adds the
@@ -62,7 +63,10 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
     this.subsystem = config.getSubsystem();
     // Drive to pose tuning needs both controllers, so only offer it when they are configured.
     if (config.getTranslationPID().isPresent() && config.getRotationPID().isPresent()) {
-      Tunables.publish("Mechanisms/" + getName() + "/tuning", Commands.startRun(this::startDriveToPoseTuning, this::applyTuningValues).finallyDo(() -> m_swerveTelemetry.stopTuning(this)));
+      // The tuning command requires the drive, so the default drive command does not undo its setpoints.
+      Subsystem[] requirements = subsystem == null ? new Subsystem[0] : new Subsystem[] {subsystem};
+      NetworkTablesBackends.ensureTuningTunableBackend();
+      Tunables.publish("Tuning/" + getName() + "/Live Tuning", Commands.startRun(this::startDriveToPoseTuning, this::applyTuningValues, requirements).finallyDo(() -> m_swerveTelemetry.stopTuning(this)).withName("Live Tuning"));
     }
   }
 

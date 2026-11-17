@@ -43,7 +43,7 @@
  *
  * <ul>
  * <li>{@link yams.core.motorcontrollers.local} REV Robotics SPARK MAX and SPARK FLEX wrappers
- * that run closed-loop control on the roboRIO. <li>{@link yams.core.motorcontrollers.remote} CTRE
+ * that run closed-loop control on the SystemCore. <li>{@link yams.core.motorcontrollers.remote} CTRE
  * TalonFX and TalonFXS wrappers that run closed-loop control on the motor controller itself via the
  * Phoenix 6 API. <li>{@code yams.core.motorcontrollers.simulation} simulation-only
  * implementations used in unit tests and the WPILib simulation GUI.

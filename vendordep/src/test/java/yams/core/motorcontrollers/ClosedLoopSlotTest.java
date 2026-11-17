@@ -14,6 +14,7 @@ import static yams.core.motorcontrollers.ClosedLoopCases.averageVoltage;
 import static yams.core.motorcontrollers.ClosedLoopCases.baseConfig;
 import static yams.core.motorcontrollers.ClosedLoopCases.close;
 import static yams.core.motorcontrollers.ClosedLoopCases.create;
+import static yams.core.motorcontrollers.ClosedLoopCases.createForVelocity;
 import static yams.core.motorcontrollers.ClosedLoopCases.kRatio;
 
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -35,7 +36,7 @@ import yams.helpers.MockHardwareExtension;
 
 /**
  * Tests that every motor controller runs the gains of the closed loop slot selected, from each of its
- * slots: the SPARK and Nova have four, the Talons three. Each slot gets different gains, so running
+ * slots: the SPARK has four, the Talons three and the Nova two. Each slot gets different gains, so running
  * another slot's gains gives the wrong voltage.
  *
  * <p>The mechanism is heavy enough that it barely moves while a gain is measured, and each gain asks
@@ -130,7 +131,7 @@ public class ClosedLoopSlotTest {
         controller.isSpark() && slot != ClosedLoopControllerSlot.SLOT_0,
         "REVLib's simulated SPARK only applies kV in slot 0");
     final double velocity = 1;
-    final SmartMotorController smc = create(controller, config("kV " + slot, controller, true));
+    final SmartMotorController smc = createForVelocity(controller, config("kV " + slot, controller, true));
     try {
       smc.setClosedLoopSlot(slot);
       final double expected = kV(slot) * velocity;

@@ -8,6 +8,7 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -74,7 +75,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
     }
 
     // Create DCMotorSim and wire up DCMotorSimSupplier.
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -82,7 +83,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, *m_smc));
     // Start the simulated pivot where the motor controller starts, as the arm's and elevator's
     // simulations do. Otherwise it starts at 0, away from its encoder.
@@ -118,8 +119,7 @@ Pivot::Pivot(config::PivotConfig* config, motorcontrollers::SmartMotorController
           wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -138,7 +138,7 @@ void Pivot::SimIterate() {
     // hard stops: its hard limits are the range it wraps over.
     double simVelRadPerSec = m_dcMotorSim->GetAngularVelocity().value();
     const wpi::units::turn_t simulatedPosition = ss->GetMechanismPosition();
-    const bool hasHardStops = !m_smc->GetConfig().GetContinuousWrapping().has_value();
+    const bool hasHardStops = !m_smc->GetConfig().IsWrappingContinuous();
     if (hasHardStops && m_pivotConfig->GetMinAngle() && simVelRadPerSec < 0.0 &&
         simulatedPosition < *m_pivotConfig->GetMinAngle()) {
       m_smc->SetEncoderPosition(*m_pivotConfig->GetMinAngle());
@@ -162,6 +162,8 @@ void Pivot::VisualizationUpdate() {
   if (m_setpointLigament) {
     m_setpointLigament->SetAngle(m_smc->GetMechanismPositionSetpoint().value_or(GetAngle()));
   }
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string Pivot::GetName() const { return m_name; }
@@ -201,10 +203,14 @@ wpi::cmd::CommandPtr Pivot::RunTo(wpi::units::degree_t angle, wpi::units::degree
 
 wpi::cmd::CommandPtr Pivot::RunTo(std::function<wpi::units::degree_t()> angle,
                                   wpi::units::degree_t tolerance) {
-  wpi::units::degree_t target = angle();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([atTarget] { atTarget->Calculate(false); },
+                           [this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
+      .Until([this, angle, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(angle(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

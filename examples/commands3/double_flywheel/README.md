@@ -8,3 +8,9 @@ YAMS Live Tuner.
 
 The teleop bindings are in the `Double FlyWheel Teleop` opmode. While nothing else runs, both wheels coast (the
 mechanism's idle command).
+
+## Tests
+
+- `DoubleFlyWheelLiveTuningTest` is the same Live Tuning test as the commands v2 example's.
+- `DoubleFlyWheelShotTest` holds the right bumper in the `Double FlyWheel Teleop` opmode and checks that both wheels
+  reach their shot speeds, within the ready tolerance, in a second, then coast down when it is let go.

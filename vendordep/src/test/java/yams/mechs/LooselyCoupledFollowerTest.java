@@ -4,6 +4,7 @@
 package yams.mechs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
@@ -19,6 +20,8 @@ import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -42,10 +45,13 @@ import yams.core.math.LQRConfig;
 import yams.core.math.LQRController;
 import yams.core.mechanisms.config.PivotConfig;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
+import yams.core.motorcontrollers.remote.TalonFXSWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 import yams.helpers.DeviceCreator;
@@ -113,8 +119,16 @@ public class LooselyCoupledFollowerTest {
     return new TalonFXWrapper(DeviceCreator.createTalonFX(), DCMotor.getKrakenX60(1), cfg);
   }
 
+  private static SmartMotorController talonFXS(SmartMotorControllerConfig cfg) {
+    return new TalonFXSWrapper(DeviceCreator.createTalonFXS(), DCMotor.getNEO(1), cfg);
+  }
+
   private static SmartMotorController nova(SmartMotorControllerConfig cfg) {
-    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), cfg);
+    return new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), DeviceCreator.withNovaProfile(cfg, false));
+  }
+
+  private static SmartMotorController a301(SmartMotorControllerConfig cfg) {
+    return new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(cfg));
   }
 
   private static Arguments pair(
@@ -134,7 +148,10 @@ public class LooselyCoupledFollowerTest {
         pair("Nova following a SPARK MAX", LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::nova, cfg -> cfg),
         pair("SPARK MAX with an exponential profile following a TalonFX", LooselyCoupledFollowerTest::talonFX, LooselyCoupledFollowerTest::sparkMax,
             LooselyCoupledFollowerTest::exponentialProfile),
-        pair("SPARK MAX with an LQR following a Nova", LooselyCoupledFollowerTest::nova, LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::lqr));
+        pair("SPARK MAX with an LQR following a Nova", LooselyCoupledFollowerTest::nova, LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::lqr),
+        // An A301's closed loop always runs on the SystemCore, as a leader or a follower.
+        pair("A301 following a SPARK MAX", LooselyCoupledFollowerTest::sparkMax, LooselyCoupledFollowerTest::a301, cfg -> cfg),
+        pair("SPARK MAX following an A301", LooselyCoupledFollowerTest::a301, LooselyCoupledFollowerTest::sparkMax, cfg -> cfg));
   }
 
   /** A pivot on the motor controller, simulated and pumped by its test subsystem. */
@@ -172,8 +189,9 @@ public class LooselyCoupledFollowerTest {
     SmartMotorController leader = createLeader.apply(
         (SmartMotorControllerConfig) config("Leader(" + name + ")[" + offset + "]").withLooselyCoupledFollowers(follower));
     try {
-      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       pivot(follower);
+      SmartMotorControllerTestSubsystem leaderSubsys = pivot(leader);
 
       // 1. The follower goes to the leader's setpoint.
       TestWithScheduler.schedule(leaderSubsys.setPositionSetpoint(Degrees.of(SETPOINT_DEGREES)));
@@ -207,6 +225,38 @@ public class LooselyCoupledFollowerTest {
     }
   }
 
+  private static Stream<Arguments> leaders() {
+    offset++;
+    return Stream.of(
+        Arguments.of("SPARK MAX", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::sparkMax),
+        Arguments.of("SPARK Flex", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::sparkFlex),
+        Arguments.of("TalonFX", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::talonFX),
+        Arguments.of("TalonFXS", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::talonFXS),
+        Arguments.of("Nova", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::nova),
+        Arguments.of("A301", (Function<SmartMotorControllerConfig, SmartMotorController>) LooselyCoupledFollowerTest::a301));
+  }
+
+  /** A follower switches closed loop slot when its leader does, whatever the leader's motor controller. */
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("leaders")
+  void followerSwitchesSlotWithItsLeader(String name, Function<SmartMotorControllerConfig, SmartMotorController> createLeader) {
+    SmartMotorController follower = sparkMax(config("SlotFollower(" + name + ")[" + offset + "]"));
+    SmartMotorController leader = createLeader.apply(
+        (SmartMotorControllerConfig) config("SlotLeader(" + name + ")[" + offset + "]").withLooselyCoupledFollowers(follower));
+    subsystem(follower).setSMC(follower);
+    subsystem(leader).setSMC(leader);
+    try {
+      for (ClosedLoopControllerSlot slot : new ClosedLoopControllerSlot[] {ClosedLoopControllerSlot.SLOT_1, ClosedLoopControllerSlot.SLOT_2, ClosedLoopControllerSlot.SLOT_0}) {
+        leader.setClosedLoopSlot(slot);
+        assertSame(slot, leader.getClosedLoopControllerSlot(), name + ": leader on " + slot);
+        assertSame(slot, follower.getClosedLoopControllerSlot(), name + ": follower on " + slot);
+      }
+    } finally {
+      close(leader);
+      close(follower);
+    }
+  }
+
   private static void close(SmartMotorController smc) {
     SmartMotorControllerTestSubsystem subsys = subsystem(smc);
     SmartMotorControllerCommandRegistry.removeCommands(subsys);
@@ -221,8 +271,12 @@ public class LooselyCoupledFollowerTest {
       spark.close();
     } else if (motor instanceof TalonFX talon) {
       talon.close();
+    } else if (motor instanceof TalonFXS talon) {
+      talon.close();
     } else if (motor instanceof Nova nova) {
       nova.close();
+    } else if (motor instanceof A301 a301) {
+      a301.close();
     }
   }
 

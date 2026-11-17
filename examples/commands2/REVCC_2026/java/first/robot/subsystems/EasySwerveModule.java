@@ -105,8 +105,7 @@ public final class EasySwerveModule
         // direction as the steering motor in the EasySwerve Module.
         .withExternalEncoderInverted(false)
         .withExternalEncoderZeroOffset(chassisAngularOffset)
-        // Report the encoder in [-0.5, 0.5) rotations, matching the wrapping range below.
-        .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
+        // The encoder reads the wrapping range below, [-0.5, 0.5) rotations.
         // Enable PID wrap around for the turning motor. This will allow the PID controller to go
         // through 0 to get to the setpoint i.e. going from 350 degrees to 10 degrees will go
         // through 0 rather than the other direction which is a longer route.

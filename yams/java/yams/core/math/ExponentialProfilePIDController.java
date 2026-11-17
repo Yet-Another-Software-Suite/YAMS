@@ -141,18 +141,18 @@ public class ExponentialProfilePIDController {
    * @param mass       {@link Mass} of the elevator carriage.
    * @param drumRadius {@link Distance} of the elevator drum radius.
    * @param gearing    {@link MechanismGearing} of the elevator from the drum to the rotor.
-   * @return {@link ExponentialProfile.Constraints}
+   * @return {@link ExponentialProfile.Constraints} in meters, for an elevator using linear closed
+   *         loop control (which an {@code ElevatorFeedforward} turns on).
    */
   public static ExponentialProfile.Constraints createElevatorConstraints(Voltage maxVolts, DCMotor motor, Mass mass, Distance drumRadius, MechanismGearing gearing) {
     var sysid = Models.elevatorFromPhysicalConstants(motor, mass.in(Kilograms), drumRadius.in(Meters), gearing.getMechanismToRotorRatio());
-    var circumference = (2.0 * Math.PI * drumRadius.in(Meters));
-
-    var A = sysid.getA(0, 0);
-    var B = sysid.getB(0, 0);
+    // The elevator model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the
+    // dynamics. A(0,0) and B(0,0) are always 0, which would make kV and kA NaN or infinite.
+    var A = sysid.getA(1, 1);
+    var B = sysid.getB(1, 0);
     var kV = MetersPerSecond.of(-A / B);
     var kA = MetersPerSecondPerSecond.of(1.0 / B);
-    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(MetersPerSecond) / circumference, kA.in(MetersPerSecondPerSecond) / circumference);
-    //    return ExponentialProfile.Constraints.fromStateSpace(maxVolts.in(Volts), A, B);
+    return ExponentialProfile.Constraints.fromCharacteristics(maxVolts.in(Volts), kV.in(MetersPerSecond), kA.in(MetersPerSecondPerSecond));
   }
 
   /**

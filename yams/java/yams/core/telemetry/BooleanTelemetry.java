@@ -217,6 +217,15 @@ public class BooleanTelemetry<F> {
   }
 
   /**
+   * Whether the telemetry is enabled.
+   *
+   * @return True if the telemetry is published.
+   */
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  /**
    * Get the field.
    *
    * @return field.

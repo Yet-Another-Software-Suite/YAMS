@@ -102,9 +102,10 @@ public class ElevatorMechanism implements Mechanism
                                      weight,
                                      radius,
                                      gearing))
-      // kG=0.1 V holds the elevator at any height; tune this before match play.
+      // kG=0.61 V holds the 16 lb carriage at any height: what it needs on a 12:1 NEO with the
+      // 22 tooth sprocket. Measure it on your robot before match play.
       // kS/kV/kA are zero until SysId is run.
-      .withFeedforward(new ElevatorFeedforward(0, 0.1, 0, 0))
+      .withFeedforward(new ElevatorFeedforward(0, 0.61, 0, 0))
       // 40 A stator limit protects the NEO during a hard-stop impact.
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)

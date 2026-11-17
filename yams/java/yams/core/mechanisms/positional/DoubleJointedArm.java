@@ -273,12 +273,12 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
       }
 
       // Setup Sim: both joints together, as each moves the other.
-      m_armSim = Optional.of(new DoubleJointedArmSim(m_dynamics, m_lowerSMC.getDCMotor(), lowerSMCConfig.getGearing().getMechanismToRotorRatio(), lowerConfig.getLowerHardLimit().get(),
-                                                     lowerConfig.getUpperHardLimit().get(), lowerSMCConfig.getStartingPosition().get(), m_upperSMC.getDCMotor(),
+      m_armSim = Optional.of(new DoubleJointedArmSim(m_dynamics, m_lowerSMC.getMechanismDCMotor(), lowerSMCConfig.getGearing().getMechanismToRotorRatio(), lowerConfig.getLowerHardLimit().get(),
+                                                     lowerConfig.getUpperHardLimit().get(), lowerSMCConfig.getStartingPosition().get(), m_upperSMC.getMechanismDCMotor(),
                                                      upperSMCConfig.getGearing().getMechanismToRotorRatio(), upperConfig.getLowerHardLimit().get(), upperConfig.getUpperHardLimit().get(),
                                                      upperSMCConfig.getStartingPosition().get(), true));
-      m_lowerSMC.setSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.LOWER, m_lowerSMC));
-      m_upperSMC.setSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.UPPER, m_upperSMC));
+      m_lowerSMC.setMechanismSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.LOWER, m_lowerSMC));
+      m_upperSMC.setMechanismSimSupplier(new DoubleJointedArmSimSupplier(m_armSim.get(), Joint.UPPER, m_upperSMC));
 
       var lowerStartingAngle = lowerSMCConfig.getStartingPosition().get();
       var upperStartingAngle = Radians.of(m_dynamics.getUpperAngleFromHorizontal(lowerStartingAngle.in(Radians), upperSMCConfig.getStartingPosition().get().in(Radians)));
@@ -658,6 +658,8 @@ public class DoubleJointedArm extends SmartPositionalMechanism {
     m_lowerLigament.setAngle(lowerArmAngle.in(Degrees));
     m_upperLigament.setAngle(upperArmAngle.in(Degrees));
     m_upperRoot.setPosition(jointPos.getX(), jointPos.getY());
+    // Telemetry.log writes the Mechanism2d as it is now, so log it again to show the change.
+    publishMechanismWindow();
   }
 
   /**

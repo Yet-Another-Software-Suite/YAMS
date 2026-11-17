@@ -9,6 +9,7 @@ import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Second;
+import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import java.util.Arrays;
@@ -148,6 +149,14 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.kP).enable();
         doubleFields.get(DoubleTelemetryField.kI).enable();
         doubleFields.get(DoubleTelemetryField.kD).enable();
+        // Only kept for a motor controller running an ADRC, see SmartMotorControllerTelemetry.setupTelemetry.
+        doubleFields.get(DoubleTelemetryField.ADRCDisturbance).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidth).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCObserverBandwidth).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCSystemOrder).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCB0).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).enable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).enable();
         // Only kept for a motor controller configured with an LQR, see getDoubleFields.
         doubleFields.get(DoubleTelemetryField.LQRQelmsPosition).enable();
         doubleFields.get(DoubleTelemetryField.LQRQelmsVelocity).enable();
@@ -169,12 +178,14 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.SetpointPosition).enable();
         doubleFields.get(DoubleTelemetryField.SetpointVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementPosition).enable();
+        doubleFields.get(DoubleTelemetryField.MeasurementCircumference).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MeasurementAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.MechanismPosition).enable();
         doubleFields.get(DoubleTelemetryField.MechanismVelocity).enable();
         doubleFields.get(DoubleTelemetryField.MechanismAcceleration).enable();
         doubleFields.get(DoubleTelemetryField.RotorPosition).enable();
+        doubleFields.get(DoubleTelemetryField.RotorGearRatio).enable();
         doubleFields.get(DoubleTelemetryField.RotorVelocity).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderPosition).enable();
         doubleFields.get(DoubleTelemetryField.ExternalEncoderVelocity).enable();
@@ -249,6 +260,7 @@ public class SmartMotorControllerTelemetryConfig {
       doubleFields.get(DoubleTelemetryField.MeasurementLowerLimit).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementPosition).disable();
+      doubleFields.get(DoubleTelemetryField.MeasurementCircumference).disable();
       doubleFields.get(DoubleTelemetryField.MeasurementVelocity).disable();
     } else {
       config.getMechanismUpperLimit().ifPresent(upperLimit -> doubleFields.get(DoubleTelemetryField.MeasurementUpperLimit).setDefaultValue(config.convertFromMechanism(upperLimit).in(Meters)));
@@ -342,6 +354,18 @@ public class SmartMotorControllerTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.LQRModelVelocity).setDefaultValue(LQRUnits.fromSI(type, false, model[1]));
         doubleFields.get(DoubleTelemetryField.LQREncoderPosition).setDefaultValue(LQRUnits.fromSI(type, true, encoder[0]));
       }
+    });
+    // An ADRC replaces kP, kI and kD with its own values. Without one, SmartMotorControllerTelemetry disables its
+    // fields.
+    smc.getADRCController().ifPresent(e -> {
+      doubleFields.get(DoubleTelemetryField.kP).disable();
+      doubleFields.get(DoubleTelemetryField.kI).disable();
+      doubleFields.get(DoubleTelemetryField.kD).disable();
+      // Seed the tuning topics with the controller's values, so the dashboard shows what is
+      // running instead of the enum defaults.
+      doubleFields.get(DoubleTelemetryField.ADRCB0).setDefaultValue(e.getB0());
+      doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).setDefaultValue(e.getSettlingTime().in(Seconds));
+      doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).setDefaultValue(e.getBandwidthScale());
     });
     config.getArmFeedforward(smc.getClosedLoopControllerSlot()).ifPresent(e -> {
       doubleFields.get(DoubleTelemetryField.kG).enable();
@@ -574,6 +598,17 @@ public class SmartMotorControllerTelemetryConfig {
   }
 
   /**
+   * Enables logging the mechanism's circumference if it has one, so a log can convert a rotor
+   * reading to meters.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withMeasurementCircumference() {
+    doubleFields.get(DoubleTelemetryField.MeasurementCircumference).enable();
+    return this;
+  }
+
+  /**
    * Enables the linear velocity logging if available.
    *
    * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
@@ -610,6 +645,17 @@ public class SmartMotorControllerTelemetryConfig {
    */
   public SmartMotorControllerTelemetryConfig withRotorPosition() {
     doubleFields.get(DoubleTelemetryField.RotorPosition).enable();
+    return this;
+  }
+
+  /**
+   * Enables logging the gear ratio, rotor rotations per mechanism rotation, so a log can convert a
+   * rotor reading to the mechanism's.
+   *
+   * @return {@link SmartMotorControllerTelemetryConfig} for chaining.
+   */
+  public SmartMotorControllerTelemetryConfig withRotorGearRatio() {
+    doubleFields.get(DoubleTelemetryField.RotorGearRatio).enable();
     return this;
   }
 

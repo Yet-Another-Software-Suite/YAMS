@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.command3.Trigger;
+import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.Distance;
 import yams.core.exceptions.ElevatorConfigurationException;
@@ -160,6 +161,10 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
   /**
    * Run the elevator to the desired height with a tolerance, then move on.
    *
+   * <p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
+   *
    * @param height    Height to reach.
    * @param tolerance The acceptable tolerance
    * @return {@link Command} which will run the elevator to the desired height with a tolerance,
@@ -168,11 +173,18 @@ public class Elevator extends yams.core.mechanisms.positional.Elevator implement
    *           after this to allow for easy chaining.
    */
   public Command runTo(Supplier<Distance> height, Distance tolerance) {
+    SmartMotorController smc = getMotorController();
     return mechanism.run(coroutine -> {
-      getMotorController().startClosedLoopController();
-      Distance target = height.get();
-      getMotorController().setPosition(target);
-      coroutine.waitUntil(near(target, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));
+      Debouncer atTarget = new Debouncer(0.1, DebounceType.RISING);
+      smc.startClosedLoopController();
+      while (true) {
+        Distance target = height.get();
+        smc.setPosition(target);
+        if (atTarget.calculate(isNear(target, tolerance))) {
+          return;
+        }
+        coroutine.yield();
+      }
     }).named(mechanism.getName() + " Run To Height Supplier");
   }
 

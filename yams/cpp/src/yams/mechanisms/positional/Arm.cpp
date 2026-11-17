@@ -8,6 +8,7 @@
 #include <string>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -82,13 +83,13 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
     wpi::units::radian_t startAngle =
         m_smc->GetConfig().GetStartingPosition().value_or(wpi::units::turn_t{0});
 
-    m_armSim.emplace(m_smc->GetDCMotor(), gearing.GetMechanismToRotorRatio(),
+    m_armSim.emplace(m_smc->GetMechanismDCMotor(), gearing.GetMechanismToRotorRatio(),
                      m_smc->GetConfig().GetMOI(), m_armConfig->GetArmLength().value(),
                      wpi::units::radian_t{m_armConfig->GetMinAngle().value()},
                      wpi::units::radian_t{m_armConfig->GetMaxAngle().value()}, true, startAngle,
                      std::array<double, 2>{0, 0.002 / 4096.0});
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ArmSimSupplier>(
         *m_armSim, *m_smc));
 
     // Build Mechanism2d window.
@@ -122,8 +123,7 @@ Arm::Arm(config::ArmConfig* config, motorcontrollers::SmartMotorController* smc)
           wpi::util::Color8Bit{wpi::util::Color::YELLOW});
     }
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -157,6 +157,8 @@ void Arm::VisualizationUpdate() {
   if (m_setpointLigament) {
     m_setpointLigament->SetAngle(m_smc->GetMechanismPositionSetpoint().value_or(GetAngle()));
   }
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string Arm::GetName() const { return m_name; }
@@ -196,10 +198,14 @@ wpi::cmd::CommandPtr Arm::RunTo(wpi::units::degree_t angle, wpi::units::degree_t
 
 wpi::cmd::CommandPtr Arm::RunTo(std::function<wpi::units::degree_t()> angle,
                                 wpi::units::degree_t tolerance) {
-  wpi::units::degree_t target = angle();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce([this, target] { SetMechanismPositionSetpoint(target); }, {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([atTarget] { atTarget->Calculate(false); },
+                           [this, angle] { SetMechanismPositionSetpoint(angle()); }, {m_subsystem})
+      .Until([this, angle, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(angle(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

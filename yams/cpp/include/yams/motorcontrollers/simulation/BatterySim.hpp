@@ -6,6 +6,7 @@
 #include <map>
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 #include <wpi/units/current.hpp>
 #include <wpi/units/impedance.hpp>
 #include <wpi/units/voltage.hpp>
@@ -122,6 +123,16 @@ class BatterySim {
   static void RemoveCurrent(const void* id);
 
   /**
+   * Set whether a consumer's current is in a leader's, so it is not counted again. A mechanism sets
+   * it for its motor controller's loosely coupled followers, since its simulation has their motors,
+   * and an A301 sets it for the A301s following it.
+   *
+   * @param id       Key the follower's current is registered under (the SmartMotorController).
+   * @param inLeader Whether its current is in its leader's.
+   */
+  static void SetSimulatedByLeader(const void* id, bool inLeader);
+
+  /**
    * Clear every tracked current draw and reset discharge simulation to a fresh, fully-charged,
    * disabled state.
    */
@@ -145,6 +156,8 @@ class BatterySim {
   /** Guards every member below, and BatteryVoltage and BatteryResistance. */
   static std::mutex m_mutex;
   static std::unordered_map<const void*, double> m_currents;
+  /** Consumers whose current is in a leader's, so it is not counted again. */
+  static std::unordered_set<const void*> m_simulatedByLeader;
   static bool m_dischargeEnabled;
   static double m_batteryCapacityAmpHours;
   static double m_ampHoursUsed;

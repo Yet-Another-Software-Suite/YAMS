@@ -5,8 +5,10 @@ robot project means updating WPILib and the vendor libraries, installing a new Y
 changing imports for the package split, and fixing a handful of renamed APIs. Each step is
 covered below, with a [checklist](#checklist) at the end.
 
-Already on YAMS 2027 v2026.10.09? See
-[Updating from v2026.10.09 to v2026.10.15](#updating-from-v20261009-to-v20261015).
+Already on YAMS 2027? See
+[Updating from v2026.10.09 to v2026.10.15](#updating-from-v20261009-to-v20261015),
+[Updating from v2026.10.15 to v2026.11.03](#updating-from-v20261015-to-v20261103) and
+[Updating from v2026.11.03](#updating-from-v20261103).
 
 ## WPILib 2027
 
@@ -140,6 +142,8 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `SwerveDrive.getGyroAngle()`, `SwerveDriveConfig.getGyroAngle()` (Java) | `getGyroRotation3d()` |
 | `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withGyro(Supplier<Rotation3d>)`, for example `withGyro(gyro::getRotation3d)` |
 | `isNear(...)` Trigger factory (Java) | `near(...)`, see below |
+| `withExternalEncoderDiscontinuityPoint(...)` | `withWrapping(min, max)`, see [Wrapping](#wrapping) |
+| `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 
 New alongside the renames:
 
@@ -241,7 +245,8 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
 
 ## Checklist
 
-1. Update the project to WPILib 2027 (`2027_alpha7`), Java 25 and the 2027 vendor libraries.
+1. Update the project to WPILib 2027 (`2027_alpha7`), Java 25 and the 2027 vendor libraries, and
+   flash SPARK MAX and SPARK Flex firmware 27.0.0.
 2. Replace `edu.wpi.first.*` imports with `org.wpilib.*`, and pass a CAN bus to vendor device
    constructors.
 3. Remove the old `yams.json` vendordep and install the Commands v2 or Commands v3 vendordep from
@@ -254,6 +259,8 @@ So a flywheel setpoint of 3000 RPM is entered as `3000`, while `MechanismVelocit
    Triggers.
 7. If you set up motor controller telemetry yourself, call `setupLiveTuning()` after
    `setupTelemetry(...)` to get the "Live Tuning" command.
+8. Replace `withExternalEncoderDiscontinuityPoint(...)` with `withWrapping(...)`, or
+   `withContinuousWrapping(...)` where the closed loop should take the shortest path.
 
 ## Updating from v2026.10.09 to v2026.10.15
 
@@ -282,8 +289,60 @@ reinstall it from `cdn.yassrobotics.com`).
   `externalencoder/position` and `externalencoder/velocity` keep their names, and hold the
   mechanism position and velocity.
 
+### New
+
+- **`SwerveDrive.driveToPose(pose, translationTolerance, rotationTolerance)`** in Commands v2, as
+  Commands v3 already had: it ends once the robot is within the tolerances. `isNear(pose,
+  translationTolerance, rotationTolerance)` and `stop()` are on the shared `SwerveDrive` for both.
+- **`SwerveInputStream` aim options**, carried over from YAGSL 2026: `withAimLookahead(Time)`,
+  `withAimFeedforward(SimpleMotorFeedforward)`, `withAimHeadingOffset(Rotation2d)`,
+  `isAimLocked(Angle)` and the `aimLock(Angle)` Trigger, `getTargetVector(Pose2d)` and
+  `calculateAngularVelocity(Angle)`. Aiming without them behaves as before.
+- **`SmartMechanism.getMeasurementSetpoint()`**: the setpoint as a distance, for linear
+  mechanisms.
+- **The C++ swerve drive matches the Java one**: the 3D gyro and gyro heading axis, anti-tipping,
+  module speed desaturation, the coupling ratio, feedforward forces and the default velocity
+  deadband.
+
+## Updating from v2026.10.15 to v2026.11.03
+
+### Changes that can need code changes
+
+- **Flash SPARK MAX and SPARK Flex firmware 27.0.0** to match REVLib 2027. REVLib 2027 no longer
+  sets conversion factors, the zero centered duty cycle or the hall sensor averaging, and this
+  firmware drops them from the SPARK too; YAMS already works without them. The firmware also changes
+  how mechanisms run, so check their gains: followers no longer run about 1% slower than their
+  leader, nor apply voltage compensation twice when the leader and follower both have it; kS no
+  longer turns the motor at a velocity setpoint of 0; and a SPARK MAX closing its loop on an
+  absolute or alternate encoder keeps using it after a reboot, where it could switch sensors in
+  brake mode, when inverted, or with a control type other than duty cycle.
+- **The `SwerveDrive` tuning command is now `NT:/Tuning/<name>/Live Tuning`**, named `Live Tuning`,
+  like every other mechanism's. It was `NT:/Mechanisms/<name>/tuning`. Move a dashboard button or
+  anything else that starts it, such as setting `running` to `true`. It now also requires the drive's
+  subsystem (Commands v2, C++) or mechanism (Commands v3), so it pauses the default drive command
+  while it runs; before, the default drive command kept pointing the wheels back where they were.
+- **`getRelativeMechanismPosition()` is replaced by `getPose3d()`** (`GetPose3d()` in C++) on every
+  mechanism. It returns the mechanism's `Pose3d` relative to the robot, worked out from its motor's
+  position, so it works on the real robot as well as in simulation: an arm's or pivot's axis turned to
+  its angle, an elevator's carriage at its height, or a flywheel's axle turned by its position. Publish
+  it as a component of an AdvantageScope robot model. `DoubleJointedArm.getUpperPose3d()` gives the
+  upper arm's.
+- **`MechanismPositionConfig` places the mechanism in 3D.** `withRelativePosition(Transform3d)` also
+  sets how the mechanism is turned where it is mounted, and `withParent(Supplier<Pose3d>)` mounts it
+  on another mechanism, such as an arm on `elevator::getPose3d`. In C++, `MechanismPositionConfig` is
+  now this class (it was an unused, undefined named-setpoint class), and `ArmConfig`, `ElevatorConfig`,
+  `PivotConfig` and `FlyWheelConfig` take one with `WithMechanismPositionConfig(...)`.
+
 ### Fixes
 
+- **A TalonFX's loosely coupled followers switch closed loop slot with it.** `setClosedLoopSlot`
+  on a TalonFX now passes the slot on to the followers from `withLooselyCoupledFollowers(...)`, as
+  the TalonFXS, SPARK and Thrifty Nova already did. C++ already did this.
+- **A TalonFX or TalonFXS vendor config wins over the device's saved settings.** With
+  `withResetPreviousConfig(false)`, the Java wrappers read the settings saved on the device into the
+  `TalonFXConfiguration` (or `TalonFXSConfiguration`) given to `withVendorConfig(...)`, which
+  replaced the vendor config's settings. A vendor config is now the base, as in C++, and the
+  device's settings are only read when there is no vendor config.
 - **Simulated SPARKs follow their profile and feedforward.** REVLib's simulation does not run
   MAXMotion, and works out kCos from the setpoint instead of the position, so in simulation a
   SPARK with a trapezoidal profile runs the profile on the SystemCore and sends kV, kA and an
@@ -302,36 +361,89 @@ reinstall it from `cdn.yassrobotics.com`).
 - C++ swerve fixes that Java already had, and C++ swerve azimuth live tuning.
 - The vendordep JSONs now require the matching WPILib command library (`command2` or `command3`).
 
-### New
-
-- **`SwerveDrive.driveToPose(pose, translationTolerance, rotationTolerance)`** in Commands v2, as
-  Commands v3 already had: it ends once the robot is within the tolerances. `isNear(pose,
-  translationTolerance, rotationTolerance)` and `stop()` are on the shared `SwerveDrive` for both.
-- **`SwerveInputStream` aim options**, carried over from YAGSL 2026: `withAimLookahead(Time)`,
-  `withAimFeedforward(SimpleMotorFeedforward)`, `withAimHeadingOffset(Rotation2d)`,
-  `isAimLocked(Angle)` and the `aimLock(Angle)` Trigger, `getTargetVector(Pose2d)` and
-  `calculateAngularVelocity(Angle)`. Aiming without them behaves as before.
-- **`SmartMechanism.getMeasurementSetpoint()`**: the setpoint as a distance, for linear
-  mechanisms.
-- **The C++ swerve drive matches the Java one**: the 3D gyro and gyro heading axis, anti-tipping,
-  module speed desaturation, the coupling ratio, feedforward forces and the default velocity
-  deadband.
-
-## Updating from v2026.10.15
+## Updating from v2026.11.03
 
 ### Changes that can need code changes
 
-- **`getRelativeMechanismPosition()` is replaced by `getPose3d()`** (`GetPose3d()` in C++) on every
-  mechanism. It returns the mechanism's `Pose3d` relative to the robot, worked out from its motor's
-  position, so it works on the real robot as well as in simulation: an arm's or pivot's axis turned to
-  its angle, an elevator's carriage at its height, or a flywheel's axle turned by its position. Publish
-  it as a component of an AdvantageScope robot model. `DoubleJointedArm.getUpperPose3d()` gives the
-  upper arm's.
-- **`MechanismPositionConfig` places the mechanism in 3D.** `withRelativePosition(Transform3d)` also
-  sets how the mechanism is turned where it is mounted, and `withParent(Supplier<Pose3d>)` mounts it
-  on another mechanism, such as an arm on `elevator::getPose3d`. In C++, `MechanismPositionConfig` is
-  now this class (it was an unused, undefined named-setpoint class), and `ArmConfig`, `ElevatorConfig`,
-  `PivotConfig` and `FlyWheelConfig` take one with `WithMechanismPositionConfig(...)`.
+- **Discontinuity points are replaced by wrapping.** `withExternalEncoderDiscontinuityPoint(...)`
+  is removed; see [Wrapping](#wrapping).
+- **The Thrifty Nova runs its own closed loop.** A PID, with or without a trapezoidal position
+  profile, now runs on the Nova. An LQR, an exponential profile and a velocity trapezoidal profile
+  still run on the SystemCore, and accept every option as before. When the Nova runs the closed
+  loop:
+  - A feedforward needs a trapezoidal position profile (`withTrapezoidalProfile(...)`), since the
+    Nova applies its feedforward in its motion profile, which is for position only; without one the
+    config is rejected. For a feedforward under velocity control, use a velocity trapezoidal profile,
+    which runs on the SystemCore.
+  - Only closed loop slots `SLOT_0` and `SLOT_1` exist.
+  - The closed loop tolerance is the slot's allowable error.
+  - Mechanism limits are the Nova's soft limits, and need both an upper and a lower limit.
+  - `withTemperatureCutoff`, `withClosedLoopControllerMaximumVoltage`,
+    `withFeedbackSynchronizationThreshold` and `withClosedLoopControlPeriod` are rejected, since
+    only the SystemCore's closed loop applies them. They still work when the SystemCore runs it.
+  - An absolute encoder closing the Nova's loop reads [0, 1) rotations, so its wrapping must be
+    [0, 1).
+- **REVLib 2027.0.0-alpha-9 and ThriftyLib 2027.0.0-alpha-6.** Update the vendordeps. A SPARK wraps
+  its position over the mechanism's continuous wrapping range with alpha-9's input range, for
+  MAXMotion too.
+
+### Wrapping
+
+`withWrapping(min, max)` sets the range an absolute external encoder reads, such as
+[-0.5, 0.5) or [0, 1) rotations, without changing the closed loop. `withContinuousWrapping(min,
+max)` sets the same range and also makes the closed loop take the shortest path to a setpoint,
+which can be the other way round. Use `withWrapping` on an arm whose encoder must read across zero,
+and `withContinuousWrapping` on a swerve azimuth or turret that can turn all the way round.
+
+```java
+// Before
+.withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
+
+// After: the encoder reads [-0.5, 0.5) rotations
+.withWrapping(Rotations.of(-0.5), Rotations.of(0.5))
+```
+
+- The range is one rotation, and an absolute encoder reads it only within what its vendor accepts;
+  anything else is rejected with a `SmartMotorControllerConfigurationException`:
+  - CANcoder and CANdi PWM: a maximum from 0 to 1 rotation (their `AbsoluteSensorDiscontinuityPoint`).
+  - SPARK absolute encoder: a range from [-1, 0) to [0, 1) (its range offset, the middle of the range).
+  - SPARK detached encoder: [-0.5, 0.5) or [0, 1).
+  - Thrifty Nova: [0, 1) when the Nova closes its loop on the encoder.
+- Without wrapping, a SPARK or Nova absolute encoder reads [0, 1), and a CANcoder or CANdi keeps its
+  own range.
+- Continuous wrapping and soft limits cannot be used together; wrapping and soft limits can.
+- `getContinuousWrapping()` and `getContinuousWrappingMin()` are now `getWrappingMax()` and
+  `getWrappingMin()`, and `isWrappingContinuous()` says whether the closed loop wraps. C++ has
+  `WithWrapping`, `GetWrappingMax`, `GetWrappingMin` and `IsWrappingContinuous`.
+
+### Fixes
+
+- **A mechanism starting at the edge of its continuous wrapping range no longer runs away** under a
+  closed loop on the SystemCore, such as one at 0 with [0, 1) wrapping.
+- A simulated CANdi reports its PWM position in the wrapping range, as a real CANdi does.
+
+## Updating from v2026.11.05
+
+### Changes in how things behave
+
+- **A Thrifty Nova wraps continuously over any range, on the Nova.** An absolute encoder on the
+  mechanism closing its loop can wrap over any one rotation range, such as [-0.5, 0.5); the Nova
+  wraps it and is sent each target in [0, 1). The Nova's motor encoder, or a quadrature encoder,
+  can wrap too, such as a swerve azimuth seeded from a CANcoder: each target is sent as the
+  equivalent nearest the mechanism, so the Nova takes the short way. A Nova azimuth with a CANcoder
+  now works like a SPARK MAX with one.
+- **A Thrifty Nova takes a feedforward without a motion profile.** The Nova runs the loop and
+  applies its motion profile slot's kS, kV, kA and kG, which YAMS sends with or without a profile,
+  so a Nova swerve drive motor or flywheel keeps its feedforward on the Nova. A velocity
+  trapezoidal profile added only to keep a Nova's feedforward on the SystemCore can be removed.
+- **A Thrifty Nova's closed loop runs on the SystemCore when the Nova can't run it**, instead of
+  throwing a `SmartMotorControllerConfigurationException`, as every Nova did before v2026.11.05:
+  - an absolute encoder closing the loop read over a range other than [0, 1) without continuous
+    wrapping;
+  - continuous wrapping of an absolute encoder geared to the mechanism.
+
+  `getClosedLoopControllerPeriod()` says where the loop runs: 1 ms on the Nova, or the closed loop
+  control period on the SystemCore.
 
 ## Why this split
 

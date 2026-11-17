@@ -3,6 +3,12 @@
 
 package yams.helpers;
 
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -12,6 +18,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.encoder.SplineEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -21,7 +28,11 @@ import com.thrifty.nova.Nova;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.wpilib.hardware.bus.CANPort;
+import yams.core.gearing.GearBox;
+import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController;
+import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
+import yams.core.motorcontrollers.SmartMotorControllerConfig;
 
 /**
  * Centralised factory for test motor controller devices.
@@ -78,6 +89,59 @@ public class DeviceCreator {
     return new SparkFlex(CANPorts.fromBusId(1), id, MotorType.kBrushless);
   }
 
+  /** Next A301 CAN ID. Like SPARKs, simulated A301s take any ID, so none is reused in a run. */
+  private static final AtomicInteger a301Id = new AtomicInteger(1);
+
+  /** Create an A301, on a bus no other device uses. */
+  public static A301 createA301() {
+    return new A301(CANPorts.fromBusId(2), a301Id.getAndIncrement());
+  }
+
+  /**
+   * Motor rotations per output shaft rotation of the A301's 64:1 gearbox, for arms and general use.
+   * The A301's gearboxes are 135:1, 64:1, 36:1, 27:1, 13.5:1 and 3:1.
+   */
+  public static final double kA301Gearbox = 64;
+
+  /**
+   * Clear the current limits of a config shared with the other motor controllers, which an A301
+   * does not have.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C withoutCurrentLimits(C cfg) {
+    cfg.withStatorCurrentLimit(null);
+    cfg.withSupplyCurrentLimit(null);
+    return cfg;
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301 on its 64:1 gearbox: see
+   * {@link #forA301(SmartMotorControllerConfig, double)}.
+   *
+   * @param cfg Config to change.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg) {
+    return forA301(cfg, kA301Gearbox);
+  }
+
+  /**
+   * Make a config shared with the other motor controllers one for an A301: without current limits,
+   * and geared through an A301 gearbox, since its motor is too small to move the tests' mechanisms
+   * through the gearing they give the other motors.
+   *
+   * @param cfg Config to change.
+   * @param gearbox Motor rotations per output shaft rotation of the A301's gearbox.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C forA301(C cfg, double gearbox) {
+    withoutCurrentLimits(cfg);
+    cfg.withGearing(new MechanismGearing(GearBox.fromReductionStages(gearbox)));
+    return cfg;
+  }
+
   // Creates an encoder a SPARK reads over CAN. REVLib's only detached encoder model is the
   // MAXSpline
   // Encoder.
@@ -109,7 +173,10 @@ public class DeviceCreator {
     if (device > 0 && device % (idsPerBus * kThriftyBuses) == 0) {
       System.err.println("Warning: used every Thrifty device ID on every bus, reusing them");
     }
-    return new Nova(device / idsPerBus % kThriftyBuses, device % idsPerBus);
+    return new Nova(
+        device / idsPerBus % kThriftyBuses,
+        device % idsPerBus,
+        com.thrifty.core.Motor.MotorType.NEO);
   }
 
   /**
@@ -224,5 +291,45 @@ public class DeviceCreator {
       }
     }
     throw new AssertionError("Could not read the device's configuration: " + status);
+  }
+
+  /**
+   * Give a config for a Nova the motion profile its feedforward needs, as a Nova applies a
+   * feedforward only with a motion profile: a trapezoidal profile, run on the Nova, for a position
+   * mechanism, or a velocity trapezoidal profile, run on the SystemCore, for a velocity one. A config
+   * without a feedforward, or with a motion profile or an LQR, is returned as it is.
+   *
+   * @param cfg      Config for the Nova.
+   * @param velocity Whether the mechanism is controlled by velocity.
+   * @return The config.
+   */
+  public static <C extends SmartMotorControllerConfig<?>> C withNovaProfile(
+      C cfg, boolean velocity) {
+    boolean feedforward = false;
+    for (ClosedLoopControllerSlot slot : ClosedLoopControllerSlot.values()) {
+      feedforward |=
+          cfg.getArmFeedforward(slot).isPresent()
+              || cfg.getElevatorFeedforward(slot).isPresent()
+              || cfg.getSimpleFeedforward(slot).isPresent();
+    }
+    if (!feedforward
+        || cfg.getTrapezoidProfile().isPresent()
+        || cfg.getExponentialProfile().isPresent()
+        || cfg.getLQRClosedLoopController().isPresent()) {
+      return cfg;
+    }
+    final boolean linear = cfg.getLinearClosedLoopControllerUse();
+    if (velocity && linear) {
+      cfg.withTrapezoidalProfile(
+          MetersPerSecondPerSecond.of(50), MetersPerSecondPerSecond.per(Second).of(500));
+    } else if (velocity) {
+      cfg.withTrapezoidalProfile(
+          DegreesPerSecondPerSecond.of(36000), DegreesPerSecondPerSecond.per(Second).of(360000));
+    } else if (linear) {
+      cfg.withTrapezoidalProfile(MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
+    } else {
+      cfg.withTrapezoidalProfile(DegreesPerSecond.of(720), DegreesPerSecondPerSecond.of(1440));
+    }
+    return cfg;
   }
 }

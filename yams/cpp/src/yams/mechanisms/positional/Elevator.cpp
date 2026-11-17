@@ -13,6 +13,7 @@
 #include <vector>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
 #include <wpi/smartdashboard/MechanismRoot2d.hpp>
@@ -95,7 +96,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
           "SMC.WithMechanismCircumference(wpi::units::meter_t)");
     }
 
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -111,7 +112,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
         m_elevatorConfig->GetMaxHeight().value(), simulateGravity, startH,
         std::array<double, 2>{0.01 / 4096.0, 0.01 / 4096.0});
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::ElevatorSimSupplier>(
         *m_elevatorSim, *m_smc));
 
     // Build Mechanism2d window.
@@ -152,8 +153,7 @@ Elevator::Elevator(config::ElevatorConfig* config, motorcontrollers::SmartMotorC
     m_setpointLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         "Setpoint", startHValue, angle, 3, wpi::util::Color8Bit{wpi::util::Color::WHITE});
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -182,6 +182,8 @@ void Elevator::VisualizationUpdate() {
           m_smc->GetConfig().ConvertFromMechanism(setpoint.value()).value());
     }
   }
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string Elevator::GetName() const { return m_name; }
@@ -222,11 +224,14 @@ wpi::cmd::CommandPtr Elevator::RunTo(wpi::units::meter_t height, wpi::units::met
 
 wpi::cmd::CommandPtr Elevator::RunTo(std::function<wpi::units::meter_t()> height,
                                      wpi::units::meter_t tolerance) {
-  wpi::units::meter_t target = height();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce([this, target] { SetMeasurementPositionSetpoint(target); },
-                           {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([atTarget] { atTarget->Calculate(false); },
+                           [this, height] { SetMeasurementPositionSetpoint(height()); }, {m_subsystem})
+      .Until([this, height, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(height(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

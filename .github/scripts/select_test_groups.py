@@ -12,7 +12,7 @@ changed file is classified by the first rule it matches:
 - Any other file under yams/java, yams/cpp or vendordep runs every group of its language, or of
   both. This includes the motor controllers, which every test uses, test helpers and build files.
   A file nothing else matches can affect anything, so it runs everything.
-- This workflow and this script run every group.
+- This workflow, this script and test_summary.py run every group.
 - Files elsewhere, such as the docs, the other workflows and the examples (which have their own
   workflow), run nothing.
 
@@ -43,6 +43,14 @@ JAVA_GROUPS = [
     # (a Nova, a SPARK with an exponential profile and a SPARK with an LQR) following and stopping
     # with their leader. A TalonFX leads one, which Phoenix runs in real time.
     {"group": "loose-followers", "test-filter": '--tests "yams.mechs.LooselyCoupledFollowerTest"'},
+    # How followers are simulated: A301s following an A301, and a mechanism simulating its motor
+    # controller's loosely coupled followers, so it has every motor's torque and the battery counts
+    # each motor's current once.
+    {"group": "follower-simulation", "test-filter": '--tests "yams.mechs.FollowerSimulationTest"'},
+    # The motor controllers with a vendor simulation, REV's SparkSim and Phoenix's, simulated through
+    # it: their encoders, applied output, current limits and closed loops. Phoenix runs a Talon's
+    # simulation in real time.
+    {"group": "vendor-simulation", "test-filter": '--tests "yams.mechs.VendorSimulationTest"'},
     # A pivot driven into its hard stops, and a Talon set to a position, on every motor controller:
     # simulated Talons, which Phoenix runs in real time.
     {"group": "hard-stops", "test-filter": '--tests "yams.mechs.HardStopTest"'},
@@ -70,28 +78,32 @@ JAVA_GROUPS = [
                     ' --tests "yams.core.motorcontrollers.StartingPositionTest"'},
     # Every absolute encoder under every closed loop controller: these create many simulated Talons,
     # which Phoenix runs in real time, so each runs in its own JVM.
-    {"group": "discontinuity-points",
-     "test-filter": '--tests "yams.core.motorcontrollers.DiscontinuityPointTest"'},
+    {"group": "absolute-encoder-ranges",
+     "test-filter": '--tests "yams.core.motorcontrollers.AbsoluteEncoderRangeTest"'},
     {"group": "zero-offsets",
      "test-filter": '--tests "yams.core.motorcontrollers.ZeroOffsetTest"'
-                    ' --tests "yams.core.motorcontrollers.ZeroOffsetDiscontinuityPointTest"'},
+                    ' --tests "yams.core.motorcontrollers.ZeroOffsetWrappingTest"'},
     # Motor controller unit tests that are not about an external encoder: the configuration each
-    # vendor's device is given, feedforwards, exponential profiles and the simulation period. Add new
-    # motor controller test classes here.
+    # vendor's device is given, feedforwards, exponential profiles, the simulation period and the
+    # A301 and the ADRC config. Add new motor controller test classes here.
     {"group": "motor-controllers",
      "test-filter": '--tests "yams.core.motorcontrollers.ArmFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.ExponentialProfileConfigTest"'
                     ' --tests "yams.core.motorcontrollers.ForceFeedforwardTest"'
                     ' --tests "yams.core.motorcontrollers.SimulationPeriodTest"'
                     ' --tests "yams.core.motorcontrollers.SparkDeviceConfigTest"'
-                    ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'},
+                    ' --tests "yams.core.motorcontrollers.TalonDeviceConfigTest"'
+                    ' --tests "yams.core.motorcontrollers.ConfigCopyAndHelpersTest"'
+                    ' --tests "yams.core.motorcontrollers.A301WrapperTest"'
+                    ' --tests "yams.core.motorcontrollers.ADRCConfigTest"'},
     # Live tuning: every motor controller applying the tuned values, the Live Tuning command a
     # mechanism registers for its motor controllers, and driving a leader and its loosely coupled
     # follower at the tuning voltage, on pivots led by a SPARK Flex, a TalonFX and a SPARK MAX.
     {"group": "live-tuning",
      "test-filter": '--tests "yams.core.motorcontrollers.LiveTuningTest"'
                     ' --tests "yams.core.telemetry.MechanismLiveTuningTest"'
-                    ' --tests "yams.mechs.VoltageLiveTuningTest"'},
+                    ' --tests "yams.mechs.VoltageLiveTuningTest"'
+                    ' --tests "yams.core.motorcontrollers.ADRCLiveTuningTest"'},
     # Every motor controller (SPARK MAX, SPARK Flex, TalonFX, TalonFXS and Nova) given the same gains
     # in YAMS units: the voltage of each feedback and feedforward gain, and the gains of the selected
     # closed loop slot. The Talons run in real time, as Phoenix simulates them, and one JVM with all
@@ -106,7 +118,17 @@ JAVA_GROUPS = [
     # The units of the gains each motor controller is given: per rotation for an arm, per meter for
     # an elevator, on the motor controller and on the SystemCore.
     {"group": "closed-loop-gain-units",
-     "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'},
+     "test-filter": '--tests "yams.core.motorcontrollers.ClosedLoopGainUnitsTest"'
+                    ' --tests "yams.core.motorcontrollers.NovaConfigTest"'},
+    # ADRC closing a flywheel's velocity, a pivot's and an arm's angle and an elevator's height on
+    # every motor controller, and each YAMS mechanism doing the same, and withClosedLoopRampRate
+    # ramping an ADRC and an LQR on every motor controller. Simulated Talons, which Phoenix runs in
+    # real time, so each runs on its own.
+    {"group": "adrc-closed-loop",
+     "test-filter": '--tests "yams.core.motorcontrollers.ADRCClosedLoopTest"'
+                    ' --tests "yams.core.motorcontrollers.ClosedLoopRampTest"'},
+    {"group": "adrc-mechanisms",
+     "test-filter": '--tests "yams.core.motorcontrollers.ADRCMechanismTest"'},
     # Everything else: swerve config tests, the battery, motor and double jointed arm simulation unit
     # tests, and the math tests. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.
@@ -114,7 +136,8 @@ JAVA_GROUPS = [
      "test-filter": '--tests "yams.core.mechanisms.*"'
                     ' --tests "yams.core.motorcontrollers.simulation.*"'
                     ' --tests "yams.core.math.*"'
-                    ' --tests "yams.ChineseRemainderTheoremTest"'},
+                    ' --tests "yams.ChineseRemainderTheoremTest"'
+                    ' --tests "yams.commands2.mechanisms.RunToSupplierTest"'},
 ]
 
 # C++ unit test groups: the same groups as the Java unit tests, for the groups the C++ tests cover.
@@ -129,22 +152,33 @@ CPP_GROUPS = [
     # Motor controller unit tests: the parity and regression tests of each vendor's wrapper. Add new
     # motor controller tags here and to the exclusions of the other group.
     {"group": "motor-controllers",
-     "catch-filter": "[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[TalonApi]"},
+     "catch-filter": "[SMCParity],[SMCRegression],[SparkParity],[NovaParity],[A301Parity],[TalonApi]"},
     # The Talon parity tests wait on simulated Talons and CANcoders, which Phoenix runs in real time,
     # so they can time out on a busy runner: they run on their own.
     {"group": "talon-parity", "catch-filter": "[TalonParity]"},
+    # How followers are simulated: A301s following an A301, and a motor controller's loosely coupled
+    # followers in its mechanism's motor model.
+    {"group": "follower-simulation", "catch-filter": "[FollowerSimulation]"},
+    # An ADRC, written by FRC Team 8331, closing an arm's and a pivot's angle, an elevator's height and
+    # a flywheel's speed on every motor controller, and live tuning it on every motor controller. They
+    # simulate Talons in real time, so they run on their own.
+    {"group": "adrc-closed-loop", "catch-filter": "[ADRCClosedLoop],[ADRCLiveTuning]"},
     # Everything else: the math tests. New tags run here unless they get their own group and are
     # excluded.
     {"group": "other",
      "catch-filter": "~[ArmTest]~[ElevatorTest]~[PivotTest]~[ShooterTest]~[SwerveDriveTest]"
                      "~[SwerveInputStreamTelemetryTest]~[SMCParity]~[SMCRegression]~[SparkParity]"
-                     "~[NovaParity]~[TalonApi]~[TalonParity]"},
+                     "~[NovaParity]~[A301Parity]~[TalonApi]~[TalonParity]~[FollowerSimulation]"
+                     "~[ADRCClosedLoop]~[ADRCLiveTuning]"},
 ]
 
 JAVA_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "mechanism-limits", "hard-stops",
-                         "loose-followers", "live-tuning", "swerve-drive", "double-jointed-arm", "other"}
+                         "loose-followers", "follower-simulation", "vendor-simulation",
+                         "live-tuning", "swerve-drive", "double-jointed-arm", "adrc-mechanisms",
+                         "other"}
 JAVA_SWERVE_GROUPS = {"swerve-drive", "other"}
-CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "swerve-drive", "other"}
+CPP_MECHANISM_GROUPS = {"arm", "elevator", "pivot", "shooter", "follower-simulation",
+                        "swerve-drive", "adrc-closed-loop", "other"}
 
 JAVA_SOURCE = "yams/java/"
 JAVA_TESTS = "vendordep/src/test/java/"
@@ -152,7 +186,8 @@ CPP_SOURCE = "yams/cpp/"
 CPP_TESTS = "vendordep/src/test/native/cpp/"
 
 # Changed files that run every group.
-CI = [".github/workflows/ci.yml", ".github/scripts/select_test_groups.py"]
+CI = [".github/workflows/ci.yml", ".github/scripts/select_test_groups.py",
+      ".github/scripts/test_summary.py"]
 
 # Changed files that affect no unit test.
 NO_TESTS = ["*.md", "docs/*", "examples/*", "vendordep/README.md"]

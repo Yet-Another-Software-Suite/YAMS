@@ -34,6 +34,7 @@
 #include <wpi/units/voltage.hpp>
 
 #include "yams/gearing/MechanismGearing.hpp"
+#include "yams/math/ADRCConfig.hpp"
 #include "yams/math/LQRConfig.hpp"
 
 namespace yams::motorcontrollers {
@@ -72,6 +73,9 @@ class SmartMotorControllerConfig {
   enum class TelemetryVerbosity { NONE, LOW, MEDIUM, HIGH };
   /** Which PID/feedforward gain slot to use (hardware-level slot selection). */
   enum class ClosedLoopControllerSlot { SLOT_0, SLOT_1, SLOT_2, SLOT_3 };
+
+  /** Construct an empty config, and report YAMS usage to the HAL as the Java config does. */
+  SmartMotorControllerConfig();
 
   // ---- Feedback -------------------------------------------------------
 
@@ -264,6 +268,37 @@ class SmartMotorControllerConfig {
    */
   SmartMotorControllerConfig& WithLQR(
       const math::LQRConfig& lqrConfig,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  // ---- ADRC --------------------------------------------------------------
+
+  /**
+   * Use an active disturbance rejection controller as the closed loop controller for a slot. It takes the place of
+   * the slot's PID and feedforward: the mechanism keeps calling SetPosition and SetVelocity, and the motor controller
+   * runs the ADRC on its closed loop thread.
+   *
+   * The ADRC's observer estimates what a feedforward models, so this removes the slot's PID, LQR and feedforwards,
+   * and their simulation overrides. While a slot has an ADRC, its feedforward getters return empty. Setting a PID or
+   * an LQR on the slot afterwards removes the ADRC.
+   *
+   * <b>The active disturbance rejection controller was written by FRC Team 8331</b>, who contributed it to YAMS.
+   *
+   * @param adrcConfig ADRC configuration. The motor config keeps its own copy, which GetADRCController returns and
+   *                   live tuning changes.
+   * @param slot       Gain slot (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithADRCController(
+      const math::ADRCConfig& adrcConfig,
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
+
+  /**
+   * Remove the ADRC from a slot.
+   *
+   * @param slot Gain slot (default SLOT_0).
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithoutADRCController(
       ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0);
 
   /**
@@ -499,7 +534,9 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithOpenLoopRampRate(wpi::units::second_t rampRate);
 
   /**
-   * Set the closed-loop output ramp rate.
+   * Set the closed-loop output ramp rate. A closed loop the motor controller runs uses its own ramp. A closed loop the
+   * SystemCore runs, such as an LQR or an ADRC, sends the motor controller a voltage, which it treats as open loop, so
+   * YAMS ramps that loop's output itself, by 12 V per ramp rate.
    *
    * @param rampRate Time to ramp from 0 to full output.
    * @return *this for chaining.
@@ -540,7 +577,7 @@ class SmartMotorControllerConfig {
    *       of `SyncCANdiPWM1`, `RemoteCANdiPWM1`, `SyncCANdiPWM2`, or
    *       `RemoteCANdiPWM2` via a vendor config so that ApplyConfig() knows which
    *       PWM channel to configure. Without this, offset, inversion, and
-   *       discontinuity-point settings will not be applied to either channel.
+   *       continuous wrapping settings will not be applied to either channel.
    *
    * @param encoder External encoder hardware object pointer.
    * @return *this for chaining.
@@ -614,19 +651,20 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithExternalEncoderGearing(double reductionRatio);
 
   /**
-   * Set the discontinuity point for absolute encoder wrapping.
+   * Set the wrapping range: an absolute external encoder reads angles in it, from @p min up to
+   * @p max. The closed loop controller does not wrap, so it never takes the mechanism the other way
+   * round; use WithContinuousWrapping() for that.
    *
-   * Must be exactly 0.5_tr (encoder reads [−0.5, 0.5]) or 1_tr (reads [0, 1]).
-   * Throws SmartMotorControllerConfigurationException otherwise.
-   *
-   * @param discontinuityPoint Wrap-around point (0.5 or 1 turns).
+   * @param min Bottom of the wrapping range (turns).
+   * @param max Top of the wrapping range (turns), one rotation above @p min.
    * @return *this for chaining.
    */
-  SmartMotorControllerConfig& WithExternalEncoderDiscontinuityPoint(
-      wpi::units::turn_t discontinuityPoint);
+  SmartMotorControllerConfig& WithWrapping(wpi::units::turn_t min, wpi::units::turn_t max);
 
   /**
-   * Enable continuous position wrapping for the closed-loop controller.
+   * Enable continuous position wrapping for the closed-loop controller: the wrapping range, as
+   * WithWrapping(), and the closed loop controller wraps over it, taking the shortest path to a
+   * setpoint.
    *
    * Throws SmartMotorControllerConfigurationException if soft limits or a linear closed-loop
    * controller are already configured, or if no PID or LQR controller is configured.
@@ -838,6 +876,17 @@ class SmartMotorControllerConfig {
   SmartMotorControllerConfig& WithMOI(wpi::units::meter_t length, wpi::units::kilogram_t mass);
 
   /**
+   * Set the moment of inertia of a wheel, roller or flywheel for simulation: a solid disk of the
+   * given diameter and mass spinning about its center (1/2 * mass * radius²). The length and mass
+   * WithMOI overload is for arms, and gives about three times this for the same size.
+   *
+   * @param diameter Wheel diameter.
+   * @param mass     Mass of the wheel, including anything that spins with it.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerConfig& WithWheelMOI(wpi::units::meter_t diameter, wpi::units::kilogram_t mass);
+
+  /**
    * Set the starting mechanism position (seeds the encoder and sim objects on init).
    *
    * Throws std::invalid_argument if WithStartingPosition(meter_t) was already called.
@@ -1023,6 +1072,16 @@ class SmartMotorControllerConfig {
   std::optional<math::LQRConfig> GetLQR(ClosedLoopControllerSlot slot) const;
 
   /**
+   * Get the ADRC configuration of a slot. It is this config's own instance, shared with the controller built from it,
+   * so changing it, as live tuning does, changes what the controller runs.
+   *
+   * @param slot Gain slot (default SLOT_0).
+   * @return The ADRC config, or null if the slot has none.
+   */
+  std::shared_ptr<math::ADRCConfig> GetADRCController(
+      ClosedLoopControllerSlot slot = ClosedLoopControllerSlot::SLOT_0) const;
+
+  /**
    * Get the proportional gain for the specified slot.
    *
    * @param slot Gain slot to query (default SLOT_0).
@@ -1062,11 +1121,16 @@ class SmartMotorControllerConfig {
   /** @return Optional upper linear soft limit. */
   std::optional<wpi::units::meter_t> GetMeasurementUpperLimit() const;
 
-  /** @return Optional upper continuous wrapping bound (turns). Erases ContinuousWrapping tracking.
+  /** @return Optional top of the wrapping range (turns). Erases ContinuousWrapping tracking. */
+  std::optional<wpi::units::turn_t> GetWrappingMax() const;
+  /** @return Optional bottom of the wrapping range (turns). */
+  std::optional<wpi::units::turn_t> GetWrappingMin() const;
+  /**
+   * @return Whether the closed loop controller wraps continuously over the wrapping range, taking
+   *         the shortest path to a setpoint, as WithContinuousWrapping() sets. Throws
+   *         SmartMotorControllerConfigurationException if soft limits are also configured.
    */
-  std::optional<wpi::units::turn_t> GetContinuousWrapping() const;
-  /** @return Optional lower continuous wrapping bound (turns). */
-  std::optional<wpi::units::turn_t> GetContinuousWrappingMin() const;
+  bool IsWrappingContinuous() const;
 
   /**
    * Get the position setpoint to command with continuous wrapping: the angle equivalent to
@@ -1074,8 +1138,8 @@ class SmartMotorControllerConfig {
    *
    * @param setpoint Mechanism angle to go to.
    * @param current  Current mechanism angle.
-   * @return The equivalent setpoint nearest @p current, or @p setpoint unchanged when continuous
-   *         wrapping is not configured.
+   * @return The equivalent setpoint nearest @p current, or @p setpoint unchanged when the wrapping
+   *         is not continuous.
    */
   wpi::units::turn_t GetContinuousWrappingSetpoint(wpi::units::turn_t setpoint,
                                                    wpi::units::turn_t current) const;
@@ -1145,6 +1209,11 @@ class SmartMotorControllerConfig {
   wpi::units::second_t GetSimulationPeriod() const;
   /** @return Moment of inertia for simulation (kg·m²). */
   wpi::units::kilogram_square_meter_t GetMOI() const;
+  /**
+   * @return Whether a moment of inertia was set (WithMOI, WithWheelMOI or an exponential profile with one), so an ADRC
+   *         can derive its b0 from it instead of the placeholder.
+   */
+  bool IsMomentOfInertiaConfigured() const;
   /** @return Optional starting mechanism position (turns). */
   std::optional<wpi::units::turn_t> GetStartingPosition() const;
   /** @return Optional vendor-specific hardware config (set via WithVendorConfig). */
@@ -1172,8 +1241,6 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> GetExternalEncoderZeroOffset() const;
   /** @return Optional external encoder gearing. */
   const std::optional<gearing::MechanismGearing>& GetExternalEncoderGearing() const;
-  /** @return Optional external encoder discontinuity point (turns). */
-  std::optional<wpi::units::turn_t> GetExternalEncoderDiscontinuityPoint() const;
 
   /** @return true if a trapezoidal motion profile is configured. */
   bool HasTrapezoidProfile() const;
@@ -1344,7 +1411,6 @@ class SmartMotorControllerConfig {
   };
   enum class ExternalEncoderOptions {
     ZeroOffset,
-    DiscontinuityPoint,
     UseExternalFeedback,
     ExternalGearing,
     ExternalEncoderInverted,
@@ -1358,8 +1424,30 @@ class SmartMotorControllerConfig {
   double ForceToRotorTorque(wpi::units::newton_t feedforwardForce) const;
   /** Throw SmartMotorControllerConfigurationException if no circumference is configured. */
   void RequireCircumference(const std::string& action) const;
-  /** @return true if any slot has PID gains or an LQR configured. */
+  /** @return true if any slot has PID gains, an LQR or an ADRC configured. */
   bool HasClosedLoopController() const;
+
+  /**
+   * A slot's ADRC config, shared with the controller built from it. Copying the motor config copies it deeply, so a
+   * copy's ADRC is tuned on its own, as in Java.
+   */
+  struct ADRCSlot {
+    std::shared_ptr<math::ADRCConfig> config;  ///< The ADRC config, or null when the slot has none.
+    ADRCSlot() = default;
+    /** Deep copy. */
+    ADRCSlot(const ADRCSlot& other)
+        : config{other.config ? std::make_shared<math::ADRCConfig>(*other.config) : nullptr} {}
+    /** Deep copy. */
+    ADRCSlot& operator=(const ADRCSlot& other) {
+      if (this != &other) config = other.config ? std::make_shared<math::ADRCConfig>(*other.config) : nullptr;
+      return *this;
+    }
+    ADRCSlot(ADRCSlot&&) = default;
+    ADRCSlot& operator=(ADRCSlot&&) = default;
+  };
+  ADRCSlot m_adrc[kNumSlots];
+  /** Whether a moment of inertia was set, not the placeholder. */
+  bool m_momentOfInertiaConfigured{false};
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {
@@ -1399,8 +1487,10 @@ class SmartMotorControllerConfig {
   std::optional<wpi::units::turn_t> m_feedbackSynchronizationThreshold;
   std::optional<wpi::units::turn_t> m_closedLoopTolerance;
   bool m_resetPreviousConfig{true};
-  std::optional<wpi::units::turn_t> m_continuousWrappingMin;
-  std::optional<wpi::units::turn_t> m_continuousWrappingMax;
+  std::optional<wpi::units::turn_t> m_wrappingMin;
+  std::optional<wpi::units::turn_t> m_wrappingMax;
+  /** Whether the closed loop controller wraps continuously over the wrapping range. */
+  bool m_wrappingContinuous{false};
 
   // Control behaviour
   ControlMode m_controlMode{ControlMode::CLOSED_LOOP};
@@ -1425,7 +1515,6 @@ class SmartMotorControllerConfig {
   std::optional<double> m_externalEncoderConversionFactor;
   std::optional<wpi::units::turn_t> m_externalEncoderZeroOffset;
   std::optional<gearing::MechanismGearing> m_externalEncoderGearing;
-  std::optional<wpi::units::turn_t> m_externalEncoderDiscontinuityPoint;
 
   // Telemetry
   std::optional<std::string> m_telemetryName;

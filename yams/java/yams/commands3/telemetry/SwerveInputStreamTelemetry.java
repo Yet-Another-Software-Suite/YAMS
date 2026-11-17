@@ -7,28 +7,20 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoublePredicate;
-import java.util.function.DoubleSupplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
-import org.wpilib.networktables.BooleanEntry;
-import org.wpilib.networktables.BooleanPublisher;
-import org.wpilib.networktables.DoubleEntry;
-import org.wpilib.networktables.DoublePublisher;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
-import org.wpilib.networktables.PubSub;
-import org.wpilib.networktables.StringPublisher;
 import org.wpilib.tunable.Tunables;
-import org.wpilib.units.measure.Angle;
 import yams.commands3.swerve.SwerveInputStream;
+import yams.core.telemetry.BooleanTelemetry;
+import yams.core.telemetry.DoubleTelemetry;
 import yams.core.telemetry.NetworkTablesBackends;
+import yams.core.telemetry.StringTelemetry;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 
 /**
@@ -46,25 +38,26 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *   every loop while it runs.</li>
  * </ul>
  *
+ * <p>Each value is a {@link DoubleTelemetryField}, {@link BooleanTelemetryField} or {@link StringTelemetryField}, which
+ * gives its key and whether it is tunable.
+ *
  * <p>While live tuning, values stay in sync both ways: a dashboard edit is applied to the stream, and a change made in
  * code, e.g. a binding that changes the translation scale, is published to the dashboard. Invalid dashboard values are
  * replaced with the stream's current value.
  */
 public class SwerveInputStreamTelemetry implements AutoCloseable {
   /** Stream to monitor and tune. */
-  private final SwerveInputStream      stream;
-  /** Current drive mode publisher. */
-  private final StringPublisher        modePublisher;
-  /** Read-only configuration, published at {@link TelemetryVerbosity#MID} and above. */
-  private final List<Runnable>         configPublishers = new ArrayList<>();
-  /** NetworkTables publishers to close with this telemetry. */
-  private final List<PubSub>           pubSubs          = new ArrayList<>();
-  /** Editable configuration, at {@link TelemetryVerbosity#HIGH}. */
-  private final List<TunableValue>     tunableValues    = new ArrayList<>();
+  private final SwerveInputStream                                                   stream;
+  /** Double telemetry fields that will be outputted. */
+  private final Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>    doubleFields = new EnumMap<>(DoubleTelemetryField.class);
+  /** Boolean telemetry fields that will be outputted. */
+  private final Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> boolFields   = new EnumMap<>(BooleanTelemetryField.class);
+  /** String telemetry fields that will be outputted. */
+  private final Map<StringTelemetryField, StringTelemetry<StringTelemetryField>>    stringFields = new EnumMap<>(StringTelemetryField.class);
   /** Command that applies the editable configuration while it runs, at {@link TelemetryVerbosity#HIGH}. */
-  private final Optional<Command>      liveTuningCommand;
+  private final Optional<Command>                                                   liveTuningCommand;
   /** Path {@link #liveTuningCommand} is published to with {@link Tunables}. */
-  private final String                 liveTuningPath;
+  private final String                                                              liveTuningPath;
 
   /**
    * Publish telemetry for a {@link SwerveInputStream}. Use
@@ -78,16 +71,68 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
     this.stream = Objects.requireNonNull(stream, "stream cannot be null");
     Objects.requireNonNull(name, "name cannot be null");
     Objects.requireNonNull(verbosity, "verbosity cannot be null");
-    NetworkTableInstance instance = NetworkTableInstance.getDefault();
-    NetworkTable dataTable = instance.getTable("SwerveInputStream").getSubTable(name);
-    modePublisher = track(dataTable.getStringTopic("mode").publish());
-    liveTuningPath = "Tuning/SwerveInputStream/" + name + "/Live Tuning";
-
-    if (verbosity != TelemetryVerbosity.LOW) {
-      publishConfig(dataTable);
+    for (DoubleTelemetryField field : DoubleTelemetryField.values()) {
+      doubleFields.put(field, field.create());
     }
+    for (BooleanTelemetryField field : BooleanTelemetryField.values()) {
+      boolFields.put(field, field.create());
+    }
+    for (StringTelemetryField field : StringTelemetryField.values()) {
+      stringFields.put(field, field.create());
+    }
+    switch (verbosity) {
+      case HIGH:
+        doubleFields.get(DoubleTelemetryField.TunableDeadband).enable();
+        doubleFields.get(DoubleTelemetryField.TunableTranslationScale).enable();
+        doubleFields.get(DoubleTelemetryField.TunableRotationScale).enable();
+        doubleFields.get(DoubleTelemetryField.TunableMaxLinearVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.TunableMaxAngularVelocity).enable();
+        boolFields.get(BooleanTelemetryField.TunableTranslationCube).enable();
+        boolFields.get(BooleanTelemetryField.TunableRotationCube).enable();
+        boolFields.get(BooleanTelemetryField.TunableAllianceRelative).enable();
+        boolFields.get(BooleanTelemetryField.TunableRobotRelative).enable();
+      case MID:
+        doubleFields.get(DoubleTelemetryField.Deadband).enable();
+        doubleFields.get(DoubleTelemetryField.TranslationScale).enable();
+        doubleFields.get(DoubleTelemetryField.RotationScale).enable();
+        doubleFields.get(DoubleTelemetryField.MaxLinearVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.MaxAngularVelocity).enable();
+        doubleFields.get(DoubleTelemetryField.RotationControllerMeasurement).enable();
+        doubleFields.get(DoubleTelemetryField.RotationControllerSetpoint).enable();
+        boolFields.get(BooleanTelemetryField.TranslationCube).enable();
+        boolFields.get(BooleanTelemetryField.RotationCube).enable();
+        boolFields.get(BooleanTelemetryField.AllianceRelative).enable();
+        boolFields.get(BooleanTelemetryField.RobotRelative).enable();
+      case LOW:
+        stringFields.get(StringTelemetryField.Mode).enable();
+    }
+
+    NetworkTableInstance instance    = NetworkTableInstance.getDefault();
+    NetworkTable         dataTable   = instance.getTable("SwerveInputStream").getSubTable(name);
+    NetworkTable         tuningTable = instance.getTable("Tuning").getSubTable("SwerveInputStream").getSubTable(name);
+    for (DoubleTelemetry<DoubleTelemetryField> dt : doubleFields.values()) {
+      if (dt.isEnabled()) {
+        dt.setupNetworkTables(dataTable, tuningTable);
+        // Skip a value an earlier telemetry left on the dashboard, so the stream's own value is published instead.
+        dt.tunable();
+      }
+    }
+    for (BooleanTelemetry<BooleanTelemetryField> bt : boolFields.values()) {
+      if (bt.isEnabled()) {
+        bt.setupNetworkTables(dataTable, tuningTable);
+        bt.tunable();
+      }
+    }
+    for (StringTelemetry<StringTelemetryField> st : stringFields.values()) {
+      if (st.isEnabled()) {
+        st.setupNetworkTables(dataTable, tuningTable);
+      }
+    }
+
+    liveTuningPath = "Tuning/SwerveInputStream/" + name + "/Live Tuning";
     if (verbosity == TelemetryVerbosity.HIGH) {
-      addTunableValues(instance.getTable("Tuning").getSubTable("SwerveInputStream").getSubTable(name));
+      // Publish the stream's values to the Tuning table.
+      applyTuningValues();
       // No requirements, so tuning does not interrupt the command driving with the stream.
       Command command = Command.noRequirements(coroutine -> {
         while (true) {
@@ -109,9 +154,46 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
    * {@link SwerveInputStream#get()}.
    */
   public void updateTelemetry() {
-    modePublisher.set(stream.getCurrentModeName());
-    for (Runnable publisher : configPublishers) {
-      publisher.run();
+    for (StringTelemetry<StringTelemetryField> st : stringFields.values()) {
+      if (!st.isEnabled()) {
+        continue;
+      }
+      switch (st.getField()) {
+        case Mode -> st.set(stream.getCurrentModeName());
+      }
+    }
+    for (DoubleTelemetry<DoubleTelemetryField> dt : doubleFields.values()) {
+      if (!dt.isEnabled()) {
+        continue;
+      }
+      switch (dt.getField()) {
+        case Deadband -> dt.set(stream.getAxisDeadband());
+        case TranslationScale -> dt.set(stream.getTranslationAxisScale());
+        case RotationScale -> dt.set(stream.getOmegaAxisScale());
+        case MaxLinearVelocity -> dt.set(stream.getMaximumChassisLinearVelocity().in(MetersPerSecond));
+        case MaxAngularVelocity -> dt.set(stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond));
+        case RotationControllerMeasurement ->
+            dt.set(stream.getRotationControllerMeasurement().map(angle -> angle.in(Radians)).orElse(Double.NaN));
+        case RotationControllerSetpoint ->
+            dt.set(stream.getRotationControllerSetpoint().map(angle -> angle.in(Radians)).orElse(Double.NaN));
+        default -> {
+          // Tunable fields are published by applyTuningValues.
+        }
+      }
+    }
+    for (BooleanTelemetry<BooleanTelemetryField> bt : boolFields.values()) {
+      if (!bt.isEnabled()) {
+        continue;
+      }
+      switch (bt.getField()) {
+        case TranslationCube -> bt.set(stream.isTranslationCubeEnabled());
+        case RotationCube -> bt.set(stream.isOmegaCubeEnabled());
+        case AllianceRelative -> bt.set(stream.isAllianceRelativeEnabled());
+        case RobotRelative -> bt.set(stream.isRobotRelativeEnabled());
+        default -> {
+          // Tunable fields are published by applyTuningValues.
+        }
+      }
     }
   }
 
@@ -121,8 +203,79 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
    * {@link TelemetryVerbosity#HIGH}.
    */
   public void applyTuningValues() {
-    for (TunableValue value : tunableValues) {
-      value.update();
+    for (DoubleTelemetry<DoubleTelemetryField> dt : doubleFields.values()) {
+      if (!dt.isEnabled()) {
+        continue;
+      }
+      switch (dt.getField()) {
+        case TunableDeadband -> {
+          if (dt.tunable() && dt.get() >= 0.0 && dt.get() < 1.0) {
+            stream.setAxisDeadband(dt.get());
+          }
+          publishStreamValue(dt, stream.getAxisDeadband());
+        }
+        case TunableTranslationScale -> {
+          if (dt.tunable() && dt.get() > 0.0 && dt.get() <= 1.0) {
+            stream.setTranslationAxisScale(dt.get());
+          }
+          publishStreamValue(dt, stream.getTranslationAxisScale());
+        }
+        case TunableRotationScale -> {
+          if (dt.tunable() && dt.get() > 0.0 && dt.get() <= 1.0) {
+            stream.setOmegaAxisScale(dt.get());
+          }
+          publishStreamValue(dt, stream.getOmegaAxisScale());
+        }
+        case TunableMaxLinearVelocity -> {
+          if (dt.tunable() && dt.get() > 0.0 && Double.isFinite(dt.get())) {
+            stream.setMaximumChassisLinearVelocity(MetersPerSecond.of(dt.get()));
+          }
+          publishStreamValue(dt, stream.getMaximumChassisLinearVelocity().in(MetersPerSecond));
+        }
+        case TunableMaxAngularVelocity -> {
+          if (dt.tunable() && dt.get() > 0.0 && Double.isFinite(dt.get())) {
+            stream.setMaximumChassisAngularVelocity(RadiansPerSecond.of(dt.get()));
+          }
+          publishStreamValue(dt, stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond));
+        }
+        default -> {
+          // Read-only fields are published by updateTelemetry.
+        }
+      }
+    }
+    for (BooleanTelemetry<BooleanTelemetryField> bt : boolFields.values()) {
+      if (!bt.isEnabled()) {
+        continue;
+      }
+      switch (bt.getField()) {
+        case TunableTranslationCube -> {
+          if (bt.tunable()) {
+            stream.setTranslationCubeEnabled(bt.get());
+          }
+          publishStreamValue(bt, stream.isTranslationCubeEnabled());
+        }
+        case TunableRotationCube -> {
+          if (bt.tunable()) {
+            stream.setOmegaCubeEnabled(bt.get());
+          }
+          publishStreamValue(bt, stream.isOmegaCubeEnabled());
+        }
+        case TunableAllianceRelative -> {
+          if (bt.tunable()) {
+            stream.setAllianceRelativeEnabled(bt.get());
+          }
+          publishStreamValue(bt, stream.isAllianceRelativeEnabled());
+        }
+        case TunableRobotRelative -> {
+          if (bt.tunable()) {
+            stream.setRobotRelativeEnabled(bt.get());
+          }
+          publishStreamValue(bt, stream.isRobotRelativeEnabled());
+        }
+        default -> {
+          // Read-only fields are published by updateTelemetry.
+        }
+      }
     }
   }
 
@@ -142,192 +295,193 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
       Scheduler.getDefault().cancel(command);
       Tunables.remove(liveTuningPath);
     });
-    for (TunableValue value : tunableValues) {
-      value.close();
+    for (DoubleTelemetry<DoubleTelemetryField> dt : doubleFields.values()) {
+      dt.close();
     }
-    for (PubSub pubSub : pubSubs) {
-      pubSub.close();
+    for (BooleanTelemetry<BooleanTelemetryField> bt : boolFields.values()) {
+      bt.close();
+    }
+    for (StringTelemetry<StringTelemetryField> st : stringFields.values()) {
+      st.close();
     }
   }
 
-  private <T extends PubSub> T track(T pubSub) {
-    pubSubs.add(pubSub);
-    return pubSub;
+  /**
+   * Publish the stream's value of a tunable field if the dashboard shows another, as after a change made in code or an
+   * invalid edit. The change is marked as seen, so it isn't applied back to the stream as a dashboard edit.
+   *
+   * @param dt          Tunable field.
+   * @param streamValue The stream's value.
+   */
+  private static void publishStreamValue(DoubleTelemetry<DoubleTelemetryField> dt, double streamValue) {
+    if (dt.get() != streamValue) {
+      dt.forceSet(streamValue);
+      dt.tunable();
+    }
   }
 
-  private void publishConfig(NetworkTable table) {
-    publishDouble(table, "deadband", stream::getAxisDeadband);
-    publishDouble(table, "translationScale", stream::getTranslationAxisScale);
-    publishDouble(table, "rotationScale", stream::getOmegaAxisScale);
-    publishDouble(table, "maxLinearVelocity", () -> stream.getMaximumChassisLinearVelocity().in(MetersPerSecond));
-    publishDouble(table, "maxAngularVelocity", () -> stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond));
-    publishBoolean(table, "translationCube", stream::isTranslationCubeEnabled);
-    publishBoolean(table, "rotationCube", stream::isOmegaCubeEnabled);
-    publishBoolean(table, "allianceRelative", stream::isAllianceRelativeEnabled);
-    publishBoolean(table, "robotRelative", stream::isRobotRelativeEnabled);
-    NetworkTable rotationController = table.getSubTable("rotationController");
-    publishDouble(rotationController, "measurement", () -> radiansOrNaN(stream.getRotationControllerMeasurement()));
-    publishDouble(rotationController, "setpoint", () -> radiansOrNaN(stream.getRotationControllerSetpoint()));
+  /**
+   * Publish the stream's value of a tunable field if the dashboard shows another, as after a change made in code. The
+   * change is marked as seen, so it isn't applied back to the stream as a dashboard edit.
+   *
+   * @param bt          Tunable field.
+   * @param streamValue The stream's value.
+   */
+  private static void publishStreamValue(BooleanTelemetry<BooleanTelemetryField> bt, boolean streamValue) {
+    if (bt.get() != streamValue) {
+      bt.forceSet(streamValue);
+      bt.tunable();
+    }
   }
 
-  private static double radiansOrNaN(Optional<Angle> angle) {
-    return angle.map(value -> value.in(Radians)).orElse(Double.NaN);
-  }
+  /** Double telemetry field for {@link SwerveInputStream}s. */
+  public enum DoubleTelemetryField {
+    /** Joystick axis deadband. */
+    Deadband("deadband", 0, false, "none"),
+    /** Translation axis scale. */
+    TranslationScale("translationScale", 1, false, "none"),
+    /** Rotation axis scale. */
+    RotationScale("rotationScale", 1, false, "none"),
+    /** Maximum chassis linear velocity, in meters per second. */
+    MaxLinearVelocity("maxLinearVelocity", 0, false, "meters_per_second"),
+    /** Maximum chassis angular velocity, in radians per second. */
+    MaxAngularVelocity("maxAngularVelocity", 0, false, "radians_per_second"),
+    /**
+     * Heading given to the rotation controller as its measurement, in radians in the gyro's frame. {@code NaN} while
+     * the stream isn't using the controller.
+     */
+    RotationControllerMeasurement("rotationController/measurement", Double.NaN, false, "radians"),
+    /**
+     * Heading given to the rotation controller as its setpoint, in radians in the gyro's frame. {@code NaN} while the
+     * stream isn't using the controller.
+     */
+    RotationControllerSetpoint("rotationController/setpoint", Double.NaN, false, "radians"),
+    /** Tunable joystick axis deadband, from 0 up to but not including 1. */
+    TunableDeadband("deadband", 0, true, "none"),
+    /** Tunable translation axis scale, above 0 and up to 1. */
+    TunableTranslationScale("translationScale", 1, true, "none"),
+    /** Tunable rotation axis scale, above 0 and up to 1. */
+    TunableRotationScale("rotationScale", 1, true, "none"),
+    /** Tunable maximum chassis linear velocity, in meters per second. */
+    TunableMaxLinearVelocity("maxLinearVelocity", 0, true, "meters_per_second"),
+    /** Tunable maximum chassis angular velocity, in radians per second. */
+    TunableMaxAngularVelocity("maxAngularVelocity", 0, true, "radians_per_second");
 
-  private void publishDouble(NetworkTable table, String key, DoubleSupplier value) {
-    DoublePublisher publisher = track(table.getDoubleTopic(key).publish());
-    configPublishers.add(() -> publisher.set(value.getAsDouble()));
-  }
-
-  private void publishBoolean(NetworkTable table, String key, BooleanSupplier value) {
-    BooleanPublisher publisher = track(table.getBooleanTopic(key).publish());
-    configPublishers.add(() -> publisher.set(value.getAsBoolean()));
-  }
-
-  private void addTunableValues(NetworkTable table) {
-    tunableValues.add(new TunableDouble(table, "deadband",
-                                        stream::getAxisDeadband, stream::setAxisDeadband,
-                                        value -> value >= 0.0 && value < 1.0));
-    tunableValues.add(new TunableDouble(table, "translationScale",
-                                        stream::getTranslationAxisScale, stream::setTranslationAxisScale,
-                                        value -> value > 0.0 && value <= 1.0));
-    tunableValues.add(new TunableDouble(table, "rotationScale",
-                                        stream::getOmegaAxisScale, stream::setOmegaAxisScale,
-                                        value -> value > 0.0 && value <= 1.0));
-    tunableValues.add(new TunableDouble(table, "maxLinearVelocity",
-                                        () -> stream.getMaximumChassisLinearVelocity().in(MetersPerSecond),
-                                        value -> stream.setMaximumChassisLinearVelocity(MetersPerSecond.of(value)),
-                                        value -> value > 0.0 && Double.isFinite(value)));
-    tunableValues.add(new TunableDouble(table, "maxAngularVelocity",
-                                        () -> stream.getMaximumChassisAngularVelocity().in(RadiansPerSecond),
-                                        value -> stream.setMaximumChassisAngularVelocity(RadiansPerSecond.of(value)),
-                                        value -> value > 0.0 && Double.isFinite(value)));
-    tunableValues.add(new TunableBoolean(table, "translationCube",
-                                         stream::isTranslationCubeEnabled, stream::setTranslationCubeEnabled));
-    tunableValues.add(new TunableBoolean(table, "rotationCube",
-                                         stream::isOmegaCubeEnabled, stream::setOmegaCubeEnabled));
-    tunableValues.add(new TunableBoolean(table, "allianceRelative",
-                                         stream::isAllianceRelativeEnabled, stream::setAllianceRelativeEnabled));
-    tunableValues.add(new TunableBoolean(table, "robotRelative",
-                                         stream::isRobotRelativeEnabled, stream::setRobotRelativeEnabled));
-  }
-
-  /** A stream value kept in sync with a NetworkTables entry. */
-  private interface TunableValue extends AutoCloseable {
-    /** Apply a dashboard edit to the stream, or publish a change made in code. */
-    void update();
-
-    @Override
-    void close();
-  }
-
-  /** A tunable {@code double} stream value. */
-  private static final class TunableDouble implements TunableValue {
-    /** Entry the dashboard edits. */
-    private final DoubleEntry     entry;
-    /** Reads the value from the stream. */
-    private final DoubleSupplier  getter;
-    /** Applies a value to the stream. */
-    private final DoubleConsumer  setter;
-    /** Whether a dashboard value can be applied. */
-    private final DoublePredicate valid;
-    /** Value last published or applied, to tell dashboard edits apart from changes made in code. */
-    private double                lastValue;
+    /** Default value of the double telemetry field. */
+    private final double  defaultVal;
+    /** Key that the telemetry is stored at. */
+    private final String  key;
+    /** Tunable field? */
+    private final boolean tunable;
+    /** Unit of the telemetry field. */
+    private final String  unit;
 
     /**
-     * Publish a tunable {@code double} stream value.
+     * Create a double telemetry field.
      *
-     * @param table  Table to publish to.
-     * @param key    Entry key.
-     * @param getter Reads the value from the stream.
-     * @param setter Applies a value to the stream.
-     * @param valid  Whether a dashboard value can be applied.
+     * @param fieldName    NT Field Name
+     * @param defaultValue Default value
+     * @param tunable      Tunable places it only in the Tuning Table.
+     * @param unit         Unit of the telemetry field.
      */
-    TunableDouble(NetworkTable table, String key, DoubleSupplier getter, DoubleConsumer setter,
-                  DoublePredicate valid) {
-      this.getter = getter;
-      this.setter = setter;
-      this.valid = valid;
-      lastValue = getter.getAsDouble();
-      entry = table.getDoubleTopic(key).getEntry(lastValue);
-      entry.set(lastValue);
+    DoubleTelemetryField(String fieldName, double defaultValue, boolean tunable, String unit) {
+      key = fieldName;
+      defaultVal = defaultValue;
+      this.tunable = tunable;
+      this.unit = unit;
     }
 
-    @Override
-    public void update() {
-      double published = entry.get();
-      if (published != lastValue && valid.test(published)) {
-        setter.accept(published);
-      }
-      double current = getter.getAsDouble();
-      if (current != published) {
-        entry.set(current);
-      }
-      lastValue = current;
-    }
-
-    @Override
-    public void close() {
-      entry.unpublish();
-      entry.close();
+    /**
+     * Create a {@link DoubleTelemetry} object for non-static usage.
+     *
+     * @return {@link DoubleTelemetry}
+     */
+    public DoubleTelemetry<DoubleTelemetryField> create() {
+      return new DoubleTelemetry<>(key, defaultVal, this, tunable, unit);
     }
   }
 
-  /** A tunable {@code boolean} stream value. */
-  private static final class TunableBoolean implements TunableValue {
-    /** Entry the dashboard edits. */
-    private final BooleanEntry    entry;
-    /** Reads the value from the stream. */
-    private final BooleanSupplier getter;
-    /** Applies a value to the stream. */
-    private final BooleanSetter   setter;
-    /** Value last published or applied, to tell dashboard edits apart from changes made in code. */
-    private boolean               lastValue;
+  /** Boolean telemetry field for {@link SwerveInputStream}s. */
+  public enum BooleanTelemetryField {
+    /** Translation axes are cubed. */
+    TranslationCube("translationCube", false, false),
+    /** Rotation axis is cubed. */
+    RotationCube("rotationCube", false, false),
+    /** Driving is relative to the alliance. */
+    AllianceRelative("allianceRelative", false, false),
+    /** Driving is relative to the robot. */
+    RobotRelative("robotRelative", false, false),
+    /** Tunable translation axis cubing. */
+    TunableTranslationCube("translationCube", false, true),
+    /** Tunable rotation axis cubing. */
+    TunableRotationCube("rotationCube", false, true),
+    /** Tunable alliance relative driving. */
+    TunableAllianceRelative("allianceRelative", false, true),
+    /** Tunable robot relative driving. */
+    TunableRobotRelative("robotRelative", false, true);
+
+    /** Key that the telemetry is stored at. */
+    private final String  key;
+    /** Default value of the boolean telemetry field. */
+    private final boolean defaultVal;
+    /** Tunable field? */
+    private final boolean tunable;
 
     /**
-     * Publish a tunable {@code boolean} stream value.
+     * Create a boolean telemetry field.
      *
-     * @param table  Table to publish to.
-     * @param key    Entry key.
-     * @param getter Reads the value from the stream.
-     * @param setter Applies a value to the stream.
+     * @param fieldName    NT Field Name
+     * @param defaultValue Default value
+     * @param tunable      Tunable places it only in the Tuning Table.
      */
-    TunableBoolean(NetworkTable table, String key, BooleanSupplier getter, BooleanSetter setter) {
-      this.getter = getter;
-      this.setter = setter;
-      lastValue = getter.getAsBoolean();
-      entry = table.getBooleanTopic(key).getEntry(lastValue);
-      entry.set(lastValue);
+    BooleanTelemetryField(String fieldName, boolean defaultValue, boolean tunable) {
+      key = fieldName;
+      defaultVal = defaultValue;
+      this.tunable = tunable;
     }
 
-    @Override
-    public void update() {
-      boolean published = entry.get();
-      if (published != lastValue) {
-        setter.accept(published);
-      }
-      boolean current = getter.getAsBoolean();
-      if (current != published) {
-        entry.set(current);
-      }
-      lastValue = current;
-    }
-
-    @Override
-    public void close() {
-      entry.unpublish();
-      entry.close();
+    /**
+     * Create a {@link BooleanTelemetry} object for non-static usage.
+     *
+     * @return {@link BooleanTelemetry}
+     */
+    public BooleanTelemetry<BooleanTelemetryField> create() {
+      return new BooleanTelemetry<>(key, defaultVal, this, tunable);
     }
   }
 
-  /** Applies a {@code boolean} value to the stream. */
-  @FunctionalInterface
-  private interface BooleanSetter {
+  /** String telemetry field for {@link SwerveInputStream}s. */
+  public enum StringTelemetryField {
+    /** Name of the stream's current drive mode. */
+    Mode("mode", "", false);
+
+    /** Key that the telemetry is stored at. */
+    private final String  key;
+    /** Default value of the string telemetry field. */
+    private final String  defaultVal;
+    /** Tunable field? */
+    private final boolean tunable;
+
     /**
-     * Apply the value.
+     * Create a string telemetry field.
      *
-     * @param value Value to apply.
+     * @param fieldName    NT Field Name
+     * @param defaultValue Default value
+     * @param tunable      Tunable places it only in the Tuning Table.
      */
-    void accept(boolean value);
+    StringTelemetryField(String fieldName, String defaultValue, boolean tunable) {
+      key = fieldName;
+      defaultVal = defaultValue;
+      this.tunable = tunable;
+    }
+
+    /**
+     * Create a {@link StringTelemetry} object for non-static usage.
+     *
+     * @return {@link StringTelemetry}
+     */
+    public StringTelemetry<StringTelemetryField> create() {
+      return new StringTelemetry<>(key, defaultVal, this, tunable);
+    }
   }
 }

@@ -31,4 +31,15 @@ inline void TeardownHardware() {
   wpi::sim::DriverStationSim::NotifyNewData();
 }
 
+/**
+ * Enables the simulated robot for as long as it exists, then resets it. A closed loop on the
+ * SystemCore sends no voltage while the robot is disabled, so a test that runs it needs one.
+ */
+struct EnabledRobot {
+  EnabledRobot() { InitializeHardware(); }
+  ~EnabledRobot() { TeardownHardware(); }
+  EnabledRobot(const EnabledRobot&) = delete;
+  EnabledRobot& operator=(const EnabledRobot&) = delete;
+};
+
 }  // namespace yams::test

@@ -76,21 +76,23 @@ public class ShooterMechanism implements Mechanism {
       // kP=1 is a starting point; a flywheel typically needs little P because
       // SimpleMotorFeedforward carries most of the steady-state load.
       .withClosedLoopController(1, 0, 0)
-      // 10000 RPM ceiling is above the NEO free-speed (~5800 RPM) so the profile
-      // never saturates; 60 RPM/s ramp keeps the belt from jerking at spin-up.
-      .withTrapezoidalProfile(RPM.of(10000), RPM.per(Second).of(60))
-      // 3:4 box gives a 12:1 total reduction from motor to flywheel shaft.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      // 5000 RPM ceiling is below the NEO's free speed (~5600 RPM) so the profile asks for
+      // speeds the wheel can reach; 4000 RPM/s spins it up to 3000 RPM in under a second.
+      .withTrapezoidalProfile(RPM.of(5000), RPM.per(Second).of(4000))
+      // Direct drive: the NEO turns the flywheel shaft 1:1. A 12:1 reduction would cap the
+      // wheel at about 470 RPM.
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
       // COAST: letting the wheel spin down naturally avoids back-driving the gearbox.
       .withZeroPower(MotorMode.COAST)
       .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
       // 40 A stator limit prevents the NEO from melting the winding during a jam.
       .withStatorCurrentLimit(Amps.of(40))
       .withMotorInverted(false)
-      // kS/kV/kA are all zero here -- tune them with SysId before competition.
-      .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-      // MOI estimated from a 4-inch, 1-lb disk; replace with CAD value when available.
-      .withMomentOfInertia(Inches.of(4), Pounds.of(1))
+      // kV=0.127 V per rotation per second is the NEO's free speed (12 V / 94.6 rotations per
+      // second), so kP only corrects what is left. Tune kS/kV/kA with SysId before competition.
+      .withFeedforward(new SimpleMotorFeedforward(0, 0.127, 0))
+      // MOI of a 4-inch, 1-lb disk spinning about its center; replace with CAD value when available.
+      .withWheelMomentOfInertia(Inches.of(4), Pounds.of(1))
       .withControlMode(ControlMode.CLOSED_LOOP);
 
   private final SmartMotorController motor = new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);

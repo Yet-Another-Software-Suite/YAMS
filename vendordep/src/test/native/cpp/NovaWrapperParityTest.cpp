@@ -2,27 +2,38 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 // Tests for NovaWrapper behaviour, mirroring the Java reference
-// (yams/java/yams/core/motorcontrollers/local/NovaWrapper.java). The Nova's closed loop runs on
-// the SystemCore, so these tests step it with IterateClosedLoopController() and SimIterate().
+// (yams/java/yams/core/motorcontrollers/local/NovaWrapper.java). The Nova runs the closed loop,
+// in simulation in its NovaSimSupplier, so these tests step it with SimIterate().
 
 #include <thrifty/canEncoder/CanEncoder.h>
+#include <thrifty/core/MotorControl.h>
 #include <thrifty/nova/Nova.h>
 #include <thrifty/nova/NovaConfig.h>
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <any>
+#include <chrono>
+#include <cmath>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
+#include <wpi/math/controller/ArmFeedforward.hpp>
 #include <wpi/math/controller/SimpleMotorFeedforward.hpp>
 #include <wpi/math/system/DCMotor.hpp>
+#include <wpi/simulation/AlertSim.hpp>
+#include <wpi/simulation/DriverStationSim.hpp>
 #include <wpi/simulation/RoboRioSim.hpp>
 #include <wpi/units/angle.hpp>
+#include <wpi/units/angular_acceleration.hpp>
 #include <wpi/units/angular_velocity.hpp>
+#include <wpi/units/temperature.hpp>
 #include <wpi/units/time.hpp>
 #include <wpi/units/voltage.hpp>
 
@@ -31,6 +42,7 @@
 #include "yams/exceptions.hpp"
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/motorcontrollers/local/NovaWrapper.hpp"
+#include "yams/motorcontrollers/simulation/NovaSimSupplier.hpp"
 
 namespace yams::test {
 
@@ -78,12 +90,30 @@ SimpleFF MakeSimpleFF(double kS, double kV, double kA) {
                   wpi::units::unit_t<SimpleFF::ka_unit>{kA}};
 }
 
-/** Run the SystemCore closed loop and the simulation together for @p steps loops. */
-void Step(NovaWrapper& smc, int steps) {
-  for (int i = 0; i < steps; i++) {
-    smc.IterateClosedLoopController();
-    smc.SimIterate();
+/**
+ * Whether the alert that @p smc's feedforward isn't applied on the Nova, as it has no trapezoidal
+ * profile, is active.
+ */
+bool FeedforwardWithoutProfileAlert(const NovaWrapper& smc) {
+  const std::string text = smc.GetName() + " has a feedforward but no trapezoidal profile";
+  for (auto& alert : wpi::sim::AlertSim::GetActive()) {
+    if (alert.text.rfind(text, 0) == 0) return true;
   }
+  return false;
+}
+
+/** Run the simulated Nova, and its closed loop, for @p steps loops. */
+void Step(NovaWrapper& smc, int steps) {
+  for (int i = 0; i < steps; i++) smc.SimIterate();
+}
+
+/** Wait for the Nova to report a value it was configured with. */
+void CheckNova(double expected, const std::function<double()>& actual, const std::string& what) {
+  for (int i = 0; i < 50 && std::abs(actual() - expected) > 1e-6 * std::max(1.0, std::abs(expected)); i++) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  INFO(what);
+  CHECK(actual() == Catch::Approx(expected).margin(1e-6));
 }
 
 struct NovaParityFixture {
@@ -97,7 +127,11 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopConvergesInSimulation"
                  "[NovaParity]") {
   auto nova = MakeNova();
   auto cfg = BaseConfig();
-  cfg.WithFeedback(8.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.0));
+  // The Nova applies a feedforward only with a motion profile.
+  cfg.WithFeedback(8.0, 0.0, 0.0)
+      .WithFeedforward(MakeSimpleFF(0.0, 1.0, 0.0))
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                            wpi::units::turns_per_second_squared_t{2.0});
   NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
   smc.SetPosition(wpi::units::turn_t{80.0 / 360.0});
   Step(smc, 150);
@@ -199,7 +233,7 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.UnsupportedOptionsThrow", "[Nova
   }
 }
 
-TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportBelowDiscontinuityPoint",
+TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportTheWrappingRange",
                  "[NovaParity]") {
   for (const bool canEncoderUsed : {false, true}) {
     DYNAMIC_SECTION((canEncoderUsed ? "CAN encoder" : "data port absolute encoder")) {
@@ -209,10 +243,13 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.AbsoluteEncodersReportBelowDisco
       cfg.WithExternalEncoder(canEncoderUsed ? std::any{canEncoder.get()}
                                              : std::any{FeedbackSensorType::ABS})
           .WithUseExternalFeedbackEncoder(true)
-          .WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{0.5});
+          // An exponential profile runs on the SystemCore, which wraps any range.
+          .WithFeedback(1.0, 0.0, 0.0)
+          .WithExponentialProfile(1.0, 0.1, 12_V)
+          .WithContinuousWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5});
       NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
       smc.SetEncoderPosition(wpi::units::turn_t{0.7});
-      // An absolute encoder reports angles within one rotation: [-0.5, 0.5) here.
+      // An absolute encoder reports angles in the wrapping range: [-0.5, 0.5) here.
       CHECK(smc.GetMechanismPosition().value() == Catch::Approx(-0.3).margin(1e-6));
       CHECK(smc.GetExternalEncoderMechanismPosition()->value() == Catch::Approx(-0.3).margin(1e-6));
       // The motor's encoder is not wrapped.
@@ -232,6 +269,22 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ExternalEncoderGearing", "[NovaP
   // A quadrature encoder is not wrapped, and reads in mechanism rotations through its gearing.
   CHECK(smc.GetMechanismPosition().value() == Catch::Approx(3.0).margin(1e-6));
   CHECK(smc.GetRotorPosition().value() == Catch::Approx(3.0 * kRatio).margin(1e-6));
+}
+
+TEST_CASE_METHOD(NovaParityFixture, "NovaParity.CanEncoderReadsTheSimulatedMechanism",
+                 "[NovaParity]") {
+  auto nova = MakeNova();
+  auto canEncoder = MakeCanEncoder();
+  auto cfg = BaseConfig();
+  cfg.WithExternalEncoder(canEncoder.get()).WithExternalEncoderGearing(2.0);
+  NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+  smc.SetEncoderPosition(wpi::units::turn_t{0.3});
+  smc.SetEncoderVelocity(wpi::units::turns_per_second_t{1.5});
+  // In simulation, the CAN encoder reads the mechanism's sim supplier through ThriftyLib's MotorSim.
+  CHECK(canEncoder->Status().GetPositionRel() == Catch::Approx(0.6).margin(1e-6));
+  CHECK(canEncoder->Status().GetVelocity() == Catch::Approx(3.0).margin(1e-6));
+  CHECK(smc.GetExternalEncoderMechanismPosition()->value() == Catch::Approx(0.3).margin(1e-6));
+  CHECK(smc.GetExternalEncoderMechanismVelocity()->value() == Catch::Approx(1.5).margin(1e-6));
 }
 
 TEST_CASE_METHOD(NovaParityFixture, "NovaParity.StartingPosition", "[NovaParity]") {
@@ -266,7 +319,10 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.FollowersMustBeNovasAndAreCleare
 TEST_CASE_METHOD(NovaParityFixture, "NovaParity.LiveSettersUpdateConfig", "[NovaParity]") {
   auto nova = MakeNova();
   auto cfg = BaseConfig();
-  cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
+  cfg.WithFeedback(1.0, 0.0, 0.0)
+      .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0))
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                            wpi::units::turns_per_second_squared_t{2.0});
   NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
   smc.SetKp(2.5);
   smc.SetKd(0.25);
@@ -280,7 +336,226 @@ TEST_CASE_METHOD(NovaParityFixture, "NovaParity.LiveSettersUpdateConfig", "[Nova
   REQUIRE(ff.has_value());
   CHECK(ff->GetKs().value() == Catch::Approx(0.3));
   CHECK(ff->GetKv().value() == Catch::Approx(1.5));
+  // The tuned gains go to the Nova's slot 0.
+  CheckNova(2.5, [&] { return nova->Status().Pid0.GetP(); }, "kP on the Nova");
+  CheckNova(0.25, [&] { return nova->Status().Pid0.GetD(); }, "kD on the Nova");
+  CheckNova(0.3, [&] { return nova->Status().Mp0.GetKS(); }, "kS on the Nova");
+  CheckNova(1.5, [&] { return nova->Status().Mp0.GetKV(); }, "kV on the Nova");
   CHECK_THROWS_AS(smc.SetEncoderInverted(true), std::runtime_error);
+}
+
+TEST_CASE_METHOD(NovaParityFixture, "NovaParity.ClosedLoopOnTheNova", "[NovaParity]") {
+  SECTION("Gains and motion profile in mechanism rotations") {
+    auto nova = MakeNova();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(8.0, 2.0, 0.5)
+        .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.5))
+        .WithTrapezoidProfile(wpi::units::turns_per_second_t{2.0},
+                              wpi::units::turns_per_second_squared_t{4.0});
+    NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    CheckNova(kRatio, [&] { return nova->Status().GetSensorToMechanismRatio(); },
+              "motor rotations per mechanism rotation");
+    CheckNova(8.0, [&] { return nova->Status().Pid0.GetP(); }, "kP");
+    CheckNova(2.0, [&] { return nova->Status().Pid0.GetI(); }, "kI");
+    CheckNova(0.5, [&] { return nova->Status().Pid0.GetD(); }, "kD");
+    CheckNova(2.0, [&] { return nova->Status().Mp0.GetMaxVel(); }, "maximum velocity");
+    CheckNova(4.0, [&] { return nova->Status().Mp0.GetMaxAccel(); }, "maximum acceleration");
+    CheckNova(0.1, [&] { return nova->Status().Mp0.GetKS(); }, "kS");
+    CheckNova(1.0, [&] { return nova->Status().Mp0.GetKV(); }, "kV");
+    CheckNova(0.5, [&] { return nova->Status().Mp0.GetKA(); }, "kA");
+  }
+  SECTION("A feedforward without a motion profile runs on the SystemCore") {
+    // The Nova applies its motion profile slot's kS, kV, kA and kG only in a motion profile, so the
+    // SystemCore runs the loop and applies them, with an alert saying why.
+    // Each case is in its own block, so its wrapper is destroyed, clearing its alert, before the
+    // next is checked: these Novas share a name.
+    {
+      auto nova = MakeNova();
+      auto cfg = BaseConfig();
+      cfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0));
+      NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+      CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(smc));
+    }
+
+    // A feedforward of 0 too, as live tuning can change it.
+    {
+      auto zeroNova = MakeNova();
+      auto zeroCfg = BaseConfig();
+      zeroCfg.WithFeedback(1.0, 0.0, 0.0).WithFeedforward(MakeSimpleFF(0.0, 0.0, 0.0));
+      NovaWrapper zero{zeroNova.get(), wpi::math::DCMotor::NEO(1), &zeroCfg};
+      CHECK(zero.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(zero));
+    }
+
+    // And one on SLOT_1, which can be switched to later.
+    {
+      auto slot1Nova = MakeNova();
+      auto slot1Cfg = BaseConfig();
+      slot1Cfg.WithFeedback(1.0, 0.0, 0.0)
+          .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1)
+          .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.0),
+                           SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1);
+      NovaWrapper slot1{slot1Nova.get(), wpi::math::DCMotor::NEO(1), &slot1Cfg};
+      CHECK(slot1.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+      CHECK(FeedforwardWithoutProfileAlert(slot1));
+    }
+
+    // With a trapezoidal profile, the Nova runs it.
+    {
+      auto profiledNova = MakeNova();
+      auto profiledCfg = BaseConfig();
+      profiledCfg.WithFeedback(1.0, 0.0, 0.0)
+          .WithFeedforward(MakeSimpleFF(0.1, 1.0, 0.1))
+          .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                                wpi::units::turns_per_second_squared_t{2.0});
+      NovaWrapper profiled{profiledNova.get(), wpi::math::DCMotor::NEO(1), &profiledCfg};
+      CHECK(profiled.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+      CHECK_FALSE(FeedforwardWithoutProfileAlert(profiled));
+      CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKS(); }, "kS on the Nova");
+      CheckNova(0.1, [&] { return profiledNova->Status().Mp0.GetKA(); }, "kA on the Nova");
+    }
+
+    // A PID alone runs on the Nova.
+    {
+      auto pidNova = MakeNova();
+      auto pidCfg = BaseConfig();
+      pidCfg.WithFeedback(1.0, 0.0, 0.0);
+      NovaWrapper pid{pidNova.get(), wpi::math::DCMotor::NEO(1), &pidCfg};
+      CHECK(pid.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+      CHECK_FALSE(FeedforwardWithoutProfileAlert(pid));
+    }
+  }
+  SECTION("Options only the SystemCore applies") {
+    auto nova = MakeNova();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(1.0, 0.0, 0.0).WithTemperatureCutoff(wpi::units::celsius_t{70.0});
+    CHECK_THROWS_AS((NovaWrapper{nova.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+  }
+  SECTION("The tolerance is the allowable error of the slots with a PID") {
+    auto nova = MakeNova();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_1)
+        .WithClosedLoopTolerance(wpi::units::turn_t{0.025});
+    NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    CheckNova(0.025, [&] { return nova->Status().Pid0.GetAllowableError(); }, "slot 0");
+    CheckNova(0.025, [&] { return nova->Status().Pid1.GetAllowableError(); }, "slot 1");
+  }
+  SECTION("Two slots") {
+    auto nova = MakeNova();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithFeedback(1.0, 0.0, 0.0, SmartMotorControllerConfig::ClosedLoopControllerSlot::SLOT_2);
+    CHECK_THROWS_AS((NovaWrapper{nova.get(), wpi::math::DCMotor::NEO(1), &cfg}), ConfigException);
+  }
+  SECTION("Mechanism limits are the Nova's soft limits") {
+    auto nova = MakeNova();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(1.0, 0.0, 0.0).WithMechanismLimits(wpi::units::turn_t{-0.25},
+                                                        wpi::units::turn_t{0.125});
+    NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    CheckNova(1.0, [&] { return nova->Status().GetSoftLimitEnable() ? 1.0 : 0.0; }, "enabled");
+    CheckNova(0.125, [&] { return nova->Status().GetSoftLimitForward(); }, "forward limit");
+    CheckNova(-0.25, [&] { return nova->Status().GetSoftLimitReverse(); }, "reverse limit");
+  }
+  SECTION("Wrapping runs on the Nova where it can") {
+    auto nova = MakeNova();
+    auto canEncoder = MakeCanEncoder();
+    auto cfg = BaseConfig();
+    cfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(canEncoder.get())
+        .WithUseExternalFeedbackEncoder(true)
+        .WithContinuousWrapping(wpi::units::turn_t{0.0}, wpi::units::turn_t{1.0});
+    NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+    CheckNova(1.0, [&] { return nova->Status().GetAbsWrapping() ? 1.0 : 0.0; }, "wrapping");
+
+    // A Nova wraps an absolute encoder closing its loop by default.
+    auto notWrappingNova = MakeNova();
+    auto notWrappingEncoder = MakeCanEncoder();
+    auto notWrappingCfg = BaseConfig();
+    notWrappingCfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(notWrappingEncoder.get())
+        .WithUseExternalFeedbackEncoder(true);
+    NovaWrapper notWrapping{notWrappingNova.get(), wpi::math::DCMotor::NEO(1), &notWrappingCfg};
+    CheckNova(0.0, [&] { return notWrappingNova->Status().GetAbsWrapping() ? 1.0 : 0.0; },
+              "no wrapping");
+
+    auto motorEncoderNova = MakeNova();
+    auto motorEncoderCfg = BaseConfig();
+    motorEncoderCfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithContinuousWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5});
+    // A swerve azimuth seeded from another vendor's absolute encoder wraps its motor's encoder on
+    // the Nova, sent the target nearest the mechanism.
+    NovaWrapper motorEncoder{motorEncoderNova.get(), wpi::math::DCMotor::NEO(1), &motorEncoderCfg};
+    CHECK(motorEncoder.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+    // In simulation, from 3.2 rotations to 3.25 for a target of 0.25, not back to 0.25.
+    motorEncoder.SetEncoderPosition(wpi::units::turn_t{3.2});
+    motorEncoder.SetPosition(wpi::units::turn_t{0.25});
+    Step(motorEncoder, 150);
+    CHECK(motorEncoder.GetRelativeMechanismPosition().value() == Catch::Approx(3.25).margin(0.1));
+
+    // The Nova wraps an absolute encoder over any range, sent each target in [0, 1).
+    auto halfNova = MakeNova();
+    auto halfEncoder = MakeCanEncoder();
+    auto halfCfg = BaseConfig();
+    halfCfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(halfEncoder.get())
+        .WithUseExternalFeedbackEncoder(true)
+        .WithContinuousWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5});
+    NovaWrapper half{halfNova.get(), wpi::math::DCMotor::NEO(1), &halfCfg};
+    CHECK(half.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+    CheckNova(1.0, [&] { return halfNova->Status().GetAbsWrapping() ? 1.0 : 0.0; },
+              "the Nova wraps");
+
+    // Only the SystemCore reads an absolute encoder closing the loop over a range other than
+    // [0, 1) without continuous wrapping.
+    auto readingNova = MakeNova();
+    auto readingEncoder = MakeCanEncoder();
+    auto readingCfg = BaseConfig();
+    readingCfg.WithFeedback(1.0, 0.0, 0.0)
+        .WithExternalEncoder(readingEncoder.get())
+        .WithUseExternalFeedbackEncoder(true)
+        .WithWrapping(wpi::units::turn_t{-0.5}, wpi::units::turn_t{0.5});
+    NovaWrapper reading{readingNova.get(), wpi::math::DCMotor::NEO(1), &readingCfg};
+    CHECK(reading.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.020));
+    CHECK(smc.GetClosedLoopControllerPeriod().value() == Catch::Approx(0.001));
+  }
+}
+
+TEST_CASE_METHOD(NovaParityFixture, "NovaParity.SimulatedNovaAppliesFeedforwardAsTheNovaDoes",
+                 "[NovaParity]") {
+  // Like the Nova, the simulated Nova applies its motion profile slot's feedforward only in a motion
+  // profile, a velocity request's feedforward, and a position request's not at all.
+  auto nova = MakeNova();
+  auto cfg = BaseConfig();
+  cfg.WithFeedback(0.0, 0.0, 0.0)
+      .WithFeedforward(wpi::math::ArmFeedforward{
+          0_V, 2_V, wpi::units::unit_t<wpi::math::ArmFeedforward::kv_unit>{0.0},
+          wpi::units::unit_t<wpi::math::ArmFeedforward::ka_unit>{0.0}})
+      .WithTrapezoidProfile(wpi::units::turns_per_second_t{1.0},
+                            wpi::units::turns_per_second_squared_t{2.0});
+  NovaWrapper smc{nova.get(), wpi::math::DCMotor::NEO(1), &cfg};
+  CheckNova(2.0, [&] { return nova->Status().Mp0.GetKG(); }, "kG on the Nova");
+  wpi::sim::DriverStationSim::SetEnabled(true);
+  wpi::sim::DriverStationSim::NotifyNewData();
+  auto* sim = dynamic_cast<motorcontrollers::simulation::NovaSimSupplier*>(smc.GetSimSupplier());
+  REQUIRE(sim != nullptr);
+
+  sim->SetControlRequest(thrifty::MotorControl::VoltagePosition(0.0).WithFeedForward(3.0));
+  sim->UpdateSim();
+  INFO("a position request: no kG and no request feedforward");
+  CHECK(sim->GetMechanismStatorVoltage().value() == Catch::Approx(0.0).margin(0.05));
+
+  sim->SetControlRequest(thrifty::MotorControl::VoltageVelocity(0.0).WithFeedForward(3.0));
+  sim->UpdateSim();
+  INFO("a velocity request: its feedforward, but no kG");
+  CHECK(sim->GetMechanismStatorVoltage().value() == Catch::Approx(3.0).margin(0.05));
+
+  sim->SetControlRequest(thrifty::MotorControl::MotionProfile(0.0));
+  sim->UpdateSim();
+  INFO("a motion profile: kG");
+  CHECK(sim->GetMechanismStatorVoltage().value() == Catch::Approx(2.0).margin(0.05));
 }
 
 }  // namespace yams::test

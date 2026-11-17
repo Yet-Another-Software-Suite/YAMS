@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.A301;
 import com.thrifty.nova.Nova;
 import java.util.function.BiFunction;
 import java.util.function.DoubleConsumer;
@@ -26,6 +27,7 @@ import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -37,8 +39,8 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Every motor controller, for tests that give each one the same closed loop gains in YAMS units and
- * expect the same reaction. The SPARK and Talons close their loops onboard; the Nova's loop runs on
- * the SystemCore.
+ * expect the same reaction. The SPARK, Talons and Nova close their loops onboard; the Nova's runs on
+ * the SystemCore with an LQR, an exponential profile or a velocity profile.
  */
 final class ClosedLoopCases {
   private ClosedLoopCases() {}
@@ -48,6 +50,12 @@ final class ClosedLoopCases {
 
   static final MechanismGearing kGearing = new MechanismGearing(GearBox.fromReductionStages(3, 4));
 
+  /**
+   * Motor rotations per mechanism rotation of an A301: its 64:1 gearbox. Its motor is too small to
+   * move the tests' mechanisms through 12:1.
+   */
+  static final double kA301Ratio = DeviceCreator.kA301Gearbox;
+
   /** Period of the robot loop and of the simulation, in seconds. */
   static final double kPeriod = 0.020;
 
@@ -56,6 +64,7 @@ final class ClosedLoopCases {
    *
    * @param name Name of the motor controller.
    * @param motor Motor it drives.
+   * @param ratio Motor rotations per mechanism rotation.
    * @param slots Number of closed loop slots it has.
    * @param realTime Whether its simulation runs in real time. Phoenix simulates a Talon on its own
    *     clock, which does not stop with WPILib's simulated time.
@@ -64,12 +73,18 @@ final class ClosedLoopCases {
   record Controller(
       String name,
       DCMotor motor,
+      double ratio,
       int slots,
       boolean realTime,
       BiFunction<DCMotor, SmartMotorControllerConfig, SmartMotorController> create) {
     @Override
     public String toString() {
       return name;
+    }
+
+    /** Gearing from the motor to the mechanism. */
+    MechanismGearing gearing() {
+      return new MechanismGearing(GearBox.fromReductionStages(ratio));
     }
 
     /** Whether this is a SPARK. */
@@ -87,33 +102,45 @@ final class ClosedLoopCases {
     new Controller(
         "SparkMax",
         DCMotor.getNEO(1),
+        kRatio,
         4,
         false,
         (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkMax(), motor, cfg)),
     new Controller(
         "SparkFlex",
         DCMotor.getNeoVortex(1),
+        kRatio,
         4,
         false,
         (motor, cfg) -> new SparkWrapper(DeviceCreator.createSparkFlex(), motor, cfg)),
     new Controller(
         "TalonFX",
         DCMotor.getKrakenX60(1),
+        kRatio,
         3,
         true,
         (motor, cfg) -> new TalonFXWrapper(DeviceCreator.createTalonFX(), motor, cfg)),
     new Controller(
         "TalonFXS",
         DCMotor.getNEO(1),
+        kRatio,
         3,
         true,
         (motor, cfg) -> new TalonFXSWrapper(DeviceCreator.createTalonFXS(), motor, cfg)),
     new Controller(
         "Nova",
         DCMotor.getNEO(1),
+        kRatio,
+        2,
+        false,
+        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, DeviceCreator.withNovaProfile(cfg, false))),
+    new Controller(
+        "A301",
+        YMotors.getA301(1),
+        kA301Ratio,
         4,
         false,
-        (motor, cfg) -> new NovaWrapper(DeviceCreator.createNova(), motor, cfg)),
+        (motor, cfg) -> new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(cfg))),
   };
 
   /** Every motor controller. */
@@ -138,12 +165,22 @@ final class ClosedLoopCases {
         .withTelemetry(name, TelemetryVerbosity.LOW);
   }
 
+  /** Create the motor controller, with its gearing. */
   static SmartMotorController create(Controller controller, SmartMotorControllerConfig cfg) {
-    final SmartMotorController smc = controller.create().apply(controller.motor(), cfg);
+    final SmartMotorController smc =
+        controller.create().apply(controller.motor(), cfg.withGearing(controller.gearing()));
     ((SmartMotorControllerTestSubsystem)
             ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem())
         .setSMC(smc);
     return smc;
+  }
+
+  /**
+   * Create the motor controller for velocity control. A Nova applies a feedforward to velocity
+   * control with a velocity profile, which runs on the SystemCore.
+   */
+  static SmartMotorController createForVelocity(Controller controller, SmartMotorControllerConfig cfg) {
+    return create(controller, controller.name().equals("Nova") ? DeviceCreator.withNovaProfile(cfg, true) : cfg);
   }
 
   static void close(SmartMotorController smc) {
@@ -166,6 +203,8 @@ final class ClosedLoopCases {
       talonFX.close();
     } else if (motorController instanceof Nova nova) {
       nova.close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 
@@ -184,13 +223,31 @@ final class ClosedLoopCases {
       double seconds,
       Runnable command,
       DoubleConsumer afterLoop) {
+    run(controller, smc::simIterate, seconds, command, afterLoop);
+  }
+
+  /**
+   * Run the simulation, commanding the setpoint each loop as a robot does.
+   *
+   * @param controller Motor controller under test.
+   * @param simIterate Steps the simulation: the motor controller's, or its mechanism's.
+   * @param seconds How long to run.
+   * @param command Commands the setpoint; run before the first loop and in every loop.
+   * @param afterLoop Given the time since the first command, in seconds, after each loop.
+   */
+  static void run(
+      Controller controller,
+      Runnable simIterate,
+      double seconds,
+      Runnable command,
+      DoubleConsumer afterLoop) {
     final double[] time = {0};
     try (PeriodicScheduler scheduler = new PeriodicScheduler()) {
       command.run();
       final long startNanos = System.nanoTime();
       scheduler.addPeriodic(
           () -> {
-            smc.simIterate();
+            simIterate.run();
             time[0] += kPeriod;
             command.run();
             afterLoop.accept(time[0]);
@@ -205,6 +262,43 @@ final class ClosedLoopCases {
           },
           Seconds.of(kPeriod));
       scheduler.runFor(Seconds.of(seconds));
+    }
+  }
+
+  /**
+   * How far a mechanism is from its setpoint while it holds it. A motor controller simulated in real
+   * time is judged on its average error: if the test runner stalls, Phoenix's clock runs on without
+   * the mechanism and can knock it off its setpoint for a loop or two. The others are judged on their
+   * largest error.
+   */
+  static final class HoldError {
+    private final boolean realTime;
+    private double worst;
+    private double sum;
+    private int count;
+
+    HoldError(Controller controller) {
+      this.realTime = controller.realTime();
+    }
+
+    /** Add one loop's distance from the setpoint. */
+    void add(double error) {
+      final double distance = Math.abs(error);
+      worst = Math.max(worst, distance);
+      sum += distance;
+      count++;
+    }
+
+    /** The error the motor controller is judged on. */
+    double judged() {
+      return realTime ? sum / Math.max(count, 1) : worst;
+    }
+
+    @Override
+    public String toString() {
+      return realTime
+          ? "on average " + sum / Math.max(count, 1) + " (at most " + worst + ") from it"
+          : "at most " + worst + " from it";
     }
   }
 

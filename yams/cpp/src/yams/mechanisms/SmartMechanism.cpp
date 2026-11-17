@@ -4,6 +4,9 @@
 #include "yams/mechanisms/SmartMechanism.hpp"
 
 #include <wpi/commands2/Commands.hpp>
+#include <wpi/telemetry/Telemetry.hpp>
+
+#include "yams/telemetry/NetworkTablesBackends.hpp"
 
 namespace yams::mechanisms {
 
@@ -79,6 +82,13 @@ std::optional<wpi::units::turn_t> SmartMechanism::GetMechanismSetpoint() {
 
 std::optional<wpi::units::meter_t> SmartMechanism::GetMeasurementSetpoint() {
   return m_smc->GetMeasurementPositionSetpoint();
+}
+
+void SmartMechanism::PublishMechanismWindow() {
+  if (m_mechanismWindow) {
+    yams::telemetry::EnsureMechanismsTelemetryBackend();
+    wpi::telemetry::Log("Mechanisms/" + GetName() + "/mechanism", *m_mechanismWindow);
+  }
 }
 
 wpi::Mechanism2d* SmartMechanism::GetMechanismWindow() {

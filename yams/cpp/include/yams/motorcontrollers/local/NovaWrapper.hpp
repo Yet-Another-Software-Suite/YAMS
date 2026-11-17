@@ -5,8 +5,11 @@
 
 #include <thrifty/canEncoder/CanEncoder.h>
 #include <thrifty/core/Motor.h>
+#include <thrifty/core/MotorControl.h>
 #include <thrifty/nova/Nova.h>
+#include <thrifty/sim/MotorSim.h>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <wpi/simulation/DCMotorSim.hpp>
@@ -14,15 +17,22 @@
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/motorcontrollers/SmartMotorController.hpp"
+#include "yams/motorcontrollers/simulation/NovaSimSupplier.hpp"
 
 namespace yams::motorcontrollers::local {
 
 /**
  * SmartMotorController implementation for The Thrifty Bot's Thrifty Nova, using ThriftyLib 2027.
  *
- * The closed loop controller runs on the SystemCore and commands the Nova with voltage, like the
- * profiled controllers of the other wrappers. ThriftyLib's simulation ignores the Nova's onboard
- * PID gains, so running the loop on the SystemCore keeps simulation and the robot the same.
+ * The closed loop runs on the Nova: its voltage position and velocity loops with the slot's PID
+ * gains, and, with a trapezoidal profile, its motion profile, with the motion profile slot's kS,
+ * kV, kA and kG and a constant or cosine gravity. The Nova applies its motion profile slot's
+ * feedforward only while it runs a motion profile, so a feedforward without a trapezoidal profile
+ * runs on the SystemCore, where the whole feedforward applies to position and velocity setpoints
+ * alike. An LQR, an exponential profile and a velocity trapezoidal profile run on the SystemCore
+ * too, and command the Nova with voltage.
+ * The Nova has two closed loop slots, SLOT_0 and SLOT_1. ThriftyLib's simulation ignores the Nova's
+ * closed loop, so in simulation a NovaSimSupplier runs it.
  *
  * Supported external encoders (WithExternalEncoder):
  * - `thrifty::Motor::FeedbackSensorType::ABS`: an absolute encoder on the Nova's data port. Its
@@ -33,8 +43,8 @@ namespace yams::motorcontrollers::local {
  *   `thrifty::NovaConfig::QuadratureEncoderType(thrifty::Motor::QuadratureEncoderType::Custom(2048))`.
  * - `thrifty::CanEncoder*`: a Thrifty CAN Encoder on the same CAN bus.
  *
- * External encoder discontinuity point (absolute and CAN encoders): 0.5 rotations reports
- * [-0.5, 0.5), 1 rotation (the default) reports [0, 1).
+ * An absolute or CAN external encoder reads the continuous wrapping range, or [0, 1) without
+ * continuous wrapping; the Nova closes its loop on one over [0, 1) only.
  *
  * The vendor config, if any, must be a `thrifty::NovaConfigBatch`; it is applied before the YAMS
  * config, which overrides it.
@@ -268,7 +278,16 @@ class NovaWrapper : public SmartMotorController {
    */
   void* GetMotorControllerConfig() override;
 
+  /**
+   * Attach the mechanism's SimSupplier, driven by a simulated Nova, which runs the Nova's closed
+   * loop as ThriftyLib's simulation does not.
+   *
+   * @param supplier Mechanism's SimSupplier, or nullptr to detach.
+   */
+  void SetSimSupplier(std::shared_ptr<SimSupplier> supplier) override;
+
  private:
+  using Slot = SmartMotorControllerConfig::ClosedLoopControllerSlot;
   thrifty::Nova* m_nova{nullptr};
   /** Vendor config applied to the Nova before the YAMS config. */
   std::optional<thrifty::NovaConfigBatch> m_vendorConfig;
@@ -279,19 +298,36 @@ class NovaWrapper : public SmartMotorController {
   /** CAN encoder used as the external encoder. */
   thrifty::CanEncoder* m_canEncoder{nullptr};
   /**
-   * Discontinuity point of the external absolute encoder: it reports angles from one rotation
-   * below it up to it.
+   * Whether the closed loop runs on the Nova. An LQR, an exponential profile and a velocity
+   * trapezoidal profile run on the SystemCore instead.
    */
-  wpi::units::turn_t m_absoluteEncoderDiscontinuityPoint{1.0};
+  bool m_closedLoopOnNova{false};
+  /** Nova slot of the closed loop slot in use. */
+  thrifty::MotorControl::Slot m_novaSlot{thrifty::MotorControl::Slot::SLOT0};
   /**
-   * Duty cycle last applied to the simulated motor. The simulation holds it between commands, as
-   * the Nova holds its output, so it must be what was commanded and not read back from the motor
-   * model.
+   * Mechanism rotations per unit of the closed loop gains and profile: 1, or the mechanism
+   * rotations per meter for a linear closed loop controller.
    */
-  double m_simDutyCycle{0.0};
+  double m_rotationsPerGainUnit{1.0};
+  /** Feedback sensor rotations per mechanism rotation, the Nova's sensor-to-mechanism ratio. */
+  double m_mechanismToFeedbackSensorRatio{1.0};
+  /** Sensor the Nova closes its loop on. */
+  thrifty::Motor::FeedbackSensorType m_feedbackSensor{thrifty::Motor::FeedbackSensorType::INTERNAL};
+  /** Simulated Nova, which runs its closed loop in simulation. */
+  std::shared_ptr<simulation::NovaSimSupplier> m_novaSim;
+  /**
+   * Simulated external encoder shaft, from the mechanism's sim supplier: its rotations and
+   * rotations per second, made by setSimSupplier. A CAN encoder reads it in simulation.
+   */
+  std::optional<thrifty::MotorSim> m_externalEncoderSim;
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   std::optional<wpi::util::Alert> m_systemCoreClosedLoopAlert;
+  /**
+   * Set while a feedforward isn't applied on the Nova because there is no trapezoidal profile, so
+   * the SystemCore runs the closed loop and feedforward instead.
+   */
+  std::optional<wpi::util::Alert> m_feedforwardWithoutProfileAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;
@@ -305,9 +341,30 @@ class NovaWrapper : public SmartMotorController {
   void ApplyFeedback(double kP, double kI, double kD);
   /** Create the simulated motor and its sim supplier from the config. */
   void CreateMotorSim();
-  /** Configure the external encoder from the config, adding Nova settings to @p novaConfig. */
+  /**
+   * Configure the external encoder, and the sensor the Nova closes its loop on with its ratio, from
+   * the config, adding Nova settings to @p novaConfig.
+   */
   void ApplyExternalEncoder(const SmartMotorControllerConfig& config,
                             thrifty::NovaConfigBatch& novaConfig);
+  /**
+   * Whether the Nova can run the closed loop. It can't run an LQR, an exponential profile or a
+   * velocity trapezoidal profile. It applies a feedforward only while it runs a motion profile, so
+   * not a feedforward without a trapezoidal profile, on either of its slots, as a slot can be
+   * switched to later. And it reads an absolute encoder closing its loop over [0, 1)
+   * rotations, so not another range without continuous wrapping, nor continuous wrapping of an
+   * absolute encoder geared to the mechanism. The SystemCore runs those instead, as it can any
+   * closed loop.
+   */
+  bool NovaCanRunClosedLoop(const SmartMotorControllerConfig& config) const;
+  /**
+   * The position target to send the Nova, in mechanism rotations of its feedback sensor. With
+   * continuous wrapping, an absolute encoder closing the loop is wrapped by the Nova itself, which
+   * reads it over [0, 1), so the target is sent in that frame. The Nova can't wrap its motor's or a
+   * quadrature encoder, so the target is sent as the equivalent nearest the mechanism, from the
+   * config's wrapping range.
+   */
+  double NovaPositionTarget(wpi::units::turn_t angle);
   /** Angle of the external encoder's shaft, if any. */
   std::optional<wpi::units::turn_t> GetExternalEncoderSensorPosition();
   /** Velocity of the external encoder's shaft, if any. */

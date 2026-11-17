@@ -55,6 +55,13 @@ enum class DoubleTelemetryField {
   LQREncoderPosition,  ///< LQR encoder position std dev, degrees or meters. Arm or elevator LQR only (tunable).
   LQREncoderVelocity,  ///< LQR encoder velocity std dev, RPM. Flywheel LQR only (tunable).
   LQRMaxVoltage,       ///< LQR maximum output voltage, V (tunable).
+  ADRCDisturbance,     ///< ADRC estimated total disturbance. ADRC only.
+  ADRCBandwidth,       ///< ADRC closed-loop bandwidth, rad/s. ADRC only.
+  ADRCObserverBandwidth,  ///< ADRC observer bandwidth, rad/s. ADRC only.
+  ADRCSystemOrder,     ///< ADRC plant order. ADRC only.
+  ADRCB0,              ///< ADRC input gain (tunable). ADRC only.
+  ADRCSettlingTime,    ///< ADRC settling time, s (tunable). ADRC only.
+  ADRCBandwidthScale,  ///< ADRC bandwidth scale (tunable). ADRC only.
   TunableSetpointPosition,            ///< Live-tunable position setpoint degrees or meters.
   SetpointPosition,                   ///< Read-only position setpoint rotations or meters.
   TunableSetpointVelocity,            ///< Live-tunable velocity setpoint RPM or m/s.
@@ -71,6 +78,7 @@ enum class DoubleTelemetryField {
   SupplyCurrentLimit,                 ///< Configured supply current limit (A, tunable).
   MotorTemperature,                   ///< Motor controller temperature (°F).
   MeasurementPosition,                ///< Linear measurement position (m).
+  MeasurementCircumference,           ///< The mechanism's circumference (m per mechanism rotation), if it has one.
   MeasurementVelocity,                ///< Linear measurement velocity (m/s).
   MeasurementAcceleration,            ///< Linear measurement acceleration (m/s²).
   MeasurementLowerLimit,              ///< Configured lower linear soft limit (m, tunable).
@@ -82,6 +90,7 @@ enum class DoubleTelemetryField {
   MechanismUpperLimit,                ///< Configured upper angular soft limit (degrees, tunable).
   RotorPosition,                      ///< Raw rotor position in rotations.
   RotorVelocity,                      ///< Raw rotor velocity in rotations per second.
+  RotorGearRatio,                     ///< Rotor rotations per mechanism rotation: 60 for a 60:1 arm.
   ExternalEncoderPosition,  ///< External encoder's mechanism position in rotations, only with an external encoder.
   ExternalEncoderVelocity,  ///< External encoder's mechanism velocity in rotations per second, only with an external encoder.
   ClosedloopRampRate,       ///< Closed-loop duty-cycle ramp rate (s, tunable).
@@ -600,6 +609,13 @@ class SmartMotorControllerTelemetry {
   void Close();
 
  private:
+  /**
+   * Set an ADRC config's live-tunable values to the tuning fields.
+   *
+   * @param adrcConfig Config to tune.
+   * @throws std::invalid_argument if the config refuses a value, after setting the ones before it.
+   */
+  void ApplyADRCTuning(math::ADRCConfig& adrcConfig);
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;

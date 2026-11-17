@@ -121,6 +121,30 @@ TEST_CASE("SMCRegression.SetupTelemetryPublishesImmediately", "[SMCRegression]")
   smc.Close();
 }
 
+TEST_CASE("SMCRegression.TelemetryLogsTheGearRatio", "[SMCRegression]") {
+  // rotor/gearRatio is logged at LOW, so a log can turn a rotor reading into the mechanism's.
+  auto name = UniqueName("GearRatio");
+  SmartMotorControllerConfig cfg;
+  cfg.WithMotorGearing(60.0).WithTelemetry(name, Verbosity::LOW);
+  FakeSmartMotorController smc{&cfg};
+  smc.SetupTelemetry(DataRoot(), TuningRoot());
+  smc.UpdateTelemetry();
+  CHECK(DataRoot()->GetSubTable(name)->GetEntry("rotor/gearRatio").GetDouble(-1.0) == Catch::Approx(60.0));
+  smc.Close();
+}
+
+TEST_CASE("SMCRegression.TelemetryLogsTheCircumference", "[SMCRegression]") {
+  // measurement/circumference is logged for a linear mechanism, so a log can turn a rotor reading into meters.
+  auto name = UniqueName("Circumference");
+  SmartMotorControllerConfig cfg;
+  cfg.WithMotorGearing(12.0).WithMechanismCircumference(0.15_m).WithTelemetry(name, Verbosity::LOW);
+  FakeSmartMotorController smc{&cfg};
+  smc.SetupTelemetry(DataRoot(), TuningRoot());
+  smc.UpdateTelemetry();
+  CHECK(DataRoot()->GetSubTable(name)->GetEntry("measurement/circumference").GetDouble(-1.0) == Catch::Approx(0.15));
+  smc.Close();
+}
+
 // ---- Item 4: Close() releases the Live Tuning registration --------------------------------
 
 TEST_CASE("SMCRegression.CloseRemovesLiveTuningCommand", "[SMCRegression]") {
@@ -310,6 +334,7 @@ TEST_CASE("SMCRegression.LinearModeNeedsLinearIndicator", "[SMCRegression]") {
 // ---- Item 6: the profiled feedforward keeps its kA term ------------------------------------
 
 TEST_CASE("SMCRegression.ProfiledFeedforwardIncludesKa", "[SMCRegression]") {
+  EnabledRobot robot;
   SmartMotorControllerConfig cfg;
   cfg.WithTrapezoidProfile(1_tps, 2_tr_per_s_sq).WithFeedforward(MakeSimpleFF(0.0, 0.0, 1.0));
   FakeSmartMotorController smc{&cfg};
@@ -323,6 +348,7 @@ TEST_CASE("SMCRegression.ProfiledFeedforwardIncludesKa", "[SMCRegression]") {
 // ---- Item 7: continuous wrapping in the RoboRIO loop ---------------------------------------
 
 TEST_CASE("SMCRegression.ContinuousWrappingTakesShortestPath", "[SMCRegression]") {
+  EnabledRobot robot;
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(1.0, 0.0, 0.0).WithContinuousWrapping(-0.5_tr, 0.5_tr);
   FakeSmartMotorController smc{&cfg};
@@ -361,6 +387,7 @@ TEST_CASE("SMCRegression.MeasurementLimitsBecomeMechanismLimits", "[SMCRegressio
 // ---- Item 9: linear profiles ---------------------------------------------------------------
 
 TEST_CASE("SMCRegression.LinearExponentialProfileIsFollowed", "[SMCRegression]") {
+  EnabledRobot robot;
   SmartMotorControllerConfig cfg;
   cfg.WithFeedback(1.0, 0.0, 0.0)
       .WithMotorGearing(gearing::MechanismGearing{10.0})
@@ -390,6 +417,7 @@ TEST_CASE("SMCRegression.LinearTrapezoidStateResetOnStart", "[SMCRegression]") {
 // ---- Item 10: elevator and arm feedforward outside the position branch ---------------------
 
 TEST_CASE("SMCRegression.FeedforwardAppliedForVelocitySetpoint", "[SMCRegression]") {
+  EnabledRobot robot;
   SECTION("elevator") {
     SmartMotorControllerConfig cfg;
     cfg.WithMechanismCircumference(1_m).WithFeedforward(MakeElevatorFF(1.0));

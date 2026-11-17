@@ -47,7 +47,6 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::ElevatorFeedforward{
           1.0_V, 0.0_V, wpi::units::unit_t<wpi::math::ElevatorFeedforward::kv_unit>{0.0},
@@ -55,6 +54,7 @@ static SmartMotorControllerConfig MakeElevatorSMCConfig(ProfileType profile, Har
       .WithClosedLoopMode()
       .WithSubsystem(subsys)
       .WithTelemetry(name);
+  ForHardware(cfg, hardware, 40.0_A);
 
   switch (profile) {
     case ProfileType::Trapezoid:

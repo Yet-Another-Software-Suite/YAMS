@@ -15,6 +15,7 @@
 #include <wpi/commands2/CommandPtr.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/UsageReporting.hpp>
 #include <wpi/math/estimator/SwerveDrivePoseEstimator.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
@@ -38,6 +39,7 @@
 #include <wpi/units/velocity.hpp>
 #include <wpi/util/array.hpp>
 
+#include "yams/Rivet.hpp"
 #include "yams/exceptions.hpp"
 #include "yams/mechanisms/swerve/SwerveDriveConfig.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
@@ -147,6 +149,7 @@ class SwerveDrive {
                         ComputeInitialPositions(*m_config), m_config->GetInitialPose()} {
     assert(m_config->GetModules().size() == NumModules &&
            "Module count in SwerveDriveConfig must equal NumModules template parameter.");
+    HAL_ReportUsage("RobotDrive", "YAGSL");
 
     if (auto optimization = m_config->GetModuleStateOptimization()) {
       for (auto* module : m_config->GetModules()) {
@@ -158,6 +161,7 @@ class SwerveDrive {
     ResetOdometry(m_config->GetInitialPose());
 
     SetupTelemetry();
+    Rivet::Show();
 
     m_field2d.SetRobotPose(GetPose());
     telemetry::EnsureMechanismsTunableBackend();
@@ -807,12 +811,16 @@ class SwerveDrive {
             ResetTranslationPID();
             ResetRotationPID();
           },
-          [this] { m_swerveTelemetry->ApplyTuningValues(this); });
+          [this] { m_swerveTelemetry->ApplyTuningValues(this); },
+          // Requires the drive, so the default drive command does not undo its setpoints.
+          {m_config->GetSubsystem()});
       // Stop any tuning voltage when the command ends.
       m_driveToPoseTuningCommand.emplace(
-          std::move(tuningCommand).FinallyDo([this] { m_swerveTelemetry->StopTuning(this); }));
-      telemetry::EnsureMechanismsTunableBackend();
-      wpi::tunables::Publish("Mechanisms/" + GetName() + "/tuning",
+          std::move(tuningCommand)
+              .FinallyDo([this] { m_swerveTelemetry->StopTuning(this); })
+              .WithName("Live Tuning"));
+      telemetry::EnsureTuningTunableBackend();
+      wpi::tunables::Publish("Tuning/" + GetName() + "/Live Tuning",
                              *m_driveToPoseTuningCommand->get());
     }
   }

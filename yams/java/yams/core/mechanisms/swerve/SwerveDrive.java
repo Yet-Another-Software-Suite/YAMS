@@ -33,6 +33,7 @@ import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.Force;
 import org.wpilib.units.measure.LinearVelocity;
+import yams.core.Rivet;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
 import yams.core.mechanisms.config.SwerveDriveConfig;
@@ -151,6 +152,7 @@ public class SwerveDrive {
     Tunables.publish("Mechanisms/" + getName() + "/field", m_field2d);
     // Report as YAGSL bc this will become apart of YAGSL in 2027...
     HAL.reportUsage("RobotDrive", "YAGSL");
+    Rivet.show();
   }
 
   /**

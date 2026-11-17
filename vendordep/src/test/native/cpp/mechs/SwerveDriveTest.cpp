@@ -1259,6 +1259,42 @@ TEST_CASE_METHOD(SwerveDriveTestFixture,
 }
 
 TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.CodeChangesBetweenTuningLoopsAreNotOverridden",
+                 "[SwerveInputStreamTelemetryTest]") {
+  StreamTables nt;
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithScaleTranslation(0.8).WithTelemetry(nt.name, Verbosity::HIGH);
+  stream.Get();
+
+  stream.WithScaleTranslation(0.4);
+  Tune(stream);
+  stream.WithScaleTranslation(0.6);
+  Tune(stream);
+  CHECK(nt.Published("translationScale") == Catch::Approx(0.6));
+  CHECK(stream.GetTranslationAxisScale() == Catch::Approx(0.6));
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
+                 "SwerveInputStreamTelemetryTest.ValuesLeftOnTheDashboardAreReplacedWithTheStreamValues",
+                 "[SwerveInputStreamTelemetryTest]") {
+  StreamTables nt;
+  // E.g. by an earlier telemetry with the same name.
+  nt.Dashboard("deadband", 0.3);
+  nt.Dashboard("translationCube", true);
+  SwerveInputStream<4> stream{*m_drive, [] { return 0.0; }, [] { return 0.0; },
+                              [] { return 0.0; }};
+  stream.WithDeadband(0.1).WithTelemetry(nt.name, Verbosity::HIGH);
+  stream.Get();
+
+  CHECK(nt.Published("deadband") == Catch::Approx(0.1));
+  CHECK_FALSE(nt.PublishedBoolean("translationCube"));
+  Tune(stream);
+  CHECK(stream.GetAxisDeadband() == Catch::Approx(0.1));
+  CHECK_FALSE(stream.IsTranslationCubeEnabled());
+}
+
+TEST_CASE_METHOD(SwerveDriveTestFixture,
                  "SwerveInputStreamTelemetryTest.SupplierControlledFeaturesAreNotOverridden",
                  "[SwerveInputStreamTelemetryTest]") {
   StreamTables nt;

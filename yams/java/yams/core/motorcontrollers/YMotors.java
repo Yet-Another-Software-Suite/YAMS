@@ -12,8 +12,8 @@ import org.wpilib.math.system.DCMotor;
  * (see {@link SmartMotorController#isMotor(DCMotor, DCMotor)}), so use them rather than building
  * your own from the same specs.
  *
- * <p>This class will be deleted once WPILib has a {@link DCMotor} of the Thrifty Pulsar. Use
- * WPILib's then.
+ * <p>This class will be deleted once WPILib has a {@link DCMotor} of the Thrifty Pulsar and the
+ * FIRST A301. Use WPILib's then.
  */
 public final class YMotors {
   private YMotors() {}
@@ -30,5 +30,21 @@ public final class YMotors {
    */
   public static DCMotor getThriftyPulsar(int numMotors) {
     return new DCMotor(12.0, 3.1, 189.0, 2.7, 7500 * 2 * Math.PI / 60, numMotors);
+  }
+
+  /**
+   * The motor inside the FIRST A301, before its gearbox, at 12 V: 13,500 RPM free, and 0.078 N-m
+   * stalled, twice the 5.27 N-m at peak power of FIRST's 135:1 gearbox. FIRST does not give its
+   * currents, and the A301 is similar to a NEO 550, so it has the NEO 550's: 100 A stalled and
+   * 1.4 A free.
+   *
+   * <p>Every A301 has this motor. Its gearbox is part of the gearing given to the {@link
+   * yams.core.motorcontrollers.local.A301Wrapper A301Wrapper}'s config.
+   *
+   * @param numMotors How many A301 motors are in the gearbox.
+   * @return The FIRST A301's motor {@link DCMotor}.
+   */
+  public static DCMotor getA301(int numMotors) {
+    return new DCMotor(12.0, 2 * 5.27 / 135, 100.0, 1.4, 13500 * 2 * Math.PI / 60, numMotors);
   }
 }

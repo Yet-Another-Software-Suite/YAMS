@@ -43,11 +43,12 @@ import yams.core.gearing.MechanismGearing;
  * <p>The LQR cost matrices determine how the regulator balances state error against control effort:
  * <ul>
  * <li><b>Q (state cost, via qelms)</b> penalizes deviation from the desired state (position,
- * velocity). Smaller values tolerate larger state errors; larger values drive the controller
- * to correct errors more aggressively.</li>
- * <li><b>R (control effort cost, via relms)</b> penalizes the voltage applied to the motor.
- * Smaller values allow higher voltages (more aggressive); larger values keep the output
- * gentler. The default of 12 V matches the approximate maximum battery voltage.</li>
+ * velocity). Each qelms value is the largest error you accept: smaller values drive the
+ * controller to correct errors more aggressively; larger values tolerate larger errors.</li>
+ * <li><b>R (control effort cost, via relms)</b> penalizes the voltage applied to the motor. The
+ * relms value is the largest voltage you accept: smaller values keep the output gentler; larger
+ * values allow higher voltages (more aggressive). 12 V matches the approximate maximum battery
+ * voltage.</li>
  * </ul>
  *
  * <h2>Example Arm LQR configuration</h2>
@@ -66,7 +67,7 @@ import yams.core.gearing.MechanismGearing;
  *         Radians.of(0.01))          // encoder position std dev
  *     .withControlEffort(Volts.of(12))
  *     .withMaxVoltage(Volts.of(12))
- *     .withAggressiveness(10);
+ *     ;
  *
  * LQRController armController = new LQRController(config);
  * }</pre>
@@ -230,7 +231,9 @@ public class LQRConfig {
   }
 
   /**
-   * Set the measurement delay of the LQR.
+   * Set how far behind the sensor measurement is, such as a velocity filtered by the motor
+   * controller. The LQR's gains are compensated for this delay, which keeps a slow sensor from
+   * making the controller overshoot.
    *
    * @param delay Measurement delay.
    * @return {@link LQRConfig} for chaining.
@@ -245,7 +248,10 @@ public class LQRConfig {
    *
    * @param aggressiveness Usually 10, arbitrary scale.
    * @return {@link LQRConfig} for chaining.
+   * @deprecated This value has never changed the LQR. Lower the state error tolerance (qelms) or
+   *             raise the control effort (relms) to make the LQR more aggressive.
    */
+  @Deprecated(forRemoval = true)
   public LQRConfig withAggressiveness(double aggressiveness) {
     m_aggressiveness = OptionalDouble.of(aggressiveness);
     return this;
@@ -497,11 +503,15 @@ public class LQRConfig {
     switch (m_type.orElseThrow()) {
       case FLYWHEEL -> /// 1 modeled state, velocity. Inputs are volts. Outputs are velocity.
       {
-        return new LinearQuadraticRegulator<N1, N1, N1>((LinearSystem<N1, N1, N1>) plant, (Vector<N1>) m_qelms.orElseThrow(), VecBuilder.fill(m_relms.in(Volts)), m_period.in(Seconds));
+        var regulator = new LinearQuadraticRegulator<N1, N1, N1>((LinearSystem<N1, N1, N1>) plant, (Vector<N1>) m_qelms.orElseThrow(), VecBuilder.fill(m_relms.in(Volts)), m_period.in(Seconds));
+        m_measurementDelay.ifPresent(delay -> regulator.latencyCompensate((LinearSystem<N1, N1, N1>) plant, m_period.in(Seconds), delay.in(Seconds)));
+        return regulator;
       }
       case ARM, ELEVATOR -> /// 2 modeled states, position and velocity. Inputs are volts. Outputs are position.
       {
-        return new LinearQuadraticRegulator<N2, N1, N1>((LinearSystem<N2, N1, N1>) plant, (Vector<N2>) m_qelms.orElseThrow(), VecBuilder.fill(m_relms.in(Volts)), m_period.in(Seconds));
+        var regulator = new LinearQuadraticRegulator<N2, N1, N1>((LinearSystem<N2, N1, N1>) plant, (Vector<N2>) m_qelms.orElseThrow(), VecBuilder.fill(m_relms.in(Volts)), m_period.in(Seconds));
+        m_measurementDelay.ifPresent(delay -> regulator.latencyCompensate((LinearSystem<N2, N1, N1>) plant, m_period.in(Seconds), delay.in(Seconds)));
+        return regulator;
       }
     }
     throw new IllegalStateException("Invalid LQR Type");

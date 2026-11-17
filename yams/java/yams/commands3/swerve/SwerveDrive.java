@@ -3,8 +3,10 @@
 
 package yams.commands3.swerve;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.wpilib.command3.Command;
+import org.wpilib.command3.Coroutine;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -15,6 +17,7 @@ import yams.commands3.config.SwerveDriveConfig;
 import yams.commands3.telemetry.CommandTunable;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
 import yams.core.exceptions.SwerveDriveConfigurationException;
+import yams.core.telemetry.NetworkTablesBackends;
 
 /**
  * Command-based extension of {@link yams.core.mechanisms.swerve.SwerveDrive} that adds the
@@ -67,13 +70,17 @@ public class SwerveDrive extends yams.core.mechanisms.swerve.SwerveDrive {
     this.mechanism = config.getMechanism();
     // Drive to pose tuning needs both controllers, so only offer it when they are configured.
     if (config.getTranslationPID().isPresent() && config.getRotationPID().isPresent()) {
-      Tunables.publish("Mechanisms/" + getName() + "/tuning", new CommandTunable(Command.noRequirements(coroutine -> {
+      // The tuning command requires the drive, so the default drive command does not undo its setpoints.
+      Consumer<Coroutine> tuning = coroutine -> {
         startDriveToPoseTuning();
         while (true) {
           applyTuningValues();
           coroutine.yield();
         }
-      }).whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named(getName() + " Tuning")));
+      };
+      var builder = mechanism == null ? Command.noRequirements(tuning) : mechanism.run(tuning);
+      NetworkTablesBackends.ensureTuningTunableBackend();
+      Tunables.publish("Tuning/" + getName() + "/Live Tuning", new CommandTunable(builder.whenCanceled(() -> m_swerveTelemetry.stopTuning(this)).named("Live Tuning")));
     }
   }
 

@@ -32,6 +32,7 @@
 
 #include "SimSupplier.hpp"
 #include "SmartMotorControllerConfig.hpp"
+#include "yams/math/ADRCController.hpp"
 #include "yams/math/LQRController.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetry.hpp"
 #include "yams/telemetry/SmartMotorControllerTelemetryConfig.hpp"
@@ -54,6 +55,11 @@ class SmartMotorController {
   /** Calls Close() so telemetry, battery-sim state and close hooks are always released. */
   virtual ~SmartMotorController();
 
+ protected:
+  /** Shows Rivet on the Driver Station display the first time any YAMS motor controller is built. */
+  SmartMotorController();
+
+ public:
   // ---- Configuration ------------------------------------------------------
 
   /**
@@ -69,8 +75,13 @@ class SmartMotorController {
   /** Initialize the DCMotorSim used for simulation. */
   virtual void SetupSimulation() = 0;
 
-  /** Advance the motor simulation by one loop iteration. */
-  virtual void SimIterate() = 0;
+  /**
+   * Advance the motor simulation by one loop iteration. Each motor controller's SimIterate() calls
+   * this last, with SmartMotorController::SimIterate(): it iterates the loosely coupled followers
+   * reading this motor controller's mechanism's simulation, which a mechanism steps right before.
+   * Each follower's iterates its own.
+   */
+  virtual void SimIterate();
 
   /**
    * Attach a SimSupplier that provides physics-model position and velocity for
@@ -79,7 +90,7 @@ class SmartMotorController {
    *
    * @param supplier Shared SimSupplier instance, or nullptr to detach.
    */
-  void SetSimSupplier(std::shared_ptr<SimSupplier> supplier);
+  virtual void SetSimSupplier(std::shared_ptr<SimSupplier> supplier);
 
   /**
    * Get the attached SimSupplier, or nullptr if none is set.
@@ -334,6 +345,37 @@ class SmartMotorController {
    * @return wpi::math::DCMotor model.
    */
   virtual wpi::math::DCMotor GetDCMotor() = 0;
+
+  /**
+   * Get the motors of the mechanism this motor controller drives: its own GetDCMotor() and its
+   * loosely coupled followers', except those already given a mechanism of their own. A mechanism
+   * simulates every motor with it. A follower's torque is given at this motor's rotor, from the
+   * gearing of each, and the free speed is this motor's.
+   *
+   * @return DCMotor of every motor on the mechanism.
+   */
+  wpi::math::DCMotor GetMechanismDCMotor();
+
+  /**
+   * Set the simulation of the mechanism this motor controller drives, made with
+   * GetMechanismDCMotor(). Each loosely coupled follower reads it, so its encoder follows the
+   * mechanism, and its current is not counted again by BatterySim. A follower that drives a
+   * mechanism of its own must be given it first, so it is left out of this one.
+   *
+   * @param supplier Simulation of the mechanism.
+   */
+  void SetMechanismSimSupplier(std::shared_ptr<SimSupplier> supplier);
+
+  /**
+   * Get the duty cycle the motors of this motor controller's simulation apply. A mechanism's
+   * simulation has its loosely coupled followers' motors too, and each motor controller applies its
+   * own output, as its vendor simulation limits it, so this is each one's duty cycle weighted by its
+   * share of GetMechanismDCMotor()'s torque. Otherwise it is the given duty cycle.
+   *
+   * @param dutyCycle Duty cycle this motor controller applies.
+   * @return Duty cycle of every motor in its simulation.
+   */
+  double GetMechanismDutyCycle(double dutyCycle);
 
   // ---- Configuration setters (live tuning) --------------------------------
 
@@ -621,6 +663,14 @@ class SmartMotorController {
    */
   math::LQRController* GetLQRController();
 
+  /**
+   * The ADRC running the closed loop, if the config selected one. Use it to read the estimated disturbance or states.
+   * The ADRC was written by FRC Team 8331.
+   *
+   * @return The ADRC, or nullptr if the closed loop does not use one.
+   */
+  math::ADRCController* GetADRCController();
+
   /** Run one iteration of the closed-loop controller on the calling thread. */
   void IterateClosedLoopController();
 
@@ -821,10 +871,39 @@ class SmartMotorController {
   std::vector<SmartMotorController*> m_looseFollowers;
 
   /**
+   * Whether this motor controller reads a leader's simulation, such as a mechanism's, which the
+   * leader iterates right after it steps. Its own SimIterate() then does nothing, so it is not
+   * iterated twice in a loop.
+   */
+  bool m_iteratedByLeader{false};
+
+  /**
+   * Whether this motor controller's simulation is its mechanism's, set with
+   * SetMechanismSimSupplier, which has its loosely coupled followers' motors.
+   */
+  bool m_simulatesMechanism{false};
+
+  /**
    * Populate m_looseFollowers from the current m_config.
    * Call this at the end of each concrete ApplyConfig() implementation.
    */
   void LoadLooselyCoupledFollowers();
+
+  /**
+   * Read the simulation of a leader whose motor model has this motor, instead of simulating it. Its
+   * current is in the leader's, so BatterySim does not count it again. Its own loosely coupled
+   * followers read the leader's simulation too.
+   *
+   * @param leader   Motor controller whose simulation has this motor. Must outlive this one's use
+   *                 of it.
+   * @param inverted Whether this motor is inverted from the leader.
+   */
+  void Follow(SmartMotorController& leader, bool inverted);
+
+  /** Weigh a duty cycle this motor controller applies with its loosely coupled followers' own. */
+  double CalculateSimDutyCycle(double dutyCycle);
+
+
 
   /**
    * Configure the software PID controller (m_pid) from @p config: continuous input over the
@@ -861,6 +940,27 @@ class SmartMotorController {
 
   std::optional<wpi::math::PIDController> m_pid;
   std::optional<math::LQRController> m_lqr;
+  /** ADRC running the closed loop, when the config selects one. Written by FRC Team 8331. */
+  std::optional<math::ADRCController> m_adrc;
+
+  /**
+   * Whether the closed loop controller runs on the SystemCore instead of the motor controller. An LQR and an ADRC
+   * both need the measured state every loop, so they run here. Wrappers use this to leave their onboard closed loop
+   * alone and send a plain voltage.
+   *
+   * @return true when an LQR or an ADRC owns the closed loop.
+   */
+  bool UsesSystemCoreController() const;
+
+  /**
+   * Build the ADRC for this motor's slot from the config, replacing any previous one, or clear it. The control period
+   * is the closed loop control period, the one IterateClosedLoopController runs at, so the controller's discrete model
+   * cannot drift from the loop that steps it. Each wrapper calls this when a config is applied.
+   *
+   * @param config Config being applied.
+   * @throws exceptions::SmartMotorControllerConfigurationException if the ADRC config cannot build a controller.
+   */
+  void ApplyADRCConfig(const SmartMotorControllerConfig& config);
 
   // Angular motion profile state
   std::optional<wpi::math::TrapezoidProfile<wpi::units::turns>::State> m_trapState;
@@ -877,6 +977,14 @@ class SmartMotorController {
    * wrapping point.
    */
   std::optional<wpi::units::turn_t> m_lastClosedLoopMechanismPosition;
+  /**
+   * Full scale of SmartMotorControllerConfig::WithClosedLoopRampRate: the ramp rate is the time the output takes to
+   * change by this much, as on a Talon.
+   */
+  static constexpr double kClosedLoopRampFullScaleVolts = 12.0;
+  /** The voltage the closed loop sent last, which the closed loop ramp starts from; empty until it runs, and again
+   * whenever it starts over. */
+  std::optional<double> m_lastClosedLoopVoltage;
 
   std::optional<wpi::units::turn_t> m_setpointPosition;
   std::optional<wpi::units::turns_per_second_t> m_setpointVelocity;
@@ -912,6 +1020,9 @@ class SmartMotorController {
  private:
   /** Reset the motion profile states to the current mechanism (or measurement) state. */
   void ResetProfileStates();
+
+  /** Start the closed loop controller's PID, motion profile and LQR from where the mechanism is now. */
+  void ResetClosedLoopControllerState();
 };
 
 }  // namespace yams::motorcontrollers

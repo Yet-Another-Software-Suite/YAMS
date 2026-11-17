@@ -50,7 +50,7 @@ public class ArmSubsystem extends SubsystemBase {
   public class ArmConstants {
     // Positions measured with a protractor, 0 deg = arm parallel to the floor.
     public static final Angle SOME_ANGLE    = Degrees.of(20);
-    public static final Angle DOWN_ANGLE    = Degrees.of(-35);   // Near-floor intake
+    public static final Angle DOWN_ANGLE    = Degrees.of(-20);   // Near-floor intake, above the -25 deg hard stop
     public static final Angle L1_ANGLE      = Degrees.of(65);    // Level-1 scoring
     public static final Angle HANDOFF_ANGLE = Degrees.of(135);   // Shooter handoff
 
@@ -62,11 +62,12 @@ public class ArmSubsystem extends SubsystemBase {
     public static final double KD = 0.2;
 
     // ArmFeedforward gains.
-    // kS=-0.1 compensates for static friction in the direction of gravity.
-    // kG=1.2 is the gravity term (volts to hold arm horizontal); tune this first.
+    // kS=0 until it is measured on the robot: the simulation has no friction.
+    // kG=0.89 V holds the arm level. It is what the 0.1055 kg*m^2 arm, 14 inches long, on a
+    // 12.5:1 Falcon 500 needs; measure it on your robot first, as the voltage that holds the arm level.
     // kV and kA are left at 0 until SysId characterization is run.
-    public static final double KS = -0.1;
-    public static final double KG = 1.2;
+    public static final double KS = 0;
+    public static final double KG = 0.89;
     public static final double KV = 0;
     public static final double KA = 0;
 

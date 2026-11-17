@@ -40,7 +40,7 @@
  * | yams | Root namespace; include `YAMS.hpp` to pull in everything |
  * | yams::exceptions | Exception types thrown by YAMS (e.g. ArmConfigurationException) |
  * | yams::gearing | GearBox and sprocket/chain gearing calculations |
- * | yams::math | Control math: LQRController, DerivativeTimeFilter, SmartMath |
+ * | yams::math | Control math: ADRCController (by FRC Team 8331), LQRController, DerivativeTimeFilter, SmartMath |
  * | yams::mechanisms | Abstract base SmartMechanism and all concrete implementations |
  * | yams::mechanisms::config | Config structs for every mechanism type |
  * | yams::mechanisms::positional | Arm, Elevator, Pivot, SmartPositionalMechanism |

@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.revrobotics.encoder.DetachedEncoder;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkBase;
 import com.thrifty.canEncoder.CanEncoder;
 import com.thrifty.core.Motor.FeedbackSensorType;
@@ -31,6 +32,7 @@ import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.telemetry.SmartMotorControllerCommandRegistry;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -42,7 +44,7 @@ import yams.helpers.SmartMotorControllerTestSubsystem;
 
 /**
  * Every absolute external encoder on every motor controller, and every closed loop controller, for
- * the tests of options that apply to absolute encoders: {@link DiscontinuityPointTest},
+ * the tests of options that apply to absolute encoders: {@link AbsoluteEncoderRangeTest},
  * {@link ZeroOffsetTest}, and {@link StartingPositionTest}. Each encoder is mounted on the
  * mechanism 1:1, behind 12:1 gearing, and closes the loop.
  */
@@ -70,7 +72,9 @@ final class AbsoluteEncoderCases {
     /** An absolute encoder wired to a Nova's data port. */
     NOVA_ABSOLUTE("Nova absolute encoder"),
     /** A Thrifty CAN Encoder a Nova reads over CAN. */
-    NOVA_CAN("Nova CAN encoder");
+    NOVA_CAN("Nova CAN encoder"),
+    /** An A301's own absolute encoder, on its output shaft. */
+    A301_ABSOLUTE("A301 absolute encoder");
 
     private final String name;
 
@@ -106,7 +110,9 @@ final class AbsoluteEncoderCases {
     /** A Nova on its motor's encoder. */
     NOVA("Nova motor encoder"),
     /** A quadrature encoder on a Nova's data port. */
-    NOVA_QUADRATURE("Nova quadrature encoder");
+    NOVA_QUADRATURE("Nova quadrature encoder"),
+    /** An A301 on its motor's encoder. */
+    A301("A301 motor encoder");
 
     private final String name;
 
@@ -178,7 +184,7 @@ final class AbsoluteEncoderCases {
    *
    * @param encoder        Encoder.
    * @param config         Mechanism config.
-   * @param encoderOptions Options for the encoder, such as its discontinuity point or zero offset.
+   * @param encoderOptions Options for the encoder, such as its continuous wrapping or zero offset.
    * @return The motor controller.
    */
   static SmartMotorController create(
@@ -240,8 +246,17 @@ final class AbsoluteEncoderCases {
         yield new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
+            DeviceCreator.withNovaProfile(encoderOptions.apply(
+                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)), false));
+      }
+      case A301_ABSOLUTE -> {
+        final A301 a301 = DeviceCreator.createA301();
+        yield new A301Wrapper(
+            a301,
             encoderOptions.apply(
-                config.withExternalEncoder(absoluteEncoder).withUseExternalFeedbackEncoder(true)));
+                DeviceCreator.forA301(config)
+                    .withExternalEncoder(a301)
+                    .withUseExternalFeedbackEncoder(true)));
       }
     };
   }
@@ -265,15 +280,26 @@ final class AbsoluteEncoderCases {
         return new NovaWrapper(
             nova,
             DCMotor.getNEO(1),
-            feedback == RelativeFeedback.NOVA_QUADRATURE
+            DeviceCreator.withNovaProfile(feedback == RelativeFeedback.NOVA_QUADRATURE
                 ? config
                     .withExternalEncoder(FeedbackSensorType.QUAD)
                     .withUseExternalFeedbackEncoder(true)
-                : config);
+                : config, false));
       } catch (RuntimeException e) {
         // The Nova rejected the config; release it for the tests after this one.
         CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
         nova.close();
+        throw e;
+      }
+    }
+    if (feedback == RelativeFeedback.A301) {
+      final A301 a301 = DeviceCreator.createA301();
+      try {
+        return new A301Wrapper(a301, DeviceCreator.forA301(config));
+      } catch (RuntimeException e) {
+        // The A301 rejected the config; release it for the tests after this one.
+        CommandScheduler.getInstance().unregisterSubsystem(config.getSubsystem());
+        a301.close();
         throw e;
       }
     }
@@ -303,7 +329,7 @@ final class AbsoluteEncoderCases {
   }
 
   /**
-   * The encoder's own absolute angle: what it reports, in the range set by its discontinuity point.
+   * The encoder's own absolute angle: what it reports, in the range set by the continuous wrapping.
    * A Talon fuses its encoder with the motor's, so its mechanism position does not wrap; the
    * encoder's absolute position still does.
    *
@@ -426,6 +452,8 @@ final class AbsoluteEncoderCases {
     } else if (smc.getMotorController() instanceof Nova nova) {
       // A Nova is put back to factory defaults when YAMS configures it, so only close it.
       nova.close();
+    } else if (smc.getMotorController() instanceof A301 a301) {
+      a301.close();
     }
   }
 }

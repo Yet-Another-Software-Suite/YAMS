@@ -211,13 +211,6 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
   m_feedforwardNotAppliedAlert.emplace("YAMS", AlertId("FeedforwardNotApplied"),
                                        GetName() + " feedforward gains were not applied.",
                                        wpi::util::Alert::Level::HIGH);
-  m_externalEncoderGearingDiscontinuityAlert.emplace(
-      "YAMS", AlertId("ExternalEncoderGearingDiscontinuity"),
-      GetName() +
-          " external encoder gearing set while ExternalEncoderDiscontinuityPoint is also set; "
-          "the discontinuity point will NOT be moved by the gearing, wrapping will occur "
-          "non-uniformly",
-      wpi::util::Alert::Level::HIGH);
 
   UpdateFeedbackSensorRatio(*m_config);
   SetupSimulation();
@@ -235,8 +228,6 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
 SparkWrapper::~SparkWrapper() {
   Close();
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
-  if (m_externalEncoderGearingDiscontinuityAlert)
-    m_externalEncoderGearingDiscontinuityAlert->Set(false);
 }
 
 // ---- SPARK configuration helpers ---------------------------------------------
@@ -477,7 +468,6 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_config = const_cast<SmartMotorControllerConfig*>(&config);
   config.ResetValidationCheck();
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
-  m_externalEncoderGearingDiscontinuityAlert->Set(false);
 
   if (config.GetVendorControlRequest().has_value())
     throw exceptions::SmartMotorControllerConfigurationException(
@@ -506,6 +496,8 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -526,7 +518,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_positionControlType = SparkLowLevel::ControlType::kMAXMotionPositionControl;
     m_velocityControlType = SparkLowLevel::ControlType::kMAXMotionVelocityControl;
     if (wpi::RobotBase::IsSimulation() && !config.GetVelocityTrapezoidalProfileInUse() &&
-        !hasExpo && !m_lqr) {
+        !hasExpo && !UsesSystemCoreController()) {
       // REVLib's MAXMotion simulation does not follow the profile (REVLib 2027.0.0-alpha-7). In
       // simulation, SimIterate() runs the profile and the SPARK holds each point of it with
       // position control instead.
@@ -536,7 +528,7 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
 
   // SPARKs have no exponential profile or LQR: the RoboRIO runs the closed loop and sends
   // voltages to the SPARK.
-  if (hasExpo || m_lqr) {
+  if (hasExpo || UsesSystemCoreController()) {
     if (!m_rioControllerAlert) {
       m_rioControllerAlert.emplace("YAMS", AlertId("ClosedLoop"),
                                    GetName() + " closed loop controller is running on the SystemCore.",
@@ -589,19 +581,17 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   if (auto start = config.GetStartingPosition(); start)
     m_relEncoder->SetPosition(start->value() * mechToRotorRatio);
 
-  // Position wrapping. REVLib's wrapping has no input range: the SPARK wraps every rotation of its
-  // feedback sensor, which is one mechanism rotation only for an absolute encoder on the
-  // mechanism. Otherwise SetPosition() sends the equivalent setpoint nearest the current position.
-  bool absoluteFeedback = false;
-  if (useExternalEncoder) {
-    if (auto enc = config.GetExternalEncoder(); enc) {
-      absoluteFeedback = std::any_cast<SparkAbsoluteEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::DetachedEncoder*>(&*enc) ||
-                         std::any_cast<rev::detached::SplineEncoder*>(&*enc);
-    }
-  }
-  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetContinuousWrapping().has_value() &&
-                                              absoluteFeedback);
+  // Position wrapping. The input range is the wrapping range, but the SPARK wraps only when the
+  // wrapping is continuous. The SPARK's range is in rotations of its feedback sensor, so scale the
+  // mechanism's range by the sensor rotations per mechanism rotation: the motor's encoder behind
+  // gearing turns several times per mechanism rotation.
+  if (config.GetWrappingMax() && config.GetWrappingMin())
+    sparkCfg.closedLoop.PositionWrappingInputRange(
+        config.GetWrappingMin()->value() * m_mechanismToFeedbackSensorRatio,
+        config.GetWrappingMax()->value() * m_mechanismToFeedbackSensorRatio);
+  // Set either way: the SPARK keeps its previous configuration.
+  sparkCfg.closedLoop.PositionWrappingEnabled(config.GetWrappingMax().has_value() &&
+                                              config.IsWrappingContinuous());
 
   ApplyExternalEncoder(config, useExternalEncoder);
 
@@ -633,24 +623,24 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
   LoadLooselyCoupledFollowers();
 
-  if (config.GetClosedLoopControlPeriod() && !hasExpo && !m_lqr)
+  if (config.GetClosedLoopControlPeriod() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Closed loop control period is unsupported without Exponential Profiles",
         "Closed loop control period does not take affect", "WithClosedLoopControlPeriod");
-  if (config.GetClosedLoopControllerMaximumVoltage() && !hasExpo && !m_lqr)
+  if (config.GetClosedLoopControllerMaximumVoltage() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Closed loop controller maximum voltage is only available for Exponential Profiled "
         "closed loop controllers",
         "Closed loop controller maximum voltage could not be applied",
         "WithClosedLoopMaxVoltage");
   // The cutoff is checked by IterateClosedLoopController(), which only runs with an exponential
-  // profile or an LQR controller: a trapezoidal profile runs on the SPARK and never reaches it.
-  if (config.GetTemperatureCutoff() && !hasExpo && !m_lqr)
+  // profile or a SystemCore controller: a trapezoidal profile runs on the SPARK and never reaches it.
+  if (config.GetTemperatureCutoff() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Temperature cutoff is only available for exponentially profiled or LQR closed loop "
         "controllers",
         "Temperature cutoff could not be applied", "WithTemperatureCutoff");
-  if (config.GetFeedbackSynchronizationThreshold() && !hasExpo && !m_lqr)
+  if (config.GetFeedbackSynchronizationThreshold() && !hasExpo && !UsesSystemCoreController())
     throw exceptions::SmartMotorControllerConfigurationException(
         "Feedback synchronization threshold is only available for exponentially profiled closed "
         "loop controllers",
@@ -670,9 +660,12 @@ bool SparkWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   // How far behind the measured velocity is, from the encoder's filtering, as WPILib's SysId works it
   // out for its REV presets: a backward difference over the measurement period is half the period
   // behind, a moving average of N samples 1 ms apart is (N - 1) / 2 ms behind, and a NEO's built-in
-  // encoder averages 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
+  // encoder averaged 8 samples 32 ms apart, (8 - 1) / 2 * 32 ms = 112 ms behind. The settings are read
   // back from the SPARK, with how often it sends the velocity, which a closed loop on the SystemCore
   // waits for too. An absolute or detached encoder's delay is not known.
+  // TODO: SPARK MAX firmware 27 replaced the NEO's moving average with a filter REV does not describe,
+  // so the 112 ms is from older firmware and may be off. SysId needs a delay, so it stays until the new
+  // filter's is measured.
   auto& signals = m_maxConfig ? static_cast<rev::spark::SparkMax*>(m_spark)->configAccessor.signals
                               : static_cast<rev::spark::SparkFlex*>(m_spark)->configAccessor.signals;
   m_velocitySignalPeriod = wpi::units::millisecond_t{double(signals.GetPrimaryEncoderVelocityPeriodMs())};
@@ -720,10 +713,6 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
 
   auto enc = config.GetExternalEncoder();
   if (!enc) {
-    if (config.GetExternalEncoderDiscontinuityPoint().has_value())
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "External encoder discontinuity point is only available for external encoders",
-          "Discontinuity point could not be applied", "WithExternalEncoder(encoder)");
     if (config.GetExternalEncoderZeroOffset().has_value())
       throw exceptions::SmartMotorControllerConfigurationException(
           "Zero offset is only available for external encoders",
@@ -744,10 +733,9 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
   const double mechToEncoder = MechanismToExternalEncoderRatio();
   const auto startingPosition = config.GetStartingPosition();
   const auto zeroOffset = config.GetExternalEncoderZeroOffset();
-  const auto discontinuityPoint = config.GetExternalEncoderDiscontinuityPoint();
+  const auto wrappingMin = config.GetWrappingMin();
+  const auto wrappingMax = config.GetWrappingMax();
   const auto inverted = config.GetExternalEncoderInverted();
-  const bool hasExternalGearing = config.GetExternalEncoderGearing().has_value();
-  m_absoluteEncoderDiscontinuityPoint = discontinuityPoint.value_or(wpi::units::turn_t{1.0});
   // Zero offsets are in [0, 1) rotations of the encoder.
   const double zeroOffsetRotations =
       zeroOffset ? wpi::math::InputModulus(zeroOffset->value() * mechToEncoder, 0.0, 1.0) : 0.0;
@@ -764,11 +752,18 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
     if (useExternalEncoder) sparkCfg.closedLoop.SetFeedbackSensor(FeedbackSensor::kAbsoluteEncoder);
     m_absEncoderZeroOffset = zeroOffsetRotations;
     if (zeroOffset) sparkCfg.absoluteEncoder.ZeroOffset(zeroOffsetRotations);
-    if (discontinuityPoint) {
-      if (hasExternalGearing) m_externalEncoderGearingDiscontinuityAlert->Set(true);
-      // REVLib's range offset is the middle of the range the encoder reports: 0 for
-      // [-0.5, 0.5) rotations, 0.5 for [0, 1).
-      sparkCfg.absoluteEncoder.RangeOffset(discontinuityPoint->value() - 0.5);
+    // The absolute encoder reads the continuous wrapping range: one rotation, offset by REVLib's
+    // range offset, the middle of the range, from -0.5 to 0.5: 0 for [-0.5, 0.5) rotations, 0.5
+    // for [0, 1).
+    if (wrappingMin && wrappingMax) {
+      const double rangeOffset = (wrappingMin->value() + wrappingMax->value()) / 2.0;
+      if (std::abs(wrappingMax->value() - wrappingMin->value() - 1.0) > 1e-9 ||
+          rangeOffset < -0.5 || rangeOffset > 0.5)
+        throw exceptions::SmartMotorControllerConfigurationException(
+            "SPARK absolute encoder reads one rotation, from [-1, 0) to [0, 1) rotations",
+            "Continuous wrapping could not be applied to the absolute encoder",
+            "WithContinuousWrapping(-0.5_tr, 0.5_tr)");
+      sparkCfg.absoluteEncoder.RangeOffset(rangeOffset);
     }
     if (sim) {
       if (m_maxConfig)
@@ -790,11 +785,6 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
           "Zero offset is only available for absolute encoders",
           "Zero offset could not be applied to the quadrature encoder",
           "WithExternalEncoderZeroOffset");
-    if (discontinuityPoint)
-      throw exceptions::SmartMotorControllerConfigurationException(
-          "Discontinuity point is only available for absolute encoders",
-          "Discontinuity point could not be applied to the quadrature encoder",
-          "WithExternalEncoderDiscontinuityPoint");
     // A SPARK MAX's data port is shared with the absolute encoder; select the alternate encoder.
     if (m_maxConfig) m_maxConfig->alternateEncoder.SetSparkMaxDataPortConfig();
     if (inverted) {
@@ -824,11 +814,15 @@ void SparkWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& config
     if (inverted) detachedConfig.Inverted(*inverted);
     m_detachedEncoderZeroOffset = zeroOffsetRotations;
     detachedConfig.ZeroOffset(m_detachedEncoderZeroOffset);
-    if (discontinuityPoint && hasExternalGearing)
-      m_externalEncoderGearingDiscontinuityAlert->Set(true);
-    // The discontinuity point is 0.5 or 1 rotation; a zero-centered angle wraps at half a turn.
-    detachedConfig.ZeroCentered(
-        std::abs(m_absoluteEncoderDiscontinuityPoint.value() - 0.5) < 1e-9);
+    // The detached encoder reads the continuous wrapping range: [0, 1), or [-0.5, 0.5) zero
+    // centered.
+    const bool zeroCentered = wrappingMin && std::abs(wrappingMin->value() + 0.5) < 1e-9;
+    if (wrappingMin && !zeroCentered && std::abs(wrappingMin->value()) > 1e-9)
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "SPARK detached encoder reads [-0.5, 0.5) or [0, 1) rotations",
+          "Continuous wrapping could not be applied to the detached encoder",
+          "WithContinuousWrapping(-0.5_tr, 0.5_tr) or WithContinuousWrapping(0_tr, 1_tr)");
+    detachedConfig.ZeroCentered(zeroCentered);
     m_detachedEncoder->Configure(detachedConfig, rev::ResetMode::kNoResetSafeParameters);
     if (useExternalEncoder)
       sparkCfg.closedLoop.SetFeedbackSensor(FeedbackSensor::kDetachedAbsoluteEncoder,
@@ -883,6 +877,7 @@ void SparkWrapper::SetupSimulation() {
 }
 
 void SparkWrapper::SimIterate() {
+  if (m_iteratedByLeader) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier || !m_sparkSim) return;
   IterateSimulatedMaxMotionPosition();
   IterateSimulatedArmGravity();
@@ -922,10 +917,11 @@ void SparkWrapper::SimIterate() {
     m_detachedEncoderSimAngle =
         wpi::units::turn_t{m_simSupplier->GetMechanismPosition().value() * mechToEncoder};
   }
+  SmartMotorController::SimIterate();
 }
 
 void SparkWrapper::IterateSimulatedMaxMotionPosition() {
-  if (!SimulatingMaxMotion() || HasExponentialProfile() || m_lqr || !m_setpointPosition) {
+  if (!SimulatingMaxMotion() || HasExponentialProfile() || UsesSystemCoreController() || !m_setpointPosition) {
     m_simMaxMotionState.reset();
     return;
   }
@@ -934,7 +930,7 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
       Profile::State{GetMechanismPosition(), GetMechanismVelocity()});
   // Wrap the goal against the profile, which is continuous even where the sensor wraps.
   const wpi::units::turn_t goal =
-      m_config->GetContinuousWrapping()
+      m_config->IsWrappingContinuous()
           ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, state.position)
           : *m_setpointPosition;
   // The profile runs in mechanism rotations, like MAXMotion.
@@ -984,15 +980,12 @@ void SparkWrapper::IterateSimulatedMaxMotionPosition() {
 void SparkWrapper::IterateSimulatedArmGravity() {
   // Only for a plain position setpoint; the simulated MAXMotion profile adds the gravity itself.
   if (!m_config->GetArmFeedforward(m_slot) || !m_setpointPosition || SimulatingMaxMotion() ||
-      HasExponentialProfile() || m_lqr) {
+      HasExponentialProfile() || UsesSystemCoreController()) {
     return;
   }
   const auto ff = GetSlotFeedforward(*m_config, m_slot);
   if (!ff) return;
-  const wpi::units::turn_t setpoint =
-      m_config->GetContinuousWrapping()
-          ? m_config->GetContinuousWrappingSetpoint(*m_setpointPosition, GetMechanismPosition())
-          : *m_setpointPosition;
+  const wpi::units::turn_t setpoint = *m_setpointPosition;
   // kG times the cosine of the arm's angle, which the SPARK's kCos adds on the robot.
   const double gravityVolts = ff->kG * std::cos(wpi::units::radian_t{GetMechanismPosition()}.value());
   UseVelocityGains(false);
@@ -1016,10 +1009,12 @@ std::optional<wpi::units::turn_t> SparkWrapper::GetExternalEncoderSensorPosition
   }
   if (!absoluteRotations) return std::nullopt;
   // REVLib does not wrap a simulated absolute encoder and does not simulate detached encoders:
-  // report simulated angles in the range the encoder reports, below its discontinuity point.
+  // report simulated angles in the range the encoder reports, the continuous wrapping's or [0, 1)
+  // rotations.
   if (wpi::RobotBase::IsSimulation()) {
-    const double dp = m_absoluteEncoderDiscontinuityPoint.value();
-    absoluteRotations = wpi::math::InputModulus(*absoluteRotations, dp - 1.0, dp);
+    absoluteRotations = wpi::math::InputModulus(
+        *absoluteRotations, m_config->GetWrappingMin().value_or(0_tr).value(),
+        m_config->GetWrappingMax().value_or(1_tr).value());
   }
   return wpi::units::turn_t{*absoluteRotations};
 }
@@ -1093,14 +1088,11 @@ void SparkWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointFeedforwardForce.reset();
   m_setpointPosition = angle;
   // While simulating MAXMotion, SimIterate() follows the profile to this setpoint instead.
-  if (!HasExponentialProfile() && !m_lqr && !SimulatingMaxMotion()) {
-    const wpi::units::turn_t setpoint =
-        m_config->GetContinuousWrapping()
-            ? m_config->GetContinuousWrappingSetpoint(angle, GetMechanismPosition())
-            : angle;
+  if (!HasExponentialProfile() && !UsesSystemCoreController() && !SimulatingMaxMotion()) {
     UseVelocityGains(false);
+    // The SPARK wraps the setpoint over the continuous wrapping range itself.
     ConfigureSpark([&] {
-      return m_sparkPid->SetSetpoint(setpoint.value() * m_mechanismToFeedbackSensorRatio,
+      return m_sparkPid->SetSetpoint(angle.value() * m_mechanismToFeedbackSensorRatio,
                                      m_positionControlType, m_closedLoopSlot);
     });
   }
@@ -1115,7 +1107,7 @@ void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
-  if (!m_lqr) {
+  if (!UsesSystemCoreController()) {
     UseVelocityGains(true);
     ConfigureSpark([&] {
       return m_sparkPid->SetSetpoint(velocity.value() * m_mechanismToFeedbackSensorRatio * 60.0,
@@ -1127,7 +1119,7 @@ void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
 
 void SparkWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
                                wpi::units::newton_t feedforwardForce) {
-  if (m_lqr) {
+  if (UsesSystemCoreController()) {
     // The RoboRIO loop adds the force's voltage.
     SetVelocity(velocity);
     m_setpointFeedforwardForce = feedforwardForce;

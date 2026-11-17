@@ -454,7 +454,7 @@ TEST_CASE_METHOD(TalonParityFixture, "TalonParity.CANcoderExternalEncoder", "[Ta
       .WithExternalEncoder(std::any{&hw.cancoder})
       .WithExternalEncoderGearing(2.0)
       .WithExternalEncoderZeroOffset(0.1_tr)
-      .WithExternalEncoderDiscontinuityPoint(1_tr)
+      .WithContinuousWrapping(0_tr, 1_tr)
       .WithStartingPosition(90_deg);
   TalonFXWrapper smc{&hw.fx, kKraken, &cfg};
   // The external encoder gives the position, so the starting position is not applied.
@@ -488,13 +488,10 @@ TEST_CASE_METHOD(TalonParityFixture, "TalonParity.CANdiNeedsPWMSource", "[TalonP
 TEST_CASE_METHOD(TalonParityFixture, "TalonParity.ExternalEncoderOptionsWithoutEncoderAlert",
                  "[TalonParity]") {
   auto cfg = BaseConfig();
-  cfg.WithFeedback(1.0, 0.0, 0.0)
-      .WithExternalEncoderZeroOffset(0.1_tr)
-      .WithExternalEncoderDiscontinuityPoint(1_tr);
+  cfg.WithFeedback(1.0, 0.0, 0.0).WithExternalEncoderZeroOffset(0.1_tr);
   {
     TalonFXWrapper smc{&hw.fx, kKraken, &cfg};
     CHECK(AlertActive("zero offset is not supported without an external encoder"));
-    CHECK(AlertActive("discontinuity point is not supported without an external encoder"));
   }
   CHECK_FALSE(AlertActive("zero offset is not supported without an external encoder"));
 }

@@ -45,6 +45,8 @@ public class DoubleJointedArmSimSupplier implements SimSupplier {
   private boolean                    inputFed   = false;
   private boolean                    simUpdated = false;
   private final Supplier<Double>     motorDutyCycleSupplier;
+  /** Duty cycle of every motor on this joint, its loosely coupled followers' too, for a given duty cycle. */
+  private final java.util.function.DoubleUnaryOperator mechanismDutyCycle;
   private final DerivativeTimeFilter accel;
   private final LinearFilter         supplyCurrentFilter;
   private final DoubleJointedArmSim  sim;
@@ -63,7 +65,9 @@ public class DoubleJointedArmSimSupplier implements SimSupplier {
     var config = smartMotorController.getConfig();
     sim = simulation;
     this.joint = joint;
-    motorDutyCycleSupplier = smartMotorController::getDutyCycle;
+    // A joint's motors apply each motor controller's own output.
+    motorDutyCycleSupplier = () -> smartMotorController.getMechanismDutyCycle(smartMotorController.getDutyCycle());
+    mechanismDutyCycle = smartMotorController::getMechanismDutyCycle;
     mechGearing = config.getGearing();
     accel = new DerivativeTimeFilter(config.getSimulationPeriod());
     // Based off comment from https://github.com/wpilibsuite/allwpilib/issues/8691
@@ -114,7 +118,7 @@ public class DoubleJointedArmSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorDutyCycle(double dutyCycle) {
     feedInput();
-    setInputVoltage(dutyCycle * getMechanismSupplyVoltage().in(Volts));
+    setInputVoltage(mechanismDutyCycle.applyAsDouble(dutyCycle) * getMechanismSupplyVoltage().in(Volts));
   }
 
   @Override
@@ -130,7 +134,9 @@ public class DoubleJointedArmSimSupplier implements SimSupplier {
   @Override
   public void setMechanismStatorVoltage(Voltage volts) {
     feedInput();
-    setInputVoltage(volts.in(Volts));
+    final double supplyVolts = getMechanismSupplyVoltage().in(Volts);
+    setInputVoltage(supplyVolts == 0 ? volts.in(Volts)
+        : mechanismDutyCycle.applyAsDouble(volts.in(Volts) / supplyVolts) * supplyVolts);
   }
 
   private void setInputVoltage(double volts) {

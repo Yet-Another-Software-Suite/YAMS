@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.command3.Trigger;
+import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearVelocity;
@@ -160,6 +161,10 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
   /**
    * Run the FlyWheel to a velocity within a tolerance, then end the command.
    *
+   * <p>The supplier is read every loop and sent as the setpoint, so a target that changes while the
+   * command runs is followed. The command ends once the mechanism has been within tolerance of the
+   * supplier's current value for 0.1 s.
+   *
    * @param velocity  {@link Supplier} of {@link AngularVelocity}
    * @param tolerance {@link AngularVelocity} tolerance
    * @return {@link Command} that runs the FlyWheel to the desired velocity then moves on.
@@ -169,10 +174,16 @@ public class FlyWheel extends yams.core.mechanisms.velocity.FlyWheel implements 
   public Command runTo(Supplier<AngularVelocity> velocity, AngularVelocity tolerance) {
     SmartMotorController smc = getMotorController();
     return mechanism.run(coroutine -> {
+      Debouncer atTarget = new Debouncer(0.1, DebounceType.RISING);
       smc.startClosedLoopController();
-      AngularVelocity target = velocity.get();
-      smc.setVelocity(target);
-      coroutine.waitUntil(near(target, tolerance).debounce(Seconds.of(0.1), DebounceType.RISING));
+      while (true) {
+        AngularVelocity target = velocity.get();
+        smc.setVelocity(target);
+        if (atTarget.calculate(isNear(target, tolerance))) {
+          return;
+        }
+        coroutine.yield();
+      }
     }).named(mechanism.getName() + " RunToVelocity Supplier");
   }
 

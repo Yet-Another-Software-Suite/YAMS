@@ -45,7 +45,6 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithMotorGearing(
           gearing::MechanismGearing{gearing::GearBox::FromReductionStages({3.0, 4.0})})
       .WithZeroPower(SmartMotorControllerConfig::MotorMode::BRAKE)
-      .WithStatorCurrentLimit(40.0_A)
       .WithMotorInverted(false)
       .WithFeedforward(wpi::math::SimpleMotorFeedforward<wpi::units::turns>{
           1.0_V,
@@ -56,6 +55,7 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
       .WithStartingPosition(0.0_deg)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
+  ForHardware(cfg, hardware, 40.0_A);
 
   switch (profile) {
     case ProfileType::Trapezoid:
@@ -271,7 +271,8 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.HardStops", "[PivotTest]") {
 }
 
 // A loosely coupled follower follows its leader, whether its closed loop runs on the motor
-// controller or on the SystemCore, as a Nova's always does and a SPARK's with an exponential profile
+// controller, as a Nova's does with its motion profile, or on the SystemCore, as a SPARK's with an
+// exponential profile
 // does. When the leader's closed loop is stopped, such as to drive it at a duty cycle, the follower
 // is stopped too, rather than its closed loop driving it on to the last setpoint. Each motor drives
 // its own simulated pivot.
@@ -287,13 +288,21 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       {"SparkMax following a SparkFlex",
        {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlex"},
        {HardwareType::SparkMax, ProfileType::None, "LooseFollowerSparkMax"}},
-      // The follower's closed loop runs on the SystemCore.
+      // The follower's closed loop runs on the Nova, which needs a motion profile for its
+      // feedforward.
       {"Nova following a SparkMax",
        {HardwareType::SparkMax, ProfileType::None, "LooseLeaderSparkMax"},
-       {HardwareType::Nova, ProfileType::None, "LooseFollowerNova"}},
+       {HardwareType::Nova, ProfileType::Trapezoid, "LooseFollowerNova"}},
       {"SparkMax with an exponential profile following a SparkFlex",
        {HardwareType::SparkFlex, ProfileType::None, "LooseLeaderSparkFlexExpo"},
        {HardwareType::SparkMax, ProfileType::Exponential, "LooseFollowerSparkMaxExpo"}},
+      // An A301's closed loop always runs on the SystemCore, as a leader or a follower.
+      {"A301 following a SparkMax",
+       {HardwareType::SparkMax, ProfileType::None, "LooseLeaderSparkMaxA301"},
+       {HardwareType::A301, ProfileType::None, "LooseFollowerA301"}},
+      {"SparkMax following an A301",
+       {HardwareType::A301, ProfileType::None, "LooseLeaderA301"},
+       {HardwareType::SparkMax, ProfileType::None, "LooseFollowerSparkMaxA301"}},
   };
   for (const auto& pair : pairs) {
     DYNAMIC_SECTION(pair.name) {
@@ -307,8 +316,9 @@ TEST_CASE_METHOD(PivotTestFixture, "PivotTest.LooselyCoupledFollowers", "[PivotT
       // The command registry needs the leader's and the follower's subsystems named apart.
       leader.subsystem->SetName(pair.leader.name);
       follower.subsystem->SetName(pair.follower.name);
-      auto* leaderPivot = CreatePivot(leader.smc, leader.subsystem.get());
+      // The follower's pivot comes first, so the leader's pivot leaves the follower's motor out.
       auto* followerPivot = CreatePivot(follower.smc, follower.subsystem.get());
+      auto* leaderPivot = CreatePivot(leader.smc, leader.subsystem.get());
       leader.smc->SetupSimulation();
       follower.smc->SetupSimulation();
       leader.subsystem->m_testRunning = true;

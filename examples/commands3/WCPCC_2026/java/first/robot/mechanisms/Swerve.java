@@ -138,7 +138,6 @@ public class Swerve implements Mechanism {
             .withUseExternalFeedbackEncoder(true)
             .withExternalEncoderInverted(false)
             .withExternalEncoderZeroOffset(encoderOffset)
-            .withExternalEncoderDiscontinuityPoint(Rotations.of(0.5))
             .withContinuousWrapping(Rotations.of(-0.5), Rotations.of(0.5))
             .withZeroPower(MotorMode.BRAKE)
             .withStatorCurrentLimit(kSteerStatorCurrentLimit)

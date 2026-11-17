@@ -13,6 +13,7 @@ import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.revrobotics.spark.A301;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.thrifty.nova.Nova;
@@ -36,6 +37,7 @@ import yams.core.math.LQRConfig;
 import yams.core.math.LQRController;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXSWrapper;
@@ -117,6 +119,16 @@ public class ArmFeedforwardTest {
                     commandedVolts.set(voltage.in(Volts));
                     super.setVoltage(voltage);
                   }
+                }),
+        new Case(
+            "A301",
+            cfg ->
+                new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.withoutCurrentLimits(cfg)) {
+                  @Override
+                  public void setVoltage(Voltage voltage) {
+                    commandedVolts.set(voltage.in(Volts));
+                    super.setVoltage(voltage);
+                  }
                 }));
   }
 
@@ -166,6 +178,8 @@ public class ArmFeedforwardTest {
       talonFX.close();
     } else if (motorController instanceof Nova nova) {
       nova.close();
+    } else if (motorController instanceof A301 a301) {
+      a301.close();
     }
   }
 

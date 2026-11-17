@@ -178,6 +178,11 @@ class SmartMotorControllerTelemetryConfig {
   SmartMotorControllerTelemetryConfig& WithMeasurementPosition();
   /** Enable linear measurement velocity logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMeasurementVelocity();
+  /**
+   * Enable logging the mechanism's circumference if it has one, so a log can convert a rotor reading to meters.
+   * @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithMeasurementCircumference();
   /** Enable mechanism angular position logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithMechanismPosition();
   /** Enable mechanism angular velocity logging. @return *this for chaining. */
@@ -186,6 +191,11 @@ class SmartMotorControllerTelemetryConfig {
   SmartMotorControllerTelemetryConfig& WithRotorPosition();
   /** Enable raw rotor velocity logging. @return *this for chaining. */
   SmartMotorControllerTelemetryConfig& WithRotorVelocity();
+  /**
+   * Enable logging the gear ratio, rotor rotations per mechanism rotation, so a log can convert a rotor reading to the
+   * mechanism's. @return *this for chaining.
+   */
+  SmartMotorControllerTelemetryConfig& WithRotorGearRatio();
 
   // ---- Accessors ----------------------------------------------------------
 

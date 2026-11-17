@@ -11,6 +11,7 @@
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/driverstation/DriverStation.hpp>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/math/filter/Debouncer.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/smartdashboard/Mechanism2d.hpp>
 #include <wpi/smartdashboard/MechanismLigament2d.hpp>
@@ -43,7 +44,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
 
   if (wpi::RobotBase::IsSimulation()) {
     // Create the DCMotorSim using LinearSystemId, then wire up the DCMotorSimSupplier.
-    wpi::math::DCMotor dcMotor = m_smc->GetDCMotor();
+    wpi::math::DCMotor dcMotor = m_smc->GetMechanismDCMotor();
     auto& gearingOpt = m_smc->GetConfig().GetMotorGearing();
     gearing::MechanismGearing gearing = gearingOpt.value_or(gearing::MechanismGearing::kOne);
 
@@ -51,7 +52,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
         dcMotor, m_smc->GetConfig().GetMOI(), gearing.GetMechanismToRotorRatio());
     m_dcMotorSim.emplace(plant, dcMotor);
 
-    m_smc->SetSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
+    m_smc->SetMechanismSimSupplier(std::make_shared<yams::motorcontrollers::simulation::DCMotorSimSupplier>(
         *m_dcMotorSim, *m_smc));
 
     // Size the window from the configured roller diameter; default to 36 in (0.9144 m) like Java.
@@ -64,8 +65,7 @@ FlyWheel::FlyWheel(config::FlyWheelConfig* config, motorcontrollers::SmartMotorC
     m_mechanismLigament = m_mechanismRoot->Append<wpi::MechanismLigament2d>(
         m_name, len, 0_deg, 6, m_flyWheelConfig->GetSimColor());
 
-    yams::telemetry::EnsureMechanismsTelemetryBackend();
-    wpi::telemetry::Log("Mechanisms/" + m_name + "/mechanism", *m_mechanismWindow);
+    PublishMechanismWindow();
   }
 }
 
@@ -88,6 +88,8 @@ void FlyWheel::VisualizationUpdate() {
   }
 
   m_mechanismLigament->SetAngle(wpi::units::degree_t{m_smc->GetMechanismPosition()});
+  // Telemetry logs the Mechanism2d as it is now, so log it again to show the change.
+  PublishMechanismWindow();
 }
 
 std::string FlyWheel::GetName() const { return m_name; }
@@ -166,15 +168,17 @@ wpi::cmd::CommandPtr FlyWheel::RunTo(wpi::units::degrees_per_second_t velocity,
 
 wpi::cmd::CommandPtr FlyWheel::RunTo(std::function<wpi::units::degrees_per_second_t()> velocity,
                                      wpi::units::degrees_per_second_t tolerance) {
-  wpi::units::degrees_per_second_t target = velocity();
-  wpi::cmd::Trigger near = IsNear(target, tolerance).Debounce(wpi::units::second_t{0.1});
-  return wpi::cmd::RunOnce(
-             [this, target] {
-               m_smc->StartClosedLoopController();
-               m_smc->SetVelocity(target);
-             },
-             {m_subsystem})
-      .AndThen(wpi::cmd::WaitUntil([near] { return near.Get(); }))
+  // Follow the supplier every loop, and end once the mechanism has been near its
+  // current value for 0.1 s. One debouncer per command, reset when it starts.
+  auto atTarget = std::make_shared<wpi::math::Debouncer>(wpi::units::second_t{0.1});
+  return wpi::cmd::StartRun([this, atTarget] {
+        atTarget->Calculate(false);
+        m_smc->StartClosedLoopController();
+      },
+                           [this, velocity] { m_smc->SetVelocity(velocity()); }, {m_subsystem})
+      .Until([this, velocity, tolerance, atTarget] {
+        return atTarget->Calculate(IsNear(velocity(), tolerance).Get());
+      })
       .WithName(m_name + " RunTo Supplier");
 }
 

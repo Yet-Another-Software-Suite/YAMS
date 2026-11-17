@@ -493,6 +493,33 @@ public class SwerveInputStreamTelemetryTest {
   }
 
   @Test
+  void codeChangesBetweenTuningLoopsAreNotOverridden() {
+    SwerveInputStream stream =
+        withTelemetry(stream().withScaleTranslation(0.8), TelemetryVerbosity.HIGH);
+
+    stream.withScaleTranslation(0.4);
+    tune(stream);
+    stream.withScaleTranslation(0.6);
+    tune(stream);
+    assertEquals(0.6, published("translationScale"), kTolerance);
+    assertEquals(0.6, stream.getTranslationAxisScale(), kTolerance);
+  }
+
+  @Test
+  void valuesLeftOnTheDashboardAreReplacedWithTheStreamValues() {
+    // E.g. by an earlier telemetry with the same name.
+    dashboard("deadband", 0.3);
+    dashboard("translationCube", true);
+    SwerveInputStream stream = withTelemetry(stream().withDeadband(0.1), TelemetryVerbosity.HIGH);
+
+    assertEquals(0.1, published("deadband"), kTolerance);
+    assertFalse(publishedBoolean("translationCube"));
+    tune(stream);
+    assertEquals(0.1, stream.getAxisDeadband(), kTolerance);
+    assertFalse(stream.isTranslationCubeEnabled());
+  }
+
+  @Test
   void supplierControlledFeaturesAreNotOverridden() {
     boolean[] allianceRelative = {false};
     SwerveInputStream stream =

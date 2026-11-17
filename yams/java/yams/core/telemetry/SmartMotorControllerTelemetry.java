@@ -18,6 +18,8 @@ import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -28,6 +30,7 @@ import yams.core.motorcontrollers.SmartMotorController.ClosedLoopControllerSlot;
 import yams.core.motorcontrollers.SmartMotorController;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 import yams.core.motorcontrollers.enums.ControlMode;
+import yams.core.math.ADRCConfig;
 import yams.core.math.LQRConfig.LQRType;
 
 /**
@@ -97,6 +100,16 @@ public class SmartMotorControllerTelemetry {
       this.config = config;
       doubleFields = config.getDoubleFields(smartMotorController);
       boolFields = config.getBoolFields(smartMotorController);
+      // The ADRC fields only exist for a motor controller running an ADRC, so live tuning always finds one.
+      if (smartMotorController.getADRCController().isEmpty()) {
+        doubleFields.get(DoubleTelemetryField.ADRCDisturbance).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidth).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCObserverBandwidth).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCSystemOrder).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCB0).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).disable();
+        doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).disable();
+      }
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : doubleFields.entrySet()) {
         if (!entry.getValue().enabled)
           continue;
@@ -160,6 +173,7 @@ public class SmartMotorControllerTelemetry {
         case SupplyCurrent -> smc.getSupplyCurrent().ifPresent(current -> dt.set(current.in(Amps)));
         case MotorTemperature -> dt.set(smc.getTemperature().in(Fahrenheit));
         case MeasurementPosition -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(smc.getMeasurementPosition().in(Meters)));
+        case MeasurementCircumference -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(circumference.in(Meters)));
         case MeasurementVelocity -> cfg.getMechanismCircumference().ifPresent(circumference -> dt.set(smc.getMeasurementVelocity().in(MetersPerSecond)));
         case MeasurementAcceleration -> cfg.getMechanismCircumference().ifPresent(c -> dt.set(smc.getMeasurementAcceleration().in(MetersPerSecondPerSecond)));
         case MechanismPosition -> dt.set(smc.getMechanismPosition().in(Rotations));
@@ -167,11 +181,33 @@ public class SmartMotorControllerTelemetry {
         case MechanismAcceleration -> dt.set(smc.getMechanismAcceleration().in(RotationsPerSecondPerSecond));
         case RotorPosition -> dt.set(smc.getRotorPosition().in(Rotations));
         case RotorVelocity -> dt.set(smc.getRotorVelocity().in(RotationsPerSecond));
+        case RotorGearRatio -> dt.set(cfg.getGearing().getMechanismToRotorRatio());
         case ExternalEncoderPosition -> dt.set(smc.getExternalEncoderMechanismPosition().orElse(Rotations.zero()).in(Rotations));
         case ExternalEncoderVelocity -> dt.set(smc.getExternalEncoderMechanismVelocity().orElse(RotationsPerSecond.zero()).in(RotationsPerSecond));
         case ActiveClosedLoopControllerSlot -> dt.set(smc.getClosedLoopControllerSlot().ordinal());
+        case ADRCDisturbance -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getEstimatedDisturbance()));
+        case ADRCBandwidth -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidth()));
+        case ADRCObserverBandwidth -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getObserverBandwidth()));
+        case ADRCSystemOrder -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSystemOrder()));
+        case ADRCB0 -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getB0()));
+        case ADRCSettlingTime -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getSettlingTime().in(Seconds)));
+        case ADRCBandwidthScale -> smc.getADRCController().ifPresent(adrc -> dt.set(adrc.getBandwidthScale()));
       }
     }
+  }
+
+  /**
+   * Set an ADRC config's live-tunable values to the tuning fields.
+   *
+   * @param adrcConfig Config to tune.
+   * @throws IllegalArgumentException if the config refuses a value, after setting the ones before
+   *                                  it.
+   */
+  private void applyADRCTuning(ADRCConfig adrcConfig) {
+    adrcConfig
+        .withB0(doubleFields.get(DoubleTelemetryField.ADRCB0).get())
+        .withSettlingTime(Seconds.of(doubleFields.get(DoubleTelemetryField.ADRCSettlingTime).get()))
+        .withBandwidthScale(doubleFields.get(DoubleTelemetryField.ADRCBandwidthScale).get());
   }
 
   /**
@@ -310,6 +346,26 @@ public class SmartMotorControllerTelemetry {
           case kP -> smartMotorController.setKp(dt.get());
           case kI -> smartMotorController.setKi(dt.get());
           case kD -> smartMotorController.setKd(dt.get());
+          case ADRCB0, ADRCSettlingTime, ADRCBandwidthScale -> {
+            // Kept in the ADRC's config, like a tuned PID. The ADRC reads its settings and gains from the config,
+            // which works the gains out again as they change, so the ADRC runs them on its next step and keeps its
+            // state estimate, so its output doesn't jump. A value the config refuses, such as a b0 of 0, leaves
+            // it as it was and raises an alert. Loosely coupled followers are tuned the same way.
+            List<SmartMotorController> tuned = new ArrayList<>(List.of(smartMotorController));
+            smartMotorController.getLooselyCoupledFollowers().ifPresent(followers -> tuned.addAll(List.of(followers)));
+            for (SmartMotorController smc : tuned) {
+              smc.getConfig().getADRCController(smc.getClosedLoopControllerSlot()).ifPresent(adrcConfig -> {
+                try {
+                  // Tune a copy first, so a refused value leaves every value as it was.
+                  applyADRCTuning(adrcConfig.clone());
+                  applyADRCTuning(adrcConfig);
+                  adrcConfig.reportRejected(Optional.empty());
+                } catch (IllegalArgumentException e) {
+                  adrcConfig.reportRejected(Optional.of(e.getMessage()));
+                }
+              });
+            }
+          }
           case kS -> smartMotorController.setKs(dt.get());
           case kV -> smartMotorController.setKv(dt.get());
           case kA -> smartMotorController.setKa(dt.get());
@@ -523,6 +579,20 @@ public class SmartMotorControllerTelemetry {
     kI("closedloop/feedback/kI", 0, true, "none"),
     /** kD */
     kD("closedloop/feedback/kD", 0, true, "none"),
+    /** ADRC estimated total disturbance. */
+    ADRCDisturbance("closedloop/adrc/disturbance", 0, false, "none"),
+    /** ADRC closed-loop bandwidth, radians per second. */
+    ADRCBandwidth("closedloop/adrc/bandwidth", 0, false, "radians_per_second"),
+    /** ADRC ESO observer bandwidth, radians per second. */
+    ADRCObserverBandwidth("closedloop/adrc/observerBandwidth", 0, false, "radians_per_second"),
+    /** ADRC plant order. */
+    ADRCSystemOrder("closedloop/adrc/systemOrder", 0, false, "none"),
+    /** ADRC input gain, in mechanism units per volt per second squared. */
+    ADRCB0("closedloop/adrc/b0", 0, true, "none"),
+    /** ADRC desired closed-loop settling time. */
+    ADRCSettlingTime("closedloop/adrc/settlingTime", 0.2, true, "seconds"),
+    /** ADRC closed-loop bandwidth scale. */
+    ADRCBandwidthScale("closedloop/adrc/bandwidthScale", 1, true, "none"),
     /** LQR position error tolerance (qelms), in degrees or meters. Only with an arm or elevator LQR. */
     LQRQelmsPosition("closedloop/lqr/qelms/position", 0, true, "tunable_position"),
     /** LQR velocity error tolerance (qelms), in RPM or meters per second. */
@@ -578,6 +648,11 @@ public class SmartMotorControllerTelemetry {
     MotorTemperature("motor/temperature", 0, false, "fahrenheit"),
     /** Measurement position */
     MeasurementPosition("measurement/position", 0, false, "meters"),
+    /**
+     * The mechanism's circumference, meters per mechanism rotation, published only when the mechanism
+     * has one: a rotor reading divided by {@code rotor/gearRatio} and times this is in meters.
+     */
+    MeasurementCircumference("measurement/circumference", 0, false, "meters"),
     /** Measurement velocity. */
     MeasurementVelocity("measurement/velocity", 0, false, "meters_per_second"),
     /** Measurement acceleration. */
@@ -600,6 +675,11 @@ public class SmartMotorControllerTelemetry {
     RotorPosition("rotor/position", 0, false, "rotations"),
     /** Rotor velocity in rotations. */
     RotorVelocity("rotor/velocity", 0, false, "rotations_per_second"),
+    /**
+     * Rotor rotations per mechanism rotation, the reduction from the motor config's gearing: 60 for a
+     * 60:1 arm. Divide a rotor reading by it to get the mechanism's.
+     */
+    RotorGearRatio("rotor/gearRatio", 1, false, "none"),
     /** External encoder's mechanism position in rotations, published only when an external encoder is defined. */
     ExternalEncoderPosition("externalencoder/position", 0, false, "rotations"),
     /** External encoder's mechanism velocity in rotations per second, published only when an external encoder is defined. */

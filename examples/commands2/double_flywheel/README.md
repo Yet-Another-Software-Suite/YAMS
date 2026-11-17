@@ -37,9 +37,9 @@ tuning both.
    - The chart shows both wheels, the upper one dashed.
    - **Copy these gains** on the Settings card copies one wheel's gains to the other.
 
-The gains start low on purpose (kV 0.1 V per rotation per second, where about 0.127 holds a NEO at speed), so both
-wheels settle short of their setpoints until they are tuned. Copy the tuned values back into
-`DoubleFlyWheelSubsystem` when you are done.
+The gains (kP 0.5, kV 0.125 V per rotation per second) bring both wheels to their setpoints in simulation, so start
+from them and tune for your robot's wheels. Copy the tuned values back into `DoubleFlyWheelSubsystem` when you are
+done.
 
 ## Controls
 
@@ -57,3 +57,6 @@ that:
 - each wheel has its own gains;
 - a voltage drives only its wheel;
 - stopping Live Tuning turns off every wheel's voltage.
+
+`DoubleFlyWheelShotTest` holds the right bumper in Teleop and checks that both wheels reach their shot speeds, within
+the ready tolerance, in a second, then coast down when it is let go.

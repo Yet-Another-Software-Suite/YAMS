@@ -18,6 +18,7 @@
 #include <wpi/system/Timer.hpp>
 #include <wpi/framework/RobotBase.hpp>
 #include <wpi/math/system/Models.hpp>
+#include <wpi/math/util/MathUtil.hpp>
 #include <wpi/units/angular_jerk.hpp>
 #include <wpi/units/dimensionless.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
@@ -203,10 +204,6 @@ TalonFXWrapper::TalonFXWrapper(hardware::TalonFX* talon, wpi::math::DCMotor dcMo
       "YAMS", AlertId("ZeroOffset"),
       GetName() + " zero offset is not supported without an external encoder.",
       wpi::util::Alert::Level::HIGH);
-  m_discontinuityPointNoExternalEncoderAlert.emplace(
-      "YAMS", AlertId("DiscontinuityPoint"),
-      GetName() + " discontinuity point is not supported without an external encoder.",
-      wpi::util::Alert::Level::HIGH);
 
   SetupSimulation();
   try {
@@ -225,8 +222,6 @@ TalonFXWrapper::~TalonFXWrapper() {
   if (m_rioControllerAlert) m_rioControllerAlert->Set(false);
   if (m_startingPositionExternalEncoderAlert) m_startingPositionExternalEncoderAlert->Set(false);
   if (m_zeroOffsetNoExternalEncoderAlert) m_zeroOffsetNoExternalEncoderAlert->Set(false);
-  if (m_discontinuityPointNoExternalEncoderAlert)
-    m_discontinuityPointNoExternalEncoderAlert->Set(false);
 }
 
 // ---- Helpers ----------------------------------------------------------------
@@ -450,7 +445,6 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   m_rioControllerAlert->Set(false);
   m_startingPositionExternalEncoderAlert->Set(false);
   m_zeroOffsetNoExternalEncoderAlert->Set(false);
-  m_discontinuityPointNoExternalEncoderAlert->Set(false);
   LoadLooselyCoupledFollowers();
 
   // LQR and software PID from the active gain slot for IterateClosedLoopController.
@@ -460,6 +454,8 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   } else {
     m_lqr.reset();
   }
+  // An ADRC runs on the SystemCore, as an LQR does; it was written by FRC Team 8331.
+  ApplyADRCConfig(config);
   if (gains.kP != 0.0 || gains.kI != 0.0 || gains.kD != 0.0) {
     m_pid = wpi::math::PIDController{gains.kP, gains.kI, gains.kD};
   } else {
@@ -492,8 +488,9 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   }
 
   // Phoenix 6 has no LQR: hand control to the RoboRIO when one is configured.
-  if (m_lqr) {
-    if (config.GetClosedLoopTolerance())
+  if (UsesSystemCoreController()) {
+    // An ADRC can use a closed loop tolerance; an LQR cannot.
+    if (!m_adrc && config.GetClosedLoopTolerance())
       throw std::invalid_argument("[ERROR] Cannot set closed-loop controller error tolerance on " +
                                   GetName());
     m_rioControllerAlert->Set(true);
@@ -515,7 +512,7 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
     m_closedLoopControllerThread.reset();
   }
 
-  if (config.GetClosedLoopTolerance())
+  if (config.GetClosedLoopTolerance() && !m_adrc)
     throw ConfigException("Closed loop tolerance is not available on TalonFX",
                           "Cannot set closed loop tolerance on TalonFX", "WithClosedLoopTolerance");
 
@@ -569,7 +566,8 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   ApplyExternalEncoder(config);
 
   // Continuous wrapping. Set either way: the configuration starts from the device's previous one.
-  m_talonConfig.ClosedLoopGeneral.ContinuousWrap = config.GetContinuousWrapping().has_value();
+  m_talonConfig.ClosedLoopGeneral.ContinuousWrap =
+      config.GetWrappingMax().has_value() && config.IsWrappingContinuous();
 
   if (config.GetEncoderInverted())
     throw ConfigException("Integrated encoder phase cannot be set", "Cannot configure TalonFX!",
@@ -579,13 +577,13 @@ bool TalonFXWrapper::ApplyConfig(const SmartMotorControllerConfig& config) {
   ApplyVendorControlRequest(config);
 
   // Unsupported options.
-  if (config.GetClosedLoopControlPeriod())
+  if (config.GetClosedLoopControlPeriod() && !m_adrc)
     throw std::invalid_argument("[ERROR] ClosedLoopControlPeriod is not supported");
   // The cutoff is checked by IterateClosedLoopController(), which only runs with an LQR controller:
   // PID and motion profiles run on the Talon and never reach it.
-  if (config.GetTemperatureCutoff() && !m_lqr)
-    throw std::invalid_argument("[ERROR] TemperatureCutoff is only supported with an LQR controller");
-  if (config.GetFeedbackSynchronizationThreshold())
+  if (config.GetTemperatureCutoff() && !UsesSystemCoreController())
+    throw std::invalid_argument("[ERROR] TemperatureCutoff is only supported with an LQR or ADRC controller");
+  if (config.GetFeedbackSynchronizationThreshold() && !UsesSystemCoreController())
     throw std::invalid_argument("[ERROR] FeedbackSynchronizationThreshold is not supported");
   if (config.GetVoltageCompensation())
     throw std::invalid_argument("[ERROR] VoltageCompensation is not supported");
@@ -606,6 +604,16 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
     // The external encoder sets the position; the starting position is not applied.
     if (startingPosition) m_startingPositionExternalEncoderAlert->Set(true);
 
+    // A CANcoder or CANdi reads the wrapping range: its AbsoluteSensorDiscontinuityPoint,
+    // the wrapping maximum, is from 0 to 1 rotation.
+    const bool absoluteEncoder = std::any_cast<hardware::CANcoder*>(&*encoder) ||
+                                 std::any_cast<hardware::CANdi*>(&*encoder);
+    if (auto max = config.GetWrappingMax();
+        absoluteEncoder && max && (*max < 0_tr || *max > 1_tr))
+      throw exceptions::SmartMotorControllerConfigurationException(
+          "CANcoder and CANdi read a range from [-1, 0) to [0, 1) rotations",
+          "Continuous wrapping could not be applied to the absolute encoder",
+          "WithContinuousWrapping(-0.5_tr, 0.5_tr)");
     if (auto* pp = std::any_cast<hardware::CANcoder*>(&*encoder); pp && *pp) {
       m_cancoder = *pp;
       WriteSensorRatios(config);
@@ -623,8 +631,9 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
         cancoderConfig.MagnetSensor.MagnetOffset = *offset;
         m_talonConfig.Feedback.FeedbackRotorOffset = 0_tr;
       }
-      if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
-        cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *dp;
+      // The CANcoder reads the wrapping range.
+      if (auto max = config.GetWrappingMax(); max)
+        cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = *max;
       configurator.Apply(cancoderConfig);
     } else if (auto* pp = std::any_cast<hardware::CANdi*>(&*encoder); pp && *pp) {
       m_candi = *pp;
@@ -646,8 +655,8 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
           pwm.AbsoluteSensorOffset = *offset;
           m_talonConfig.Feedback.FeedbackRotorOffset = 0_tr;
         }
-        if (auto dp = config.GetExternalEncoderDiscontinuityPoint(); dp)
-          pwm.AbsoluteSensorDiscontinuityPoint = *dp;
+        // The CANdi reads the wrapping range.
+        if (auto max = config.GetWrappingMax(); max) pwm.AbsoluteSensorDiscontinuityPoint = *max;
       };
       if (UseCANdiPWM1()) {
         configurePWM(candiConfig.PWM1);
@@ -697,8 +706,6 @@ void TalonFXWrapper::ApplyExternalEncoder(const SmartMotorControllerConfig& conf
       if (applied.IsOK()) break;
     }
   }
-  if (config.GetExternalEncoderDiscontinuityPoint())
-    m_discontinuityPointNoExternalEncoderAlert->Set(true);
 }
 
 void TalonFXWrapper::ApplyFollowers(const SmartMotorControllerConfig& config) {
@@ -792,6 +799,7 @@ void TalonFXWrapper::SetupSimulation() {
 }
 
 void TalonFXWrapper::SimIterate() {
+  if (m_iteratedByLeader) return;
   if (!wpi::RobotBase::IsSimulation() || !m_simSupplier) return;
 
   auto& sim = m_talon->GetSimState();
@@ -808,6 +816,7 @@ void TalonFXWrapper::SimIterate() {
   sim.SetRotorAcceleration(
       wpi::units::turns_per_second_squared_t{m_simSupplier->GetRotorAcceleration()});
 
+  SmartMotorController::SimIterate();
   if (!m_cancoder && !m_candi) return;
   // The external encoder turns with the mechanism through its gearing; its reading includes the
   // zero offset.
@@ -827,15 +836,23 @@ void TalonFXWrapper::SimIterate() {
     cancoderSim.SetMagnetHealth(signals::MagnetHealthValue::Magnet_Green);
   }
   if (m_candi) {
+    // Phoenix does not wrap a simulated CANdi's PWM position: report it in the range the CANdi
+    // reads, the wrapping's. The CANdi adds its zero offset to the raw position.
+    wpi::units::turn_t candiPosition = sensorPosition;
+    if (auto max = m_config->GetWrappingMax(); max)
+      candiPosition = wpi::units::turn_t{wpi::math::InputModulus(
+                          (sensorPosition + zeroOffset).value(),
+                          m_config->GetWrappingMin()->value(), max->value())} -
+                      zeroOffset;
     auto& candiSim = m_candi->GetSimState();
     candiSim.SetSupplyVoltage(m_simSupplier->GetMechanismSupplyVoltage());
     if (UseCANdiPWM1()) {
       candiSim.SetPwm1Connected(true);
-      candiSim.SetPwm1Position(sensorPosition);
+      candiSim.SetPwm1Position(candiPosition);
       candiSim.SetPwm1Velocity(sensorVelocity);
     } else if (UseCANdiPWM2()) {
       candiSim.SetPwm2Connected(true);
-      candiSim.SetPwm2Position(sensorPosition);
+      candiSim.SetPwm2Position(candiPosition);
       candiSim.SetPwm2Velocity(sensorVelocity);
     }
   }
@@ -886,7 +903,7 @@ void TalonFXWrapper::SetPosition(wpi::units::turn_t angle) {
   m_setpointFeedforwardForce.reset();
   m_setpointPosition = angle;
   // With an LQR the RoboRIO closed loop drives the motor.
-  if (m_lqr) return;
+  if (UsesSystemCoreController()) return;
   EnsureRequest([&] {
     return std::visit([&](auto& req) { return m_talon->SetControl(req.WithPosition(angle)); },
                       m_positionReq);
@@ -902,7 +919,7 @@ void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
   m_setpointPosition.reset();
   m_setpointVelocity = velocity;
   m_setpointFeedforwardForce.reset();
-  if (m_lqr) return;
+  if (UsesSystemCoreController()) return;
   // The request objects are reused, so clear any feedforward left by SetVelocity(velocity, force).
   EnsureRequest([&] {
     return std::visit(
@@ -917,7 +934,7 @@ void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity) {
 
 void TalonFXWrapper::SetVelocity(wpi::units::turns_per_second_t velocity,
                                  wpi::units::newton_t feedforwardForce) {
-  if (m_lqr) {
+  if (UsesSystemCoreController()) {
     // The RoboRIO loop adds the force's voltage.
     SetVelocity(velocity);
     m_setpointFeedforwardForce = feedforwardForce;

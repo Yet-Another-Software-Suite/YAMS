@@ -7,14 +7,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.RPM;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Second;
 import static org.wpilib.units.Units.Value;
 import static org.wpilib.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
+import com.thrifty.nova.Nova;
+import com.thrifty.core.MotorConfig.MPGravityType;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +36,7 @@ import yams.core.gearing.GearBox;
 import yams.core.gearing.MechanismGearing;
 import yams.core.motorcontrollers.enums.ControlMode;
 import yams.core.motorcontrollers.enums.MotorMode;
+import yams.core.motorcontrollers.local.A301Wrapper;
 import yams.core.motorcontrollers.local.NovaWrapper;
 import yams.core.motorcontrollers.local.SparkWrapper;
 import yams.core.motorcontrollers.remote.TalonFXWrapper;
@@ -103,28 +110,62 @@ public class ClosedLoopGainUnitsTest {
     assertSpark(kAVoltsPerRotationPerSecondSquared / encoderRpmPerMechanismRotationPerSecond, feedForward::getkA, "kA per RPM per second");
   }
 
+  /** kA of {@link #systemCoreArmConfig(String)}, in volts per rotation per second squared. */
+  private static final double kSystemCoreKa = 0.05;
+
   /**
-   * The Nova's loop runs on the SystemCore. From rest to 1 rotation per second in one 20 ms loop is
-   * 50 rotations per second squared, so a kA of 0.05 volts per rotation per second squared asks for
-   * 2.5 V. Read per radian, the same kA would ask for 2π times as much.
+   * An arm with only a kA, and a velocity profile fast enough to reach 1 rotation per second in one
+   * loop.
    */
+  private static SmartMotorControllerConfig systemCoreArmConfig(String name) {
+    return config(name)
+        .withFeedforward(new ArmFeedforward(0, 0, 0, kSystemCoreKa))
+        .withTrapezoidalProfile(RotationsPerSecondPerSecond.of(1000), RotationsPerSecondPerSecond.per(Second).of(1e6));
+  }
+
+  /**
+   * A closed loop on the SystemCore uses an arm's kA per rotation. From rest to 1 rotation per second
+   * in one 20 ms loop is 50 rotations per second squared, so a kA of 0.05 volts per rotation per
+   * second squared asks for 2.5 V. Read per radian, the same kA would ask for 2π times as much.
+   *
+   * @param smc Motor controller made from {@link #systemCoreArmConfig(String)}.
+   * @param commandedVolts The voltage the motor controller was last commanded.
+   */
+  private static void assertSystemCoreUsesArmGainsPerRotation(SmartMotorController smc, AtomicReference<Double> commandedVolts) {
+    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
+    smc.setVelocity(RotationsPerSecond.of(1));
+    commandedVolts.set(Double.NaN);
+    smc.iterateClosedLoopController();
+    final double accelerationRotationsPerSecondSquared = RotationsPerSecond.of(1).in(RotationsPerSecond) / 0.020;
+    assertEquals(kSystemCoreKa * accelerationRotationsPerSecondSquared, commandedVolts.get(), 0.1, "volts from kA per rotation per second squared");
+  }
+
+  /** A Nova's velocity profile runs on the SystemCore. */
   @Test
   void systemCoreUsesArmGainsPerRotation() {
-    final double kA = 0.05;
     final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
-    final var smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), config("Nova").withFeedforward(new ArmFeedforward(0, 0, 0, kA))) {
+    final var smc = new NovaWrapper(DeviceCreator.createNova(), DCMotor.getNEO(1), systemCoreArmConfig("Nova")) {
       @Override
       public void setVoltage(Voltage voltage) {
         commandedVolts.set(voltage.in(Volts));
         super.setVoltage(voltage);
       }
     };
-    ((SmartMotorControllerTestSubsystem) ((yams.commands2.config.SmartMotorControllerConfig) smc.getConfig()).getSubsystem()).setSMC(smc);
-    smc.setVelocity(RotationsPerSecond.of(1));
-    commandedVolts.set(Double.NaN);
-    smc.iterateClosedLoopController();
-    final double accelerationRotationsPerSecondSquared = RotationsPerSecond.of(1).in(RotationsPerSecond) / 0.020;
-    assertEquals(kA * accelerationRotationsPerSecondSquared, commandedVolts.get(), 0.1, "volts from kA per rotation per second squared");
+    assertSystemCoreUsesArmGainsPerRotation(smc, commandedVolts);
+  }
+
+  /** An A301's closed loop always runs on the SystemCore. */
+  @Test
+  void a301UsesArmGainsPerRotation() {
+    final AtomicReference<Double> commandedVolts = new AtomicReference<>(Double.NaN);
+    final var smc = new A301Wrapper(DeviceCreator.createA301(), DeviceCreator.forA301(systemCoreArmConfig("A301"))) {
+      @Override
+      public void setVoltage(Voltage voltage) {
+        commandedVolts.set(voltage.in(Volts));
+        super.setVoltage(voltage);
+      }
+    };
+    assertSystemCoreUsesArmGainsPerRotation(smc, commandedVolts);
   }
 
   /** An elevator whose drum moves 0.2 m per mechanism rotation. */
@@ -170,5 +211,54 @@ public class ClosedLoopGainUnitsTest {
     assertSpark(kAVoltsPerMeterPerSecondSquared / encoderRpmPerMeterPerSecond, feedForward::getkA, "kA per encoder RPM per second");
     assertSpark(0.1, feedForward::getkS, "kS is in volts");
     assertSpark(0.2, feedForward::getkG, "kG is in volts");
+  }
+
+  /** Wait for the Nova to report a value it was configured with. */
+  private static void assertNova(double expected, DoubleSupplier actual, String what) throws InterruptedException {
+    assertTrue(
+        AbsoluteEncoderCases.eventually(() -> Math.abs(actual.getAsDouble() - expected) <= 1e-4 * Math.max(1, Math.abs(expected))),
+        what + ": expected " + expected + " on the Nova but was " + actual.getAsDouble());
+  }
+
+  /**
+   * The Nova runs the closed loop in mechanism rotations, with its sensor-to-mechanism ratio, so an
+   * arm's gains, integral and derivative too, are sent per rotation as they are. Its feedforward is its motion profile's, with cosine gravity.
+   */
+  @Test
+  void novaGetsArmGainsPerMechanismRotation() throws InterruptedException {
+    final Nova nova = DeviceCreator.createNova();
+    new NovaWrapper(nova, DCMotor.getNEO(1),
+        config("Nova arm")
+            .withClosedLoopController(8, 2, 0.5)
+            .withFeedforward(new ArmFeedforward(0.1, 0.2, kVVoltsPerRotationPerSecond, kAVoltsPerRotationPerSecondSquared))
+            .withTrapezoidalProfile(RotationsPerSecond.of(2), RotationsPerSecondPerSecond.of(4)));
+    final var status = nova.status();
+    assertNova(kGearRatio, status::getSensorToMechanismRatio, "motor rotations per mechanism rotation");
+    assertNova(8, status.Pid0::getP, "kP per mechanism rotation");
+    assertNova(2, status.Pid0::getI, "kI per second");
+    assertNova(0.5, status.Pid0::getD, "kD per second");
+    assertNova(2, status.Mp0::getMaxVel, "maximum velocity in rotations per second");
+    assertNova(4, status.Mp0::getMaxAccel, "maximum acceleration in rotations per second squared");
+    assertNova(kVVoltsPerRotationPerSecond, status.Mp0::getKV, "kV per rotation per second");
+    assertNova(kAVoltsPerRotationPerSecondSquared, status.Mp0::getKA, "kA per rotation per second squared");
+    assertNova(0.1, status.Mp0::getKS, "kS is in volts");
+    assertNova(0.2, status.Mp0::getKG, "kG is in volts");
+    assertEquals(MPGravityType.COSINE, status.Mp0.getGravType(), "an arm's gravity is cosine");
+  }
+
+  /** An elevator's gains and feedforward are per meter; the Nova's per mechanism rotation. */
+  @Test
+  void novaGetsElevatorGainsPerMechanismRotation() throws InterruptedException {
+    final Nova nova = DeviceCreator.createNova();
+    new NovaWrapper(nova, DCMotor.getNEO(1),
+        elevatorConfig("Nova elevator").withTrapezoidalProfile(MetersPerSecond.of(1), MetersPerSecondPerSecond.of(2)));
+    final var status = nova.status();
+    assertNova(kPVoltsPerMeter / mechanismRotationsPerMeter(), status.Pid0::getP, "kP per mechanism rotation");
+    assertNova(1 * mechanismRotationsPerMeter(), status.Mp0::getMaxVel, "maximum velocity in mechanism rotations per second");
+    assertNova(kVVoltsPerMeterPerSecond / mechanismRotationsPerMeter(), status.Mp0::getKV, "kV per mechanism rotation per second");
+    assertNova(kAVoltsPerMeterPerSecondSquared / mechanismRotationsPerMeter(), status.Mp0::getKA, "kA per mechanism rotation per second squared");
+    assertNova(0.1, status.Mp0::getKS, "kS is in volts");
+    assertNova(0.2, status.Mp0::getKG, "kG is in volts");
+    assertEquals(MPGravityType.CONSTANT, status.Mp0.getGravType(), "an elevator's gravity is constant");
   }
 }

@@ -17,6 +17,10 @@
 // #include "subsystems/SwerveSubsystem.h"
 // #include "subsystems/DiffDriveSubsystem.h"
 // #include "subsystems/doubleflywheel/DoubleFlyWheelSubsystem.h"
+// An arm, an elevator and a shooter, each run by an ADRC (written by FRC Team 8331) instead of a PID:
+// #include "subsystems/adrc/ADRCArmSubsystem.h"
+// #include "subsystems/adrc/ADRCElevatorSubsystem.h"
+// #include "subsystems/adrc/ADRCShooterSubsystem.h"
 
 class RobotContainer {
  public:
@@ -36,6 +40,9 @@ class RobotContainer {
   // SwerveSubsystem m_drive;
   // DiffDriveSubsystem m_diffDrive;
   // DoubleFlyWheelSubsystem m_flyWheelSubsystem;
+  // ADRCArmSubsystem m_adrcArm;
+  // ADRCElevatorSubsystem m_adrcElevator;
+  // ADRCShooterSubsystem m_adrcShooter;
 
   void ConfigureBindings();
 };

@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 #include <wpi/framework/RobotBase.hpp>
+#include <wpi/hal/UsageReporting.hpp>
 #include <wpi/math/system/Models.hpp>
 #include <wpi/math/util/MathUtil.hpp>
 #include <wpi/simulation/SingleJointedArmSim.hpp>
@@ -92,8 +93,6 @@ std::string_view SmartMotorControllerConfig::ToString(ExternalEncoderOptions opt
   switch (opt) {
     case ExternalEncoderOptions::ZeroOffset:
       return "ZeroOffset";
-    case ExternalEncoderOptions::DiscontinuityPoint:
-      return "DiscontinuityPoint";
     case ExternalEncoderOptions::UseExternalFeedback:
       return "UseExternalFeedback";
     case ExternalEncoderOptions::ExternalGearing:
@@ -137,7 +136,6 @@ void SmartMotorControllerConfig::ResetValidationCheck() const {
   };
   m_externalEncoderOptions = {
       ExternalEncoderOptions::ZeroOffset,
-      ExternalEncoderOptions::DiscontinuityPoint,
       ExternalEncoderOptions::UseExternalFeedback,
       ExternalEncoderOptions::ExternalGearing,
       ExternalEncoderOptions::ExternalEncoderInverted,
@@ -165,6 +163,10 @@ void SmartMotorControllerConfig::ValidateExternalEncoderOptions() const {
       "Call the corresponding getter for each missing option in ApplyConfig");
 }
 
+SmartMotorControllerConfig::SmartMotorControllerConfig() {
+  HAL_ReportUsage("SmartMotorController", "YAMS");
+}
+
 // ---- Feedback -----------------------------------------------------------
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
@@ -174,6 +176,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedback(
   s.kI = kI;
   s.kD = kD;
   m_slotHasFeedback[SlotIndex(slot)] = true;
+  // A PID replaces the slot's ADRC.
+  m_adrc[SlotIndex(slot)].config.reset();
   return *this;
 }
 
@@ -292,6 +296,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
     wpi::units::kilogram_square_meter_t moi) {
   using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
   m_moi = moi;
+  m_momentOfInertiaConfigured = true;
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
   auto sys = wpi::math::Models::FlywheelFromPhysicalConstants(motor, moi, gearing);
   // A is [1/s], B is [(rad/s²)/V] from the flywheel velocity model.
@@ -367,6 +372,25 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithLQR(const math::LQRConfig& lqrConfig,
                                                                 ClosedLoopControllerSlot slot) {
   m_slots[SlotIndex(slot)].lqr = lqrConfig;
+  // An LQR replaces the slot's ADRC.
+  m_adrc[SlotIndex(slot)].config.reset();
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithADRCController(const math::ADRCConfig& adrcConfig,
+                                                                           ClosedLoopControllerSlot slot) {
+  const int i = SlotIndex(slot);
+  m_adrc[i].config = std::make_shared<math::ADRCConfig>(adrcConfig);
+  // The ADRC's observer estimates the disturbance a feedforward models, so keeping both would count the plant twice.
+  // Clear the slot's PID, LQR and every feedforward, and their simulation overrides.
+  m_slots[i] = PIDGains{};
+  m_slotHasFeedback[i] = false;
+  m_simGains[i] = SimGainsOverride{};
+  return *this;
+}
+
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithoutADRCController(ClosedLoopControllerSlot slot) {
+  m_adrc[SlotIndex(slot)].config.reset();
   return *this;
 }
 
@@ -378,7 +402,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearClosedLoopCont
 
 bool SmartMotorControllerConfig::HasClosedLoopController() const {
   for (int i = 0; i < kNumSlots; ++i) {
-    if (m_slotHasFeedback[i] || m_slots[i].lqr) return true;
+    if (m_slotHasFeedback[i] || m_slots[i].lqr || m_adrc[i].config) return true;
   }
   return false;
 }
@@ -447,7 +471,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismRadius(
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMechanismLimits(
     wpi::units::turn_t lower, wpi::units::turn_t upper) {
-  if (m_continuousWrappingMax)
+  if (m_wrappingMax && m_wrappingContinuous)
     throw exceptions::SmartMotorControllerConfigurationException(
         "Soft limits set while configuring continuous wrapping", "Cannot set soft limits",
         "WithContinuousWrapping() should be removed");
@@ -502,6 +526,14 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithFeedbackSynchronizat
   return *this;
 }
 
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithWrapping(wpi::units::turn_t min,
+                                                                  wpi::units::turn_t max) {
+  m_wrappingMin = min;
+  m_wrappingMax = max;
+  m_wrappingContinuous = false;
+  return *this;
+}
+
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     wpi::units::turn_t min, wpi::units::turn_t max) {
   if (m_mechLowerLimit || m_mechUpperLimit)
@@ -516,8 +548,9 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithContinuousWrapping(
     throw exceptions::SmartMotorControllerConfigurationException(
         "No closed loop controller used", "Cannot set continuous wrapping!",
         "WithFeedback() or WithLQR()");
-  m_continuousWrappingMin = min;
-  m_continuousWrappingMax = max;
+  m_wrappingMin = min;
+  m_wrappingMax = max;
+  m_wrappingContinuous = true;
   return *this;
 }
 
@@ -594,7 +627,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderZeroO
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGearing(
     const gearing::MechanismGearing& gearing) {
-  if (gearing.GetRotorToMechanismRatio() > 1.0) {
+  if (gearing.GetMechanismToRotorRatio() > 1.0) {
     WPILIB_ReportWarning(
         "[IMPORTANT] Your gearing is set in a way that the external encoder will exceed the "
         "maximum reading, this WILL result in multiple angles being read as the same angle. "
@@ -608,19 +641,6 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderGeari
     double reductionRatio) {
   return WithExternalEncoderGearing(gearing::MechanismGearing{reductionRatio});
 }
-SmartMotorControllerConfig& SmartMotorControllerConfig::WithExternalEncoderDiscontinuityPoint(
-    wpi::units::turn_t discontinuityPoint) {
-  if (discontinuityPoint != wpi::units::turn_t{0.5} &&
-      discontinuityPoint != wpi::units::turn_t{1.0}) {
-    throw exceptions::SmartMotorControllerConfigurationException(
-        "Cannot set external encoder discontinuity point",
-        "Discontinuity point must be 0.5 or 1 rotations",
-        "WithExternalEncoderDiscontinuityPoint(wpi::units::turn_t{0.5})");
-  }
-  m_externalEncoderDiscontinuityPoint = discontinuityPoint;
-  return *this;
-}
-
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
     const std::string& name, TelemetryVerbosity verbosity) {
   m_telemetryName = name;
@@ -660,12 +680,21 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimulationPeriod(
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
     wpi::units::kilogram_square_meter_t moi) {
   m_moi = moi;
+  m_momentOfInertiaConfigured = true;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(wpi::units::meter_t length,
                                                                 wpi::units::kilogram_t mass) {
   m_moi = wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass);
+  m_momentOfInertiaConfigured = true;
+  return *this;
+}
+SmartMotorControllerConfig& SmartMotorControllerConfig::WithWheelMOI(wpi::units::meter_t diameter,
+                                                                     wpi::units::kilogram_t mass) {
+  wpi::units::meter_t radius = diameter / 2.0;
+  m_moi = 0.5 * mass * radius * radius;
+  m_momentOfInertiaConfigured = true;
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
@@ -820,12 +849,16 @@ SmartMotorControllerConfig::PIDGains SmartMotorControllerConfig::GetSlotGains(
       result.elevatorFF.reset();
     }
   }
+  if (m_adrc[SlotIndex(slot)].config) {
+    result = PIDGains{};
+  }
   return result;
 }
 
 std::optional<wpi::math::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].armFF)
     return m_simGains[SlotIndex(slot)].armFF;
   return m_slots[SlotIndex(slot)].armFF;
@@ -833,6 +866,7 @@ std::optional<wpi::math::ArmFeedforward> SmartMotorControllerConfig::GetArmFeedf
 std::optional<wpi::math::ElevatorFeedforward> SmartMotorControllerConfig::GetElevatorFeedforward(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].elevatorFF)
     return m_simGains[SlotIndex(slot)].elevatorFF;
   return m_slots[SlotIndex(slot)].elevatorFF;
@@ -840,6 +874,7 @@ std::optional<wpi::math::ElevatorFeedforward> SmartMotorControllerConfig::GetEle
 std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::turns>>
 SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].simpleFF)
     return m_simGains[SlotIndex(slot)].simpleFF;
   return m_slots[SlotIndex(slot)].simpleFF;
@@ -847,9 +882,16 @@ SmartMotorControllerConfig::GetSimpleFeedforward(ClosedLoopControllerSlot slot) 
 std::optional<math::LQRConfig> SmartMotorControllerConfig::GetLQR(
     ClosedLoopControllerSlot slot) const {
   m_basicOptions.erase(BasicOptions::SlotGains);
+  if (m_adrc[SlotIndex(slot)].config) return std::nullopt;
   if (wpi::RobotBase::IsSimulation() && m_simGains[SlotIndex(slot)].lqr)
     return m_simGains[SlotIndex(slot)].lqr;
   return m_slots[SlotIndex(slot)].lqr;
+}
+
+std::shared_ptr<math::ADRCConfig> SmartMotorControllerConfig::GetADRCController(
+    ClosedLoopControllerSlot slot) const {
+  m_basicOptions.erase(BasicOptions::SlotGains);
+  return m_adrc[SlotIndex(slot)].config;
 }
 
 double SmartMotorControllerConfig::GetKp(ClosedLoopControllerSlot slot) const {
@@ -885,30 +927,38 @@ std::optional<wpi::units::meter_t> SmartMotorControllerConfig::GetMeasurementUpp
   return ConvertFromMechanism(*m_mechUpperLimit);
 }
 
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrapping() const {
-  if (m_continuousWrappingMax && m_continuousWrappingMin &&
-      std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetWrappingMax() const {
+  if (m_wrappingMax && m_wrappingMin &&
+      std::abs((m_wrappingMax->value() - 1.0) - m_wrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
-        "Bounds are not correct!", "Cannot get the continuous wrapping point.",
+        "Bounds are not correct!", "Cannot get the wrapping.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
   m_basicOptions.erase(BasicOptions::ContinuousWrapping);
-  return m_continuousWrappingMax;
+  return m_wrappingMax;
 }
 
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetContinuousWrappingMin() const {
-  if (m_continuousWrappingMax && m_continuousWrappingMin &&
-      std::abs((m_continuousWrappingMax->value() - 1.0) - m_continuousWrappingMin->value()) > 1e-9)
+std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetWrappingMin() const {
+  if (m_wrappingMax && m_wrappingMin &&
+      std::abs((m_wrappingMax->value() - 1.0) - m_wrappingMin->value()) > 1e-9)
     throw exceptions::SmartMotorControllerConfigurationException(
-        "Bounds are not correct!", "Cannot get the continuous wrapping point.",
+        "Bounds are not correct!", "Cannot get the wrapping.",
         "WithContinuousWrapping(min, max) where max - min == 1 rotation");
-  return m_continuousWrappingMin;
+  return m_wrappingMin;
+}
+
+bool SmartMotorControllerConfig::IsWrappingContinuous() const {
+  if (m_wrappingContinuous && m_wrappingMax && (m_mechUpperLimit || m_mechLowerLimit))
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "Soft limits set with continuous wrapping", "Cannot use continuous wrapping",
+        "WithMechanismLimits() should be removed, or WithWrapping() used instead");
+  return m_wrappingContinuous;
 }
 
 wpi::units::turn_t SmartMotorControllerConfig::GetContinuousWrappingSetpoint(
     wpi::units::turn_t setpoint, wpi::units::turn_t current) const {
-  auto max = GetContinuousWrapping();
-  auto min = GetContinuousWrappingMin();
-  if (!max || !min) return setpoint;
+  auto max = GetWrappingMax();
+  auto min = GetWrappingMin();
+  if (!m_wrappingContinuous || !max || !min) return setpoint;
   const double halfRange = (max->value() - min->value()) / 2.0;
   const double currentRotations = current.value();
   return wpi::units::turn_t{
@@ -1022,6 +1072,7 @@ wpi::units::second_t SmartMotorControllerConfig::GetSimulationPeriod() const {
   return m_simulationPeriod.value_or(20_ms);
 }
 wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
+bool SmartMotorControllerConfig::IsMomentOfInertiaConfigured() const { return m_momentOfInertiaConfigured; }
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
   m_basicOptions.erase(BasicOptions::StartingPosition);
   if (wpi::RobotBase::IsSimulation() && m_simStartingPosition.has_value())
@@ -1070,11 +1121,6 @@ const std::optional<gearing::MechanismGearing>&
 SmartMotorControllerConfig::GetExternalEncoderGearing() const {
   m_externalEncoderOptions.erase(ExternalEncoderOptions::ExternalGearing);
   return m_externalEncoderGearing;
-}
-std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetExternalEncoderDiscontinuityPoint()
-    const {
-  m_externalEncoderOptions.erase(ExternalEncoderOptions::DiscontinuityPoint);
-  return m_externalEncoderDiscontinuityPoint;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithLinearExponentialProfile(

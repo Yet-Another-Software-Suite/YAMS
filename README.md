@@ -11,6 +11,10 @@
 
 [YAMS Gitbook](https://yagsl.gitbook.io/yams/documentation)
 
+[Java API (Javadocs)](https://javadocs.yassrobotics.com/yams/)
+
+[C++ API (Doxygen)](https://doxygen.yassrobotics.com/yams/)
+
 [YASS Website](https://yetanothersoftwaresuite.com)
 
 ---

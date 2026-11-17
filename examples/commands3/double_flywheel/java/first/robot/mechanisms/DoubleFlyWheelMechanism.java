@@ -58,8 +58,8 @@ public class DoubleFlyWheelMechanism implements Mechanism {
       upperMotor);
 
   /**
-   * The configuration both wheels' motors share. The feedforward starts a little low and the feedback small, so there
-   * is something to tune live.
+   * The configuration both wheels' motors share. The feedforward holds a NEO at speed and the feedback closes the
+   * rest, so both wheels reach their setpoints; live tune them from there for your robot.
    *
    * @param telemetryName Telemetry name of the motor.
    * @param inverted      Whether the motor is inverted.
@@ -69,8 +69,8 @@ public class DoubleFlyWheelMechanism implements Mechanism {
     return new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
         // A flywheel's velocity loop runs without a motion profile.
-        .withClosedLoopController(0.002, 0, 0)
-        .withFeedforward(new SimpleMotorFeedforward(0, 0.1, 0))
+        .withClosedLoopController(0.5, 0, 0)
+        .withFeedforward(new SimpleMotorFeedforward(0, 0.125, 0))
         .withGearing(new MechanismGearing(1))
         .withZeroPower(MotorMode.COAST)
         .withStatorCurrentLimit(Amps.of(40))
