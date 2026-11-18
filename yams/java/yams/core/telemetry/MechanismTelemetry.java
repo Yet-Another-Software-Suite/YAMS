@@ -168,10 +168,10 @@ public class MechanismTelemetry {
   public DoubleConsumer publishDouble(String key, String unit) {
     var topic = networkTable.getDoubleTopic(key);
     DoublePublisher publisher = unit != null ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
-    Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) (Timer.getTimestamp() * 1e6)));
+    Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key));
     return value -> {
       publisher.accept(value);
-      logEntry.ifPresent(entry -> entry.append(value, (long) (Timer.getTimestamp() * 1e6)));
+      logEntry.ifPresent(entry -> entry.append(value));
     };
   }
 
@@ -187,10 +187,10 @@ public class MechanismTelemetry {
    */
   public <T> Consumer<T> publishStruct(String key, Struct<T> struct) {
     StructPublisher<T> publisher = networkTable.getStructTopic(key, struct).publish();
-    Optional<StructLogEntry<T>> logEntry = dataLogName.map(prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct, (long) (Timer.getTimestamp() * 1e6)));
+    Optional<StructLogEntry<T>> logEntry = dataLogName.map(prefix -> StructLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
     return value -> {
       publisher.accept(value);
-      logEntry.ifPresent(entry -> entry.append(value, (long) (Timer.getTimestamp() * 1e6)));
+      logEntry.ifPresent(entry -> entry.append(value));
     };
   }
 
@@ -206,10 +206,10 @@ public class MechanismTelemetry {
    */
   public <T> Consumer<T[]> publishStructArray(String key, Struct<T> struct) {
     StructArrayPublisher<T> publisher = networkTable.getStructArrayTopic(key, struct).publish();
-    Optional<StructArrayLogEntry<T>> logEntry = dataLogName.map(prefix -> StructArrayLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct, (long) (Timer.getTimestamp() * 1e6)));
+    Optional<StructArrayLogEntry<T>> logEntry = dataLogName.map(prefix -> StructArrayLogEntry.create(DataLogManager.getLog(), prefix + "/" + key, struct));
     return value -> {
       publisher.accept(value);
-      logEntry.ifPresent(entry -> entry.append(value, (long) (Timer.getTimestamp() * 1e6)));
+      logEntry.ifPresent(entry -> entry.append(value));
     };
   }
 

@@ -16,14 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.wpilib.datalog.DataLogReader;
 import org.wpilib.datalog.DataLogRecord;
+import org.wpilib.datalog.DoubleLogEntry;
 import org.wpilib.simulation.SimHooks;
 import org.wpilib.system.DataLogManager;
-import org.wpilib.system.Timer;
 import yams.helpers.MockHardwareExtension;
 
 /**
- * YAMS' dedicated DataLog entries must be stamped in microseconds at the time each value is
- * written, so a recorded run plays back over time instead of every value landing at one instant.
+ * YAMS' dedicated DataLog entries must be stamped on the DataLog's own clock, the one the
+ * NetworkTables mirror and every other entry use, so a recorded run plays back over time instead of
+ * every value landing at one instant.
  */
 public class DataLogTimestampTest {
   @TempDir
@@ -43,37 +44,37 @@ public class DataLogTimestampTest {
   }
 
   @Test
-  void valuesAreStampedWhenTheyAreWritten() throws IOException {
+  void valuesAreStampedOnTheDataLogClock() throws IOException {
     DataLogManager.start(logDir.toString(), "timestamps.wpilog");
     DoubleTelemetry<String> telemetry = new DoubleTelemetry<>("value", 0, "value", false, "units");
     telemetry.enable();
     telemetry.setupDataLog("Test");
+    // A plain entry, stamped by the DataLog itself, as the NetworkTables mirror is.
+    DoubleLogEntry reference = new DoubleLogEntry(DataLogManager.getLog(), "Reference");
 
-    long expectedFirst = (long) (Timer.getTimestamp() * 1e6);
-    telemetry.set(1);
-    SimHooks.stepTiming(0.5);
-    telemetry.set(2);
-    SimHooks.stepTiming(0.5);
-    telemetry.set(3);
-    // The DataLog's writer can hold back its newest record, so write one more and check the first three.
-    SimHooks.stepTiming(0.5);
-    telemetry.set(4);
+    for (int i = 0; i < 4; i++) {
+      telemetry.set(i);
+      reference.append(i);
+      SimHooks.stepTiming(0.5);
+    }
     DataLogManager.getLog().flush();
 
-    // The DataLog writes on a background thread, so wait for the records to reach the file.
-    List<Long> stamps = List.of();
-    for (int tries = 0; tries < 50 && stamps.size() < 3; tries++) {
+    // The DataLog writes on a background thread and can hold back its newest records, so wait for
+    // the first three of each.
+    Path file = logDir.resolve("timestamps.wpilog");
+    List<Long> yams = List.of();
+    List<Long> ref = List.of();
+    for (int tries = 0; tries < 50 && (yams.size() < 3 || ref.size() < 3); tries++) {
       sleep(100);
-      stamps = timestampsOf(logDir.resolve("timestamps.wpilog"), "Test/units/value");
+      yams = timestampsOf(file, "Test/units/value");
+      ref = timestampsOf(file, "Reference");
     }
-    assertTrue(stamps.size() >= 3, "one record per value: " + stamps);
-    assertTrue(Math.abs(stamps.get(0) - expectedFirst) < 1_000,
-               "stamped in microseconds of Timer.getTimestamp(): " + stamps.get(0) + " vs " + expectedFirst);
-    // Half a second of simulated time between writes is 500,000 microseconds.
-    for (int i = 1; i < 3; i++) {
-      long step = stamps.get(i) - stamps.get(i - 1);
-      assertTrue(Math.abs(step - 500_000) < 50_000,
-                 "expected about 500000 us between records, got " + step + " us (" + stamps + ")");
+    assertTrue(yams.size() >= 3 && ref.size() >= 3, "records reached the file: " + yams + " " + ref);
+    long halfSecond = ref.get(1) - ref.get(0);
+    assertTrue(halfSecond > 0, "the reference entry advances: " + ref);
+    for (int i = 0; i < 3; i++) {
+      assertTrue(Math.abs(yams.get(i) - ref.get(i)) < halfSecond / 100,
+                 "record " + i + " is on the DataLog clock: YAMS " + yams + ", reference " + ref);
     }
   }
 

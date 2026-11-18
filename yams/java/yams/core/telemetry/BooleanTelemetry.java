@@ -11,7 +11,6 @@ import org.wpilib.networktables.BooleanTopic;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.PubSub;
 import org.wpilib.system.DataLogManager;
-import org.wpilib.system.Timer;
 
 /**
  * Boolean Telemetry for SmartMotorControllers.
@@ -115,7 +114,7 @@ public class BooleanTelemetry<F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(), prefix + key, (long) (Timer.getTimestamp() * 1e6)));
+      dataLogEntry = Optional.of(new BooleanLogEntry(DataLogManager.getLog(), prefix + key));
     }
   }
 
@@ -136,7 +135,7 @@ public class BooleanTelemetry<F> {
    */
   public boolean set(boolean value) {
     if (dataLogEntry.isPresent()) {
-      dataLogEntry.get().append(value, (long) (Timer.getTimestamp() * 1e6));
+      dataLogEntry.get().append(value);
     }
     if (subscriber.isPresent()) {
       boolean tuningValue = subscriber.get().get(defaultValue);

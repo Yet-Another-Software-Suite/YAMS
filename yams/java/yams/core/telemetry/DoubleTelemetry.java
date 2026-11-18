@@ -11,7 +11,6 @@ import org.wpilib.networktables.DoubleTopic;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.PubSub;
 import org.wpilib.system.DataLogManager;
-import org.wpilib.system.Timer;
 import yams.core.motorcontrollers.SmartMotorControllerConfig;
 
 /**
@@ -163,7 +162,7 @@ public class DoubleTelemetry<F> {
         prefix += "/";
       }
       prefix += unit + "/";
-      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) (Timer.getTimestamp() * 1e6)));
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key));
     }
   }
 
@@ -234,7 +233,7 @@ public class DoubleTelemetry<F> {
       return false;
     }
     if (dataLogEntry.isPresent()) {
-      dataLogEntry.get().append(value, (long) (Timer.getTimestamp() * 1e6));
+      dataLogEntry.get().append(value);
     }
     if (subscriber.isPresent()) {
       double tuningValue = subscriber.get().get(defaultValue);

@@ -11,7 +11,6 @@ import org.wpilib.networktables.StructPublisher;
 import org.wpilib.networktables.StructSubscriber;
 import org.wpilib.networktables.StructTopic;
 import org.wpilib.system.DataLogManager;
-import org.wpilib.system.Timer;
 import org.wpilib.util.struct.Struct;
 
 /**
@@ -161,7 +160,7 @@ public class StructTelemetry<T, F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(StructLogEntry.create(DataLogManager.getLog(), prefix + key, struct, (long) (Timer.getTimestamp() * 1e6)));
+      dataLogEntry = Optional.of(StructLogEntry.create(DataLogManager.getLog(), prefix + key, struct));
     }
   }
 
@@ -185,7 +184,7 @@ public class StructTelemetry<T, F> {
       return false;
     }
     if (dataLogEntry.isPresent()) {
-      dataLogEntry.get().append(value, (long) (Timer.getTimestamp() * 1e6));
+      dataLogEntry.get().append(value);
     }
     if (subscriber.isPresent()) {
       T tuningValue = subscriber.get().get(defaultValue);
