@@ -168,10 +168,10 @@ public class MechanismTelemetry {
   public DoubleConsumer publishDouble(String key, String unit) {
     var topic = networkTable.getDoubleTopic(key);
     DoublePublisher publisher = unit != null ? topic.publishEx("double", "{\"units\": \"" + unit + "\"}") : topic.publish();
-    Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key, (long) Timer.getTimestamp()));
+    Optional<DoubleLogEntry> logEntry = dataLogName.map(prefix -> new DoubleLogEntry(DataLogManager.getLog(), prefix + "/" + key));
     return value -> {
       publisher.accept(value);
-      logEntry.ifPresent(entry -> entry.append(value, (long) Timer.getTimestamp()));
+      logEntry.ifPresent(entry -> entry.append(value));
     };
   }
 
