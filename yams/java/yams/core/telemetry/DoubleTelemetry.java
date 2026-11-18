@@ -163,7 +163,7 @@ public class DoubleTelemetry<F> {
         prefix += "/";
       }
       prefix += unit + "/";
-      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(new DoubleLogEntry(DataLogManager.getLog(), prefix + key, (long) (Timer.getTimestamp() * 1e6)));
     }
   }
 
@@ -234,7 +234,7 @@ public class DoubleTelemetry<F> {
       return false;
     }
     if (dataLogEntry.isPresent()) {
-      dataLogEntry.get().append(value, (long) Timer.getTimestamp());
+      dataLogEntry.get().append(value, (long) (Timer.getTimestamp() * 1e6));
     }
     if (subscriber.isPresent()) {
       double tuningValue = subscriber.get().get(defaultValue);

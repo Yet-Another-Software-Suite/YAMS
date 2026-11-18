@@ -105,7 +105,7 @@ public class StringTelemetry<F> {
       if (!prefix.endsWith("/")) {
         prefix += "/";
       }
-      dataLogEntry = Optional.of(new StringLogEntry(DataLogManager.getLog(), prefix + key, (long) Timer.getTimestamp()));
+      dataLogEntry = Optional.of(new StringLogEntry(DataLogManager.getLog(), prefix + key, (long) (Timer.getTimestamp() * 1e6)));
     }
   }
 
@@ -129,7 +129,7 @@ public class StringTelemetry<F> {
       return false;
     }
     if (dataLogEntry.isPresent()) {
-      dataLogEntry.get().append(value);
+      dataLogEntry.get().append(value, (long) (Timer.getTimestamp() * 1e6));
     }
     if (subscriber.isPresent()) {
       String tuningValue = subscriber.get().get(defaultValue);
