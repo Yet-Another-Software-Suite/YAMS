@@ -861,7 +861,7 @@ class SmartMotorControllerConfig {
    *
    * Every way of setting the moment of inertia comes through here, and it may only be set once
    * per config: a simulation reads it once, when it is built, so a second value would leave the
-   * config and the simulation disagreeing.
+   * config and the simulation disagreeing. A copy of a config may set it again once.
    *
    * @param moi Moment of inertia in kg·m².
    * @return *this for chaining.
@@ -1453,6 +1453,23 @@ class SmartMotorControllerConfig {
   ADRCSlot m_adrc[kNumSlots];
   /** Whether a moment of inertia was set, not the placeholder. */
   bool m_momentOfInertiaConfigured{false};
+  /**
+   * Whether the moment of inertia was set on this config. A copy, such as one from Clone(),
+   * starts without it, so a copy's moment of inertia can be set once even if the original's was.
+   * Moving keeps it.
+   */
+  struct SetOnThisConfig {
+    bool value{false};
+    SetOnThisConfig() = default;
+    SetOnThisConfig(const SetOnThisConfig&) {}
+    SetOnThisConfig& operator=(const SetOnThisConfig&) {
+      value = false;
+      return *this;
+    }
+    SetOnThisConfig(SetOnThisConfig&&) = default;
+    SetOnThisConfig& operator=(SetOnThisConfig&&) = default;
+  };
+  SetOnThisConfig m_momentOfInertiaSetOnThisConfig;
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {

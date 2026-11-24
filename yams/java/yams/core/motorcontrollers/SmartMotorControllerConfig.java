@@ -338,6 +338,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private boolean momentOfInertiaConfigured = false;
   /**
+   * Whether the moment of inertia was set on this config. A copy starts without it, so a copy's
+   * moment of inertia can be set once even if the original's was.
+   */
+  private boolean momentOfInertiaSetOnThisConfig = false;
+  /**
    * Loosely coupled followers.
    */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
@@ -426,6 +431,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
+    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia.
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -978,24 +984,25 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    *
    * <p>Every way of setting the moment of inertia comes through here, and it may only be set once
    * per config: a simulation reads it once, when it is built, so a second value would leave the
-   * config and the simulation disagreeing.
+   * config and the simulation disagreeing. A copy of a config may set it again once.
    *
    * @param MOI Known moment of inertia.
    * @return {@link SmartMotorControllerConfig} for chaining
    * @throws SmartMotorControllerConfigurationException if the moment of inertia was already set.
    */
   public T withMomentOfInertia(MomentOfInertia MOI) {
-    if (momentOfInertiaConfigured) {
+    if (momentOfInertiaSetOnThisConfig) {
       throw new SmartMotorControllerConfigurationException(
           "The moment of inertia was already set to " + moi + "; it cannot be changed to " + MOI
               + ".",
           "A simulation built from the first value would not use the second.",
           "Set the moment of inertia once, with withMomentOfInertia(...), "
               + "withWheelMomentOfInertia(...) or withExponentialProfile(Voltage, DCMotor, "
-              + "MomentOfInertia)");
+              + "MomentOfInertia), or set it on a copy made with clone()");
     }
     moi = MOI;
     momentOfInertiaConfigured = true;
+    momentOfInertiaSetOnThisConfig = true;
     basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
   }

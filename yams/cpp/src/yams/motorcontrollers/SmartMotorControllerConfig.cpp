@@ -678,16 +678,18 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimulationPeriod(
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
     wpi::units::kilogram_square_meter_t moi) {
-  if (m_momentOfInertiaConfigured) {
+  if (m_momentOfInertiaSetOnThisConfig.value) {
     throw exceptions::SmartMotorControllerConfigurationException(
         "The moment of inertia was already set to " + std::to_string(m_moi.value()) +
             " kg m^2; it cannot be changed to " + std::to_string(moi.value()) + " kg m^2.",
         "A simulation built from the first value would not use the second.",
         "Set the moment of inertia once, with WithMOI(...), WithWheelMOI(...) or "
-        "WithExponentialProfile(volt_t, DCMotor, kilogram_square_meter_t)");
+        "WithExponentialProfile(volt_t, DCMotor, kilogram_square_meter_t), or set it on a copy "
+        "made with Clone()");
   }
   m_moi = moi;
   m_momentOfInertiaConfigured = true;
+  m_momentOfInertiaSetOnThisConfig.value = true;
   return *this;
 }
 
