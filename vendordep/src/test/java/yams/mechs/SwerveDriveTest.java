@@ -845,6 +845,26 @@ public class SwerveDriveTest {
   }
 
   @Test
+  void maximumModuleVelocityIsPublished() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    // Dashboards scale module state arrows by the maximum module velocity, so it's published from
+    // MID verbosity up, but only when the drive has one.
+    SwerveDrive limited =
+        new SwerveDrive(
+            baseConfig(TelemetryVerbosity.MID).withMaximumModuleSpeed(MetersPerSecond.of(4.2)));
+    limited.updateTelemetry();
+    NetworkTable limitedTable =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(limited.getName());
+    assertEquals(4.2, limitedTable.getEntry("maxModuleVelocity").getDouble(-1), kTolerance);
+
+    SwerveDrive unlimited = new SwerveDrive(baseConfig(TelemetryVerbosity.MID));
+    unlimited.updateTelemetry();
+    NetworkTable unlimitedTable =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(unlimited.getName());
+    assertFalse(unlimitedTable.containsKey("maxModuleVelocity"));
+  }
+
+  @Test
   void initialPoseIsTheStartingPose() {
     build(kTalonFXDriveSparkMaxAzimuth);
     Pose2d pose = drive.getPose();

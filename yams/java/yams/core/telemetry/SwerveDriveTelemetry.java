@@ -124,6 +124,7 @@ public class SwerveDriveTelemetry {
         continue;
       switch (dt.getField()) {
         case Gyro -> dt.set(drive.getGyroRotation3d().getMeasureZ().in(Degrees));
+        case MaximumModuleVelocity -> cfg.getMaximumModuleLinearVelocity().ifPresent(v -> dt.set(v.in(MetersPerSecond)));
       }
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
@@ -414,6 +415,7 @@ public class SwerveDriveTelemetry {
           }
           break;
         case Gyro:
+        case MaximumModuleVelocity:
           break;
       }
     }
@@ -646,7 +648,12 @@ public class SwerveDriveTelemetry {
      */
     ModulesAzimuthVoltage("modules/azimuth/voltage/setpoint", 0, true, "volts"),
     /** Gyro angle, in degrees. */
-    Gyro("gyro", 0, false, "degrees");
+    Gyro("gyro", 0, false, "degrees"),
+    /**
+     * Maximum speed of each module, in meters per second, from
+     * {@link yams.core.mechanisms.config.SwerveDriveConfig#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)}.
+     */
+    MaximumModuleVelocity("maxModuleVelocity", 0, false, "meters_per_second");
 
     /** Default value of the double telemetry field. */
     private final double defaultVal;

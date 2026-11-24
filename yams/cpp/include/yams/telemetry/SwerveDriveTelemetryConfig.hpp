@@ -39,6 +39,7 @@ namespace yams::telemetry {
  *         .WithTelemetryVerbosity(TelemetryVerbosity::HIGH)
  *         .WithPose()
  *         .WithGyro()
+ *         .WithMaximumModuleVelocity()
  *         .WithCurrentRobotRelativeChassisSpeeds()
  *         .WithFieldRelativeChassisSpeeds()
  *         .WithDesiredRobotRelativeChassisSpeeds()
@@ -128,6 +129,9 @@ class SwerveDriveTelemetryConfig {
     ModulesAzimuthVoltage,
     /** Gyro angle, in degrees. */
     Gyro,
+    /** Maximum speed of each module, in meters per second, from
+     *  SwerveDriveConfig::WithMaximumModuleSpeed(). */
+    MaximumModuleVelocity,
   };
 
   /** Boolean telemetry field for a SwerveDrive. */
@@ -193,6 +197,10 @@ class SwerveDriveTelemetryConfig {
   SwerveDriveTelemetryConfig& WithPose();
   /** Enables the gyro angle logging. @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithGyro();
+  /** Enables the maximum module velocity logging, so dashboards can scale module state arrows.
+   *  Only published when the drive has a maximum module speed, from
+   *  SwerveDriveConfig::WithMaximumModuleSpeed(). @return *this for chaining. */
+  SwerveDriveTelemetryConfig& WithMaximumModuleVelocity();
   /** Enables the last-commanded desired robot relative chassis speeds logging. */
   SwerveDriveTelemetryConfig& WithDesiredRobotRelativeChassisSpeeds();
   /** Enables the measured robot relative chassis speeds logging. */

@@ -94,6 +94,10 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
   m_doubleFields.emplace(DoubleTelemetryField::Gyro,
                          DoubleTelemetry<DoubleTelemetryField>{
                              "gyro", 0.0, DoubleTelemetryField::Gyro, false, "degrees"});
+  m_doubleFields.emplace(DoubleTelemetryField::MaximumModuleVelocity,
+                         DoubleTelemetry<DoubleTelemetryField>{
+                             "maxModuleVelocity", 0.0, DoubleTelemetryField::MaximumModuleVelocity,
+                             false, "meters_per_second"});
 
   m_boolFields.emplace(
       BooleanTelemetryField::AutoAlignEnabled,
@@ -184,6 +188,7 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();
       m_chassisSpeedsFields.at(StructTelemetryField::FieldRelativeChassisSpeeds).Enable();
       m_moduleStatesFields.at(StructArrayTelemetryField::CurrentModuleStates).Enable();
+      m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::LOW:
       m_poseFields.at(StructTelemetryField::Pose).Enable();
@@ -202,6 +207,11 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithPose() {
 
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithGyro() {
   m_doubleFields.at(DoubleTelemetryField::Gyro).Enable();
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithMaximumModuleVelocity() {
+  m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
   return *this;
 }
 

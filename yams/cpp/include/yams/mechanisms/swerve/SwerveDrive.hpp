@@ -924,6 +924,13 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
       doubleFields.at(DoubleTelemetryField::AutoAlignPoseRotation).Disable();
       m_config.GetBoolFields().at(BooleanTelemetryField::AutoAlignEnabled).Disable();
     }
+    // Only publish the maximum module velocity when the drive has one.
+    if (auto maxModuleVelocity = drive->GetConfig().GetMaximumModuleLinearVelocity()) {
+      doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity)
+          .SetDefaultValue(maxModuleVelocity->value());
+    } else {
+      doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Disable();
+    }
 
     auto& modules = drive->GetConfig().GetModules();
     if (!modules.empty()) {
@@ -1033,6 +1040,11 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
     switch (field) {
       case DoubleTelemetryField::Gyro:
         dt.Set(drive->GetGyroAngle().value());
+        break;
+      case DoubleTelemetryField::MaximumModuleVelocity:
+        if (auto maxModuleVelocity = drive->GetConfig().GetMaximumModuleLinearVelocity()) {
+          dt.Set(maxModuleVelocity->value());
+        }
         break;
       default:
         break;
