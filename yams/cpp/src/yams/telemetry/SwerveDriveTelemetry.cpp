@@ -19,6 +19,7 @@ void SwerveDriveTelemetry::Close() {
   for (auto& [field, bt] : m_config.GetBoolFields()) bt.Close();
   for (auto& [field, stt] : m_config.GetPoseFields()) stt.Close();
   for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) stt.Close();
+  m_typePublisher.reset();
   for (auto& [field, stat] : m_config.GetModuleStatesFields()) stat.Close();
 }
 

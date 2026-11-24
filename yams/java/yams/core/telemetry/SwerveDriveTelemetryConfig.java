@@ -3,6 +3,8 @@
 
 package yams.core.telemetry;
 
+import static org.wpilib.units.Units.MetersPerSecond;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +33,7 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *         // optionally enable individual fields on top of the preset
  *         .withPose()
  *         .withGyro()
+ *         .withMaximumModuleVelocity()
  *         .withCurrentRobotRelativeChassisSpeeds()
  *         .withFieldRelativeChassisSpeeds()
  *         .withDesiredRobotRelativeChassisSpeeds()
@@ -110,8 +113,6 @@ public class SwerveDriveTelemetryConfig {
   public SwerveDriveTelemetryConfig withTelemetryVerbosity(TelemetryVerbosity verbosity) {
     switch (verbosity) {
       case HIGH:
-        structFields.get(StructTelemetryField.DesiredRobotRelativeChassisSpeeds).enable();
-        structArrayFields.get(StructArrayTelemetryField.DesiredModuleStates).enable();
         doubleFields.get(DoubleTelemetryField.TranslationP).enable();
         doubleFields.get(DoubleTelemetryField.TranslationI).enable();
         doubleFields.get(DoubleTelemetryField.TranslationD).enable();
@@ -144,12 +145,16 @@ public class SwerveDriveTelemetryConfig {
         boolFields.get(BooleanTelemetryField.ModulesDriveVoltageEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesAzimuthVoltageEnabled).enable();
       case MID:
-        structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();
-        structArrayFields.get(StructArrayTelemetryField.CurrentModuleStates).enable();
       case LOW:
+        // Everything a dashboard's swerve drive widget needs.
         structFields.get(StructTelemetryField.Pose).enable();
         doubleFields.get(DoubleTelemetryField.Gyro).enable();
+        structArrayFields.get(StructArrayTelemetryField.CurrentModuleStates).enable();
+        structArrayFields.get(StructArrayTelemetryField.DesiredModuleStates).enable();
+        doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).enable();
+        structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
+        structFields.get(StructTelemetryField.DesiredRobotRelativeChassisSpeeds).enable();
     }
     return this;
   }
@@ -230,6 +235,11 @@ public class SwerveDriveTelemetryConfig {
       boolFields.get(BooleanTelemetryField.AutoAlignEnabled).disable();
     }
 
+    // Only publish the maximum module velocity when the drive has one.
+    cfg.getMaximumModuleLinearVelocity().ifPresentOrElse(
+        v -> doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).setDefaultValue(v.in(MetersPerSecond)),
+        () -> doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).disable());
+
     var modules = drive.getModules();
     if (modules.length > 0) {
       var driveMotor = modules[0].getDriveMotorController();
@@ -284,6 +294,18 @@ public class SwerveDriveTelemetryConfig {
    */
   public SwerveDriveTelemetryConfig withGyro() {
     doubleFields.get(DoubleTelemetryField.Gyro).enable();
+    return this;
+  }
+
+  /**
+   * Enables the maximum module velocity logging, so dashboards can scale module state arrows. Only published when the
+   * drive has a maximum module speed, from
+   * {@link yams.core.mechanisms.config.SwerveDriveConfig#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)}.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} for chaining.
+   */
+  public SwerveDriveTelemetryConfig withMaximumModuleVelocity() {
+    doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).enable();
     return this;
   }
 

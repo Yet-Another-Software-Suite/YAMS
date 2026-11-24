@@ -845,6 +845,44 @@ public class SwerveDriveTest {
   }
 
   @Test
+  void maximumModuleVelocityIsPublished() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    // Dashboards scale module state arrows by the maximum module velocity, so it's published from
+    // LOW verbosity up, but only when the drive has one.
+    SwerveDrive limited =
+        new SwerveDrive(
+            baseConfig(TelemetryVerbosity.LOW).withMaximumModuleSpeed(MetersPerSecond.of(4.2)));
+    limited.updateTelemetry();
+    NetworkTable limitedTable =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(limited.getName());
+    assertEquals(4.2, limitedTable.getEntry("maxModuleVelocity").getDouble(-1), kTolerance);
+
+    SwerveDrive unlimited = new SwerveDrive(baseConfig(TelemetryVerbosity.LOW));
+    unlimited.updateTelemetry();
+    NetworkTable unlimitedTable =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(unlimited.getName());
+    assertFalse(unlimitedTable.containsKey("maxModuleVelocity"));
+  }
+
+  @Test
+  void telemetryTableHasWhatASwerveWidgetNeeds() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
+    // to find it by, the module states, the current and desired chassis speeds, and the gyro in
+    // degrees.
+    drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
+    drive.updateTelemetry();
+    NetworkTable table =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(drive.getName());
+    assertEquals("SwerveDrive", table.getEntry(".type").getString(""));
+    assertTrue(table.getSubTable("states").containsKey("current"));
+    assertTrue(table.getSubTable("states").containsKey("desired"));
+    assertTrue(table.getSubTable("chassis").containsKey("current"));
+    assertTrue(table.getSubTable("chassis").containsKey("desired"));
+    assertEquals(30, table.getEntry("gyro").getDouble(0), 0.1);
+  }
+
+  @Test
   void initialPoseIsTheStartingPose() {
     build(kTalonFXDriveSparkMaxAzimuth);
     Pose2d pose = drive.getPose();
