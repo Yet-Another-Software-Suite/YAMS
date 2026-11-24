@@ -17,6 +17,7 @@
 #include <wpi/commands2/CommandScheduler.hpp>
 #include <wpi/commands2/Commands.hpp>
 #include <wpi/math/system/DCMotor.hpp>
+#include <wpi/simulation/SingleJointedArmSim.hpp>
 #include <wpi/units/angle.hpp>
 #include <wpi/units/angular_acceleration.hpp>
 #include <wpi/units/angular_velocity.hpp>
@@ -51,20 +52,23 @@ static SmartMotorControllerConfig MakePivotSMCConfig(ProfileType profile, Hardwa
           wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::kv_unit>{0.0},
           wpi::units::unit_t<wpi::math::SimpleMotorFeedforward<wpi::units::turns>::ka_unit>{0.0}})
       .WithClosedLoopMode()
-      .WithMOI(12_in, 1_lb)
       .WithStartingPosition(0.0_deg)
       .WithSubsystem(subsys)
       .WithTelemetry(name);
   ForHardware(cfg, hardware, 40.0_A);
 
+  // The moment of inertia may only be set once. The exponential profile sets the one it is made
+  // from, so it is given the same moment of inertia instead of WithMOI.
   switch (profile) {
     case ProfileType::Trapezoid:
-      cfg.WithTrapezoidProfile(180.0_deg_per_s, 90.0_deg_per_s_sq);
+      cfg.WithMOI(12_in, 1_lb).WithTrapezoidProfile(180.0_deg_per_s, 90.0_deg_per_s_sq);
       break;
     case ProfileType::Exponential:
-      cfg.WithExponentialProfile(12.0_V, MotorForHardware(hardware), cfg.GetMOI());
+      cfg.WithExponentialProfile(12.0_V, MotorForHardware(hardware),
+                                 wpi::sim::SingleJointedArmSim::EstimateMOI(12_in, 1_lb));
       break;
     default:
+      cfg.WithMOI(12_in, 1_lb);
       break;
   }
   return cfg;
