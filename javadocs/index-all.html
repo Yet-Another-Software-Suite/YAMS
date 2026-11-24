@@ -540,6 +540,8 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 <dd>
 <div class="block">Close the SMC for unit testing.</div>
 </dd>
+<dt><a href="yams/core/motorcontrollers/local/NovaWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.local.<a href="yams/core/motorcontrollers/local/NovaWrapper.html" title="class in yams.core.motorcontrollers.local">NovaWrapper</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXSWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXSWrapper</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html#close()" class="member-name-link">close()</a> - Method in class yams.core.motorcontrollers.remote.<a href="yams/core/motorcontrollers/remote/TalonFXWrapper.html" title="class in yams.core.motorcontrollers.remote">TalonFXWrapper</a></dt>
@@ -4414,6 +4416,11 @@ limit on the pivot.</div>
 <dd>
 <div class="block">Maximum chassis angular velocity, in radians per second.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#MaximumModuleVelocity" class="member-name-link">MaximumModuleVelocity</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dd>
+<div class="block">Maximum speed of each module, in meters per second, from
+<a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)"><code>SwerveDriveConfig.withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)</code></a>.</div>
+</dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html#MaxLinearVelocity" class="member-name-link">MaxLinearVelocity</a> - Enum constant in enum class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></dt>
 <dd>
 <div class="block">Maximum chassis linear velocity, in meters per second.</div>
@@ -7813,6 +7820,10 @@ instead of the closed loop controller while on.</div>
 </dd>
 <dt><a href="yams/core/math/ADRCConfig.html#tuning-the-response-heading" class="search-tag-link">Tuning the response</a> - Section in class yams.core.math.ADRCConfig</dt>
 <dd>&nbsp;</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.html#TYPE" class="member-name-link">TYPE</a> - Static variable in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.html" title="class in yams.core.telemetry">SwerveDriveTelemetry</a></dt>
+<dd>
+<div class="block">The <code>.type</code> published in the drive's telemetry table.</div>
+</dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveModule.html#typical-usage-heading" class="search-tag-link">Typical usage</a> - Section in class yams.core.mechanisms.swerve.SwerveModule</dt>
 <dd>&nbsp;</dd>
 <dt><a href="yams/core/package-summary.html#typical-usage-heading" class="search-tag-link">Typical Usage</a> - Section in package yams.core</dt>
@@ -8901,6 +8912,10 @@ shows up as its roll or pitch instead of its yaw.</div>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withMaximumModuleSpeed(LinearVelocity)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Set the maximum speed of the modules to desaturate towards.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withMaximumModuleVelocity()" class="member-name-link">withMaximumModuleVelocity()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables the maximum module velocity logging, so dashboards can scale module state arrows.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/MechanismPositionConfig.html#withMaxRobotHeight(org.wpilib.units.measure.Distance)" class="member-name-link">withMaxRobotHeight(Distance)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/MechanismPositionConfig.html" title="class in yams.core.mechanisms.config">MechanismPositionConfig</a></dt>
 <dd>

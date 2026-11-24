@@ -3288,6 +3288,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Set the moment of inertia of the mechanism for simulation.</p>
+<p>Every way of setting the moment of inertia comes through here, and it may only be set once per config: a simulation reads it once, when it is built, so a second value would leave the config and the simulation disagreeing. A copy of a config may set it again once.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">moi</td><td>Moment of inertia in kg·m². </td></tr>
@@ -3295,6 +3296,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">SmartMotorControllerConfigurationException</td><td>if the moment of inertia was already set. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

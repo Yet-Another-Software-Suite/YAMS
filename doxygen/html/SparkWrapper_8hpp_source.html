@@ -274,43 +274,44 @@ $(function(){initNavTree('SparkWrapper_8hpp_source.html','',''); });
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>  std::optional&lt;wpi::units::second_t&gt; m_velocityMeasurementDelay;</div>
 <div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>  wpi::units::second_t m_velocitySignalPeriod{0.02};</div>
 <div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>  std::optional&lt;wpi::util::Alert&gt; m_feedforwardNotAppliedAlert;</div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>  <span class="keywordtype">void</span> Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,</div>
-<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>            SmartMotorControllerConfig* config);</div>
-<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>  rev::spark::SparkBaseConfig&amp; SparkConfig();</div>
-<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>  <span class="keywordtype">bool</span> ConfigureSpark(<span class="keyword">const</span> std::function&lt;rev::REVLibError()&gt;&amp; call,</div>
-<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>                      wpi::units::second_t retryFor = wpi::units::second_t{0.015});</div>
-<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span></div>
-<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::SparkBaseConfig&amp; config);</div>
-<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span></div>
-<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::ClosedLoopConfig&amp; closedLoop);</div>
-<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span></div>
-<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::FeedForwardConfig&amp; feedForward);</div>
-<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>  rev::PersistMode PersistModeForState() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>  <span class="keywordtype">void</span> ConfigureAsync();</div>
-<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>  std::string AlertId(<span class="keyword">const</span> std::string&amp; alertType) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>  <span class="keywordtype">void</span> ApplyFeedback(<span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD);</div>
-<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>  <span class="keywordtype">double</span> MechanismToExternalEncoderRatio() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>  <span class="keywordtype">void</span> UpdateFeedbackSensorRatio(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>  <span class="keywordtype">void</span> WriteSparkPID(<span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD, rev::spark::ClosedLoopSlot slot);</div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>  <span class="keywordtype">void</span> WriteSparkFeedforward(<span class="keywordtype">double</span> kS, <span class="keywordtype">double</span> kV, <span class="keywordtype">double</span> kA, rev::spark::ClosedLoopSlot slot);</div>
-<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>  <span class="keywordtype">void</span> WriteSlotGains(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config, <a class="code hl_typedef" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a67cd474ba064657e33251bafee4256e5">ClosedLoopControllerSlot</a> slot);</div>
-<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>  <span class="keywordtype">void</span> WriteMotionProfile(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>  <span class="keywordtype">void</span> WriteClosedLoopTolerance(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>  <span class="keywordtype">void</span> WriteSoftLimits(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
-<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>  <span class="keywordtype">void</span> RewriteScaledParameters();</div>
-<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>  <span class="keywordtype">void</span> UseVelocityGains(<span class="keywordtype">bool</span> velocity);</div>
-<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>  <span class="keywordtype">void</span> ApplyExternalEncoder(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config, <span class="keywordtype">bool</span> useExternalEncoder);</div>
-<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
-<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
-<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>  <span class="keywordtype">void</span> IterateSimulatedMaxMotionPosition();</div>
-<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>  <span class="keywordtype">void</span> IterateSimulatedArmGravity();</div>
-<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>  <span class="keywordtype">bool</span> SimulatingMaxMotion() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>  <span class="keywordtype">bool</span> HasExponentialProfile() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>};</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>  std::optional&lt;wpi::util::Alert&gt; m_defaultMomentOfInertiaAlert;</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span> </div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>  <span class="keywordtype">void</span> Init(rev::spark::SparkBase* spark, wpi::math::DCMotor motor,</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>            SmartMotorControllerConfig* config);</div>
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span>  rev::spark::SparkBaseConfig&amp; SparkConfig();</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>  <span class="keywordtype">bool</span> ConfigureSpark(<span class="keyword">const</span> std::function&lt;rev::REVLibError()&gt;&amp; call,</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>                      wpi::units::second_t retryFor = wpi::units::second_t{0.015});</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span></div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::SparkBaseConfig&amp; config);</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span></div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::ClosedLoopConfig&amp; closedLoop);</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span></div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>  <span class="keywordtype">bool</span> ConfigureSpark(rev::spark::FeedForwardConfig&amp; feedForward);</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>  rev::PersistMode PersistModeForState() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>  <span class="keywordtype">void</span> ConfigureAsync();</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span>  std::string AlertId(<span class="keyword">const</span> std::string&amp; alertType) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>  <span class="keywordtype">void</span> ApplyFeedback(<span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD);</div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>  <span class="keywordtype">double</span> MechanismToExternalEncoderRatio() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>  <span class="keywordtype">void</span> UpdateFeedbackSensorRatio(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>  <span class="keywordtype">void</span> WriteSparkPID(<span class="keywordtype">double</span> kP, <span class="keywordtype">double</span> kI, <span class="keywordtype">double</span> kD, rev::spark::ClosedLoopSlot slot);</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>  <span class="keywordtype">void</span> WriteSparkFeedforward(<span class="keywordtype">double</span> kS, <span class="keywordtype">double</span> kV, <span class="keywordtype">double</span> kA, rev::spark::ClosedLoopSlot slot);</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>  <span class="keywordtype">void</span> WriteSlotGains(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config, <a class="code hl_typedef" href="classyams_1_1motorcontrollers_1_1SmartMotorController.html#a67cd474ba064657e33251bafee4256e5">ClosedLoopControllerSlot</a> slot);</div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>  <span class="keywordtype">void</span> WriteMotionProfile(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span>  <span class="keywordtype">void</span> WriteClosedLoopTolerance(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>  <span class="keywordtype">void</span> WriteSoftLimits(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config);</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span>  <span class="keywordtype">void</span> RewriteScaledParameters();</div>
+<div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>  <span class="keywordtype">void</span> UseVelocityGains(<span class="keywordtype">bool</span> velocity);</div>
+<div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>  <span class="keywordtype">void</span> ApplyExternalEncoder(<span class="keyword">const</span> SmartMotorControllerConfig&amp; config, <span class="keywordtype">bool</span> useExternalEncoder);</div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>  std::optional&lt;wpi::units::turn_t&gt; GetExternalEncoderSensorPosition();</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>  std::optional&lt;wpi::units::turns_per_second_t&gt; GetExternalEncoderSensorVelocity();</div>
+<div class="line"><a id="l00508" name="l00508"></a><span class="lineno">  508</span>  <span class="keywordtype">void</span> IterateSimulatedMaxMotionPosition();</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>  <span class="keywordtype">void</span> IterateSimulatedArmGravity();</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>  <span class="keywordtype">bool</span> SimulatingMaxMotion() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>  <span class="keywordtype">bool</span> HasExponentialProfile() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>};</div>
 </div>
-<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span> </div>
-<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>}  <span class="comment">// namespace yams::motorcontrollers::local</span></div>
+<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span> </div>
+<div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>}  <span class="comment">// namespace yams::motorcontrollers::local</span></div>
 <div class="ttc" id="aDerivativeTimeFilter_8hpp_html"><div class="ttname"><a href="DerivativeTimeFilter_8hpp.html">DerivativeTimeFilter.hpp</a></div></div>
 <div class="ttc" id="aSmartMotorController_8hpp_html"><div class="ttname"><a href="SmartMotorController_8hpp.html">SmartMotorController.hpp</a></div></div>
 <div class="ttc" id="aclassyams_1_1gearing_1_1MechanismGearing_html"><div class="ttname"><a href="classyams_1_1gearing_1_1MechanismGearing.html">yams::gearing::MechanismGearing</a></div><div class="ttdef"><b>Definition</b> MechanismGearing.hpp:19</div></div>

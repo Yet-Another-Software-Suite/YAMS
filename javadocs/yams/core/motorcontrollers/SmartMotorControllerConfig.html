@@ -1833,12 +1833,18 @@ and mass spinning about its center, <code>1/2 * mass * radius^2</code>.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SmartMotorControllerConfig">T</a></span>&nbsp;<span class="element-name">withMomentOfInertia</span><wbr><span class="parameters">(org.wpilib.units.measure.MomentOfInertia&nbsp;MOI)</span></div>
 <div class="block">Add the mechanism moment of inertia to the <a href="SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a>s simulation when not
-run under a formal mechanism.</div>
+run under a formal mechanism.
+
+<p>Every way of setting the moment of inertia comes through here, and it may only be set once
+per config: a simulation reads it once, when it is built, so a second value would leave the
+config and the simulation disagreeing. A copy of a config may set it again once.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>MOI</code> - Known moment of inertia.</dd>
 <dt>Returns:</dt>
 <dd><a href="SmartMotorControllerConfig.html" title="class in yams.core.motorcontrollers"><code>SmartMotorControllerConfig</code></a> for chaining</dd>
+<dt>Throws:</dt>
+<dd><code><a href="../exceptions/SmartMotorControllerConfigurationException.html" title="class in yams.core.exceptions">SmartMotorControllerConfigurationException</a></code> - if the moment of inertia was already set.</dd>
 </dl>
 </div>
 </section>

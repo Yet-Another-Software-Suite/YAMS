@@ -86,6 +86,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#ModulesAzimuthAngle" tabindex="0">ModulesAzimuthAngle</a></li>
 <li><a href="#ModulesAzimuthVoltage" tabindex="0">ModulesAzimuthVoltage</a></li>
 <li><a href="#Gyro" tabindex="0">Gyro</a></li>
+<li><a href="#MaximumModuleVelocity" tabindex="0">MaximumModuleVelocity</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">Method Details</a>
@@ -158,94 +159,99 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Gyro angle, in degrees.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesAzimuthAngle" class="member-name-link">ModulesAzimuthAngle</a></code></div>
+<div class="col-first even-row-color"><code><a href="#MaximumModuleVelocity" class="member-name-link">MaximumModuleVelocity</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Maximum speed of each module, in meters per second, from
+<a href="../mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)"><code>SwerveDriveConfig.withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)</code></a>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthAngle" class="member-name-link">ModulesAzimuthAngle</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Tunable angle setpoint applied to every module's azimuth motor, in degrees.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthD" class="member-name-link">ModulesAzimuthD</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesAzimuthD" class="member-name-link">ModulesAzimuthD</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Derivative gain for tuning every module's azimuth motor closed-loop controller.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesAzimuthI" class="member-name-link">ModulesAzimuthI</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthI" class="member-name-link">ModulesAzimuthI</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Integral gain for tuning every module's azimuth motor closed-loop controller.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthKa" class="member-name-link">ModulesAzimuthKa</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesAzimuthKa" class="member-name-link">ModulesAzimuthKa</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Acceleration feedforward gain for tuning every module's azimuth motor.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesAzimuthKs" class="member-name-link">ModulesAzimuthKs</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthKs" class="member-name-link">ModulesAzimuthKs</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Static feedforward gain for tuning every module's azimuth motor.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthKv" class="member-name-link">ModulesAzimuthKv</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesAzimuthKv" class="member-name-link">ModulesAzimuthKv</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Velocity feedforward gain for tuning every module's azimuth motor.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesAzimuthP" class="member-name-link">ModulesAzimuthP</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthP" class="member-name-link">ModulesAzimuthP</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Proportional gain for tuning every module's azimuth motor closed-loop controller.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesAzimuthVoltage" class="member-name-link">ModulesAzimuthVoltage</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesAzimuthVoltage" class="member-name-link">ModulesAzimuthVoltage</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Tunable voltage applied to every module's azimuth motor, without its closed loop controller,
 while <a href="SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesAzimuthVoltageEnabled"><code>SwerveDriveTelemetry.BooleanTelemetryField.ModulesAzimuthVoltageEnabled</code></a> is on.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesDriveD" class="member-name-link">ModulesDriveD</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveD" class="member-name-link">ModulesDriveD</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Derivative gain for tuning every module's drive motor closed-loop controller.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesDriveI" class="member-name-link">ModulesDriveI</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesDriveI" class="member-name-link">ModulesDriveI</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Integral gain for tuning every module's drive motor closed-loop controller.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesDriveKa" class="member-name-link">ModulesDriveKa</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveKa" class="member-name-link">ModulesDriveKa</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Acceleration feedforward gain for tuning every module's drive motor.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesDriveKs" class="member-name-link">ModulesDriveKs</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesDriveKs" class="member-name-link">ModulesDriveKs</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Static feedforward gain for tuning every module's drive motor.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesDriveKv" class="member-name-link">ModulesDriveKv</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveKv" class="member-name-link">ModulesDriveKv</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Velocity feedforward gain for tuning every module's drive motor.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesDriveP" class="member-name-link">ModulesDriveP</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesDriveP" class="member-name-link">ModulesDriveP</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Proportional gain for tuning every module's drive motor closed-loop controller.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ModulesDriveVelocity" class="member-name-link">ModulesDriveVelocity</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ModulesDriveVelocity" class="member-name-link">ModulesDriveVelocity</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Tunable velocity setpoint applied to every module's drive motor, in meters per second.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ModulesDriveVoltage" class="member-name-link">ModulesDriveVoltage</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ModulesDriveVoltage" class="member-name-link">ModulesDriveVoltage</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Tunable voltage applied to every module's drive motor, without its closed loop controller, while
 <a href="SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesDriveVoltageEnabled"><code>SwerveDriveTelemetry.BooleanTelemetryField.ModulesDriveVoltageEnabled</code></a> is on.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#RotationD" class="member-name-link">RotationD</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#RotationD" class="member-name-link">RotationD</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Rotational derivative gain for auto-aligning the robot.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#RotationI" class="member-name-link">RotationI</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#RotationI" class="member-name-link">RotationI</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Rotational integral gain for auto-aligning the robot.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#RotationP" class="member-name-link">RotationP</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#RotationP" class="member-name-link">RotationP</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Rotational proporational gain for auto-aligning the robot.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#TranslationD" class="member-name-link">TranslationD</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#TranslationD" class="member-name-link">TranslationD</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Translational derivative gain for auto-aligning the robot.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#TranslationI" class="member-name-link">TranslationI</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#TranslationI" class="member-name-link">TranslationI</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Translational integral gain for auto-aligning the robot.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#TranslationP" class="member-name-link">TranslationP</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#TranslationP" class="member-name-link">TranslationP</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Translational proporational gain for auto-aligning the robot.</div>
 </div>
 </div>
@@ -531,6 +537,16 @@ while <a href="SwerveDriveTelemetry.BooleanTelemetryField.html#ModulesAzimuthVol
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">Gyro</span></div>
 <div class="block">Gyro angle, in degrees.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="MaximumModuleVelocity">
+<h3>MaximumModuleVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">MaximumModuleVelocity</span></div>
+<div class="block">Maximum speed of each module, in meters per second, from
+<a href="../mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)"><code>SwerveDriveConfig.withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)</code></a>.</div>
 </div>
 </section>
 </li>

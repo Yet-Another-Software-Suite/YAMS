@@ -1,5 +1,9 @@
 var NAVTREEINDEX16 =
 {
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86":[1,0,0,3,4,0,6],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86":[2,0,0,3,4,0,6],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#acb840ea6c1beffaf9ab6dab51bfa24e9":[1,0,0,3,4,0,7],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#acb840ea6c1beffaf9ab6dab51bfa24e9":[2,0,0,3,4,0,7],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ad83c92281423324a8a377909318fb0e1":[1,0,0,3,4,0,0],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ad83c92281423324a8a377909318fb0e1":[2,0,0,3,4,0,0],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ad951bc7d787b551adcd7c760ff4a2696":[1,0,0,3,4,0,4],

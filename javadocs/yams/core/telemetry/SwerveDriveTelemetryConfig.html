@@ -80,6 +80,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getBoolFields()" tabindex="0">getBoolFields()</a></li>
 <li><a href="#withPose()" tabindex="0">withPose()</a></li>
 <li><a href="#withGyro()" tabindex="0">withGyro()</a></li>
+<li><a href="#withMaximumModuleVelocity()" tabindex="0">withMaximumModuleVelocity()</a></li>
 <li><a href="#withDesiredRobotRelativeChassisSpeeds()" tabindex="0">withDesiredRobotRelativeChassisSpeeds()</a></li>
 <li><a href="#withCurrentRobotRelativeChassisSpeeds()" tabindex="0">withCurrentRobotRelativeChassisSpeeds()</a></li>
 <li><a href="#withFieldRelativeChassisSpeeds()" tabindex="0">withFieldRelativeChassisSpeeds()</a></li>
@@ -125,6 +126,7 @@ Every field is disabled by default; call the individual <code>with*()</code> met
         // optionally enable individual fields on top of the preset
         .withPose()
         .withGyro()
+        .withMaximumModuleVelocity()
         .withCurrentRobotRelativeChassisSpeeds()
         .withFieldRelativeChassisSpeeds()
         .withDesiredRobotRelativeChassisSpeeds()
@@ -282,23 +284,28 @@ Every field is disabled by default; call the individual <code>with*()</code> met
 <div class="block">Enables the gyro angle logging.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withNetworkTables(boolean)" class="member-name-link">withNetworkTables</a><wbr>(boolean&nbsp;NT4Telemetry)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumModuleVelocity()" class="member-name-link">withMaximumModuleVelocity</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Enables the maximum module velocity logging, so dashboards can scale module state arrows.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withNetworkTables(boolean)" class="member-name-link">withNetworkTables</a><wbr>(boolean&nbsp;NT4Telemetry)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enable or disable NT4 Telemetry.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withoutNetworkTables()" class="member-name-link">withoutNetworkTables</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withoutNetworkTables()" class="member-name-link">withoutNetworkTables</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Disable NetworkTable output.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withPose()" class="member-name-link">withPose</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withPose()" class="member-name-link">withPose</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Enables the pose logging.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup with <a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums"><code>TelemetryVerbosity</code></a></div>
 </div>
 </div>
@@ -509,6 +516,21 @@ advisable during competition matches.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></span>&nbsp;<span class="element-name">withGyro</span>()</div>
 <div class="block">Enables the gyro angle logging.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a> for chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withMaximumModuleVelocity()">
+<h3>withMaximumModuleVelocity</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></span>&nbsp;<span class="element-name">withMaximumModuleVelocity</span>()</div>
+<div class="block">Enables the maximum module velocity logging, so dashboards can scale module state arrows. Only published when the
+drive has a maximum module speed, from
+<a href="../mechanisms/config/SwerveDriveConfig.html#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)"><code>SwerveDriveConfig.withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a> for chaining.</dd>

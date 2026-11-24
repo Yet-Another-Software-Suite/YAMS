@@ -13,5 +13,6 @@ var searchData=
   ['kp_10',['kP',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a38d737e288450bad022d502dfb6f3ea1',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
   ['ks_11',['kS',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a5e02f3d398223f69e27ccdcafc1b4dd3',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]],
   ['kspeedpervolttimeconstantperiods_12',['kSpeedPerVoltTimeConstantPeriods',['../classyams_1_1math_1_1ADRCConfig.html#a2ca6f02508a83bd84df0a0690118549d',1,'yams::math::ADRCConfig']]],
-  ['kv_13',['kV',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a93258fbae1f2cbb8f1524d5807d060b0',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
+  ['ktype_13',['kType',['../classyams_1_1telemetry_1_1SwerveDriveTelemetry.html#a07d1d345d9a1d1f763c8675f5457b5fe',1,'yams::telemetry::SwerveDriveTelemetry']]],
+  ['kv_14',['kV',['../structyams_1_1motorcontrollers_1_1SmartMotorControllerConfig_1_1PIDGains.html#a93258fbae1f2cbb8f1524d5807d060b0',1,'yams::motorcontrollers::SmartMotorControllerConfig::PIDGains']]]
 ];

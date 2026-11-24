@@ -131,6 +131,7 @@ Public Types</h2></td></tr>
 , <br />
 &#160;&#160;<a class="el" href="#a0910fa4f6540bca87994367b1bdd63d1aceb3e2166f01292a036024f2ec60d354">ModulesAzimuthVoltage</a>
 , <a class="el" href="#a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac">Gyro</a>
+, <a class="el" href="#a0910fa4f6540bca87994367b1bdd63d1ab160e86a7e3d79c331a7e3247f807b4d">MaximumModuleVelocity</a>
 <br />
  }</td></tr>
 <tr class="separator:a0910fa4f6540bca87994367b1bdd63d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,6 +167,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:adf0f4c38b56552ec62b53e232af7fb4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a138f90e7ad49f9fa0d8e3948e8ffff74" id="r_a138f90e7ad49f9fa0d8e3948e8ffff74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">SwerveDriveTelemetryConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a138f90e7ad49f9fa0d8e3948e8ffff74">WithGyro</a> ()</td></tr>
 <tr class="separator:a138f90e7ad49f9fa0d8e3948e8ffff74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab140697ad8b42e4153ba712d4082bee2" id="r_ab140697ad8b42e4153ba712d4082bee2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">SwerveDriveTelemetryConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab140697ad8b42e4153ba712d4082bee2">WithMaximumModuleVelocity</a> ()</td></tr>
+<tr class="separator:ab140697ad8b42e4153ba712d4082bee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29c2610b726fd97ca9f579e268202363" id="r_a29c2610b726fd97ca9f579e268202363"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">SwerveDriveTelemetryConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29c2610b726fd97ca9f579e268202363">WithDesiredRobotRelativeChassisSpeeds</a> ()</td></tr>
 <tr class="separator:a29c2610b726fd97ca9f579e268202363"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cf83efdd7b437c19b69f2d9869130e0" id="r_a1cf83efdd7b437c19b69f2d9869130e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">SwerveDriveTelemetryConfig</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1cf83efdd7b437c19b69f2d9869130e0">WithCurrentRobotRelativeChassisSpeeds</a> ()</td></tr>
@@ -218,6 +221,7 @@ Example</h3>
 <div class="line">        .<a class="code hl_function" href="#a761af0835cf664a5bf6a40b2a5b0fef3">WithTelemetryVerbosity</a>(TelemetryVerbosity::HIGH)</div>
 <div class="line">        .<a class="code hl_function" href="#adf0f4c38b56552ec62b53e232af7fb4b">WithPose</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#a138f90e7ad49f9fa0d8e3948e8ffff74">WithGyro</a>()</div>
+<div class="line">        .<a class="code hl_function" href="#ab140697ad8b42e4153ba712d4082bee2">WithMaximumModuleVelocity</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#a1cf83efdd7b437c19b69f2d9869130e0">WithCurrentRobotRelativeChassisSpeeds</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#a733aba50b8ff5f9db85ee99ce28529d0">WithFieldRelativeChassisSpeeds</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#a29c2610b726fd97ca9f579e268202363">WithDesiredRobotRelativeChassisSpeeds</a>()</div>
@@ -225,7 +229,7 @@ Example</h3>
 <div class="line">        .<a class="code hl_function" href="#abb8895c3ae208034163092955ff9b7da">WithCurrentModuleStates</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#acc0ccc9a5144b2a887fd206f6de2e8c4">WithoutNetworkTables</a>()</div>
 <div class="line">        .<a class="code hl_function" href="#a5e7e1b8b6e6fba39bdf54fd394883ac7">WithDataLogName</a>(<span class="stringliteral">&quot;swerve&quot;</span>);</div>
-<div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html"><div class="ttname"><a href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">yams::telemetry::SwerveDriveTelemetryConfig</a></div><div class="ttdef"><b>Definition</b> SwerveDriveTelemetryConfig.hpp:51</div></div>
+<div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html"><div class="ttname"><a href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">yams::telemetry::SwerveDriveTelemetryConfig</a></div><div class="ttdef"><b>Definition</b> SwerveDriveTelemetryConfig.hpp:52</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a138f90e7ad49f9fa0d8e3948e8ffff74"><div class="ttname"><a href="#a138f90e7ad49f9fa0d8e3948e8ffff74">yams::telemetry::SwerveDriveTelemetryConfig::WithGyro</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithGyro()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a1cf83efdd7b437c19b69f2d9869130e0"><div class="ttname"><a href="#a1cf83efdd7b437c19b69f2d9869130e0">yams::telemetry::SwerveDriveTelemetryConfig::WithCurrentRobotRelativeChassisSpeeds</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithCurrentRobotRelativeChassisSpeeds()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a29c2610b726fd97ca9f579e268202363"><div class="ttname"><a href="#a29c2610b726fd97ca9f579e268202363">yams::telemetry::SwerveDriveTelemetryConfig::WithDesiredRobotRelativeChassisSpeeds</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithDesiredRobotRelativeChassisSpeeds()</div></div>
@@ -234,6 +238,7 @@ Example</h3>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a733aba50b8ff5f9db85ee99ce28529d0"><div class="ttname"><a href="#a733aba50b8ff5f9db85ee99ce28529d0">yams::telemetry::SwerveDriveTelemetryConfig::WithFieldRelativeChassisSpeeds</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithFieldRelativeChassisSpeeds()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a761af0835cf664a5bf6a40b2a5b0fef3"><div class="ttname"><a href="#a761af0835cf664a5bf6a40b2a5b0fef3">yams::telemetry::SwerveDriveTelemetryConfig::WithTelemetryVerbosity</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithTelemetryVerbosity(TelemetryVerbosity verbosity)</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_a8c21ceea50b303073c0ef97dcf39c71f"><div class="ttname"><a href="#a8c21ceea50b303073c0ef97dcf39c71f">yams::telemetry::SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig</a></div><div class="ttdeci">SwerveDriveTelemetryConfig()</div></div>
+<div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_ab140697ad8b42e4153ba712d4082bee2"><div class="ttname"><a href="#ab140697ad8b42e4153ba712d4082bee2">yams::telemetry::SwerveDriveTelemetryConfig::WithMaximumModuleVelocity</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithMaximumModuleVelocity()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_abb8895c3ae208034163092955ff9b7da"><div class="ttname"><a href="#abb8895c3ae208034163092955ff9b7da">yams::telemetry::SwerveDriveTelemetryConfig::WithCurrentModuleStates</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithCurrentModuleStates()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_acc0ccc9a5144b2a887fd206f6de2e8c4"><div class="ttname"><a href="#acc0ccc9a5144b2a887fd206f6de2e8c4">yams::telemetry::SwerveDriveTelemetryConfig::WithoutNetworkTables</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithoutNetworkTables()</div></div>
 <div class="ttc" id="aclassyams_1_1telemetry_1_1_swerve_drive_telemetry_config_html_adf0f4c38b56552ec62b53e232af7fb4b"><div class="ttname"><a href="#adf0f4c38b56552ec62b53e232af7fb4b">yams::telemetry::SwerveDriveTelemetryConfig::WithPose</a></div><div class="ttdeci">SwerveDriveTelemetryConfig &amp; WithPose()</div></div>
@@ -362,6 +367,8 @@ Example</h3>
 <tr><td class="fieldname"><a id="a0910fa4f6540bca87994367b1bdd63d1aceb3e2166f01292a036024f2ec60d354" name="a0910fa4f6540bca87994367b1bdd63d1aceb3e2166f01292a036024f2ec60d354"></a>ModulesAzimuthVoltage&#160;</td><td class="fielddoc"><p>Tunable voltage applied to every module's azimuth motor, without its closed-loop controller, while ModulesAzimuthVoltageEnabled is on. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac" name="a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac"></a>Gyro&#160;</td><td class="fielddoc"><p>Gyro angle, in degrees. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a0910fa4f6540bca87994367b1bdd63d1ab160e86a7e3d79c331a7e3247f807b4d" name="a0910fa4f6540bca87994367b1bdd63d1ab160e86a7e3d79c331a7e3247f807b4d"></a>MaximumModuleVelocity&#160;</td><td class="fielddoc"><p>Maximum speed of each module, in meters per second, from SwerveDriveConfig::WithMaximumModuleSpeed(). </p>
 </td></tr>
 </table>
 
@@ -920,6 +927,24 @@ Example</h3>
       </table>
 </div><div class="memdoc">
 <p>Enables the gyro angle logging. </p><dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
+
+</div>
+</div>
+<a id="ab140697ad8b42e4153ba712d4082bee2" name="ab140697ad8b42e4153ba712d4082bee2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab140697ad8b42e4153ba712d4082bee2">&#9670;&#160;</a></span>WithMaximumModuleVelocity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classyams_1_1telemetry_1_1_swerve_drive_telemetry_config.html">SwerveDriveTelemetryConfig</a> &amp; yams::telemetry::SwerveDriveTelemetryConfig::WithMaximumModuleVelocity </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Enables the maximum module velocity logging, so dashboards can scale module state arrows. Only published when the drive has a maximum module speed, from SwerveDriveConfig::WithMaximumModuleSpeed(). </p><dl class="section return"><dt>Returns</dt><dd>*this for chaining. </dd></dl>
 
 </div>
 </div>

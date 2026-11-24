@@ -71,8 +71,8 @@ var NAVTREEINDEX =
 "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad34d64bbbc8ca48d01018ece2cfbac94",
 "classyams_1_1telemetry_1_1BooleanTelemetry.html#a3eacb3e091173f5c589feb2cc3fe0b28",
 "classyams_1_1telemetry_1_1StructTelemetry.html#a8cd0cfa2fc9b06cfc40981b383106dd5",
-"classyams_1_1units_1_1EasyCRT.html#aa42dfe75900a11a9868b870647cf624e",
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ad83c92281423324a8a377909318fb0e1"
+"classyams_1_1units_1_1EasyCRT.html#a433ff12dfbceab17b372576a3cd70336",
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

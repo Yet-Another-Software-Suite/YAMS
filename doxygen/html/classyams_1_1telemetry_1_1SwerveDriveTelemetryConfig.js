@@ -35,7 +35,8 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
       [ "ModulesAzimuthKa", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a5b827224f765642a4757a8a0a4b62b58", null ],
       [ "ModulesAzimuthAngle", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a35ad9149b175ff82a5af7081e961cde3", null ],
       [ "ModulesAzimuthVoltage", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1aceb3e2166f01292a036024f2ec60d354", null ],
-      [ "Gyro", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac", null ]
+      [ "Gyro", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac", null ],
+      [ "MaximumModuleVelocity", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1ab160e86a7e3d79c331a7e3247f807b4d", null ]
     ] ],
     [ "StructArrayTelemetryField", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ae98cb7badf234d5f70f02f0ca32acdbc", [
       [ "DesiredModuleStates", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ae98cb7badf234d5f70f02f0ca32acdbcaf9fb0a8ebdb9559d5f9f2fed239ee05d", null ],
@@ -71,6 +72,7 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
     [ "WithDesiredRobotRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a29c2610b726fd97ca9f579e268202363", null ],
     [ "WithFieldRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a733aba50b8ff5f9db85ee99ce28529d0", null ],
     [ "WithGyro", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a138f90e7ad49f9fa0d8e3948e8ffff74", null ],
+    [ "WithMaximumModuleVelocity", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ab140697ad8b42e4153ba712d4082bee2", null ],
     [ "WithNetworkTables", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#afd1aa18c1807d0f85be8a3eaffdbe76d", null ],
     [ "WithoutNetworkTables", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#acc0ccc9a5144b2a887fd206f6de2e8c4", null ],
     [ "WithPose", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#adf0f4c38b56552ec62b53e232af7fb4b", null ],
