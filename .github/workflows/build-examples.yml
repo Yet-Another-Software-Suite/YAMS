@@ -11,6 +11,12 @@ on:
       - "examples/**"
       - "yams/**"
 
+# A new push to a pull request cancels that pull request's older runs of this workflow. Pushes to
+# master never cancel each other, so every master commit gets its own result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
