@@ -150,7 +150,6 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
     TelemetryVerbosity verbosity) {
   switch (verbosity) {
     case TelemetryVerbosity::HIGH:
-      m_chassisSpeedsFields.at(StructTelemetryField::DesiredRobotRelativeChassisSpeeds).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationP).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationI).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationD).Enable();
@@ -184,7 +183,6 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_boolFields.at(BooleanTelemetryField::ModulesAzimuthVoltageEnabled).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
-      m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();
       m_chassisSpeedsFields.at(StructTelemetryField::FieldRelativeChassisSpeeds).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::LOW:
@@ -194,6 +192,8 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_moduleStatesFields.at(StructArrayTelemetryField::CurrentModuleStates).Enable();
       m_moduleStatesFields.at(StructArrayTelemetryField::DesiredModuleStates).Enable();
       m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
+      m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();
+      m_chassisSpeedsFields.at(StructTelemetryField::DesiredRobotRelativeChassisSpeeds).Enable();
       break;
     case TelemetryVerbosity::NONE:
       break;

@@ -113,7 +113,6 @@ public class SwerveDriveTelemetryConfig {
   public SwerveDriveTelemetryConfig withTelemetryVerbosity(TelemetryVerbosity verbosity) {
     switch (verbosity) {
       case HIGH:
-        structFields.get(StructTelemetryField.DesiredRobotRelativeChassisSpeeds).enable();
         doubleFields.get(DoubleTelemetryField.TranslationP).enable();
         doubleFields.get(DoubleTelemetryField.TranslationI).enable();
         doubleFields.get(DoubleTelemetryField.TranslationD).enable();
@@ -146,7 +145,6 @@ public class SwerveDriveTelemetryConfig {
         boolFields.get(BooleanTelemetryField.ModulesDriveVoltageEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesAzimuthVoltageEnabled).enable();
       case MID:
-        structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();
       case LOW:
         // Everything a dashboard's swerve drive widget needs.
@@ -155,6 +153,8 @@ public class SwerveDriveTelemetryConfig {
         structArrayFields.get(StructArrayTelemetryField.CurrentModuleStates).enable();
         structArrayFields.get(StructArrayTelemetryField.DesiredModuleStates).enable();
         doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).enable();
+        structFields.get(StructTelemetryField.CurrentRobotRelativeChassisSpeeds).enable();
+        structFields.get(StructTelemetryField.DesiredRobotRelativeChassisSpeeds).enable();
     }
     return this;
   }

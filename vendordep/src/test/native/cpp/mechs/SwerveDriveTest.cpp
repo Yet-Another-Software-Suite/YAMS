@@ -386,6 +386,8 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatA
     CHECK(table->GetEntry(".type").GetString("") == "SwerveDrive");
     CHECK(table->GetSubTable("states")->ContainsKey("current"));
     CHECK(table->GetSubTable("states")->ContainsKey("desired"));
+    CHECK(table->GetSubTable("chassis")->ContainsKey("current"));
+    CHECK(table->GetSubTable("chassis")->ContainsKey("desired"));
     CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
     CHECK(table->GetEntry("gyro").GetDouble(0) == Catch::Approx(30.0).margin(0.1));
     drive.reset();
