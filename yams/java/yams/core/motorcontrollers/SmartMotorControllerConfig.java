@@ -874,14 +874,16 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withTelemetry(String telemetryName, TelemetryVerbosity verbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.verbosity = Optional.ofNullable(verbosity);
-    // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
     defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(false));
-    defaultMomentOfInertiaAlert = this.telemetryName.filter(name -> RobotBase.isSimulation())
-        .map(name -> new Alert("SMCConfig", name + "/DefaultMOI",
-            name + " uses the default moment of inertia, " + moi.in(KilogramSquareMeters)
-                + " kg m^2. Set it with withMomentOfInertia(...) so the simulation matches the "
-                + "mechanism.",
-            Alert.Level.MEDIUM));
+    defaultMomentOfInertiaAlert = Optional.empty();
+    // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
+    if (RobotBase.isSimulation() && telemetryName != null) {
+      defaultMomentOfInertiaAlert = Optional.of(new Alert("SMCConfig", telemetryName + "/DefaultMOI",
+          telemetryName + " uses the default moment of inertia, " + moi.in(KilogramSquareMeters)
+              + " kg m^2. Set it with withMomentOfInertia(...) so the simulation matches the "
+              + "mechanism.",
+          Alert.Level.MEDIUM));
+    }
     return self();
   }
 
