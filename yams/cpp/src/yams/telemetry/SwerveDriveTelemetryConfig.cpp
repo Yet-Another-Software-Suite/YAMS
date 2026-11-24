@@ -28,6 +28,10 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                                 StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>{
                                     "chassis/field", wpi::math::ChassisVelocities{},
                                     StructTelemetryField::FieldRelativeChassisSpeeds, false});
+  m_rotationFields.emplace(StructTelemetryField::GyroRotation,
+                           StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>{
+                               "gyroRotation", wpi::math::Rotation2d{},
+                               StructTelemetryField::GyroRotation, false});
 
   m_moduleStatesFields.emplace(
       StructArrayTelemetryField::DesiredModuleStates,
@@ -151,7 +155,6 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
   switch (verbosity) {
     case TelemetryVerbosity::HIGH:
       m_chassisSpeedsFields.at(StructTelemetryField::DesiredRobotRelativeChassisSpeeds).Enable();
-      m_moduleStatesFields.at(StructArrayTelemetryField::DesiredModuleStates).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationP).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationI).Enable();
       m_doubleFields.at(DoubleTelemetryField::TranslationD).Enable();
@@ -187,12 +190,15 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
     case TelemetryVerbosity::MEDIUM:
       m_chassisSpeedsFields.at(StructTelemetryField::CurrentRobotRelativeChassisSpeeds).Enable();
       m_chassisSpeedsFields.at(StructTelemetryField::FieldRelativeChassisSpeeds).Enable();
-      m_moduleStatesFields.at(StructArrayTelemetryField::CurrentModuleStates).Enable();
-      m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::LOW:
+      // Everything a dashboard's swerve drive widget needs.
       m_poseFields.at(StructTelemetryField::Pose).Enable();
       m_doubleFields.at(DoubleTelemetryField::Gyro).Enable();
+      m_rotationFields.at(StructTelemetryField::GyroRotation).Enable();
+      m_moduleStatesFields.at(StructArrayTelemetryField::CurrentModuleStates).Enable();
+      m_moduleStatesFields.at(StructArrayTelemetryField::DesiredModuleStates).Enable();
+      m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
       break;
     case TelemetryVerbosity::NONE:
       break;
@@ -207,6 +213,11 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithPose() {
 
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithGyro() {
   m_doubleFields.at(DoubleTelemetryField::Gyro).Enable();
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithGyroRotation() {
+  m_rotationFields.at(StructTelemetryField::GyroRotation).Enable();
   return *this;
 }
 
@@ -272,6 +283,13 @@ SwerveDriveTelemetryConfig::GetChassisSpeedsFields() {
   return m_chassisSpeedsFields;
 }
 
+std::unordered_map<
+    SwerveDriveTelemetryConfig::StructTelemetryField,
+    StructTelemetry<wpi::math::Rotation2d, SwerveDriveTelemetryConfig::StructTelemetryField>>&
+SwerveDriveTelemetryConfig::GetRotationFields() {
+  return m_rotationFields;
+}
+
 std::unordered_map<SwerveDriveTelemetryConfig::StructArrayTelemetryField,
                    StructArrayTelemetry<wpi::math::SwerveModuleVelocity,
                                         SwerveDriveTelemetryConfig::StructArrayTelemetryField>>&
@@ -291,6 +309,11 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithCustom(StructTelemet
   auto it = m_poseFields.find(field);
   if (it != m_poseFields.end()) {
     value ? it->second.Enable() : it->second.Disable();
+    return *this;
+  }
+  auto rotation = m_rotationFields.find(field);
+  if (rotation != m_rotationFields.end()) {
+    value ? rotation->second.Enable() : rotation->second.Disable();
     return *this;
   }
   auto& stt = m_chassisSpeedsFields.at(field);

@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 #include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/nt/StructTopic.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -356,6 +357,59 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.PIDControllersAreOptio
   CHECK_THROWS_AS(drive->DriveToPoseSetpoint(wpi::math::Pose2d{}),
                   yams::exceptions::SwerveDriveConfigurationException);
   drive.reset();
+}
+
+// At LOW verbosity the drive's telemetry table has everything a dashboard's swerve widget needs:
+// a .type, the module states, the gyro as a Rotation2d, and the maximum module velocity, which is
+// only published when the drive has one.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasTypeGyroAndMaxVelocity",
+                 "[SwerveDriveTest]") {
+  // Release the fixture's drive so its modules can be reused by drives with telemetry.
+  Hardware().sub->m_drive = nullptr;
+  m_drive.reset();
+  auto mechanisms = wpi::nt::NetworkTableInstance::GetDefault().GetTable("Mechanisms");
+
+  {
+    SwerveDriveConfig cfg;
+    cfg.WithSubsystem(Hardware().sub)
+        .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
+        .WithGyro([this] { return m_simGyro; })
+        .WithStartingPose(wpi::math::Pose2d{})
+        .WithMaximumModuleSpeed(4.2_mps)
+        .WithTelemetry("SwerveTelemetryLimited", SwerveDriveConfig::TelemetryVerbosity::LOW);
+    std::optional<SwerveDrive<4>> drive;
+    drive.emplace(&cfg);
+    // Resetting the odometry turns the simulated gyro to the pose's heading.
+    drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{30_deg}});
+    drive->UpdateTelemetry();
+
+    auto table = mechanisms->GetSubTable("SwerveTelemetryLimited");
+    CHECK(table->GetEntry(".type").GetString("") == "SwerveDrive");
+    CHECK(table->GetSubTable("states")->ContainsKey("current"));
+    CHECK(table->GetSubTable("states")->ContainsKey("desired"));
+    CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
+    auto gyroRotation = table->GetStructTopic<wpi::math::Rotation2d>("gyroRotation")
+                            .Subscribe(wpi::math::Rotation2d{})
+                            .Get();
+    CHECK(gyroRotation.Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    drive.reset();
+  }
+
+  {
+    SwerveDriveConfig cfg;
+    cfg.WithSubsystem(Hardware().sub)
+        .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
+        .WithGyro([this] { return m_simGyro; })
+        .WithStartingPose(wpi::math::Pose2d{})
+        .WithTelemetry("SwerveTelemetryUnlimited", SwerveDriveConfig::TelemetryVerbosity::LOW);
+    std::optional<SwerveDrive<4>> drive;
+    drive.emplace(&cfg);
+    drive->UpdateTelemetry();
+
+    auto table = mechanisms->GetSubTable("SwerveTelemetryUnlimited");
+    CHECK_FALSE(table->ContainsKey("maxModuleVelocity"));
+    drive.reset();
+  }
 }
 
 // UpdateTelemetry and SimIterate run for several loops without crashing.

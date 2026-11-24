@@ -848,20 +848,37 @@ public class SwerveDriveTest {
   void maximumModuleVelocityIsPublished() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // Dashboards scale module state arrows by the maximum module velocity, so it's published from
-    // MID verbosity up, but only when the drive has one.
+    // LOW verbosity up, but only when the drive has one.
     SwerveDrive limited =
         new SwerveDrive(
-            baseConfig(TelemetryVerbosity.MID).withMaximumModuleSpeed(MetersPerSecond.of(4.2)));
+            baseConfig(TelemetryVerbosity.LOW).withMaximumModuleSpeed(MetersPerSecond.of(4.2)));
     limited.updateTelemetry();
     NetworkTable limitedTable =
         NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(limited.getName());
     assertEquals(4.2, limitedTable.getEntry("maxModuleVelocity").getDouble(-1), kTolerance);
 
-    SwerveDrive unlimited = new SwerveDrive(baseConfig(TelemetryVerbosity.MID));
+    SwerveDrive unlimited = new SwerveDrive(baseConfig(TelemetryVerbosity.LOW));
     unlimited.updateTelemetry();
     NetworkTable unlimitedTable =
         NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(unlimited.getName());
     assertFalse(unlimitedTable.containsKey("maxModuleVelocity"));
+  }
+
+  @Test
+  void telemetryTableHasTypeAndGyroRotation() {
+    build(kTalonFXDriveSparkMaxAzimuth);
+    // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
+    // to find it by, the module states, and the gyro as a Rotation2d.
+    drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
+    drive.updateTelemetry();
+    NetworkTable table =
+        NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(drive.getName());
+    assertEquals("SwerveDrive", table.getEntry(".type").getString(""));
+    assertTrue(table.getSubTable("states").containsKey("current"));
+    assertTrue(table.getSubTable("states").containsKey("desired"));
+    Rotation2d gyroRotation =
+        table.getStructTopic("gyroRotation", Rotation2d.struct).subscribe(new Rotation2d()).get();
+    assertEquals(30, gyroRotation.getDegrees(), 0.1);
   }
 
   @Test

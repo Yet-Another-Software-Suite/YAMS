@@ -15,18 +15,24 @@ import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
+import org.wpilib.networktables.StringPublisher;
 import org.wpilib.util.struct.Struct;
 import yams.core.mechanisms.swerve.SwerveDrive;
 import yams.core.mechanisms.swerve.SwerveModule;
 
 /** Publishes {@link SwerveDrive} telemetry to NetworkTables and DataLog, and applies live tuning values. */
 public class SwerveDriveTelemetry {
+  /** The {@code .type} published in the drive's telemetry table. */
+  public static final String TYPE = "SwerveDrive";
+
   private final SwerveDriveTelemetryConfig                                                   m_config;
   private Map<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>>                   m_doubleTelemetry;
   private Map<StructTelemetryField, StructTelemetry<?, StructTelemetryField>>                m_structTelemetry;
   private Map<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> m_structArrayTelemetry;
   private Map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>>                m_boolTelemetry;
   private NetworkTable                                                                       m_dataNt;
+  /** Publishes the drive's {@code .type}, so dashboards know what the table is. */
+  private StringPublisher                                                                    m_typePublisher;
   private NetworkTable                                                                       m_tuningNt;
   /** The tuning modes on in the last loop, to send the setpoints again when they change, or null for none yet. */
   private EnumSet<TuningMode>                                                                m_lastModes;
@@ -52,6 +58,10 @@ public class SwerveDriveTelemetry {
     }
     m_dataNt = NetworkTableInstance.getDefault().getTable("Mechanisms").getSubTable(driveName);
     m_tuningNt = NetworkTableInstance.getDefault().getTable("Tuning").getSubTable(driveName);
+    if (m_config.getNT4Enabled()) {
+      m_typePublisher = m_dataNt.getStringTopic(".type").publish();
+      m_typePublisher.set(TYPE);
+    }
     m_doubleTelemetry = m_config.getDoubleFields(drive);
     m_structTelemetry = m_config.getStructFields();
     m_structArrayTelemetry = m_config.getStructArrayFields();
@@ -116,6 +126,7 @@ public class SwerveDriveTelemetry {
         case DesiredRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getDesiredChassisSpeeds());
         case CurrentRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getRobotRelativeSpeed());
         case FieldRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getFieldRelativeSpeed());
+        case GyroRotation -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getGyroRotation3d().toRotation2d());
       }
     }
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
@@ -442,6 +453,10 @@ public class SwerveDriveTelemetry {
 
   /** Close and unpublish telemetry. */
   public void close() {
+    if (m_typePublisher != null) {
+      m_typePublisher.close();
+      m_typePublisher = null;
+    }
     if (m_doubleTelemetry != null) {
       for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
         entry.getValue().close();
@@ -497,7 +512,9 @@ public class SwerveDriveTelemetry {
     /** Measured robot relative {@link ChassisVelocities}. */
     CurrentRobotRelativeChassisSpeeds("chassis/current", ChassisVelocities.struct, new ChassisVelocities(), false),
     /** Measured field relative {@link ChassisVelocities}. */
-    FieldRelativeChassisSpeeds("chassis/field", ChassisVelocities.struct, new ChassisVelocities(), false);
+    FieldRelativeChassisSpeeds("chassis/field", ChassisVelocities.struct, new ChassisVelocities(), false),
+    /** Gyro yaw, as a {@link Rotation2d}. */
+    GyroRotation("gyroRotation", Rotation2d.struct, new Rotation2d(), false);
 
     /** Key that the telemetry is stored at. */
     private final String key;

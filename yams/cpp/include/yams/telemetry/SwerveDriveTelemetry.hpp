@@ -7,7 +7,9 @@
 #include <memory>
 #include <optional>
 #include <set>
+#include <string_view>
 #include <wpi/nt/NetworkTable.hpp>
+#include <wpi/nt/StringTopic.hpp>
 
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
 
@@ -36,6 +38,9 @@ namespace yams::telemetry {
  */
 class SwerveDriveTelemetry {
  public:
+  /** The .type published in the drive's telemetry table. */
+  static constexpr std::string_view kType = "SwerveDrive";
+
   using DoubleTelemetryField = SwerveDriveTelemetryConfig::DoubleTelemetryField;
   using BooleanTelemetryField = SwerveDriveTelemetryConfig::BooleanTelemetryField;
   using StructTelemetryField = SwerveDriveTelemetryConfig::StructTelemetryField;
@@ -108,6 +113,8 @@ class SwerveDriveTelemetry {
 
   std::shared_ptr<wpi::nt::NetworkTable> m_dataTable;
   std::shared_ptr<wpi::nt::NetworkTable> m_tuningTable;
+  /** Publishes the drive's .type, so dashboards know what the table is. */
+  std::optional<wpi::nt::StringPublisher> m_typePublisher;
 };
 
 }  // namespace yams::telemetry

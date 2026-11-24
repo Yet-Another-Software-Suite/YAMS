@@ -8,7 +8,9 @@
 #include <unordered_map>
 #include <vector>
 #include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/struct/Pose2dStruct.hpp>
+#include <wpi/math/geometry/struct/Rotation2dStruct.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/math/kinematics/struct/ChassisVelocitiesStruct.hpp>
@@ -39,6 +41,7 @@ namespace yams::telemetry {
  *         .WithTelemetryVerbosity(TelemetryVerbosity::HIGH)
  *         .WithPose()
  *         .WithGyro()
+ *         .WithGyroRotation()
  *         .WithMaximumModuleVelocity()
  *         .WithCurrentRobotRelativeChassisSpeeds()
  *         .WithFieldRelativeChassisSpeeds()
@@ -63,6 +66,8 @@ class SwerveDriveTelemetryConfig {
     CurrentRobotRelativeChassisSpeeds,
     /** Measured field-relative chassis speeds. */
     FieldRelativeChassisSpeeds,
+    /** Gyro yaw, as a Rotation2d. */
+    GyroRotation,
   };
 
   /** Struct array telemetry field for a SwerveDrive, backed by wpi::math::SwerveModuleVelocity. */
@@ -197,6 +202,8 @@ class SwerveDriveTelemetryConfig {
   SwerveDriveTelemetryConfig& WithPose();
   /** Enables the gyro angle logging. @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithGyro();
+  /** Enables the gyro yaw logging as a Rotation2d. @return *this for chaining. */
+  SwerveDriveTelemetryConfig& WithGyroRotation();
   /** Enables the maximum module velocity logging, so dashboards can scale module state arrows.
    *  Only published when the drive has a maximum module speed, from
    *  SwerveDriveConfig::WithMaximumModuleSpeed(). @return *this for chaining. */
@@ -234,6 +241,11 @@ class SwerveDriveTelemetryConfig {
   std::unordered_map<StructTelemetryField,
                      StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>>&
   GetChassisSpeedsFields();
+
+  /** @return Configured StructTelemetry<Rotation2d> for the rotation fields. */
+  std::unordered_map<StructTelemetryField,
+                     StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>>&
+  GetRotationFields();
 
   /** @return Configured StructArrayTelemetry<SwerveModuleState> for the module state fields. */
   std::unordered_map<
@@ -279,6 +291,9 @@ class SwerveDriveTelemetryConfig {
   std::unordered_map<StructTelemetryField,
                      StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>>
       m_chassisSpeedsFields;
+  std::unordered_map<StructTelemetryField,
+                     StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>>
+      m_rotationFields;
   std::unordered_map<
       StructArrayTelemetryField,
       StructArrayTelemetry<wpi::math::SwerveModuleVelocity, StructArrayTelemetryField>>
