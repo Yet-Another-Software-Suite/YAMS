@@ -1076,7 +1076,24 @@ std::optional<wpi::math::DCMotor> SmartMotorControllerConfig::GetSimMotor() cons
 wpi::units::second_t SmartMotorControllerConfig::GetSimulationPeriod() const {
   return m_simulationPeriod.value_or(20_ms);
 }
-wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const { return m_moi; }
+wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const {
+  if (m_telemetryName && wpi::RobotBase::IsSimulation()) {
+    if (m_momentOfInertiaConfigured) {
+      if (m_defaultMOIAlert.alert) m_defaultMOIAlert.alert->Set(false);
+    } else {
+      if (!m_defaultMOIAlert.alert) {
+        m_defaultMOIAlert.alert.emplace(
+            "SMCConfig", *m_telemetryName + "/DefaultMOI",
+            *m_telemetryName + " uses the default moment of inertia, " +
+                std::to_string(m_moi.value()) +
+                " kg m^2. Set it with WithMOI(...) so the simulation matches the mechanism.",
+            wpi::util::Alert::Level::MEDIUM);
+      }
+      m_defaultMOIAlert.alert->Set(true);
+    }
+  }
+  return m_moi;
+}
 bool SmartMotorControllerConfig::IsMomentOfInertiaConfigured() const { return m_momentOfInertiaConfigured; }
 std::optional<wpi::units::turn_t> SmartMotorControllerConfig::GetStartingPosition() const {
   m_basicOptions.erase(BasicOptions::StartingPosition);

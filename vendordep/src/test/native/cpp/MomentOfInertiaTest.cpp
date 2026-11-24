@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 // A config's moment of inertia may only be set once, whichever setter sets it, but a copy of the
-// config may set its own. Mirrors the Java MomentOfInertiaTest.
+// config may set its own. Fetching the default one warns in the SMCConfig alert group. Mirrors the
+// Java MomentOfInertiaTest.
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+#include <string>
+
 #include <wpi/math/system/DCMotor.hpp>
+#include <wpi/simulation/AlertSim.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/mass.hpp>
 #include <wpi/units/moment_of_inertia.hpp>
@@ -26,6 +31,15 @@ SmartMotorControllerConfig Config() {
   SmartMotorControllerConfig config;
   config.WithMotorGearing(12.0);
   return config;
+}
+
+/** How many SMCConfig default moment of inertia alerts there are for a telemetry name. */
+long DefaultMOIAlerts(const std::string& name, bool activeOnly) {
+  auto alerts = wpi::sim::AlertSim::GetAll();
+  return std::count_if(alerts.begin(), alerts.end(), [&](const auto& alert) {
+    return alert.group == "SMCConfig" && alert.id == name + "/DefaultMOI" &&
+           (!activeOnly || alert.isActive());
+  });
 }
 }  // namespace
 
@@ -64,6 +78,37 @@ TEST_CASE("MomentOfInertiaTest.ACopyCanSetItAgain", "[MomentOfInertia]") {
   // A plain copy is a copy too.
   SmartMotorControllerConfig assigned = original;
   CHECK_NOTHROW(assigned.WithMOI(0.4_kg_sq_m));
+}
+
+TEST_CASE("MomentOfInertiaTest.FetchingTheDefaultWarnsUntilItIsSet", "[MomentOfInertia]") {
+  auto config = Config();
+  config.WithTelemetry("DefaultMOIAlertTest");
+  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", false) == 0);
+
+  config.GetMOI();
+  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", true) == 1);
+
+  config.WithMOI(0.1_kg_sq_m);
+  config.GetMOI();
+  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", true) == 0);
+}
+
+TEST_CASE("MomentOfInertiaTest.FetchingASetOneNeverWarns", "[MomentOfInertia]") {
+  auto config = Config();
+  config.WithTelemetry("SetMOIAlertTest").WithMOI(0.1_kg_sq_m);
+  config.GetMOI();
+  CHECK(DefaultMOIAlerts("SetMOIAlertTest", false) == 0);
+}
+
+TEST_CASE("MomentOfInertiaTest.NoWarningWithoutATelemetryName", "[MomentOfInertia]") {
+  auto count = [] {
+    auto alerts = wpi::sim::AlertSim::GetAll();
+    return std::count_if(alerts.begin(), alerts.end(),
+                         [](const auto& alert) { return alert.group == "SMCConfig"; });
+  };
+  auto before = count();
+  Config().GetMOI();
+  CHECK(count() == before);
 }
 
 }  // namespace yams::test

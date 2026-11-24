@@ -54,6 +54,7 @@ import org.wpilib.units.measure.Temperature;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
+import org.wpilib.util.Alert;
 import org.wpilib.util.Pair;
 import yams.core.Rivet;
 import yams.core.exceptions.SmartMotorControllerConfigurationException;
@@ -343,6 +344,12 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private boolean momentOfInertiaSetOnThisConfig = false;
   /**
+   * Warning that the moment of inertia is still the default when it is fetched, in the
+   * {@code SMCConfig} alert group. Only made in simulation, and when the config has a telemetry
+   * name, which makes it unique. A copy makes its own.
+   */
+  private Optional<Alert> defaultMomentOfInertiaAlert = Optional.empty();
+  /**
    * Loosely coupled followers.
    */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
@@ -431,7 +438,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
-    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia.
+    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia. Nor is
+    // defaultMomentOfInertiaAlert: a copy makes its own.
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -1084,10 +1092,27 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * Get the Moment of Inertia of the {@link SmartMotorController}'s mechanism for the
    * {@link org.wpilib.simulation.DCMotorSim}.
    *
+   * <p>In simulation, when the config has a telemetry name, fetching the default moment of inertia
+   * sets a warning in the {@code SMCConfig} alert group, and fetching a set one clears it. A real
+   * robot doesn't use the moment of inertia, so it never warns there.
+   *
    * @return Moment of Inertia in JKgMetersSquared.
    */
   public double getMOI() {
-    //    basicOptions.remove(BasicOptions.MomentOfInertia);
+    telemetryName.filter(name -> RobotBase.isSimulation()).ifPresent(name -> {
+      if (momentOfInertiaConfigured) {
+        defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(false));
+        return;
+      }
+      if (defaultMomentOfInertiaAlert.isEmpty()) {
+        defaultMomentOfInertiaAlert = Optional.of(new Alert("SMCConfig", name + "/DefaultMOI",
+            name + " uses the default moment of inertia, " + moi.in(KilogramSquareMeters)
+                + " kg m^2. Set it with withMomentOfInertia(...) so the simulation matches the "
+                + "mechanism.",
+            Alert.Level.MEDIUM));
+      }
+      defaultMomentOfInertiaAlert.get().set(true);
+    });
     return moi.in(KilogramSquareMeters);
   }
 
