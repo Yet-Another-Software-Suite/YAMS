@@ -328,6 +328,8 @@ class NovaWrapper : public SmartMotorController {
    * the SystemCore runs the closed loop and feedforward instead.
    */
   std::optional<wpi::util::Alert> m_feedforwardWithoutProfileAlert;
+  /** Shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  std::optional<wpi::util::Alert> m_defaultMomentOfInertiaAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;

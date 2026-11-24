@@ -179,6 +179,8 @@ public class TalonFXWrapper extends SmartMotorController {
   private Alert m_feedbackNotAppliedAlert;
   /** Alert shown when the Talon does not take a feedforward gain. */
   private Alert m_feedforwardNotAppliedAlert;
+  /** Alert shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  private Alert m_defaultMomentOfInertiaAlert;
   /**
    * Whether {@link StatusSignal} refreshes should report errors; false in simulation, where status
    * signals are not always updated before they are read.
@@ -228,6 +230,7 @@ public class TalonFXWrapper extends SmartMotorController {
     m_zeroOffsetNoExternalEncoderAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "ZeroOffset"), getName() + " zero offset is not supported without an external encoder.", Alert.Level.HIGH);
     m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Alert.Level.HIGH);
     m_feedforwardNotAppliedAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "FeedforwardNotApplied"), getName() + " feedforward gain was not applied.", Alert.Level.HIGH);
+    m_defaultMomentOfInertiaAlert = new Alert("YAMS", buildAlertId("TalonFX", m_talonfx.getDeviceID(), "DefaultMomentOfInertia"), getName() + " is simulated with the default moment of inertia. Set it with withMomentOfInertia(...).", Alert.Level.MEDIUM);
     m_configurator = m_talonfx.getConfigurator();
     if (smartConfig.getVendorConfig().isPresent()) {
       var genCfg = smartConfig.getVendorConfig().get();
@@ -356,6 +359,7 @@ public class TalonFXWrapper extends SmartMotorController {
       if (!setupRan) {
         m_dcmotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_dcmotor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio()), m_dcmotor));
         setSimSupplier(new DCMotorSimSupplier(m_dcmotorSim.get(), this));
+        m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
       }
       m_config.getStartingPosition().ifPresent(mechPos -> {
         m_simSupplier.get().setMechanismPosition(mechPos);
@@ -2196,5 +2200,6 @@ public class TalonFXWrapper extends SmartMotorController {
     super.close();
     m_startingPositionExternalEncoderAlert.close();
     m_zeroOffsetNoExternalEncoderAlert.close();
+    m_defaultMomentOfInertiaAlert.close();
   }
 }

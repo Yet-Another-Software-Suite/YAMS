@@ -84,6 +84,10 @@ A301Wrapper::A301Wrapper(first::a301::A301* a301, SmartMotorControllerConfig* cf
       "YAMS", AlertId("ClosedLoop"),
       GetName() + " closed loop controller is running on the SystemCore.",
       wpi::util::Alert::Level::MEDIUM);
+  m_defaultMomentOfInertiaAlert.emplace(
+      "YAMS", AlertId("DefaultMomentOfInertia"),
+      GetName() + " is simulated with the default moment of inertia. Set it with WithMOI(...).",
+      wpi::util::Alert::Level::MEDIUM);
 
   SetupSimulation();
   try {
@@ -159,6 +163,7 @@ void A301Wrapper::CreateMotorSim() {
                                                                         MechanismToRotorRatio());
   m_motorSim.emplace(plant, m_motor);
   SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
+  m_defaultMomentOfInertiaAlert->Set(!m_config->IsMomentOfInertiaConfigured());
 }
 
 // ---- Configuration ----------------------------------------------------------

@@ -147,6 +147,8 @@ public class NovaWrapper extends SmartMotorController {
    * the SystemCore runs the closed loop and feedforward instead.
    */
   private final Alert m_feedforwardWithoutProfileAlert;
+  /** Alert shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  private final Alert m_defaultMomentOfInertiaAlert;
   /**
    * Mechanism rotations per unit of the closed loop gains and profile: 1, or the mechanism
    * rotations per meter for a linear closed loop controller.
@@ -202,6 +204,9 @@ public class NovaWrapper extends SmartMotorController {
     m_feedforwardWithoutProfileAlert = new Alert("YAMS",
         buildAlertId("Nova", m_nova.status().getCanId(), "FeedforwardWithoutProfile"),
         getName() + " has a feedforward but no trapezoidal profile. The Nova only applies a feedforward in a motion profile, so the SystemCore runs its closed loop and feedforward instead. Add withTrapezoidalProfile to run them on the Nova.", Alert.Level.MEDIUM);
+    m_defaultMomentOfInertiaAlert = new Alert("YAMS",
+        buildAlertId("Nova", m_nova.status().getCanId(), "DefaultMomentOfInertia"),
+        getName() + " is simulated with the default moment of inertia. Set it with withMomentOfInertia(...).", Alert.Level.MEDIUM);
     setupSimulation();
     try {
       applyConfig(config);
@@ -223,6 +228,7 @@ public class NovaWrapper extends SmartMotorController {
                                m_config.getGearing().getMechanismToRotorRatio()),
                 m_motor));
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+        m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
       }
       m_config.getStartingPosition().ifPresent(
           startingPos -> m_simSupplier.ifPresent(sim -> sim.setMechanismPosition(startingPos)));
@@ -1668,6 +1674,7 @@ public class NovaWrapper extends SmartMotorController {
                                          m_config.getMOI(), gearing.getMechanismToRotorRatio()),
               m_motor));
       setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+      m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {
@@ -1707,6 +1714,7 @@ public class NovaWrapper extends SmartMotorController {
   @Override
   public void close() {
     m_feedforwardWithoutProfileAlert.close();
+    m_defaultMomentOfInertiaAlert.close();
     super.close();
   }
 

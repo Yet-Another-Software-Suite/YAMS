@@ -191,6 +191,8 @@ public class SparkWrapper extends SmartMotorController {
   private Alert m_feedbackNotAppliedAlert;
   /** Alert shown when the SPARK does not take a feedforward gain. */
   private Alert m_feedforwardNotAppliedAlert;
+  /** Alert shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  private Alert m_defaultMomentOfInertiaAlert;
 
   /**
    * Create a {@link SmartMotorController} from {@link SparkMax} or {@link SparkFlex}
@@ -251,6 +253,7 @@ public class SparkWrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "ClosedLoop"), getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
     m_feedbackNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedbackNotApplied"), getName() + " feedback gain was not applied.", Level.HIGH);
     m_feedforwardNotAppliedAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "FeedforwardNotApplied"), getName() + " feedforward gain was not applied.", Level.HIGH);
+    m_defaultMomentOfInertiaAlert = new Alert("YAMS", buildAlertId("Spark", m_spark.getDeviceId(), "DefaultMomentOfInertia"), getName() + " is simulated with the default moment of inertia. Set it with withMomentOfInertia(...).", Level.MEDIUM);
     m_sparkRelativeEncoder = controller.getEncoder();
     setupSimulation();
     try {
@@ -331,6 +334,7 @@ public class SparkWrapper extends SmartMotorController {
         sparkRelativeEncoderSim = Optional.of(sparkSim.get().getRelativeEncoderSim());
         m_dcMotorSim = Optional.of(new DCMotorSim(Models.singleJointedArmFromPhysicalConstants(m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio()), m_motor));
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+        m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
       }
       m_config.getStartingPosition().ifPresent(startingPos -> {
         sparkSim.get().setPosition(startingPos.times(m_mechanismToFeedbackSensorRatio).in(Rotations));

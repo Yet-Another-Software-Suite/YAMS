@@ -133,6 +133,10 @@ NovaWrapper::NovaWrapper(thrifty::Nova* nova, wpi::math::DCMotor motor,
       "YAMS", AlertId("FeedforwardWithoutProfile"),
       GetName() + " has a feedforward but no trapezoidal profile. The Nova only applies a feedforward in a motion profile, so the SystemCore runs its closed loop and feedforward instead. Add WithTrapezoidProfile to run them on the Nova.",
       wpi::util::Alert::Level::MEDIUM);
+  m_defaultMomentOfInertiaAlert.emplace(
+      "YAMS", AlertId("DefaultMomentOfInertia"),
+      GetName() + " is simulated with the default moment of inertia. Set it with WithMOI(...).",
+      wpi::util::Alert::Level::MEDIUM);
 
   SetupSimulation();
   try {
@@ -195,6 +199,7 @@ void NovaWrapper::CreateMotorSim() {
       m_motor, m_config->GetMOI(), MechanismToRotorRatio());
   m_motorSim.emplace(plant, m_motor);
   SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
+  m_defaultMomentOfInertiaAlert->Set(!m_config->IsMomentOfInertiaConfigured());
 }
 
 // ---- Configuration ----------------------------------------------------------

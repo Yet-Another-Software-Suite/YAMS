@@ -32,7 +32,6 @@
 #include <wpi/units/time.hpp>
 #include <wpi/units/velocity.hpp>
 #include <wpi/units/voltage.hpp>
-#include <wpi/util/Alert.hpp>
 
 #include "yams/gearing/MechanismGearing.hpp"
 #include "yams/math/ADRCConfig.hpp"
@@ -1213,14 +1212,7 @@ class SmartMotorControllerConfig {
   std::optional<wpi::math::DCMotor> GetSimMotor() const;
   /** @return Simulation loop period (default 20 ms). */
   wpi::units::second_t GetSimulationPeriod() const;
-  /**
-   * Get the moment of inertia for simulation. In simulation, when the config has a telemetry name,
-   * fetching the default moment of inertia sets a warning in the SMCConfig alert group, and
-   * fetching a set one clears it. A real robot doesn't use the moment of inertia, so it never warns
-   * there.
-   *
-   * @return Moment of inertia for simulation (kg·m²).
-   */
+  /** @return Moment of inertia for simulation (kg·m²). */
   wpi::units::kilogram_square_meter_t GetMOI() const;
   /**
    * @return Whether a moment of inertia was set (WithMOI, WithWheelMOI or an exponential profile with one), so an ADRC
@@ -1478,12 +1470,6 @@ class SmartMotorControllerConfig {
     SetOnThisConfig& operator=(SetOnThisConfig&&) = default;
   };
   SetOnThisConfig m_momentOfInertiaSetOnThisConfig;
-  /**
-   * Warning that the moment of inertia is still the default when it is fetched, in the SMCConfig
-   * alert group. Made by WithTelemetry in simulation, as the telemetry name makes it unique. A copy
-   * shares it, as it has the same name.
-   */
-  std::shared_ptr<wpi::util::Alert> m_defaultMOIAlert;
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {

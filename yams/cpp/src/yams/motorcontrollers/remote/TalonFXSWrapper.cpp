@@ -211,6 +211,10 @@ TalonFXSWrapper::TalonFXSWrapper(hardware::TalonFXS* talon, wpi::math::DCMotor d
       "YAMS", AlertId("ZeroOffset"),
       GetName() + " zero offset is not supported without an external encoder.",
       wpi::util::Alert::Level::HIGH);
+  m_defaultMomentOfInertiaAlert.emplace(
+      "YAMS", AlertId("DefaultMomentOfInertia"),
+      GetName() + " is simulated with the default moment of inertia. Set it with WithMOI(...).",
+      wpi::util::Alert::Level::MEDIUM);
 
   SetupSimulation();
   try {
@@ -818,6 +822,7 @@ void TalonFXSWrapper::SetupSimulation() {
         simMotor, m_config->GetMOI(), mechanismToRotor);
     m_motorSim.emplace(plant, simMotor);
     SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
+    m_defaultMomentOfInertiaAlert->Set(!m_config->IsMomentOfInertiaConfigured());
   }
   if (auto startPos = m_config->GetStartingPosition()) {
     m_simSupplier->SetMechanismPosition(*startPos);
