@@ -122,6 +122,9 @@ public class A301Wrapper extends SmartMotorController {
   /** Sim for the A301. */
   private Optional<DCMotorSim> m_dcMotorSim = Optional.empty();
 
+  /** Alert shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  private final Alert m_defaultMomentOfInertiaAlert;
+
   /** Whether the A301's absolute encoder is the external encoder. */
   private boolean m_useAbsoluteEncoder = false;
 
@@ -155,6 +158,9 @@ public class A301Wrapper extends SmartMotorController {
     m_systemCoreClosedLoopAlert = Optional.of(new Alert("YAMS",
         buildAlertId("A301", m_a301.getDeviceId(), "ClosedLoop"),
         getName() + " closed loop controller is running on the SystemCore.", Alert.Level.MEDIUM));
+    m_defaultMomentOfInertiaAlert = new Alert("YAMS",
+        buildAlertId("A301", m_a301.getDeviceId(), "DefaultMomentOfInertia"),
+        getName() + " is simulated with the default moment of inertia. Set it with withMomentOfInertia(...).", Alert.Level.MEDIUM);
     setupSimulation();
     try {
       applyConfig(config);
@@ -175,6 +181,7 @@ public class A301Wrapper extends SmartMotorController {
             m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio());
         m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+        m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
       }
       m_config.getStartingPosition().ifPresent(
           startingPos -> m_simSupplier.ifPresent(sim -> sim.setMechanismPosition(startingPos)));
@@ -582,6 +589,7 @@ public class A301Wrapper extends SmartMotorController {
             m_motor, m_config.getMOI(), m_config.getGearing().getMechanismToRotorRatio());
         m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
         setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+        m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
       }
     }
   
@@ -688,6 +696,7 @@ public class A301Wrapper extends SmartMotorController {
         .filter(follower -> follower.getFirst() != this)
         .toList());
     m_leader = Optional.empty();
+    m_defaultMomentOfInertiaAlert.close();
     super.close();
   }
 
@@ -1206,6 +1215,7 @@ public class A301Wrapper extends SmartMotorController {
           m_motor, m_config.getMOI(), gearing.getMechanismToRotorRatio());
       m_dcMotorSim = Optional.of(new DCMotorSim(plant, m_motor));
       setSimSupplier(new DCMotorSimSupplier(m_dcMotorSim.get(), this));
+      m_defaultMomentOfInertiaAlert.set(!m_config.isMomentOfInertiaConfigured());
     }
     m_looseFollowers.ifPresent(smcs -> {
       for (var f : smcs) {

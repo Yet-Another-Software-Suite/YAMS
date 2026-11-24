@@ -213,6 +213,10 @@ void SparkWrapper::Init(SparkBase* spark, wpi::math::DCMotor motor,
                                        wpi::util::Alert::Level::HIGH);
 
   UpdateFeedbackSensorRatio(*m_config);
+  m_defaultMomentOfInertiaAlert.emplace(
+      "YAMS", AlertId("DefaultMomentOfInertia"),
+      GetName() + " is simulated with the default moment of inertia. Set it with WithMOI(...).",
+      wpi::util::Alert::Level::MEDIUM);
   SetupSimulation();
   try {
     ApplyConfig(*m_config);
@@ -856,6 +860,7 @@ void SparkWrapper::SetupSimulation() {
         m_motor, m_config->GetMOI(), mechToRotor);
     m_motorSim.emplace(plant, m_motor);
     SetSimSupplier(std::make_shared<simulation::DCMotorSimSupplier>(*m_motorSim, *this));
+    m_defaultMomentOfInertiaAlert->Set(!m_config->IsMomentOfInertiaConfigured());
     m_sparkSim.emplace(m_spark, &m_motor);
     if (m_maxConfig)
       m_relEncoderSim.emplace(static_cast<SparkMax*>(m_spark));

@@ -338,6 +338,11 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   private boolean momentOfInertiaConfigured = false;
   /**
+   * Whether the moment of inertia was set on this config. A copy starts without it, so a copy's
+   * moment of inertia can be set once even if the original's was.
+   */
+  private boolean momentOfInertiaSetOnThisConfig = false;
+  /**
    * Loosely coupled followers.
    */
   private Optional<SmartMotorController[]> looselyCoupledFollowers = Optional.empty();
@@ -426,6 +431,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
+    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia.
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -948,12 +954,9 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
           "MOI is necessary for standalone SmartMotorController simulation!",
           "withMomentOfInertia(Inches.of(18), Pounds.of(8))");
     } else {
-      moi = KilogramSquareMeters.of(
-          SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms)));
-      momentOfInertiaConfigured = true;
-      basicOptions.remove(BasicOptions.MomentOfInertia);
+      return withMomentOfInertia(KilogramSquareMeters.of(
+          SingleJointedArmSim.estimateMOI(length.in(Meters), weight.in(Kilograms))));
     }
-    return self();
   }
 
   /**
@@ -972,22 +975,34 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
           "withWheelMomentOfInertia(Inches.of(4), Pounds.of(1))");
     }
     double radius = diameter.in(Meters) / 2.0;
-    moi = KilogramSquareMeters.of(0.5 * mass.in(Kilograms) *radius * radius);
-    momentOfInertiaConfigured = true;
-    basicOptions.remove(BasicOptions.MomentOfInertia);
-    return self();
+    return withMomentOfInertia(KilogramSquareMeters.of(0.5 * mass.in(Kilograms) * radius * radius));
   }
 
   /**
    * Add the mechanism moment of inertia to the {@link SmartMotorController}s simulation when not
    * run under a formal mechanism.
    *
+   * <p>Every way of setting the moment of inertia comes through here, and it may only be set once
+   * per config: a simulation reads it once, when it is built, so a second value would leave the
+   * config and the simulation disagreeing. A copy of a config may set it again once.
+   *
    * @param MOI Known moment of inertia.
    * @return {@link SmartMotorControllerConfig} for chaining
+   * @throws SmartMotorControllerConfigurationException if the moment of inertia was already set.
    */
   public T withMomentOfInertia(MomentOfInertia MOI) {
+    if (momentOfInertiaSetOnThisConfig) {
+      throw new SmartMotorControllerConfigurationException(
+          "The moment of inertia was already set to " + moi + "; it cannot be changed to " + MOI
+              + ".",
+          "A simulation built from the first value would not use the second.",
+          "Set the moment of inertia once, with withMomentOfInertia(...), "
+              + "withWheelMomentOfInertia(...) or withExponentialProfile(Voltage, DCMotor, "
+              + "MomentOfInertia), or set it on a copy made with clone()");
+    }
     moi = MOI;
     momentOfInertiaConfigured = true;
+    momentOfInertiaSetOnThisConfig = true;
     basicOptions.remove(BasicOptions.MomentOfInertia);
     return self();
   }
@@ -1771,9 +1786,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withExponentialProfile(Voltage maxVolts, DCMotor motor, MomentOfInertia moi) {
-    this.moi = moi;
-    momentOfInertiaConfigured = true;
-    basicOptions.remove(BasicOptions.MomentOfInertia);
+    withMomentOfInertia(moi);
     var sysid = Models.singleJointedArmFromPhysicalConstants(
         motor, moi.in(KilogramSquareMeters), gearing.getMechanismToRotorRatio());
     // The arm model is [position, velocity]; the velocity row (A(1,1), B(1,0)) holds the dynamics.

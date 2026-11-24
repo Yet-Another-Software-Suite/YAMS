@@ -305,6 +305,8 @@ class A301Wrapper : public SmartMotorController {
   math::DerivativeTimeFilter m_accelFilter{20_ms};
 
   std::optional<wpi::util::Alert> m_systemCoreClosedLoopAlert;
+  /** Shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  std::optional<wpi::util::Alert> m_defaultMomentOfInertiaAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;

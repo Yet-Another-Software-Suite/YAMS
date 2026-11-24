@@ -295,8 +295,7 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithExponentialProfile(
     wpi::units::volt_t maxVolts, wpi::math::DCMotor motor,
     wpi::units::kilogram_square_meter_t moi) {
   using Profile = wpi::math::ExponentialProfile<wpi::units::turns, wpi::units::volts>;
-  m_moi = moi;
-  m_momentOfInertiaConfigured = true;
+  WithMOI(moi);
   double gearing = m_motorGearing ? m_motorGearing->GetMechanismToRotorRatio() : 1.0;
   auto sys = wpi::math::Models::FlywheelFromPhysicalConstants(motor, moi, gearing);
   // A is [1/s], B is [(rad/s²)/V] from the flywheel velocity model.
@@ -679,23 +678,29 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithSimulationPeriod(
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(
     wpi::units::kilogram_square_meter_t moi) {
+  if (m_momentOfInertiaSetOnThisConfig.value) {
+    throw exceptions::SmartMotorControllerConfigurationException(
+        "The moment of inertia was already set to " + std::to_string(m_moi.value()) +
+            " kg m^2; it cannot be changed to " + std::to_string(moi.value()) + " kg m^2.",
+        "A simulation built from the first value would not use the second.",
+        "Set the moment of inertia once, with WithMOI(...), WithWheelMOI(...) or "
+        "WithExponentialProfile(volt_t, DCMotor, kilogram_square_meter_t), or set it on a copy "
+        "made with Clone()");
+  }
   m_moi = moi;
   m_momentOfInertiaConfigured = true;
+  m_momentOfInertiaSetOnThisConfig.value = true;
   return *this;
 }
 
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithMOI(wpi::units::meter_t length,
                                                                 wpi::units::kilogram_t mass) {
-  m_moi = wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass);
-  m_momentOfInertiaConfigured = true;
-  return *this;
+  return WithMOI(wpi::sim::SingleJointedArmSim::EstimateMOI(length, mass));
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithWheelMOI(wpi::units::meter_t diameter,
                                                                      wpi::units::kilogram_t mass) {
   wpi::units::meter_t radius = diameter / 2.0;
-  m_moi = 0.5 * mass * radius * radius;
-  m_momentOfInertiaConfigured = true;
-  return *this;
+  return WithMOI(0.5 * mass * radius * radius);
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithStartingPosition(
     wpi::units::degree_t startingAngle) {

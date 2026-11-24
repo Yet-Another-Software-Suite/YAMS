@@ -424,6 +424,8 @@ class TalonFXWrapper : public SmartMotorController {
   std::optional<wpi::util::Alert> m_feedbackNotAppliedAlert;
   /** Shown when the Talon does not take the feedforward gains. */
   std::optional<wpi::util::Alert> m_feedforwardNotAppliedAlert;
+  /** Shown in simulation when the moment of inertia is the default, so the simulation is not the mechanism. */
+  std::optional<wpi::util::Alert> m_defaultMomentOfInertiaAlert;
 
   /** Unique alert id, like the Java buildAlertId. */
   std::string AlertId(const std::string& alertType) const;
