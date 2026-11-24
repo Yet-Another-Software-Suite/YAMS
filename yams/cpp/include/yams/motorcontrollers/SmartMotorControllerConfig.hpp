@@ -1448,6 +1448,12 @@ class SmartMotorControllerConfig {
   ADRCSlot m_adrc[kNumSlots];
   /** Whether a moment of inertia was set, not the placeholder. */
   bool m_momentOfInertiaConfigured{false};
+  /**
+   * Set the moment of inertia, which may only be set once per config.
+   *
+   * @throws SmartMotorControllerConfigurationException if it was already set.
+   */
+  void SetMOI(wpi::units::kilogram_square_meter_t moi, const std::string& caller);
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {
