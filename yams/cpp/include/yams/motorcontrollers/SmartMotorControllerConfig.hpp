@@ -859,8 +859,13 @@ class SmartMotorControllerConfig {
   /**
    * Set the moment of inertia of the mechanism for simulation.
    *
+   * Every way of setting the moment of inertia comes through here, and it may only be set once
+   * per config: a simulation reads it once, when it is built, so a second value would leave the
+   * config and the simulation disagreeing.
+   *
    * @param moi Moment of inertia in kg·m².
    * @return *this for chaining.
+   * @throws SmartMotorControllerConfigurationException if the moment of inertia was already set.
    */
   SmartMotorControllerConfig& WithMOI(wpi::units::kilogram_square_meter_t moi);
 
@@ -1448,12 +1453,6 @@ class SmartMotorControllerConfig {
   ADRCSlot m_adrc[kNumSlots];
   /** Whether a moment of inertia was set, not the placeholder. */
   bool m_momentOfInertiaConfigured{false};
-  /**
-   * Set the moment of inertia, which may only be set once per config.
-   *
-   * @throws SmartMotorControllerConfigurationException if it was already set.
-   */
-  void SetMOI(wpi::units::kilogram_square_meter_t moi, const std::string& caller);
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {
