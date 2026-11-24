@@ -126,7 +126,6 @@ public class SwerveDriveTelemetry {
         case DesiredRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getDesiredChassisSpeeds());
         case CurrentRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getRobotRelativeSpeed());
         case FieldRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getFieldRelativeSpeed());
-        case GyroRotation -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getGyroRotation3d().toRotation2d());
       }
     }
     for (Map.Entry<DoubleTelemetryField, DoubleTelemetry<DoubleTelemetryField>> entry : m_doubleTelemetry.entrySet()) {
@@ -512,9 +511,7 @@ public class SwerveDriveTelemetry {
     /** Measured robot relative {@link ChassisVelocities}. */
     CurrentRobotRelativeChassisSpeeds("chassis/current", ChassisVelocities.struct, new ChassisVelocities(), false),
     /** Measured field relative {@link ChassisVelocities}. */
-    FieldRelativeChassisSpeeds("chassis/field", ChassisVelocities.struct, new ChassisVelocities(), false),
-    /** Gyro yaw, as a {@link Rotation2d}. */
-    GyroRotation("gyroRotation", Rotation2d.struct, new Rotation2d(), false);
+    FieldRelativeChassisSpeeds("chassis/field", ChassisVelocities.struct, new ChassisVelocities(), false);
 
     /** Key that the telemetry is stored at. */
     private final String key;

@@ -41,7 +41,6 @@
 #include <utility>
 #include <vector>
 #include <wpi/nt/NetworkTableInstance.hpp>
-#include <wpi/nt/StructTopic.hpp>
 
 #include "helpers/MockHardware.h"
 #include "helpers/MotorControllerFactory.h"
@@ -360,9 +359,9 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.PIDControllersAreOptio
 }
 
 // At LOW verbosity the drive's telemetry table has everything a dashboard's swerve widget needs:
-// a .type, the module states, the gyro as a Rotation2d, and the maximum module velocity, which is
+// a .type, the module states, the gyro in degrees, and the maximum module velocity, which is
 // only published when the drive has one.
-TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasTypeGyroAndMaxVelocity",
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatASwerveWidgetNeeds",
                  "[SwerveDriveTest]") {
   // Release the fixture's drive so its modules can be reused by drives with telemetry.
   Hardware().sub->m_drive = nullptr;
@@ -388,10 +387,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasTypeG
     CHECK(table->GetSubTable("states")->ContainsKey("current"));
     CHECK(table->GetSubTable("states")->ContainsKey("desired"));
     CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
-    auto gyroRotation = table->GetStructTopic<wpi::math::Rotation2d>("gyroRotation")
-                            .Subscribe(wpi::math::Rotation2d{})
-                            .Get();
-    CHECK(gyroRotation.Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    CHECK(table->GetEntry("gyro").GetDouble(0) == Catch::Approx(30.0).margin(0.1));
     drive.reset();
   }
 

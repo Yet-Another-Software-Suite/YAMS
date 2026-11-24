@@ -33,7 +33,6 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *         // optionally enable individual fields on top of the preset
  *         .withPose()
  *         .withGyro()
- *         .withGyroRotation()
  *         .withMaximumModuleVelocity()
  *         .withCurrentRobotRelativeChassisSpeeds()
  *         .withFieldRelativeChassisSpeeds()
@@ -153,7 +152,6 @@ public class SwerveDriveTelemetryConfig {
         // Everything a dashboard's swerve drive widget needs.
         structFields.get(StructTelemetryField.Pose).enable();
         doubleFields.get(DoubleTelemetryField.Gyro).enable();
-        structFields.get(StructTelemetryField.GyroRotation).enable();
         structArrayFields.get(StructArrayTelemetryField.CurrentModuleStates).enable();
         structArrayFields.get(StructArrayTelemetryField.DesiredModuleStates).enable();
         doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).enable();
@@ -296,16 +294,6 @@ public class SwerveDriveTelemetryConfig {
    */
   public SwerveDriveTelemetryConfig withGyro() {
     doubleFields.get(DoubleTelemetryField.Gyro).enable();
-    return this;
-  }
-
-  /**
-   * Enables the gyro yaw logging as a {@link org.wpilib.math.geometry.Rotation2d}.
-   *
-   * @return {@link SwerveDriveTelemetryConfig} for chaining.
-   */
-  public SwerveDriveTelemetryConfig withGyroRotation() {
-    structFields.get(StructTelemetryField.GyroRotation).enable();
     return this;
   }
 

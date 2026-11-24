@@ -1004,11 +1004,6 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
     if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
     if (dataLogName) stt.SetupDataLog(*dataLogName);
   }
-  for (auto& [field, stt] : m_config.GetRotationFields()) {
-    if (!stt.IsEnabled()) continue;
-    if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
-    if (dataLogName) stt.SetupDataLog(*dataLogName);
-  }
   for (auto& [field, stat] : m_config.GetModuleStatesFields()) {
     if (!stat.IsEnabled()) continue;
     if (nt4Enabled) stat.SetupNetworkTables(m_dataTable, m_tuningTable);
@@ -1039,16 +1034,6 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
         break;
       case StructTelemetryField::FieldRelativeChassisSpeeds:
         stt.Set(drive->GetFieldRelativeSpeed());
-        break;
-      default:
-        break;
-    }
-  }
-  for (auto& [field, stt] : m_config.GetRotationFields()) {
-    if (!stt.IsEnabled()) continue;
-    switch (field) {
-      case StructTelemetryField::GyroRotation:
-        stt.Set(wpi::math::Rotation2d{drive->GetGyroAngle()});
         break;
       default:
         break;

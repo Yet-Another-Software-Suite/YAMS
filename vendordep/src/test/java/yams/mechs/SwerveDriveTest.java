@@ -865,10 +865,10 @@ public class SwerveDriveTest {
   }
 
   @Test
-  void telemetryTableHasTypeAndGyroRotation() {
+  void telemetryTableHasWhatASwerveWidgetNeeds() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
-    // to find it by, the module states, and the gyro as a Rotation2d.
+    // to find it by, the module states, and the gyro in degrees.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
     drive.updateTelemetry();
     NetworkTable table =
@@ -876,9 +876,7 @@ public class SwerveDriveTest {
     assertEquals("SwerveDrive", table.getEntry(".type").getString(""));
     assertTrue(table.getSubTable("states").containsKey("current"));
     assertTrue(table.getSubTable("states").containsKey("desired"));
-    Rotation2d gyroRotation =
-        table.getStructTopic("gyroRotation", Rotation2d.struct).subscribe(new Rotation2d()).get();
-    assertEquals(30, gyroRotation.getDegrees(), 0.1);
+    assertEquals(30, table.getEntry("gyro").getDouble(0), 0.1);
   }
 
   @Test
