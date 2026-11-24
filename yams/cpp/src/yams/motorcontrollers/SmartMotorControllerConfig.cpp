@@ -644,9 +644,8 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
     const std::string& name, TelemetryVerbosity verbosity) {
   m_telemetryName = name;
   m_verbosity = verbosity;
-  // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
-  if (m_defaultMOIAlert) m_defaultMOIAlert->Set(false);
   m_defaultMOIAlert.reset();
+  // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
   if (wpi::RobotBase::IsSimulation()) {
     m_defaultMOIAlert = std::make_shared<wpi::util::Alert>(
         "SMCConfig", name + "/DefaultMOI",

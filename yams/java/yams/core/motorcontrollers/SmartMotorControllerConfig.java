@@ -874,7 +874,6 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withTelemetry(String telemetryName, TelemetryVerbosity verbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.verbosity = Optional.ofNullable(verbosity);
-    defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(false));
     defaultMomentOfInertiaAlert = Optional.empty();
     // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
     if (RobotBase.isSimulation() && telemetryName != null) {
