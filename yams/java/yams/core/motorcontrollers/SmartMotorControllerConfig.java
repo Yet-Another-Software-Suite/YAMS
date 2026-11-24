@@ -345,8 +345,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   private boolean momentOfInertiaSetOnThisConfig = false;
   /**
    * Warning that the moment of inertia is still the default when it is fetched, in the
-   * {@code SMCConfig} alert group. Only made in simulation, and when the config has a telemetry
-   * name, which makes it unique. A copy makes its own.
+   * {@code SMCConfig} alert group. Made by {@link #withTelemetry(String, TelemetryVerbosity)} in
+   * simulation, as the telemetry name makes it unique. A copy shares it, as it has the same name.
    */
   private Optional<Alert> defaultMomentOfInertiaAlert = Optional.empty();
   /**
@@ -438,8 +438,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
     this.closedLoopTolerance = cfg.closedLoopTolerance;
     this.moi = cfg.moi;
     this.momentOfInertiaConfigured = cfg.momentOfInertiaConfigured;
-    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia. Nor is
-    // defaultMomentOfInertiaAlert: a copy makes its own.
+    // momentOfInertiaSetOnThisConfig is not copied: a copy may set its own moment of inertia.
+    this.defaultMomentOfInertiaAlert = cfg.defaultMomentOfInertiaAlert;
     this.looselyCoupledFollowers = cfg.looselyCoupledFollowers;
     this.linearClosedLoopController = cfg.linearClosedLoopController;
     this.velocityTrapezoidalProfile = cfg.velocityTrapezoidalProfile;
@@ -874,6 +874,14 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
   public T withTelemetry(String telemetryName, TelemetryVerbosity verbosity) {
     this.telemetryName = Optional.ofNullable(telemetryName);
     this.verbosity = Optional.ofNullable(verbosity);
+    // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
+    defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(false));
+    defaultMomentOfInertiaAlert = this.telemetryName.filter(name -> RobotBase.isSimulation())
+        .map(name -> new Alert("SMCConfig", name + "/DefaultMOI",
+            name + " uses the default moment of inertia, " + moi.in(KilogramSquareMeters)
+                + " kg m^2. Set it with withMomentOfInertia(...) so the simulation matches the "
+                + "mechanism.",
+            Alert.Level.MEDIUM));
     return self();
   }
 
@@ -884,9 +892,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return {@link SmartMotorControllerConfig} for chaining.
    */
   public T withTelemetry(TelemetryVerbosity verbosity) {
-    this.telemetryName = Optional.of("motor");
-    this.verbosity = Optional.of(verbosity);
-    return self();
+    return withTelemetry("motor", verbosity);
   }
 
   /**
@@ -899,10 +905,8 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    */
   public T withTelemetry(
       String telemetryName, SmartMotorControllerTelemetryConfig telemetryConfig) {
-    this.telemetryName = Optional.ofNullable(telemetryName);
-    this.verbosity = Optional.of(TelemetryVerbosity.HIGH);
     this.specifiedTelemetryConfig = Optional.ofNullable(telemetryConfig);
-    return self();
+    return withTelemetry(telemetryName, TelemetryVerbosity.HIGH);
   }
 
   /**
@@ -1099,20 +1103,7 @@ public abstract class SmartMotorControllerConfig<T extends SmartMotorControllerC
    * @return Moment of Inertia in JKgMetersSquared.
    */
   public double getMOI() {
-    telemetryName.filter(name -> RobotBase.isSimulation()).ifPresent(name -> {
-      if (momentOfInertiaConfigured) {
-        defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(false));
-        return;
-      }
-      if (defaultMomentOfInertiaAlert.isEmpty()) {
-        defaultMomentOfInertiaAlert = Optional.of(new Alert("SMCConfig", name + "/DefaultMOI",
-            name + " uses the default moment of inertia, " + moi.in(KilogramSquareMeters)
-                + " kg m^2. Set it with withMomentOfInertia(...) so the simulation matches the "
-                + "mechanism.",
-            Alert.Level.MEDIUM));
-      }
-      defaultMomentOfInertiaAlert.get().set(true);
-    });
+    defaultMomentOfInertiaAlert.ifPresent(alert -> alert.set(!momentOfInertiaConfigured));
     return moi.in(KilogramSquareMeters);
   }
 

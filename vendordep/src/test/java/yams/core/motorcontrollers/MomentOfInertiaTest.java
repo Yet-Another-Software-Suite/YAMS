@@ -60,10 +60,9 @@ public class MomentOfInertiaTest {
         () -> original.withMomentOfInertia(KilogramSquareMeters.of(0.3)));
   }
 
-  private static long defaultMOIAlerts(String name, boolean activeOnly) {
-    return Arrays.stream(AlertSim.getAll())
+  private static long activeDefaultMOIAlerts(String name) {
+    return Arrays.stream(AlertSim.getActive())
         .filter(alert -> alert.group.equals("SMCConfig") && alert.id.equals(name + "/DefaultMOI"))
-        .filter(alert -> !activeOnly || alert.isActive())
         .count();
   }
 
@@ -71,14 +70,14 @@ public class MomentOfInertiaTest {
   void fetchingTheDefaultWarnsUntilItIsSet() {
     SmartMotorControllerConfig cfg =
         config().withTelemetry("DefaultMOIAlertTest", TelemetryVerbosity.LOW);
-    assertEquals(0, defaultMOIAlerts("DefaultMOIAlertTest", false));
+    assertEquals(0, activeDefaultMOIAlerts("DefaultMOIAlertTest"));
 
     cfg.getMOI();
-    assertEquals(1, defaultMOIAlerts("DefaultMOIAlertTest", true));
+    assertEquals(1, activeDefaultMOIAlerts("DefaultMOIAlertTest"));
 
     cfg.withMomentOfInertia(KilogramSquareMeters.of(0.1));
     cfg.getMOI();
-    assertEquals(0, defaultMOIAlerts("DefaultMOIAlertTest", true));
+    assertEquals(0, activeDefaultMOIAlerts("DefaultMOIAlertTest"));
   }
 
   @Test
@@ -87,7 +86,7 @@ public class MomentOfInertiaTest {
         .withTelemetry("SetMOIAlertTest", TelemetryVerbosity.LOW)
         .withMomentOfInertia(KilogramSquareMeters.of(0.1));
     cfg.getMOI();
-    assertEquals(0, defaultMOIAlerts("SetMOIAlertTest", false));
+    assertEquals(0, activeDefaultMOIAlerts("SetMOIAlertTest"));
   }
 
   @Test

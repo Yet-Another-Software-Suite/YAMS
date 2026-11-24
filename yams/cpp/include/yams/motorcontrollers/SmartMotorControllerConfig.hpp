@@ -1480,21 +1480,10 @@ class SmartMotorControllerConfig {
   SetOnThisConfig m_momentOfInertiaSetOnThisConfig;
   /**
    * Warning that the moment of inertia is still the default when it is fetched, in the SMCConfig
-   * alert group. Only made in simulation, and when the config has a telemetry name, which makes it
-   * unique. A copy makes its own; moving keeps it.
+   * alert group. Made by WithTelemetry in simulation, as the telemetry name makes it unique. A copy
+   * shares it, as it has the same name.
    */
-  struct DefaultMOIAlert {
-    std::optional<wpi::util::Alert> alert;
-    DefaultMOIAlert() = default;
-    DefaultMOIAlert(const DefaultMOIAlert&) {}
-    DefaultMOIAlert& operator=(const DefaultMOIAlert&) {
-      alert.reset();
-      return *this;
-    }
-    DefaultMOIAlert(DefaultMOIAlert&&) = default;
-    DefaultMOIAlert& operator=(DefaultMOIAlert&&) = default;
-  };
-  mutable DefaultMOIAlert m_defaultMOIAlert;
+  std::shared_ptr<wpi::util::Alert> m_defaultMOIAlert;
 
   // Per-slot simulation gain overrides
   struct SimGainsOverride {

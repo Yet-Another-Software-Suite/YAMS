@@ -33,12 +33,11 @@ SmartMotorControllerConfig Config() {
   return config;
 }
 
-/** How many SMCConfig default moment of inertia alerts there are for a telemetry name. */
-long DefaultMOIAlerts(const std::string& name, bool activeOnly) {
-  auto alerts = wpi::sim::AlertSim::GetAll();
+/** How many active SMCConfig default moment of inertia alerts there are for a telemetry name. */
+long ActiveDefaultMOIAlerts(const std::string& name) {
+  auto alerts = wpi::sim::AlertSim::GetActive();
   return std::count_if(alerts.begin(), alerts.end(), [&](const auto& alert) {
-    return alert.group == "SMCConfig" && alert.id == name + "/DefaultMOI" &&
-           (!activeOnly || alert.isActive());
+    return alert.group == "SMCConfig" && alert.id == name + "/DefaultMOI";
   });
 }
 }  // namespace
@@ -83,21 +82,21 @@ TEST_CASE("MomentOfInertiaTest.ACopyCanSetItAgain", "[MomentOfInertia]") {
 TEST_CASE("MomentOfInertiaTest.FetchingTheDefaultWarnsUntilItIsSet", "[MomentOfInertia]") {
   auto config = Config();
   config.WithTelemetry("DefaultMOIAlertTest");
-  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", false) == 0);
+  CHECK(ActiveDefaultMOIAlerts("DefaultMOIAlertTest") == 0);
 
   config.GetMOI();
-  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", true) == 1);
+  CHECK(ActiveDefaultMOIAlerts("DefaultMOIAlertTest") == 1);
 
   config.WithMOI(0.1_kg_sq_m);
   config.GetMOI();
-  CHECK(DefaultMOIAlerts("DefaultMOIAlertTest", true) == 0);
+  CHECK(ActiveDefaultMOIAlerts("DefaultMOIAlertTest") == 0);
 }
 
 TEST_CASE("MomentOfInertiaTest.FetchingASetOneNeverWarns", "[MomentOfInertia]") {
   auto config = Config();
   config.WithTelemetry("SetMOIAlertTest").WithMOI(0.1_kg_sq_m);
   config.GetMOI();
-  CHECK(DefaultMOIAlerts("SetMOIAlertTest", false) == 0);
+  CHECK(ActiveDefaultMOIAlerts("SetMOIAlertTest") == 0);
 }
 
 TEST_CASE("MomentOfInertiaTest.NoWarningWithoutATelemetryName", "[MomentOfInertia]") {

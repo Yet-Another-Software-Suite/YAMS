@@ -644,6 +644,16 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
     const std::string& name, TelemetryVerbosity verbosity) {
   m_telemetryName = name;
   m_verbosity = verbosity;
+  // A real robot doesn't use the moment of inertia, so the alert is only made in simulation.
+  if (m_defaultMOIAlert) m_defaultMOIAlert->Set(false);
+  m_defaultMOIAlert.reset();
+  if (wpi::RobotBase::IsSimulation()) {
+    m_defaultMOIAlert = std::make_shared<wpi::util::Alert>(
+        "SMCConfig", name + "/DefaultMOI",
+        name + " uses the default moment of inertia, " + std::to_string(m_moi.value()) +
+            " kg m^2. Set it with WithMOI(...) so the simulation matches the mechanism.",
+        wpi::util::Alert::Level::MEDIUM);
+  }
   return *this;
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
@@ -652,11 +662,9 @@ SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithTelemetry(
     const std::string& name, telemetry::SmartMotorControllerTelemetryConfig telemetryConfig) {
-  m_telemetryName = name;
-  m_verbosity = TelemetryVerbosity::HIGH;
   m_telemetryConfig =
       std::make_shared<telemetry::SmartMotorControllerTelemetryConfig>(std::move(telemetryConfig));
-  return *this;
+  return WithTelemetry(name, TelemetryVerbosity::HIGH);
 }
 SmartMotorControllerConfig& SmartMotorControllerConfig::WithSubsystem(
     wpi::cmd::SubsystemBase* sys) {
@@ -1077,21 +1085,7 @@ wpi::units::second_t SmartMotorControllerConfig::GetSimulationPeriod() const {
   return m_simulationPeriod.value_or(20_ms);
 }
 wpi::units::kilogram_square_meter_t SmartMotorControllerConfig::GetMOI() const {
-  if (m_telemetryName && wpi::RobotBase::IsSimulation()) {
-    if (m_momentOfInertiaConfigured) {
-      if (m_defaultMOIAlert.alert) m_defaultMOIAlert.alert->Set(false);
-    } else {
-      if (!m_defaultMOIAlert.alert) {
-        m_defaultMOIAlert.alert.emplace(
-            "SMCConfig", *m_telemetryName + "/DefaultMOI",
-            *m_telemetryName + " uses the default moment of inertia, " +
-                std::to_string(m_moi.value()) +
-                " kg m^2. Set it with WithMOI(...) so the simulation matches the mechanism.",
-            wpi::util::Alert::Level::MEDIUM);
-      }
-      m_defaultMOIAlert.alert->Set(true);
-    }
-  }
+  if (m_defaultMOIAlert) m_defaultMOIAlert->Set(!m_momentOfInertiaConfigured);
   return m_moi;
 }
 bool SmartMotorControllerConfig::IsMomentOfInertiaConfigured() const { return m_momentOfInertiaConfigured; }
