@@ -145,6 +145,9 @@ public class SwerveDriveTelemetryConfig {
         doubleFields.get(DoubleTelemetryField.ModulesAzimuthVoltage).enable();
         boolFields.get(BooleanTelemetryField.ModulesDriveVoltageEnabled).enable();
         boolFields.get(BooleanTelemetryField.ModulesAzimuthVoltageEnabled).enable();
+        doubleFields.get(DoubleTelemetryField.SkidRatio).enable();
+        doubleFields.get(DoubleTelemetryField.TiltOdometryScale).enable();
+        boolFields.get(BooleanTelemetryField.IsSkidding).enable();
       case MID:
         structFields.get(StructTelemetryField.FieldRelativeChassisSpeeds).enable();
       case LOW:
@@ -489,6 +492,36 @@ public class SwerveDriveTelemetryConfig {
     for (BooleanTelemetryField field1 : field) {
       withCustom(field1, value);
     }
+    return this;
+  }
+
+  /**
+   * Publish the wheel-skid ratio from {@link yams.core.mechanisms.swerve.SkidDetector}.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} for chaining.
+   */
+  public SwerveDriveTelemetryConfig withSkidRatio() {
+    doubleFields.get(DoubleTelemetryField.SkidRatio).enable();
+    return this;
+  }
+
+  /**
+   * Publish whether {@link yams.core.mechanisms.swerve.SkidDetector} is currently flagging a skid.
+   *
+   * @return {@link SwerveDriveTelemetryConfig} for chaining.
+   */
+  public SwerveDriveTelemetryConfig withIsSkidding() {
+    boolFields.get(BooleanTelemetryField.IsSkidding).enable();
+    return this;
+  }
+
+  /**
+   * Publish the active tilt-odometry wheel-delta scale factor ({@code [0.0, 1.0]}).
+   *
+   * @return {@link SwerveDriveTelemetryConfig} for chaining.
+   */
+  public SwerveDriveTelemetryConfig withTiltOdometryScale() {
+    doubleFields.get(DoubleTelemetryField.TiltOdometryScale).enable();
     return this;
   }
 }

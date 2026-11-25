@@ -102,6 +102,15 @@ public class SwerveDrive {
   /** The simulated pose of the robot if the {@link SwerveModuleVelocity}s were met perfectly. */
   private Pose2d m_simPose = new Pose2d();
 
+  /** Cached robot-frame module locations for zero-allocation skid evaluation. */
+  private final Translation2d[] m_moduleLocations;
+
+  /** Latest {@link SkidDetector.SkidState} computed during {@link #updatePoseEstimator()}. */
+  private SkidDetector.SkidState m_lastSkidState = SkidDetector.SkidState.NOMINAL;
+
+  /** Optional scaler used when skid odometry rejection is enabled without tilt scaling. */
+  private final TiltOdometryScaler m_skidOnlyScaler;
+
   /**
    * Create a SwerveDrive.
    *
@@ -124,6 +133,14 @@ public class SwerveDrive {
     m_desiredModuleStates = new SwerveModuleVelocity[m_modules.length];
     m_simPose = config.getInitialPose();
     Arrays.fill(m_desiredModuleStates, new SwerveModuleVelocity());
+    m_moduleLocations =
+        Arrays.stream(m_modules)
+            .map(module -> module.getConfig().getLocation().orElseThrow())
+            .toArray(Translation2d[]::new);
+    m_skidOnlyScaler =
+        config.getTiltOdometryScaler().isEmpty() && config.isSkidOdometryRejectionEnabled()
+            ? new TiltOdometryScaler(Radians.of(Math.PI * 0.49), Radians.of(Math.PI * 0.5))
+            : null;
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getGyroRotation3d().toRotation2d(), getModulePositions(), m_config.getInitialPose());
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
@@ -463,7 +480,13 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().resetOdometry(pose);
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
-    m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), getModulePositions(), pose);
+    SwerveModulePosition[] rawPositions = getModulePositions();
+    m_config.getTiltOdometryScaler().ifPresent(scaler -> scaler.reset(rawPositions));
+    if (m_skidOnlyScaler != null) {
+      m_skidOnlyScaler.reset(rawPositions);
+    }
+    m_lastSkidState = SkidDetector.SkidState.NOMINAL;
+    m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), rawPositions, pose);
     m_desiredChassisSpeeds = new ChassisVelocities();
     m_desiredModuleStates = m_kinematics.toSwerveModuleVelocities(new ChassisVelocities());
     m_simPose = pose;
@@ -608,6 +631,11 @@ public class SwerveDrive {
    *                                 pixel). By optimizing this you can get * vision accurate to inches instead of feet.
    */
   public void addVisionMeasurement(Pose2d robotPose, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
+    if (m_config.getVisionMaxTilt().isPresent()
+        && TiltOdometryScaler.isTiltExceeding(
+            getGyroRotation3d(), m_config.getVisionMaxTilt().get())) {
+      return;
+    }
     m_poseEstimator.addVisionMeasurement(robotPose, timestamp, visionMeasurementStdDevs);
   }
 
@@ -633,6 +661,11 @@ public class SwerveDrive {
    *                  from {@link Timer#getTimestamp()} or similar sources.
    */
   public void addVisionMeasurement(Pose2d robotPose, double timestamp) {
+    if (m_config.getVisionMaxTilt().isPresent()
+        && TiltOdometryScaler.isTiltExceeding(
+            getGyroRotation3d(), m_config.getVisionMaxTilt().get())) {
+      return;
+    }
     m_poseEstimator.addVisionMeasurement(robotPose, timestamp);
   }
 
@@ -641,7 +674,26 @@ public class SwerveDrive {
    * {@link SwerveModulePosition}
    */
   private void updatePoseEstimator() {
-    m_poseEstimator.update(getGyroRotation3d().toRotation2d(), getModulePositions());
+    Rotation3d attitude = getGyroRotation3d();
+    SwerveModulePosition[] positions = getModulePositions();
+
+    if (m_config.getSkidDetector().isPresent()) {
+      SwerveModuleVelocity[] states = getModuleStates();
+      double omegaRadPerSec = m_kinematics.toChassisVelocities(states).omega;
+      m_lastSkidState =
+          m_config.getSkidDetector().get().calculate(states, m_moduleLocations, omegaRadPerSec);
+    }
+
+    boolean rejectSkid =
+        m_config.isSkidOdometryRejectionEnabled() && m_lastSkidState.skidding();
+    if (m_config.getTiltOdometryScaler().isPresent()) {
+      positions =
+          m_config.getTiltOdometryScaler().get().scalePositions(attitude, positions, rejectSkid);
+    } else if (m_skidOnlyScaler != null) {
+      positions = m_skidOnlyScaler.scalePositions(attitude, positions, rejectSkid);
+    }
+
+    m_poseEstimator.update(attitude.toRotation2d(), positions);
   }
 
   /** Update the telemetry and {@link SwerveDrivePoseEstimator} of the drive. */
@@ -805,5 +857,50 @@ public class SwerveDrive {
    */
   public SwerveModule[] getModules() {
     return m_modules;
+  }
+
+  /**
+   * Get the latest rigid-body wheel-skid ratio from {@link SkidDetector} ({@code 1.0} when
+   * stationary, not skidding, or when skid detection is not configured).
+   *
+   * @return Wheel-skid ratio ({@code >= 1.0}).
+   */
+  public double getSkidRatio() {
+    return m_lastSkidState.skidRatio();
+  }
+
+  /**
+   * Whether {@link SkidDetector} flagged wheel slip on the most recent odometry update.
+   *
+   * @return {@code true} if skidding, {@code false} otherwise or if skid detection is disabled.
+   */
+  public boolean isSkidding() {
+    return m_lastSkidState.skidding();
+  }
+
+  /**
+   * Get the most recently applied tilt-odometry scale factor in {@code [0.0, 1.0]} ({@code 1.0}
+   * when flat or when tilt scaling is disabled).
+   *
+   * @return Odometry scale factor in {@code [0.0, 1.0]}.
+   */
+  public double getTiltOdometryScale() {
+    if (m_config.getTiltOdometryScaler().isPresent()) {
+      return m_config.getTiltOdometryScaler().get().getLastScale();
+    }
+    if (m_skidOnlyScaler != null) {
+      return m_skidOnlyScaler.getLastScale();
+    }
+    return 1.0;
+  }
+
+  /**
+   * Get the robot's current yaw-invariant 3D tilt angle from vertical derived from {@link
+   * #getGyroRotation3d()}.
+   *
+   * @return Non-negative 3D tilt {@link Angle}.
+   */
+  public Angle getTiltAngle() {
+    return TiltOdometryScaler.computeTiltAngle(getGyroRotation3d());
   }
 }

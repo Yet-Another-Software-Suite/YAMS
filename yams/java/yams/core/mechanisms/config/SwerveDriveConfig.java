@@ -31,7 +31,9 @@ import org.wpilib.util.Alert;
 import yams.core.math.DerivativeTimeFilter;
 import yams.core.mechanisms.config.enums.GyroAxis;
 import yams.core.mechanisms.swerve.SwerveDrive;
+import yams.core.mechanisms.swerve.SkidDetector;
 import yams.core.mechanisms.swerve.SwerveModule;
+import yams.core.mechanisms.swerve.TiltOdometryScaler;
 import yams.core.telemetry.SwerveDriveTelemetryConfig;
 import yams.core.telemetry.enums.TelemetryVerbosity;
 
@@ -100,6 +102,17 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    * Gyro inverted.
    */
   private boolean gyroInverted = false;
+  /** Optional {@link SkidDetector} for detecting swerve wheel slip. */
+  private Optional<SkidDetector> skidDetector = Optional.empty();
+  /**
+   * Whether wheel odometry deltas should be attenuated to zero while {@link #skidDetector} flags a
+   * skid. Defaults to {@code false} (reporting telemetry and getters only).
+   */
+  private boolean skidOdometryRejection = false;
+  /** Optional {@link TiltOdometryScaler} for attenuating wheel odometry while tilted. */
+  private Optional<TiltOdometryScaler> tiltOdometryScaler = Optional.empty();
+  /** Optional maximum 3D tilt angle above which 2D vision pose updates are rejected. */
+  private Optional<Angle> visionMaxTilt = Optional.empty();
   /**
    * Starting pose on the field.
    */
@@ -845,5 +858,117 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   public boolean useExternalFeedbackSensor() {
     return true;
+  }
+
+  /**
+   * Enable rigid-body wheel-skid detection using {@link SkidDetector} with the default minimum
+   * translational speed deadband ({@code 0.10 m/s}). By default this reports {@code getSkidRatio()}
+   * and {@code isSkidding()} without modifying odometry; call {@link
+   * #withSkidOdometryRejection(boolean)} to also attenuate wheel deltas during a skid.
+   *
+   * @param skidRatioThreshold Ratio threshold strictly greater than {@code 1.0} (e.g. {@code
+   *     1.35}).
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withSkidDetection(double skidRatioThreshold) {
+    this.skidDetector = Optional.of(new SkidDetector(skidRatioThreshold));
+    return (T) this;
+  }
+
+  /**
+   * Enable rigid-body wheel-skid detection using {@link SkidDetector}.
+   *
+   * @param skidRatioThreshold Ratio threshold strictly greater than {@code 1.0} (e.g. {@code
+   *     1.35}).
+   * @param minTranslationalSpeed Minimum translational speed deadband below which skid ratio stays
+   *     at {@code 1.0}.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withSkidDetection(double skidRatioThreshold, LinearVelocity minTranslationalSpeed) {
+    this.skidDetector = Optional.of(new SkidDetector(skidRatioThreshold, minTranslationalSpeed));
+    return (T) this;
+  }
+
+  /**
+   * Configure whether wheel-odometry distance deltas are attenuated to zero while {@link
+   * SkidDetector} reports a skid. Defaults to {@code false} (telemetry and getters only).
+   *
+   * @param rejectWhileSkidding {@code true} to freeze wheel-delta integration while skidding.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withSkidOdometryRejection(boolean rejectWhileSkidding) {
+    this.skidOdometryRejection = rejectWhileSkidding;
+    return (T) this;
+  }
+
+  /**
+   * Enable tilt-scaled odometry using {@link TiltOdometryScaler}, linearly attenuating wheel
+   * travel from {@code 1.0} at {@code fullTrustTilt} down to {@code 0.0} at {@code zeroTrustTilt}.
+   *
+   * @param fullTrustTilt 3D tilt angle at or below which wheel travel is trusted at {@code 1.0}
+   *     (e.g. {@code Degrees.of(2)}).
+   * @param zeroTrustTilt 3D tilt angle at or above which wheel travel is scaled to {@code 0.0}
+   *     (e.g. {@code Degrees.of(25)}).
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withTiltScaledOdometry(Angle fullTrustTilt, Angle zeroTrustTilt) {
+    this.tiltOdometryScaler = Optional.of(new TiltOdometryScaler(fullTrustTilt, zeroTrustTilt));
+    return (T) this;
+  }
+
+  /**
+   * Reject 2D vision pose updates in {@link SwerveDrive#addVisionMeasurement} whenever the robot's
+   * 3D tilt angle exceeds {@code maxTilt} (e.g. {@code Degrees.of(5)} while crossing a field bump).
+   *
+   * @param maxTilt Maximum permitted 3D tilt angle ({@code > 0 deg}).
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withVisionMaxTilt(Angle maxTilt) {
+    if (maxTilt == null || !Double.isFinite(maxTilt.in(Radians)) || maxTilt.in(Radians) <= 0.0) {
+      throw new IllegalArgumentException("maxTilt must be finite and positive.");
+    }
+    this.visionMaxTilt = Optional.of(maxTilt);
+    return (T) this;
+  }
+
+  /**
+   * Get the configured {@link SkidDetector}, if enabled.
+   *
+   * @return Optional {@link SkidDetector}.
+   */
+  public Optional<SkidDetector> getSkidDetector() {
+    return skidDetector;
+  }
+
+  /**
+   * Whether wheel-odometry deltas are rejected while {@link SkidDetector} flags a skid.
+   *
+   * @return {@code true} if skid odometry rejection is enabled.
+   */
+  public boolean isSkidOdometryRejectionEnabled() {
+    return skidOdometryRejection;
+  }
+
+  /**
+   * Get the configured {@link TiltOdometryScaler}, if enabled.
+   *
+   * @return Optional {@link TiltOdometryScaler}.
+   */
+  public Optional<TiltOdometryScaler> getTiltOdometryScaler() {
+    return tiltOdometryScaler;
+  }
+
+  /**
+   * Get the configured maximum 3D tilt angle for accepting vision updates, if enabled.
+   *
+   * @return Optional maximum vision tilt {@link Angle}.
+   */
+  public Optional<Angle> getVisionMaxTilt() {
+    return visionMaxTilt;
   }
 }

@@ -135,6 +135,8 @@ public class SwerveDriveTelemetry {
         continue;
       switch (dt.getField()) {
         case MaximumModuleVelocity -> cfg.getMaximumModuleLinearVelocity().ifPresent(v -> dt.set(v.in(MetersPerSecond)));
+        case SkidRatio -> dt.set(drive.getSkidRatio());
+        case TiltOdometryScale -> dt.set(drive.getTiltOdometryScale());
       }
     }
     for (Map.Entry<StructArrayTelemetryField, StructArrayTelemetry<?, StructArrayTelemetryField>> entry : m_structArrayTelemetry.entrySet()) {
@@ -145,6 +147,15 @@ public class SwerveDriveTelemetry {
       switch (stat.getField()) {
         case DesiredModuleStates -> ((StructArrayTelemetry<SwerveModuleVelocity, StructArrayTelemetryField>) stat).set(drive.getDesiredModuleStates());
         case CurrentModuleStates -> ((StructArrayTelemetry<SwerveModuleVelocity, StructArrayTelemetryField>) stat).set(drive.getModuleStates());
+      }
+    }
+    for (Map.Entry<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> entry : m_boolTelemetry.entrySet()) {
+      var bt = entry.getValue();
+      if (!bt.enabled) {
+        continue;
+      }
+      if (bt.getField() == BooleanTelemetryField.IsSkidding) {
+        bt.set(drive.isSkidding());
       }
     }
   }
@@ -174,7 +185,7 @@ public class SwerveDriveTelemetry {
     // controller is missing.
     var modes = EnumSet.noneOf(TuningMode.class);
     for (BooleanTelemetry<BooleanTelemetryField> bt : m_boolTelemetry.values()) {
-      if (!bt.enabled || !bt.get()) {
+      if (!bt.enabled || !bt.getField().tunable || !bt.get()) {
         continue;
       }
       switch (bt.getField()) {
@@ -671,7 +682,11 @@ public class SwerveDriveTelemetry {
      * Maximum speed of each module, in meters per second, from
      * {@link yams.core.mechanisms.config.SwerveDriveConfig#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)}.
      */
-    MaximumModuleVelocity("maxModuleVelocity", 0, false, "meters_per_second");
+    MaximumModuleVelocity("maxModuleVelocity", 0, false, "meters_per_second"),
+    /** Wheel-skid ratio from {@link yams.core.mechanisms.swerve.SkidDetector} ({@code >= 1.0}). */
+    SkidRatio("odometry/skidRatio", 1.0, false, "none"),
+    /** Tilt-odometry wheel-delta scale factor in {@code [0.0, 1.0]}. */
+    TiltOdometryScale("odometry/tiltScale", 1.0, false, "none");
 
     /** Default value of the double telemetry field. */
     private final double defaultVal;
@@ -740,7 +755,9 @@ public class SwerveDriveTelemetry {
      * {@link DoubleTelemetryField#ModulesAzimuthVoltage} instead of the angle setpoint, without its
      * closed loop controller, as for characterizing it.
      */
-    ModulesAzimuthVoltageEnabled("modules/azimuth/voltage/enabled", false, true);
+    ModulesAzimuthVoltageEnabled("modules/azimuth/voltage/enabled", false, true),
+    /** Whether {@link yams.core.mechanisms.swerve.SkidDetector} is currently flagging wheel slip. */
+    IsSkidding("odometry/skidding", false, false);
 
     /** Default value of the boolean telemetry field. */
     private final boolean defaultVal;

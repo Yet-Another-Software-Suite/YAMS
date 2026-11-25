@@ -59,7 +59,8 @@ JAVA_GROUPS = [
                     ' --tests "yams.commands2.swerve.SwerveInputStreamAimTest"'
                     ' --tests "yams.commands2.telemetry.SwerveInputStreamTelemetryTest"'
                     ' --tests "yams.commands3.swerve.SwerveInputStreamAimTest"'
-                    ' --tests "yams.commands3.telemetry.SwerveInputStreamTelemetryTest"'},
+                    ' --tests "yams.commands3.telemetry.SwerveInputStreamTelemetryTest"'
+                    ' --tests "yams.core.mechanisms.swerve.SwerveSkidAndTiltOdometryTest"'},
     # Every motor controller, closed loop controller, and attached encoder crossing the continuous
     # wrapping point: many simulated Talons, which Phoenix runs in real time.
     {"group": "continuous-wrapping",
