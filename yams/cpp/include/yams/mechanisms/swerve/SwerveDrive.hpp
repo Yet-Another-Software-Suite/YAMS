@@ -1219,6 +1219,8 @@ void SwerveDriveTelemetry::ApplyTuningValues(mechanisms::swerve::SwerveDrive<Num
       case BooleanTelemetryField::ModulesAzimuthVoltageEnabled:
         modes.insert(TuningMode::AzimuthVoltage);
         break;
+      case BooleanTelemetryField::IsSkidding:
+        break;
     }
   }
   // Spinning in place and a voltage only apply while their tuning mode is on.
@@ -1487,7 +1489,7 @@ void SwerveDriveTelemetry::StopTuning(mechanisms::swerve::SwerveDrive<NumModules
   // Turn every tuning mode off and apply it, so a voltage stops and the wheels are held where they
   // are.
   for (auto& [field, bt] : m_config.GetBoolFields()) {
-    if (bt.IsEnabled()) bt.ForceSet(false);
+    if (field != BooleanTelemetryField::IsSkidding && bt.IsEnabled()) bt.ForceSet(false);
   }
   ApplyTuningValues(drive);
   // Send everything again when tuning starts again.
