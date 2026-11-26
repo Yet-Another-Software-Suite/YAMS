@@ -33,6 +33,7 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *         // optionally enable individual fields on top of the preset
  *         .withPose()
  *         .withRotation()
+ *         .withGyro()
  *         .withMaximumModuleVelocity()
  *         .withCurrentRobotRelativeChassisSpeeds()
  *         .withFieldRelativeChassisSpeeds()
@@ -150,6 +151,7 @@ public class SwerveDriveTelemetryConfig {
         // Everything a dashboard's swerve drive widget needs.
         structFields.get(StructTelemetryField.Pose).enable();
         structFields.get(StructTelemetryField.Rotation).enable();
+        structFields.get(StructTelemetryField.Gyro).enable();
         structArrayFields.get(StructArrayTelemetryField.CurrentModuleStates).enable();
         structArrayFields.get(StructArrayTelemetryField.DesiredModuleStates).enable();
         doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).enable();
@@ -288,8 +290,8 @@ public class SwerveDriveTelemetryConfig {
   }
 
   /**
-   * Enables logging the robot's rotation from the gyro, not from odometry, as a {@link org.wpilib.math.geometry.Rotation2d}
-   * at {@code rotation}.
+   * Enables logging the robot's rotation from odometry, the rotation used to turn field relative speeds into module
+   * states, as a {@link org.wpilib.math.geometry.Rotation2d} at {@code rotation}.
    *
    * @return {@link SwerveDriveTelemetryConfig} for chaining.
    */
@@ -299,12 +301,13 @@ public class SwerveDriveTelemetryConfig {
   }
 
   /**
-   * Same as {@link #withRotation()}: enables logging the robot's rotation from the gyro.
+   * Enables logging the gyro's rotation as a {@link org.wpilib.math.geometry.Rotation2d} at {@code gyro}.
    *
    * @return {@link SwerveDriveTelemetryConfig} for chaining.
    */
   public SwerveDriveTelemetryConfig withGyro() {
-    return withRotation();
+    structFields.get(StructTelemetryField.Gyro).enable();
+    return this;
   }
 
   /**

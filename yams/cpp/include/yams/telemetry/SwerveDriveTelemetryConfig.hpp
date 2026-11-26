@@ -41,6 +41,7 @@ namespace yams::telemetry {
  *         .WithTelemetryVerbosity(TelemetryVerbosity::HIGH)
  *         .WithPose()
  *         .WithRotation()
+ *         .WithGyro()
  *         .WithMaximumModuleVelocity()
  *         .WithCurrentRobotRelativeChassisSpeeds()
  *         .WithFieldRelativeChassisSpeeds()
@@ -59,8 +60,11 @@ class SwerveDriveTelemetryConfig {
   enum class StructTelemetryField {
     /** Estimated field-relative pose of the robot. */
     Pose,
-    /** The robot's rotation from the gyro, not from odometry, as a wpi::math::Rotation2d. */
+    /** The robot's rotation from odometry, used to turn field-relative speeds into module states,
+     *  as a wpi::math::Rotation2d. */
     Rotation,
+    /** The gyro's rotation, as a wpi::math::Rotation2d. */
+    Gyro,
     /** Last-commanded desired robot-relative chassis speeds. */
     DesiredRobotRelativeChassisSpeeds,
     /** Measured robot-relative chassis speeds. */
@@ -197,10 +201,10 @@ class SwerveDriveTelemetryConfig {
 
   /** Enables the pose logging. @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithPose();
-  /** Enables logging the robot's rotation from the gyro, not from odometry, as a
-   *  wpi::math::Rotation2d at "rotation". @return *this for chaining. */
+  /** Enables logging the robot's rotation from odometry, used to turn field-relative speeds into
+   *  module states, as a wpi::math::Rotation2d at "rotation". @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithRotation();
-  /** Same as WithRotation(): enables logging the robot's rotation from the gyro.
+  /** Enables logging the gyro's rotation as a wpi::math::Rotation2d at "gyro".
    *  @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithGyro();
   /** Enables the maximum module velocity logging, so dashboards can scale module state arrows.
@@ -236,7 +240,7 @@ class SwerveDriveTelemetryConfig {
                      StructTelemetry<wpi::math::Pose2d, StructTelemetryField>>&
   GetPoseFields();
 
-  /** @return Configured StructTelemetry<Rotation2d> for Rotation. */
+  /** @return Configured StructTelemetry<Rotation2d> for Rotation and Gyro. */
   std::unordered_map<StructTelemetryField,
                      StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>>&
   GetRotationFields();

@@ -156,7 +156,7 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 | `getRelativeMechanismPosition()` on a mechanism | `getPose3d()` (C++ `GetPose3d()`): the mechanism's `Pose3d` relative to the robot, for an AdvantageScope robot model |
 | `SwerveModule.lock(Rotation2d)` | `setAzimuthAngle(Rotation2d)`, which turns the wheel without driving it |
-| Swerve drive telemetry `gyro` (degrees, `double`) | `rotation` (`struct:Rotation2d`), the robot's rotation from the gyro, not from odometry. Turned on by `withRotation()` or `withGyro()` (C++ `WithRotation()` or `WithGyro()`) and at every verbosity from `LOW` |
+| Swerve drive telemetry `gyro` (degrees, `double`) | `gyro` (`struct:Rotation2d`), the gyro's rotation, with `withGyro()` (C++ `WithGyro()`). New beside it: `rotation` (`struct:Rotation2d`), the robot's rotation from odometry, used for the module states, with `withRotation()` (C++ `WithRotation()`). Both are on from `LOW` up |
 
 New alongside the renames:
 
@@ -264,6 +264,15 @@ drive.getGyroRotation3d().getZ()
 A gyro mounted on its side can be used as the heading source with
 `SwerveDriveConfig.withGyroHeadingAxis(GyroAxis)` (`YAW` by default, `ROLL` or `PITCH`). C++ is
 unchanged and still uses `GetGyroAngle()`.
+
+### Field relative driving uses the odometry rotation
+
+Field relative driving (`setFieldRelativeChassisSpeeds`), `getFieldRelativeSpeed()`, driving to a
+pose and `SwerveInputStream`'s heading, aim and locked-heading control use the robot's rotation from
+odometry, `SwerveDrive.getRotation()` (C++ `GetRotation()`), instead of the gyro. It's the heading of
+`getPose()`, so vision measurements that correct the pose's heading also correct which way "forward"
+is. Without vision, it is the gyro's heading, so nothing changes. If vision's heading is noisy, give
+it a larger heading standard deviation in `addVisionMeasurement`.
 
 ### Trigger factory rename
 

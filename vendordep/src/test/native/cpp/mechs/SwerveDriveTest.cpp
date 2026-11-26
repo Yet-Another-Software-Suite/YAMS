@@ -393,14 +393,25 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatA
     CHECK(table->GetSubTable("chassis")->ContainsKey("desired"));
     CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
     auto rotation = table->GetStructTopic<wpi::math::Rotation2d>("rotation").Subscribe({});
+    auto gyro = table->GetStructTopic<wpi::math::Rotation2d>("gyro").Subscribe({});
     CHECK(rotation.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
-    // A vision measurement turns the pose, but rotation is the gyro's, not odometry's.
+    CHECK(gyro.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    // A vision measurement turns the pose: rotation follows odometry, gyro stays the gyro's.
     drive->AddVisionMeasurement(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{60_deg}},
                                 wpi::Timer::GetTimestamp(),
                                 wpi::util::array<double, 3>{0.01, 0.01, 0.01});
     drive->UpdateTelemetry();
-    CHECK(drive->GetPose().Rotation().Degrees().value() > 40.0);
-    CHECK(rotation.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    double poseDegrees = drive->GetPose().Rotation().Degrees().value();
+    CHECK(poseDegrees > 40.0);
+    CHECK(drive->GetRotation().Degrees().value() == Catch::Approx(poseDegrees));
+    CHECK(rotation.Get().Degrees().value() == Catch::Approx(poseDegrees).margin(0.1));
+    CHECK(gyro.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
+
+    // Field-relative speeds are turned into module states with the odometry rotation.
+    drive->SetFieldRelativeChassisSpeeds(wpi::math::ChassisVelocities{1_mps, 0_mps, 0_rad_per_s});
+    auto robotRelative = drive->GetDesiredChassisSpeeds();
+    CHECK(robotRelative.vx.value() == Catch::Approx(std::cos(-poseDegrees * std::numbers::pi / 180.0)).margin(1e-6));
+    CHECK(robotRelative.vy.value() == Catch::Approx(std::sin(-poseDegrees * std::numbers::pi / 180.0)).margin(1e-6));
     drive.reset();
   }
 

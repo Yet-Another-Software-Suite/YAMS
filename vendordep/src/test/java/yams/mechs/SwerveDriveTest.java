@@ -870,8 +870,8 @@ public class SwerveDriveTest {
   void telemetryTableHasWhatASwerveWidgetNeeds() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
-    // to find it by, the module states, the current and desired chassis speeds, and the robot's
-    // rotation from the gyro.
+    // to find it by, the module states, the current and desired chassis speeds, the robot's
+    // rotation from odometry and the gyro's rotation.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
     drive.updateTelemetry();
     NetworkTable table =
@@ -881,16 +881,27 @@ public class SwerveDriveTest {
     assertTrue(table.getSubTable("states").containsKey("desired"));
     assertTrue(table.getSubTable("chassis").containsKey("current"));
     assertTrue(table.getSubTable("chassis").containsKey("desired"));
-    try (var rotation = table.getStructTopic("rotation", Rotation2d.struct).subscribe(Rotation2d.ZERO)) {
+    try (var rotation = table.getStructTopic("rotation", Rotation2d.struct).subscribe(Rotation2d.ZERO);
+         var gyro = table.getStructTopic("gyro", Rotation2d.struct).subscribe(Rotation2d.ZERO)) {
       assertEquals(30, rotation.get().getDegrees(), 0.1);
-      // A vision measurement turns the pose, but rotation is the gyro's, not odometry's.
+      assertEquals(30, gyro.get().getDegrees(), 0.1);
+      // A vision measurement turns the pose: rotation follows odometry, gyro stays the gyro's.
       drive.addVisionMeasurement(
           new Pose2d(0, 0, Rotation2d.fromDegrees(60)),
           Timer.getTimestamp(),
           VecBuilder.fill(0.01, 0.01, 0.01));
       drive.updateTelemetry();
-      assertTrue(drive.getPose().getRotation().getDegrees() > 40, "the pose didn't turn");
-      assertEquals(30, rotation.get().getDegrees(), 0.1);
+      double poseDegrees = drive.getPose().getRotation().getDegrees();
+      assertTrue(poseDegrees > 40, "the pose didn't turn");
+      assertEquals(poseDegrees, drive.getRotation().getDegrees(), 1e-9);
+      assertEquals(poseDegrees, rotation.get().getDegrees(), 0.1);
+      assertEquals(30, gyro.get().getDegrees(), 0.1);
+
+      // Field relative speeds are turned into module states with the odometry rotation.
+      drive.setFieldRelativeChassisSpeeds(new ChassisVelocities(1, 0, 0));
+      ChassisVelocities robotRelative = drive.getDesiredChassisSpeeds();
+      assertEquals(Math.cos(Math.toRadians(-poseDegrees)), robotRelative.vx, 1e-6);
+      assertEquals(Math.sin(Math.toRadians(-poseDegrees)), robotRelative.vy, 1e-6);
     }
   }
 

@@ -122,7 +122,8 @@ public class SwerveDriveTelemetry {
       }
       switch (stt.getField()) {
         case Pose -> ((StructTelemetry<Pose2d, StructTelemetryField>) stt).set(drive.getPose());
-        case Rotation -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getGyroRotation3d().toRotation2d());
+        case Rotation -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getRotation());
+        case Gyro -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getGyroRotation3d().toRotation2d());
         case DesiredRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getDesiredChassisSpeeds());
         case CurrentRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getRobotRelativeSpeed());
         case FieldRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getFieldRelativeSpeed());
@@ -505,10 +506,12 @@ public class SwerveDriveTelemetry {
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
     /**
-     * The robot's {@link Rotation2d} from the gyro, as {@link SwerveDrive#getGyroRotation3d()} reads it, not from
-     * odometry.
+     * The robot's {@link Rotation2d} from odometry, {@link SwerveDrive#getRotation()}: the rotation used to turn field
+     * relative speeds into module states.
      */
     Rotation("rotation", Rotation2d.struct, Rotation2d.ZERO, false),
+    /** The gyro's {@link Rotation2d}, from {@link SwerveDrive#getGyroRotation3d()}. */
+    Gyro("gyro", Rotation2d.struct, Rotation2d.ZERO, false),
     /** Last-commanded desired robot relative {@link ChassisVelocities}. */
     DesiredRobotRelativeChassisSpeeds("chassis/desired", ChassisVelocities.struct, new ChassisVelocities(), false),
     /** Measured robot relative {@link ChassisVelocities}. */

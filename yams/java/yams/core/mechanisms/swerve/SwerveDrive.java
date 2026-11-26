@@ -373,7 +373,19 @@ public class SwerveDrive {
    *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds) {
-    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(getGyroRotation3d().toRotation2d()));
+    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(getRotation()));
+  }
+
+  /**
+   * The robot's rotation from odometry: the heading of {@link #getPose()}, which vision measurements
+   * correct. Field relative driving, driving to a pose and {@code SwerveInputStream}'s heading control
+   * use it to turn field relative speeds into module states. {@link #getGyroRotation3d()} is the
+   * gyro's own reading.
+   *
+   * @return The robot's rotation from odometry.
+   */
+  public Rotation2d getRotation() {
+    return getPose().getRotation();
   }
 
   /**
@@ -560,7 +572,7 @@ public class SwerveDrive {
    * @throws SwerveDriveConfigurationException if the rotation PID controller is not configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
-    return driveToPoseSetpoint(targetPose, getPose(), getGyroRotation3d().toRotation2d());
+    return driveToPoseSetpoint(targetPose, getPose(), getRotation());
   }
 
   /**
@@ -702,7 +714,7 @@ public class SwerveDrive {
    * @return Field relative speed of the drive.
    */
   public ChassisVelocities getFieldRelativeSpeed() {
-    return getRobotRelativeSpeed().toFieldRelative(getGyroRotation3d().toRotation2d());
+    return getRobotRelativeSpeed().toFieldRelative(getRotation());
   }
 
   /**
