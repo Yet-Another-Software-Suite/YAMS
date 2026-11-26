@@ -142,11 +142,11 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="col-first odd-row-color"><code><a href="#RotationControllerMeasurement" class="member-name-link">RotationControllerMeasurement</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Heading given to the rotation controller as its measurement, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's).</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#RotationControllerSetpoint" class="member-name-link">RotationControllerSetpoint</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Heading given to the rotation controller as its setpoint, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's).</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#RotationScale" class="member-name-link">RotationScale</a></code></div>
 <div class="col-last odd-row-color">
@@ -276,7 +276,7 @@ the order they are declared.</div>
 <h3>RotationControllerMeasurement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">RotationControllerMeasurement</span></div>
-<div class="block">Heading given to the rotation controller as its measurement, in radians in the gyro's frame. <code>NaN</code> while
+<div class="block">Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's). <code>NaN</code> while
 the stream isn't using the controller.</div>
 </div>
 </section>
@@ -286,7 +286,7 @@ the stream isn't using the controller.</div>
 <h3>RotationControllerSetpoint</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></span>&nbsp;<span class="element-name">RotationControllerSetpoint</span></div>
-<div class="block">Heading given to the rotation controller as its setpoint, in radians in the gyro's frame. <code>NaN</code> while the
+<div class="block">Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's). <code>NaN</code> while the
 stream isn't using the controller.</div>
 </div>
 </section>

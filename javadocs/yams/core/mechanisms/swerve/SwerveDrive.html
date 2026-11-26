@@ -82,8 +82,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" tabindex="0">setRobotRelativeChassisSpeeds(ChassisVelocities)</a></li>
 <li><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities,org.wpilib.units.measure.Force%5B%5D)" tabindex="0">setRobotRelativeChassisSpeeds(ChassisVelocities, Force[])</a></li>
 <li><a href="#setFieldRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" tabindex="0">setFieldRelativeChassisSpeeds(ChassisVelocities)</a></li>
+<li><a href="#getRotation()" tabindex="0">getRotation()</a></li>
 <li><a href="#getPose()" tabindex="0">getPose()</a></li>
 <li><a href="#getKinematics()" tabindex="0">getKinematics()</a></li>
+<li><a href="#zeroOdometryHeading()" tabindex="0">zeroOdometryHeading()</a></li>
 <li><a href="#zeroGyro()" tabindex="0">zeroGyro()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#resetOdometry(org.wpilib.math.geometry.Pose2d)" tabindex="0">resetOdometry(Pose2d)</a></li>
@@ -308,120 +310,131 @@ yaw is the robot's heading.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the robot relative speed of the drive.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose2d</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimPose()" class="member-name-link">getSimPose</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Rotation2d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotation()" class="member-name-link">getRotation</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">The robot's rotation from odometry: the heading of <a href="#getPose()"><code>getPose()</code></a>, which vision measurements
+correct.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose2d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimPose()" class="member-name-link">getSimPose</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the simulated pose of the robot, assuming the <code>SwerveModuleVelocity</code>s commanded to
 the modules are met perfectly.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStateFromRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">getStateFromRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.SwerveModuleVelocity[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStateFromRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">getStateFromRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <code>SwerveModuleVelocity</code>s of the swerve drive given a robot relative chassis
 speed.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNear(org.wpilib.math.geometry.Pose2d,org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)" class="member-name-link">isNear</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isNear(org.wpilib.math.geometry.Pose2d,org.wpilib.units.measure.Distance,org.wpilib.units.measure.Angle)" class="member-name-link">isNear</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose,
  org.wpilib.units.measure.Distance&nbsp;translationTolerance,
  org.wpilib.units.measure.Angle&nbsp;rotationTolerance)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Whether the robot is within the given tolerances of a pose.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lockPose()" class="member-name-link">lockPose</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#lockPose()" class="member-name-link">lockPose</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Point all modules toward the robot center, thus making the robot very difficult to move.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetOdometry(org.wpilib.math.geometry.Pose2d)" class="member-name-link">resetOdometry</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resets odometry to the given pose, and sets the gyro to read the pose's heading.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetRotationPID()" class="member-name-link">resetRotationPID</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetOdometry(org.wpilib.math.geometry.Pose2d)" class="member-name-link">resetOdometry</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets odometry to the given pose.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetRotationPID()" class="member-name-link">resetRotationPID</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resets the auto-align rotational PID controller, if one is configured.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetTranslationPID()" class="member-name-link">resetTranslationPID</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetTranslationPID()" class="member-name-link">resetTranslationPID</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resets the auto-align translation PID controller, if one is configured.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAzimuthAngles(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">setAzimuthAngles</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAzimuthAngles(org.wpilib.math.geometry.Rotation2d)" class="member-name-link">setAzimuthAngles</a><wbr>(org.wpilib.math.geometry.Rotation2d&nbsp;angle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Turn every module to the given angle without driving, as for tuning the azimuth motors.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFieldRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">setFieldRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;fieldRelativeChassisSpeeds)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFieldRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">setFieldRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;fieldRelativeChassisSpeeds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set field relative chassis speeds.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set robot relative chassis speeds.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities,org.wpilib.units.measure.Force%5B%5D)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities,org.wpilib.units.measure.Force%5B%5D)" class="member-name-link">setRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;robotRelativeChassisSpeeds,
  org.wpilib.units.measure.Force[]&nbsp;feedforwardForces)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set robot relative chassis speeds, with an additional drive wheel feedforward <code>Force</code>
 applied per module, e.g.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRotationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setRotationPID</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRotationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setRotationPID</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the auto-align rotational PID controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(org.wpilib.math.kinematics.SwerveModuleVelocity%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity[]&nbsp;states)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(org.wpilib.math.kinematics.SwerveModuleVelocity%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity[]&nbsp;states)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <code>SwerveModuleVelocity</code>s of the swerve drive directly.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(org.wpilib.math.kinematics.SwerveModuleVelocity%5B%5D,org.wpilib.units.measure.Force%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity[]&nbsp;states,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSwerveModuleStates(org.wpilib.math.kinematics.SwerveModuleVelocity%5B%5D,org.wpilib.units.measure.Force%5B%5D)" class="member-name-link">setSwerveModuleStates</a><wbr>(org.wpilib.math.kinematics.SwerveModuleVelocity[]&nbsp;states,
  org.wpilib.units.measure.Force[]&nbsp;feedforwardForces)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the <code>SwerveModuleVelocity</code>s of the swerve drive directly, with an additional drive
 wheel feedforward <code>Force</code> applied per module, e.g.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setTranslationPID</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setTranslationPID(org.wpilib.math.controller.PIDController)" class="member-name-link">setTranslationPID</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the auto-align translation PID controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVisionMeasurementStdDevs(org.wpilib.math.linalg.Matrix)" class="member-name-link">setVisionMeasurementStdDevs</a><wbr>(org.wpilib.math.linalg.Matrix&lt;org.wpilib.math.numbers.N3, org.wpilib.math.numbers.N1&gt;&nbsp;visionMeasurementStdDevs)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVisionMeasurementStdDevs(org.wpilib.math.linalg.Matrix)" class="member-name-link">setVisionMeasurementStdDevs</a><wbr>(org.wpilib.math.linalg.Matrix&lt;org.wpilib.math.numbers.N3, org.wpilib.math.numbers.N1&gt;&nbsp;visionMeasurementStdDevs)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the pose estimator's trust of global measurements.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#simIterate()" class="member-name-link">simIterate</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Simulate the drive, updating the gyroscope based off of module states.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startDriveToPoseTuning()" class="member-name-link">startDriveToPoseTuning</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#startDriveToPoseTuning()" class="member-name-link">startDriveToPoseTuning</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Reset the auto-align PID controllers and pull the live-tuned values (from NetworkTables) into
 this <a href="SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Stop the drive by commanding zero chassis speeds.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateTelemetry()" class="member-name-link">updateTelemetry</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Update the telemetry and <code>SwerveDrivePoseEstimator</code> of the drive.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#zeroGyro()" class="member-name-link">zeroGyro</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Same as <a href="#zeroOdometryHeading()"><code>zeroOdometryHeading()</code></a>: field relative "forward" becomes the way the robot faces.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#zeroGyro()" class="member-name-link">zeroGyro</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#zeroOdometryHeading()" class="member-name-link">zeroOdometryHeading</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
-(red alliance station).</div>
+<div class="block">Resets odometry to the same position, but facing toward 0 (red alliance station), so
+<a href="#getRotation()"><code>getRotation()</code></a>, which field relative driving uses, reads 0.</div>
 </div>
 </div>
 </div>
@@ -720,6 +733,22 @@ applied per module, e.g. from a PathPlanner set-point generator.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getRotation()">
+<h3>getRotation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Rotation2d</span>&nbsp;<span class="element-name">getRotation</span>()</div>
+<div class="block">The robot's rotation from odometry: the heading of <a href="#getPose()"><code>getPose()</code></a>, which vision measurements
+correct. Field relative driving, driving to a pose and <code>SwerveInputStream</code>'s heading control
+use it to turn field relative speeds into module states. <a href="#getGyroRotation3d()"><code>getGyroRotation3d()</code></a> is the
+gyro's own reading.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>The robot's rotation from odometry.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getPose()">
 <h3>getPose</h3>
 <div class="horizontal-scroll">
@@ -747,16 +776,21 @@ applied per module, e.g. from a PathPlanner set-point generator.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="zeroOdometryHeading()">
+<h3>zeroOdometryHeading</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">zeroOdometryHeading</span>()</div>
+<div class="block">Resets odometry to the same position, but facing toward 0 (red alliance station), so
+<a href="#getRotation()"><code>getRotation()</code></a>, which field relative driving uses, reads 0. The gyro is not changed.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="zeroGyro()">
 <h3>zeroGyro</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">zeroGyro</span>()</div>
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
-(red alliance station).</div>
-<dl class="notes">
-<dt>Implementation Note:</dt>
-<dd>Not compatible with AdvantageKit</dd>
-</dl>
+<div class="block">Same as <a href="#zeroOdometryHeading()"><code>zeroOdometryHeading()</code></a>: field relative "forward" becomes the way the robot faces.</div>
 </div>
 </section>
 </li>
@@ -778,9 +812,10 @@ applied per module, e.g. from a PathPlanner set-point generator.</div>
 <h3>resetOdometry</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetOdometry</span><wbr><span class="parameters">(org.wpilib.math.geometry.Pose2d&nbsp;pose)</span></div>
-<div class="block">Resets odometry to the given pose, and sets the gyro to read the pose's heading. Field relative
-driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
-with the reset pose. Module positions do not need to be reset when calling this method.</div>
+<div class="block">Resets odometry to the given pose. Field relative driving and heading control use the odometry
+rotation, <a href="#getRotation()"><code>getRotation()</code></a>, so they follow the reset pose. The gyro is not changed: the
+pose estimator keeps the offset between the gyro and the pose. Module positions do not need to
+be reset when calling this method.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>pose</code> - The pose to set the odometry to. Field relative, blue-origin where 0deg is facing

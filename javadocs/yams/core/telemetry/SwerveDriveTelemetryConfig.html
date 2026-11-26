@@ -79,6 +79,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getDoubleFields(yams.core.mechanisms.swerve.SwerveDrive)" tabindex="0">getDoubleFields(SwerveDrive)</a></li>
 <li><a href="#getBoolFields()" tabindex="0">getBoolFields()</a></li>
 <li><a href="#withPose()" tabindex="0">withPose()</a></li>
+<li><a href="#withRotation()" tabindex="0">withRotation()</a></li>
 <li><a href="#withGyro()" tabindex="0">withGyro()</a></li>
 <li><a href="#withMaximumModuleVelocity()" tabindex="0">withMaximumModuleVelocity()</a></li>
 <li><a href="#withDesiredRobotRelativeChassisSpeeds()" tabindex="0">withDesiredRobotRelativeChassisSpeeds()</a></li>
@@ -125,6 +126,7 @@ Every field is disabled by default; call the individual <code>with*()</code> met
         .withTelemetryVerbosity(TelemetryVerbosity.HIGH)
         // optionally enable individual fields on top of the preset
         .withPose()
+        .withRotation()
         .withGyro()
         .withMaximumModuleVelocity()
         .withCurrentRobotRelativeChassisSpeeds()
@@ -281,7 +283,7 @@ Every field is disabled by default; call the individual <code>with*()</code> met
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyro()" class="member-name-link">withGyro</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Enables the gyro angle logging.</div>
+<div class="block">Enables logging the gyro's rotation as a <code>Rotation2d</code> at <code>gyro</code>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaximumModuleVelocity()" class="member-name-link">withMaximumModuleVelocity</a>()</code></div>
@@ -304,8 +306,14 @@ Every field is disabled by default; call the individual <code>with*()</code> met
 <div class="block">Enables the pose logging.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRotation()" class="member-name-link">withRotation</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Enables logging the robot's rotation from odometry, the rotation used to turn field relative speeds into module
+states, as a <code>Rotation2d</code> at <code>rotation</code>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetryVerbosity(yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetryVerbosity</a><wbr>(<a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;verbosity)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Setup with <a href="enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums"><code>TelemetryVerbosity</code></a></div>
 </div>
 </div>
@@ -511,11 +519,25 @@ advisable during competition matches.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="withRotation()">
+<h3>withRotation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></span>&nbsp;<span class="element-name">withRotation</span>()</div>
+<div class="block">Enables logging the robot's rotation from odometry, the rotation used to turn field relative speeds into module
+states, as a <code>Rotation2d</code> at <code>rotation</code>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a> for chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="withGyro()">
 <h3>withGyro</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></span>&nbsp;<span class="element-name">withGyro</span>()</div>
-<div class="block">Enables the gyro angle logging.</div>
+<div class="block">Enables logging the gyro's rotation as a <code>Rotation2d</code> at <code>gyro</code>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd><a href="SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a> for chaining.</dd>

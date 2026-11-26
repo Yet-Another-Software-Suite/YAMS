@@ -145,7 +145,7 @@ Public Member Functions</h2></td></tr>
 class yams::mechanisms::swerve::utility::SwerveInputStreamTelemetry&lt; NumModules &gt;</div><p>Telemetry and live tuning for a <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1utility_1_1SwerveInputStream.html">SwerveInputStream</a>, created by SwerveInputStream::WithTelemetry(name, verbosity) and published every time the stream is read.</p>
 <ul>
 <li>LOW: the current drive mode, under SwerveInputStream/&lt;name&gt;.</li>
-<li>MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance and robot relative), read-only, and the rotation controller's measurement and setpoint under rotationController, in radians in the gyro's frame. Those are what heading, aim and translation only control give the controller, and are NaN while the stream isn't using it.</li>
+<li>MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance and robot relative), read-only, and the rotation controller's measurement and setpoint under rotationController, in radians in the field's frame (the odometry rotation's). Those are what heading, aim and translation only control give the controller, and are NaN while the stream isn't using it.</li>
 <li>HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/&lt;name&gt;, and a "Live Tuning" command there that applies them to the stream every loop while it runs.</li>
 </ul>
 <p>Each value is a <a class="el" href="#aac670b3d377d6d676cfcbbd96599f149">DoubleTelemetryField</a>, <a class="el" href="#afa3f9653233ae8e5b1b1a18040928c80">BooleanTelemetryField</a> or <a class="el" href="#afbda617ee5e256d54e38858af2b81eae">StringTelemetryField</a>, which gives its key and whether it is tunable.</p>
@@ -245,9 +245,9 @@ template&lt;size_t NumModules = 4&gt; </div>
 </td></tr>
 <tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149af4f2f2822c801a741be59d4aec20a99a" name="aac670b3d377d6d676cfcbbd96599f149af4f2f2822c801a741be59d4aec20a99a"></a>MaxAngularVelocity&#160;</td><td class="fielddoc"><p>Maximum chassis angular velocity, in radians per second. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149afd1c2ddcff5504ee049547a20021b40b" name="aac670b3d377d6d676cfcbbd96599f149afd1c2ddcff5504ee049547a20021b40b"></a>RotationControllerMeasurement&#160;</td><td class="fielddoc"><p>Heading given to the rotation controller as its measurement, in radians in the gyro's frame. NaN while the stream isn't using the controller. </p>
+<tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149afd1c2ddcff5504ee049547a20021b40b" name="aac670b3d377d6d676cfcbbd96599f149afd1c2ddcff5504ee049547a20021b40b"></a>RotationControllerMeasurement&#160;</td><td class="fielddoc"><p>Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's). NaN while the stream isn't using the controller. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149a857f25760424a42f535384becf8a7d97" name="aac670b3d377d6d676cfcbbd96599f149a857f25760424a42f535384becf8a7d97"></a>RotationControllerSetpoint&#160;</td><td class="fielddoc"><p>Heading given to the rotation controller as its setpoint, in radians in the gyro's frame. NaN while the stream isn't using the controller. </p>
+<tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149a857f25760424a42f535384becf8a7d97" name="aac670b3d377d6d676cfcbbd96599f149a857f25760424a42f535384becf8a7d97"></a>RotationControllerSetpoint&#160;</td><td class="fielddoc"><p>Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's). NaN while the stream isn't using the controller. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="aac670b3d377d6d676cfcbbd96599f149a6835f78c1068a979878cffb4ce55528d" name="aac670b3d377d6d676cfcbbd96599f149a6835f78c1068a979878cffb4ce55528d"></a>TunableDeadband&#160;</td><td class="fielddoc"><p>Tunable joystick axis deadband, from 0 up to but not including 1. </p>
 </td></tr>

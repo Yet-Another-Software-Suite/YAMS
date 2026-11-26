@@ -62,6 +62,8 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#TargetPose" tabindex="0">TargetPose</a></li>
 <li><a href="#Pose" tabindex="0">Pose</a></li>
+<li><a href="#Rotation" tabindex="0">Rotation</a></li>
+<li><a href="#Gyro" tabindex="0">Gyro</a></li>
 <li><a href="#DesiredRobotRelativeChassisSpeeds" tabindex="0">DesiredRobotRelativeChassisSpeeds</a></li>
 <li><a href="#CurrentRobotRelativeChassisSpeeds" tabindex="0">CurrentRobotRelativeChassisSpeeds</a></li>
 <li><a href="#FieldRelativeChassisSpeeds" tabindex="0">FieldRelativeChassisSpeeds</a></li>
@@ -133,10 +135,19 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Measured field relative <code>ChassisVelocities</code>.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#Pose" class="member-name-link">Pose</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#Gyro" class="member-name-link">Gyro</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">The gyro's <code>Rotation2d</code>, from <a href="../mechanisms/swerve/SwerveDrive.html#getGyroRotation3d()"><code>SwerveDrive.getGyroRotation3d()</code></a>.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#Pose" class="member-name-link">Pose</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Estimated <code>Pose2d</code> of the robot, as reported by the
 <code>SwerveDrivePoseEstimator</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#Rotation" class="member-name-link">Rotation</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">The robot's <code>Rotation2d</code> from odometry, <a href="../mechanisms/swerve/SwerveDrive.html#getRotation()"><code>SwerveDrive.getRotation()</code></a>: the rotation used to turn field
+relative speeds into module states.</div>
 </div>
 <div class="col-first even-row-color"><code><a href="#TargetPose" class="member-name-link">TargetPose</a></code></div>
 <div class="col-last even-row-color">
@@ -210,6 +221,25 @@ the order they are declared.</div>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></span>&nbsp;<span class="element-name">Pose</span></div>
 <div class="block">Estimated <code>Pose2d</code> of the robot, as reported by the
 <code>SwerveDrivePoseEstimator</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="Rotation">
+<h3>Rotation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></span>&nbsp;<span class="element-name">Rotation</span></div>
+<div class="block">The robot's <code>Rotation2d</code> from odometry, <a href="../mechanisms/swerve/SwerveDrive.html#getRotation()"><code>SwerveDrive.getRotation()</code></a>: the rotation used to turn field
+relative speeds into module states.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="Gyro">
+<h3>Gyro</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></span>&nbsp;<span class="element-name">Gyro</span></div>
+<div class="block">The gyro's <code>Rotation2d</code>, from <a href="../mechanisms/swerve/SwerveDrive.html#getGyroRotation3d()"><code>SwerveDrive.getGyroRotation3d()</code></a>.</div>
 </div>
 </section>
 </li>

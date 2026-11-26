@@ -522,7 +522,7 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#clone()" class="member-name-link">clone()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Clone the <a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> without modules, subsystem, telemetry name, gyro supplier,
-gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
+gyro angular velocity supplier, and gyro inversion.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveModuleConfig.html#clone()" class="member-name-link">clone()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveModuleConfig.html" title="class in yams.core.mechanisms.config">SwerveModuleConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -2155,16 +2155,11 @@ configured external encoder <a href="yams/core/gearing/MechanismGearing.html" ti
 <div class="block">Get the gearing to convert rotor rotations to mechanisms rotations connected to the
 <a href="yams/core/motorcontrollers/SmartMotorController.html" title="class in yams.core.motorcontrollers"><code>SmartMotorController</code></a></div>
 </dd>
-<dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getGyroOffset()" class="member-name-link">getGyroOffset()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
-<dd>
-<div class="block">Get the gyro offset.</div>
-</dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#getGyroRotation3d()" class="member-name-link">getGyroRotation3d()</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Get the robot's attitude from the gyro: the gyro's attitude rotated into the robot's frame for
 the axis set with <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>SwerveDriveConfig.withGyroHeadingAxis(GyroAxis)</code></a>, with the inversion
-(<a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroInverted(boolean)"><code>SwerveDriveConfig.withGyroInverted(boolean)</code></a>) and offset (<a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroOffset(org.wpilib.units.measure.Angle)"><code>SwerveDriveConfig.withGyroOffset(Angle)</code></a>) applied to its
-yaw.</div>
+(<a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroInverted(boolean)"><code>SwerveDriveConfig.withGyroInverted(boolean)</code></a>) applied to its yaw.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#getGyroRotation3d()" class="member-name-link">getGyroRotation3d()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -3052,6 +3047,11 @@ configured <a href="yams/core/gearing/MechanismGearing.html" title="class in yam
 <div class="block">The pose of a part that turns about the axis normal to the movement plane, such as an arm or a
 pivot, at an angle.</div>
 </dd>
+<dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#getRotation()" class="member-name-link">getRotation()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">The robot's rotation from odometry: the heading of <a href="yams/core/mechanisms/swerve/SwerveDrive.html#getPose()"><code>SwerveDrive.getPose()</code></a>, which vision measurements
+correct.</div>
+</dd>
 <dt><a href="yams/commands2/swerve/SwerveInputStream.html#getRotationControllerMeasurement()" class="member-name-link">getRotationControllerMeasurement()</a> - Method in class yams.commands2.swerve.<a href="yams/commands2/swerve/SwerveInputStream.html" title="class in yams.commands2.swerve">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Get the measurement the rotation controller was given by the last <a href="yams/commands2/swerve/SwerveInputStream.html#get()"><code>SwerveInputStream.get()</code></a> call, in
@@ -3794,9 +3794,9 @@ robot height if set, or twice the given length.</div>
 <dd>
 <div class="block">Greater than or equal to height.</div>
 </dd>
-<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html#Gyro" class="member-name-link">Gyro</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.DoubleTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.DoubleTelemetryField</a></dt>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#Gyro" class="member-name-link">Gyro</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
 <dd>
-<div class="block">Gyro angle, in degrees.</div>
+<div class="block">The gyro's <code>Rotation2d</code>, from <a href="yams/core/mechanisms/swerve/SwerveDrive.html#getGyroRotation3d()"><code>SwerveDrive.getGyroRotation3d()</code></a>.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/enums/GyroAxis.html" class="type-name-link" title="enum class in yams.core.mechanisms.config.enums">GyroAxis</a> - Enum Class in <a href="yams/core/mechanisms/config/enums/package-summary.html">yams.core.mechanisms.config.enums</a></dt>
 <dd>
@@ -5097,7 +5097,7 @@ velocity.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#resetOdometry(org.wpilib.math.geometry.Pose2d)" class="member-name-link">resetOdometry(Pose2d)</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Resets odometry to the given pose, and sets the gyro to read the pose's heading.</div>
+<div class="block">Resets odometry to the given pose.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#resetRotationPID()" class="member-name-link">resetRotationPID()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
@@ -5142,21 +5142,26 @@ the new loop starts where the old one was, so the output doesn't jump.</div>
 <dd>
 <div class="block">The gyro's X axis points up: the robot turning is the gyro's roll.</div>
 </dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html#Rotation" class="member-name-link">Rotation</a> - Enum constant in enum class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetry.StructTelemetryField.html" title="enum class in yams.core.telemetry">SwerveDriveTelemetry.StructTelemetryField</a></dt>
+<dd>
+<div class="block">The robot's <code>Rotation2d</code> from odometry, <a href="yams/core/mechanisms/swerve/SwerveDrive.html#getRotation()"><code>SwerveDrive.getRotation()</code></a>: the rotation used to turn field
+relative speeds into module states.</div>
+</dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html#RotationControllerMeasurement" class="member-name-link">RotationControllerMeasurement</a> - Enum constant in enum class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></dt>
 <dd>
-<div class="block">Heading given to the rotation controller as its measurement, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's).</div>
 </dd>
 <dt><a href="yams/commands3/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html#RotationControllerMeasurement" class="member-name-link">RotationControllerMeasurement</a> - Enum constant in enum class yams.commands3.telemetry.<a href="yams/commands3/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands3.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></dt>
 <dd>
-<div class="block">Heading given to the rotation controller as its measurement, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's).</div>
 </dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html#RotationControllerSetpoint" class="member-name-link">RotationControllerSetpoint</a> - Enum constant in enum class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></dt>
 <dd>
-<div class="block">Heading given to the rotation controller as its setpoint, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's).</div>
 </dd>
 <dt><a href="yams/commands3/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html#RotationControllerSetpoint" class="member-name-link">RotationControllerSetpoint</a> - Enum constant in enum class yams.commands3.telemetry.<a href="yams/commands3/telemetry/SwerveInputStreamTelemetry.DoubleTelemetryField.html" title="enum class in yams.commands3.telemetry">SwerveInputStreamTelemetry.DoubleTelemetryField</a></dt>
 <dd>
-<div class="block">Heading given to the rotation controller as its setpoint, in radians in the gyro's frame.</div>
+<div class="block">Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's).</div>
 </dd>
 <dt><a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.BooleanTelemetryField.html#RotationCube" class="member-name-link">RotationCube</a> - Enum constant in enum class yams.commands2.telemetry.<a href="yams/commands2/telemetry/SwerveInputStreamTelemetry.BooleanTelemetryField.html" title="enum class in yams.commands2.telemetry">SwerveInputStreamTelemetry.BooleanTelemetryField</a></dt>
 <dd>
@@ -8790,13 +8795,11 @@ per second squared.</div>
 </dd>
 <dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withGyro()" class="member-name-link">withGyro()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
 <dd>
-<div class="block">Enables the gyro angle logging.</div>
+<div class="block">Enables logging the gyro's rotation as a <code>Rotation2d</code> at <code>gyro</code>.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyro(java.util.function.Supplier)" class="member-name-link">withGyro(Supplier)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
-<div class="block">Set the gyro, as the robot's attitude: its yaw is the robot's heading (or the axis set with
-<a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>SwerveDriveConfig.withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what anti-tipping corrects
-with (see <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>SwerveDriveConfig.withAntiTipping(AntiTipping)</code></a>).</div>
+<div class="block">Same as <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withRotation(java.util.function.Supplier)"><code>SwerveDriveConfig.withRotation(Supplier)</code></a>: set the gyro, as the robot's attitude.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroAngularVelocityScaleFactor(double)" class="member-name-link">withGyroAngularVelocityScaleFactor(double)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -8810,10 +8813,6 @@ shows up as its roll or pitch instead of its yaw.</div>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroInverted(boolean)" class="member-name-link">withGyroInverted(boolean)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
 <div class="block">Set the gyro inverted.</div>
-</dd>
-<dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroOffset(org.wpilib.units.measure.Angle)" class="member-name-link">withGyroOffset(Angle)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
-<dd>
-<div class="block">Set the gyro offset.</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroVelocity(java.util.function.Supplier)" class="member-name-link">withGyroVelocity(Supplier)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -9140,6 +9139,17 @@ given to <a href="yams/core/motorcontrollers/SmartMotorControllerConfig.html" ti
 <dt><a href="yams/commands3/swerve/SwerveInputStream.html#withRobotRelative(java.util.function.BooleanSupplier)" class="member-name-link">withRobotRelative(BooleanSupplier)</a> - Method in class yams.commands3.swerve.<a href="yams/commands3/swerve/SwerveInputStream.html" title="class in yams.commands3.swerve">SwerveInputStream</a></dt>
 <dd>
 <div class="block">Treat the translation axes as robot relative while enabled.</div>
+</dd>
+<dt><a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html#withRotation()" class="member-name-link">withRotation()</a> - Method in class yams.core.telemetry.<a href="yams/core/telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a></dt>
+<dd>
+<div class="block">Enables logging the robot's rotation from odometry, the rotation used to turn field relative speeds into module
+states, as a <code>Rotation2d</code> at <code>rotation</code>.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withRotation(java.util.function.Supplier)" class="member-name-link">withRotation(Supplier)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
+<dd>
+<div class="block">Set the robot's rotation from the gyro, as the robot's attitude: its yaw is the robot's heading
+(or the axis set with <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>SwerveDriveConfig.withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what
+anti-tipping corrects with (see <a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>SwerveDriveConfig.withAntiTipping(AntiTipping)</code></a>).</div>
 </dd>
 <dt><a href="yams/core/mechanisms/config/SwerveDriveConfig.html#withRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withRotationController(PIDController)</a> - Method in class yams.core.mechanisms.config.<a href="yams/core/mechanisms/config/SwerveDriveConfig.html" title="class in yams.core.mechanisms.config">SwerveDriveConfig</a></dt>
 <dd>
@@ -9766,8 +9776,12 @@ mode and zero power mode.</div>
 <dl class="index">
 <dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#zeroGyro()" class="member-name-link">zeroGyro()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
 <dd>
-<div class="block">Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
-(red alliance station).</div>
+<div class="block">Same as <a href="yams/core/mechanisms/swerve/SwerveDrive.html#zeroOdometryHeading()"><code>SwerveDrive.zeroOdometryHeading()</code></a>: field relative "forward" becomes the way the robot faces.</div>
+</dd>
+<dt><a href="yams/core/mechanisms/swerve/SwerveDrive.html#zeroOdometryHeading()" class="member-name-link">zeroOdometryHeading()</a> - Method in class yams.core.mechanisms.swerve.<a href="yams/core/mechanisms/swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve">SwerveDrive</a></dt>
+<dd>
+<div class="block">Resets odometry to the same position, but facing toward 0 (red alliance station), so
+<a href="yams/core/mechanisms/swerve/SwerveDrive.html#getRotation()"><code>SwerveDrive.getRotation()</code></a>, which field relative driving uses, reads 0.</div>
 </dd>
 </dl>
 <a href="#I:A">A</a>&nbsp;<a href="#I:B">B</a>&nbsp;<a href="#I:C">C</a>&nbsp;<a href="#I:D">D</a>&nbsp;<a href="#I:E">E</a>&nbsp;<a href="#I:F">F</a>&nbsp;<a href="#I:G">G</a>&nbsp;<a href="#I:H">H</a>&nbsp;<a href="#I:I">I</a>&nbsp;<a href="#I:J">J</a>&nbsp;<a href="#I:K">K</a>&nbsp;<a href="#I:L">L</a>&nbsp;<a href="#I:M">M</a>&nbsp;<a href="#I:N">N</a>&nbsp;<a href="#I:O">O</a>&nbsp;<a href="#I:P">P</a>&nbsp;<a href="#I:Q">Q</a>&nbsp;<a href="#I:R">R</a>&nbsp;<a href="#I:S">S</a>&nbsp;<a href="#I:T">T</a>&nbsp;<a href="#I:U">U</a>&nbsp;<a href="#I:V">V</a>&nbsp;<a href="#I:W">W</a>&nbsp;<a href="#I:X">X</a>&nbsp;<a href="#I:Y">Y</a>&nbsp;<a href="#I:Z">Z</a>&nbsp;<br><a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a><span class="vertical-separator">|</span><a href="allpackages-index.html">All&nbsp;Packages</a><span class="vertical-separator">|</span><a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a><span class="vertical-separator">|</span><a href="serialized-form.html">Serialized&nbsp;Form</a></main>

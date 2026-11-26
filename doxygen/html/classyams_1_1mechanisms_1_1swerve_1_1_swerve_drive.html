@@ -123,8 +123,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4268e9f46e5717cd2169283cd84bc466"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b770775ec0e65495c4488ff98b190e8" id="r_a6b770775ec0e65495c4488ff98b190e8"><td class="memItemLeft" align="right" valign="top">wpi::math::Pose2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b770775ec0e65495c4488ff98b190e8">GetPose</a> ()</td></tr>
 <tr class="separator:a6b770775ec0e65495c4488ff98b190e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add8a7c812a34fb4b15f488f3ebf2e493" id="r_add8a7c812a34fb4b15f488f3ebf2e493"><td class="memItemLeft" align="right" valign="top">wpi::math::Rotation2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add8a7c812a34fb4b15f488f3ebf2e493">GetRotation</a> ()</td></tr>
+<tr class="separator:add8a7c812a34fb4b15f488f3ebf2e493"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a2b783e08566331a80f535b034ff0c7" id="r_a3a2b783e08566331a80f535b034ff0c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a2b783e08566331a80f535b034ff0c7">ResetOdometry</a> (wpi::math::Pose2d pose)</td></tr>
 <tr class="separator:a3a2b783e08566331a80f535b034ff0c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a258408f30b5dc478af7d03e88b9c985f" id="r_a258408f30b5dc478af7d03e88b9c985f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a258408f30b5dc478af7d03e88b9c985f">ZeroOdometryHeading</a> ()</td></tr>
+<tr class="separator:a258408f30b5dc478af7d03e88b9c985f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09b5f2b0bc0cb9ecdc8a671151257889" id="r_a09b5f2b0bc0cb9ecdc8a671151257889"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09b5f2b0bc0cb9ecdc8a671151257889">ZeroGyro</a> ()</td></tr>
 <tr class="separator:a09b5f2b0bc0cb9ecdc8a671151257889"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a206407d6aed23a26a4a36f934d40b4fe" id="r_a206407d6aed23a26a4a36f934d40b4fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a206407d6aed23a26a4a36f934d40b4fe">AddVisionMeasurement</a> (wpi::math::Pose2d robotPose, wpi::units::second_t timestamp)</td></tr>
@@ -856,7 +860,7 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the field-relative chassis speeds derived from the module states and gyro. </p>
+<p>Get the field-relative chassis speeds derived from the module states and the odometry rotation. </p>
 
 </div>
 </div>
@@ -1156,6 +1160,34 @@ template&lt;size_t NumModules = 4&gt; </div>
 
 </div>
 </div>
+<a id="add8a7c812a34fb4b15f488f3ebf2e493" name="add8a7c812a34fb4b15f488f3ebf2e493"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add8a7c812a34fb4b15f488f3ebf2e493">&#9670;&#160;</a></span>GetRotation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpi::math::Rotation2d <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::GetRotation </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The robot's rotation from odometry: the heading of <a class="el" href="#a6b770775ec0e65495c4488ff98b190e8">GetPose()</a>, which vision measurements correct. Field-relative driving, driving to a pose and SwerveInputStream's heading control use it to turn field-relative speeds into module states. <a class="el" href="#a49a948929ce996b1a119174c67035eaf">GetGyroAngle()</a> is the gyro's own reading. </p>
+
+</div>
+</div>
 <a id="a3823774ca12031a6992e4c013ee581f2" name="a3823774ca12031a6992e4c013ee581f2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3823774ca12031a6992e4c013ee581f2">&#9670;&#160;</a></span>GetSimPose()</h2>
 
@@ -1318,7 +1350,7 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Reset odometry to the given pose, and set the gyro to read the pose's heading. Field relative driving and heading control use the gyro, so keeping it aligned with the pose makes them agree with the reset pose.</p>
+<p>Reset odometry to the given pose. Field-relative driving and heading control use the odometry rotation, <a class="el" href="#add8a7c812a34fb4b15f488f3ebf2e493">GetRotation()</a>, so they follow the reset pose. The gyro is not changed: the pose estimator keeps the offset between the gyro and the pose.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pose</td><td>New field-relative pose (blue-origin, 0° facing red alliance wall). </td></tr>
@@ -1844,7 +1876,35 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Zero the gyro and reset odometry to the current translation with 0° heading. </p>
+<p>Same as <a class="el" href="#a258408f30b5dc478af7d03e88b9c985f">ZeroOdometryHeading()</a>: field-relative "forward" becomes the way the robot faces. </p>
+
+</div>
+</div>
+<a id="a258408f30b5dc478af7d03e88b9c985f" name="a258408f30b5dc478af7d03e88b9c985f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a258408f30b5dc478af7d03e88b9c985f">&#9670;&#160;</a></span>ZeroOdometryHeading()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;size_t NumModules = 4&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classyams_1_1mechanisms_1_1swerve_1_1_swerve_drive.html">yams::mechanisms::swerve::SwerveDrive</a>&lt; NumModules &gt;::ZeroOdometryHeading </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Reset odometry to the current translation with a 0° heading, so <a class="el" href="#add8a7c812a34fb4b15f488f3ebf2e493">GetRotation()</a>, which field-relative driving uses, reads 0. The gyro is not changed. </p>
 
 </div>
 </div>

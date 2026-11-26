@@ -97,7 +97,7 @@ implements <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#LOW"><code>TelemetryVerbosity.LOW</code></a>: the current drive mode, under <code>SwerveInputStream/&lt;name&gt;</code>.</li>
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#MID"><code>TelemetryVerbosity.MID</code></a>: also the stream's configuration (deadband, scales, maximum velocities, cubing,
   alliance and robot relative), read-only, and the rotation controller's <code>measurement</code> and <code>setpoint</code>
-  under <code>rotationController</code>, in radians in the gyro's frame. Those are what heading, aim and translation only
+  under <code>rotationController</code>, in radians in the field's frame (the odometry rotation's). Those are what heading, aim and translation only
   control give the controller, and are <code>NaN</code> while the stream isn't using it.</li>
   <li><a href="../../core/telemetry/enums/TelemetryVerbosity.html#HIGH"><code>TelemetryVerbosity.HIGH</code></a>: also editable copies of the configuration under
   <code>Tuning/SwerveInputStream/&lt;name&gt;</code>, and a <code>Live Tuning</code> command there that applies them to the stream

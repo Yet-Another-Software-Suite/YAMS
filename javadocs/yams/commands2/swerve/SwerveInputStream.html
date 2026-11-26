@@ -665,7 +665,7 @@ Heading control is only used while <a href="#withHeadingControl(java.util.functi
 <code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>The robot's heading, in the gyro's frame, or empty if the last call did not use the rotation controller.</dd>
+<dd>The robot's heading, in the field's frame (the odometry rotation's), or empty if the last call did not use the rotation controller.</dd>
 </dl>
 </div>
 </section>
@@ -679,7 +679,7 @@ Heading control is only used while <a href="#withHeadingControl(java.util.functi
 <code>SwerveInputStream.SwerveInputMode.TRANSLATION_ONLY</code>, <code>SwerveInputStream.SwerveInputMode.HEADING</code> or <code>SwerveInputStream.SwerveInputMode.AIM</code>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>The heading being turned to, in the gyro's frame, or empty if the last call did not use the rotation
+<dd>The heading being turned to, in the field's frame (the odometry rotation's), or empty if the last call did not use the rotation
     controller.</dd>
 </dl>
 </div>
@@ -1397,7 +1397,7 @@ robot.</div>
 controller and the <a href="#withAimFeedforward(org.wpilib.math.controller.SimpleMotorFeedforward)"><code>withAimFeedforward(SimpleMotorFeedforward)</code></a> feedforward if there is one.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>target</code> - Heading to face, in the same frame as the gyro.</dd>
+<dd><code>target</code> - Heading to face, in the field's frame, as the odometry rotation is.</dd>
 <dt>Returns:</dt>
 <dd><code>AngularVelocity</code> that turns the robot toward the heading.</dd>
 </dl>

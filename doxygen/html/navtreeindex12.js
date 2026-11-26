@@ -1,5 +1,7 @@
 var NAVTREEINDEX12 =
 {
+"classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#abcf0b822897ef3409cd1496fcafd9c30":[1,0,0,2,0,2,20],
+"classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#abcf0b822897ef3409cd1496fcafd9c30":[2,0,0,2,0,2,20],
 "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad34d64bbbc8ca48d01018ece2cfbac94":[1,0,0,2,0,2,22],
 "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad34d64bbbc8ca48d01018ece2cfbac94":[2,0,0,2,0,2,22],
 "classyams_1_1motorcontrollers_1_1simulation_1_1DCMotorSimSupplier.html#ad4eabaa9d6ab3431e86dbbad2b5cf251":[1,0,0,2,0,2,9],
@@ -247,7 +249,5 @@ var NAVTREEINDEX12 =
 "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ad4e4f80d3a365fdf82c721348c9b1014":[1,0,0,2,0,7,14],
 "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ad4e4f80d3a365fdf82c721348c9b1014":[2,0,0,2,0,7,14],
 "classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ae2ff6f390e34747ca865e7e68545d3cf":[1,0,0,2,0,7,17],
-"classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ae2ff6f390e34747ca865e7e68545d3cf":[2,0,0,2,0,7,17],
-"classyams_1_1telemetry_1_1BooleanTelemetry.html":[1,0,0,5,3],
-"classyams_1_1telemetry_1_1BooleanTelemetry.html":[2,0,0,5,3]
+"classyams_1_1motorcontrollers_1_1simulation_1_1SensorData.html#ae2ff6f390e34747ca865e7e68545d3cf":[2,0,0,2,0,7,17]
 };

@@ -1,5 +1,13 @@
 var NAVTREEINDEX16 =
 {
+"structyams_1_1math_1_1ADRCGains.html#af75c602e1626b9d39fd667eab03dce97":[1,0,0,3,0,1],
+"structyams_1_1math_1_1ADRCGains.html#af75c602e1626b9d39fd667eab03dce97":[2,0,0,3,0,1],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html":[1,0,0,3,4,0],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html":[2,0,0,3,4,0],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a01a10276953184f9b316d0b080829f28":[1,0,0,3,4,0,1],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a01a10276953184f9b316d0b080829f28":[2,0,0,3,4,0,1],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a692824e131a04830dda4f04f05619fd7":[1,0,0,3,4,0,2],
+"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a692824e131a04830dda4f04f05619fd7":[2,0,0,3,4,0,2],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86":[1,0,0,3,4,0,6],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#ab1a0ace2be21af68479ef79a4db5ef86":[2,0,0,3,4,0,6],
 "structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#acb840ea6c1beffaf9ab6dab51bfa24e9":[1,0,0,3,4,0,7],

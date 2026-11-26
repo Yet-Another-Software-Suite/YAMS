@@ -26,6 +26,7 @@ var classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive =
     [ "GetPose", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a6b770775ec0e65495c4488ff98b190e8", null ],
     [ "GetRobotRelativeChassisSpeedsFromState", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a05dc7eeb2b575ce9f154994e84ba8ad5", null ],
     [ "GetRobotRelativeSpeed", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#adca2293a038204e1fb1d951b4f7020a4", null ],
+    [ "GetRotation", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#add8a7c812a34fb4b15f488f3ebf2e493", null ],
     [ "GetSimPose", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a3823774ca12031a6992e4c013ee581f2", null ],
     [ "GetStateFromRobotRelativeChassisSpeeds", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a457462468a5bd619a092bb82a65c1b76", null ],
     [ "IsNear", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#ad7bab0fd664a333f8cfee3a2adacd4a9", null ],
@@ -46,5 +47,6 @@ var classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive =
     [ "StartDriveToPoseTuning", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a8b1e5d43939c368af5c9b1d2caad8483", null ],
     [ "Stop", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a878f98c7e0c9d3361dcf70d3b7401725", null ],
     [ "UpdateTelemetry", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a6ae682c0cf8dac806b53199430eca32f", null ],
-    [ "ZeroGyro", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a09b5f2b0bc0cb9ecdc8a671151257889", null ]
+    [ "ZeroGyro", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a09b5f2b0bc0cb9ecdc8a671151257889", null ],
+    [ "ZeroOdometryHeading", "classyams_1_1mechanisms_1_1swerve_1_1SwerveDrive.html#a258408f30b5dc478af7d03e88b9c985f", null ]
 ];

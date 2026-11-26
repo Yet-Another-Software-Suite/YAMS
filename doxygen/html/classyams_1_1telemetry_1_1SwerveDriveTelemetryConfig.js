@@ -35,7 +35,6 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
       [ "ModulesAzimuthKa", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a5b827224f765642a4757a8a0a4b62b58", null ],
       [ "ModulesAzimuthAngle", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1a35ad9149b175ff82a5af7081e961cde3", null ],
       [ "ModulesAzimuthVoltage", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1aceb3e2166f01292a036024f2ec60d354", null ],
-      [ "Gyro", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1af613d2d84bfcc9538ab8da90946cadac", null ],
       [ "MaximumModuleVelocity", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a0910fa4f6540bca87994367b1bdd63d1ab160e86a7e3d79c331a7e3247f807b4d", null ]
     ] ],
     [ "StructArrayTelemetryField", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ae98cb7badf234d5f70f02f0ca32acdbc", [
@@ -44,6 +43,8 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
     ] ],
     [ "StructTelemetryField", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0", [
       [ "Pose", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0a8109c9c9d6a2ca3bec3e006fe51a5f3e", null ],
+      [ "Rotation", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0af1a42bd417390fc63b030a519624607a", null ],
+      [ "Gyro", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0af613d2d84bfcc9538ab8da90946cadac", null ],
       [ "DesiredRobotRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0aaf3f150508027a8500347847027e0ebb", null ],
       [ "CurrentRobotRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0a8fb581cb858b7dfa78aeff0081c177d7", null ],
       [ "FieldRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abeebd790bffb4f8fa055fa69e9dce0d0a14363d1a22b2d651eb5f7beb82bab277", null ]
@@ -57,6 +58,7 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
     [ "GetModuleStatesFields", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a920504ec43ee80bd9ba8c1ed10db5d09", null ],
     [ "GetNT4Enabled", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abd016b4572d2078d56d4614ff47d7807", null ],
     [ "GetPoseFields", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a666b05a14219a3ef962a59485568ae83", null ],
+    [ "GetRotationFields", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a57b424e576e2cb76cedb31b16bf674cd", null ],
     [ "WithCurrentModuleStates", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#abb8895c3ae208034163092955ff9b7da", null ],
     [ "WithCurrentRobotRelativeChassisSpeeds", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a1cf83efdd7b437c19b69f2d9869130e0", null ],
     [ "WithCustom", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a4a42c8618f005193fcc669d1b4e52bce", null ],
@@ -76,5 +78,6 @@ var classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig =
     [ "WithNetworkTables", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#afd1aa18c1807d0f85be8a3eaffdbe76d", null ],
     [ "WithoutNetworkTables", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#acc0ccc9a5144b2a887fd206f6de2e8c4", null ],
     [ "WithPose", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#adf0f4c38b56552ec62b53e232af7fb4b", null ],
+    [ "WithRotation", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#ad65a33ff712d919c0e054a3b4d8138df", null ],
     [ "WithTelemetryVerbosity", "classyams_1_1telemetry_1_1SwerveDriveTelemetryConfig.html#a761af0835cf664a5bf6a40b2a5b0fef3", null ]
 ];

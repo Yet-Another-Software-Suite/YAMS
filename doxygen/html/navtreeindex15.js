@@ -1,5 +1,13 @@
 var NAVTREEINDEX15 =
 {
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#ab6fea042236fed7c93a09fc03bbabc48":[1,0,0,5,12,16],
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#ab6fea042236fed7c93a09fc03bbabc48":[2,0,0,5,12,16],
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#ace4363bd623702a940deab7c7313c10e":[1,0,0,5,12,5],
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#ace4363bd623702a940deab7c7313c10e":[2,0,0,5,12,5],
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#af0cc50e9e39c993d09cbbc3d89110538":[1,0,0,5,12,14],
+"classyams_1_1telemetry_1_1SwerveModuleTelemetryConfig.html#af0cc50e9e39c993d09cbbc3d89110538":[2,0,0,5,12,14],
+"classyams_1_1units_1_1EasyCRT.html":[1,0,0,6,0],
+"classyams_1_1units_1_1EasyCRT.html":[2,0,0,6,0],
 "classyams_1_1units_1_1EasyCRT.html#a433ff12dfbceab17b372576a3cd70336":[1,0,0,6,0,1],
 "classyams_1_1units_1_1EasyCRT.html#a433ff12dfbceab17b372576a3cd70336":[2,0,0,6,0,1],
 "classyams_1_1units_1_1EasyCRT.html#a789149872603f68ac322d8f89ec71c04":[1,0,0,6,0,3],
@@ -241,13 +249,5 @@ var NAVTREEINDEX15 =
 "structyams_1_1math_1_1ADRCGains.html#a31bf8eb49da65e4863ba6b6b5c83004e":[1,0,0,3,0,2],
 "structyams_1_1math_1_1ADRCGains.html#a31bf8eb49da65e4863ba6b6b5c83004e":[2,0,0,3,0,2],
 "structyams_1_1math_1_1ADRCGains.html#acfac97dcfb992307ccd2e610117fc71e":[1,0,0,3,0,4],
-"structyams_1_1math_1_1ADRCGains.html#acfac97dcfb992307ccd2e610117fc71e":[2,0,0,3,0,4],
-"structyams_1_1math_1_1ADRCGains.html#af75c602e1626b9d39fd667eab03dce97":[1,0,0,3,0,1],
-"structyams_1_1math_1_1ADRCGains.html#af75c602e1626b9d39fd667eab03dce97":[2,0,0,3,0,1],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html":[1,0,0,3,4,0],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html":[2,0,0,3,4,0],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a01a10276953184f9b316d0b080829f28":[1,0,0,3,4,0,1],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a01a10276953184f9b316d0b080829f28":[2,0,0,3,4,0,1],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a692824e131a04830dda4f04f05619fd7":[1,0,0,3,4,0,2],
-"structyams_1_1math_1_1LQRConfig_1_1LoopBundle.html#a692824e131a04830dda4f04f05619fd7":[2,0,0,3,4,0,2]
+"structyams_1_1math_1_1ADRCGains.html#acfac97dcfb992307ccd2e610117fc71e":[2,0,0,3,0,4]
 };

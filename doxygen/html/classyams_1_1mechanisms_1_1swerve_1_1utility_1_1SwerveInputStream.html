@@ -293,7 +293,7 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Angular velocity that turns the robot to a heading in the gyro's frame, from the drive's rotation controller and the WithAimFeedforward feedforward if there is one. </p>
+<p>Angular velocity that turns the robot to a heading in the field's frame (the odometry rotation's), from the drive's rotation controller and the WithAimFeedforward feedforward if there is one. </p>
 
 </div>
 </div>
@@ -539,7 +539,7 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Measurement the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the robot's heading in the gyro's frame. Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
+<p>Measurement the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the robot's heading in the field's frame (the odometry rotation's). Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
 
 </div>
 </div>
@@ -567,7 +567,7 @@ template&lt;size_t NumModules = 4&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Setpoint the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the heading being turned to in the gyro's frame. Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
+<p>Setpoint the rotation controller was given by the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a>, in TRANSLATION_ONLY, HEADING or AIM: the heading being turned to in the field's frame (the odometry rotation's). Empty if the last <a class="el" href="#a7140e255b1f174b47fe4158a36168587">Get()</a> did not use the controller. </p>
 
 </div>
 </div>

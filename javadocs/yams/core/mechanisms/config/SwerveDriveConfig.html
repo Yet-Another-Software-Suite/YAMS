@@ -79,12 +79,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#withDiscretizationTime(org.wpilib.units.measure.Time)" tabindex="0">withDiscretizationTime(Time)</a></li>
 <li><a href="#withGyroAngularVelocityScaleFactor(double)" tabindex="0">withGyroAngularVelocityScaleFactor(double)</a></li>
 <li><a href="#withGyroVelocity(java.util.function.Supplier)" tabindex="0">withGyroVelocity(Supplier)</a></li>
+<li><a href="#withRotation(java.util.function.Supplier)" tabindex="0">withRotation(Supplier)</a></li>
 <li><a href="#withGyro(java.util.function.Supplier)" tabindex="0">withGyro(Supplier)</a></li>
 <li><a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)" tabindex="0">withGyroHeadingAxis(GyroAxis)</a></li>
 <li><a href="#withAntiTipping(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.LinearVelocity)" tabindex="0">withAntiTipping(LinearVelocity, Angle, LinearVelocity)</a></li>
 <li><a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)" tabindex="0">withAntiTipping(AntiTipping)</a></li>
 <li><a href="#getAntiTippingCorrection()" tabindex="0">getAntiTippingCorrection()</a></li>
-<li><a href="#withGyroOffset(org.wpilib.units.measure.Angle)" tabindex="0">withGyroOffset(Angle)</a></li>
 <li><a href="#withGyroInverted(boolean)" tabindex="0">withGyroInverted(boolean)</a></li>
 <li><a href="#withMaximumChassisSpeed(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.AngularVelocity)" tabindex="0">withMaximumChassisSpeed(LinearVelocity, AngularVelocity)</a></li>
 <li><a href="#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)" tabindex="0">withMaximumModuleSpeed(LinearVelocity)</a></li>
@@ -104,7 +104,6 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMaximumModuleLinearVelocity()" tabindex="0">getMaximumModuleLinearVelocity()</a></li>
 <li><a href="#getModuleStateOptimization()" tabindex="0">getModuleStateOptimization()</a></li>
 <li><a href="#optimizeRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" tabindex="0">optimizeRobotRelativeChassisSpeeds(ChassisVelocities)</a></li>
-<li><a href="#getGyroOffset()" tabindex="0">getGyroOffset()</a></li>
 <li><a href="#getTranslationPID()" tabindex="0">getTranslationPID()</a></li>
 <li><a href="#getRotationPID()" tabindex="0">getRotationPID()</a></li>
 <li><a href="#cubeTranslation(org.wpilib.math.geometry.Translation2d)" tabindex="0">cubeTranslation(Translation2d)</a></li>
@@ -187,7 +186,7 @@ Subsystem-bound subclass and a full construction example.</div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#clone()" class="member-name-link">clone</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Clone the <a href="SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> without modules, subsystem, telemetry name, gyro supplier,
-gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
+gyro angular velocity supplier, and gyro inversion.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.wpilib.math.geometry.Translation2d</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cubeTranslation(org.wpilib.math.geometry.Translation2d)" class="member-name-link">cubeTranslation</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;translation)</code></div>
@@ -210,158 +209,145 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 <div class="block">Get the discretization time for the pose estimation used by
 <a href="#optimizeRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)"><code>optimizeRobotRelativeChassisSpeeds(ChassisVelocities)</code></a></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.units.measure.Angle</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGyroOffset()" class="member-name-link">getGyroOffset</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Rotation3d</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGyroRotation3d()" class="member-name-link">getGyroRotation3d</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Get the gyro offset.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Rotation3d</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGyroRotation3d()" class="member-name-link">getGyroRotation3d</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the robot's attitude from the gyro: the gyro's attitude rotated into the robot's frame for
 the axis set with <a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>, with the inversion
-(<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a>) and offset (<a href="#withGyroOffset(org.wpilib.units.measure.Angle)"><code>withGyroOffset(Angle)</code></a>) applied to its
-yaw.</div>
+(<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a>) applied to its yaw.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose2d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInitialPose()" class="member-name-link">getInitialPose</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.geometry.Pose2d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInitialPose()" class="member-name-link">getInitialPose</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the starting pose of the robot.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.AngularVelocity&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisAngularVelocity()" class="member-name-link">getMaximumChassisAngularVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the maximum angular speed of the chassis.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.LinearVelocity&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.LinearVelocity&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumChassisLinearVelocity()" class="member-name-link">getMaximumChassisLinearVelocity</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the maximum speed of the chassis.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.LinearVelocity&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumModuleLinearVelocity()" class="member-name-link">getMaximumModuleLinearVelocity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.units.measure.LinearVelocity&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaximumModuleLinearVelocity()" class="member-name-link">getMaximumModuleLinearVelocity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the maximum speed of the modules.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve">SwerveModule</a>[]</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getModules()" class="member-name-link">getModules</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve">SwerveModule</a>[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getModules()" class="member-name-link">getModules</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the <a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a>s for the <a href="../swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getModuleStateOptimization()" class="member-name-link">getModuleStateOptimization</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Boolean.html" title="class or interface in java.lang" class="external-link">Boolean</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getModuleStateOptimization()" class="member-name-link">getModuleStateOptimization</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the module state optimization override.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.controller.PIDController&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotationPID()" class="member-name-link">getRotationPID</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.controller.PIDController&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotationPID()" class="member-name-link">getRotationPID</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the rotation PID controller used for drive to pose and heading control.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSwerveDriveTelemetryConfig()" class="member-name-link">getSwerveDriveTelemetryConfig</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSwerveDriveTelemetryConfig()" class="member-name-link">getSwerveDriveTelemetryConfig</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the user specified <a href="../../telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a>, if configured via
 <a href="#withTelemetry(java.lang.String,yams.core.telemetry.SwerveDriveTelemetryConfig)"><code>withTelemetry(String,SwerveDriveTelemetryConfig)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryName()" class="member-name-link">getTelemetryName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the telemetry name for the <a href="../swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../../telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTelemetryVerbosity()" class="member-name-link">getTelemetryVerbosity</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the telemetry verbosity for the <a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.controller.PIDController&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTranslationPID()" class="member-name-link">getTranslationPID</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;org.wpilib.math.controller.PIDController&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTranslationPID()" class="member-name-link">getTranslationPID</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Get the translation PID controller used for drive to pose.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.ChassisVelocities</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#optimizeRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">optimizeRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;speeds)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>org.wpilib.math.kinematics.ChassisVelocities</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#optimizeRobotRelativeChassisSpeeds(org.wpilib.math.kinematics.ChassisVelocities)" class="member-name-link">optimizeRobotRelativeChassisSpeeds</a><wbr>(org.wpilib.math.kinematics.ChassisVelocities&nbsp;speeds)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Optimize the given chassis speeds, first adding the anti-tipping correction when it is
 configured with <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.wpilib.math.geometry.Translation2d</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#scaleTranslation(org.wpilib.math.geometry.Translation2d,double)" class="member-name-link">scaleTranslation</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;translation,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static org.wpilib.math.geometry.Translation2d</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#scaleTranslation(org.wpilib.math.geometry.Translation2d,double)" class="member-name-link">scaleTranslation</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;translation,
  double&nbsp;scalar)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Scale the <code>Translation2d</code> Polar coordinate magnitude.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#self()" class="member-name-link">self</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>protected abstract <a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#self()" class="member-name-link">self</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Get this config as its concrete type, so chained <code>with</code> calls keep the subclass type.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useExternalFeedbackSensor()" class="member-name-link">useExternalFeedbackSensor</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useExternalFeedbackSensor()" class="member-name-link">useExternalFeedbackSensor</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Use an external feedback sensor for the <a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a>s.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)" class="member-name-link">withAntiTipping</a><wbr>(org.wpilib.math.controller.AntiTipping&nbsp;antiTipping)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)" class="member-name-link">withAntiTipping</a><wbr>(org.wpilib.math.controller.AntiTipping&nbsp;antiTipping)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Drive the robot back under itself when it starts to tip, with an <code>AntiTipping</code> reading the
 robot's attitude from the gyro set with <a href="#withGyro(java.util.function.Supplier)"><code>withGyro(Supplier)</code></a>: its correction is added to
 every robot relative chassis speed.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAntiTipping(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withAntiTipping</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;kP,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withAntiTipping(org.wpilib.units.measure.LinearVelocity,org.wpilib.units.measure.Angle,org.wpilib.units.measure.LinearVelocity)" class="member-name-link">withAntiTipping</a><wbr>(org.wpilib.units.measure.LinearVelocity&nbsp;kP,
  org.wpilib.units.measure.Angle&nbsp;tippingThreshold,
  org.wpilib.units.measure.LinearVelocity&nbsp;maxCorrectionSpeed)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Drive the robot back under itself when it starts to tip, with WPILib's <code>AntiTipping</code>: once
 the robot's pitch or roll, from the gyro set with <a href="#withGyro(java.util.function.Supplier)"><code>withGyro(Supplier)</code></a>, is past
 <code>tippingThreshold</code>, a correction toward the side it is tipping to, <code>kP</code> times the sine
 of the tilt and at most <code>maxCorrectionSpeed</code>, is added to every robot relative chassis
 speed.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCenterOfRotation(org.wpilib.math.geometry.Translation2d)" class="member-name-link">withCenterOfRotation</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;centerOfRotation)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the center of rotation; 0,0 is the center of the robot.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCenterOfRotation(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" class="member-name-link">withCenterOfRotation</a><wbr>(org.wpilib.units.measure.Distance&nbsp;forward,
- org.wpilib.units.measure.Distance&nbsp;left)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCenterOfRotation(org.wpilib.math.geometry.Translation2d)" class="member-name-link">withCenterOfRotation</a><wbr>(org.wpilib.math.geometry.Translation2d&nbsp;centerOfRotation)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the center of rotation; 0,0 is the center of the robot.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDiscretizationTime(org.wpilib.units.measure.Time)" class="member-name-link">withDiscretizationTime</a><wbr>(org.wpilib.units.measure.Time&nbsp;dt)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withCenterOfRotation(org.wpilib.units.measure.Distance,org.wpilib.units.measure.Distance)" class="member-name-link">withCenterOfRotation</a><wbr>(org.wpilib.units.measure.Distance&nbsp;forward,
+ org.wpilib.units.measure.Distance&nbsp;left)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the center of rotation; 0,0 is the center of the robot.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withDiscretizationTime(org.wpilib.units.measure.Time)" class="member-name-link">withDiscretizationTime</a><wbr>(org.wpilib.units.measure.Time&nbsp;dt)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the discretization time for the pose estimation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyro(java.util.function.Supplier)" class="member-name-link">withGyro</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Rotation3d&gt;&nbsp;gyro)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the gyro, as the robot's attitude: its yaw is the robot's heading (or the axis set with
-<a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what anti-tipping corrects
-with (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>).</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroAngularVelocityScaleFactor(double)" class="member-name-link">withGyroAngularVelocityScaleFactor</a><wbr>(double&nbsp;scaleFactor)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyro(java.util.function.Supplier)" class="member-name-link">withGyro</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Rotation3d&gt;&nbsp;gyro)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Same as <a href="#withRotation(java.util.function.Supplier)"><code>withRotation(Supplier)</code></a>: set the gyro, as the robot's attitude.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroAngularVelocityScaleFactor(double)" class="member-name-link">withGyroAngularVelocityScaleFactor</a><wbr>(double&nbsp;scaleFactor)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the angular velocity scale factor to improve the accuracy of the pose estimation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)" class="member-name-link">withGyroHeadingAxis</a><wbr>(<a href="enums/GyroAxis.html" title="enum class in yams.core.mechanisms.config.enums">GyroAxis</a>&nbsp;axis)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)" class="member-name-link">withGyroHeadingAxis</a><wbr>(<a href="enums/GyroAxis.html" title="enum class in yams.core.mechanisms.config.enums">GyroAxis</a>&nbsp;axis)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set which axis of the gyro points up through the robot, for a gyro mounted so the robot turning
 shows up as its roll or pitch instead of its yaw.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroInverted(boolean)" class="member-name-link">withGyroInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the gyro inverted.</div>
-</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroOffset(org.wpilib.units.measure.Angle)" class="member-name-link">withGyroOffset</a><wbr>(org.wpilib.units.measure.Angle&nbsp;offset)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroInverted(boolean)" class="member-name-link">withGyroInverted</a><wbr>(boolean&nbsp;inverted)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the gyro offset.</div>
+<div class="block">Set the gyro inverted.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withGyroVelocity(java.util.function.Supplier)" class="member-name-link">withGyroVelocity</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.units.measure.AngularVelocity&gt;&nbsp;angularVelocitySupplier)</code></div>
@@ -391,50 +377,57 @@ shows up as its roll or pitch instead of its yaw.</div>
 module's <a href="SwerveModuleConfig.html#withOptimization(boolean)"><code>SwerveModuleConfig.withOptimization(boolean)</code></a>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withRotationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRotation(java.util.function.Supplier)" class="member-name-link">withRotation</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Rotation3d&gt;&nbsp;rotation)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Set the rotation PID controller.</div>
+<div class="block">Set the robot's rotation from the gyro, as the robot's attitude: its yaw is the robot's heading
+(or the axis set with <a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what
+anti-tipping corrects with (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimDiscretizationTime(org.wpilib.units.measure.Time)" class="member-name-link">withSimDiscretizationTime</a><wbr>(org.wpilib.units.measure.Time&nbsp;dt)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withRotationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Set the rotation PID controller.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimDiscretizationTime(org.wpilib.units.measure.Time)" class="member-name-link">withSimDiscretizationTime</a><wbr>(org.wpilib.units.measure.Time&nbsp;dt)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the discretization time for the pose estimation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimGyroAngularVelocityScaleFactor(double)" class="member-name-link">withSimGyroAngularVelocityScaleFactor</a><wbr>(double&nbsp;scaleFactor)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimGyroAngularVelocityScaleFactor(double)" class="member-name-link">withSimGyroAngularVelocityScaleFactor</a><wbr>(double&nbsp;scaleFactor)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the angular velocity scale factor to improve the accuracy of the pose estimation.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withSimRotationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimRotationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withSimRotationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the rotation PID controller.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimTranslationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withSimTranslationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withSimTranslationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withSimTranslationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the translation PID controller.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStartingPose(org.wpilib.math.geometry.Pose2d)" class="member-name-link">withStartingPose</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withStartingPose(org.wpilib.math.geometry.Pose2d)" class="member-name-link">withStartingPose</a><wbr>(org.wpilib.math.geometry.Pose2d&nbsp;pose)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the starting pose of the robot.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.enums.TelemetryVerbosity)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="../../telemetry/enums/TelemetryVerbosity.html" title="enum class in yams.core.telemetry.enums">TelemetryVerbosity</a>&nbsp;telemetryVerbosity)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure telemetry for the <a href="../swerve/SwerveModule.html" title="class in yams.core.mechanisms.swerve"><code>SwerveModule</code></a> mechanism.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.SwerveDriveTelemetryConfig)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTelemetry(java.lang.String,yams.core.telemetry.SwerveDriveTelemetryConfig)" class="member-name-link">withTelemetry</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
  <a href="../../telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry">SwerveDriveTelemetryConfig</a>&nbsp;telemetryConfig)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Configure telemetry for the <a href="../swerve/SwerveDrive.html" title="class in yams.core.mechanisms.swerve"><code>SwerveDrive</code></a> with a <a href="../../telemetry/SwerveDriveTelemetryConfig.html" title="class in yams.core.telemetry"><code>SwerveDriveTelemetryConfig</code></a>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withTranslationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withTranslationController(org.wpilib.math.controller.PIDController)" class="member-name-link">withTranslationController</a><wbr>(org.wpilib.math.controller.PIDController&nbsp;controller)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Set the translation PID controller.</div>
 </div>
 </div>
@@ -524,7 +517,7 @@ module's <a href="SwerveModuleConfig.html#withOptimization(boolean)"><code>Swerv
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></span>&nbsp;<span class="element-name">clone</span>()</div>
 <div class="block">Clone the <a href="SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> without modules, subsystem, telemetry name, gyro supplier,
-gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
+gyro angular velocity supplier, and gyro inversion.</div>
 <dl class="notes">
 <dt>Overrides:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="class or interface in java.lang" class="external-link">clone</a></code>&nbsp;in class&nbsp;<code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></dd>
@@ -718,13 +711,29 @@ gyro angular velocity supplier, gyro offset, and gyro inversion.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="withRotation(java.util.function.Supplier)">
+<h3>withRotation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></span>&nbsp;<span class="element-name">withRotation</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Rotation3d&gt;&nbsp;rotation)</span></div>
+<div class="block">Set the robot's rotation from the gyro, as the robot's attitude: its yaw is the robot's heading
+(or the axis set with <a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what
+anti-tipping corrects with (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>).</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>rotation</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a> for the robot's attitude, such as <code>pigeon::getRotation3d</code>
+                or <code>imu::getRotation3d</code>.</dd>
+<dt>Returns:</dt>
+<dd><a href="SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> for chaining.</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="withGyro(java.util.function.Supplier)">
 <h3>withGyro</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></span>&nbsp;<span class="element-name">withGyro</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;org.wpilib.math.geometry.Rotation3d&gt;&nbsp;gyro)</span></div>
-<div class="block">Set the gyro, as the robot's attitude: its yaw is the robot's heading (or the axis set with
-<a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>), and its roll and pitch are what anti-tipping corrects
-with (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>).</div>
+<div class="block">Same as <a href="#withRotation(java.util.function.Supplier)"><code>withRotation(Supplier)</code></a>: set the gyro, as the robot's attitude.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>gyro</code> - <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link"><code>Supplier</code></a> for the robot's attitude, such as <code>pigeon::getRotation3d</code> or
@@ -744,8 +753,7 @@ with (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><co
 shows up as its roll or pitch instead of its yaw. Defaults to <a href="enums/GyroAxis.html#YAW"><code>GyroAxis.YAW</code></a>. The gyro's
 attitude is rotated into the robot's frame with <a href="enums/GyroAxis.html#toRobotAttitude(org.wpilib.math.geometry.Rotation3d)"><code>GyroAxis.toRobotAttitude(Rotation3d)</code></a>
 before the heading and anti-tipping (see <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping)"><code>withAntiTipping(AntiTipping)</code></a>) read it;
-<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a> and <a href="#withGyroOffset(org.wpilib.units.measure.Angle)"><code>withGyroOffset(Angle)</code></a> apply to the resulting
-heading.</div>
+<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a> applies to the resulting heading.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>axis</code> - Axis of the gyro that points up through the robot.</dd>
@@ -809,21 +817,6 @@ every robot relative chassis speed.</div>
 <dt>Returns:</dt>
 <dd>Robot relative correction, or zero when the robot is not tipping, or anti-tipping or the
     gyro is not configured.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="withGyroOffset(org.wpilib.units.measure.Angle)">
-<h3>withGyroOffset</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="#type-param-T" title="type parameter in SwerveDriveConfig">T</a></span>&nbsp;<span class="element-name">withGyroOffset</span><wbr><span class="parameters">(org.wpilib.units.measure.Angle&nbsp;offset)</span></div>
-<div class="block">Set the gyro offset.</div>
-<dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>offset</code> - Offset to apply to the gyro.</dd>
-<dt>Returns:</dt>
-<dd><a href="SwerveDriveConfig.html" title="class in yams.core.mechanisms.config"><code>SwerveDriveConfig</code></a> for chaining.</dd>
 </dl>
 </div>
 </section>
@@ -1020,8 +1013,7 @@ during operation. Modules added later with <a href="#withModules(yams.core.mecha
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.math.geometry.Rotation3d</span>&nbsp;<span class="element-name">getGyroRotation3d</span>()</div>
 <div class="block">Get the robot's attitude from the gyro: the gyro's attitude rotated into the robot's frame for
 the axis set with <a href="#withGyroHeadingAxis(yams.core.mechanisms.config.enums.GyroAxis)"><code>withGyroHeadingAxis(GyroAxis)</code></a>, with the inversion
-(<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a>) and offset (<a href="#withGyroOffset(org.wpilib.units.measure.Angle)"><code>withGyroOffset(Angle)</code></a>) applied to its
-yaw. Its yaw is the robot's heading, wrapped to half a rotation each way, and its roll and pitch
+(<a href="#withGyroInverted(boolean)"><code>withGyroInverted(boolean)</code></a>) applied to its yaw. Its yaw is the robot's heading, wrapped to half a rotation each way, and its roll and pitch
 are the robot's tilt.</div>
 <dl class="notes">
 <dt>Returns:</dt>
@@ -1114,19 +1106,6 @@ configured with <a href="#withAntiTipping(org.wpilib.math.controller.AntiTipping
 <dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if a gyro angular velocity scale factor is configured with
                               <a href="#withGyroAngularVelocityScaleFactor(double)"><code>withGyroAngularVelocityScaleFactor(double)</code></a> but no gyro
                               supplier was set with <a href="#withGyro(java.util.function.Supplier)"><code>withGyro(Supplier)</code></a>.</dd>
-</dl>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="getGyroOffset()">
-<h3>getGyroOffset</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">org.wpilib.units.measure.Angle</span>&nbsp;<span class="element-name">getGyroOffset</span>()</div>
-<div class="block">Get the gyro offset.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>Gyro offset.</dd>
 </dl>
 </div>
 </section>

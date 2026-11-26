@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"classyams_1_1telemetry_1_1BooleanTelemetry.html":[1,0,0,5,3],
+"classyams_1_1telemetry_1_1BooleanTelemetry.html":[2,0,0,5,3],
 "classyams_1_1telemetry_1_1BooleanTelemetry.html#a3eacb3e091173f5c589feb2cc3fe0b28":[1,0,0,5,3,11],
 "classyams_1_1telemetry_1_1BooleanTelemetry.html#a3eacb3e091173f5c589feb2cc3fe0b28":[2,0,0,5,3,11],
 "classyams_1_1telemetry_1_1BooleanTelemetry.html#a3f99067a6e11e913d73e296773138f9b":[1,0,0,5,3,5],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "classyams_1_1telemetry_1_1StructTelemetry.html#a77f4da0805666ea9f08bcea11f1c2101":[1,0,0,5,8,2],
 "classyams_1_1telemetry_1_1StructTelemetry.html#a77f4da0805666ea9f08bcea11f1c2101":[2,0,0,5,8,2],
 "classyams_1_1telemetry_1_1StructTelemetry.html#a89a4154c0206b6e0b4e5f853aec4c9eb":[1,0,0,5,8,4],
-"classyams_1_1telemetry_1_1StructTelemetry.html#a89a4154c0206b6e0b4e5f853aec4c9eb":[2,0,0,5,8,4],
-"classyams_1_1telemetry_1_1StructTelemetry.html#a89f927d96ed21ff9bcdbb974047f3e80":[1,0,0,5,8,10],
-"classyams_1_1telemetry_1_1StructTelemetry.html#a89f927d96ed21ff9bcdbb974047f3e80":[2,0,0,5,8,10]
+"classyams_1_1telemetry_1_1StructTelemetry.html#a89a4154c0206b6e0b4e5f853aec4c9eb":[2,0,0,5,8,4]
 };
