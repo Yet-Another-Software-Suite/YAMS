@@ -42,6 +42,9 @@ public class TiltOdometryScaler {
   /** Tilt threshold in radians at or above which scale is {@code 0.0}. */
   private final double m_zeroTrustTiltRad;
 
+  /** Whether tilt-based attenuation is enabled (false for skid-rejection-only passthrough). */
+  private final boolean m_tiltScalingEnabled;
+
   /** Previous raw wheel distances in meters used to compute incremental deltas. */
   private double[] m_lastRawDistancesMeters;
 
@@ -88,6 +91,24 @@ public class TiltOdometryScaler {
     }
     m_fullTrustTiltRad = fullRad;
     m_zeroTrustTiltRad = zeroRad;
+    m_tiltScalingEnabled = true;
+  }
+
+  private TiltOdometryScaler(boolean tiltScalingEnabled) {
+    m_fullTrustTiltRad = 0.0;
+    m_zeroTrustTiltRad = Math.PI * 0.5;
+    m_tiltScalingEnabled = tiltScalingEnabled;
+  }
+
+  /**
+   * Create a passthrough {@link TiltOdometryScaler} that leaves wheel deltas unscaled by tilt
+   * ({@code 1.0}) while still tracking raw wheel-distance deltas for temporary {@code rejectUpdate}
+   * suppression (such as skid odometry rejection without tilt attenuation).
+   *
+   * @return Passthrough {@link TiltOdometryScaler}.
+   */
+  public static TiltOdometryScaler passthrough() {
+    return new TiltOdometryScaler(false);
   }
 
   /**
@@ -125,6 +146,9 @@ public class TiltOdometryScaler {
    * @return Scale factor in {@code [0.0, 1.0]}.
    */
   public double computeScale(Rotation3d attitude) {
+    if (!m_tiltScalingEnabled) {
+      return 1.0;
+    }
     double tiltRad = computeTiltAngle(attitude).in(Radians);
     if (tiltRad <= m_fullTrustTiltRad) {
       return 1.0;

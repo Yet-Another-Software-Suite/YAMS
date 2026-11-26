@@ -139,7 +139,7 @@ public class SwerveDrive {
             .toArray(Translation2d[]::new);
     m_skidOnlyScaler =
         config.getTiltOdometryScaler().isEmpty() && config.isSkidOdometryRejectionEnabled()
-            ? new TiltOdometryScaler(Radians.of(Math.PI * 0.49), Radians.of(Math.PI * 0.5))
+            ? TiltOdometryScaler.passthrough()
             : null;
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getGyroRotation3d().toRotation2d(), getModulePositions(), m_config.getInitialPose());

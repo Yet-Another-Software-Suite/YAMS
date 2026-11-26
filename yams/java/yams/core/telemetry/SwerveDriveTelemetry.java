@@ -154,8 +154,9 @@ public class SwerveDriveTelemetry {
       if (!bt.enabled) {
         continue;
       }
-      if (bt.getField() == BooleanTelemetryField.IsSkidding) {
-        bt.set(drive.isSkidding());
+      switch (bt.getField()) {
+        case IsSkidding -> bt.set(drive.isSkidding());
+        default -> {}
       }
     }
   }
