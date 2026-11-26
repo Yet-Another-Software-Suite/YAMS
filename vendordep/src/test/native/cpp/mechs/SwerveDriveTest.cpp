@@ -800,14 +800,13 @@ TEST_CASE("SwerveDriveTest.GyroHeadingAxisReadsTheHeadingFromRollOrPitch", "[Swe
   CHECK(cfg.GetGyroAngle().value() == Catch::Approx(40.0).margin(1e-6));
 }
 
-// The inversion and the offset apply to the heading of the rotated attitude.
-TEST_CASE("SwerveDriveTest.GyroInversionAndOffsetApplyToTheHeading", "[SwerveDriveTest]") {
+// The inversion applies to the heading of the rotated attitude.
+TEST_CASE("SwerveDriveTest.GyroInversionAppliesToTheHeading", "[SwerveDriveTest]") {
   SwerveDriveConfig cfg;
   cfg.WithGyro(std::function<wpi::math::Rotation3d()>{
          [] { return wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{30.0_deg}}; }})
-      .WithGyroInverted(true)
-      .WithGyroOffset(10.0_deg);
-  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(-40.0).margin(1e-6));
+      .WithGyroInverted(true);
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(-30.0).margin(1e-6));
 }
 
 // Anti-tipping rejects values that cannot work.

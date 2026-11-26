@@ -74,19 +74,18 @@ public class SwerveDriveGyroAxisTest {
   }
 
   @Test
-  void inversionAndOffsetApplyToTheChosenAxis() {
-    final SwerveDriveConfig<?> config =
-        config(GyroAxis.ROLL).withGyroInverted(true).withGyroOffset(Degrees.of(10));
+  void inversionAppliesToTheChosenAxis() {
+    final SwerveDriveConfig<?> config = config(GyroAxis.ROLL).withGyroInverted(true);
     rotateGyro(1, 0, 0, 30);
-    assertEquals(-40, headingDegrees(config), kTolerance, "inverted, offset roll heading");
+    assertEquals(-30, headingDegrees(config), kTolerance, "inverted roll heading");
   }
 
   @Test
-  void offsetChangesOnlyTheHeading() {
-    final SwerveDriveConfig<?> config = config(GyroAxis.YAW).withGyroOffset(Degrees.of(90));
+  void inversionChangesOnlyTheHeading() {
+    final SwerveDriveConfig<?> config = config(GyroAxis.YAW).withGyroInverted(true);
     gyro.set(new Rotation3d(Math.toRadians(5), Math.toRadians(-8), Math.toRadians(30)));
     final Rotation3d robot = config.getGyroRotation3d();
-    assertEquals(-60, Math.toDegrees(robot.getZ()), kTolerance, "offset heading");
+    assertEquals(-30, Math.toDegrees(robot.getZ()), kTolerance, "inverted heading");
     assertEquals(5, Math.toDegrees(robot.getX()), kTolerance, "roll kept");
     assertEquals(-8, Math.toDegrees(robot.getY()), kTolerance, "pitch kept");
   }

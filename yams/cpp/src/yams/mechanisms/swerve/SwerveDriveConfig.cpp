@@ -98,11 +98,6 @@ SwerveDriveConfig& SwerveDriveConfig::WithGyroVelocity(
   return *this;
 }
 
-SwerveDriveConfig& SwerveDriveConfig::WithGyroOffset(wpi::units::degree_t offset) {
-  m_gyroOffset = offset;
-  return *this;
-}
-
 SwerveDriveConfig& SwerveDriveConfig::WithGyroInverted(bool inverted) {
   m_gyroInverted = inverted;
   return *this;
@@ -239,10 +234,6 @@ SwerveDriveConfig::GetSwerveDriveTelemetryConfig() {
   return result;
 }
 
-wpi::units::degree_t SwerveDriveConfig::GetGyroOffset() const {
-  return m_gyroOffset.value_or(wpi::units::degree_t{0});
-}
-
 wpi::units::degree_t SwerveDriveConfig::GetGyroAngle() const {
   if (!m_gyroSupplier) {
     throw std::runtime_error(
@@ -260,8 +251,7 @@ wpi::math::Rotation3d SwerveDriveConfig::GetGyroRotation3d() const {
   if (m_gyroInverted) {
     attitude = wpi::math::Rotation3d{attitude.X(), attitude.Y(), -attitude.Z()};
   }
-  return attitude.RotateBy(
-      wpi::math::Rotation3d{wpi::units::radian_t{0}, wpi::units::radian_t{0}, -wpi::units::radian_t{GetGyroOffset()}});
+  return attitude;
 }
 
 wpi::math::ChassisVelocities SwerveDriveConfig::GetAntiTippingCorrection() const {

@@ -8,7 +8,6 @@ import static org.wpilib.units.Units.Microsecond;
 import static org.wpilib.units.Units.Milliseconds;
 import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.RadiansPerSecond;
-import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.Seconds;
 
 import java.util.Optional;
@@ -97,10 +96,6 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    * derived from the gyro angle instead.
    */
   private Alert noGyroAngularVelocitySupplierAlert = null;
-  /**
-   * Gyro offset.
-   */
-  private Optional<Angle> gyroOffset = Optional.empty();
   /**
    * Gyro inverted.
    */
@@ -212,7 +207,6 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     // Intentionally not copying these, as they are not user-configurable.
     //    this.gyroSupplier = cfg.gyroSupplier;
     //    this.gyroAngularVelocitySupplier = cfg.gyroAngularVelocitySupplier;
-    //    this.gyroOffset = cfg.gyroOffset;
     //    this.gyroInverted = cfg.gyroInverted;
     //    this.telemetryName = cfg.telemetryName;
     //    this.modules = cfg.modules;
@@ -229,7 +223,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
 
   /**
    * Clone the {@link SwerveDriveConfig} without modules, subsystem, telemetry name, gyro supplier,
-   * gyro angular velocity supplier, gyro offset, and gyro inversion.
+   * gyro angular velocity supplier, and gyro inversion.
    *
    * @return New {@link SwerveDriveConfig}
    */
@@ -407,8 +401,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    * shows up as its roll or pitch instead of its yaw. Defaults to {@link GyroAxis#YAW}. The gyro's
    * attitude is rotated into the robot's frame with {@link GyroAxis#toRobotAttitude(Rotation3d)}
    * before the heading and anti-tipping (see {@link #withAntiTipping(AntiTipping)}) read it;
-   * {@link #withGyroInverted(boolean)} and {@link #withGyroOffset(Angle)} apply to the resulting
-   * heading.
+   * {@link #withGyroInverted(boolean)} applies to the resulting heading.
    *
    * @param axis Axis of the gyro that points up through the robot.
    * @return {@link SwerveDriveConfig} for chaining.
@@ -474,17 +467,6 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     // field's. Turn it to the robot's, like the chassis speeds it is added to.
     final Rotation3d attitude = getGyroRotation3d();
     return antiTipping.get().calculate(attitude).toRobotRelative(new Rotation2d(attitude.getZ()));
-  }
-
-  /**
-   * Set the gyro offset.
-   *
-   * @param offset Offset to apply to the gyro.
-   * @return {@link SwerveDriveConfig} for chaining.
-   */
-  public T withGyroOffset(Angle offset) {
-    gyroOffset = Optional.ofNullable(offset);
-    return self();
   }
 
   /**
@@ -663,8 +645,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   /**
    * Get the robot's attitude from the gyro: the gyro's attitude rotated into the robot's frame for
    * the axis set with {@link #withGyroHeadingAxis(GyroAxis)}, with the inversion
-   * ({@link #withGyroInverted(boolean)}) and offset ({@link #withGyroOffset(Angle)}) applied to its
-   * yaw. Its yaw is the robot's heading, wrapped to half a rotation each way, and its roll and pitch
+   * ({@link #withGyroInverted(boolean)}) applied to its yaw. Its yaw is the robot's heading, wrapped to half a rotation each way, and its roll and pitch
    * are the robot's tilt.
    *
    * @return The robot's attitude.
@@ -678,8 +659,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     if (gyroInverted) {
       attitude = new Rotation3d(attitude.getX(), attitude.getY(), -attitude.getZ());
     }
-    // Turning the attitude about the robot's Z axis, after its roll and pitch, offsets only its yaw.
-    return attitude.rotateBy(new Rotation3d(0, 0, -getGyroOffset().in(Radians)));
+    return attitude;
   }
 
   /**
@@ -787,14 +767,6 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
     return speeds;
   }
 
-  /**
-   * Get the gyro offset.
-   *
-   * @return Gyro offset.
-   */
-  public Angle getGyroOffset() {
-    return gyroOffset.orElse(Rotations.of(0));
-  }
   /**
    * Get the translation PID controller used for drive to pose. In simulation the simulation
    * controller is preferred over the real one.

@@ -141,14 +141,6 @@ class SwerveDriveConfig {
       std::function<wpi::units::degrees_per_second_t()> angularVelocitySupplier);
 
   /**
-   * Set the gyro offset (subtracted from the raw gyro reading in GetGyroAngle).
-   *
-   * @param offset Gyro angle offset.
-   * @return *this for chaining.
-   */
-  SwerveDriveConfig& WithGyroOffset(wpi::units::degree_t offset);
-
-  /**
    * Invert the gyro direction.
    *
    * @param inverted true to negate the raw gyro angle.
@@ -328,12 +320,7 @@ class SwerveDriveConfig {
   std::optional<telemetry::SwerveDriveTelemetryConfig> GetSwerveDriveTelemetryConfig();
 
   /**
-   * Get the stored gyro offset (zero if never set).
-   */
-  wpi::units::degree_t GetGyroOffset() const;
-
-  /**
-   * Get the gyro angle with inversion and offset applied.
+   * Get the gyro angle with inversion applied.
    *
    * @throws std::runtime_error if no gyro supplier has been configured.
    */
@@ -341,7 +328,7 @@ class SwerveDriveConfig {
 
   /**
    * The robot's attitude: the gyro's attitude rotated into the robot's frame (see
-   * WithGyroHeadingAxis), with the gyro inversion and offset applied to its yaw. Its yaw is the
+   * WithGyroHeadingAxis), with the gyro inversion applied to its yaw. Its yaw is the
    * robot's heading, and its roll and pitch are the robot's tilt.
    *
    * @return The robot's attitude.
@@ -417,7 +404,6 @@ class SwerveDriveConfig {
   mutable math::DerivativeTimeFilter m_gyroAngularVelocityFilter{wpi::units::millisecond_t{20}};
   mutable std::optional<wpi::util::Alert> m_noGyroAngularVelocitySupplierAlert;
   std::optional<std::function<wpi::units::degrees_per_second_t()>> m_gyroAngularVelocitySupplier;
-  std::optional<wpi::units::degree_t> m_gyroOffset;
   bool m_gyroInverted{false};
   wpi::math::Pose2d m_initialPose;
   std::optional<wpi::units::meters_per_second_t> m_maximumChassisLinearVelocity;

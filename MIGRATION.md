@@ -156,6 +156,7 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 | `getRelativeMechanismPosition()` on a mechanism | `getPose3d()` (C++ `GetPose3d()`): the mechanism's `Pose3d` relative to the robot, for an AdvantageScope robot model |
 | `SwerveModule.lock(Rotation2d)` | `setAzimuthAngle(Rotation2d)`, which turns the wheel without driving it |
+| `SwerveDriveConfig.withGyroOffset(Angle)`, `getGyroOffset()` (C++ `WithGyroOffset`, `GetGyroOffset`) | removed. The pose estimator keeps the offset between the gyro and the pose: set the robot's heading with the starting pose (`withStartingPose`), `resetOdometry(Pose2d)` or `zeroOdometryHeading()`. See [Field relative driving uses the odometry rotation](#field-relative-driving-uses-the-odometry-rotation) |
 | Swerve drive telemetry `gyro` (degrees, `double`) | `gyro` (`struct:Rotation2d`), the gyro's rotation, with `withGyro()` (C++ `WithGyro()`). New beside it: `rotation` (`struct:Rotation2d`), the robot's rotation from odometry, used for the module states, with `withRotation()` (C++ `WithRotation()`). Both are on from `LOW` up |
 
 New alongside the renames:
@@ -275,8 +276,9 @@ is. Without vision, it is the gyro's heading, so nothing changes. If vision's he
 it a larger heading standard deviation in `addVisionMeasurement`.
 
 `resetOdometry(Pose2d)` (C++ `ResetOdometry`) resets only the pose. It no longer changes the gyro
-offset or the simulated gyro, since the pose estimator keeps the offset between the gyro and the
-pose. `getGyroRotation3d()` and the `gyro` telemetry keep reading the gyro after a reset, while
+or the simulated gyro, since the pose estimator keeps the offset between the gyro and the pose. For
+the same reason `withGyroOffset` is removed: a heading offset belongs in the starting pose or a
+`resetOdometry` call. `getGyroRotation3d()` and the `gyro` telemetry keep reading the gyro after a reset, while
 `getRotation()` reads the reset pose's heading. `zeroOdometryHeading()` (C++ `ZeroOdometryHeading()`)
 turns the pose to face 0 so field relative "forward" is the way the robot faces, and `zeroGyro()`
 does the same.
