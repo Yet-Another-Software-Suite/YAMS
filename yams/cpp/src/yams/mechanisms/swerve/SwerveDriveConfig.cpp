@@ -28,18 +28,21 @@ SwerveDriveConfig& SwerveDriveConfig::WithModules(std::vector<SwerveModule*> mod
 
 SwerveDriveConfig& SwerveDriveConfig::WithGyro(std::function<wpi::units::degree_t()> gyroSupplier) {
   if (!gyroSupplier) {
-    m_gyroSupplier.reset();
-    m_continuousHeadingRead = false;
-    return *this;
+    return WithRotation(std::function<wpi::math::Rotation3d()>{});
   }
-  return WithGyro(std::function<wpi::math::Rotation3d()>{[supplier = std::move(gyroSupplier)] {
+  return WithRotation(std::function<wpi::math::Rotation3d()>{[supplier = std::move(gyroSupplier)] {
     return wpi::math::Rotation3d{wpi::units::radian_t{0}, wpi::units::radian_t{0}, wpi::units::radian_t{supplier()}};
   }});
 }
 
 SwerveDriveConfig& SwerveDriveConfig::WithGyro(std::function<wpi::math::Rotation3d()> gyroSupplier) {
-  if (gyroSupplier) {
-    m_gyroSupplier = std::move(gyroSupplier);
+  return WithRotation(std::move(gyroSupplier));
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithRotation(
+    std::function<wpi::math::Rotation3d()> rotationSupplier) {
+  if (rotationSupplier) {
+    m_gyroSupplier = std::move(rotationSupplier);
   } else {
     m_gyroSupplier.reset();
   }

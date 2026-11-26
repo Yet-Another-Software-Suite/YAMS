@@ -377,18 +377,29 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Set the gyro, as the robot's attitude: its yaw is the robot's heading (or the axis set with
-   * {@link #withGyroHeadingAxis(GyroAxis)}), and its roll and pitch are what anti-tipping corrects
-   * with (see {@link #withAntiTipping(AntiTipping)}).
+   * Set the robot's rotation from the gyro, as the robot's attitude: its yaw is the robot's heading
+   * (or the axis set with {@link #withGyroHeadingAxis(GyroAxis)}), and its roll and pitch are what
+   * anti-tipping corrects with (see {@link #withAntiTipping(AntiTipping)}).
+   *
+   * @param rotation {@link Supplier} for the robot's attitude, such as {@code pigeon::getRotation3d}
+   *                 or {@code imu::getRotation3d}.
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  public T withRotation(Supplier<Rotation3d> rotation) {
+    gyroSupplier = Optional.ofNullable(rotation);
+    continuousHeadingRead = false;
+    return self();
+  }
+
+  /**
+   * Same as {@link #withRotation(Supplier)}: set the gyro, as the robot's attitude.
    *
    * @param gyro {@link Supplier} for the robot's attitude, such as {@code pigeon::getRotation3d} or
    *             {@code imu::getRotation3d}.
    * @return {@link SwerveDriveConfig} for chaining.
    */
   public T withGyro(Supplier<Rotation3d> gyro) {
-    gyroSupplier = Optional.ofNullable(gyro);
-    continuousHeadingRead = false;
-    return self();
+    return withRotation(gyro);
   }
 
   /**

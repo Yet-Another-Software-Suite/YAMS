@@ -150,7 +150,7 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `SmartMotorController.getExternalEncoderPosition()` | `getExternalEncoderMechanismPosition()` |
 | `SmartMotorController.getExternalEncoderVelocity()` | `getExternalEncoderMechanismVelocity()` |
 | `SwerveDrive.getGyroAngle()`, `SwerveDriveConfig.getGyroAngle()` (Java) | `getGyroRotation3d()` |
-| `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withGyro(Supplier<Rotation3d>)`, for example `withGyro(gyro::getRotation3d)` |
+| `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withRotation(Supplier<Rotation3d>)`, for example `withRotation(gyro::getRotation3d)`. `withGyro(Supplier<Rotation3d>)` does the same (C++ `WithRotation` and `WithGyro`) |
 | `isNear(...)` Trigger factory (Java) | `near(...)`, see below |
 | `withExternalEncoderDiscontinuityPoint(...)` | `withWrapping(min, max)`, see [Wrapping](#wrapping) |
 | `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |

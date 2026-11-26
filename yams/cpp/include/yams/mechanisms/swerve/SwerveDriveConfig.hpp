@@ -71,12 +71,21 @@ class SwerveDriveConfig {
   SwerveDriveConfig& WithGyro(std::function<wpi::units::degree_t()> gyroSupplier);
 
   /**
-   * Supply the gyro's full 3D attitude. See WithGyroHeadingAxis for a gyro that is not mounted flat.
+   * Same as WithRotation: supply the gyro's full 3D attitude.
    *
    * @param gyroSupplier Callable returning the gyro's attitude.
    * @return *this for chaining.
    */
   SwerveDriveConfig& WithGyro(std::function<wpi::math::Rotation3d()> gyroSupplier);
+
+  /**
+   * Supply the robot's rotation from the gyro, as its full 3D attitude. See WithGyroHeadingAxis for
+   * a gyro that is not mounted flat.
+   *
+   * @param rotationSupplier Callable returning the gyro's attitude.
+   * @return *this for chaining.
+   */
+  SwerveDriveConfig& WithRotation(std::function<wpi::math::Rotation3d()> rotationSupplier);
 
   /**
    * Set which gyro axis points up through the robot, for a gyro mounted on its side. The attitude
