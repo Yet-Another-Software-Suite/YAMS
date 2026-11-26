@@ -936,16 +936,18 @@ public class SwerveDriveTest {
   }
 
   @Test
-  void gyroHeadingWrapsAtHalfARotation() {
+  void odometryRotationWrapsAtHalfARotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
-    // The heading is the gyro attitude's yaw, which wraps at half a rotation each way.
+    // The odometry rotation wraps at half a rotation each way. Resetting it leaves the gyro.
+    double gyroBefore = gyroHeadingDegrees();
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(270)));
-    assertEquals(-90, gyroHeadingDegrees(), 0.1);
+    assertEquals(-90, drive.getRotation().getDegrees(), 0.1);
     assertEquals(-90, drive.getPose().getRotation().getDegrees(), 0.1);
+    assertEquals(gyroBefore, gyroHeadingDegrees(), 0.1);
   }
 
   @Test
-  void fieldRelativeSpeedsUseTheGyroHeading() {
+  void fieldRelativeSpeedsUseTheOdometryRotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // Facing left (90 degrees), driving toward the field's +X is driving to the robot's right.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(90)));

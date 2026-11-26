@@ -983,12 +983,16 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleStateCarriesTheA
         Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value()).margin(1e-6));
 }
 
-// The simulated attitude is the simulated heading with no tilt.
+// The simulated attitude is the simulated gyro heading with no tilt. Resetting odometry doesn't
+// turn it.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DriveGyroRotation3dFollowsTheHeading",
                  "[SwerveDriveTest]") {
+  double headingBefore = m_drive->GetGyroAngle().value();
   m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{90.0_deg}});
   auto attitude = m_drive->GetGyroRotation3d();
-  CHECK(wpi::units::degree_t{attitude.Z()}.value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(wpi::units::degree_t{attitude.Z()}.value() == Catch::Approx(headingBefore).margin(0.1));
+  CHECK(wpi::units::degree_t{attitude.Z()}.value() ==
+        Catch::Approx(m_drive->GetGyroAngle().value()).margin(0.1));
   CHECK(attitude.X().value() == Catch::Approx(0.0).margin(1e-9));
   CHECK(attitude.Y().value() == Catch::Approx(0.0).margin(1e-9));
 }
