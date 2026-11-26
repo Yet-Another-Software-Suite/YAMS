@@ -31,7 +31,7 @@ import yams.core.telemetry.enums.TelemetryVerbosity;
  *   <li>{@link TelemetryVerbosity#LOW}: the current drive mode, under {@code SwerveInputStream/<name>}.</li>
  *   <li>{@link TelemetryVerbosity#MID}: also the stream's configuration (deadband, scales, maximum velocities, cubing,
  *   alliance and robot relative), read-only, and the rotation controller's {@code measurement} and {@code setpoint}
- *   under {@code rotationController}, in radians in the gyro's frame. Those are what heading, aim and translation only
+ *   under {@code rotationController}, in radians in the field's frame (the odometry rotation's). Those are what heading, aim and translation only
  *   control give the controller, and are {@code NaN} while the stream isn't using it.</li>
  *   <li>{@link TelemetryVerbosity#HIGH}: also editable copies of the configuration under
  *   {@code Tuning/SwerveInputStream/<name>}, and a {@code Live Tuning} command there that applies them to the stream
@@ -342,12 +342,12 @@ public class SwerveInputStreamTelemetry implements AutoCloseable {
     /** Maximum chassis angular velocity, in radians per second. */
     MaxAngularVelocity("maxAngularVelocity", 0, false, "radians_per_second"),
     /**
-     * Heading given to the rotation controller as its measurement, in radians in the gyro's frame. {@code NaN} while
+     * Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's). {@code NaN} while
      * the stream isn't using the controller.
      */
     RotationControllerMeasurement("rotationController/measurement", Double.NaN, false, "radians"),
     /**
-     * Heading given to the rotation controller as its setpoint, in radians in the gyro's frame. {@code NaN} while the
+     * Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's). {@code NaN} while the
      * stream isn't using the controller.
      */
     RotationControllerSetpoint("rotationController/setpoint", Double.NaN, false, "radians"),

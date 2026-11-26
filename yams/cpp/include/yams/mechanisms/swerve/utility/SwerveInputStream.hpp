@@ -124,7 +124,7 @@ class SwerveInputStream {
 
   /**
    * Measurement the rotation controller was given by the last Get(), in TRANSLATION_ONLY, HEADING or
-   * AIM: the robot's heading in the gyro's frame. Empty if the last Get() did not use the controller.
+   * AIM: the robot's heading in the field's frame (the odometry rotation's). Empty if the last Get() did not use the controller.
    */
   std::optional<wpi::units::radian_t> GetRotationControllerMeasurement() const {
     return m_rotationControllerMeasurement;
@@ -132,7 +132,7 @@ class SwerveInputStream {
 
   /**
    * Setpoint the rotation controller was given by the last Get(), in TRANSLATION_ONLY, HEADING or AIM:
-   * the heading being turned to in the gyro's frame. Empty if the last Get() did not use the controller.
+   * the heading being turned to in the field's frame (the odometry rotation's). Empty if the last Get() did not use the controller.
    */
   std::optional<wpi::units::radian_t> GetRotationControllerSetpoint() const {
     return m_rotationControllerSetpoint;
@@ -305,7 +305,7 @@ class SwerveInputStream {
       return false;
     }
     auto currentHeading =
-        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
+        m_swerveDrive->GetRotation();
     return wpi::units::math::abs((m_aimGoalHeading.value() - currentHeading).Radians()) <=
            tolerance;
   }
@@ -325,12 +325,12 @@ class SwerveInputStream {
   }
 
   /**
-   * Angular velocity that turns the robot to a heading in the gyro's frame, from the drive's rotation
+   * Angular velocity that turns the robot to a heading in the field's frame (the odometry rotation's), from the drive's rotation
    * controller and the WithAimFeedforward feedforward if there is one.
    */
   wpi::units::radians_per_second_t CalculateAngularVelocity(wpi::units::radian_t target) {
     double omega = CalculateRotation(
-        wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}}.Radians(), target);
+        m_swerveDrive->GetRotation().Radians(), target);
     if (m_aimFeedforward.has_value()) {
       omega += m_aimFeedforward
                    ->Calculate(m_swerveDrive->GetRobotRelativeSpeed().omega,
@@ -417,7 +417,7 @@ class SwerveInputStream {
 
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY: {
-        omega = CalculateRotation(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()},
+        omega = CalculateRotation(m_swerveDrive->GetRotation().Radians(),
                                   m_lockedHeading.value().Radians());
         break;
       }
@@ -427,7 +427,7 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::HEADING: {
-        omega = CalculateRotation(wpi::units::radian_t{m_swerveDrive->GetGyroAngle()},
+        omega = CalculateRotation(m_swerveDrive->GetRotation().Radians(),
                                   m_headingSupplier.value()());
         if (m_controllerHeadingX.has_value() && m_controllerHeadingY.has_value() &&
             m_axisDeadband.has_value() &&
@@ -438,12 +438,10 @@ class SwerveInputStream {
         break;
       }
       case SwerveInputMode::AIM: {
-        auto currentHeading =
-            wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
-        auto target = currentHeading;
-        // The vector is field relative. Turn it into a heading in the gyro's frame.
+        auto target = m_swerveDrive->GetRotation();
+        // The vector is field relative, as the odometry rotation is.
         if (auto fieldAngle = GetTargetVector(m_aimTarget.value()()).Angle()) {
-          target = fieldAngle.value() - m_swerveDrive->GetPose().Rotation() + currentHeading;
+          target = fieldAngle.value();
         }
         if (m_aimHeadingOffset.has_value() && m_aimHeadingOffsetEnabled.has_value() &&
             m_aimHeadingOffsetEnabled.value()()) {
@@ -515,7 +513,7 @@ class SwerveInputStream {
   std::optional<wpi::math::SimpleMotorFeedforward<wpi::units::radians>> m_aimFeedforward;
   std::optional<wpi::math::Rotation2d> m_aimHeadingOffset;
   std::optional<std::function<bool()>> m_aimHeadingOffsetEnabled;
-  // Heading the robot is turning to in AIM, in the gyro's frame.
+  // Heading the robot is turning to in AIM, in the field's frame (the odometry rotation's).
   std::optional<wpi::math::Rotation2d> m_aimGoalHeading;
   // Measurement and setpoint the rotation controller was given in the last Get(), empty when it
   // wasn't used.
@@ -621,7 +619,7 @@ class SwerveInputStream {
     switch (newMode) {
       case SwerveInputMode::TRANSLATION_ONLY:
         m_lockedHeading =
-            wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}};
+            m_swerveDrive->GetRotation();
         m_swerveDrive->ResetRotationPID();
         break;
       case SwerveInputMode::HEADING:
@@ -666,7 +664,7 @@ class SwerveInputStream {
   wpi::math::ChassisVelocities ApplyRobotRelativeTranslation(wpi::math::ChassisVelocities speeds) {
     if (m_robotRelative.has_value() && m_robotRelative.value()()) {
       return speeds.ToFieldRelative(
-          wpi::math::Rotation2d{wpi::units::radian_t{m_swerveDrive->GetGyroAngle()}});
+          m_swerveDrive->GetRotation());
     }
     return speeds;
   }

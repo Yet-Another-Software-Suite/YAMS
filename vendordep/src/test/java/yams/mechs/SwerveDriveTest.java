@@ -52,11 +52,13 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.math.linalg.VecBuilder;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.preferences.Preferences;
+import org.wpilib.system.Timer;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
@@ -660,18 +662,27 @@ public class SwerveDriveTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("layouts")
-  void resetOdometryAlignsGyro(Layout layout) {
+  void resetOdometryLeavesTheGyro(Layout layout) {
     build(layout);
-    // ResetOdometry sets the gyro to the pose's heading so field relative driving and heading
-    // control, which use the gyro, agree with the reset pose. ZeroGyro resets both to 0 degrees.
+    // Field relative driving and heading control use the odometry rotation, so resetting odometry
+    // only resets the pose; the gyro keeps reading what it did. zeroOdometryHeading, and zeroGyro,
+    // reset the pose's heading to 0 degrees.
+    double gyroBefore = gyroHeadingDegrees();
     drive.resetOdometry(new Pose2d(1, 2, Rotation2d.fromDegrees(90)));
-    assertEquals(90, gyroHeadingDegrees(), 0.1);
+    assertEquals(gyroBefore, gyroHeadingDegrees(), 0.1);
     assertEquals(90, drive.getPose().getRotation().getDegrees(), 0.1);
+    assertEquals(90, drive.getRotation().getDegrees(), 0.1);
 
-    drive.zeroGyro();
-    assertEquals(0, gyroHeadingDegrees(), 0.1);
-    assertEquals(0, drive.getPose().getRotation().getDegrees(), 0.1);
+    drive.zeroOdometryHeading();
+    assertEquals(gyroBefore, gyroHeadingDegrees(), 0.1);
+    assertEquals(0, drive.getRotation().getDegrees(), 0.1);
     assertEquals(1, drive.getPose().getX(), 0.01);
+
+    // zeroGyro is the same.
+    drive.resetOdometry(new Pose2d(1, 2, Rotation2d.fromDegrees(45)));
+    drive.zeroGyro();
+    assertEquals(gyroBefore, gyroHeadingDegrees(), 0.1);
+    assertEquals(0, drive.getRotation().getDegrees(), 0.1);
   }
 
   @ParameterizedTest(name = "{0}")
@@ -868,8 +879,8 @@ public class SwerveDriveTest {
   void telemetryTableHasWhatASwerveWidgetNeeds() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
-    // to find it by, the module states, the current and desired chassis speeds, and the gyro in
-    // degrees.
+    // to find it by, the module states, the current and desired chassis speeds, the robot's
+    // rotation from odometry and the gyro's rotation. Resetting odometry doesn't turn the gyro.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
     drive.updateTelemetry();
     NetworkTable table =
@@ -879,7 +890,29 @@ public class SwerveDriveTest {
     assertTrue(table.getSubTable("states").containsKey("desired"));
     assertTrue(table.getSubTable("chassis").containsKey("current"));
     assertTrue(table.getSubTable("chassis").containsKey("desired"));
-    assertEquals(30, table.getEntry("gyro").getDouble(0), 0.1);
+    double gyroDegrees = drive.getGyroRotation3d().toRotation2d().getDegrees();
+    try (var rotation = table.getStructTopic("rotation", Rotation2d.struct).subscribe(Rotation2d.ZERO);
+         var gyro = table.getStructTopic("gyro", Rotation2d.struct).subscribe(Rotation2d.ZERO)) {
+      assertEquals(30, rotation.get().getDegrees(), 0.1);
+      assertEquals(gyroDegrees, gyro.get().getDegrees(), 0.1);
+      // A vision measurement turns the pose: rotation follows odometry, gyro stays the gyro's.
+      drive.addVisionMeasurement(
+          new Pose2d(0, 0, Rotation2d.fromDegrees(60)),
+          Timer.getTimestamp(),
+          VecBuilder.fill(0.01, 0.01, 0.01));
+      drive.updateTelemetry();
+      double poseDegrees = drive.getPose().getRotation().getDegrees();
+      assertTrue(poseDegrees > 40, "the pose didn't turn");
+      assertEquals(poseDegrees, drive.getRotation().getDegrees(), 1e-9);
+      assertEquals(poseDegrees, rotation.get().getDegrees(), 0.1);
+      assertEquals(gyroDegrees, gyro.get().getDegrees(), 0.1);
+
+      // Field relative speeds are turned into module states with the odometry rotation.
+      drive.setFieldRelativeChassisSpeeds(new ChassisVelocities(1, 0, 0));
+      ChassisVelocities robotRelative = drive.getDesiredChassisSpeeds();
+      assertEquals(Math.cos(Math.toRadians(-poseDegrees)), robotRelative.vx, 1e-6);
+      assertEquals(Math.sin(Math.toRadians(-poseDegrees)), robotRelative.vy, 1e-6);
+    }
   }
 
   @Test
@@ -903,16 +936,18 @@ public class SwerveDriveTest {
   }
 
   @Test
-  void gyroHeadingWrapsAtHalfARotation() {
+  void odometryRotationWrapsAtHalfARotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
-    // The heading is the gyro attitude's yaw, which wraps at half a rotation each way.
+    // The odometry rotation wraps at half a rotation each way. Resetting it leaves the gyro.
+    double gyroBefore = gyroHeadingDegrees();
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(270)));
-    assertEquals(-90, gyroHeadingDegrees(), 0.1);
+    assertEquals(-90, drive.getRotation().getDegrees(), 0.1);
     assertEquals(-90, drive.getPose().getRotation().getDegrees(), 0.1);
+    assertEquals(gyroBefore, gyroHeadingDegrees(), 0.1);
   }
 
   @Test
-  void fieldRelativeSpeedsUseTheGyroHeading() {
+  void fieldRelativeSpeedsUseTheOdometryRotation() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // Facing left (90 degrees), driving toward the field's +X is driving to the robot's right.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(90)));

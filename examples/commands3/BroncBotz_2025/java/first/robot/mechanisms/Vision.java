@@ -44,7 +44,7 @@ class Vision {
     }
 
     void update() {
-        limelight.setRobotOrientation(drive.getPose().getRotation().getDegrees(), true);
+        limelight.setRobotOrientation(drive.getRotation().getDegrees(), true);
         final PoseEstimate estimate = limelight.getPoseEstimate(PoseEstimateType.MT1_WPIBLUE);
         if (estimate == null || !estimate.isValid()) {
             return;

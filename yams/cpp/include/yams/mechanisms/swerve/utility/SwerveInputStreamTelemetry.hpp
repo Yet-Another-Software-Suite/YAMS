@@ -31,7 +31,7 @@ namespace yams::mechanisms::swerve::utility {
  * - LOW: the current drive mode, under SwerveInputStream/<name>.
  * - MEDIUM: also the stream's configuration (deadband, scales, maximum velocities, cubing, alliance
  *   and robot relative), read-only, and the rotation controller's measurement and setpoint under
- *   rotationController, in radians in the gyro's frame. Those are what heading, aim and translation
+ *   rotationController, in radians in the field's frame (the odometry rotation's). Those are what heading, aim and translation
  *   only control give the controller, and are NaN while the stream isn't using it.
  * - HIGH: also editable copies of the configuration under Tuning/SwerveInputStream/<name>, and a
  *   "Live Tuning" command there that applies them to the stream every loop while it runs.
@@ -64,12 +64,12 @@ class SwerveInputStreamTelemetry {
     /** Maximum chassis angular velocity, in radians per second. */
     MaxAngularVelocity,
     /**
-     * Heading given to the rotation controller as its measurement, in radians in the gyro's frame.
+     * Heading given to the rotation controller as its measurement, in radians in the field's frame (the odometry rotation's).
      * NaN while the stream isn't using the controller.
      */
     RotationControllerMeasurement,
     /**
-     * Heading given to the rotation controller as its setpoint, in radians in the gyro's frame. NaN
+     * Heading given to the rotation controller as its setpoint, in radians in the field's frame (the odometry rotation's). NaN
      * while the stream isn't using the controller.
      */
     RotationControllerSetpoint,

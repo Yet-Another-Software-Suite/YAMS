@@ -90,7 +90,7 @@ public class SwerveMechanism implements Mechanism
                                    .map(this::createModule)
                                    .toArray(SwerveModule[]::new);
     SwerveDriveConfig config = new SwerveDriveConfig(this, modules)
-        .withGyro(imu::getRotation3d)
+        .withRotation(imu::getRotation3d)
         .withStartingPose(Constants.SwerveDrive.startPose)
         .withMaximumChassisSpeed(maxLinearVelocity, maxAngularVelocity)
         .withMaximumModuleSpeed(maxLinearVelocity)
@@ -371,7 +371,7 @@ public class SwerveMechanism implements Mechanism
 
   public Rotation2d getHeading()
   {
-    return getPose().getRotation();
+    return swerveDrive.getRotation();
   }
 
   /**
@@ -389,7 +389,7 @@ public class SwerveMechanism implements Mechanism
   {
     return run(coroutine -> {
       MatchState.getAlliance().ifPresent(alliance -> {
-        swerveDrive.zeroGyro();
+        swerveDrive.zeroOdometryHeading();
         if (alliance == Alliance.RED)
         {
           swerveDrive.resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.k180deg));

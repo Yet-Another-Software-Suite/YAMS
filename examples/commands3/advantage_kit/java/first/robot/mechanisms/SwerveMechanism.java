@@ -231,7 +231,7 @@ public class SwerveMechanism implements Mechanism
    */
   private void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeSpeeds)
   {
-    ChassisVelocities speeds = fieldRelativeSpeeds.toRobotRelative(getGyroAngle());
+    ChassisVelocities speeds = fieldRelativeSpeeds.toRobotRelative(getPose().getRotation());
     Logger.recordOutput("Swerve/DesiredChassisSpeeds", speeds);
     Logger.recordOutput("Swerve/DesiredOptimizedChassisSpeeds", config.optimizeRobotRelativeChassisSpeeds(speeds));
     SwerveModuleVelocity[] states = drive.getStateFromRobotRelativeChassisSpeeds(speeds);
@@ -285,7 +285,7 @@ public class SwerveMechanism implements Mechanism
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
     config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        .withGyro(() -> new Rotation3d(getGyroAngle()))
+        .withRotation(() -> new Rotation3d(getGyroAngle()))
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
         .withStartingPose(swerveInputs.estimatedPose)
@@ -367,7 +367,7 @@ public class SwerveMechanism implements Mechanism
   private ChassisVelocities driveToPoseSpeeds(Pose2d pose)
   {
     // Replayed pose and gyro angle during log replay, so the path matches the real match.
-    return drive.driveToPoseSetpoint(pose, getPose(), getGyroAngle());
+    return drive.driveToPoseSetpoint(pose, getPose(), getPose().getRotation());
   }
 
   public Command setRobotRelativeChassisSpeeds(Supplier<ChassisVelocities> speedsSupplier)

@@ -13,6 +13,7 @@
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/struct/Rotation2dStruct.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
@@ -25,6 +26,8 @@
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
+#include <wpi/system/Timer.hpp>
+#include <wpi/util/array.hpp>
 
 #include <cmath>
 #include <stdexcept>
@@ -378,7 +381,7 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatA
         .WithTelemetry("SwerveTelemetryLimited", SwerveDriveConfig::TelemetryVerbosity::LOW);
     std::optional<SwerveDrive<4>> drive;
     drive.emplace(&cfg);
-    // Resetting the odometry turns the simulated gyro to the pose's heading.
+    // Resetting the odometry turns the pose to 30 degrees; the gyro keeps its reading.
     drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{30_deg}});
     drive->UpdateTelemetry();
 
@@ -389,7 +392,27 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatA
     CHECK(table->GetSubTable("chassis")->ContainsKey("current"));
     CHECK(table->GetSubTable("chassis")->ContainsKey("desired"));
     CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
-    CHECK(table->GetEntry("gyro").GetDouble(0) == Catch::Approx(30.0).margin(0.1));
+    double gyroDegrees = drive->GetGyroAngle().value();
+    auto rotation = table->GetStructTopic<wpi::math::Rotation2d>("rotation").Subscribe({});
+    auto gyro = table->GetStructTopic<wpi::math::Rotation2d>("gyro").Subscribe({});
+    CHECK(rotation.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    CHECK(gyro.Get().Degrees().value() == Catch::Approx(gyroDegrees).margin(0.1));
+    // A vision measurement turns the pose: rotation follows odometry, gyro stays the gyro's.
+    drive->AddVisionMeasurement(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{60_deg}},
+                                wpi::Timer::GetTimestamp(),
+                                wpi::util::array<double, 3>{0.01, 0.01, 0.01});
+    drive->UpdateTelemetry();
+    double poseDegrees = drive->GetPose().Rotation().Degrees().value();
+    CHECK(poseDegrees > 40.0);
+    CHECK(drive->GetRotation().Degrees().value() == Catch::Approx(poseDegrees));
+    CHECK(rotation.Get().Degrees().value() == Catch::Approx(poseDegrees).margin(0.1));
+    CHECK(gyro.Get().Degrees().value() == Catch::Approx(gyroDegrees).margin(0.1));
+
+    // Field-relative speeds are turned into module states with the odometry rotation.
+    drive->SetFieldRelativeChassisSpeeds(wpi::math::ChassisVelocities{1_mps, 0_mps, 0_rad_per_s});
+    auto robotRelative = drive->GetDesiredChassisSpeeds();
+    CHECK(robotRelative.vx.value() == Catch::Approx(std::cos(-poseDegrees * std::numbers::pi / 180.0)).margin(1e-6));
+    CHECK(robotRelative.vy.value() == Catch::Approx(std::sin(-poseDegrees * std::numbers::pi / 180.0)).margin(1e-6));
     drive.reset();
   }
 
@@ -436,17 +459,26 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ResetOdometryMatchesPo
   CHECK(pose.Rotation().Degrees().value() == Catch::Approx(45.0).margin(0.1));
 }
 
-// ResetOdometry sets the gyro to the pose's heading so field relative driving and heading control,
-// which use the gyro, agree with the reset pose. ZeroGyro resets both to 0 degrees.
-TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ResetOdometryAlignsGyro",
+// Field-relative driving and heading control use the odometry rotation, so resetting odometry only
+// resets the pose; the gyro keeps reading what it did. ZeroOdometryHeading, and ZeroGyro, reset the
+// pose's heading to 0.
+TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ResetOdometryLeavesTheGyro",
                  "[SwerveDriveTest]") {
+  double gyroBefore = m_drive->GetGyroAngle().value();
   m_drive->ResetOdometry(wpi::math::Pose2d{1.0_m, 2.0_m, wpi::math::Rotation2d{90.0_deg}});
-  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(gyroBefore).margin(0.1));
   CHECK(m_drive->GetPose().Rotation().Degrees().value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(m_drive->GetRotation().Degrees().value() == Catch::Approx(90.0).margin(0.1));
 
+  m_drive->ZeroOdometryHeading();
+  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(gyroBefore).margin(0.1));
+  CHECK(m_drive->GetRotation().Degrees().value() == Catch::Approx(0.0).margin(0.1));
+
+  // ZeroGyro is the same.
+  m_drive->ResetOdometry(wpi::math::Pose2d{1.0_m, 2.0_m, wpi::math::Rotation2d{45.0_deg}});
   m_drive->ZeroGyro();
-  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(0.0).margin(0.1));
-  CHECK(m_drive->GetPose().Rotation().Degrees().value() == Catch::Approx(0.0).margin(0.1));
+  CHECK(m_drive->GetGyroAngle().value() == Catch::Approx(gyroBefore).margin(0.1));
+  CHECK(m_drive->GetRotation().Degrees().value() == Catch::Approx(0.0).margin(0.1));
   CHECK(m_drive->GetPose().X().value() == Catch::Approx(1.0).margin(0.01));
 }
 
@@ -768,14 +800,13 @@ TEST_CASE("SwerveDriveTest.GyroHeadingAxisReadsTheHeadingFromRollOrPitch", "[Swe
   CHECK(cfg.GetGyroAngle().value() == Catch::Approx(40.0).margin(1e-6));
 }
 
-// The inversion and the offset apply to the heading of the rotated attitude.
-TEST_CASE("SwerveDriveTest.GyroInversionAndOffsetApplyToTheHeading", "[SwerveDriveTest]") {
+// The inversion applies to the heading of the rotated attitude.
+TEST_CASE("SwerveDriveTest.GyroInversionAppliesToTheHeading", "[SwerveDriveTest]") {
   SwerveDriveConfig cfg;
   cfg.WithGyro(std::function<wpi::math::Rotation3d()>{
          [] { return wpi::math::Rotation3d{0_rad, 0_rad, wpi::units::radian_t{30.0_deg}}; }})
-      .WithGyroInverted(true)
-      .WithGyroOffset(10.0_deg);
-  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(-40.0).margin(1e-6));
+      .WithGyroInverted(true);
+  CHECK(cfg.GetGyroAngle().value() == Catch::Approx(-30.0).margin(1e-6));
 }
 
 // Anti-tipping rejects values that cannot work.
@@ -951,12 +982,16 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.ModuleStateCarriesTheA
         Catch::Approx(Hardware().flDriveSMC->GetMeasurementVelocity().value()).margin(1e-6));
 }
 
-// The simulated attitude is the simulated heading with no tilt.
+// The simulated attitude is the simulated gyro heading with no tilt. Resetting odometry doesn't
+// turn it.
 TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.DriveGyroRotation3dFollowsTheHeading",
                  "[SwerveDriveTest]") {
+  double headingBefore = m_drive->GetGyroAngle().value();
   m_drive->ResetOdometry(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{90.0_deg}});
   auto attitude = m_drive->GetGyroRotation3d();
-  CHECK(wpi::units::degree_t{attitude.Z()}.value() == Catch::Approx(90.0).margin(0.1));
+  CHECK(wpi::units::degree_t{attitude.Z()}.value() == Catch::Approx(headingBefore).margin(0.1));
+  CHECK(wpi::units::degree_t{attitude.Z()}.value() ==
+        Catch::Approx(m_drive->GetGyroAngle().value()).margin(0.1));
   CHECK(attitude.X().value() == Catch::Approx(0.0).margin(1e-9));
   CHECK(attitude.Y().value() == Catch::Approx(0.0).margin(1e-9));
 }

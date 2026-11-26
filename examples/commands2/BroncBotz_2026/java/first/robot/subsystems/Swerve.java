@@ -80,7 +80,7 @@ public class Swerve extends SubsystemBase {
             new Translation2d(DriveConstants.kModuleOffset.unaryMinus(), DriveConstants.kModuleOffset.unaryMinus()));
 
         final SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, backLeft, backRight)
-            .withGyro(gyro::getRotation3d)
+            .withRotation(gyro::getRotation3d)
             // The original started the robot on the red side of the field, facing the blue wall.
             .withStartingPose(new Pose2d(13, 4, Rotation2d.k180deg))
             .withMaximumChassisSpeed(DriveConstants.kMaxSpeed, DriveConstants.kMaxAngularSpeed)

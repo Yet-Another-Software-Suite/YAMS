@@ -150,12 +150,14 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `SmartMotorController.getExternalEncoderPosition()` | `getExternalEncoderMechanismPosition()` |
 | `SmartMotorController.getExternalEncoderVelocity()` | `getExternalEncoderMechanismVelocity()` |
 | `SwerveDrive.getGyroAngle()`, `SwerveDriveConfig.getGyroAngle()` (Java) | `getGyroRotation3d()` |
-| `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withGyro(Supplier<Rotation3d>)`, for example `withGyro(gyro::getRotation3d)` |
+| `SwerveDriveConfig.withGyro(Supplier<Angle>)` (Java) | `withRotation(Supplier<Rotation3d>)`, for example `withRotation(gyro::getRotation3d)`. `withGyro(Supplier<Rotation3d>)` does the same (C++ `WithRotation` and `WithGyro`) |
 | `isNear(...)` Trigger factory (Java) | `near(...)`, see below |
 | `withExternalEncoderDiscontinuityPoint(...)` | `withWrapping(min, max)`, see [Wrapping](#wrapping) |
 | `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 | `getRelativeMechanismPosition()` on a mechanism | `getPose3d()` (C++ `GetPose3d()`): the mechanism's `Pose3d` relative to the robot, for an AdvantageScope robot model |
 | `SwerveModule.lock(Rotation2d)` | `setAzimuthAngle(Rotation2d)`, which turns the wheel without driving it |
+| `SwerveDriveConfig.withGyroOffset(Angle)`, `getGyroOffset()` (C++ `WithGyroOffset`, `GetGyroOffset`) | removed. The pose estimator keeps the offset between the gyro and the pose: set the robot's heading with the starting pose (`withStartingPose`), `resetOdometry(Pose2d)` or `zeroOdometryHeading()`. See [Field relative driving uses the odometry rotation](#field-relative-driving-uses-the-odometry-rotation) |
+| Swerve drive telemetry `gyro` (degrees, `double`) | `gyro` (`struct:Rotation2d`), the gyro's rotation, with `withGyro()` (C++ `WithGyro()`). New beside it: `rotation` (`struct:Rotation2d`), the robot's rotation from odometry, used for the module states, with `withRotation()` (C++ `WithRotation()`). Both are on from `LOW` up |
 
 New alongside the renames:
 
@@ -263,6 +265,23 @@ drive.getGyroRotation3d().getZ()
 A gyro mounted on its side can be used as the heading source with
 `SwerveDriveConfig.withGyroHeadingAxis(GyroAxis)` (`YAW` by default, `ROLL` or `PITCH`). C++ is
 unchanged and still uses `GetGyroAngle()`.
+
+### Field relative driving uses the odometry rotation
+
+Field relative driving (`setFieldRelativeChassisSpeeds`), `getFieldRelativeSpeed()`, driving to a
+pose and `SwerveInputStream`'s heading, aim and locked-heading control use the robot's rotation from
+odometry, `SwerveDrive.getRotation()` (C++ `GetRotation()`), instead of the gyro. It's the heading of
+`getPose()`, so vision measurements that correct the pose's heading also correct which way "forward"
+is. Without vision, it is the gyro's heading, so nothing changes. If vision's heading is noisy, give
+it a larger heading standard deviation in `addVisionMeasurement`.
+
+`resetOdometry(Pose2d)` (C++ `ResetOdometry`) resets only the pose. It no longer changes the gyro
+or the simulated gyro, since the pose estimator keeps the offset between the gyro and the pose. For
+the same reason `withGyroOffset` is removed: a heading offset belongs in the starting pose or a
+`resetOdometry` call. `getGyroRotation3d()` and the `gyro` telemetry keep reading the gyro after a reset, while
+`getRotation()` reads the reset pose's heading. `zeroOdometryHeading()` (C++ `ZeroOdometryHeading()`)
+turns the pose to face 0 so field relative "forward" is the way the robot faces, and `zeroGyro()`
+does the same.
 
 ### Trigger factory rename
 

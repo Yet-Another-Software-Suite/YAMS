@@ -264,8 +264,7 @@ class SwerveDrive {
    *     not configured.
    */
   wpi::math::ChassisVelocities DriveToPoseSetpoint(wpi::math::Pose2d targetPose) {
-    return DriveToPoseSetpoint(targetPose, GetPose(),
-                               wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
+    return DriveToPoseSetpoint(targetPose, GetPose(), GetRotation());
   }
 
   /**
@@ -422,7 +421,7 @@ class SwerveDrive {
   void SetFieldRelativeChassisSpeeds(wpi::math::ChassisVelocities fieldRelativeSpeeds) {
     SetRobotRelativeChassisSpeeds(
         (fieldRelativeSpeeds)
-            .ToRobotRelative(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}}));
+            .ToRobotRelative(GetRotation()));
   }
 
   /**
@@ -462,14 +461,20 @@ class SwerveDrive {
   wpi::math::Pose2d GetPose() { return m_poseEstimator.GetEstimatedPosition(); }
 
   /**
-   * Reset odometry to the given pose, and set the gyro to read the pose's heading. Field relative
-   * driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
-   * with the reset pose.
+   * The robot's rotation from odometry: the heading of GetPose(), which vision measurements
+   * correct. Field-relative driving, driving to a pose and SwerveInputStream's heading control use
+   * it to turn field-relative speeds into module states. GetGyroAngle() is the gyro's own reading.
+   */
+  wpi::math::Rotation2d GetRotation() { return GetPose().Rotation(); }
+
+  /**
+   * Reset odometry to the given pose. Field-relative driving and heading control use the odometry
+   * rotation, GetRotation(), so they follow the reset pose. The gyro is not changed: the pose
+   * estimator keeps the offset between the gyro and the pose.
    *
    * @param pose New field-relative pose (blue-origin, 0° facing red alliance wall).
    */
   void ResetOdometry(wpi::math::Pose2d pose) {
-    SetGyroAngle(pose.Rotation().Degrees());
     m_poseEstimator.ResetPosition(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}},
                                   GetModulePositions(), pose);
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
@@ -478,12 +483,15 @@ class SwerveDrive {
   }
 
   /**
-   * Zero the gyro and reset odometry to the current translation with 0° heading.
+   * Reset odometry to the current translation with a 0° heading, so GetRotation(), which
+   * field-relative driving uses, reads 0. The gyro is not changed.
    */
-  void ZeroGyro() {
-    // ResetOdometry also sets the gyro to read the new heading.
+  void ZeroOdometryHeading() {
     ResetOdometry(wpi::math::Pose2d{GetPose().Translation(), wpi::math::Rotation2d{}});
   }
+
+  /** Same as ZeroOdometryHeading(): field-relative "forward" becomes the way the robot faces. */
+  void ZeroGyro() { ZeroOdometryHeading(); }
 
   /**
    * Add a vision measurement to the pose estimator.
@@ -617,10 +625,9 @@ class SwerveDrive {
     return m_kinematics.ToChassisVelocities(GetModuleStates());
   }
 
-  /** Get the field-relative chassis speeds derived from the module states and gyro. */
+  /** Get the field-relative chassis speeds derived from the module states and the odometry rotation. */
   wpi::math::ChassisVelocities GetFieldRelativeSpeed() {
-    return GetRobotRelativeSpeed().ToFieldRelative(
-        wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}});
+    return GetRobotRelativeSpeed().ToFieldRelative(GetRotation());
   }
 
   /** Get the current module positions (distance + angle). */
@@ -840,18 +847,6 @@ class SwerveDrive {
     return wpi::math::SwerveDriveKinematics<NumModules>{locations};
   }
 
-  /**
-   * Make GetGyroAngle() read the given heading from now on. On a real robot the gyro offset is
-   * adjusted; in simulation the simulated gyro angle is set directly.
-   */
-  void SetGyroAngle(wpi::units::degree_t heading) {
-    if (wpi::RobotBase::IsSimulation()) {
-      m_simGyroAngle = heading;
-      return;
-    }
-    m_config->WithGyroOffset(GetGyroAngle() + m_config->GetGyroOffset() - heading);
-  }
-
   static wpi::math::Rotation2d ComputeInitialRotation(const SwerveDriveConfig& config) {
     if (wpi::RobotBase::IsSimulation()) return wpi::math::Rotation2d{};
     return wpi::math::Rotation2d{wpi::units::radian_t{config.GetGyroAngle()}};
@@ -999,6 +994,11 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
     if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
     if (dataLogName) stt.SetupDataLog(*dataLogName);
   }
+  for (auto& [field, stt] : m_config.GetRotationFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) stt.SetupDataLog(*dataLogName);
+  }
   for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
     if (!stt.IsEnabled()) continue;
     if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
@@ -1023,6 +1023,14 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
         break;
     }
   }
+  for (auto& [field, stt] : m_config.GetRotationFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (field == StructTelemetryField::Rotation) {
+      stt.Set(drive->GetRotation());
+    } else if (field == StructTelemetryField::Gyro) {
+      stt.Set(wpi::math::Rotation2d{drive->GetGyroAngle()});
+    }
+  }
   for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
     if (!stt.IsEnabled()) continue;
     switch (field) {
@@ -1042,9 +1050,6 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
   for (auto& [field, dt] : m_config.GetDoubleFields()) {
     if (!dt.IsEnabled()) continue;
     switch (field) {
-      case DoubleTelemetryField::Gyro:
-        dt.Set(drive->GetGyroAngle().value());
-        break;
       case DoubleTelemetryField::MaximumModuleVelocity:
         if (auto maxModuleVelocity = drive->GetConfig().GetMaximumModuleLinearVelocity()) {
           dt.Set(maxModuleVelocity->value());

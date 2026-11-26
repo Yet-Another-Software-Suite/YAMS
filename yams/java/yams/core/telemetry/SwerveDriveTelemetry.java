@@ -3,7 +3,6 @@
 
 package yams.core.telemetry;
 
-import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Volts;
 
@@ -123,6 +122,8 @@ public class SwerveDriveTelemetry {
       }
       switch (stt.getField()) {
         case Pose -> ((StructTelemetry<Pose2d, StructTelemetryField>) stt).set(drive.getPose());
+        case Rotation -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getRotation());
+        case Gyro -> ((StructTelemetry<Rotation2d, StructTelemetryField>) stt).set(drive.getGyroRotation3d().toRotation2d());
         case DesiredRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getDesiredChassisSpeeds());
         case CurrentRobotRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getRobotRelativeSpeed());
         case FieldRelativeChassisSpeeds -> ((StructTelemetry<ChassisVelocities, StructTelemetryField>) stt).set(drive.getFieldRelativeSpeed());
@@ -133,7 +134,6 @@ public class SwerveDriveTelemetry {
       if (!dt.enabled)
         continue;
       switch (dt.getField()) {
-        case Gyro -> dt.set(drive.getGyroRotation3d().getMeasureZ().in(Degrees));
         case MaximumModuleVelocity -> cfg.getMaximumModuleLinearVelocity().ifPresent(v -> dt.set(v.in(MetersPerSecond)));
       }
     }
@@ -424,7 +424,6 @@ public class SwerveDriveTelemetry {
             }
           }
           break;
-        case Gyro:
         case MaximumModuleVelocity:
           break;
       }
@@ -506,6 +505,13 @@ public class SwerveDriveTelemetry {
      * {@link org.wpilib.math.estimator.SwerveDrivePoseEstimator}.
      */
     Pose("pose", Pose2d.struct, new Pose2d(), false),
+    /**
+     * The robot's {@link Rotation2d} from odometry, {@link SwerveDrive#getRotation()}: the rotation used to turn field
+     * relative speeds into module states.
+     */
+    Rotation("rotation", Rotation2d.struct, Rotation2d.ZERO, false),
+    /** The gyro's {@link Rotation2d}, from {@link SwerveDrive#getGyroRotation3d()}. */
+    Gyro("gyro", Rotation2d.struct, Rotation2d.ZERO, false),
     /** Last-commanded desired robot relative {@link ChassisVelocities}. */
     DesiredRobotRelativeChassisSpeeds("chassis/desired", ChassisVelocities.struct, new ChassisVelocities(), false),
     /** Measured robot relative {@link ChassisVelocities}. */
@@ -661,8 +667,6 @@ public class SwerveDriveTelemetry {
      * while {@link BooleanTelemetryField#ModulesAzimuthVoltageEnabled} is on.
      */
     ModulesAzimuthVoltage("modules/azimuth/voltage/setpoint", 0, true, "volts"),
-    /** Gyro angle, in degrees. */
-    Gyro("gyro", 0, false, "degrees"),
     /**
      * Maximum speed of each module, in meters per second, from
      * {@link yams.core.mechanisms.config.SwerveDriveConfig#withMaximumModuleSpeed(org.wpilib.units.measure.LinearVelocity)}.

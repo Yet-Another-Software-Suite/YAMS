@@ -75,7 +75,7 @@ public class DriveSubsystem extends SubsystemBase
                                                      DriveConstants.kRearRightTurningMotorOnBottom);
 
     SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, rearLeft, rearRight)
-        .withGyro(m_gyro::getRotation3d)
+        .withRotation(m_gyro::getRotation3d)
         .withGyroInverted(DriveConstants.kGyroReversed)
         .withStartingPose(Pose2d.ZERO)
         // Caps chassis speeds and desaturates module speeds, like the REV drive() method did.
@@ -174,7 +174,7 @@ public class DriveSubsystem extends SubsystemBase
   /** Zeroes the heading of the robot. */
   public Command zeroHeadingCommand()
   {
-    return this.runOnce(m_drive::zeroGyro);
+    return this.runOnce(m_drive::zeroOdometryHeading);
   }
 
   /**
@@ -184,7 +184,7 @@ public class DriveSubsystem extends SubsystemBase
    */
   public double getHeading()
   {
-    return m_drive.getPose().getRotation().getDegrees();
+    return m_drive.getRotation().getDegrees();
   }
 
   /**

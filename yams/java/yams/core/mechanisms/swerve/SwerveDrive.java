@@ -373,7 +373,19 @@ public class SwerveDrive {
    *                               {@link SwerveDriveConfig#withGyro(java.util.function.Supplier)}.
    */
   public void setFieldRelativeChassisSpeeds(ChassisVelocities fieldRelativeChassisSpeeds) {
-    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(getGyroRotation3d().toRotation2d()));
+    setRobotRelativeChassisSpeeds(fieldRelativeChassisSpeeds.toRobotRelative(getRotation()));
+  }
+
+  /**
+   * The robot's rotation from odometry: the heading of {@link #getPose()}, which vision measurements
+   * correct. Field relative driving, driving to a pose and {@code SwerveInputStream}'s heading control
+   * use it to turn field relative speeds into module states. {@link #getGyroRotation3d()} is the
+   * gyro's own reading.
+   *
+   * @return The robot's rotation from odometry.
+   */
+  public Rotation2d getRotation() {
+    return getPose().getRotation();
   }
 
   /**
@@ -415,28 +427,16 @@ public class SwerveDrive {
   //  }
 
   /**
-   * Resets the gyro angle to zero and resets odometry to the same position, but facing toward 0
-   * (red alliance station).
-   *
-   * @implNote Not compatible with AdvantageKit
+   * Resets odometry to the same position, but facing toward 0 (red alliance station), so
+   * {@link #getRotation()}, which field relative driving uses, reads 0. The gyro is not changed.
    */
-  public void zeroGyro() {
-    // resetOdometry also sets the gyro to read the new heading.
+  public void zeroOdometryHeading() {
     resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.ZERO));
   }
 
-  /**
-   * Make {@link #getGyroRotation3d()} read the given heading as its yaw from now on. On a real robot
-   * the gyro offset is adjusted; in simulation the simulated gyro angle is set directly.
-   *
-   * @param heading Heading the gyro should report.
-   */
-  private void setGyroAngle(Angle heading) {
-    if (RobotBase.isSimulation()) {
-      m_simGyroAngle = heading;
-      return;
-    }
-    m_config.withGyroOffset(getGyroRotation3d().getMeasureZ().plus(m_config.getGyroOffset()).minus(heading));
+  /** Same as {@link #zeroOdometryHeading()}: field relative "forward" becomes the way the robot faces. */
+  public void zeroGyro() {
+    zeroOdometryHeading();
   }
 
   /**
@@ -449,9 +449,10 @@ public class SwerveDrive {
   }
 
   /**
-   * Resets odometry to the given pose, and sets the gyro to read the pose's heading. Field relative
-   * driving and heading control use the gyro, so keeping it aligned with the pose makes them agree
-   * with the reset pose. Module positions do not need to be reset when calling this method.
+   * Resets odometry to the given pose. Field relative driving and heading control use the odometry
+   * rotation, {@link #getRotation()}, so they follow the reset pose. The gyro is not changed: the
+   * pose estimator keeps the offset between the gyro and the pose. Module positions do not need to
+   * be reset when calling this method.
    *
    * @param pose The pose to set the odometry to. Field relative, blue-origin where 0deg is facing
    *             towards RED alliance.
@@ -462,7 +463,6 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().resetOdometry(pose);
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
-    setGyroAngle(pose.getRotation().getMeasure());
     m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), getModulePositions(), pose);
     m_desiredChassisSpeeds = new ChassisVelocities();
     m_desiredModuleStates = m_kinematics.toSwerveModuleVelocities(new ChassisVelocities());
@@ -560,7 +560,7 @@ public class SwerveDrive {
    * @throws SwerveDriveConfigurationException if the rotation PID controller is not configured.
    */
   public ChassisVelocities driveToPoseSetpoint(Pose2d targetPose) {
-    return driveToPoseSetpoint(targetPose, getPose(), getGyroRotation3d().toRotation2d());
+    return driveToPoseSetpoint(targetPose, getPose(), getRotation());
   }
 
   /**
@@ -702,7 +702,7 @@ public class SwerveDrive {
    * @return Field relative speed of the drive.
    */
   public ChassisVelocities getFieldRelativeSpeed() {
-    return getRobotRelativeSpeed().toFieldRelative(getGyroRotation3d().toRotation2d());
+    return getRobotRelativeSpeed().toFieldRelative(getRotation());
   }
 
   /**
