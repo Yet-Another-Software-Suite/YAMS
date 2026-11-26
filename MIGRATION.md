@@ -274,6 +274,13 @@ odometry, `SwerveDrive.getRotation()` (C++ `GetRotation()`), instead of the gyro
 is. Without vision, it is the gyro's heading, so nothing changes. If vision's heading is noisy, give
 it a larger heading standard deviation in `addVisionMeasurement`.
 
+`resetOdometry(Pose2d)` (C++ `ResetOdometry`) resets only the pose. It no longer changes the gyro
+offset or the simulated gyro, since the pose estimator keeps the offset between the gyro and the
+pose. `getGyroRotation3d()` and the `gyro` telemetry keep reading the gyro after a reset, while
+`getRotation()` reads the reset pose's heading. `zeroOdometryHeading()` (C++ `ZeroOdometryHeading()`)
+turns the pose to face 0 so field relative "forward" is the way the robot faces, and `zeroGyro()`
+does the same.
+
 ### Trigger factory rename
 
 `isNear(...)` as a Trigger factory was renamed to `near(...)` for consistency with the other
