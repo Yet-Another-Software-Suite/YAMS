@@ -130,7 +130,8 @@ JAVA_GROUPS = [
     # standalone math test. Gradle's --tests cannot exclude the groups above, so each class is
     # listed: add new test classes here unless they get their own group.
     {"group": "other",
-     "test-filter": '--tests "yams.core.mechanisms.*"'
+     "test-filter": '--tests "yams.core.diagnostics.*"'
+                    ' --tests "yams.core.mechanisms.*"'
                     ' --tests "yams.core.motorcontrollers.simulation.*"'
                     ' --tests "yams.ChineseRemainderTheoremTest"'
                     ' --tests "yams.core.math.ADRCControllerTest"'
