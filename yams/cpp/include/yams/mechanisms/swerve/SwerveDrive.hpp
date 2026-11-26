@@ -999,6 +999,11 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
     if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
     if (dataLogName) stt.SetupDataLog(*dataLogName);
   }
+  for (auto& [field, stt] : m_config.GetRotationFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
+    if (dataLogName) stt.SetupDataLog(*dataLogName);
+  }
   for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
     if (!stt.IsEnabled()) continue;
     if (nt4Enabled) stt.SetupNetworkTables(m_dataTable, m_tuningTable);
@@ -1023,6 +1028,12 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
         break;
     }
   }
+  for (auto& [field, stt] : m_config.GetRotationFields()) {
+    if (!stt.IsEnabled()) continue;
+    if (field == StructTelemetryField::Rotation) {
+      stt.Set(wpi::math::Rotation2d{drive->GetGyroAngle()});
+    }
+  }
   for (auto& [field, stt] : m_config.GetChassisSpeedsFields()) {
     if (!stt.IsEnabled()) continue;
     switch (field) {
@@ -1042,9 +1053,6 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
   for (auto& [field, dt] : m_config.GetDoubleFields()) {
     if (!dt.IsEnabled()) continue;
     switch (field) {
-      case DoubleTelemetryField::Gyro:
-        dt.Set(drive->GetGyroAngle().value());
-        break;
       case DoubleTelemetryField::MaximumModuleVelocity:
         if (auto maxModuleVelocity = drive->GetConfig().GetMaximumModuleLinearVelocity()) {
           dt.Set(maxModuleVelocity->value());

@@ -13,6 +13,7 @@
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/struct/Rotation2dStruct.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
@@ -25,6 +26,8 @@
 #include <wpi/units/angle.hpp>
 #include <wpi/units/length.hpp>
 #include <wpi/units/velocity.hpp>
+#include <wpi/system/Timer.hpp>
+#include <wpi/util/array.hpp>
 
 #include <cmath>
 #include <stdexcept>
@@ -389,7 +392,15 @@ TEST_CASE_METHOD(SwerveDriveTestFixture, "SwerveDriveTest.TelemetryTableHasWhatA
     CHECK(table->GetSubTable("chassis")->ContainsKey("current"));
     CHECK(table->GetSubTable("chassis")->ContainsKey("desired"));
     CHECK(table->GetEntry("maxModuleVelocity").GetDouble(-1) == Catch::Approx(4.2));
-    CHECK(table->GetEntry("gyro").GetDouble(0) == Catch::Approx(30.0).margin(0.1));
+    auto rotation = table->GetStructTopic<wpi::math::Rotation2d>("rotation").Subscribe({});
+    CHECK(rotation.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
+    // A vision measurement turns the pose, but rotation is the gyro's, not odometry's.
+    drive->AddVisionMeasurement(wpi::math::Pose2d{0_m, 0_m, wpi::math::Rotation2d{60_deg}},
+                                wpi::Timer::GetTimestamp(),
+                                wpi::util::array<double, 3>{0.01, 0.01, 0.01});
+    drive->UpdateTelemetry();
+    CHECK(drive->GetPose().Rotation().Degrees().value() > 40.0);
+    CHECK(rotation.Get().Degrees().value() == Catch::Approx(30.0).margin(0.1));
     drive.reset();
   }
 

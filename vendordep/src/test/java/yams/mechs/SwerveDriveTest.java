@@ -52,11 +52,13 @@ import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.math.linalg.VecBuilder;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.util.MathUtil;
 import org.wpilib.networktables.NetworkTable;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.preferences.Preferences;
+import org.wpilib.system.Timer;
 import yams.commands2.config.SmartMotorControllerConfig;
 import yams.commands2.config.SwerveDriveConfig;
 import yams.commands2.swerve.SwerveDrive;
@@ -868,8 +870,8 @@ public class SwerveDriveTest {
   void telemetryTableHasWhatASwerveWidgetNeeds() {
     build(kTalonFXDriveSparkMaxAzimuth);
     // At LOW verbosity, the drive's table has everything a dashboard's swerve widget needs: a .type
-    // to find it by, the module states, the current and desired chassis speeds, and the gyro in
-    // degrees.
+    // to find it by, the module states, the current and desired chassis speeds, and the robot's
+    // rotation from the gyro.
     drive.resetOdometry(new Pose2d(0, 0, Rotation2d.fromDegrees(30)));
     drive.updateTelemetry();
     NetworkTable table =
@@ -879,7 +881,17 @@ public class SwerveDriveTest {
     assertTrue(table.getSubTable("states").containsKey("desired"));
     assertTrue(table.getSubTable("chassis").containsKey("current"));
     assertTrue(table.getSubTable("chassis").containsKey("desired"));
-    assertEquals(30, table.getEntry("gyro").getDouble(0), 0.1);
+    try (var rotation = table.getStructTopic("rotation", Rotation2d.struct).subscribe(Rotation2d.ZERO)) {
+      assertEquals(30, rotation.get().getDegrees(), 0.1);
+      // A vision measurement turns the pose, but rotation is the gyro's, not odometry's.
+      drive.addVisionMeasurement(
+          new Pose2d(0, 0, Rotation2d.fromDegrees(60)),
+          Timer.getTimestamp(),
+          VecBuilder.fill(0.01, 0.01, 0.01));
+      drive.updateTelemetry();
+      assertTrue(drive.getPose().getRotation().getDegrees() > 40, "the pose didn't turn");
+      assertEquals(30, rotation.get().getDegrees(), 0.1);
+    }
   }
 
   @Test

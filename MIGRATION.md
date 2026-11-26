@@ -156,6 +156,7 @@ Anything on `ArmConfig`, `ElevatorConfig`, `PivotConfig` and `FlyWheelConfig` th
 | `getContinuousWrapping()`, `getContinuousWrappingMin()` | `getWrappingMax()`, `getWrappingMin()`, with `isWrappingContinuous()` |
 | `getRelativeMechanismPosition()` on a mechanism | `getPose3d()` (C++ `GetPose3d()`): the mechanism's `Pose3d` relative to the robot, for an AdvantageScope robot model |
 | `SwerveModule.lock(Rotation2d)` | `setAzimuthAngle(Rotation2d)`, which turns the wheel without driving it |
+| Swerve drive telemetry `gyro` (degrees, `double`) | `rotation` (`struct:Rotation2d`), the robot's rotation from the gyro, not from odometry. Turned on by `withRotation()` or `withGyro()` (C++ `WithRotation()` or `WithGyro()`) and at every verbosity from `LOW` |
 
 New alongside the renames:
 

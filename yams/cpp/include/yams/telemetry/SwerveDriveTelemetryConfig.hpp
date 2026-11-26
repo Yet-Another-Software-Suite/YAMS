@@ -8,7 +8,9 @@
 #include <unordered_map>
 #include <vector>
 #include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Rotation2d.hpp>
 #include <wpi/math/geometry/struct/Pose2dStruct.hpp>
+#include <wpi/math/geometry/struct/Rotation2dStruct.hpp>
 #include <wpi/math/kinematics/ChassisVelocities.hpp>
 #include <wpi/math/kinematics/SwerveModuleVelocity.hpp>
 #include <wpi/math/kinematics/struct/ChassisVelocitiesStruct.hpp>
@@ -38,7 +40,7 @@ namespace yams::telemetry {
  *     SwerveDriveTelemetryConfig()
  *         .WithTelemetryVerbosity(TelemetryVerbosity::HIGH)
  *         .WithPose()
- *         .WithGyro()
+ *         .WithRotation()
  *         .WithMaximumModuleVelocity()
  *         .WithCurrentRobotRelativeChassisSpeeds()
  *         .WithFieldRelativeChassisSpeeds()
@@ -53,10 +55,12 @@ class SwerveDriveTelemetryConfig {
  public:
   using TelemetryVerbosity = motorcontrollers::SmartMotorControllerConfig::TelemetryVerbosity;
 
-  /** Struct telemetry field for a SwerveDrive, backed by wpi::math::Pose2d. */
+  /** Struct telemetry field for a SwerveDrive. */
   enum class StructTelemetryField {
     /** Estimated field-relative pose of the robot. */
     Pose,
+    /** The robot's rotation from the gyro, not from odometry, as a wpi::math::Rotation2d. */
+    Rotation,
     /** Last-commanded desired robot-relative chassis speeds. */
     DesiredRobotRelativeChassisSpeeds,
     /** Measured robot-relative chassis speeds. */
@@ -127,8 +131,6 @@ class SwerveDriveTelemetryConfig {
     /** Tunable voltage applied to every module's azimuth motor, without its closed-loop
      *  controller, while ModulesAzimuthVoltageEnabled is on. */
     ModulesAzimuthVoltage,
-    /** Gyro angle, in degrees. */
-    Gyro,
     /** Maximum speed of each module, in meters per second, from
      *  SwerveDriveConfig::WithMaximumModuleSpeed(). */
     MaximumModuleVelocity,
@@ -195,7 +197,11 @@ class SwerveDriveTelemetryConfig {
 
   /** Enables the pose logging. @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithPose();
-  /** Enables the gyro angle logging. @return *this for chaining. */
+  /** Enables logging the robot's rotation from the gyro, not from odometry, as a
+   *  wpi::math::Rotation2d at "rotation". @return *this for chaining. */
+  SwerveDriveTelemetryConfig& WithRotation();
+  /** Same as WithRotation(): enables logging the robot's rotation from the gyro.
+   *  @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithGyro();
   /** Enables the maximum module velocity logging, so dashboards can scale module state arrows.
    *  Only published when the drive has a maximum module speed, from
@@ -229,6 +235,11 @@ class SwerveDriveTelemetryConfig {
   std::unordered_map<StructTelemetryField,
                      StructTelemetry<wpi::math::Pose2d, StructTelemetryField>>&
   GetPoseFields();
+
+  /** @return Configured StructTelemetry<Rotation2d> for Rotation. */
+  std::unordered_map<StructTelemetryField,
+                     StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>>&
+  GetRotationFields();
 
   /** @return Configured StructTelemetry<ChassisSpeeds> for the chassis speeds fields. */
   std::unordered_map<StructTelemetryField,
@@ -276,6 +287,9 @@ class SwerveDriveTelemetryConfig {
   std::unordered_map<BooleanTelemetryField, BooleanTelemetry<BooleanTelemetryField>> m_boolFields;
   std::unordered_map<StructTelemetryField, StructTelemetry<wpi::math::Pose2d, StructTelemetryField>>
       m_poseFields;
+  std::unordered_map<StructTelemetryField,
+                     StructTelemetry<wpi::math::Rotation2d, StructTelemetryField>>
+      m_rotationFields;
   std::unordered_map<StructTelemetryField,
                      StructTelemetry<wpi::math::ChassisVelocities, StructTelemetryField>>
       m_chassisSpeedsFields;
