@@ -5,6 +5,7 @@ package yams.core.mechanisms.swerve;
 
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.Rotations;
 
 import java.util.Arrays;
@@ -84,6 +85,8 @@ public class SwerveDrive {
    * Simulated Gyro Angle. Used for simulation purposes only. Not used in real robot code.
    */
   private Angle m_simGyroAngle = Rotations.of(0);
+  /** Simulated yaw angular velocity in rad/s. Used in simulation only. */
+  private double m_simGyroAngularVelocityRadPerSec = 0.0;
   /**
    * Field to display the robot's pose.
    */
@@ -108,8 +111,8 @@ public class SwerveDrive {
   /** Latest {@link SkidDetector.SkidState} computed during {@link #updatePoseEstimator()}. */
   private SkidDetector.SkidState m_lastSkidState = SkidDetector.SkidState.NOMINAL;
 
-  /** Optional scaler used when skid odometry rejection is enabled without tilt scaling. */
-  private final TiltOdometryScaler m_skidOnlyScaler;
+  /** Per-drive tilt/skid odometry scaler owned by this instance (null when both features are disabled). */
+  private final TiltOdometryScaler m_tiltOdometryScaler;
 
   /**
    * Create a SwerveDrive.
@@ -137,10 +140,17 @@ public class SwerveDrive {
         Arrays.stream(m_modules)
             .map(module -> module.getConfig().getLocation().orElseThrow())
             .toArray(Translation2d[]::new);
-    m_skidOnlyScaler =
-        config.getTiltOdometryScaler().isEmpty() && config.isSkidOdometryRejectionEnabled()
-            ? TiltOdometryScaler.passthrough()
-            : null;
+    if (config.isSkidOdometryRejectionEnabled() && config.getSkidDetector().isEmpty()) {
+      throw new IllegalStateException(
+          "withSkidOdometryRejection(true) requires withSkidDetection(...) to be configured.");
+    }
+    if (config.getTiltOdometryScalerConfig().isPresent()) {
+      m_tiltOdometryScaler = new TiltOdometryScaler(config.getTiltOdometryScalerConfig().get());
+    } else if (config.isSkidOdometryRejectionEnabled()) {
+      m_tiltOdometryScaler = TiltOdometryScaler.passthrough();
+    } else {
+      m_tiltOdometryScaler = null;
+    }
     m_kinematics = getKinematics();
     m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, getGyroRotation3d().toRotation2d(), getModulePositions(), m_config.getInitialPose());
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
@@ -481,10 +491,10 @@ public class SwerveDrive {
     //      m_config.getMapleDriveSim().get().setSimulationWorldPose(pose);
     //    }
     SwerveModulePosition[] rawPositions = getModulePositions();
-    m_config.getTiltOdometryScaler().ifPresent(scaler -> scaler.reset(rawPositions));
-    if (m_skidOnlyScaler != null) {
-      m_skidOnlyScaler.reset(rawPositions);
+    if (m_tiltOdometryScaler != null) {
+      m_tiltOdometryScaler.reset(rawPositions);
     }
+    m_simGyroAngularVelocityRadPerSec = 0.0;
     m_lastSkidState = SkidDetector.SkidState.NOMINAL;
     m_poseEstimator.resetPosition(getGyroRotation3d().toRotation2d(), rawPositions, pose);
     m_desiredChassisSpeeds = new ChassisVelocities();
@@ -629,6 +639,9 @@ public class SwerveDrive {
    *                                 vision measurement, for best accuracy calculate the standard deviation at 2 or more points and
    *                                 fit a line to it with the calculated optimal standard deviation. (Units should be meters per
    *                                 pixel). By optimizing this you can get * vision accurate to inches instead of feet.
+   * @implNote When {@link SwerveDriveConfig#withVisionMaxTilt(Angle)} is configured, this method
+   *     compares the robot's current gyro tilt ({@link #getGyroRotation3d()}) against the threshold
+   *     rather than interpolating historical tilt at {@code timestamp}.
    */
   public void addVisionMeasurement(Pose2d robotPose, double timestamp, Matrix<N3, N1> visionMeasurementStdDevs) {
     if (m_config.getVisionMaxTilt().isPresent()
@@ -659,6 +672,9 @@ public class SwerveDrive {
    * @param robotPose Robot {@link Pose2d} as measured by vision.
    * @param timestamp Timestamp the measurement was taken as time since startup, should be taken
    *                  from {@link Timer#getTimestamp()} or similar sources.
+   * @implNote When {@link SwerveDriveConfig#withVisionMaxTilt(Angle)} is configured, this method
+   *     compares the robot's current gyro tilt ({@link #getGyroRotation3d()}) against the threshold
+   *     rather than interpolating historical tilt at {@code timestamp}.
    */
   public void addVisionMeasurement(Pose2d robotPose, double timestamp) {
     if (m_config.getVisionMaxTilt().isPresent()
@@ -679,18 +695,17 @@ public class SwerveDrive {
 
     if (m_config.getSkidDetector().isPresent()) {
       SwerveModuleVelocity[] states = getModuleStates();
-      double omegaRadPerSec = m_kinematics.toChassisVelocities(states).omega;
+      double omegaRadPerSec = getGyroAngularVelocity().in(RadiansPerSecond);
       m_lastSkidState =
           m_config.getSkidDetector().get().calculate(states, m_moduleLocations, omegaRadPerSec);
     }
 
-    boolean rejectSkid =
-        m_config.isSkidOdometryRejectionEnabled() && m_lastSkidState.skidding();
-    if (m_config.getTiltOdometryScaler().isPresent()) {
-      positions =
-          m_config.getTiltOdometryScaler().get().scalePositions(attitude, positions, rejectSkid);
-    } else if (m_skidOnlyScaler != null) {
-      positions = m_skidOnlyScaler.scalePositions(attitude, positions, rejectSkid);
+    int slippingMask =
+        m_config.isSkidOdometryRejectionEnabled()
+            ? m_lastSkidState.slippingModuleMask()
+            : SkidDetector.NO_SLIPPING_MODULES;
+    if (m_tiltOdometryScaler != null) {
+      positions = m_tiltOdometryScaler.scalePositions(attitude, positions, slippingMask);
     }
 
     m_poseEstimator.update(attitude.toRotation2d(), positions);
@@ -735,7 +750,8 @@ public class SwerveDrive {
     var dt = m_simTimer.get();
     Twist2d twist = new Twist2d(desired.vx * dt, desired.vy * dt, desired.omega * dt);
     m_simPose = m_simPose.plus(twist.exp());
-    m_simGyroAngle = m_simGyroAngle.plus(Radians.of(m_kinematics.toChassisVelocities(getModuleStates()).omega * dt));
+    m_simGyroAngularVelocityRadPerSec = m_kinematics.toChassisVelocities(getModuleStates()).omega;
+    m_simGyroAngle = m_simGyroAngle.plus(Radians.of(m_simGyroAngularVelocityRadPerSec * dt));
     m_simTimer.reset();
   }
 
@@ -885,13 +901,20 @@ public class SwerveDrive {
    * @return Odometry scale factor in {@code [0.0, 1.0]}.
    */
   public double getTiltOdometryScale() {
-    if (m_config.getTiltOdometryScaler().isPresent()) {
-      return m_config.getTiltOdometryScaler().get().getLastScale();
+    return m_tiltOdometryScaler != null ? m_tiltOdometryScaler.getLastScale() : 1.0;
+  }
+
+  /**
+   * Get the chassis yaw angular velocity from the configured gyro velocity supplier (or
+   * differentiated gyro heading), or the simulated yaw rate in simulation.
+   *
+   * @return Chassis yaw {@link AngularVelocity}.
+   */
+  public AngularVelocity getGyroAngularVelocity() {
+    if (RobotBase.isSimulation()) {
+      return RadiansPerSecond.of(m_simGyroAngularVelocityRadPerSec);
     }
-    if (m_skidOnlyScaler != null) {
-      return m_skidOnlyScaler.getLastScale();
-    }
-    return 1.0;
+    return m_config.getGyroAngularVelocity();
   }
 
   /**

@@ -110,7 +110,7 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   private boolean skidOdometryRejection = false;
   /** Optional {@link TiltOdometryScaler} for attenuating wheel odometry while tilted. */
-  private Optional<TiltOdometryScaler> tiltOdometryScaler = Optional.empty();
+  private Optional<TiltOdometryScaler.Config> tiltOdometryScalerConfig = Optional.empty();
   /** Optional maximum 3D tilt angle above which 2D vision pose updates are rejected. */
   private Optional<Angle> visionMaxTilt = Optional.empty();
   /**
@@ -728,25 +728,34 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    * @return {@link ChassisVelocities} of the robot after angular velocity skew correction.
    * @throws IllegalStateException if no gyro supplier was set with {@link #withGyro(Supplier)}.
    */
-  private ChassisVelocities angularVelocitySkewCorrection(ChassisVelocities robotRelativeVelocity) {
-    AngularVelocity gyroAngularVelocity;
+  /**
+   * Get the chassis angular velocity about +Z from {@link #withGyroVelocity(Supplier)} when
+   * configured, or differentiated from {@link #getGyroRotation3d()} via {@link
+   * DerivativeTimeFilter} otherwise.
+   *
+   * @return Chassis yaw {@link AngularVelocity}.
+   */
+  public AngularVelocity getGyroAngularVelocity() {
     if (gyroAngularVelocitySupplier.isPresent()) {
-      gyroAngularVelocity = gyroAngularVelocitySupplier.get().get();
-    } else {
-      if (noGyroAngularVelocitySupplierAlert == null) {
-        noGyroAngularVelocitySupplierAlert = new Alert("YAMS",
-            getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + ("supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro " + "angle instead."), Alert.Level.LOW);
-        noGyroAngularVelocitySupplierAlert.set(true);
-      }
-      // Differentiate the heading kept continuous: wrapped, it jumps a whole rotation when the robot
-      // turns past half a rotation, and the derived angular velocity would spike.
-      final double wrappedHeadingRadians = getGyroRotation3d().getZ();
-      continuousHeadingRadians = continuousHeadingRead
-                                 ? continuousHeadingRadians + MathUtil.angleModulus(wrappedHeadingRadians - continuousHeadingRadians)
-                                 : wrappedHeadingRadians;
-      continuousHeadingRead = true;
-      gyroAngularVelocity = Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(continuousHeadingRadians));
+      return gyroAngularVelocitySupplier.get().get();
     }
+    // Differentiate the heading kept continuous: wrapped, it jumps a whole rotation when the robot
+    // turns past half a rotation, and the derived angular velocity would spike.
+    final double wrappedHeadingRadians = getGyroRotation3d().getZ();
+    continuousHeadingRadians = continuousHeadingRead
+        ? continuousHeadingRadians + MathUtil.angleModulus(wrappedHeadingRadians - continuousHeadingRadians)
+        : wrappedHeadingRadians;
+    continuousHeadingRead = true;
+    return Radians.per(Microsecond).of(gyroAngularVelocityFilter.derivative(continuousHeadingRadians));
+  }
+
+  private ChassisVelocities angularVelocitySkewCorrection(ChassisVelocities robotRelativeVelocity) {
+    if (gyroAngularVelocitySupplier.isEmpty() && noGyroAngularVelocitySupplierAlert == null) {
+      noGyroAngularVelocitySupplierAlert = new Alert("YAMS",
+          getTelemetryName() + " has an angular velocity scale factor configured but no gyro angular velocity " + ("supplier (see SwerveDriveConfig#withGyroVelocity); deriving it from the gyro " + "angle instead."), Alert.Level.LOW);
+      noGyroAngularVelocitySupplierAlert.set(true);
+    }
+    AngularVelocity gyroAngularVelocity = getGyroAngularVelocity();
     var angularVelocityScale = (RobotBase.isSimulation() ? simAngularVelocityScaleFactor.orElse(angularVelocityScaleFactor.orElseThrow()) : angularVelocityScaleFactor.orElseThrow());
     var angularVelocity = new Rotation2d(gyroAngularVelocity.in(RadiansPerSecond) * angularVelocityScale);
     if (angularVelocity.getRadians() != 0.0) {
@@ -892,10 +901,15 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Configure whether wheel-odometry distance deltas are attenuated to zero while {@link
-   * SkidDetector} reports a skid. Defaults to {@code false} (telemetry and getters only).
+   * Configure whether wheel-odometry distance deltas are suppressed for slipping module(s) while
+   * {@link SkidDetector} reports a skid. Defaults to {@code false} (telemetry and getters only).
    *
-   * @param rejectWhileSkidding {@code true} to freeze wheel-delta integration while skidding.
+   * <p>Requires {@link #withSkidDetection(double)} or {@link #withSkidDetection(double,
+   * LinearVelocity)} to also be configured; constructing {@link SwerveDrive} with skid rejection
+   * enabled but no {@link SkidDetector} throws {@link IllegalStateException}.
+   *
+   * @param rejectWhileSkidding {@code true} to drop wheel deltas for slipping module(s) while
+   *     skidding.
    * @return {@link SwerveDriveConfig} for chaining.
    */
   @SuppressWarnings("unchecked")
@@ -905,8 +919,9 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Enable tilt-scaled odometry using {@link TiltOdometryScaler}, linearly attenuating wheel
-   * travel from {@code 1.0} at {@code fullTrustTilt} down to {@code 0.0} at {@code zeroTrustTilt}.
+   * Enable tilt-scaled odometry using {@link TiltOdometryScaler} with {@link
+   * TiltOdometryScaler.ScalingMode#LINEAR_RAMP}, attenuating wheel travel from {@code 1.0} at
+   * {@code fullTrustTilt} down to {@code 0.0} at {@code zeroTrustTilt}.
    *
    * @param fullTrustTilt 3D tilt angle at or below which wheel travel is trusted at {@code 1.0}
    *     (e.g. {@code Degrees.of(2)}).
@@ -916,13 +931,37 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
    */
   @SuppressWarnings("unchecked")
   public T withTiltScaledOdometry(Angle fullTrustTilt, Angle zeroTrustTilt) {
-    this.tiltOdometryScaler = Optional.of(new TiltOdometryScaler(fullTrustTilt, zeroTrustTilt));
+    return withTiltScaledOdometry(
+        fullTrustTilt, zeroTrustTilt, TiltOdometryScaler.ScalingMode.LINEAR_RAMP);
+  }
+
+  /**
+   * Enable tilt-scaled odometry using {@link TiltOdometryScaler} with an explicit {@link
+   * TiltOdometryScaler.ScalingMode}.
+   *
+   * @param fullTrustTilt 3D tilt angle at or below which wheel travel is trusted at {@code 1.0}
+   *     (e.g. {@code Degrees.of(2)}).
+   * @param zeroTrustTilt 3D tilt angle at or above which wheel travel is scaled to {@code 0.0}
+   *     (e.g. {@code Degrees.of(25)}).
+   * @param scalingMode Attenuation curve ({@link TiltOdometryScaler.ScalingMode#LINEAR_RAMP} or
+   *     {@link TiltOdometryScaler.ScalingMode#COSINE_PROJECTION}).
+   * @return {@link SwerveDriveConfig} for chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public T withTiltScaledOdometry(
+      Angle fullTrustTilt, Angle zeroTrustTilt, TiltOdometryScaler.ScalingMode scalingMode) {
+    this.tiltOdometryScalerConfig =
+        Optional.of(new TiltOdometryScaler.Config(fullTrustTilt, zeroTrustTilt, scalingMode));
     return (T) this;
   }
 
   /**
    * Reject 2D vision pose updates in {@link SwerveDrive#addVisionMeasurement} whenever the robot's
-   * 3D tilt angle exceeds {@code maxTilt} (e.g. {@code Degrees.of(5)} while crossing a field bump).
+   * current 3D tilt angle exceeds {@code maxTilt} (e.g. {@code Degrees.of(5)} while crossing a
+   * field bump).
+   *
+   * <p>Note: checks the robot's <em>current</em> gyro tilt when {@code addVisionMeasurement} is
+   * called rather than interpolating historical tilt at the vision timestamp.
    *
    * @param maxTilt Maximum permitted 3D tilt angle ({@code > 0 deg}).
    * @return {@link SwerveDriveConfig} for chaining.
@@ -955,12 +994,12 @@ public abstract class SwerveDriveConfig<T extends SwerveDriveConfig<T>> {
   }
 
   /**
-   * Get the configured {@link TiltOdometryScaler}, if enabled.
+   * Get the immutable {@link TiltOdometryScaler.Config}, if tilt-scaled odometry is enabled.
    *
-   * @return Optional {@link TiltOdometryScaler}.
+   * @return Optional {@link TiltOdometryScaler.Config}.
    */
-  public Optional<TiltOdometryScaler> getTiltOdometryScaler() {
-    return tiltOdometryScaler;
+  public Optional<TiltOdometryScaler.Config> getTiltOdometryScalerConfig() {
+    return tiltOdometryScalerConfig;
   }
 
   /**

@@ -24,7 +24,9 @@
 
 #include "yams/math/DerivativeTimeFilter.hpp"
 #include "yams/mechanisms/config/GyroAxis.hpp"
+#include "yams/mechanisms/swerve/SkidDetector.hpp"
 #include "yams/mechanisms/swerve/SwerveModule.hpp"
+#include "yams/mechanisms/swerve/TiltOdometryScaler.hpp"
 #include "yams/motorcontrollers/SmartMotorControllerConfig.hpp"
 #include "yams/telemetry/SwerveDriveTelemetryConfig.hpp"
 
@@ -383,6 +385,49 @@ class SwerveDriveConfig {
    */
   std::optional<std::reference_wrapper<wpi::math::PIDController>> GetRotationPID();
 
+  /**
+   * Get the chassis yaw angular velocity from WithGyroVelocity() when configured, or
+   * differentiated from GetGyroRotation3d() via DerivativeTimeFilter otherwise.
+   */
+  wpi::units::radians_per_second_t GetGyroAngularVelocity() const;
+
+  /** Enable rigid-body wheel-skid detection using SkidDetector. */
+  SwerveDriveConfig& WithSkidDetection(
+      double skidRatioThreshold,
+      wpi::units::meters_per_second_t minTranslationalSpeed =
+          SkidDetector::kDefaultMinTranslationalSpeed);
+
+  /**
+   * Configure whether wheel-odometry distance deltas are suppressed for slipping module(s) while
+   * SkidDetector reports a skid. Requires WithSkidDetection(...) to also be configured.
+   */
+  SwerveDriveConfig& WithSkidOdometryRejection(bool rejectWhileSkidding);
+
+  /** Enable tilt-scaled odometry using TiltOdometryScaler. */
+  SwerveDriveConfig& WithTiltScaledOdometry(
+      wpi::units::radian_t fullTrustTilt, wpi::units::radian_t zeroTrustTilt,
+      TiltOdometryScaler::ScalingMode scalingMode = TiltOdometryScaler::ScalingMode::LINEAR_RAMP);
+
+  /**
+   * Reject 2D vision pose updates in SwerveDrive::AddVisionMeasurement whenever the robot's
+   * current 3D tilt angle exceeds maxTilt.
+   */
+  SwerveDriveConfig& WithVisionMaxTilt(wpi::units::radian_t maxTilt);
+
+  /** Get the configured SkidDetector, if enabled. */
+  const std::optional<SkidDetector>& GetSkidDetector() const { return m_skidDetector; }
+
+  /** Whether wheel-odometry deltas are rejected while SkidDetector flags a skid. */
+  bool IsSkidOdometryRejectionEnabled() const { return m_skidOdometryRejection; }
+
+  /** Get the immutable TiltOdometryScaler::Config, if enabled. */
+  const std::optional<TiltOdometryScaler::Config>& GetTiltOdometryScalerConfig() const {
+    return m_tiltOdometryScalerConfig;
+  }
+
+  /** Get the configured maximum 3D tilt angle for accepting vision updates, if enabled. */
+  std::optional<wpi::units::radian_t> GetVisionMaxTilt() const { return m_visionMaxTilt; }
+
   /** Cube the polar-coordinate magnitude of a Translation2d. */
   static wpi::math::Translation2d CubeTranslation(wpi::math::Translation2d translation);
 
@@ -420,6 +465,11 @@ class SwerveDriveConfig {
   std::optional<wpi::math::PIDController> m_rotationController;
   std::optional<wpi::math::PIDController> m_simTranslationController;
   std::optional<wpi::math::PIDController> m_simRotationController;
+
+  std::optional<SkidDetector> m_skidDetector;
+  bool m_skidOdometryRejection{false};
+  std::optional<TiltOdometryScaler::Config> m_tiltOdometryScalerConfig;
+  std::optional<wpi::units::radian_t> m_visionMaxTilt;
 
   wpi::math::ChassisVelocities AngularVelocitySkewCorrection(
       wpi::math::ChassisVelocities robotRelativeSpeeds) const;

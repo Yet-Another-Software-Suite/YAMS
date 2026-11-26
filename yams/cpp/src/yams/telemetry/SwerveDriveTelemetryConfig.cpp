@@ -103,6 +103,8 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                          DoubleTelemetry<DoubleTelemetryField>{
                              "maxModuleVelocity", 0.0, DoubleTelemetryField::MaximumModuleVelocity,
                              false, "meters_per_second"});
+  m_doubleFields.emplace(DoubleTelemetryField::SkidRatio, DoubleTelemetry<DoubleTelemetryField>{"skidRatio", 1.0, DoubleTelemetryField::SkidRatio, false, "ratio"});
+  m_doubleFields.emplace(DoubleTelemetryField::TiltOdometryScale, DoubleTelemetry<DoubleTelemetryField>{"tiltOdometryScale", 1.0, DoubleTelemetryField::TiltOdometryScale, false, "scale"});
 
   m_boolFields.emplace(
       BooleanTelemetryField::AutoAlignEnabled,
@@ -128,6 +130,7 @@ SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig() {
                        BooleanTelemetry<BooleanTelemetryField>{
                            "modules/azimuth/voltage/enabled", false,
                            BooleanTelemetryField::ModulesAzimuthVoltageEnabled, true});
+  m_boolFields.emplace(BooleanTelemetryField::IsSkidding, BooleanTelemetry<BooleanTelemetryField>{"isSkidding", false, BooleanTelemetryField::IsSkidding, false});
 }
 
 SwerveDriveTelemetryConfig::SwerveDriveTelemetryConfig(TelemetryVerbosity verbosity)
@@ -186,6 +189,9 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTelemetryVerbosity(
       m_doubleFields.at(DoubleTelemetryField::ModulesAzimuthVoltage).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesDriveVoltageEnabled).Enable();
       m_boolFields.at(BooleanTelemetryField::ModulesAzimuthVoltageEnabled).Enable();
+      m_doubleFields.at(DoubleTelemetryField::SkidRatio).Enable();
+      m_doubleFields.at(DoubleTelemetryField::TiltOdometryScale).Enable();
+      m_boolFields.at(BooleanTelemetryField::IsSkidding).Enable();
       [[fallthrough]];
     case TelemetryVerbosity::MEDIUM:
       m_chassisSpeedsFields.at(StructTelemetryField::FieldRelativeChassisSpeeds).Enable();
@@ -224,6 +230,21 @@ SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithGyro() {
 
 SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithMaximumModuleVelocity() {
   m_doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Enable();
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithSkidRatio() {
+  m_doubleFields.at(DoubleTelemetryField::SkidRatio).Enable();
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithIsSkidding() {
+  m_boolFields.at(BooleanTelemetryField::IsSkidding).Enable();
+  return *this;
+}
+
+SwerveDriveTelemetryConfig& SwerveDriveTelemetryConfig::WithTiltOdometryScale() {
+  m_doubleFields.at(DoubleTelemetryField::TiltOdometryScale).Enable();
   return *this;
 }
 

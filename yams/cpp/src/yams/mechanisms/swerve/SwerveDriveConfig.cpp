@@ -270,6 +270,49 @@ std::optional<wpi::units::second_t> SwerveDriveConfig::GetDiscretization() const
   return wpi::RobotBase::IsSimulation() ? m_simDiscretizationSeconds : m_discretizationSeconds;
 }
 
+wpi::units::radians_per_second_t SwerveDriveConfig::GetGyroAngularVelocity() const {
+  if (m_gyroAngularVelocitySupplier) {
+    return (*m_gyroAngularVelocitySupplier)();
+  }
+  const double wrappedHeadingRadians = GetGyroRotation3d().Z().value();
+  m_continuousHeadingRadians =
+      m_continuousHeadingRead
+          ? m_continuousHeadingRadians +
+                wpi::math::AngleModulus(
+                    wpi::units::radian_t{wrappedHeadingRadians - m_continuousHeadingRadians})
+                    .value()
+          : wrappedHeadingRadians;
+  m_continuousHeadingRead = true;
+  return wpi::units::radians_per_second_t{
+      m_gyroAngularVelocityFilter.Derivative(m_continuousHeadingRadians)};
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithSkidDetection(
+    double skidRatioThreshold, wpi::units::meters_per_second_t minTranslationalSpeed) {
+  m_skidDetector.emplace(skidRatioThreshold, minTranslationalSpeed);
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithSkidOdometryRejection(bool rejectWhileSkidding) {
+  m_skidOdometryRejection = rejectWhileSkidding;
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithTiltScaledOdometry(
+    wpi::units::radian_t fullTrustTilt, wpi::units::radian_t zeroTrustTilt,
+    TiltOdometryScaler::ScalingMode scalingMode) {
+  m_tiltOdometryScalerConfig.emplace(fullTrustTilt, zeroTrustTilt, scalingMode);
+  return *this;
+}
+
+SwerveDriveConfig& SwerveDriveConfig::WithVisionMaxTilt(wpi::units::radian_t maxTilt) {
+  if (!std::isfinite(maxTilt.value()) || maxTilt.value() <= 0.0) {
+    throw std::invalid_argument("maxTilt must be finite and positive.");
+  }
+  m_visionMaxTilt = maxTilt;
+  return *this;
+}
+
 wpi::math::ChassisVelocities SwerveDriveConfig::AngularVelocitySkewCorrection(
     wpi::math::ChassisVelocities robotRelativeVelocity) const {
   double scaleFactor =

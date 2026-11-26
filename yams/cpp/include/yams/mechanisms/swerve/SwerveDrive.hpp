@@ -156,6 +156,18 @@ class SwerveDrive {
         module->GetMutableConfig().WithOptimization(*optimization);
       }
     }
+    if (m_config->IsSkidOdometryRejectionEnabled() && !m_config->GetSkidDetector().has_value()) {
+      throw std::logic_error(
+          "WithSkidOdometryRejection(true) requires WithSkidDetection(...) to be configured.");
+    }
+    for (size_t i = 0; i < NumModules; ++i) {
+      m_moduleLocations[i] = *m_config->GetModules()[i]->GetConfig().GetLocation();
+    }
+    if (auto scalerCfg = m_config->GetTiltOdometryScalerConfig()) {
+      m_tiltOdometryScaler.emplace(*scalerCfg);
+    } else if (m_config->IsSkidOdometryRejectionEnabled()) {
+      m_tiltOdometryScaler.emplace(TiltOdometryScaler::Passthrough());
+    }
     m_simPose = m_config->GetInitialPose();
     // Start with the gyro reading the starting pose's heading so field relative driving matches it.
     ResetOdometry(m_config->GetInitialPose());
@@ -436,6 +448,12 @@ class SwerveDrive {
       m_desiredModuleStates[i] = module->SetAzimuthAngle(
           module->GetConfig().GetLocation()->Angle().value_or(wpi::math::Rotation2d{}));
     }
+    auto rawPositions = GetModulePositions();
+    if (m_tiltOdometryScaler) {
+      m_tiltOdometryScaler->Reset(rawPositions);
+    }
+    m_lastSkidState = SkidDetector::SkidState::Nominal();
+    m_simGyroAngularVelocity = wpi::units::radians_per_second_t{0};
     m_desiredChassisSpeeds = wpi::math::ChassisVelocities{};
   }
 
@@ -500,6 +518,9 @@ class SwerveDrive {
    * @param timestamp FPGA timestamp of the measurement (seconds).
    */
   void AddVisionMeasurement(wpi::math::Pose2d robotPose, wpi::units::second_t timestamp) {
+    if (auto maxTilt = m_config->GetVisionMaxTilt()) {
+      if (TiltOdometryScaler::IsTiltExceeding(GetGyroRotation3d(), *maxTilt)) return;
+    }
     m_poseEstimator.AddVisionMeasurement(robotPose, timestamp);
   }
 
@@ -512,6 +533,9 @@ class SwerveDrive {
    */
   void AddVisionMeasurement(wpi::math::Pose2d robotPose, wpi::units::second_t timestamp,
                             const wpi::util::array<double, 3>& stdDevs) {
+    if (auto maxTilt = m_config->GetVisionMaxTilt()) {
+      if (TiltOdometryScaler::IsTiltExceeding(GetGyroRotation3d(), *maxTilt)) return;
+    }
     m_poseEstimator.AddVisionMeasurement(robotPose, timestamp, stdDevs);
   }
 
@@ -566,6 +590,7 @@ class SwerveDrive {
     m_simPose = m_simPose + twist.Exp();
 
     auto speeds = m_kinematics.ToChassisVelocities(GetModuleStates());
+    m_simGyroAngularVelocity = speeds.omega;
     m_simGyroAngle +=
         wpi::units::degree_t{wpi::units::degrees_per_second_t{speeds.omega}.value() * dt.value()};
     m_simTimer.Reset();
@@ -767,6 +792,30 @@ class SwerveDrive {
     return m_desiredModuleStates;
   }
 
+  /** Get the chassis yaw angular velocity from the gyro (or simulated yaw rate in simulation). */
+  wpi::units::radians_per_second_t GetGyroAngularVelocity() const {
+    if (wpi::RobotBase::IsSimulation()) {
+      return m_simGyroAngularVelocity;
+    }
+    return m_config->GetGyroAngularVelocity();
+  }
+
+  /** Get the latest rigid-body wheel-skid ratio (>= 1.0). */
+  double GetSkidRatio() const { return m_lastSkidState.skidRatio; }
+
+  /** Whether SkidDetector flagged wheel slip on the most recent odometry update. */
+  bool IsSkidding() const { return m_lastSkidState.skidding; }
+
+  /** Get the most recently applied tilt/skid odometry scale factor in [0.0, 1.0]. */
+  double GetTiltOdometryScale() const {
+    return m_tiltOdometryScaler ? m_tiltOdometryScaler->GetLastScale() : 1.0;
+  }
+
+  /** Get the robot's current yaw-invariant 3D tilt angle from vertical. */
+  wpi::units::radian_t GetTiltAngle() {
+    return TiltOdometryScaler::ComputeTiltAngle(GetGyroRotation3d());
+  }
+
  private:
   SwerveDriveConfig* m_config{nullptr};
   wpi::math::SwerveDriveKinematics<NumModules> m_kinematics;
@@ -779,6 +828,10 @@ class SwerveDrive {
   wpi::Field2d m_field2d;
   wpi::Timer m_simTimer;
   wpi::units::degree_t m_simGyroAngle{0};
+  wpi::units::radians_per_second_t m_simGyroAngularVelocity{0};
+  wpi::util::array<wpi::math::Translation2d, NumModules> m_moduleLocations{wpi::util::empty_array};
+  SkidDetector::SkidState m_lastSkidState{SkidDetector::SkidState::Nominal()};
+  std::optional<TiltOdometryScaler> m_tiltOdometryScaler;
   wpi::math::Pose2d m_simPose;
 
   wpi::util::array<wpi::math::SwerveModuleVelocity, NumModules> m_desiredModuleStates{
@@ -833,8 +886,23 @@ class SwerveDrive {
   }
 
   void UpdatePoseEstimator() {
-    m_poseEstimator.Update(wpi::math::Rotation2d{wpi::units::radian_t{GetGyroAngle()}},
-                           GetModulePositions());
+    auto attitude = GetGyroRotation3d();
+    auto positions = GetModulePositions();
+
+    if (const auto& detector = m_config->GetSkidDetector()) {
+      auto states = GetModuleStates();
+      double omegaRadPerSec = GetGyroAngularVelocity().value();
+      m_lastSkidState = detector->Calculate(states, m_moduleLocations, omegaRadPerSec);
+    }
+
+    uint32_t slippingMask = m_config->IsSkidOdometryRejectionEnabled()
+                                ? m_lastSkidState.slippingModuleMask
+                                : SkidDetector::kNoSlippingModules;
+    if (m_tiltOdometryScaler) {
+      positions = m_tiltOdometryScaler->ScalePositions(attitude, positions, slippingMask);
+    }
+
+    m_poseEstimator.Update(attitude.ToRotation2d(), positions);
   }
 
   static wpi::math::SwerveDriveKinematics<NumModules> BuildKinematics(
@@ -929,6 +997,14 @@ void SwerveDriveTelemetry::SetupTelemetry(mechanisms::swerve::SwerveDrive<NumMod
           .SetDefaultValue(maxModuleVelocity->value());
     } else {
       doubleFields.at(DoubleTelemetryField::MaximumModuleVelocity).Disable();
+    }
+    if (!drive->GetConfig().GetSkidDetector().has_value()) {
+      doubleFields.at(DoubleTelemetryField::SkidRatio).Disable();
+      m_config.GetBoolFields().at(BooleanTelemetryField::IsSkidding).Disable();
+    }
+    if (!drive->GetConfig().GetTiltOdometryScalerConfig().has_value() &&
+        !drive->GetConfig().IsSkidOdometryRejectionEnabled()) {
+      doubleFields.at(DoubleTelemetryField::TiltOdometryScale).Disable();
     }
 
     auto& modules = drive->GetConfig().GetModules();
@@ -1055,6 +1131,12 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
           dt.Set(maxModuleVelocity->value());
         }
         break;
+      case DoubleTelemetryField::SkidRatio:
+        dt.Set(drive->GetSkidRatio());
+        break;
+      case DoubleTelemetryField::TiltOdometryScale:
+        dt.Set(drive->GetTiltOdometryScale());
+        break;
       default:
         break;
     }
@@ -1072,6 +1154,16 @@ void SwerveDriveTelemetry::Publish(mechanisms::swerve::SwerveDrive<NumModules>* 
         stat.Set(std::vector<wpi::math::SwerveModuleVelocity>(states.begin(), states.end()));
         break;
       }
+      default:
+        break;
+    }
+  }
+  for (auto& [field, bt] : m_config.GetBoolFields()) {
+    if (!bt.IsEnabled()) continue;
+    switch (field) {
+      case BooleanTelemetryField::IsSkidding:
+        bt.Set(drive->IsSkidding());
+        break;
       default:
         break;
     }

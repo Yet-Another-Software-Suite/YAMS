@@ -138,6 +138,10 @@ class SwerveDriveTelemetryConfig {
     /** Maximum speed of each module, in meters per second, from
      *  SwerveDriveConfig::WithMaximumModuleSpeed(). */
     MaximumModuleVelocity,
+    /** Rigid-body wheel-skid ratio from SkidDetector (>= 1.0). */
+    SkidRatio,
+    /** Active tilt/skid odometry wheel-delta scale factor in [0.0, 1.0]. */
+    TiltOdometryScale,
   };
 
   /** Boolean telemetry field for a SwerveDrive. */
@@ -160,6 +164,8 @@ class SwerveDriveTelemetryConfig {
      *  instead of the angle setpoint, without its closed-loop controller, as for characterizing
      *  it. */
     ModulesAzimuthVoltageEnabled,
+    /** Whether SkidDetector is currently flagging wheel slip. */
+    IsSkidding,
   };
 
   SwerveDriveTelemetryConfig();
@@ -211,6 +217,12 @@ class SwerveDriveTelemetryConfig {
    *  Only published when the drive has a maximum module speed, from
    *  SwerveDriveConfig::WithMaximumModuleSpeed(). @return *this for chaining. */
   SwerveDriveTelemetryConfig& WithMaximumModuleVelocity();
+  /** Enables the wheel-skid ratio logging. */
+  SwerveDriveTelemetryConfig& WithSkidRatio();
+  /** Enables the is-skidding boolean logging. */
+  SwerveDriveTelemetryConfig& WithIsSkidding();
+  /** Enables the tilt-odometry scale factor logging. */
+  SwerveDriveTelemetryConfig& WithTiltOdometryScale();
   /** Enables the last-commanded desired robot relative chassis speeds logging. */
   SwerveDriveTelemetryConfig& WithDesiredRobotRelativeChassisSpeeds();
   /** Enables the measured robot relative chassis speeds logging. */

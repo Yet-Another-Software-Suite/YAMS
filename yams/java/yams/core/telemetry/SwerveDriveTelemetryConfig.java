@@ -245,6 +245,15 @@ public class SwerveDriveTelemetryConfig {
         v -> doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).setDefaultValue(v.in(MetersPerSecond)),
         () -> doubleFields.get(DoubleTelemetryField.MaximumModuleVelocity).disable());
 
+    // Only publish skid and tilt odometry telemetry when those features are configured.
+    if (cfg.getSkidDetector().isEmpty()) {
+      doubleFields.get(DoubleTelemetryField.SkidRatio).disable();
+      boolFields.get(BooleanTelemetryField.IsSkidding).disable();
+    }
+    if (cfg.getTiltOdometryScalerConfig().isEmpty() && !cfg.isSkidOdometryRejectionEnabled()) {
+      doubleFields.get(DoubleTelemetryField.TiltOdometryScale).disable();
+    }
+
     var modules = drive.getModules();
     if (modules.length > 0) {
       var driveMotor = modules[0].getDriveMotorController();

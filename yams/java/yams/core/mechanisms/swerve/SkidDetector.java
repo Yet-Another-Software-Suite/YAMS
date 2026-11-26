@@ -5,6 +5,7 @@ package yams.core.mechanisms.swerve;
 
 import static org.wpilib.units.Units.MetersPerSecond;
 
+import java.util.Arrays;
 import java.util.Objects;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
@@ -13,11 +14,11 @@ import org.wpilib.units.measure.LinearVelocity;
 /**
  * Rigid-body swerve wheel-skid detector based on module translational-velocity consistency.
  *
- * <p>For a rigid swerve chassis rotating at angular velocity {@code omega}, each module {@code i}
- * at robot-frame location {@code (x_i, y_i)} has a known rotational velocity component {@code
- * v_rot_i = (-omega * y_i, omega * x_i)}. Subtracting {@code v_rot_i} from the module's measured
- * velocity vector isolates the module's translational velocity {@code v_trans_i}. Without wheel
- * slip, every module measures the same translational speed, so {@code skidRatio =
+ * <p>For a rigid swerve chassis rotating at gyro-measured angular velocity {@code omega}, each
+ * module {@code i} at robot-frame location {@code (x_i, y_i)} has a known rotational velocity
+ * component {@code v_rot_i = (-omega * y_i, omega * x_i)}. Subtracting {@code v_rot_i} from the
+ * module's measured velocity vector isolates the module's translational velocity {@code v_trans_i}.
+ * Without wheel slip, every module measures the same translational speed, so {@code skidRatio =
  * max(|v_trans_i|) / min(|v_trans_i|)} equals {@code 1.0}. When one or more wheels slip or drag,
  * {@code skidRatio} rises above {@code 1.0}.
  *
@@ -36,10 +37,23 @@ public class SkidDetector {
   public static final double DEFAULT_SKID_RATIO_THRESHOLD = 1.35;
 
   /**
-   * Default minimum translational speed below which the skid ratio stays at {@code 1.0} so stopped
-   * or pure-spinning modules do not amplify encoder quantization noise.
+   * Default minimum translational speed (and speed spread) deadband below which the skid ratio
+   * stays at {@code 1.0} so stopped, pure-spinning, or low-speed noisy modules do not false-trigger
+   * skid detection.
    */
   public static final LinearVelocity DEFAULT_MIN_TRANSLATIONAL_SPEED = MetersPerSecond.of(0.10);
+
+  /** Ratio reported when stationary, below deadband, or without wheel slip. */
+  private static final double NOMINAL_RATIO = 1.0;
+
+  /** Minimum denominator in m/s to prevent division by zero when one wheel stalls. */
+  private static final double MIN_DENOMINATOR_MPS = 1e-4;
+
+  /** Bitmask indicating that no modules are flagged as slipping. */
+  public static final int NO_SLIPPING_MODULES = 0;
+
+  /** Minimum number of swerve modules required to compare translational speeds. */
+  private static final int MIN_MODULES_FOR_SKID = 2;
 
   /**
    * Immutable snapshot of one skid evaluation.
@@ -49,21 +63,42 @@ public class SkidDetector {
    * @param skidding {@code true} when {@code skidRatio} exceeds the configured threshold.
    * @param minTranslationalSpeedMps Smallest isolated module translational speed in m/s.
    * @param maxTranslationalSpeedMps Largest isolated module translational speed in m/s.
+   * @param slippingModuleMask Bitmask where bit {@code i} ({@code 1 << i}) is set when module
+   *     {@code i} is flagged as slipping. When a majority of modules agree, only the outlier
+   *     module(s) are flagged so healthy wheels can continue advancing odometry; if a skid occurs
+   *     with no clear majority (e.g. a 2-vs-2 split), all module bits are set.
    */
   public record SkidState(
       double skidRatio,
       boolean skidding,
       double minTranslationalSpeedMps,
-      double maxTranslationalSpeedMps) {
+      double maxTranslationalSpeedMps,
+      int slippingModuleMask) {
 
     /** Nominal non-skidding state returned before first update or while stationary. */
-    public static final SkidState NOMINAL = new SkidState(1.0, false, 0.0, 0.0);
+    public static final SkidState NOMINAL =
+        new SkidState(NOMINAL_RATIO, false, 0.0, 0.0, NO_SLIPPING_MODULES);
+
+    /**
+     * Check whether the given module index was flagged as slipping on this tick.
+     *
+     * @param moduleIndex Zero-based module index.
+     * @return {@code true} if module {@code moduleIndex} is set in {@link #slippingModuleMask()}.
+     */
+    public boolean isModuleSlipping(int moduleIndex) {
+      return moduleIndex >= 0
+          && moduleIndex < Integer.SIZE
+          && (slippingModuleMask & (1 << moduleIndex)) != 0;
+    }
   }
 
   /** Skid ratio threshold above which wheel slip is flagged. */
   private final double m_skidRatioThreshold;
 
-  /** Minimum translational speed in m/s required before computing the ratio. */
+  /**
+   * Minimum translational speed and speed-spread deadband in m/s required before computing the
+   * ratio.
+   */
   private final double m_minTranslationalSpeedMps;
 
   /**
@@ -81,12 +116,12 @@ public class SkidDetector {
    *
    * @param skidRatioThreshold Ratio threshold strictly greater than {@code 1.0} (e.g. {@code
    *     1.35}).
-   * @param minTranslationalSpeed Minimum translational speed deadband ({@code >= 0}) below which
-   *     {@code skidRatio} is reported as {@code 1.0}.
+   * @param minTranslationalSpeed Minimum translational speed and speed-spread deadband ({@code >=
+   *     0}) below which {@code skidRatio} is reported as {@code 1.0}.
    */
   public SkidDetector(double skidRatioThreshold, LinearVelocity minTranslationalSpeed) {
     Objects.requireNonNull(minTranslationalSpeed, "minTranslationalSpeed");
-    if (!Double.isFinite(skidRatioThreshold) || skidRatioThreshold <= 1.0) {
+    if (!Double.isFinite(skidRatioThreshold) || skidRatioThreshold <= NOMINAL_RATIO) {
       throw new IllegalArgumentException(
           "skidRatioThreshold must be finite and greater than 1.0, got: " + skidRatioThreshold);
     }
@@ -118,13 +153,13 @@ public class SkidDetector {
   }
 
   /**
-   * Evaluate wheel skid from measured module states, module robot-frame locations, and chassis
-   * angular velocity.
+   * Evaluate wheel skid from measured module states, module robot-frame locations, and
+   * gyro-measured chassis angular velocity.
    *
    * @param moduleStates Measured {@link SwerveModuleVelocity} for each module.
    * @param moduleLocations Robot-frame {@link Translation2d} location for each module (same order
    *     and length as {@code moduleStates}).
-   * @param omegaRadPerSec Chassis angular velocity about +Z in rad/s (CCW positive).
+   * @param omegaRadPerSec Gyro-measured chassis angular velocity about +Z in rad/s (CCW positive).
    * @return {@link SkidState} for this tick.
    */
   public SkidState calculate(
@@ -137,14 +172,16 @@ public class SkidDetector {
       throw new IllegalArgumentException(
           "moduleStates and moduleLocations must have the same length.");
     }
-    if (moduleStates.length < 2 || !Double.isFinite(omegaRadPerSec)) {
+    int n = moduleStates.length;
+    if (n < MIN_MODULES_FOR_SKID || !Double.isFinite(omegaRadPerSec)) {
       return SkidState.NOMINAL;
     }
 
+    double[] transSpeeds = new double[n];
     double minTrans = Double.POSITIVE_INFINITY;
     double maxTrans = 0.0;
 
-    for (int i = 0; i < moduleStates.length; i++) {
+    for (int i = 0; i < n; i++) {
       SwerveModuleVelocity state = moduleStates[i];
       Translation2d loc = moduleLocations[i];
       double angleRad = state.angle.getRadians();
@@ -155,6 +192,7 @@ public class SkidDetector {
       double transVx = measVx - (-omegaRadPerSec * loc.getY());
       double transVy = measVy - (omegaRadPerSec * loc.getX());
       double transSpeed = Math.hypot(transVx, transVy);
+      transSpeeds[i] = transSpeed;
 
       if (transSpeed < minTrans) {
         minTrans = transSpeed;
@@ -164,12 +202,50 @@ public class SkidDetector {
       }
     }
 
-    // Guard against division by near-zero translational speeds (stationary or pure spin).
-    if (maxTrans < m_minTranslationalSpeedMps) {
-      return new SkidState(1.0, false, minTrans, maxTrans);
+    // Guard against division by near-zero translational speeds and low-speed encoder noise:
+    // require both the fastest module and the speed spread (max - min) to exceed the deadband.
+    if (maxTrans < m_minTranslationalSpeedMps
+        || (maxTrans - minTrans) < m_minTranslationalSpeedMps) {
+      return new SkidState(NOMINAL_RATIO, false, minTrans, maxTrans, NO_SLIPPING_MODULES);
     }
-    double denom = Math.max(minTrans, 1e-4);
+
+    double denom = Math.max(minTrans, MIN_DENOMINATOR_MPS);
     double ratio = maxTrans / denom;
-    return new SkidState(ratio, ratio > m_skidRatioThreshold, minTrans, maxTrans);
+    boolean skidding = ratio > m_skidRatioThreshold;
+    int slippingMask = skidding ? computeSlippingMask(transSpeeds) : NO_SLIPPING_MODULES;
+    return new SkidState(ratio, skidding, minTrans, maxTrans, slippingMask);
+  }
+
+  /**
+   * Identify which module(s) deviate from the chassis median translational speed by more than the
+   * configured threshold. Falls back to flagging all modules when there is no majority consensus
+   * (such as a 2-vs-2 split).
+   */
+  private int computeSlippingMask(double[] transSpeeds) {
+    int n = transSpeeds.length;
+    double[] sorted = transSpeeds.clone();
+    Arrays.sort(sorted);
+    double median =
+        (n % 2 == 1)
+            ? sorted[n / 2]
+            : 0.5 * (sorted[(n / 2) - 1] + sorted[n / 2]);
+
+    int mask = NO_SLIPPING_MODULES;
+    int bitLimit = Math.min(n, Integer.SIZE);
+    for (int i = 0; i < bitLimit; i++) {
+      double speed = transSpeeds[i];
+      double hi = Math.max(speed, median);
+      double lo = Math.max(Math.min(speed, median), MIN_DENOMINATOR_MPS);
+      if ((hi / lo) > m_skidRatioThreshold
+          && Math.abs(speed - median) >= m_minTranslationalSpeedMps) {
+        mask |= (1 << i);
+      }
+    }
+    if (mask == NO_SLIPPING_MODULES) {
+      for (int i = 0; i < bitLimit; i++) {
+        mask |= (1 << i);
+      }
+    }
+    return mask;
   }
 }
