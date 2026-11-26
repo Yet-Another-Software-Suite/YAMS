@@ -78,7 +78,7 @@ public class DriveMechanism implements Mechanism
                                                      DriveConstants.kRearRightTurningMotorOnBottom);
 
     SwerveDriveConfig config = new SwerveDriveConfig(this, frontLeft, frontRight, rearLeft, rearRight)
-        .withGyro(m_gyro::getRotation3d)
+        .withRotation(m_gyro::getRotation3d)
         .withGyroInverted(DriveConstants.kGyroReversed)
         .withStartingPose(Pose2d.ZERO)
         // Caps chassis speeds and desaturates module speeds, like the REV drive() method did.
@@ -174,7 +174,7 @@ public class DriveMechanism implements Mechanism
    */
   public Command zeroHeading()
   {
-    return Command.noRequirements(coroutine -> m_drive.zeroGyro()).named("Zero Heading");
+    return Command.noRequirements(coroutine -> m_drive.zeroOdometryHeading()).named("Zero Heading");
   }
 
   /**
@@ -231,7 +231,7 @@ public class DriveMechanism implements Mechanism
    */
   public double getHeading()
   {
-    return m_drive.getPose().getRotation().getDegrees();
+    return m_drive.getRotation().getDegrees();
   }
 
   /**

@@ -131,7 +131,7 @@ public class AlignToGoal extends Command {
     var feedforwardOutput = feedforward.calculate(pidController.getSetpoint().velocity);
     var originalSpeed     = this.inputStream.get();
     originalSpeed.omega = output + feedforwardOutput;
-    swerveSubsystem.driveRobotRelative(() -> originalSpeed.toRobotRelative(swerveSubsystem.getGyroRotation3d().toRotation2d())).execute();
+    swerveSubsystem.driveRobotRelative(() -> originalSpeed.toRobotRelative(swerveSubsystem.getPose().getRotation())).execute();
     shooterSubsystem.setRPM(newHorizontalSpeed);
   }
 

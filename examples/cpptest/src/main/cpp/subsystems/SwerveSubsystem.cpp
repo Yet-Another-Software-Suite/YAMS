@@ -6,6 +6,7 @@
 #include <wpi/math/controller/PIDController.hpp>
 #include <wpi/math/geometry/Pose2d.hpp>
 #include <wpi/math/geometry/Rotation2d.hpp>
+#include <wpi/math/geometry/Rotation3d.hpp>
 #include <wpi/math/geometry/Translation2d.hpp>
 #include <wpi/math/system/DCMotor.hpp>
 #include <wpi/commands2/Commands.hpp>
@@ -124,8 +125,8 @@ SwerveSubsystem::SwerveSubsystem() {
   // placeholder -- tune these in auto by checking overshoot and settling time.
   m_driveConfig.WithSubsystem(this)
       .WithModules({&m_fl.value(), &m_fr.value(), &m_bl.value(), &m_br.value()})
-      .WithGyro([gyroPtr = &m_gyro]() -> wpi::units::degree_t {
-        return wpi::units::degree_t{wpi::units::turn_t{gyroPtr->GetYaw().GetValue()}};
+      .WithRotation([gyroPtr = &m_gyro]() -> wpi::math::Rotation3d {
+        return gyroPtr->GetRotation3d();
       })
       .WithStartingPose(wpi::math::Pose2d{wpi::units::meter_t{0}, wpi::units::meter_t{0}, wpi::math::Rotation2d{}})
       .WithTranslationController(wpi::math::PIDController{1, 0, 0})
@@ -193,8 +194,7 @@ wpi::cmd::CommandPtr SwerveSubsystem::DriveCommand(wpi::cmd::CommandXboxControll
   m_driveStream.emplace(MakeDriveInputStream(controller));
   // The stream outputs field-relative speeds and SwerveDrive::Drive takes robot-relative speeds.
   return m_drive->Drive([this] {
-    return (*m_driveStream)().ToRobotRelative(
-        wpi::math::Rotation2d{wpi::units::radian_t{m_drive->GetGyroAngle()}});
+    return (*m_driveStream)().ToRobotRelative(m_drive->GetRotation());
   });
 }
 

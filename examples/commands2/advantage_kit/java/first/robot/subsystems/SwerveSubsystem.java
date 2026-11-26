@@ -230,7 +230,7 @@ public class SwerveSubsystem extends SubsystemBase
                           new Translation2d(Inches.of(-24), Inches.of(-24)));
 
     config = new SwerveDriveConfig(this, fl, fr, bl, br)
-        .withGyro(() -> new Rotation3d(getGyroAngle()))
+        .withRotation(() -> new Rotation3d(getGyroAngle()))
         // Use the logged estimated pose as the starting pose so the drive's
         // internal odometry initialises from the replayed value, not from zero.
         .withStartingPose(swerveInputs.estimatedPose)
@@ -294,7 +294,7 @@ public class SwerveSubsystem extends SubsystemBase
       drive.resetRotationPID();
     }, () -> {
       // Replayed pose and gyro angle during log replay, so the path matches the real match.
-      drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(pose, getPose(), getGyroAngle()));
+      drive.setRobotRelativeChassisSpeeds(drive.driveToPoseSetpoint(pose, getPose(), getPose().getRotation()));
     }).withName("Drive to Pose");
   }
 
@@ -313,7 +313,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public Command setFieldRelativeChassisSpeeds(Supplier<ChassisVelocities> fieldRelativeSpeeds)
   {
-    return run(() -> setRobotRelativeChassisSpeedsSetpoint(fieldRelativeSpeeds.get().toRobotRelative(getGyroAngle())))
+    return run(() -> setRobotRelativeChassisSpeedsSetpoint(fieldRelativeSpeeds.get().toRobotRelative(getPose().getRotation())))
         .withName("Set Field Relative Chassis Speeds Supplier");
   }
 
