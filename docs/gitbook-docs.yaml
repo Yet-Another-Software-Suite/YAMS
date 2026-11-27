@@ -15,7 +15,7 @@ site:
           path: home
           default: true
           content:
-            directory: ./docs
+            directory: ./home
     - type: section
       key: section-2
       title: Documentation
