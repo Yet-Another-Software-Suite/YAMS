@@ -32,3 +32,4 @@ The examples live in [`examples/`](https://github.com/Yet-Another-Software-Suite
 | Page | What the robot does |
 | --- | --- |
 | [Shoot on the move](shoot-on-the-move/) | Aims, sets its shooter speed and feeds only when the shot is ready, while it keeps driving. |
+| [Swerve skid detection](swerve-skid-detection/) | Compares each swerve wheel's translational speed against the gyro's turn rate and excludes slipping wheels from pose estimation. |
