@@ -118,6 +118,8 @@
 * [Advanced features](advanced/README.md)
 * [Shoot on the move](advanced/shoot-on-the-move/README.md)
   * [The shoot on the move example](advanced/shoot-on-the-move/the-example.md)
+* [Tilt-scaled odometry](advanced/tilt-scaled-odometry/README.md)
+  * [The tilt-scaled odometry example](advanced/tilt-scaled-odometry/the-example.md)
 
 ## Reference
 
