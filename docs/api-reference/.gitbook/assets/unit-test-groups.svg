@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1268" height="540" viewBox="0 0 1268 540">
+<rect width="1268" height="540" fill="#ffffff"/>
+<text x="529.0" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1d2b4a" font-family="Helvetica, Arial, sans-serif">Java groups</text>
+<text x="1054.0" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1d2b4a" font-family="Helvetica, Arial, sans-serif">C++ groups</text>
+<rect x="20" y="80" width="1238" height="84" rx="8" fill="#eef4ff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="34" y="127.0" font-size="15" font-weight="bold" fill="#3b6fd8" font-family="Helvetica, Arial, sans-serif">Mechanisms</text>
+<rect x="250" y="88" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="339.0" y="108" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">arm</text>
+<rect x="436" y="88" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="525.0" y="108" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">elevator</text>
+<rect x="622" y="88" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="711.0" y="108" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">pivot</text>
+<rect x="250" y="126" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="339.0" y="146" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">shooter</text>
+<rect x="436" y="126" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="525.0" y="146" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">mechanism-limits</text>
+<rect x="622" y="126" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="711.0" y="146" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">hard-stops</text>
+<rect x="868" y="88" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="957.0" y="108" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">arm</text>
+<rect x="1054" y="88" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="1143.0" y="108" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">elevator</text>
+<rect x="868" y="126" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="957.0" y="146" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">pivot</text>
+<rect x="1054" y="126" width="178" height="30" rx="15" fill="#ffffff" stroke="#3b6fd8" stroke-width="1.5"/>
+<text x="1143.0" y="146" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">shooter</text>
+<rect x="20" y="174" width="1238" height="46" rx="8" fill="#f4eeff" stroke="#8a4fd1" stroke-width="1.5"/>
+<text x="34" y="202.0" font-size="15" font-weight="bold" fill="#8a4fd1" font-family="Helvetica, Arial, sans-serif"></text>
+<text x="34" y="193.0" font-size="15" font-weight="bold" fill="#8a4fd1" font-family="Helvetica, Arial, sans-serif">Followers and</text><text x="34" y="211.0" font-size="15" font-weight="bold" fill="#8a4fd1" font-family="Helvetica, Arial, sans-serif">simulation</text>
+<rect x="250" y="182" width="178" height="30" rx="15" fill="#ffffff" stroke="#8a4fd1" stroke-width="1.5"/>
+<text x="339.0" y="202" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">loose-followers</text>
+<rect x="436" y="182" width="178" height="30" rx="15" fill="#ffffff" stroke="#8a4fd1" stroke-width="1.5"/>
+<text x="525.0" y="202" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">follower-simulation</text>
+<rect x="622" y="182" width="178" height="30" rx="15" fill="#ffffff" stroke="#8a4fd1" stroke-width="1.5"/>
+<text x="711.0" y="202" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">vendor-simulation</text>
+<rect x="868" y="182" width="178" height="30" rx="15" fill="#ffffff" stroke="#8a4fd1" stroke-width="1.5"/>
+<text x="957.0" y="202" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">follower-simulation</text>
+<rect x="20" y="230" width="1238" height="46" rx="8" fill="#eaf7ee" stroke="#2f9a55" stroke-width="1.5"/>
+<text x="34" y="258.0" font-size="15" font-weight="bold" fill="#2f9a55" font-family="Helvetica, Arial, sans-serif">Swerve</text>
+<rect x="250" y="238" width="178" height="30" rx="15" fill="#ffffff" stroke="#2f9a55" stroke-width="1.5"/>
+<text x="339.0" y="258" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">swerve-drive</text>
+<rect x="868" y="238" width="178" height="30" rx="15" fill="#ffffff" stroke="#2f9a55" stroke-width="1.5"/>
+<text x="957.0" y="258" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">swerve-drive</text>
+<rect x="20" y="286" width="1238" height="84" rx="8" fill="#fff6e5" stroke="#d08a1b" stroke-width="1.5"/>
+<text x="34" y="333.0" font-size="15" font-weight="bold" fill="#d08a1b" font-family="Helvetica, Arial, sans-serif">Encoders</text>
+<rect x="250" y="294" width="178" height="30" rx="15" fill="#ffffff" stroke="#d08a1b" stroke-width="1.5"/>
+<text x="339.0" y="314" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">continuous-wrapping</text>
+<rect x="436" y="294" width="178" height="30" rx="15" fill="#ffffff" stroke="#d08a1b" stroke-width="1.5"/>
+<text x="525.0" y="314" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">absolute-encoders</text>
+<rect x="622" y="294" width="178" height="30" rx="15" fill="#ffffff" stroke="#d08a1b" stroke-width="1.5"/>
+<text x="711.0" y="314" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">absolute-encoder-ranges</text>
+<rect x="250" y="332" width="178" height="30" rx="15" fill="#ffffff" stroke="#d08a1b" stroke-width="1.5"/>
+<text x="339.0" y="352" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">zero-offsets</text>
+<rect x="20" y="380" width="1238" height="84" rx="8" fill="#fdecee" stroke="#c4394b" stroke-width="1.5"/>
+<text x="34" y="427.0" font-size="15" font-weight="bold" fill="#c4394b" font-family="Helvetica, Arial, sans-serif"></text>
+<text x="34" y="418.0" font-size="15" font-weight="bold" fill="#c4394b" font-family="Helvetica, Arial, sans-serif">Motor controllers and</text><text x="34" y="436.0" font-size="15" font-weight="bold" fill="#c4394b" font-family="Helvetica, Arial, sans-serif">closed loop</text>
+<rect x="250" y="388" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="339.0" y="408" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">motor-controllers</text>
+<rect x="436" y="388" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="525.0" y="408" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">live-tuning</text>
+<rect x="622" y="388" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="711.0" y="408" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">closed-loop-gains</text>
+<rect x="250" y="426" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="339.0" y="446" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">closed-loop-profiles</text>
+<rect x="436" y="426" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="525.0" y="446" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">closed-loop-gain-units</text>
+<rect x="868" y="388" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="957.0" y="408" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">motor-controllers</text>
+<rect x="1054" y="388" width="178" height="30" rx="15" fill="#ffffff" stroke="#c4394b" stroke-width="1.5"/>
+<text x="1143.0" y="408" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">talon-parity</text>
+<rect x="20" y="474" width="1238" height="46" rx="8" fill="#f1f3f7" stroke="#55607a" stroke-width="1.5"/>
+<text x="34" y="502.0" font-size="15" font-weight="bold" fill="#55607a" font-family="Helvetica, Arial, sans-serif">Everything else</text>
+<rect x="250" y="482" width="178" height="30" rx="15" fill="#ffffff" stroke="#55607a" stroke-width="1.5"/>
+<text x="339.0" y="502" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">other</text>
+<rect x="868" y="482" width="178" height="30" rx="15" fill="#ffffff" stroke="#55607a" stroke-width="1.5"/>
+<text x="957.0" y="502" text-anchor="middle" font-size="13" fill="#1d2b4a" font-family="Menlo, Consolas, monospace">other</text>
+</svg>
