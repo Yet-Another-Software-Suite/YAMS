@@ -118,6 +118,8 @@
 * [Advanced features](advanced/README.md)
 * [Shoot on the move](advanced/shoot-on-the-move/README.md)
   * [The shoot on the move example](advanced/shoot-on-the-move/the-example.md)
+* [Collision and jerk detection](advanced/collision-jerk-detection/README.md)
+  * [The collision and jerk detection example](advanced/collision-jerk-detection/the-example.md)
 
 ## Reference
 
