@@ -58,7 +58,7 @@ input.withAim(() -> speakerPose, driverController.rightBumper());
 `withAim` points the front of the robot at the pose it is given. The options below refine that. They are the same in Commands v2 and Commands v3, and C++ has each one in PascalCase.
 
 {% hint style="info" %}
-Aiming at a target is not the same as shooting on the move. The stream turns the robot, and it knows nothing about your shooter or how long a shot is in the air. [How do I shoot on the move?](../../how-to-mechanisms/how-do-i-shoot-on-the-move/) explains what these options cover and what you still have to work out yourself.
+Aiming at a target is not the same as shooting on the move. The stream turns the robot, and it knows nothing about your shooter or how long a shot is in the air. [Shoot on the move](../../advanced/shoot-on-the-move/) explains what these options cover and what you still have to work out yourself, and its [example](../../advanced/shoot-on-the-move/the-example.md) puts them together.
 {% endhint %}
 
 ### Aim lookahead

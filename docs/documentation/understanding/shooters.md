@@ -187,11 +187,11 @@ While the trigger is held the shooter holds 3000 RPM, and the feeder only runs w
 
 ## Shooting on the move
 
-A shooter on a moving robot needs a lead: [How do I shoot on the move?](../how-to-mechanisms/how-do-i-shoot-on-the-move/) lists where to learn the math and which YAMS call does each part, and [Shoot on the move: worked example](../how-to-mechanisms/how-do-i-shoot-on-the-move/shoot-on-the-move-example.md) builds a complete robot. This section explains the idea, and what the Swerve Input Stream does for you.
+A shooter on a moving robot needs a lead: [Shoot on the move](../advanced/shoot-on-the-move/) lists where to learn the math and which YAMS call does each part, and [the shoot on the move example](../advanced/shoot-on-the-move/the-example.md) walks through a complete robot in the YAMS repository. This section explains the idea, and what the Swerve Input Stream does for you.
 
 ### The idea in one picture
 
-A game piece keeps the robot's velocity when it leaves the shooter, so a robot that aims straight at the target while driving sideways misses. The sources listed in [How do I shoot on the move?](../how-to-mechanisms/how-do-i-shoot-on-the-move/) all solve the same problem: work out a **lead** that cancels the robot's motion.
+A game piece keeps the robot's velocity when it leaves the shooter, so a robot that aims straight at the target while driving sideways misses. The sources listed in [Shoot on the move](../advanced/shoot-on-the-move/) all solve the same problem: work out a **lead** that cancels the robot's motion.
 
 <figure><img src="../.gitbook/assets/howto-sotm-virtual-target.gif" alt="Animation of two robots seen from above, both driving to the right at the same speed and shooting at a target. The first aims straight at the target, and every shot drifts to the right of it and misses. The second aims at a virtual target to the left of the real one, and every shot drifts into the real target."><figcaption><p>The shot keeps the robot's velocity, so the aim has to lead it.</p></figcaption></figure>
 
@@ -208,7 +208,7 @@ Before you pick a firing strategy, it helps to see the lead as one subtraction, 
 
 <figure><img src="../.gitbook/assets/howto-sotm-vector-subtraction.gif" alt="Animation of a robot driving to the right with a target ahead and to its right, built up in four steps. A purple arrow from the robot points at the target: the velocity the game piece needs over the ground. A green arrow points right: the robot&#x27;s velocity. A dashed green arrow of the same length runs backwards from the tip of the purple arrow: the subtraction. An orange arrow from the robot to the end of the dashed arrow is the velocity the shooter has to give, and the robot turns to face along it."><figcaption><p>The orange arrow is what the shooter has to give: the purple arrow minus the green one.</p></figcaption></figure>
 
-Two things follow from this, and every firing strategy has to deal with both. The **aim** changes when the robot moves, and so does the **speed** of the shot: drive toward the target and the shooter needs less, drive away and it needs more. The firing strategies in the [worked example](../how-to-mechanisms/how-do-i-shoot-on-the-move/shoot-on-the-move-example.md) are different ways of working out that same lead from the time of flight in your table.
+Two things follow from this, and every firing strategy has to deal with both. The **aim** changes when the robot moves, and so does the **speed** of the shot: drive toward the target and the shooter needs less, drive away and it needs more. The firing strategies in [the example](../advanced/shoot-on-the-move/the-example.md#the-firing-strategies) are different ways of working out that same lead from the time of flight in your table.
 
 <figure><img src="../.gitbook/assets/howto-sotm-vector-sweep.gif" alt="Animation of a robot with a target straight ahead, driving at 2 meters per second in every direction in turn. The velocity needed over the ground stays at 4.3 meters per second toward the target. Driving toward the target, the velocity the shooter gives shrinks to 2.3 meters per second. Driving away, it grows to 6.3 meters per second. Driving across, it stays near 4.7 meters per second and swings about 25 degrees back against the motion."><figcaption><p>Toward the target the shot needs less speed, away it needs more, and across it the aim swings back.</p></figcaption></figure>
 

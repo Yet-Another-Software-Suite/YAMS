@@ -54,8 +54,6 @@
 * [How do I set an arm's target angle?](how-to-mechanisms/how-to-set-an-arms-target-angle.md)
 * [How do I set an elevator's target height?](how-to-mechanisms/how-to-set-an-elevators-target-height.md)
 * [How do I shoot with a shooter?](how-to-mechanisms/how-to-shoot-with-a-shooter.md)
-* [How do I shoot on the move?](how-to-mechanisms/how-do-i-shoot-on-the-move/README.md)
-  * [Shoot on the move: worked example](how-to-mechanisms/how-do-i-shoot-on-the-move/shoot-on-the-move-example.md)
 * [How do I use absolute encoders on my arm?](how-to-mechanisms/how-do-i-use-absolute-encoders-on-my-arm.md)
 * [How do I home a mechanism with limit switches?](how-to-mechanisms/how-do-i-home-a-mechanism-with-limit-switches.md)
 * [How do I zero a mechanism without limit switches?](how-to-mechanisms/how-do-i-zero-a-mechanism-without-limit-switches.md)
@@ -114,6 +112,12 @@
 * [Battery simulation](understanding/battery-simulation.md)
 * [Telemetry](understanding/telemetry.md)
 * [DataLog best practices](understanding/datalog-best-practices.md)
+
+## Advanced
+
+* [Advanced features](advanced/README.md)
+* [Shoot on the move](advanced/shoot-on-the-move/README.md)
+  * [The shoot on the move example](advanced/shoot-on-the-move/the-example.md)
 
 ## Reference
 
