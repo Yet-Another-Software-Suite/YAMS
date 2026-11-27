@@ -32,3 +32,4 @@ The examples live in [`examples/`](https://github.com/Yet-Another-Software-Suite
 | Page | What the robot does |
 | --- | --- |
 | [Shoot on the move](shoot-on-the-move/) | Aims, sets its shooter speed and feeds only when the shot is ready, while it keeps driving. |
+| [Collision and jerk detection](collision-jerk-detection/) | Subtracts gyro-rotated 3D gravity from IMU acceleration to detect sharp impacts via linear jerk without tripping on hard driving. |
