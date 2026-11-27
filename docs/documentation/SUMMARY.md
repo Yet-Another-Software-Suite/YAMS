@@ -118,6 +118,8 @@
 * [Advanced features](advanced/README.md)
 * [Shoot on the move](advanced/shoot-on-the-move/README.md)
   * [The shoot on the move example](advanced/shoot-on-the-move/the-example.md)
+* [Power health monitoring](advanced/power-health-monitoring/README.md)
+  * [The power health monitoring example](advanced/power-health-monitoring/the-example.md)
 
 ## Reference
 
