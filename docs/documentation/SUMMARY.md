@@ -118,6 +118,8 @@
 * [Advanced features](advanced/README.md)
 * [Shoot on the move](advanced/shoot-on-the-move/README.md)
   * [The shoot on the move example](advanced/shoot-on-the-move/the-example.md)
+* [Swerve skid detection](advanced/swerve-skid-detection/README.md)
+  * [The swerve skid detection example](advanced/swerve-skid-detection/the-example.md)
 
 ## Reference
 
