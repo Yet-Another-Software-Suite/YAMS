@@ -1,0 +1,58 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: YAMS
+  structure:
+    - type: section
+      key: section-1
+      title: Home
+      path: home
+      icon: house
+      default: true
+      children:
+        - type: space
+          key: space-1
+          title: Home
+          path: home
+          default: true
+          content:
+            directory: ./docs
+    - type: section
+      key: section-2
+      title: Documentation
+      path: documentation
+      icon: book-blank
+      children:
+        - type: space
+          key: space-2
+          title: Documentation
+          path: documentation
+          default: true
+          content:
+            directory: ./documentation
+            language: en
+    - type: section
+      key: section-3
+      title: API Reference
+      path: api-reference
+      icon: terminal
+      children:
+        - type: space
+          key: space-3
+          title: API Reference
+          path: api-reference
+          default: true
+          content:
+            directory: ./api-reference
+    - type: section
+      key: section-4
+      title: Changelog
+      path: changelog
+      icon: clock-rotate-left
+      children:
+        - type: space
+          key: space-4
+          title: Changelog
+          path: changelog
+          default: true
+          content:
+            directory: ./changelog
